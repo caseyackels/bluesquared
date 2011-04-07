@@ -183,6 +183,8 @@ proc 'distHelper_loadOptions {} {
     
     # Theme setting for Tile
     ttk::style theme use $ttk::currentTheme
+    
+    Disthelper_Helper::initVariables
     ;# The ttk way, to change the background
     #ttk::style map TEntry -fieldbackground [list focus yellow]
     #ttk::style configure TEntry -fieldbackground [list focus yellow]

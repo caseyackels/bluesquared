@@ -120,10 +120,7 @@ proc disthelperGUI {} {
         dropDest $frame2a.jobNumberEntry GS_job(Number)
         set GS_job(Number) ""
     
-    ttk::label $frame2a.jobNameField -text [mc "Job Name"]
-    ttk::entry $frame2a.jobNameEntry -textvariable GS_job(Name)
-         dropDest $frame2a.jobNameEntry GS_job(Name)
-        set GS_job(Name) ""
+    ttk::button $frame2a.jobNumberButton -text [mc "Import File"] -command { Disthelper_Helper::getAutoOpenFile $GS_job(Number) }
     
     
    
@@ -134,11 +131,13 @@ proc disthelperGUI {} {
     grid $frame2a.jobNumberField -column 0 -row 0 -sticky nse -padx 5p -pady 5p
     grid $frame2a.jobNumberEntry -column 1 -row 0 -sticky news -padx 5p -pady 5p
     
-    grid $frame2a.jobNameField -column 2 -row 0 -sticky nse -padx 5p -pady 5p
-    grid $frame2a.jobNameEntry -column 3 -row 0 -sticky news -padx 5p -pady 5p
+    #grid $frame2a.jobNameField -column 2 -row 0 -sticky nse -padx 5p -pady 5p
+    #grid $frame2a.jobNameEntry -column 3 -row 0 -sticky news -padx 5p -pady 5p
+    
+    grid $frame2a.jobNumberButton -column 2 -row 0 -sticky news -padx 5p -pady 5p
     
     grid columnconfigure $frame2a 1 -weight 1
-    grid columnconfigure $frame2a 3 -weight 1
+    grid columnconfigure $frame2a 2 -weight 1
 
     
 #    

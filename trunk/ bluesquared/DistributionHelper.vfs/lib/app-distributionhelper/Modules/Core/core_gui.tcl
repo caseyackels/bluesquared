@@ -70,22 +70,21 @@ proc disthelper::parentGUI {} {
     menu $mb.file -tearoff 0 -relief raised -bd 2
     
     $mb add cascade -label [mc "File"] -menu $mb.file
-    $mb.file add command -label [mc "Import File"] -command {Disthelper_Code::getOpenFile}
+    $mb.file add command -label [mc "Import File"] -command {Disthelper_Helper::getOpenFile}
     $mb.file add command -label [mc "Exit"] -command {exit}
     
     ## Edit
     menu $mb.edit -tearoff 0 -relief raised -bd 2
     $mb add cascade -label [mc "Edit"] -menu $mb.edit
     
-    $mb.edit add command -label "Clear List" -command {}
-    $mb.edit add command -label "Breakdown" -command {}
+    $mb.edit add command -label [mc "Options"] -command {}
+    #$mb.edit add command -label "Breakdown" -command {}
     
     ## Help
     menu $mb.help -tearoff 0 -relief raised -bd 2
     $mb add cascade -label [mc "Help"] -menu $mb.help
     
     $mb.help add command -label [mc "About"] -command {}
-    #$mb.help add command -label "v0.4" -command {}
     
 
     # Create Separator Frame
@@ -110,8 +109,8 @@ proc disthelper::parentGUI {} {
     
     set btnBar [ttk::frame .btnBar]
     
-    ttk::button $btnBar.print -text "Generate File" -command { Disthelper_Code::writeOutPut }
-    ttk::button $btnBar.close -text "Cancel" -command {exit}
+    ttk::button $btnBar.print -text [mc "Generate File"] -command { Disthelper_Code::writeOutPut }
+    ttk::button $btnBar.close -text [mc "Exit"] -command {exit}
     
     grid $btnBar.print -column 0 -row 3 -sticky nse -padx 8p  
     grid $btnBar.close -column 1 -row 3 -sticky nse
@@ -122,6 +121,5 @@ proc disthelper::parentGUI {} {
     
     # Bindings
     bind $btnBar.close <Return> {exit}
-    #bind all <Control-p> "Shipping_Code::printLabels"
 
 } ;# End of parentGUI
