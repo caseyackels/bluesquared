@@ -151,45 +151,47 @@ proc 'distHelper_sourceOtherFiles {} {
 }
 
 
-proc 'distHelper_loadOptions {} {
-    #****f* 'distHelper_loadOptions/global
+proc 'distHelper_initVariables {} { 
+    #****f* initVariables/Disthelper_Helper
     # AUTHOR
     #	Casey Ackels
     #
     # COPYRIGHT
-    #	(c) 2008 - Casey Ackels
+    #	(c) 2011 - Casey Ackels
     #
     # FUNCTION
-    #	Load the options / configurations
+    #	
     #
     # SYNOPSIS
-    #	None
+    #	Initialize program defaults. Create new file if one does not exist.
     #
     # CHILDREN
-    #	None
-    #
-    # PARENTS
-    #	None
-    #
-    # NOTES
     #	N/A
     #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
     # SEE ALSO
-    #	'distHelper_loadSettings
     #
     #***
-    #option add *font {tahoma 10}
-    #option add *Listbox.font {tahoma 8}
+    global settings
     
-    # Theme setting for Tile
-    ttk::style theme use $ttk::currentTheme
+    # Application location
+    set settings(Home) [pwd]
     
-    Disthelper_Helper::initVariables
-    ;# The ttk way, to change the background
-    #ttk::style map TEntry -fieldbackground [list focus yellow]
-    #ttk::style configure TEntry -fieldbackground [list focus yellow]
-    #style configure TCombobox -fieldbackground yellow
-    #style theme use clam
+    # Location for saving the file
+    set settings(outFilePath) [file dirname $settings(Home)]
+    
+    # Location for saving a copy of the file (this should just be up one directory)
+    set settings(outFilePathCopy) [file dirname $settings(Home)]
+    
+    # Default for finding the source import files
+    set settings(sourceFiles) [file dirname $settings(Home)]
+    
+    # Box Tare Weight
+    set settings(BoxTareWeight) .566
 }
 
 
@@ -223,33 +225,51 @@ proc 'distHelper_loadSettings {} {
     #***
     global settings
     
+    # Theme setting for Tile
+    ttk::style theme use $ttk::currentTheme
+    
+    # Import msgcat namespace so we only have to use [mc]
+    namespace import msgcat::mc
+    
     if {[catch {open config.txt r} fd]} {
 	puts "unable to load defaults"
-    
+        puts "execute initVariables"
+        
+        # Initialize default values
+        'distHelper_initVariables
+        
+        set fd [open config.txt w]
+        foreach value [array names settings] {
+            # Creating application defaults.
+            # Original installation, or the config.txt was deleted.
+            puts $fd "settings($value) $settings($value)"
+        }
+        close $fd
+        
     } else {
-	set settings [split [read $fd] \n]
+	set configFile [split [read $fd] \n]
 	catch {close $fd}
 	
-	foreach line $settings {
+	foreach line $configFile {
 	    if {$line == ""} {continue}
 	    set l_line [split $line " "]
 	    set [lindex $l_line 0] [join [lrange $l_line 1 end] " "]
 	}
+        puts "Loaded variables"
     }
 }
 
-namespace import msgcat::mc
+
+# Load the config file
+'distHelper_loadSettings
+
 # Load required files / packages
 'distHelper_sourceReqdFiles
 
 # Load the Option Database options
-'distHelper_loadOptions
-
-# Load the config file
-#'distHelper_loadSettings
+#'distHelper_loadOptions
 
 # Start the GUI
-#blueSquirrel::shippingGUI
 disthelper::parentGUI
 
 # Load the rest of the files

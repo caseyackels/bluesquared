@@ -1,0 +1,305 @@
+# Creator: Casey Ackels
+# Initial Date: March 12, 2011]
+# Dependencies: See Below
+#-------------------------------------------------------------------------------
+#
+# Subversion
+#
+# $Revision$
+# $LastChangedBy$
+# $LastChangedDate$
+#
+########################################################################################
+
+##
+## - Overview
+# This file holds the parent GUI frame, buttons and menu for Distribution Helper
+
+# Definitions for prefixes of Variables
+# G = Global
+# S = String
+# L = List
+# I = Integer (Do not use this unless you are certain it is an Integer and not a plain string)
+
+## Coding Conventions
+# - Namespaces: 
+
+# - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
+#   will be uppercase. I.E sourceFiles, sourceFileExample
+
+namespace eval Disthelper_Code {}
+
+
+proc Disthelper_Code::readFile {filename} {
+    #****f* readFile/Disthelper_Code
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011 - Casey Ackels
+    #
+    # FUNCTION
+    #	Open the target file, and read it into Distribtion Helper
+    #
+    # SYNOPSIS
+    #	N/A
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	Disthelper_Code::getOpenFile
+    #
+    # NOTES
+    #   Global Array
+    #   GL_file / DataList Header
+    #   GS_file / Name
+    #   GS_job / Number, Name, Quantity, pieceWeight, fullBoxQty, Date, Version
+    #
+    # SEE ALSO
+    #
+    #
+    #***
+    global GL_file GS_file GS_job GS_ship GS_address
+
+    
+    # Cleanse file name, and prepare it for when we create the output file.
+    set GS_file(Name) [join [lrange [file rootname [file tail $filename]] 0 end]]
+    puts "GS_file(Name): $GS_file(Name)"
+    
+    set GS_job(Number) [join [lrange [split $GS_file(Name)] 0 0]]
+    puts "Job Number: $GS_job(Number)"
+    puts "filename: $filename"
+    
+    # Open File the file
+    set fileName [open "$filename" RDONLY]
+      
+    # Make the data useful, and put it into lists
+    # While we are at it, make everything UPPER CASE
+    while { [gets $fileName line] >= 0 } {
+        lappend GL_file(dataList) [string toupper $line]
+        puts "while: $line"
+    }
+
+    chan close $fileName
+    
+    set GL_file(Header) [csv::split [lindex $GL_file(dataList) 0]]
+    
+    foreach line $GL_file(Header) {
+        # If the file has headers, lets auto-insert the values to help the user.
+        .container.frame1.listbox insert end $line
+
+        switch -nocase $line {
+            Company     {set GS_address(Company) $line}
+            Consignee   {set GS_address(Consignee) $line}
+            Address1    {set GS_address(deliveryAddr) $line}
+            Address2    {set GS_address(addrTwo) $line}
+            Address3    {set GS_address(addrThree) $line}
+            City        {set GS_address(City) $line}
+            State       {set GS_address(State) $line}
+            Zip         {set GS_address(Zip) $line}
+            Phone       {set GS_address(Phone) $line}
+            Quantity    {set GS_job(Quantity) $line}
+            Version     {set GS_job(Version) $line}
+            "Ship Date" {set GS_job(Date) $line}
+            "Ship Via"  {set GS_ship(shipVia) $line}
+            default     {puts "Didn't set anything"}
+        }
+    }
+
+
+} ;# Disthelper_Code::readFile
+
+
+proc Disthelper_Code::doMath {totalQuantity maxPerBox} {
+    #****f* doMath/Disthelper_Code
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011 - Casey Ackels
+    #
+    # FUNCTION
+    #	Disthelper_Code::doMath TotalQuantity MaxPerBox
+    #
+    # SYNOPSIS
+    #	Read in the total quantity of a shipment, along with the maximum qty per box, the output is total number of full boxes, and the qty of the partial.
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	Disthelper_Code::writeOutPut
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    # Do mathmatical equations, then double check to make sure it comes out to the value of totalQty
+    #puts "Starting doMath"
+    
+    # Guard against a mistake the at we could make
+    if {$totalQuantity == "" || $totalQuantity == 0} {puts "I need a total qty argument!"; return}
+    
+    if {$totalQuantity < $maxPerBox} {
+	lappend partialBoxQTY
+    }
+    
+    set divideTotalQuantity [expr {$totalQuantity/$maxPerBox}]
+    
+    set totalFullBoxs [expr {round($divideTotalQuantity)}]
+    set fullBoxQTY [expr {round(floor($divideTotalQuantity) * $maxPerBox)}]
+    
+    ## Use fullBoxQty as a starting point for the partial box.
+    lappend partialBoxQTY [expr {round($totalQuantity - $fullBoxQTY)}]
+    
+    puts "doMath::TotalQty: $totalQuantity"
+    puts "doMath::maxPerBox: $maxPerBox"
+    puts "doMath::totalFullBoxs: $totalFullBoxs"
+    puts "doMath::partialBoxQTY: $partialBoxQTY"
+    
+    #totalFullBoxs = full box total for that shipment
+    #partialBoxQty = the partial amount of that shipment. 
+    return [list $totalFullBoxs $partialBoxQTY]
+
+    #puts "Ending doMath"
+    
+} ;# End of doMath
+
+
+proc Disthelper_Code::writeOutPut {} {
+    #****f* writeOutPut/Disthelper_Code
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011 - Casey Ackels
+    #
+    # FUNCTION
+    #	Write out the data to a file
+    #
+    # SYNOPSIS
+    #	N/A
+    #
+    # CHILDREN
+    #	
+    #
+    # PARENTS
+    #	disthelper::parentGUI
+    #
+    # NOTES
+    #	Set the ability to save the path to where you want the files saved to.
+    #
+    #   Used: Global Arrays
+    #   GL_file / dataList, Header
+    #   GS_job / Number, Name, Quantity, pieceWeight, fullBoxQty, Date, Version
+    #   GS_ship / shipVia
+    #   GS_address / Consignee, Company, addrThree, addrTwo, deliveryAddr, City, State, Zip, Phone
+    #
+    #   Set: Global Arrays
+    #
+    # SEE ALSO
+    #	
+    #
+    #***
+    global GS_job GS_ship GS_address GL_file GS_file
+
+    ##
+    ## WE NEED TO MAKE ANOTHER PROC FOR CATCHING VARIABLES THAT MUST BE POPULATED
+    ## pieceWeight, fullBoxQty -- Everything else should / can be auto-populated
+    ##
+    
+
+
+    # Get the indices of each element of the address/shipment information. Later we will use this to map the data.
+    array set importFile "
+        shipVia     [lsearch $GL_file(Header) $GS_ship(shipVia)]
+        Company     [lsearch $GL_file(Header) $GS_address(Company)]
+        Consignee   [lsearch $GL_file(Header) $GS_address(Consignee)]
+        delAddr     [lsearch $GL_file(Header) $GS_address(deliveryAddr)]
+        delAddr2    [lsearch $GL_file(Header) $GS_address(addrTwo)]
+        delAddr3    [lsearch $GL_file(Header) $GS_address(addrThree)]
+        City        [lsearch $GL_file(Header) $GS_address(City)]
+        State       [lsearch $GL_file(Header) $GS_address(State)]
+        Zip         [lsearch $GL_file(Header) $GS_address(Zip)]
+        Phone       [lsearch $GL_file(Header) $GS_address(Phone)]
+        Quantity    [lsearch $GL_file(Header) $GS_job(Quantity)]
+        Version     [lsearch $GL_file(Header) $GS_job(Version)]
+        Date        [lsearch $GL_file(Header) $GS_job(Date)]
+    "
+    
+    # Open the destination file for writing
+    set filesDestination [open "$GS_file(Name) Copy.csv" w]
+
+    # line = each address string
+    # GL_file(dataList) = the entire shipping file
+    foreach line $GL_file(dataList) {
+        set l_line [csv::split $line]
+        set l_line [join [split $l_line ,] ""] ;# remove all comma's
+        
+        # Map data to variable
+        foreach name [array names importFile] {
+            if {[lindex $l_line $importFile($name)] eq ""} {
+                # we need a placeholder if there isn't any data
+                set $name .
+            } elseif {$name eq "shipVia"} {
+                # add a zero to the front because SmartLinc requires it.
+                set $name 0[list [string toupper [lindex $l_line $importFile($name)]]]
+            } else {
+                set $name [list [string toupper [lindex $l_line $importFile($name)]]]
+            }
+            lappend printVariables importFile($name)
+        }
+        
+        if {[string is integer [lindex $l_line $importFile(Quantity)]]} {
+            set val [Disthelper_Code::doMath [lindex $l_line $importFile(Quantity)] $GS_job(fullBoxQty)]
+            puts "writeOutPut::val $val"
+        } else {
+            # If we come across a quantity that isn't an integer, we will skip it.
+            # I'm using this to skip the header (if there is one).
+            puts "String is not an integer. Skipping..."
+            continue
+        }
+        
+        # Checking for amount of boxes per shipment
+        # First we assume we have full boxes, and a partial
+        if {([lindex $val 0] != 0) && ([lindex $val 1] != 0)} {
+            set totalBoxes [expr [lindex $val 0]+1]
+            puts "writeOutPut::boxes1 $totalBoxes - Full boxes and Partials"
+            
+        # Now we check to see if we have full boxes, and no partials
+        } elseif {([lindex $val 0] != 0) && ([lindex $val 1] == 0)} {
+            set totalBoxes [lindex $val 0]
+            set onlyFullBoxes yes ;# now we can process like a full box in a multiple box shipment
+            puts "writeOutPut::boxes2 $totalBoxes - Full boxes only"
+        
+        # Now we check to see if we have zero full boxes, and a partial
+        } elseif {([lindex $val 0] == 0) && ([lindex $val 1] != 0)} {
+            set totalBoxes 1
+            puts "writeOutPut::boxes3 $totalBoxes - Partial Only"
+        }
+        
+        for {set x 1} {$x <= $totalBoxes} {incr x} {
+            if {($x != $totalBoxes) || ($onlyFullBoxes eq yes)} {
+                set onlyFullBoxes "" ;# Clear this out because we are in a [foreach] and it will never be reset if we don't do it here.
+                puts "boxes: $x - TotalBoxes: $totalBoxes"
+                # Make the box tare weight (.566) editable in the options config
+                set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + .566}]]
+                puts [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $GS_job(fullBoxQty) $GS_job(fullBoxQty)-$Version $boxWeight $x $totalBoxes"]
+                chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $GS_job(fullBoxQty) $GS_job(fullBoxQty)-$Version $boxWeight $x $totalBoxes "]
+            
+            } else {
+                set boxWeight [::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + .566}]]
+                puts [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) [lindex $val 1] [lindex $val 1]-$Version $boxWeight $x $totalBoxes"]
+                chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) [lindex $val 1] [lindex $val 1]-$Version $boxWeight $x $totalBoxes"]
+            }
+        }
+        
+        puts "--------------"
+    }
+    
+    chan close $filesDestination
+
+} ;# End of writeOutPut
+
