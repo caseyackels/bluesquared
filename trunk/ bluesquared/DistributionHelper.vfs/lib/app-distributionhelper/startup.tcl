@@ -179,7 +179,7 @@ proc 'distHelper_loadOptions {} {
     #
     #***
     #option add *font {tahoma 10}
-    option add *Listbox.font {tahoma 8}
+    #option add *Listbox.font {tahoma 8}
     
     # Theme setting for Tile
     ttk::style theme use $ttk::currentTheme
@@ -221,21 +221,21 @@ proc 'distHelper_loadSettings {} {
     #	'distHelper_loadOptions
     #
     #***
-#    global programPath
-#    
-#    if {[catch {open LD_Defaults.txt r} fd]} {
-#	puts "unable to load defaults"
-#    
-#    } else {
-#	set settings [split [read $fd] \n]
-#	catch {close $fd}
-#	
-#	foreach line $settings {
-#	    if {$line == ""} {continue}
-#	    set l_line [split $line " "]
-#	    set [lindex $l_line 0] [join [lrange $l_line 1 end] " "]
-#	}
-#    }
+    global settings
+    
+    if {[catch {open config.txt r} fd]} {
+	puts "unable to load defaults"
+    
+    } else {
+	set settings [split [read $fd] \n]
+	catch {close $fd}
+	
+	foreach line $settings {
+	    if {$line == ""} {continue}
+	    set l_line [split $line " "]
+	    set [lindex $l_line 0] [join [lrange $l_line 1 end] " "]
+	}
+    }
 }
 
 namespace import msgcat::mc
