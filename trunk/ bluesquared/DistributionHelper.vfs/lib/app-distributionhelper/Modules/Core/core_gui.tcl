@@ -120,6 +120,7 @@ proc disthelper::parentGUI {} {
     #tooltip::tooltip $btnBar.close "Close (Esc)"
     
     # Bindings
+    
     bind $btnBar.close <Return> {exit}
 
 } ;# End of parentGUI

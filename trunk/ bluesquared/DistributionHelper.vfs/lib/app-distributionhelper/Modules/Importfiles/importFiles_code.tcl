@@ -199,6 +199,7 @@ proc Disthelper_Code::writeOutPut {} {
     #   GS_job / Number, Name, Quantity, pieceWeight, fullBoxQty, Date, Version
     #   GS_ship / shipVia
     #   GS_address / Consignee, Company, addrThree, addrTwo, deliveryAddr, City, State, Zip, Phone
+    #   settings / BoxTareWeight
     #
     #   Set: Global Arrays
     #
@@ -206,13 +207,11 @@ proc Disthelper_Code::writeOutPut {} {
     #	
     #
     #***
-    global GS_job GS_ship GS_address GL_file GS_file
+    global GS_job GS_ship GS_address GL_file GS_file settings
 
-    ##
-    ## WE NEED TO MAKE ANOTHER PROC FOR CATCHING VARIABLES THAT MUST BE POPULATED
-    ## pieceWeight, fullBoxQty -- Everything else should / can be auto-populated
-    ##
-    
+    # Error checking
+    if {$GS_job(pieceWeight) == ""} {Error_Message::errorMsg pieceWeight1; return}
+    if {$GS_job(fullBoxQty) == ""} {Error_Message::errorMsg fullBoxQty1; return}
 
 
     # Get the indices of each element of the address/shipment information. Later we will use this to map the data.
@@ -257,11 +256,11 @@ proc Disthelper_Code::writeOutPut {} {
         
         if {[string is integer [lindex $l_line $importFile(Quantity)]]} {
             set val [Disthelper_Code::doMath [lindex $l_line $importFile(Quantity)] $GS_job(fullBoxQty)]
-            puts "writeOutPut::val $val"
+            'debug "(val) $val"
         } else {
             # If we come across a quantity that isn't an integer, we will skip it.
             # I'm using this to skip the header (if there is one).
-            puts "String is not an integer. Skipping..."
+            'debug "String is not an integer. Skipping..."
             continue
         }
         
@@ -269,37 +268,36 @@ proc Disthelper_Code::writeOutPut {} {
         # First we assume we have full boxes, and a partial
         if {([lindex $val 0] != 0) && ([lindex $val 1] != 0)} {
             set totalBoxes [expr [lindex $val 0]+1]
-            puts "writeOutPut::boxes1 $totalBoxes - Full boxes and Partials"
+            'debug "(boxes1) $totalBoxes - Full boxes and Partials"
             
         # Now we check to see if we have full boxes, and no partials
         } elseif {([lindex $val 0] != 0) && ([lindex $val 1] == 0)} {
             set totalBoxes [lindex $val 0]
             set onlyFullBoxes yes ;# now we can process like a full box in a multiple box shipment
-            puts "writeOutPut::boxes2 $totalBoxes - Full boxes only"
+            'debug "(boxes2) $totalBoxes - Full boxes only"
         
         # Now we check to see if we have zero full boxes, and a partial
         } elseif {([lindex $val 0] == 0) && ([lindex $val 1] != 0)} {
             set totalBoxes 1
-            puts "writeOutPut::boxes3 $totalBoxes - Partial Only"
+            'debug "(boxes3) $totalBoxes - Partial Only"
         }
         
         for {set x 1} {$x <= $totalBoxes} {incr x} {
             if {($x != $totalBoxes) || ($onlyFullBoxes eq yes)} {
                 set onlyFullBoxes "" ;# Clear this out because we are in a [foreach] and it will never be reset if we don't do it here.
-                puts "boxes: $x - TotalBoxes: $totalBoxes"
-                # Make the box tare weight (.566) editable in the options config
-                set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + .566}]]
-                puts [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $GS_job(fullBoxQty) $GS_job(fullBoxQty)-$Version $boxWeight $x $totalBoxes"]
+                'debug "boxes: $x - TotalBoxes: $totalBoxes"
+                set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
+                'debug [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $GS_job(fullBoxQty) $GS_job(fullBoxQty)-$Version $boxWeight $x $totalBoxes"]
                 chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $GS_job(fullBoxQty) $GS_job(fullBoxQty)-$Version $boxWeight $x $totalBoxes "]
             
             } else {
-                set boxWeight [::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + .566}]]
-                puts [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) [lindex $val 1] [lindex $val 1]-$Version $boxWeight $x $totalBoxes"]
+                set boxWeight [::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
+                'debug [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) [lindex $val 1] [lindex $val 1]-$Version $boxWeight $x $totalBoxes"]
                 chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) [lindex $val 1] [lindex $val 1]-$Version $boxWeight $x $totalBoxes"]
             }
         }
         
-        puts "--------------"
+        'debug "--------------"
     }
     
     chan close $filesDestination

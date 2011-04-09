@@ -58,7 +58,6 @@ proc 'distHelper_sourceReqdFiles {} {
     #	'distHelper_sourceOtherFiles
     #
     #***
-#console show
 	## All files that need to be sourced should go here. That way if any of them fail to load, we'll catch it.
 	
 	#Modify the Auto_path so our 'package requires' work.
@@ -71,7 +70,7 @@ proc 'distHelper_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries autoscroll]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries csv]
-	#lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.2]
+	##lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.2]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
 	
 	
@@ -94,13 +93,17 @@ proc 'distHelper_sourceReqdFiles {} {
 	package require csv
 	
 	## Distribution Helper modules
-	#package require shipping
 	package require disthelper_core
 	package require disthelper_importFiles
 
 	
-	# Source the required files
+	# Source files that are not in a package
         source [file join [file dirname [info script]] Libraries popups.tcl]
+        source [file join [file dirname [info script]] Libraries errorMsg_gui.tcl]
+        source [file join [file dirname [info script]] Libraries debug.tcl]
+        
+        #namespace import dh_Debug::debug
+        'debug "Loaded"
 }
 
 
@@ -131,23 +134,7 @@ proc 'distHelper_sourceOtherFiles {} {
     #	'blueSquirrel_sourceReqdFiles
     #
     #***
-    catch {	
-	# Source the Error files
-	source [file join [file dirname [info script]] Libraries errorMsg_gui.tcl]
-    
-    } S_errMsg
-    
-    if {([info exists S_errMsg]) && ($S_errMsg != "")} {
-	tk_messageBox \
-            -parent . \
-            -default ok \
-            -icon warning \
-            -title "Couldn't find File" \
-            -message "I'm sorry, but I need a file to start. Can you please locate it, and put it here:\n[pwd]\n\n$S_errMsg"
-	   
-	unset S_errMsg
-	exit ;# Don't even open the GUI. Exit right away.
-    }
+
 }
 
 
@@ -181,7 +168,6 @@ proc 'distHelper_initVariables {} {
     # Application location
     set settings(Home) [pwd]
     
-    
     # Location for saving the file
     set settings(outFilePath) [file dirname $settings(Home)]
     
@@ -193,6 +179,7 @@ proc 'distHelper_initVariables {} {
     
     # Box Tare Weight
     set settings(BoxTareWeight) .566
+    
 }
 
 
@@ -205,8 +192,7 @@ proc 'distHelper_loadSettings {} {
     #	(c) 2008 - Casey Ackels
     #
     # FUNCTION
-    #	Load the defaults, this includes the path to BarTender among other things,
-    #	that must be done at the client site.
+    #	Load the mandatory defaults. Everything else should be loaded in options
     #
     # SYNOPSIS
     #	None
@@ -224,10 +210,14 @@ proc 'distHelper_loadSettings {} {
     #	'distHelper_loadOptions
     #
     #***
-    global settings
+    global settings debug
+    
+    # Enable / Disable Debugging
+    # See 'distHelper_sourceReqdFiles for the [namespace import] command
+    set debug(onOff) on
     
     # Theme setting for Tile
-    ttk::style theme use $ttk::currentTheme
+    #ttk::style theme use $ttk::currentTheme
     
     # Import msgcat namespace so we only have to use [mc]
     namespace import msgcat::mc
@@ -240,13 +230,6 @@ proc 'distHelper_loadSettings {} {
         'distHelper_initVariables
         
         Disthelper_Preferences::saveConfig
-        #set fd [open config.txt w]
-        #foreach value [array names settings] {
-        #    # Creating application defaults.
-        #    # Original installation, or the config.txt was deleted.
-        #    puts $fd "settings($value) $settings($value)"
-        #}
-        #chan close $fd
         
     } else {
 	set configFile [split [read $fd] \n]
@@ -275,4 +258,4 @@ proc 'distHelper_loadSettings {} {
 disthelper::parentGUI
 
 # Load the rest of the files
-'distHelper_sourceOtherFiles
+#'distHelper_sourceOtherFiles

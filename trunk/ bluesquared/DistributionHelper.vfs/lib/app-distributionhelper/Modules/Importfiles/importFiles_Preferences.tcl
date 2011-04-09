@@ -59,7 +59,7 @@ proc Disthelper_Preferences::prefGUI {} {
     toplevel .preferences
     wm transient .preferences .
     wm title .preferences [mc "Preferences"]
-    wm geometry .preferences 400x300 ;# width X Height
+    wm geometry .preferences 640x300 ;# width X Height
     
     set locX [expr {([winfo screenwidth .] - [winfo width .]) / 2}]
     set locY [expr {([winfo screenheight .] - [winfo height .]) / 2}]
@@ -80,14 +80,14 @@ proc Disthelper_Preferences::prefGUI {} {
     pack $nb -expand yes -fill both
     
 
-    $nb add [ttk::frame $nb.f1] -text "First tab"
-    $nb add [ttk::frame $nb.f2] -text "Second tab"
+    $nb add [ttk::frame $nb.f1] -text [mc "File Paths"]
+    $nb add [ttk::frame $nb.f2] -text [mc "Miscellaneous"]
     $nb select $nb.f1
 
     ttk::notebook::enableTraversal $nb
     
     ##
-    ## Tab 1
+    ## Tab 1 (File Paths)
     ##
     
     ttk::label $nb.f1.sourceText -text [mc "Source Import Files"]
@@ -114,13 +114,28 @@ proc Disthelper_Preferences::prefGUI {} {
     grid $nb.f1.outFilesCopyEntry -column 1 -row 2 -sticky ew -padx 5p -pady 5p
     grid $nb.f1.outFilesCopyButton -column 2 -row 2 -sticky e -padx 5p -pady 5p
     
+    grid columnconfigure $nb.f1 1 -weight 2
+
+    
+    ##
+    ## Tab 2 (Miscellaneous)
+    ##
+    
+    ttk::label $nb.f2.boxTareText -text [mc "Box Tare"]
+    ttk::entry $nb.f2.boxTareEntry -textvariable settings(BoxTareWeight)
+    
+    grid $nb.f2.boxTareText -column 0 -row 0 -sticky e -padx 5p -pady 5p
+    grid $nb.f2.boxTareEntry -column 1 -row 0 -sticky ew -padx 5p -pady 5p
+
+    
+    
     ##
     ## Button Bar
     ##
     
     set buttonbar [ttk::frame .preferences.buttonbar]
-    ttk::button $buttonbar.print -text [mc "Ok"] -command { Disthelper_Preferences::saveConfig }
-    ttk::button $buttonbar.close -text [mc "Cancel"] -command {destroy .preferences}
+    ttk::button $buttonbar.print -text [mc "Ok"] -command { Disthelper_Preferences::saveConfig; destroy .preferences }
+    ttk::button $buttonbar.close -text [mc "Cancel"] -command { destroy .preferences }
     
     grid $buttonbar.print -column 0 -row 3 -sticky nse -padx 8p  
     grid $buttonbar.close -column 1 -row 3 -sticky nse
@@ -158,16 +173,22 @@ proc Disthelper_Preferences::chooseDir {target} {
     global settings
     
     
-    set settings($target) [tk_chooseDirectory \
+    set settingsTMP($target) [tk_chooseDirectory \
         -parent .preferences \
         -title [mc "Choose a Directory"] \
 	-initialdir $settings($target)
     ]
     
-    puts "folderName: $settings($target)"
+    'debug "(folderName) $settingsTMP($target)"
     
     # If we do not select a file name, and cancel out of the dialog, do not produce an error.
-    if {$settings($target) eq ""} {return}
+    # The usage of settingsTMP prevents us from over writing our original value; which we may want to keep if the user does not select a directory.
+    if {$settings($target) eq ""} {
+        'debug "No directory was selected"
+        return
+        } else {
+            set settings($target) $settingsTMP($target)
+        }
     
 } ;# end Disthelper_Preferences::chooseDir
 

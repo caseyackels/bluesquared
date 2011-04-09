@@ -71,7 +71,7 @@ proc disthelperGUI {} {
 
 # Frame 1 - Listbox only
     set frame1 [ttk::labelframe .container.frame1 -text [mc "File Headers"]]
-    pack $frame1 -fill both -padx 5p -pady 5p -ipady 2p -anchor nw -side left;#-ipadx 5p
+    pack $frame1 -fill both -padx 5p -pady 5p -ipady 2p -anchor nw -side left
     
     listbox $frame1.listbox \
                 -width 30 \
@@ -87,7 +87,6 @@ proc disthelperGUI {} {
       {list {copy move} DND_Text {[.container.frame1.listbox get [.container.frame1.listbox curselection]]}}
     
 
-   
     ttk::scrollbar $frame1.scrolly -orient v -command [list $frame1.listbox yview]
     ttk::scrollbar $frame1.scrollx -orient h -command [list $frame1.listbox xview]
     
@@ -120,8 +119,7 @@ proc disthelperGUI {} {
         dropDest $frame2a.jobNumberEntry GS_job(Number)
         set GS_job(Number) ""
     
-    ttk::button $frame2a.jobNumberButton -text [mc "Import File"] -command { Disthelper_Helper::getAutoOpenFile $GS_job(Number) }
-    
+    ttk::button $frame2a.jobNumberButton -text [mc "Import File"] -command { Disthelper_Helper::getAutoOpenFile $GS_job(Number) }    
     
    
 
@@ -130,9 +128,6 @@ proc disthelperGUI {} {
 #
     grid $frame2a.jobNumberField -column 0 -row 0 -sticky nse -padx 5p -pady 5p
     grid $frame2a.jobNumberEntry -column 1 -row 0 -sticky news -padx 5p -pady 5p
-    
-    #grid $frame2a.jobNameField -column 2 -row 0 -sticky nse -padx 5p -pady 5p
-    #grid $frame2a.jobNameEntry -column 3 -row 0 -sticky news -padx 5p -pady 5p
     
     grid $frame2a.jobNumberButton -column 2 -row 0 -sticky news -padx 5p -pady 5p
     
@@ -289,8 +284,9 @@ proc disthelperGUI {} {
 ## - Bindings
 ##
 #ttk::style configure TEntry -fieldbackground [list focus yellow]
-
 #ttk::style map TEntry -fieldbackground [list focus yellow]
+
+
 
 #bind all <<ComboboxSelected>> {
 #    Shipping_Code::readHistory [$frame1.entry1 current]

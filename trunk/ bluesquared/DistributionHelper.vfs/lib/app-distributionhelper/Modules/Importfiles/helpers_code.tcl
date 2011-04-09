@@ -155,7 +155,7 @@ proc Disthelper_Helper::getAutoOpenFile { jobNumber } {
     global settings GS_job
     
     # Error control. Exit gracefully if the user clicks the Import Button without a job number.
-    if {$jobNumber == ""} {return}
+    if {$jobNumber == ""} {Disthelper_Helper::getOpenFile; return}
     
     # Strip off the (#) number if it exists
     set jobNumber [string trimleft $jobNumber #]
