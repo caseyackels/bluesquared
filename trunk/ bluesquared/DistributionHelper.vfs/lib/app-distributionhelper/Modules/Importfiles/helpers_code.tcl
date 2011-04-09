@@ -98,6 +98,7 @@ proc Disthelper_Helper::getOpenFile {} {
     #	
     #
     #***
+    global settings
     
     set filetypes {
         {{CSV Files}    {.csv}      }
@@ -106,6 +107,7 @@ proc Disthelper_Helper::getOpenFile {} {
     set filename [tk_getOpenFile \
         -parent . \
         -title [mc "Choose a File"] \
+	-initialdir $settings(sourceFiles) \
         -defaultextension .csv \
         -filetypes $filetypes
     ]
@@ -154,18 +156,28 @@ proc Disthelper_Helper::getAutoOpenFile { jobNumber } {
     
     # Error control. Exit gracefully if the user clicks the Import Button without a job number.
     if {$jobNumber == ""} {return}
+    
+    # Strip off the (#) number if it exists
+    set jobNumber [string trimleft $jobNumber #]
 	
     # Get the list of files in the directory
     set data [glob -tails -directory $settings(sourceFiles) *csv]
     
+    # use join, to make it a string, if we don't for some reason it doesn't work as intended.
     foreach list $data {
-	if {[lsearch -glob $list #$jobNumber] != -1} {
+	puts "getAUtoOpen: $data"
+	puts "lsearch: [lsearch -glob [join $list] #$jobNumber]"
+	if {[lsearch -glob [join $list] #$jobNumber] != -1} {
 	    lappend OpenFile $list
-	} else {
-	    set reply [tk_dialog .warning "Can't Find Job Number" "I can't seem to locate that job number, please try again." warning 0 Ok]
-	    return
 	}
     }
+
+    if {![info exists OpenFile]} { 
+	set reply [tk_dialog .warning "Can't Find Job Number" "I can't seem to locate that job number, please try again." warning 0 Ok]
+	Disthelper_Helper::resetVars -resetGUI
+	return
+    }
+
     
     # Reset the variables before importing another file
     Disthelper_Helper::resetVars -resetGUI

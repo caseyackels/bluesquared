@@ -181,6 +181,7 @@ proc 'distHelper_initVariables {} {
     # Application location
     set settings(Home) [pwd]
     
+    
     # Location for saving the file
     set settings(outFilePath) [file dirname $settings(Home)]
     
@@ -238,17 +239,18 @@ proc 'distHelper_loadSettings {} {
         # Initialize default values
         'distHelper_initVariables
         
-        set fd [open config.txt w]
-        foreach value [array names settings] {
-            # Creating application defaults.
-            # Original installation, or the config.txt was deleted.
-            puts $fd "settings($value) $settings($value)"
-        }
-        close $fd
+        Disthelper_Preferences::saveConfig
+        #set fd [open config.txt w]
+        #foreach value [array names settings] {
+        #    # Creating application defaults.
+        #    # Original installation, or the config.txt was deleted.
+        #    puts $fd "settings($value) $settings($value)"
+        #}
+        #chan close $fd
         
     } else {
 	set configFile [split [read $fd] \n]
-	catch {close $fd}
+	catch {chan close $fd}
 	
 	foreach line $configFile {
 	    if {$line == ""} {continue}

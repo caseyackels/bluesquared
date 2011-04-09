@@ -68,6 +68,7 @@ proc Disthelper_Code::readFile {filename} {
     puts "GS_file(Name): $GS_file(Name)"
     
     set GS_job(Number) [join [lrange [split $GS_file(Name)] 0 0]]
+    set GS_job(Number) [string trimleft $GS_job(Number) #]
     puts "Job Number: $GS_job(Number)"
     puts "filename: $filename"
     
@@ -90,20 +91,22 @@ proc Disthelper_Code::readFile {filename} {
         .container.frame1.listbox insert end $line
 
         switch -nocase $line {
-            Company     {set GS_address(Company) $line}
-            Consignee   {set GS_address(Consignee) $line}
-            Address1    {set GS_address(deliveryAddr) $line}
-            Address2    {set GS_address(addrTwo) $line}
-            Address3    {set GS_address(addrThree) $line}
-            City        {set GS_address(City) $line}
-            State       {set GS_address(State) $line}
-            Zip         {set GS_address(Zip) $line}
-            Phone       {set GS_address(Phone) $line}
-            Quantity    {set GS_job(Quantity) $line}
-            Version     {set GS_job(Version) $line}
-            "Ship Date" {set GS_job(Date) $line}
-            "Ship Via"  {set GS_ship(shipVia) $line}
-            default     {puts "Didn't set anything"}
+            Company             {set GS_address(Company) $line}
+            Consignee           {set GS_address(Consignee) $line}
+            "Delivery Address"  {set GS_address(deliveryAddr) $line}
+            Address2            {set GS_address(addrTwo) $line}
+            Address3            {set GS_address(addrThree) $line}
+            City                {set GS_address(City) $line}
+            State               {set GS_address(State) $line}
+            Zip                 {set GS_address(Zip) $line}
+            Phone               {set GS_address(Phone) $line}
+            Quantity            {set GS_job(Quantity) $line}
+            Version             {set GS_job(Version) $line}
+            "Ship Date"         {set GS_job(Date) $line}
+            "Ship Via"          {set GS_ship(shipVia) $line}
+            "Piece Weight"      {set GS_job(pieceWeight) $line}
+            "Full Box Qty"      {set GS_job(FullBoxQty) $line}
+            default             {puts "Didn't set anything"}
         }
     }
 

@@ -70,15 +70,15 @@ proc disthelper::parentGUI {} {
     menu $mb.file -tearoff 0 -relief raised -bd 2
     
     $mb add cascade -label [mc "File"] -menu $mb.file
-    $mb.file add command -label [mc "Import File"] -command {Disthelper_Helper::getOpenFile}
+    $mb.file add command -label [mc "Import File"] -command { Disthelper_Helper::getOpenFile }
     $mb.file add command -label [mc "Exit"] -command {exit}
     
     ## Edit
     menu $mb.edit -tearoff 0 -relief raised -bd 2
     $mb add cascade -label [mc "Edit"] -menu $mb.edit
     
-    $mb.edit add command -label [mc "Options"] -command {}
-    #$mb.edit add command -label "Breakdown" -command {}
+    $mb.edit add command -label [mc "Preferences"] -command { Disthelper_Preferences::prefGUI }
+    $mb.edit add command -label "Reset" -command {Disthelper_Helper::resetVars -resetGUI}
     
     ## Help
     menu $mb.help -tearoff 0 -relief raised -bd 2
