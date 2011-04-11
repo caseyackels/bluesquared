@@ -208,6 +208,8 @@ proc Disthelper_Code::writeOutPut {} {
     #
     #***
     global GS_job GS_ship GS_address GL_file GS_file settings
+    
+    'debug "(fullBoxQty) $GS_job(fullBoxQty)"
 
     # Error checking
     if {$GS_job(pieceWeight) == ""} {Error_Message::errorMsg pieceWeight1; return}
@@ -242,7 +244,10 @@ proc Disthelper_Code::writeOutPut {} {
         
         # Map data to variable
         foreach name [array names importFile] {
-            if {[lindex $l_line $importFile($name)] eq ""} {
+            if {($name eq "Version") && ([lindex $l_line $importFile($name)] ne "")} {
+                set Version [list [string toupper " - $importFile(Version)"]]
+                
+            } elseif {[lindex $l_line $importFile($name)] eq ""} {
                 # we need a placeholder if there isn't any data
                 set $name .
             } elseif {$name eq "shipVia"} {
@@ -287,13 +292,13 @@ proc Disthelper_Code::writeOutPut {} {
                 set onlyFullBoxes "" ;# Clear this out because we are in a [foreach] and it will never be reset if we don't do it here.
                 'debug "boxes: $x - TotalBoxes: $totalBoxes"
                 set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
-                'debug [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $GS_job(fullBoxQty) $GS_job(fullBoxQty)-$Version $boxWeight $x $totalBoxes"]
-                chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $GS_job(fullBoxQty) $GS_job(fullBoxQty)-$Version $boxWeight $x $totalBoxes "]
+                'debug [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $GS_job(fullBoxQty) ${GS_job(fullBoxQty)}${Version} $boxWeight $x $totalBoxes"]
+                chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $GS_job(fullBoxQty) ${GS_job(fullBoxQty)}${Version} $boxWeight $x $totalBoxes"]
             
             } else {
                 set boxWeight [::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
-                'debug [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) [lindex $val 1] [lindex $val 1]-$Version $boxWeight $x $totalBoxes"]
-                chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) [lindex $val 1] [lindex $val 1]-$Version $boxWeight $x $totalBoxes"]
+                'debug [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) [lindex $val 1] [lindex $val 1]$Version $boxWeight $x $totalBoxes"]
+                chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) [lindex $val 1] [lindex $val 1]${Version} $boxWeight $x $totalBoxes"]
             }
         }
         
