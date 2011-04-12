@@ -59,15 +59,25 @@ proc Disthelper_Helper::resetVars {args} {
     global GL_file GS_address GS_job GS_ship
     
     switch -- $args {
-	-resetGUI { # Clear out all the variables (We need this so we don't have to keep exiting the app to make more import files
-		    array unset GL_file
-		    array unset GS_address
-		    array unset GS_job
-		    array unset GS_ship
+	-resetGUI {
+		    # Clear out all the variables (We need this so we don't have to keep exiting the app to make more import files
+		    foreach name [array names GL_file] {
+			set GL_file($name) ""
+		    }
+		    foreach name [array names GS_address] {
+			set GS_address($name) ""
+		    }
+		    foreach name [array names GS_job] {
+			set GS_job($name) ""
+		    }
+		    foreach name [array names GS_ship] {
+			set GS_ship($name) ""
+		    }
 	    
 		    # Clear out the listbox
 		    .container.frame1.listbox delete 0 end
-		    }
+
+	}
     }
 } ;# Disthelper_Helper::resetVars
 
@@ -165,8 +175,8 @@ proc Disthelper_Helper::getAutoOpenFile { jobNumber } {
     
     # use join, to make it a string, if we don't for some reason it doesn't work as intended.
     foreach list $data {
-	puts "getAUtoOpen: $data"
-	puts "lsearch: [lsearch -glob [join $list] #$jobNumber]"
+	'debug "getAUtoOpen: $data"
+	'debug "lsearch: [lsearch -glob [join $list] #$jobNumber]"
 	if {[lsearch -glob [join $list] #$jobNumber] != -1} {
 	    lappend OpenFile $list
 	}
