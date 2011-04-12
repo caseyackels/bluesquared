@@ -208,12 +208,9 @@ proc Disthelper_Code::writeOutPut {} {
     #
     #***
     global GS_job GS_ship GS_address GL_file GS_file settings
-    
-    #if {![info exists $GS_job(fullBoxQty)]} {Error_Message::errorMsg pieceWeight1; return}
-    
-    #'debug "(fullBoxQty) $GS_job(fullBoxQty)"
 
     # Error checking
+    # Delivery Address
     if {$GS_job(Number) == ""} {Error_Message::errorMsg jobNumber1; return}
     if {$GS_job(pieceWeight) == ""} {Error_Message::errorMsg pieceWeight1; return}
     if {$GS_job(fullBoxQty) == ""} {Error_Message::errorMsg fullBoxQty1; return}
@@ -296,12 +293,14 @@ proc Disthelper_Code::writeOutPut {} {
                 'debug "boxes: $x - TotalBoxes: $totalBoxes"
                 if {[string match $Version .] == 1 } { set boxVersion $GS_job(fullBoxQty)} else { set boxVersion [join [concat $Version _ $GS_job(fullBoxQty)] ""] }
                 set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
+                
                 'debug "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $GS_job(fullBoxQty) $boxVersion $boxWeight $x $totalBoxes"
                 chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $GS_job(fullBoxQty) $boxVersion $boxWeight $x $totalBoxes"]
             
             } else {
                 if {[string match $Version .] == 1} { set boxVersion [lindex $val 1] } else { set boxVersion [join [concat $Version _ [lindex $val 1]] ""] } 
                 set boxWeight [::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
+                
                 'debug [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) [lindex $val 1] $boxVersion $boxWeight $x $totalBoxes"]
                 chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) [lindex $val 1] $boxVersion $boxWeight $x $totalBoxes"]
             }
