@@ -229,7 +229,7 @@ proc 'distHelper_loadSettings {} {
         # Initialize default values
         'distHelper_initVariables
         
-        Disthelper_Preferences::saveConfig
+        #Disthelper_Preferences::saveConfig
         
     } else {
 	set configFile [split [read $fd] \n]
