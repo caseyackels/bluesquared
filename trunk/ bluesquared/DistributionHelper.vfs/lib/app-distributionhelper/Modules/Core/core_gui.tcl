@@ -112,7 +112,7 @@ proc disthelper::parentGUI {} {
     ttk::button $btnBar.print -text [mc "Generate File"] -command { Disthelper_Code::writeOutPut }
     ttk::button $btnBar.close -text [mc "Exit"] -command {exit}
     
-    grid $btnBar.print -column 0 -row 3 -sticky nse -padx 8p  
+    grid $btnBar.print -column 0 -row 3 -sticky nse -padx 8p
     grid $btnBar.close -column 1 -row 3 -sticky nse
     pack $btnBar -side bottom -anchor e -pady 10p -padx 5p
     
