@@ -61,19 +61,26 @@ proc 'distHelper_sourceReqdFiles {} {
 	## All files that need to be sourced should go here. That way if any of them fail to load, we'll catch it.
 	
 	#Modify the Auto_path so our 'package requires' work.
+        ##
+        ## Binaries
+        ##
 	lappend ::auto_path [file join [file dirname [info script]]]
         lappend ::auto_path [file join [file dirname [info script]] Binaries]
         #lappend ::auto_path [file join [file dirname [info script]] Binaries sqlite3.3.8]
 	lappend ::auto_path [file join [file dirname [info script]] Binaries tkdnd2.2]
         
-	
+	##
+        ## 3rd party tcl scripts
+        ##
 	lappend ::auto_path [file join [file dirname [info script]] Libraries]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries autoscroll]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries csv]
 	##lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.2]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
 	
-	
+	##
+        ## Project built scripts
+        ##
 	lappend ::auto_path [file join [file dirname [info script]] Modules]
 	lappend ::auto_path [file join [file dirname [info script]] Modules Core]
 	lappend ::auto_path [file join [file dirname [info script]] Modules Importfiles]

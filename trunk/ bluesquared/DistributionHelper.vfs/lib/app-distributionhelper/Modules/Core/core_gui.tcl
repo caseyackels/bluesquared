@@ -116,8 +116,9 @@ proc disthelper::parentGUI {} {
     grid $btnBar.close -column 1 -row 3 -sticky nse
     pack $btnBar -side bottom -anchor e -pady 10p -padx 5p
     
+    
     # ToolTips
-    #tooltip::tooltip $btnBar.close "Close (Esc)"
+    tooltip::tooltip $btnBar.close "Close (Esc)"
     
     # Bindings
     

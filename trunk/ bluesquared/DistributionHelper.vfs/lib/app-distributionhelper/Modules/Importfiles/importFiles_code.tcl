@@ -298,6 +298,7 @@ proc Disthelper_Code::writeOutPut {} {
                 chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $GS_job(fullBoxQty) $boxVersion $boxWeight $x $totalBoxes"]
             
             } else {
+                'debug "boxes: $x - TotalBoxes: $totalBoxes"
                 if {[string match $Version .] == 1} { set boxVersion [lindex $val 1] } else { set boxVersion [join [concat $Version _ [lindex $val 1]] ""] } 
                 set boxWeight [::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
                 
