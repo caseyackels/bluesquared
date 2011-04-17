@@ -91,9 +91,10 @@ proc Disthelper_Code::readFile {filename} {
         .container.frame1.listbox insert end $line
 
         switch -nocase $line {
+            "Ship Via"          {set GS_ship(shipVia) $line}
             Company             {set GS_address(Company) $line}
             Consignee           {set GS_address(Consignee) $line}
-            "Delivery Address"  {set GS_address(deliveryAddr) $line}
+            Address1            {set GS_address(deliveryAddr) $line}
             Address2            {set GS_address(addrTwo) $line}
             Address3            {set GS_address(addrThree) $line}
             City                {set GS_address(City) $line}
@@ -103,9 +104,6 @@ proc Disthelper_Code::readFile {filename} {
             Quantity            {set GS_job(Quantity) $line}
             Version             {set GS_job(Version) $line}
             "Ship Date"         {set GS_job(Date) $line}
-            "Ship Via"          {set GS_ship(shipVia) $line}
-            "Piece Weight"      {set GS_job(pieceWeight) $line}
-            "Full Box Qty"      {set GS_job(FullBoxQty) $line}
             default             {puts "Didn't set anything"}
         }
     }
@@ -272,6 +270,7 @@ proc Disthelper_Code::writeOutPut {} {
         # First we assume we have full boxes, and a partial
         if {([lindex $val 0] != 0) && ([lindex $val 1] != 0)} {
             set totalBoxes [expr [lindex $val 0]+1]
+            set onlyFullBoxes no
             #set boxAndVersion "$totalBoxes$Version"
             'debug "(boxes1) $totalBoxes - Full boxes and Partials"
             
@@ -283,6 +282,7 @@ proc Disthelper_Code::writeOutPut {} {
         
         # Now we check to see if we have zero full boxes, and a partial
         } elseif {([lindex $val 0] == 0) && ([lindex $val 1] != 0)} {
+            set onlyFullBoxes no
             set totalBoxes 1
             'debug "(boxes3) $totalBoxes - Partial Only"
         }

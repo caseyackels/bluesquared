@@ -101,10 +101,33 @@ proc disthelperGUI {} {
     ::autoscroll::autoscroll $frame1.scrolly
     ::autoscroll::autoscroll $frame1.scrollx
 
+
+#
+## Frame 1a (Just a frame to hold some text for people who are new to DH)
+#
+
+    set frame1a [ttk::frame .container.frame1a]
+    
+    ttk::label $frame1a.tips1 -text [mc "Type a job number in the entry field then press 'Import File'."]
+    ttk::label $frame1a.tips2 -text [mc "If the fields aren't assigned automatically you may drag and drop the values"]
+    
+    grid $frame1a.tips1 -column 0 -row 1 -sticky nsw
+    grid $frame1a.tips2 -column 0 -row 2 -sticky nsw
+    
+    pack $frame1a -expand yes -fill both -padx 5p -ipady 2p -anchor n -side top
+
+
 #    
 ## Frame2 (This is a container for three frames: Job, Address, Shipment)
 #
     set frame2 [ttk::frame .container.frame2]
+    
+    #ttk::label $frame2.tips1 -text [mc "Type a job number in, then press 'Import File'."]
+    #ttk::label $frame2.tips2 -text [mc "If the fields aren't assigned automatically, you can drag N drop the values"]
+    
+    #grid $frame2.tips1 -column 0 -row 1
+    #grid $frame2.tips2 -column 0 -row 2
+    
     pack $frame2 -expand yes -fill both -padx 5p -pady 5p -ipady 2p -anchor n -side top
 
 #    
@@ -119,7 +142,7 @@ proc disthelperGUI {} {
         dropDest $frame2a.jobNumberEntry GS_job(Number)
         set GS_job(Number) ""
     
-    ttk::button $frame2a.jobNumberButton -text [mc "Import File"] -command { Disthelper_Helper::getAutoOpenFile $GS_job(Number) }    
+    ttk::button $frame2a.jobNumberButton -text [mc "Import File"] -command { Disthelper_Helper::getAutoOpenFile $GS_job(Number) }
     
    
 

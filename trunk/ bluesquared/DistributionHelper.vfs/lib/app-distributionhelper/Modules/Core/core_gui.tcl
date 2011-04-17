@@ -60,7 +60,7 @@ proc disthelper::parentGUI {} {
     #
     #***
  
-    wm geometry . 640x480 ;# width X Height
+    wm geometry . 640x525 ;# width X Height
     
     # Create the Menu's
     set mb [menu .mb]
