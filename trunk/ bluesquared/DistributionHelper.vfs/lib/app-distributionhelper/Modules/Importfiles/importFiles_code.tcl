@@ -288,7 +288,7 @@ proc Disthelper_Code::writeOutPut {} {
         }
         
         for {set x 1} {$x <= $totalBoxes} {incr x} {
-            if {($x != $totalBoxes) || ([info exists $onlyFullBoxes] == 1)} {
+            if {($x != $totalBoxes) || ($onlyFullBoxes eq yes)} {
                 set onlyFullBoxes "" ;# Clear this out because we are in a [foreach] and it will never be reset if we don't do it here.
                 'debug "boxes: $x - TotalBoxes: $totalBoxes"
                 if {[string match $Version .] == 1 } { set boxVersion $GS_job(fullBoxQty)} else { set boxVersion [join [concat $Version _ $GS_job(fullBoxQty)] ""] }
