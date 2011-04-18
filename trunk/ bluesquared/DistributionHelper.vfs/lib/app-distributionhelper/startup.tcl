@@ -224,7 +224,7 @@ proc 'distHelper_loadSettings {} {
     set debug(onOff) on
     
     # Theme setting for Tile
-    #ttk::style theme use $ttk::currentTheme
+    #ttk::style theme use xpnative
     
     # Import msgcat namespace so we only have to use [mc]
     namespace import msgcat::mc

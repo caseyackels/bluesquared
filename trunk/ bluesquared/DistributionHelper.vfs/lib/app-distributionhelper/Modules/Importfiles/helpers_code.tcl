@@ -275,4 +275,59 @@ proc Disthelper_Helper::displayLists { OpenFile jobNumber } {
     pack $frame2 -side bottom -anchor e -pady 10p -padx 5p
     
     
-}
+} ;# Disthelper_Helper::displayLists
+
+
+proc Disthelper_Helper::getChildren {} { 
+    #****f* getChildren/Disthelper_Helper
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011 - Casey Ackels
+    #
+    # FUNCTION
+    #	Get the children of the frame to configure the widgets
+    #
+    # SYNOPSIS
+    #	N/A
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    
+    # Get the children widgets, so that we can enable/disable them.
+    foreach child [winfo children .container.frame2] {
+        'debug (child) $child
+        if {[lsearch -glob $child *2b] != -1} {
+            # Now get the child widgets (notably the Entry widget)
+            foreach child2 [winfo children $child] {
+                if {[lsearch -glob $child2 *Entry] != -1} {
+                    #'debug (child2b) [lrange $child2 [lsearch -glob $child2 *Entry] [lsearch -glob $child2 *Entry]]
+		    #'debug (child2b) "set state to normal [lrange $child2 [lsearch -glob $child2 *Entry] [lsearch -glob $child2 *Entry]]"
+		    [lrange $child2 [lsearch -glob $child2 *Entry] [lsearch -glob $child2 *Entry]] configure -state normal
+                }
+            }
+        }
+    
+        if {[lsearch -glob $child *2c] != -1} {
+            # Now get the child widgets (notably the Entry widget)
+            foreach child2 [winfo children $child] {
+                if {[lsearch -glob $child2 *Entry] != -1} {
+                    #'debug (child2c) [lrange $child2 [lsearch -glob $child2 *Entry] [lsearch -glob $child2 *Entry]]
+		    #'debug (child2c) "set state to normal [lrange $child2 [lsearch -glob $child2 *Entry] [lsearch -glob $child2 *Entry]]"
+		    [lrange $child2 [lsearch -glob $child2 *Entry] [lsearch -glob $child2 *Entry]] configure -state normal
+                }
+            }
+        }
+    }
+
+} ;# Disthelper_Helper::getChildren

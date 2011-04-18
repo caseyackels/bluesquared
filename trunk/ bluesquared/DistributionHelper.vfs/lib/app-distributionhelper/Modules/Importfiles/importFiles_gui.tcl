@@ -121,13 +121,6 @@ proc disthelperGUI {} {
 ## Frame2 (This is a container for three frames: Job, Address, Shipment)
 #
     set frame2 [ttk::frame .container.frame2]
-    
-    #ttk::label $frame2.tips1 -text [mc "Type a job number in, then press 'Import File'."]
-    #ttk::label $frame2.tips2 -text [mc "If the fields aren't assigned automatically, you can drag N drop the values"]
-    
-    #grid $frame2.tips1 -column 0 -row 1
-    #grid $frame2.tips2 -column 0 -row 2
-    
     pack $frame2 -expand yes -fill both -padx 5p -pady 5p -ipady 2p -anchor n -side top
 
 #    
@@ -142,7 +135,7 @@ proc disthelperGUI {} {
         dropDest $frame2a.jobNumberEntry GS_job(Number)
         set GS_job(Number) ""
     
-    ttk::button $frame2a.jobNumberButton -text [mc "Import File"] -command { Disthelper_Helper::getAutoOpenFile $GS_job(Number) }
+    ttk::button $frame2a.jobNumberButton -text [mc "Import File"] -state active -command { Disthelper_Helper::getAutoOpenFile $GS_job(Number) }
     
    
 
@@ -165,47 +158,48 @@ proc disthelperGUI {} {
     pack $frame2b -expand yes -fill both -anchor n
    
     ttk::label $frame2b.addressConsigneeField -text [mc "Consignee"]
-    ttk::entry $frame2b.addressConsigneeEntry -textvariable GS_address(Consignee)
+    ttk::entry $frame2b.addressConsigneeEntry -textvariable GS_address(Consignee) -state disabled 
         dropDest $frame2b.addressConsigneeEntry GS_address(Consignee)
         set GS_address(Consignee) ""
+        
     
     ttk::label $frame2b.addressCompanyField -text [mc "Company"]
-    ttk::entry $frame2b.addressCompanyEntry -textvariable GS_address(Company)
+    ttk::entry $frame2b.addressCompanyEntry -textvariable GS_address(Company) -state disabled 
         dropDest $frame2b.addressCompanyEntry GS_address(Company)
         set GS_address(Company) ""
     
     ttk::label $frame2b.addressAddr3Field -text [mc "Address 3"]
-    ttk::entry $frame2b.addressAddr3Entry -textvariable GS_address(addrThree)
+    ttk::entry $frame2b.addressAddr3Entry -textvariable GS_address(addrThree) -state disabled 
         dropDest $frame2b.addressAddr3Entry GS_address(addrThree)
         set GS_address(addrThree) ""
     
     ttk::label $frame2b.addressAddr2Field -text [mc "Address 2"]
-    ttk::entry $frame2b.addressAddr2Entry -textvariable GS_address(addrTwo)
+    ttk::entry $frame2b.addressAddr2Entry -textvariable GS_address(addrTwo) -state disabled 
         dropDest $frame2b.addressAddr2Entry GS_address(addrTwo)
         set GS_address(addrTwo) ""
     
     ttk::label $frame2b.addressDelAddrField -text [mc "Delivery Address"]
-    ttk::entry $frame2b.addressDelAddrEntry -textvariable GS_address(deliveryAddr)
+    ttk::entry $frame2b.addressDelAddrEntry -textvariable GS_address(deliveryAddr) -state disabled 
         dropDest $frame2b.addressDelAddrEntry GS_address(deliveryAddr)
         set GS_address(deliveryAddr) ""
     
     ttk::label $frame2b.addressCityField -text [mc "City"]
-    ttk::entry $frame2b.addressCityEntry -textvariable GS_address(City)
+    ttk::entry $frame2b.addressCityEntry -textvariable GS_address(City) -state disabled 
         dropDest $frame2b.addressCityEntry GS_address(City)
         set GS_address(City) ""
     
     ttk::label $frame2b.addressStateField -text [mc "State"] 
-    ttk::entry $frame2b.addressStateEntry -textvariable GS_address(State) -width 5
+    ttk::entry $frame2b.addressStateEntry -textvariable GS_address(State) -width 5 -state disabled 
         dropDest $frame2b.addressStateEntry GS_address(State)
         set GS_address(State) ""
     
     ttk::label $frame2b.addressZipField -text [mc "Zip"] 
-    ttk::entry $frame2b.addressZipEntry -textvariable GS_address(Zip) -width 9
+    ttk::entry $frame2b.addressZipEntry -textvariable GS_address(Zip) -width 9 -state disabled 
         dropDest $frame2b.addressZipEntry GS_address(Zip)
         set GS_address(Zip) ""
     
     ttk::label $frame2b.addressPhoneField -text [mc "Phone"]
-    ttk::entry $frame2b.addressPhoneEntry -textvariable GS_address(Phone)
+    ttk::entry $frame2b.addressPhoneEntry -textvariable GS_address(Phone) -state disabled 
         dropDest $frame2b.addressPhoneEntry GS_address(Phone)
         set GS_address(Phone) ""
     
@@ -250,32 +244,32 @@ proc disthelperGUI {} {
     pack $frame2c -expand yes -fill both -anchor n
     
     ttk::label $frame2c.shipmentDateField -text [mc "Date"]
-    ttk::entry $frame2c.shipmentDateEntry -textvariable GS_job(Date)
+    ttk::entry $frame2c.shipmentDateEntry -textvariable GS_job(Date) -state disabled 
         dropDest $frame2c.shipmentDateEntry GS_job(Date)
         set GS_job(Date) ""
     
     ttk::label $frame2c.shipmentVersionField -text [mc "Version"]
-    ttk::entry $frame2c.shipmentVersionEntry -textvariable GS_job(Version)
+    ttk::entry $frame2c.shipmentVersionEntry -textvariable GS_job(Version) -state disabled 
         dropDest $frame2c.shipmentVersionEntry GS_job(Version)
         set GS_job(Version) ""
 
     ttk::label $frame2c.shipmentShipViaField -text [mc "Ship Via"]
-    ttk::entry $frame2c.shipmentShipViaEntry -textvariable GS_ship(shipVia)
+    ttk::entry $frame2c.shipmentShipViaEntry -textvariable GS_ship(shipVia) -state disabled 
         dropDest $frame2c.shipmentShipViaEntry GS_ship(shipVia)
         set GS_ship(shipVia) ""
     
     ttk::label $frame2c.shipmentQuantityField -text [mc "Quantity"]
-    ttk::entry $frame2c.shipmentQuantityEntry -textvariable GS_job(Quantity)
+    ttk::entry $frame2c.shipmentQuantityEntry -textvariable GS_job(Quantity) -state disabled 
         dropDest $frame2c.shipmentQuantityEntry GS_job(Quantity)
         set GS_job(Quantity) ""
     
     ttk::label $frame2c.shipmentPieceWeightField -text [mc "Piece Weight"]
-    ttk::entry $frame2c.shipmentPieceWeightEntry -textvariable GS_job(pieceWeight)
+    ttk::entry $frame2c.shipmentPieceWeightEntry -textvariable GS_job(pieceWeight) -state disabled 
         dropDest $frame2c.shipmentPieceWeightEntry GS_job(pieceWeight)
         set GS_job(pieceWeight) ""
     
     ttk::label $frame2c.shipmentFullBoxField -text [mc "Full Box Qty"]
-    ttk::entry $frame2c.shipmentFullBoxEntry -textvariable GS_job(fullBoxQty)
+    ttk::entry $frame2c.shipmentFullBoxEntry -textvariable GS_job(fullBoxQty) -state disabled 
         dropDest $frame2c.shipmentFullBoxEntry GS_job(fullBoxQty)
         set GS_job(fullBoxQty) ""
     
@@ -325,7 +319,15 @@ editPopup
 bind all <Escape> {exit}
 bind all <F1> {console show}
 bind all <F2> {console hide}
+
+focus $frame2a.jobNumberEntry
+
+bind $frame2a.jobNumberEntry <Return> "$frame2a.jobNumberButton invoke"
+bind $frame2a.jobNumberButton <Return> "$frame2a.jobNumberButton invoke"
+
 ttk::style map TEntry -fieldbackground [list focus yellow]
+
+
 } ;# End of disthelperGUI
 
 proc dropDest {window txtVar} {

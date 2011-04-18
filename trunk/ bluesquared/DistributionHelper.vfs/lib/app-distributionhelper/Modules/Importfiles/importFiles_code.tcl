@@ -86,6 +86,10 @@ proc Disthelper_Code::readFile {filename} {
     
     set GL_file(Header) [csv::split [lindex $GL_file(dataList) 0]]
     
+
+    # Set the entry widgets to normal state    
+    Disthelper_Helper::getChildren
+    
     foreach line $GL_file(Header) {
         # If the file has headers, lets auto-insert the values to help the user.
         .container.frame1.listbox insert end $line
