@@ -240,6 +240,11 @@ proc 'blueSquirrel_loadSettings {} {
 	    set [lindex $l_line 0] [join [lrange $l_line 1 end] " "]
 	}
     }
+    
+    #source [file join [file dirname [info script]] Modules Core core_gui.tcl]
+    #set g_changeNotes [split [read [open changenotes.txt r]] \n]
+    #close $g_changeNotes
+    
 }
 # Load required files / packages
 'blueSquirrel_sourceReqdFiles
