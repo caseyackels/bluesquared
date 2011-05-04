@@ -199,12 +199,15 @@ proc shippingGUI {} {
     
 
 #Frame3
-    set frame3 [ttk::labelframe .container.frame3 -text "Did you know?" -width 4.5i -labelanchor nw]
+    #set frame3 [ttk::labelframe .container.frame3 -text "Did you know?" -width 4.5i -labelanchor nw]
+    set frame3 [ttk::frame .container.frame3]
     pack $frame3 -expand yes -fill both -padx 5p
 
-    ttk::label $frame3.tip -textvariable GS_textVar(tips)
+    ##ttk::label $frame3.tip -textvariable GS_textVar(tips)
+    ttk::checkbutton $frame3.checkbutton -text "Print Manifest?" -variable printManifest
 
-    grid $frame3.tip -column 0 -row 0 -sticky nse -padx 5p
+    #grid $frame3.tip -column 0 -row 0 -sticky nse -padx 5p
+    grid $frame3.checkbutton -column 0 -row 0 -sticky nse -padx 5p
    
 
 ##
