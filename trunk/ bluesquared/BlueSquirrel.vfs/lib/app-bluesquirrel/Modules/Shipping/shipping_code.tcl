@@ -500,6 +500,11 @@ proc printLabels {} {
 		exec $programPath(Bartend) /AF=$programPath(LabelPath)\\2LINEDB.btw /P /CLOSE
 	    }
 	}
+        
+        if {$GS_textVar(printManifest) == 1} {
+            # Print a manifest at the end
+            exec $programPath(Bartend) /AF=$programPath(LabelPath)\\manifest.btw /P /CLOSE
+        }
             #C:/path/to/bartend.exe /F=C:/Labels/path/to/format /P /S /CLOSE
 } ;# printLabels
 

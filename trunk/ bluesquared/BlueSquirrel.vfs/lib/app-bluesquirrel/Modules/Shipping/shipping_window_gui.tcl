@@ -203,7 +203,7 @@ proc shippingGUI {} {
     set frame3 [ttk::frame .container.frame3]
     pack $frame3 -side right -padx 5p -pady 5p
 
-    ttk::checkbutton $frame3.checkbutton -text "Print Manifest?" -variable printManifest
+    ttk::checkbutton $frame3.checkbutton -text "Print Manifest?" -variable GS_textVar(printManifest)
 
     grid $frame3.checkbutton -column 0 -row 0 -sticky nse
    
@@ -324,7 +324,7 @@ proc breakDown {} {
     
         text .breakdown.txt
         set GS_widget(breakdown) .breakdown.txt
-        ttk::button .breakdown.refresh -text "Refresh" -command { Shipping_Gui::breakDown }
+        ttk::button .breakdown.refresh -text "Close" -command { destroy .breakdown }
     
         pack $GS_widget(breakdown)
         pack .breakdown.refresh
