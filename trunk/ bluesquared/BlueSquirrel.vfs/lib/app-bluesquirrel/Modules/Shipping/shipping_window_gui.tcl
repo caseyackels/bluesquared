@@ -203,9 +203,9 @@ proc shippingGUI {} {
     set frame3 [ttk::frame .container.frame3]
     pack $frame3 -side right -padx 5p -pady 5p
 
-    ttk::checkbutton $frame3.checkbutton -text "Print Manifest?" -variable GS_textVar(printManifest)
+    #ttk::checkbutton $frame3.checkbutton -text "Print Manifest?" -variable GS_textVar(printManifest)
 
-    grid $frame3.checkbutton -column 0 -row 0 -sticky nse
+    #grid $frame3.checkbutton -column 0 -row 0 -sticky nse
    
 
 ##
@@ -289,6 +289,60 @@ bind all <F2> {console hide}
 
 } ;# End of shippingGUI
 
+
+proc printbreakDown {} {
+    #****f* printbreakDown/Shipping_Gui
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011 - Casey Ackels
+    #
+    # FUNCTION
+    #	Displays the breakdown per boxes. (I.E. 5 Boxes at 50, 3 Boxes at 25)
+    #
+    # SYNOPSIS
+    #	N/A
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	blueSquirrel::parentGUI, Shipping_Code::createList
+    #
+    # NOTES
+    #	None
+    #
+    # SEE ALSO
+    #	TODO: List the other *GUI procs.
+    #
+    #***
+    global GS_textVar
+    
+    set myBreakDownText [.breakdown.txt get 0.0 end]
+    set file [open breakdown.txt w]
+    
+    puts $file $GS_textVar(line1)
+    puts $file $GS_textVar(line2)
+    puts $file $GS_textVar(line3)
+    puts $file $GS_textVar(line4)
+    puts $file $GS_textVar(line5)
+    puts $file \n
+    puts $file $myBreakDownText
+    
+    close $file
+    
+    ##
+    ## This needs to be a user set option!!
+    ##
+    # Test Printer
+    #exec [file join C:\\ "Program Files" "Windows NT" Accessories wordpad.exe] /pt breakdown.txt {\\vm-printserver\Mailing 9050}
+    
+    # Shipping Printer
+    exec [file join C:\\ "Program Files" "Windows NT" Accessories wordpad.exe] /pt breakdown.txt {\\vm-printserver\Shipping-Time}
+} ;# End of printbreakDown
+
+
 proc breakDown {} {
     #****f* breakDown/Shipping_Gui
     # AUTHOR
@@ -324,7 +378,8 @@ proc breakDown {} {
     
         text .breakdown.txt
         set GS_widget(breakdown) .breakdown.txt
-        ttk::button .breakdown.refresh -text "Close" -command { destroy .breakdown }
+        #ttk::button .breakdown.refresh -text "Close" -command { destroy .breakdown } printbreakDown
+        ttk::button .breakdown.refresh -text "Print" -command {puts "blah"; Shipping_Gui::printbreakDown}
     
         pack $GS_widget(breakdown)
         pack .breakdown.refresh
@@ -368,4 +423,7 @@ proc breakDown {} {
     
 
 } ;# End of breakDown
+
+
+    
 } ;# End of Shipping_Gui namespace
