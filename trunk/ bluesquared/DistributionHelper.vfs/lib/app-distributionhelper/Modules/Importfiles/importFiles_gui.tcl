@@ -108,8 +108,8 @@ proc disthelperGUI {} {
 
     set frame1a [ttk::frame .container.frame1a]
     
-    ttk::label $frame1a.tips1 -text [mc "Type a job number in the entry field then press 'Import File'."]
-    ttk::label $frame1a.tips2 -text [mc "If the fields aren't assigned automatically you may drag and drop the values"]
+    ttk::label $frame1a.tips1 -text [mc "Type a job number in the entry field then press 'Import File'."] -foreground red
+    ttk::label $frame1a.tips2 -text [mc "If the fields aren't assigned automatically you may drag and drop the values"] -foreground orange
     
     grid $frame1a.tips1 -column 0 -row 1 -sticky nsw
     grid $frame1a.tips2 -column 0 -row 2 -sticky nsw
@@ -162,7 +162,7 @@ proc disthelperGUI {} {
         dropDest $frame2b.addressCompanyEntry GS_address(Company)
         set GS_address(Company) ""
         
-    ttk::label $frame2b.addressConsigneeField -text [mc "Consignee"]
+    ttk::label $frame2b.addressConsigneeField -text [mc "Consignee / Attn To:"]
     ttk::entry $frame2b.addressConsigneeEntry -textvariable GS_address(Consignee) -state disabled 
         dropDest $frame2b.addressConsigneeEntry GS_address(Consignee)
         set GS_address(Consignee) ""
@@ -258,7 +258,7 @@ proc disthelperGUI {} {
         dropDest $frame2c.shipmentShipViaEntry GS_ship(shipVia)
         set GS_ship(shipVia) ""
     
-    ttk::label $frame2c.shipmentQuantityField -text [mc "Quantity"]
+    ttk::label $frame2c.shipmentQuantityField -text [mc "Shipment Qty"]
     ttk::entry $frame2c.shipmentQuantityEntry -textvariable GS_job(Quantity) -state disabled 
         dropDest $frame2c.shipmentQuantityEntry GS_job(Quantity)
         set GS_job(Quantity) ""
