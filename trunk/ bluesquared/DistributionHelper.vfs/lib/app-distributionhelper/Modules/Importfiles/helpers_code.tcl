@@ -254,7 +254,7 @@ proc Disthelper_Helper::displayLists { OpenFile jobNumber } {
                 -selectbackground yellow \
                 -selectforeground black \
                 -exportselection yes \
-                -selectmode single
+                -selectmode browse
     
 
     grid $frame1.listbox -column 0 -row 0 -sticky news -padx 5p -pady 5p
@@ -305,6 +305,7 @@ proc Disthelper_Helper::getChildren {} {
     #***
     
     # Get the children widgets, so that we can enable/disable them.
+    # *2c/*2b is the last part of the widget name
     foreach child [winfo children .container.frame2] {
         'debug (child) $child
         if {[lsearch -glob $child *2b] != -1} {
@@ -331,3 +332,41 @@ proc Disthelper_Helper::getChildren {} {
     }
 
 } ;# Disthelper_Helper::getChildren
+
+
+proc Disthelper_Helper::detectData {args} { 
+    #****f* detectData/Disthelper_Helper
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011 - Casey Ackels
+    #
+    # FUNCTION
+    #	Detect if there is enough data in the entry field, to change the label text from Red to Black.
+    #
+    # SYNOPSIS
+    #	N/A
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    
+    #'debug "Data: [[lindex $args 0] get]"
+    'debug "StringLength: [string length [lindex $args 0]]"
+    'debug "Widget: [lindex $args 1]"
+    #if {$args eq ""} {return}
+    if {[string length [[lindex $args 0] get]] >= 3} {[lindex $args 1] configure -foreground black
+	} else {
+	    [lindex $args 1] configure -foreground red; return
+    }
+    
+} ;# Disthelper_Helper::detectData
