@@ -34,6 +34,7 @@ proc Error_Message::errorMsg {code} {
     
     switch -- $code {
         jobNumber1  {set message [mc "You must specify a job number."]; set message2 [mc "Error Location %s" $code]}
+        shipVia1    {set message [mc "You must specify how to ship your shipments."]; set message2 [mc "Error Locations %s" $code]}
         pieceWeight1 {set message [mc "You do not have a value set for your Piece Weight"]; set message2 [mc "Error Location: %s" $code]}
         fullBoxQty1 {set message [mc "You did not enter the full box amount"]; set message2 [mc "Error Location: %s" $code]}
         default {set message [mc "Unknown Error Message"]; set message2 ""}

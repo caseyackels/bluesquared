@@ -215,6 +215,7 @@ proc Disthelper_Code::writeOutPut {} {
     # Error checking
     # Delivery Address
     if {$GS_job(Number) == ""} {Error_Message::errorMsg jobNumber1; return}
+    if {$GS_ship(shipVia) == ""} {Error_Message:errorMsg shipVia1; return}
     if {$GS_job(pieceWeight) == ""} {Error_Message::errorMsg pieceWeight1; return}
     if {$GS_job(fullBoxQty) == ""} {Error_Message::errorMsg fullBoxQty1; return}
 
@@ -297,17 +298,18 @@ proc Disthelper_Code::writeOutPut {} {
                 #set onlyFullBoxes "" ;# Clear this out because we are in a [foreach] and it will never be reset if we don't do it here.
                 'debug "boxes: $x - TotalBoxes: $totalBoxes"
                 if {[string match $Version .] == 1 } { set boxVersion $GS_job(fullBoxQty)} else { set boxVersion [join [concat $Version _ $GS_job(fullBoxQty)] ""] }
-                set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
+                set boxWeight [catch {[::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]}]
                 
+                'debug "FullBoxes_err: $err_1"
                 'debug "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $boxWeight $x $totalBoxes"
                 chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $boxWeight $x $totalBoxes"]
             
             } elseif {($x == $totalBoxes) || ($onlyFullBoxes eq no)} {
                 'debug "boxes: $x - TotalBoxes (Partials): $totalBoxes"
                 if {[string match $Version .] == 1} { set boxVersion [lindex $val 1] } else { set boxVersion [join [concat $Version _ [lindex $val 1]] ""] } 
-                set boxWeight [catch {[::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]} err]
+                set boxWeight [catch {[::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]} err_1]
                 
-                'debug "err: $err"
+                'debug "PartialBoxes_err: $err_1"
                 'debug [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion [lindex $val 1] $boxWeight $x $totalBoxes"]
                 chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion [lindex $val 1] $boxWeight $x $totalBoxes"]
             }
