@@ -346,7 +346,7 @@ proc Disthelper_Helper::detectData {args} {
     #	Detect if there is enough data in the entry field, to change the label text from Red to Black.
     #
     # SYNOPSIS
-    #	N/A
+    #	Two widget paths make up the arguments. The first path is for the [Label Widget] the second is for the [Entry Widget]
     #
     # CHILDREN
     #	N/A
@@ -359,14 +359,42 @@ proc Disthelper_Helper::detectData {args} {
     # SEE ALSO
     #
     #***
+    global pieceWeightTmp fullBoxTmp
     
     #'debug "Data: [[lindex $args 0] get]"
-    'debug "StringLength: [string length [lindex $args 0]]"
-    'debug "Widget: [lindex $args 1]"
-    #if {$args eq ""} {return}
-    if {[string length [[lindex $args 0] get]] >= 3} {[lindex $args 1] configure -foreground black
-	} else {
-	    [lindex $args 1] configure -foreground red; return
+    #'debug "arg1: [lindex $args 0]"
+    #'debug "arg2: [lindex $args 1]"
+    'debug "StringLength: [string length [[lindex $args 0] get]]"
+    'debug "String: [[lindex $args 0] get]"
+    #'debug "Widget: [lindex $args 1]"
+
+    switch -- [lindex $args 2] {
+	pieceWeight {
+		    if {[string length [[lindex $args 0] get]] >= 3} {[lindex $args 1] configure -foreground black
+			set pieceWeightTmp 1
+			} else {
+			    set pieceWeightTmp 0
+			    [lindex $args 1] configure -foreground red
+			    .btnBar.print configure -state disabled
+			    return
+		    }
+	}
+	fullBox	{
+		if {[string length [[lindex $args 0] get]] >= 1} {[lindex $args 1] configure -foreground black
+		    set fullBoxTmp 1
+			} else {
+			    set fullBoxTmp 0
+			    [lindex $args 1] configure -foreground red
+			    .btnBar.print configure -state disabled
+			    return
+		}
+	}
     }
-    
+	# Only enable the Generate File button if the required fields are populated.
+	'debug "pieceWeightTmp: [info exists pieceWeightTmp]"
+	'debug "fullBoxTmp: [info exists fullBoxTmp]"
+	
+	if {![info exists pieceWeightTmp]} {return}
+	if {![info exists fullBoxTmp]} {return}
+	if {$pieceWeightTmp == 1 && $fullBoxTmp == 1} {.btnBar.print configure -state enabled}
 } ;# Disthelper_Helper::detectData

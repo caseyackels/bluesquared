@@ -263,12 +263,12 @@ proc disthelperGUI {} {
         dropDest $frame2c.shipmentQuantityEntry GS_job(Quantity)
         set GS_job(Quantity) ""
     
-    ttk::label $frame2c.shipmentPieceWeightField -text [mc "Piece Weight"]
+    ttk::label $frame2c.shipmentPieceWeightField -text [mc "Piece Weight"] -foreground red
     ttk::entry $frame2c.shipmentPieceWeightEntry -textvariable GS_job(pieceWeight) -state disabled 
         dropDest $frame2c.shipmentPieceWeightEntry GS_job(pieceWeight)
         set GS_job(pieceWeight) ""
     
-    ttk::label $frame2c.shipmentFullBoxField -text [mc "Full Box Qty"]
+    ttk::label $frame2c.shipmentFullBoxField -text [mc "Full Box Qty"] -foreground red
     ttk::entry $frame2c.shipmentFullBoxEntry -textvariable GS_job(fullBoxQty) -state disabled 
         dropDest $frame2c.shipmentFullBoxEntry GS_job(fullBoxQty)
         set GS_job(fullBoxQty) ""
@@ -303,7 +303,8 @@ proc disthelperGUI {} {
 #ttk::style configure TEntry -fieldbackground [list focus yellow]
 #ttk::style map TEntry -fieldbackground [list focus yellow]
 
-
+bind $frame2c.shipmentPieceWeightEntry <KeyRelease> "Disthelper_Helper::detectData $frame2c.shipmentPieceWeightEntry $frame2c.shipmentPieceWeightField pieceWeight"
+bind $frame2c.shipmentFullBoxEntry <KeyRelease> "Disthelper_Helper::detectData $frame2c.shipmentFullBoxEntry $frame2c.shipmentFullBoxField fullBox"
 
 #bind all <<ComboboxSelected>> {
 #    Shipping_Code::readHistory [$frame1.entry1 current]

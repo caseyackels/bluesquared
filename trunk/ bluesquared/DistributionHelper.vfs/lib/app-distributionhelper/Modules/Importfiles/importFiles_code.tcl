@@ -144,7 +144,7 @@ proc Disthelper_Code::doMath {totalQuantity maxPerBox} {
     # Do mathmatical equations, then double check to make sure it comes out to the value of totalQty
     #puts "Starting doMath"
     
-    # Guard against a mistake the at we could make
+    # Guard against a mistake that we could make
     if {$totalQuantity == "" || $totalQuantity == 0} {puts "I need a total qty argument!"; return}
     
     if {$totalQuantity < $maxPerBox} {
@@ -152,6 +152,7 @@ proc Disthelper_Code::doMath {totalQuantity maxPerBox} {
     }
     
     set divideTotalQuantity [expr {$totalQuantity/$maxPerBox}]
+    'debug "divideTotalQuantity: $divideTotalQuantity"
     
     set totalFullBoxs [expr {round($divideTotalQuantity)}]
     set fullBoxQTY [expr {round(floor($divideTotalQuantity) * $maxPerBox)}]
@@ -293,7 +294,7 @@ proc Disthelper_Code::writeOutPut {} {
         
         for {set x 1} {$x <= $totalBoxes} {incr x} {
             if {($x != $totalBoxes) || ($onlyFullBoxes eq yes)} {
-                set onlyFullBoxes "" ;# Clear this out because we are in a [foreach] and it will never be reset if we don't do it here.
+                #set onlyFullBoxes "" ;# Clear this out because we are in a [foreach] and it will never be reset if we don't do it here.
                 'debug "boxes: $x - TotalBoxes: $totalBoxes"
                 if {[string match $Version .] == 1 } { set boxVersion $GS_job(fullBoxQty)} else { set boxVersion [join [concat $Version _ $GS_job(fullBoxQty)] ""] }
                 set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
@@ -301,8 +302,8 @@ proc Disthelper_Code::writeOutPut {} {
                 'debug "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $boxWeight $x $totalBoxes"
                 chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $boxWeight $x $totalBoxes"]
             
-            } else {
-                'debug "boxes: $x - TotalBoxes: $totalBoxes"
+            } elseif {($x == $totalBoxes) || ($onlyFullBoxes eq no)} {
+                'debug "boxes: $x - TotalBoxes (Partials): $totalBoxes"
                 if {[string match $Version .] == 1} { set boxVersion [lindex $val 1] } else { set boxVersion [join [concat $Version _ [lindex $val 1]] ""] } 
                 set boxWeight [catch {[::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]} err]
                 
