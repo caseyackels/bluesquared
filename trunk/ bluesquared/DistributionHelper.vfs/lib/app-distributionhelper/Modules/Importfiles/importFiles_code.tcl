@@ -298,16 +298,17 @@ proc Disthelper_Code::writeOutPut {} {
                 if {[string match $Version .] == 1 } { set boxVersion $GS_job(fullBoxQty)} else { set boxVersion [join [concat $Version _ $GS_job(fullBoxQty)] ""] }
                 set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
                 
-                'debug "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $GS_job(fullBoxQty) $boxVersion $boxWeight $x $totalBoxes"
-                chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $GS_job(fullBoxQty) $boxVersion $boxWeight $x $totalBoxes"]
+                'debug "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $boxWeight $x $totalBoxes"
+                chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $boxWeight $x $totalBoxes"]
             
             } else {
                 'debug "boxes: $x - TotalBoxes: $totalBoxes"
                 if {[string match $Version .] == 1} { set boxVersion [lindex $val 1] } else { set boxVersion [join [concat $Version _ [lindex $val 1]] ""] } 
-                set boxWeight [::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
+                set boxWeight [catch {[::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]} err]
                 
-                'debug [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) [lindex $val 1] $boxVersion $boxWeight $x $totalBoxes"]
-                chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) [lindex $val 1] $boxVersion $boxWeight $x $totalBoxes"]
+                'debug "err: $err"
+                'debug [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion [lindex $val 1] $boxWeight $x $totalBoxes"]
+                chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion [lindex $val 1] $boxWeight $x $totalBoxes"]
             }
         }
         
