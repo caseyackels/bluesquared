@@ -157,31 +157,31 @@ proc disthelperGUI {} {
     set frame2b [ttk::labelframe $frame2.frame2b -text [mc "Address"]]
     pack $frame2b -expand yes -fill both -anchor n
    
+    ttk::label $frame2b.addressCompanyField -text [mc "Company"]
+    ttk::entry $frame2b.addressCompanyEntry -textvariable GS_address(Company) -state disabled 
+        dropDest $frame2b.addressCompanyEntry GS_address(Company)
+        set GS_address(Company) ""
+        
     ttk::label $frame2b.addressConsigneeField -text [mc "Consignee"]
     ttk::entry $frame2b.addressConsigneeEntry -textvariable GS_address(Consignee) -state disabled 
         dropDest $frame2b.addressConsigneeEntry GS_address(Consignee)
         set GS_address(Consignee) ""
         
-    
-    ttk::label $frame2b.addressCompanyField -text [mc "Company"]
-    ttk::entry $frame2b.addressCompanyEntry -textvariable GS_address(Company) -state disabled 
-        dropDest $frame2b.addressCompanyEntry GS_address(Company)
-        set GS_address(Company) ""
-    
+    ttk::label $frame2b.addressDelAddrField -text [mc "Delivery Address"]
+    ttk::entry $frame2b.addressDelAddrEntry -textvariable GS_address(deliveryAddr) -state disabled 
+        dropDest $frame2b.addressDelAddrEntry GS_address(deliveryAddr)
+        set GS_address(deliveryAddr) ""
+        
+    ttk::label $frame2b.addressAddr2Field -text [mc "Address 2"]
+    ttk::entry $frame2b.addressAddr2Entry -textvariable GS_address(addrTwo) -state disabled 
+        dropDest $frame2b.addressAddr2Entry GS_address(addrTwo)
+        set GS_address(addrTwo) ""
+        
     ttk::label $frame2b.addressAddr3Field -text [mc "Address 3"]
     ttk::entry $frame2b.addressAddr3Entry -textvariable GS_address(addrThree) -state disabled 
         dropDest $frame2b.addressAddr3Entry GS_address(addrThree)
         set GS_address(addrThree) ""
     
-    ttk::label $frame2b.addressAddr2Field -text [mc "Address 2"]
-    ttk::entry $frame2b.addressAddr2Entry -textvariable GS_address(addrTwo) -state disabled 
-        dropDest $frame2b.addressAddr2Entry GS_address(addrTwo)
-        set GS_address(addrTwo) ""
-    
-    ttk::label $frame2b.addressDelAddrField -text [mc "Delivery Address"]
-    ttk::entry $frame2b.addressDelAddrEntry -textvariable GS_address(deliveryAddr) -state disabled 
-        dropDest $frame2b.addressDelAddrEntry GS_address(deliveryAddr)
-        set GS_address(deliveryAddr) ""
     
     ttk::label $frame2b.addressCityField -text [mc "City"]
     ttk::entry $frame2b.addressCityEntry -textvariable GS_address(City) -state disabled 
@@ -207,20 +207,20 @@ proc disthelperGUI {} {
 #
 ## Grid Frame2b
 #
-    grid $frame2b.addressConsigneeField -column 0 -row 0 -sticky nse -padx 5p -pady 3p
-    grid $frame2b.addressConsigneeEntry -column 1 -row 0 -columnspan 5 -sticky news -padx 3p -pady 3p
-     
-    grid $frame2b.addressCompanyField -column 0 -row 1 -sticky nse -padx 5p -pady 3p
-    grid $frame2b.addressCompanyEntry -column 1 -row 1 -columnspan 5 -sticky news -padx 3p -pady 3p
+    grid $frame2b.addressCompanyField -column 0 -row 0 -sticky nse -padx 5p -pady 3p
+    grid $frame2b.addressCompanyEntry -column 1 -row 0 -columnspan 5 -sticky news -padx 3p -pady 3p
+
+    grid $frame2b.addressConsigneeField -column 0 -row 1 -sticky nse -padx 5p -pady 3p
+    grid $frame2b.addressConsigneeEntry -column 1 -row 1 -columnspan 5 -sticky news -padx 3p -pady 3p
     
-    grid $frame2b.addressAddr3Field -column 0 -row 2 -sticky nse -padx 5p -pady 3p
-    grid $frame2b.addressAddr3Entry -column 1 -row 2 -columnspan 5 -sticky news -padx 3p -pady 3p
+    grid $frame2b.addressDelAddrField -column 0 -row 2 -sticky nse -padx 5p -pady 3p
+    grid $frame2b.addressDelAddrEntry -column 1 -row 2 -columnspan 5 -sticky news -padx 3p -pady 3p
     
     grid $frame2b.addressAddr2Field -column 0 -row 3 -sticky nse -padx 5p -pady 3p
     grid $frame2b.addressAddr2Entry -column 1 -row 3 -columnspan 5 -sticky news -padx 3p -pady 3p
     
-    grid $frame2b.addressDelAddrField -column 0 -row 4 -sticky nse -padx 5p -pady 3p
-    grid $frame2b.addressDelAddrEntry -column 1 -row 4 -columnspan 5 -sticky news -padx 3p -pady 3p
+    grid $frame2b.addressAddr3Field -column 0 -row 4 -sticky nse -padx 5p -pady 3p
+    grid $frame2b.addressAddr3Entry -column 1 -row 4 -columnspan 5 -sticky news -padx 3p -pady 3p
     
     grid $frame2b.addressCityField -column 0 -row 5 -sticky nse -padx 5p -pady 3p
     grid $frame2b.addressCityEntry -column 1 -row 5 -sticky news -padx 2p -pady 3p
