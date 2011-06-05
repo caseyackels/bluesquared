@@ -65,12 +65,12 @@ proc Disthelper_Code::readFile {filename} {
     
     # Cleanse file name, and prepare it for when we create the output file.
     set GS_file(Name) [join [lrange [file rootname [file tail $filename]] 0 end]]
-    puts "GS_file(Name): $GS_file(Name)"
+    'debug "GS_file(Name): $GS_file(Name)"
     
     set GS_job(Number) [join [lrange [split $GS_file(Name)] 0 0]]
     set GS_job(Number) [string trimleft $GS_job(Number) #]
-    puts "Job Number: $GS_job(Number)"
-    puts "filename: $filename"
+    'debug "Job Number: $GS_job(Number)"
+    'debug "filename: $filename"
     
     # Open File the file
     set fileName [open "$filename" RDONLY]
@@ -79,7 +79,7 @@ proc Disthelper_Code::readFile {filename} {
     # While we are at it, make everything UPPER CASE
     while { [gets $fileName line] >= 0 } {
         lappend GL_file(dataList) [string toupper $line]
-        puts "while: $line"
+        'debug "while: $line"
     }
 
     chan close $fileName

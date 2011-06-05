@@ -359,7 +359,7 @@ proc Disthelper_Helper::detectData {args} {
     # SEE ALSO
     #
     #***
-    global pieceWeightTmp fullBoxTmp
+    global tempVars
     
     #'debug "Data: [[lindex $args 0] get]"
     #'debug "arg1: [lindex $args 0]"
@@ -369,11 +369,21 @@ proc Disthelper_Helper::detectData {args} {
     #'debug "Widget: [lindex $args 1]"
 
     switch -- [lindex $args 2] {
+	shipVia {
+		    if {[string length [[lindex $args 0] get]] >= 3} {[lindex $args 1] configure -foreground black
+			set tempVars(shipVia) 1
+			} else {
+			    set tempVars(shipVia) 0
+			    [lindex $args 1] configure -foreground red
+			    .btnBar.print configure -state disabled
+			    return
+		    }
+	}
 	pieceWeight {
 		    if {[string length [[lindex $args 0] get]] >= 3} {[lindex $args 1] configure -foreground black
-			set pieceWeightTmp 1
+			set tempVars(pieceWeightTmp) 1
 			} else {
-			    set pieceWeightTmp 0
+			    set tempVars(pieceWeightTmp) 0
 			    [lindex $args 1] configure -foreground red
 			    .btnBar.print configure -state disabled
 			    return
@@ -381,9 +391,9 @@ proc Disthelper_Helper::detectData {args} {
 	}
 	fullBox	{
 		if {[string length [[lindex $args 0] get]] >= 1} {[lindex $args 1] configure -foreground black
-		    set fullBoxTmp 1
+		    set tempVars(fullBoxTmp) 1
 			} else {
-			    set fullBoxTmp 0
+			    set tempVars(fullBoxTmp) 0
 			    [lindex $args 1] configure -foreground red
 			    .btnBar.print configure -state disabled
 			    return
@@ -391,10 +401,12 @@ proc Disthelper_Helper::detectData {args} {
 	}
     }
 	# Only enable the Generate File button if the required fields are populated.
-	'debug "pieceWeightTmp: [info exists pieceWeightTmp]"
-	'debug "fullBoxTmp: [info exists fullBoxTmp]"
+	'debug "shipVia: [info exists tempVars(shipVia)]"
+	'debug "pieceWeightTmp: [info exists tempVars(pieceWeightTmp)]"
+	'debug "fullBoxTmp: [info exists tempVars(fullBoxTmp)]"
 	
-	if {![info exists pieceWeightTmp]} {return}
-	if {![info exists fullBoxTmp]} {return}
-	if {$pieceWeightTmp == 1 && $fullBoxTmp == 1} {.btnBar.print configure -state enabled}
+	if {![info exists tempVars(shipVia)]} {return}
+	if {![info exists tempVars(pieceWeightTmp)]} {return}
+	if {![info exists tempVars(fullBoxTmp)]} {return}
+	if {($tempVars(shipVia) == 1) && ($tempVars(pieceWeightTmp) == 1) && ($tempVars(fullBoxTmp) == 1)} {.btnBar.print configure -state enabled}
 } ;# Disthelper_Helper::detectData

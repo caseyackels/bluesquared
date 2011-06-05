@@ -303,6 +303,7 @@ proc disthelperGUI {} {
 #ttk::style configure TEntry -fieldbackground [list focus yellow]
 #ttk::style map TEntry -fieldbackground [list focus yellow]
 
+bind $frame2c.shipmentShipViaEntry <KeyRelease> "Disthelper_Helper::detectData $frame2c.shipmentShipViaEntry $frame2c.shipmentShipViaField shipVia"
 bind $frame2c.shipmentPieceWeightEntry <KeyRelease> "Disthelper_Helper::detectData $frame2c.shipmentPieceWeightEntry $frame2c.shipmentPieceWeightField pieceWeight"
 bind $frame2c.shipmentFullBoxEntry <KeyRelease> "Disthelper_Helper::detectData $frame2c.shipmentFullBoxEntry $frame2c.shipmentFullBoxField fullBox"
 
