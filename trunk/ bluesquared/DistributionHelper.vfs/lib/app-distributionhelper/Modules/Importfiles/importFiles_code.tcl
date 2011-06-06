@@ -238,7 +238,7 @@ proc Disthelper_Code::writeOutPut {} {
     "
     
     # Open the destination file for writing
-    set filesDestination [open "$GS_file(Name) Copy.csv" w]
+    set filesDestination [open [file join $settings(outFilePath) "$GS_file(Name) Copy.csv"] w]
 
     # line = each address string
     # GL_file(dataList) = the entire shipping file
