@@ -405,8 +405,8 @@ proc Disthelper_Helper::detectData {args} {
 	'debug "pieceWeightTmp: [info exists tempVars(pieceWeightTmp)]"
 	'debug "fullBoxTmp: [info exists tempVars(fullBoxTmp)]"
 	
-	if {![info exists tempVars(shipVia)]} {return}
+	#if {![info exists tempVars(shipVia)]} {return}
 	if {![info exists tempVars(pieceWeightTmp)]} {return}
 	if {![info exists tempVars(fullBoxTmp)]} {return}
-	if {($tempVars(shipVia) == 1) && ($tempVars(pieceWeightTmp) == 1) && ($tempVars(fullBoxTmp) == 1)} {.btnBar.print configure -state enabled}
+	if {($tempVars(pieceWeightTmp) == 1) && ($tempVars(fullBoxTmp) == 1)} {.btnBar.print configure -state enabled}
 } ;# Disthelper_Helper::detectData

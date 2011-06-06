@@ -298,7 +298,7 @@ proc Disthelper_Code::writeOutPut {} {
                 #set onlyFullBoxes "" ;# Clear this out because we are in a [foreach] and it will never be reset if we don't do it here.
                 'debug "boxes: $x - TotalBoxes: $totalBoxes"
                 if {[string match $Version .] == 1 } { set boxVersion $GS_job(fullBoxQty)} else { set boxVersion [join [concat $Version _ $GS_job(fullBoxQty)] ""] }
-                set boxWeight [catch {[::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]}]
+                set boxWeight [catch {[::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]} err_1]
                 
                 'debug "FullBoxes_err: $err_1"
                 'debug "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $boxWeight $x $totalBoxes"
@@ -307,9 +307,9 @@ proc Disthelper_Code::writeOutPut {} {
             } elseif {($x == $totalBoxes) || ($onlyFullBoxes eq no)} {
                 'debug "boxes: $x - TotalBoxes (Partials): $totalBoxes"
                 if {[string match $Version .] == 1} { set boxVersion [lindex $val 1] } else { set boxVersion [join [concat $Version _ [lindex $val 1]] ""] } 
-                set boxWeight [catch {[::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]} err_1]
+                set boxWeight [catch {[::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]} err_2]
                 
-                'debug "PartialBoxes_err: $err_1"
+                'debug "PartialBoxes_err: $err_2"
                 'debug [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion [lindex $val 1] $boxWeight $x $totalBoxes"]
                 chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion [lindex $val 1] $boxWeight $x $totalBoxes"]
             }
@@ -319,6 +319,8 @@ proc Disthelper_Code::writeOutPut {} {
     }
     
     chan close $filesDestination
+    
+    tk_dialog .information "Finished Creating File" "Your file has been generated!" info 0 Ok
 
 } ;# End of writeOutPut
 
