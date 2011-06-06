@@ -1,8 +1,8 @@
 @echo off
-taskkill /IM DistributionHelper.exe /T /F
+taskkill /IM EfficiencyAssist.exe /T /F
 
-tclkitsh858.exe sdx.kit wrap DistributionHelper.exe -runtime tclkit-858.exe
+tclkitsh858.exe sdx.kit wrap EfficiencyAssist.exe -runtime tclkit-858.exe
 
-DistributionHelper.exe
+EfficiencyAssist.exe
 
 exit
