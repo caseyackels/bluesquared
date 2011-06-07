@@ -82,7 +82,8 @@ proc blueSquirrel::parentGUI {} {
     $mb add cascade -label "Edit" -menu $mb.edit
     
     $mb.edit add command -label "Clear List" -command { Shipping_Code::clearList }
-    $mb.edit add command -label "Breakdown" -command { Shipping_Gui::breakDown }
+    #$mb.edit add command -label "Breakdown" -command { Shipping_Gui::breakDown }
+    $mb.edit add command -label "Breakdown" -command { wm deiconify .breakdown }
                 
     ## Mode
     #menu $mb.mode -tearoff 0 -relief raised -bd 2
@@ -113,6 +114,9 @@ proc blueSquirrel::parentGUI {} {
         # All frames that make up the GUI are children to .container
     Shipping_Gui::shippingGUI
     
+    # Start the breakDown window, and immediately withdraw it (code in [breakDown])
+    Shipping_Gui::breakDown
+    
 
     ## 
     ## Control Buttons
@@ -120,12 +124,14 @@ proc blueSquirrel::parentGUI {} {
     
     set btnBar [ttk::frame .btnBar]
     
-    ttk::button $btnBar.print -text "Print Labels" -command "Shipping_Code::printLabels"
-    ttk::button $btnBar.close -text "Close" -command {exit}
+    ttk::button $btnBar.printb -text "Print Breakdown" -command Shipping_Gui::printbreakDown
+    ttk::button $btnBar.print -text "Print Labels" -command Shipping_Code::printLabels
+    ttk::button $btnBar.close -text "Close" -command exit
     #ttk::label $btnBar.copy -text "\u00a9 Casey Ackels - 2007"
     
-    grid $btnBar.print -column 0 -row 3 -sticky nse -padx 8p  
-    grid $btnBar.close -column 1 -row 3 -sticky nse ;#-padx 2p
+    grid $btnBar.printb -column 0 -row 3 -sticky nse -padx 8p
+    grid $btnBar.print -column 1 -row 3 -sticky nse -padx 8p  
+    grid $btnBar.close -column 2 -row 3 -sticky nse ;#-padx 2p
     #grid $btnBar.copy -columnspan 2 -row 4 -sticky nse -pady 2p;#-padx 2p
     
     pack $btnBar -side bottom -anchor se -pady 4p -padx 5p
@@ -158,11 +164,13 @@ proc blueSquirrel::about {} {
     
     .about.parent.txt insert end "I wrote this program so that we would not have to repeatedly do mundane math for each job that required box labels.\n"
     .about.parent.txt insert end "\n\n"
-    .about.parent.txt insert end "Release 1.5.1 (February 2011)\n\n1. Break Down will now automatically refresh if the window is open and you add or remove an entry."
+    .about.parent.txt insert end "Release 1.6.0 (June 2011)\n1. Ability to print what is listed in the Breakdown window"
     .about.parent.txt insert end "\n\n"
-    .about.parent.txt insert end "Release 1.5 (February 2011)\n\n1. Fixed Break Down to work correctly.\n2. Changed the versioning scheme to include version number, following with the month it was released.\n3. Deactivated a module that wasn't in use, might increase speed."
+    .about.parent.txt insert end "Release 1.5.1 (February 2011)\n1. Break Down will now automatically refresh if the window is open and you add or remove an entry."
     .about.parent.txt insert end "\n\n"
-    .about.parent.txt insert end "Release 1.2.11 (February 2011)\n\n1. Overview reinstated, go to Edit > Breakdown\n\n2. When selecting the blank line in the History it will now clear out all entry fields\n\n3. A few cosmetic updates"
+    .about.parent.txt insert end "Release 1.5 (February 2011)\n1. Fixed Break Down to work correctly.\n2. Changed the versioning scheme to include version number, following with the month it was released.\n3. Deactivated a module that wasn't in use, might increase speed."
+    .about.parent.txt insert end "\n\n"
+    .about.parent.txt insert end "Release 1.2.11 (February 2011)\n1. Overview reinstated, go to Edit > Breakdown\n\n2. When selecting the blank line in the History it will now clear out all entry fields\n\n3. A few cosmetic updates"
     
     
     bind .about.parent.txt <KeyPress> {break} ;# Prevent people from entering/removing anything

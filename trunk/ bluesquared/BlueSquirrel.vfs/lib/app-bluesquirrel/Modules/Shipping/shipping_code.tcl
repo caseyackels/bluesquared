@@ -386,10 +386,10 @@ proc displayListHelper {fullboxes partialboxes {reset 0}} {
             set fullboxes [expr [join "$fullboxes" +]]
             # If we only have one label, make it nonplural. Otherwise make it plural
             if {$fullboxes < 2} {
-                set labels Label
+                set labels Box
                 #puts "non-plural - $fullboxes"
                } else {
-                set labels Labels
+                set labels Boxes
                 #puts "plural - $fullboxes"
             }
             
@@ -433,7 +433,7 @@ proc displayListHelper {fullboxes partialboxes {reset 0}} {
 
     set GS_textVar(labelsPartialUnique) $valueLists ;# get clean list with no other text
      foreach value $valueLists {
-	set GI_textVar(labelsPartial2) "1 Label @ $valueLists"
+	set GI_textVar(labelsPartial2) "1 Box @ $valueLists"
         
 	writeText 1 $value
     }
@@ -501,11 +501,7 @@ proc printLabels {} {
 	    }
 	}
         
-        if {$GS_textVar(printManifest) == 1} {
-            # Print a manifest at the end
-            exec $programPath(Bartend) /AF=$programPath(LabelPath)\\manifest.btw /P /CLOSE
-        }
-            #C:/path/to/bartend.exe /F=C:/Labels/path/to/format /P /S /CLOSE
+        #C:/path/to/bartend.exe /F=C:/Labels/path/to/format /P /S /CLOSE
 } ;# printLabels
 
 

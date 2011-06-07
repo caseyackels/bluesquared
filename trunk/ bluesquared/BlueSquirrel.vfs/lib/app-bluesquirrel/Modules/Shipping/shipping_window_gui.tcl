@@ -65,7 +65,7 @@ proc shippingGUI {} {
         }
     }
     
-    wm title . "Box Labels"
+    wm title . "Box Labels - 1.6.2 (June 2011)"
 
 # Frame 1
     set frame1 [ttk::labelframe .container.frame1 -text "Label Information"]
@@ -322,12 +322,12 @@ proc printbreakDown {} {
     set myBreakDownText [.breakdown.txt get 0.0 end]
     set file [open breakdown.txt w]
     
+    puts $file [clock format [clock scan now] -format "%A %B %d %r"]\n
     puts $file $GS_textVar(line1)
     puts $file $GS_textVar(line2)
     puts $file $GS_textVar(line3)
     puts $file $GS_textVar(line4)
-    puts $file $GS_textVar(line5)
-    puts $file \n
+    puts $file $GS_textVar(line5)\n
     puts $file $myBreakDownText
     
     close $file
@@ -336,10 +336,10 @@ proc printbreakDown {} {
     ## This needs to be a user set option!!
     ##
     # Test Printer
-    #exec [file join C:\\ "Program Files" "Windows NT" Accessories wordpad.exe] /pt breakdown.txt {\\vm-printserver\Mailing 9050}
+    #catch {exec [file join C:\\ "Program Files" "Windows NT" Accessories wordpad.exe] /pt breakdown.txt {\\vm-printserver\Mailing 9050}}
     
     # Shipping Printer
-    exec [file join C:\\ "Program Files" "Windows NT" Accessories wordpad.exe] /pt breakdown.txt {\\vm-printserver\Shipping-Time}
+    catch {exec [file join C:\\ "Program Files" "Windows NT" Accessories wordpad.exe] /pt breakdown.txt {\\vm-printserver\Shipping-Time}}
 } ;# End of printbreakDown
 
 
@@ -375,11 +375,13 @@ proc breakDown {} {
     if {![winfo exists .breakdown]} {
         toplevel .breakdown
         wm title .breakdown "Break Down"
+        wm withdraw .breakdown
+        puts "breakdown window created"
     
         text .breakdown.txt
         set GS_widget(breakdown) .breakdown.txt
         #ttk::button .breakdown.refresh -text "Close" -command { destroy .breakdown } printbreakDown
-        ttk::button .breakdown.refresh -text "Print" -command {puts "blah"; Shipping_Gui::printbreakDown}
+        ttk::button .breakdown.refresh -text "Print" -command {Shipping_Gui::printbreakDown}
     
         pack $GS_widget(breakdown)
         pack .breakdown.refresh
@@ -400,10 +402,10 @@ proc breakDown {} {
         # Make sure that it has 2 or more values
         if {[llength $GS_textVar(labelsFull)] >= 2} {
             puts "LabelsFull <=: $GS_textVar(labelsFull)"
-            $GS_widget(breakdown) insert end "Full Boxes: [expr [join $GS_textVar(labelsFull) +]]\n"
+            $GS_widget(breakdown) insert end "Full Boxes: [expr [join $GS_textVar(labelsFull) +]] @ $GS_textVar(maxBoxQty)\n"
         } else {
             # If we have less than 2 values, just insert what the full boxes are.
-            $GS_widget(breakdown) insert end "Full Boxes: $GS_textVar(labelsFull)\n"
+            $GS_widget(breakdown) insert end "Full Box: $GS_textVar(labelsFull) @ $GS_textVar(maxBoxQty)\n"
         }
     }
 
@@ -417,7 +419,7 @@ proc breakDown {} {
     # Unique Numbers
     if {[info exists GS_textVar(labelsPartialUnique)] == 1} {
         foreach value $GS_textVar(labelsPartialUnique) {
-            $GS_widget(breakdown) insert end "Partial: 1 Label @ $value\n"
+            $GS_widget(breakdown) insert end "Partial: 1 Box @ $value\n"
         }
     }
     
