@@ -56,11 +56,11 @@ proc Disthelper_Helper::resetVars {args} {
     # SEE ALSO
     #
     #***
-    global GL_file GS_address GS_job GS_ship
+    global GL_file GS_address GS_job GS_ship tempVars
     
     switch -- $args {
 	-resetGUI {
-		    # Clear out all the variables (We need this so we don't have to keep exiting the app to make more import files
+		    # Clear out all the variables (We need this so we don't have to keep exiting the app to make more import files)
 		    foreach name [array names GL_file] {
 			set GL_file($name) ""
 		    }
@@ -73,9 +73,22 @@ proc Disthelper_Helper::resetVars {args} {
 		    foreach name [array names GS_ship] {
 			set GS_ship($name) ""
 		    }
+		    foreach name [array names tempVars] {
+			set tempVars($name) ""
+		    }
 	    
 		    # Clear out the listbox
 		    .container.frame1.listbox delete 0 end
+		    
+		    # Disable entry widgets
+		    Disthelper_Helper::getChildren disabled
+		    
+		    # If the user types in enough data in these fields they will deactivate the 'red' color. So lets reset it, just in case.
+		    .container.frame2.frame2c.shipmentPieceWeightField configure -foreground red
+		    .container.frame2.frame2c.shipmentFullBoxField configure -foreground red
+		    
+		    # Disable the print button also
+		    .btnBar.print configure -state disable
 
 	}
     }
@@ -278,7 +291,7 @@ proc Disthelper_Helper::displayLists { OpenFile jobNumber } {
 } ;# Disthelper_Helper::displayLists
 
 
-proc Disthelper_Helper::getChildren {} { 
+proc Disthelper_Helper::getChildren {key} { 
     #****f* getChildren/Disthelper_Helper
     # AUTHOR
     #	Casey Ackels
@@ -287,10 +300,10 @@ proc Disthelper_Helper::getChildren {} {
     #	(c) 2011 - Casey Ackels
     #
     # FUNCTION
-    #	Get the children of the frame to configure the widgets
+    #	Get the children of the frame to configure the widgets to a normal or disabled state
     #
     # SYNOPSIS
-    #	N/A
+    #	key = normal or disabled
     #
     # CHILDREN
     #	N/A
@@ -304,6 +317,8 @@ proc Disthelper_Helper::getChildren {} {
     #
     #***
     
+    #if {$key ne "normal" || $key ne "disabled"} {'debug "$key is not the correct arg. normal or disabled only"; return}
+    
     # Get the children widgets, so that we can enable/disable them.
     # *2c/*2b is the last part of the widget name
     foreach child [winfo children .container.frame2] {
@@ -314,7 +329,7 @@ proc Disthelper_Helper::getChildren {} {
                 if {[lsearch -glob $child2 *Entry] != -1} {
                     #'debug (child2b) [lrange $child2 [lsearch -glob $child2 *Entry] [lsearch -glob $child2 *Entry]]
 		    #'debug (child2b) "set state to normal [lrange $child2 [lsearch -glob $child2 *Entry] [lsearch -glob $child2 *Entry]]"
-		    [lrange $child2 [lsearch -glob $child2 *Entry] [lsearch -glob $child2 *Entry]] configure -state normal
+		    [lrange $child2 [lsearch -glob $child2 *Entry] [lsearch -glob $child2 *Entry]] configure -state $key
                 }
             }
         }
@@ -325,7 +340,7 @@ proc Disthelper_Helper::getChildren {} {
                 if {[lsearch -glob $child2 *Entry] != -1} {
                     #'debug (child2c) [lrange $child2 [lsearch -glob $child2 *Entry] [lsearch -glob $child2 *Entry]]
 		    #'debug (child2c) "set state to normal [lrange $child2 [lsearch -glob $child2 *Entry] [lsearch -glob $child2 *Entry]]"
-		    [lrange $child2 [lsearch -glob $child2 *Entry] [lsearch -glob $child2 *Entry]] configure -state normal
+		    [lrange $child2 [lsearch -glob $child2 *Entry] [lsearch -glob $child2 *Entry]] configure -state $key
                 }
             }
         }
@@ -401,7 +416,7 @@ proc Disthelper_Helper::detectData {args} {
 	}
     }
 	# Only enable the Generate File button if the required fields are populated.
-	'debug "shipVia: [info exists tempVars(shipVia)]"
+	#'debug "shipVia: [info exists tempVars(shipVia)]"
 	'debug "pieceWeightTmp: [info exists tempVars(pieceWeightTmp)]"
 	'debug "fullBoxTmp: [info exists tempVars(fullBoxTmp)]"
 	

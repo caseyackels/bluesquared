@@ -109,7 +109,7 @@ proc disthelperGUI {} {
     set frame1a [ttk::frame .container.frame1a]
     
     ttk::label $frame1a.tips1 -text [mc "Type a job number in the entry field then press 'Import File'."] -foreground red
-    ttk::label $frame1a.tips2 -text [mc "If the fields aren't assigned automatically you may drag and drop the values"] -foreground orange
+    ttk::label $frame1a.tips2 -text [mc "If the fields aren't assigned automatically you may drag and drop the values,"] -foreground blue
     
     grid $frame1a.tips1 -column 0 -row 1 -sticky nsw
     grid $frame1a.tips2 -column 0 -row 2 -sticky nsw

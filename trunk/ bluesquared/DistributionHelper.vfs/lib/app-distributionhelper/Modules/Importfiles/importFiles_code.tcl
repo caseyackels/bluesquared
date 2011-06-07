@@ -88,7 +88,7 @@ proc Disthelper_Code::readFile {filename} {
     
 
     # Set the entry widgets to normal state    
-    Disthelper_Helper::getChildren
+    Disthelper_Helper::getChildren normal
     
     foreach line $GL_file(Header) {
         # If the file has headers, lets auto-insert the values to help the user.
