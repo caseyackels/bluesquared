@@ -76,6 +76,8 @@ proc Disthelper_Helper::resetVars {args} {
 		    foreach name [array names tempVars] {
 			set tempVars($name) ""
 		    }
+		    
+		    array unset importFile
 	    
 		    # Clear out the listbox
 		    .container.frame1.listbox delete 0 end

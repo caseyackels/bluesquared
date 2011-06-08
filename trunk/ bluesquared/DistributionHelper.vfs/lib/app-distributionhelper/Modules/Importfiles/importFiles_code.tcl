@@ -241,11 +241,17 @@ proc Disthelper_Code::writeOutPut {} {
         Email       [lsearch $GL_file(Header) $GS_job(Email)]
         3rdParty    [lsearch $GL_file(Header) $GS_job(3rdParty)]
     "
-    
-    if {$importFile(Email) ne "" || $importFile(Email) ne "."} { set EmailGateway Y } else {set EmailGateway .}
-    if {$importFile(3rdParty) ne "" || $importFile(3rdParty) ne "."} {set PaymentTerms 3} else {set PaymentTerms .}
 
-        
+    # Make sure we only activate the following two variables if they data actually exists.
+    if {$importFile(Email) != -1} {set EmailGateway Y} else {set EmailGateway .}
+    if {$importFile(3rdParty) != -1} {set PaymentTerms 3} else {set PaymentTerms .}
+
+    # Make sure that leading zero's are present when required.
+    if {[string length $importFile(Zip)] == 4} {
+        set importFile(Zip) [concat 0$importFile(Zip)]
+    }
+    
+    
     # Open the destination file for writing
     set filesDestination [open [file join $settings(outFilePath) "$GS_file(Name) Copy.csv"] w]
 
@@ -305,7 +311,7 @@ proc Disthelper_Code::writeOutPut {} {
         for {set x 1} {$x <= $totalBoxes} {incr x} {
             if {($x != $totalBoxes) || ($onlyFullBoxes eq yes)} {
                 'debug "boxes: $x - TotalBoxes: $totalBoxes"
-                if {[string match $Version .] == 1 } { set boxVersion $GS_job(fullBoxQty)} else { set boxVersion [join [concat $Version _ $GS_job(fullBoxQty)] ""] }
+                if {[string match $Version .] == 1 } { set boxVersion $GS_job(fullBoxQty)} else { set boxVersion [list [join [concat $Version _ $GS_job(fullBoxQty)] ""]] }
                 #set boxWeight [catch {[::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]} err_1]
                 set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
                 
@@ -315,7 +321,7 @@ proc Disthelper_Code::writeOutPut {} {
             
             } elseif {($x == $totalBoxes) || ($onlyFullBoxes eq no)} {
                 'debug "boxes: $x - TotalBoxes (Partials): $totalBoxes"
-                if {[string match $Version .] == 1} { set boxVersion [lindex $val 1] } else { set boxVersion [join [concat $Version _ [lindex $val 1]] ""] } 
+                if {[string match $Version .] == 1} { set boxVersion [lindex $val 1] } else { set boxVersion [list [join [concat $Version _ [lindex $val 1]] ""]] } 
                 #set boxWeight [catch {[::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]} err_2]
                 set boxWeight [::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
                 
