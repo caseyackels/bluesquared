@@ -84,8 +84,8 @@ proc Disthelper_Helper::resetVars {args} {
 		    Disthelper_Helper::getChildren disabled
 		    
 		    # If the user types in enough data in these fields they will deactivate the 'red' color. So lets reset it, just in case.
-		    .container.frame2.frame2c.shipmentPieceWeightField configure -foreground red
-		    .container.frame2.frame2c.shipmentFullBoxField configure -foreground red
+		    .container.frame2.frame2d.shipmentPieceWeightField configure -foreground red
+		    .container.frame2.frame2d.shipmentFullBoxField configure -foreground red
 		    
 		    # Disable the print button also
 		    .btnBar.print configure -state disable
@@ -267,7 +267,7 @@ proc Disthelper_Helper::displayLists { OpenFile jobNumber } {
                 -selectbackground yellow \
                 -selectforeground black \
                 -exportselection yes \
-                -selectmode browse
+                -selectmode single
     
 
     grid $frame1.listbox -column 0 -row 0 -sticky news -padx 5p -pady 5p
@@ -323,30 +323,59 @@ proc Disthelper_Helper::getChildren {key} {
     # *2c/*2b is the last part of the widget name
     foreach child [winfo children .container.frame2] {
         'debug (child) $child
-        if {[lsearch -glob $child *2b] != -1} {
-            # Now get the child widgets (notably the Entry widget)
-            foreach child2 [winfo children $child] {
-                if {[lsearch -glob $child2 *Entry] != -1} {
-                    #'debug (child2b) [lrange $child2 [lsearch -glob $child2 *Entry] [lsearch -glob $child2 *Entry]]
-		    #'debug (child2b) "set state to normal [lrange $child2 [lsearch -glob $child2 *Entry] [lsearch -glob $child2 *Entry]]"
-		    [lrange $child2 [lsearch -glob $child2 *Entry] [lsearch -glob $child2 *Entry]] configure -state $key
-                }
-            }
-        }
-    
-        if {[lsearch -glob $child *2c] != -1} {
-            # Now get the child widgets (notably the Entry widget)
-            foreach child2 [winfo children $child] {
-                if {[lsearch -glob $child2 *Entry] != -1} {
-                    #'debug (child2c) [lrange $child2 [lsearch -glob $child2 *Entry] [lsearch -glob $child2 *Entry]]
-		    #'debug (child2c) "set state to normal [lrange $child2 [lsearch -glob $child2 *Entry] [lsearch -glob $child2 *Entry]]"
-		    [lrange $child2 [lsearch -glob $child2 *Entry] [lsearch -glob $child2 *Entry]] configure -state $key
-                }
-            }
-        }
+	
+	if {[lsearch -glob $child *2b] != -1} {
+	    Disthelper_Helper::processChildren $child $key
+	}
+	
+	if {[lsearch -glob $child *2c] != -1} {
+	    Disthelper_Helper::processChildren $child $key
+	}
+	
+	if {[lsearch -glob $child *2d] != -1} {
+	    Disthelper_Helper::processChildren $child $key
+	}
     }
 
 } ;# Disthelper_Helper::getChildren
+
+
+proc Disthelper_Helper::processChildren {child key} { 
+    #****f* processChildren/Disthelper_Helper
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011 - Casey Ackels
+    #
+    # FUNCTION
+    #	Pass the child widgets' name so we can enable/disable them
+    #
+    # SYNOPSIS
+    #	
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	Disthelper_Helper::getChildren
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    
+    foreach child2 [winfo children $child] {
+	if {[lsearch -glob $child2 *Entry] != -1} {
+	#'debug (child2b) [lrange $child2 [lsearch -glob $child2 *Entry] [lsearch -glob $child2 *Entry]]
+        #'debug (child2b) "set state to normal [lrange $child2 [lsearch -glob $child2 *Entry] [lsearch -glob $child2 *Entry]]"
+        [lrange $child2 [lsearch -glob $child2 *Entry] [lsearch -glob $child2 *Entry]] configure -state $key
+        }
+    }
+
+
+}
 
 
 proc Disthelper_Helper::detectData {args} { 

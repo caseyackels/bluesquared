@@ -60,7 +60,7 @@ proc disthelper::parentGUI {} {
     #
     #***
  
-    wm geometry . 640x525 ;# width X Height
+    wm geometry . 640x575 ;# width x Height
     
     # Create the Menu's
     set mb [menu .mb]
@@ -114,7 +114,7 @@ proc disthelper::parentGUI {} {
     
     grid $btnBar.print -column 0 -row 3 -sticky nse -padx 8p
     grid $btnBar.close -column 1 -row 3 -sticky nse
-    pack $btnBar -side bottom -anchor e -pady 10p -padx 5p
+    pack $btnBar -side bottom -anchor e -pady 13p -padx 5p
     
     
     # ToolTips

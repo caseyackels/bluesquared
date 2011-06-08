@@ -109,7 +109,7 @@ proc disthelperGUI {} {
     set frame1a [ttk::frame .container.frame1a]
     
     ttk::label $frame1a.tips1 -text [mc "Type a job number in the entry field then press 'Import File'."] -foreground red
-    ttk::label $frame1a.tips2 -text [mc "If the fields aren't assigned automatically you may drag and drop the values,"] -foreground blue
+    ttk::label $frame1a.tips2 -text [mc "If the fields aren't assigned automatically you may drag and drop the values."] -foreground blue
     
     grid $frame1a.tips1 -column 0 -row 1 -sticky nsw
     grid $frame1a.tips2 -column 0 -row 2 -sticky nsw
@@ -118,7 +118,7 @@ proc disthelperGUI {} {
 
 
 #    
-## Frame2 (This is a container for three frames: Job, Address, Shipment)
+## Frame2 (This is a container for four frames: Job, Address, Custonmer, Shipment)
 #
     set frame2 [ttk::frame .container.frame2]
     pack $frame2 -expand yes -fill both -padx 5p -pady 5p -ipady 2p -anchor n -side top
@@ -237,64 +237,98 @@ proc disthelperGUI {} {
     grid columnconfigure $frame2b 1 -weight 1
 
 
-#    
+#
 ## Frame2c (Label frame for Shipment)
 #
-    set frame2c [ttk::labelframe $frame2.frame2c -text [mc "Shipment"]]
+
+    set frame2c [ttk::labelframe $frame2.frame2c -text [mc "Customer"]]
     pack $frame2c -expand yes -fill both -anchor n
     
-    ttk::label $frame2c.shipmentDateField -text [mc "Date"]
-    ttk::entry $frame2c.shipmentDateEntry -textvariable GS_job(Date) -state disabled 
-        dropDest $frame2c.shipmentDateEntry GS_job(Date)
+    ttk::label $frame2c.thirdPartyField -text [mc "3rd Party No."]
+    ttk::entry $frame2c.thirdPartyEntry -textvariable GS_job(3rdParty) -state disabled
+        dropDest $frame2c.thirdPartyEntry GS_job(3rdParty)
+        set GS_job(3rdParty) ""
+        
+    ttk::label $frame2c.contactField -text [mc "Contact"]
+    ttk::entry $frame2c.contactEntry -textvariable GS_job(Contact) -state disabled
+        dropDest $frame2c.contactEntry GS_job(Contact)
+        set GS_job(Contact) ""
+        
+    ttk::label $frame2c.emailField -text [mc "Email"]
+    ttk::entry $frame2c.emailEntry -textvariable GS_job(Email) -state disabled
+        dropDest $frame2c.emailEntry GS_job(Email)
+        set GS_job(Email) ""
+    
+    
+    grid $frame2c.contactField -column 0 -row 0 -sticky nse -padx 5p -pady 3p
+    grid $frame2c.contactEntry -column 1 -row 0 -sticky ew -padx 5p
+    
+    grid $frame2c.emailField -column 0 -row 1 -sticky nse -padx 5p -pady 5p
+    grid $frame2c.emailEntry -column 1 -row 1 -sticky ew -padx 5p
+    
+    grid $frame2c.thirdPartyField -column 2 -row 0 -sticky nse -padx 5p -pady 3p
+    grid $frame2c.thirdPartyEntry -column 3 -row 0 -sticky ew -padx 5p
+
+    grid columnconfigure $frame2c 1 -weight 1
+    
+#
+## Frame2d (Label frame for Shipment)
+#
+    set frame2d [ttk::labelframe $frame2.frame2d -text [mc "Shipment"]]
+    pack $frame2d -expand yes -fill both -anchor n
+    
+    ttk::label $frame2d.shipmentDateField -text [mc "Date"]
+    ttk::entry $frame2d.shipmentDateEntry -textvariable GS_job(Date) -state disabled 
+        dropDest $frame2d.shipmentDateEntry GS_job(Date)
         set GS_job(Date) ""
     
-    ttk::label $frame2c.shipmentVersionField -text [mc "Version"]
-    ttk::entry $frame2c.shipmentVersionEntry -textvariable GS_job(Version) -state disabled 
-        dropDest $frame2c.shipmentVersionEntry GS_job(Version)
+    ttk::label $frame2d.shipmentVersionField -text [mc "Version"]
+    ttk::entry $frame2d.shipmentVersionEntry -textvariable GS_job(Version) -state disabled 
+        dropDest $frame2d.shipmentVersionEntry GS_job(Version)
         set GS_job(Version) ""
 
-    ttk::label $frame2c.shipmentShipViaField -text [mc "Ship Via"]
-    ttk::entry $frame2c.shipmentShipViaEntry -textvariable GS_ship(shipVia) -state disabled 
-        dropDest $frame2c.shipmentShipViaEntry GS_ship(shipVia)
+    ttk::label $frame2d.shipmentShipViaField -text [mc "Ship Via"]
+    ttk::entry $frame2d.shipmentShipViaEntry -textvariable GS_ship(shipVia) -state disabled 
+        dropDest $frame2d.shipmentShipViaEntry GS_ship(shipVia)
         set GS_ship(shipVia) ""
     
-    ttk::label $frame2c.shipmentQuantityField -text [mc "Shipment Qty"]
-    ttk::entry $frame2c.shipmentQuantityEntry -textvariable GS_job(Quantity) -state disabled 
-        dropDest $frame2c.shipmentQuantityEntry GS_job(Quantity)
+    ttk::label $frame2d.shipmentQuantityField -text [mc "Shipment Qty"]
+    ttk::entry $frame2d.shipmentQuantityEntry -textvariable GS_job(Quantity) -state disabled 
+        dropDest $frame2d.shipmentQuantityEntry GS_job(Quantity)
         set GS_job(Quantity) ""
     
-    ttk::label $frame2c.shipmentPieceWeightField -text [mc "Piece Weight"] -foreground red
-    ttk::entry $frame2c.shipmentPieceWeightEntry -textvariable GS_job(pieceWeight) -state disabled 
-        dropDest $frame2c.shipmentPieceWeightEntry GS_job(pieceWeight)
+    ttk::label $frame2d.shipmentPieceWeightField -text [mc "Piece Weight"] -foreground red
+    ttk::entry $frame2d.shipmentPieceWeightEntry -textvariable GS_job(pieceWeight) -state disabled 
+        dropDest $frame2d.shipmentPieceWeightEntry GS_job(pieceWeight)
         set GS_job(pieceWeight) ""
     
-    ttk::label $frame2c.shipmentFullBoxField -text [mc "Full Box Qty"] -foreground red
-    ttk::entry $frame2c.shipmentFullBoxEntry -textvariable GS_job(fullBoxQty) -state disabled 
-        dropDest $frame2c.shipmentFullBoxEntry GS_job(fullBoxQty)
+    ttk::label $frame2d.shipmentFullBoxField -text [mc "Full Box Qty"] -foreground red
+    ttk::entry $frame2d.shipmentFullBoxEntry -textvariable GS_job(fullBoxQty) -state disabled 
+        dropDest $frame2d.shipmentFullBoxEntry GS_job(fullBoxQty)
         set GS_job(fullBoxQty) ""
     
 #
 ## Grid Frame2b
 #
-    grid $frame2c.shipmentDateField -column 0 -row 0 -sticky nse -padx 5p -pady 3p
-    grid $frame2c.shipmentDateEntry -column 1 -row 0 -sticky ew
+    grid $frame2d.shipmentDateField -column 0 -row 0 -sticky nse -padx 5p -pady 3p
+    grid $frame2d.shipmentDateEntry -column 1 -row 0 -sticky ew
     
-    grid $frame2c.shipmentVersionField -column 2 -row 0 -sticky nse -padx 5p -pady 3p
-    grid $frame2c.shipmentVersionEntry -column 3 -row 0 -sticky ew -padx 5p
+    grid $frame2d.shipmentVersionField -column 2 -row 0 -sticky nse -padx 5p -pady 3p
+    grid $frame2d.shipmentVersionEntry -column 3 -row 0 -sticky ew -padx 5p
     
-    grid $frame2c.shipmentShipViaField -column 0 -row 1 -sticky nse -padx 5p -pady 5p
-    grid $frame2c.shipmentShipViaEntry -column 1 -row 1 -sticky ew
+    grid $frame2d.shipmentShipViaField -column 0 -row 1 -sticky nse -padx 5p -pady 5p
+    grid $frame2d.shipmentShipViaEntry -column 1 -row 1 -sticky ew
     
-    grid $frame2c.shipmentQuantityField -column 2 -row 1 -sticky nse -padx 5p -pady 5p
-    grid $frame2c.shipmentQuantityEntry -column 3 -row 1 -sticky ew -padx 5p
+    grid $frame2d.shipmentQuantityField -column 2 -row 1 -sticky nse -padx 5p -pady 5p
+    grid $frame2d.shipmentQuantityEntry -column 3 -row 1 -sticky ew -padx 5p
     
-    grid $frame2c.shipmentPieceWeightField -column 0 -row 2 -sticky nse -padx 5p -pady 5p
-    grid $frame2c.shipmentPieceWeightEntry -column 1 -row 2 -sticky ew
+    grid $frame2d.shipmentPieceWeightField -column 0 -row 2 -sticky nse -padx 5p -pady 5p
+    grid $frame2d.shipmentPieceWeightEntry -column 1 -row 2 -sticky ew
     
-    grid $frame2c.shipmentFullBoxField -column 2 -row 2 -sticky nse -padx 5p -pady 5p
-    grid $frame2c.shipmentFullBoxEntry -column 3 -row 2 -sticky ew -padx 5p
+    grid $frame2d.shipmentFullBoxField -column 2 -row 2 -sticky nse -padx 5p -pady 5p
+    grid $frame2d.shipmentFullBoxEntry -column 3 -row 2 -sticky ew -padx 5p
     
-    grid columnconfigure $frame2c 1 -weight 1
+    grid columnconfigure $frame2d 1 -weight 1
 
 
 ##
@@ -303,9 +337,9 @@ proc disthelperGUI {} {
 #ttk::style configure TEntry -fieldbackground [list focus yellow]
 #ttk::style map TEntry -fieldbackground [list focus yellow]
 
-#bind $frame2c.shipmentShipViaEntry <KeyRelease> "Disthelper_Helper::detectData $frame2c.shipmentShipViaEntry $frame2c.shipmentShipViaField shipVia"
-bind $frame2c.shipmentPieceWeightEntry <KeyRelease> "Disthelper_Helper::detectData $frame2c.shipmentPieceWeightEntry $frame2c.shipmentPieceWeightField pieceWeight"
-bind $frame2c.shipmentFullBoxEntry <KeyRelease> "Disthelper_Helper::detectData $frame2c.shipmentFullBoxEntry $frame2c.shipmentFullBoxField fullBox"
+#bind $frame2d.shipmentShipViaEntry <KeyRelease> "Disthelper_Helper::detectData $frame2d.shipmentShipViaEntry $frame2d.shipmentShipViaField shipVia"
+bind $frame2d.shipmentPieceWeightEntry <KeyRelease> "Disthelper_Helper::detectData $frame2d.shipmentPieceWeightEntry $frame2d.shipmentPieceWeightField pieceWeight"
+bind $frame2d.shipmentFullBoxEntry <KeyRelease> "Disthelper_Helper::detectData $frame2d.shipmentFullBoxEntry $frame2d.shipmentFullBoxField fullBox"
 
 #bind all <<ComboboxSelected>> {
 #    Shipping_Code::readHistory [$frame1.entry1 current]

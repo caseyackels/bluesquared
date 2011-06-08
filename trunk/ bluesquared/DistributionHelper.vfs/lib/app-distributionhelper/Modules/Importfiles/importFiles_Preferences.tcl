@@ -82,6 +82,7 @@ proc Disthelper_Preferences::prefGUI {} {
 
     $nb add [ttk::frame $nb.f1] -text [mc "File Paths"]
     $nb add [ttk::frame $nb.f2] -text [mc "Miscellaneous"]
+    $nb add [ttk::frame $nb.f3] -text [mc "Headers"]
     $nb select $nb.f1
 
     ttk::notebook::enableTraversal $nb
@@ -134,10 +135,10 @@ proc Disthelper_Preferences::prefGUI {} {
     ##
     
     set buttonbar [ttk::frame .preferences.buttonbar]
-    ttk::button $buttonbar.print -text [mc "Ok"] -command { Disthelper_Preferences::saveConfig; destroy .preferences }
+    ttk::button $buttonbar.ok -text [mc "Ok"] -command { Disthelper_Preferences::saveConfig; destroy .preferences }
     ttk::button $buttonbar.close -text [mc "Cancel"] -command { destroy .preferences }
     
-    grid $buttonbar.print -column 0 -row 3 -sticky nse -padx 8p  
+    grid $buttonbar.ok -column 0 -row 3 -sticky nse -padx 8p  
     grid $buttonbar.close -column 1 -row 3 -sticky nse
     pack $buttonbar -side bottom -anchor e -pady 8p -padx 5p
     

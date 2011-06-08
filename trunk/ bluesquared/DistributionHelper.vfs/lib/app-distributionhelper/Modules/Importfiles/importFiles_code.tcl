@@ -87,7 +87,7 @@ proc Disthelper_Code::readFile {filename} {
     set GL_file(Header) [csv::split [lindex $GL_file(dataList) 0]]
     
 
-    # Set the entry widgets to normal state    
+    # Set the entry widgets to normal state, special handling for the Customer frame is required since they are not always used.
     Disthelper_Helper::getChildren normal
     
     foreach line $GL_file(Header) {
@@ -108,6 +108,9 @@ proc Disthelper_Code::readFile {filename} {
             Quantity            {set GS_job(Quantity) $line}
             Version             {set GS_job(Version) $line}
             "Ship Date"         {set GS_job(Date) $line}
+            "3rd Party"         {set GS_job(3rdParty) $line}
+            EmailContact        {set GS_job(Contact) $line}
+            email               {set GS_job(Email) $line}
             default             {puts "Didn't set anything"}
         }
     }
@@ -142,7 +145,6 @@ proc Disthelper_Code::doMath {totalQuantity maxPerBox} {
     #
     #***
     # Do mathmatical equations, then double check to make sure it comes out to the value of totalQty
-    #puts "Starting doMath"
     
     # Guard against a mistake that we could make
     if {$totalQuantity == "" || $totalQuantity == 0} {puts "I need a total qty argument!"; return}
@@ -199,7 +201,7 @@ proc Disthelper_Code::writeOutPut {} {
     #
     #   Used: Global Arrays
     #   GL_file / dataList, Header
-    #   GS_job / Number, Name, Quantity, pieceWeight, fullBoxQty, Date, Version
+    #   GS_job / Number, Name, Quantity, pieceWeight, fullBoxQty, Date, Version, Contact, Email, 3rdParty
     #   GS_ship / shipVia
     #   GS_address / Consignee, Company, addrThree, addrTwo, deliveryAddr, City, State, Zip, Phone
     #   settings / BoxTareWeight
@@ -235,8 +237,15 @@ proc Disthelper_Code::writeOutPut {} {
         Quantity    [lsearch $GL_file(Header) $GS_job(Quantity)]
         Version     [lsearch $GL_file(Header) $GS_job(Version)]
         Date        [lsearch $GL_file(Header) $GS_job(Date)]
+        Contact     [lsearch $GL_file(Header) $GS_job(Contact)]
+        Email       [lsearch $GL_file(Header) $GS_job(Email)]
+        3rdParty    [lsearch $GL_file(Header) $GS_job(3rdParty)]
     "
     
+    if {$importFile(Email) ne "" || $importFile(Email) ne "."} { set EmailGateway Y } else {set EmailGateway .}
+    if {$importFile(3rdParty) ne "" || $importFile(3rdParty) ne "."} {set PaymentTerms 3} else {set PaymentTerms .}
+
+        
     # Open the destination file for writing
     set filesDestination [open [file join $settings(outFilePath) "$GS_file(Name) Copy.csv"] w]
 
@@ -295,23 +304,24 @@ proc Disthelper_Code::writeOutPut {} {
         
         for {set x 1} {$x <= $totalBoxes} {incr x} {
             if {($x != $totalBoxes) || ($onlyFullBoxes eq yes)} {
-                #set onlyFullBoxes "" ;# Clear this out because we are in a [foreach] and it will never be reset if we don't do it here.
                 'debug "boxes: $x - TotalBoxes: $totalBoxes"
                 if {[string match $Version .] == 1 } { set boxVersion $GS_job(fullBoxQty)} else { set boxVersion [join [concat $Version _ $GS_job(fullBoxQty)] ""] }
-                set boxWeight [catch {[::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]} err_1]
+                #set boxWeight [catch {[::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]} err_1]
+                set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
                 
-                'debug "FullBoxes_err: $err_1"
-                'debug "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $boxWeight $x $totalBoxes"
-                chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $boxWeight $x $totalBoxes"]
+                #'debug "FullBoxes_err: $err_1"
+                'debug [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) PaymentTerms $3rdParty $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
+                chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $PaymentTerms $3rdParty $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
             
             } elseif {($x == $totalBoxes) || ($onlyFullBoxes eq no)} {
                 'debug "boxes: $x - TotalBoxes (Partials): $totalBoxes"
                 if {[string match $Version .] == 1} { set boxVersion [lindex $val 1] } else { set boxVersion [join [concat $Version _ [lindex $val 1]] ""] } 
-                set boxWeight [catch {[::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]} err_2]
+                #set boxWeight [catch {[::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]} err_2]
+                set boxWeight [::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
                 
-                'debug "PartialBoxes_err: $err_2"
-                'debug [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion [lindex $val 1] $boxWeight $x $totalBoxes"]
-                chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion [lindex $val 1] $boxWeight $x $totalBoxes"]
+                #'debug "PartialBoxes_err: $err_2"
+                'debug [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion [lindex $val 1] $PaymentTerms $3rdParty $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
+                chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion [lindex $val 1] $PaymentTerms $3rdParty $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
             }
         }
         
