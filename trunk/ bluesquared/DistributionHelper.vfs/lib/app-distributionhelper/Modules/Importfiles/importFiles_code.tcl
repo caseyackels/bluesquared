@@ -336,7 +336,12 @@ proc Disthelper_Code::writeOutPut {} {
     
     chan close $filesDestination
     
-    tk_dialog .information "Finished Creating File" "Your file has been generated!" info 0 Ok
+    # Tell the user that the file has been generated once we close the channel
+    tk_messageBox -type ok \
+                    -message [mc "Your file has been generated!"] \
+                    -title [mc "Finished Creating File"] \
+                    -icon info \
+                    -parent .
 
 } ;# End of writeOutPut
 

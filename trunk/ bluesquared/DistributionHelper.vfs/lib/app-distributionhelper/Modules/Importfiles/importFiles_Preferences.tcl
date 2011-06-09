@@ -129,6 +129,31 @@ proc Disthelper_Preferences::prefGUI {} {
     grid $nb.f2.boxTareEntry -column 1 -row 0 -sticky ew -padx 5p -pady 5p
 
     
+    ##
+    ## Tab 3 (Headers)
+    ##
+    
+    ttk::label $nb.f3.txt -text [mc "Add to List"]
+    ttk::entry $nb.f3.entry -textvariable -settings(AddEntry)
+    ttk::button $nb.f3.btn -text [mc "Add"] -command {}
+    
+    
+    listbox $nb.f3.listbox \
+                -width 30 \
+                -height 5 \
+                -selectbackground yellow \
+                -selectforeground black \
+                -exportselection yes \
+                -selectmode single
+                ;#-yscrollcommand [list $nb.f3.scrolly set] \
+                ;#-xscrollcommand [list $nb.f3.scrollx set]
+    
+    
+    grid $nb.f3.txt -column 0 -row 0 -sticky nse -padx 5p -pady 5p
+    grid $nb.f3.entry -column 1 -row 0 -sticky news -padx 5p -pady 5p
+    grid $nb.f3.btn -column 2 -row 0 -sticky news -padx 5p -pady 5p
+    
+    grid $nb.f3.listbox -columnspan 3 -row 1 -sticky news -padx 5p -pady 5p
     
     ##
     ## Button Bar
