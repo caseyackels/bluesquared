@@ -133,27 +133,47 @@ proc Disthelper_Preferences::prefGUI {} {
     ## Tab 3 (Headers)
     ##
     
-    ttk::label $nb.f3.txt -text [mc "Add to List"]
-    ttk::entry $nb.f3.entry -textvariable -settings(AddEntry)
-    ttk::button $nb.f3.btn -text [mc "Add"] -command {}
+    set tab3 [ttk::labelframe $nb.f3.importOrder -text [mc "Import Order"]]
+    grid $tab3 -column 0 -row 0 -padx 5p -pady 5p
+    
+    ttk::entry $tab3.entry -textvariable -settings(AddEntry)
+    ttk::button $tab3.add -text [mc "Add"] -command {}
+    
+    ttk::button $tab3.up -text [mc "Up"]
+    ttk::button $tab3.down -text [mc "Down"]
     
     
-    listbox $nb.f3.listbox \
-                -width 30 \
-                -height 5 \
+    listbox $tab3.listbox \
+                -width 18 \
+                -height 10 \
                 -selectbackground yellow \
                 -selectforeground black \
                 -exportselection yes \
-                -selectmode single
-                ;#-yscrollcommand [list $nb.f3.scrolly set] \
-                ;#-xscrollcommand [list $nb.f3.scrollx set]
+                -selectmode single \
+                -yscrollcommand [list $tab3.scrolly set] \
+                -xscrollcommand [list $tab3.scrollx set]
     
+    ttk::scrollbar $tab3.scrolly -orient v -command [list $tab3.listbox yview]
+    ttk::scrollbar $tab3.scrollx -orient h -command [list $tab3.listbox xview]
     
-    grid $nb.f3.txt -column 0 -row 0 -sticky nse -padx 5p -pady 5p
-    grid $nb.f3.entry -column 1 -row 0 -sticky news -padx 5p -pady 5p
-    grid $nb.f3.btn -column 2 -row 0 -sticky news -padx 5p -pady 5p
+    foreach printOrderName $settings(importOrder) {
+        $tab3.listbox insert end $printOrderName
+    }
     
-    grid $nb.f3.listbox -columnspan 3 -row 1 -sticky news -padx 5p -pady 5p
+    grid $tab3.entry -column 0 -row 0 -sticky news -padx 3p -pady 3p
+    grid $tab3.add -column 1 -row 0 -sticky news -padx 2p -pady 3p
+    
+    grid $tab3.listbox -column 0 -row 1 -sticky news ;#-padx 5p -pady 5p
+    grid $tab3.scrolly -column 0 -row 1 -sticky nse
+    grid $tab3.scrollx -column 0 -row 1 -sticky sew
+    
+    grid $tab3.up -column 1 -row 1 -sticky nse
+    grid $tab3.down -column 1 -row 2 -sticky nse
+    
+    # Enable the 'autoscrollbar'
+    ::autoscroll::autoscroll $tab3.scrolly
+    ::autoscroll::autoscroll $tab3.scrollx
+    
     
     ##
     ## Button Bar

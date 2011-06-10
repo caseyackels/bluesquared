@@ -172,20 +172,37 @@ proc 'distHelper_initVariables {} {
     #***
     global settings
     
-    # Application location
-    set settings(Home) [pwd]
+    # hackish, but this will allow us to add new defaults/settings without killing an existing config file.
     
-    # Location for saving the file
-    set settings(outFilePath) [file dirname $settings(Home)]
+    if {![info exists setings(Home)]} {
+        # Application location
+        set settings(Home) [pwd]
+    }
     
-    # Location for saving a copy of the file (this should just be up one directory)
-    set settings(outFilePathCopy) [file dirname $settings(Home)]
+    if {![info exists settings(outFilePath)]} {
+        # Location for saving the file
+        set settings(outFilePath) [file dirname $settings(Home)]
+    }
     
-    # Default for finding the source import files
-    set settings(sourceFiles) [file dirname $settings(Home)]
+    if {![info exists settings(outFilePathCopy)]} {
+        # Location for saving a copy of the file (this should just be up one directory)
+        set settings(outFilePathCopy) [file dirname $settings(Home)]
+    }
     
-    # Box Tare Weight
-    set settings(BoxTareWeight) .566
+    if {![info exists settings(sourceFiles)]} {
+        # Default for finding the source import files
+        set settings(sourceFiles) [file dirname $settings(Home)]
+    }
+    
+    if {![info exists settings(importOrder)]} {
+        # Set default for headers
+        set settings(importOrder) [list shipVia Company Consignee delAddr delAddr2 delAddr3 City State Zip Phone Quantity Version Date Contact Email 3rdParty]
+    }
+    
+    if {![info exists settings(BoxTareWeight)]} {
+        # Box Tare Weight
+        set settings(BoxTareWeight) .566
+    }
     
 }
 
@@ -233,7 +250,7 @@ proc 'distHelper_loadSettings {} {
 	puts "unable to load defaults"
         puts "execute initVariables"
         
-        # Initialize default values
+        # Initialize default values 
         'distHelper_initVariables
         
         #Disthelper_Preferences::saveConfig
@@ -247,6 +264,10 @@ proc 'distHelper_loadSettings {} {
 	    set l_line [split $line " "]
 	    set [lindex $l_line 0] [join [lrange $l_line 1 end] " "]
 	}
+        
+        # Check to see if we have new default settings
+        'distHelper_initVariables
+        
         puts "Loaded variables"
     }
 }
