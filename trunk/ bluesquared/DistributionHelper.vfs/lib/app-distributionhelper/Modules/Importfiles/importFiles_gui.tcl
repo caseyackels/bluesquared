@@ -57,12 +57,13 @@ proc disthelperGUI {} {
     #   GS_job / Number, Name, pieceWeight, fullBoxQty, Date, Version
     #   GS_ship / shipVia
     #   GS_address / Consignee, Company, addrThree, addrTwo, deliveryAddr, City, State, Zip, Phone
+    #   GS_file / Name
     #
     # SEE ALSO
     #	TODO: List the other *GUI procs.
     #
     #***
-    global GS_job GS_ship GS_address
+    global GS_job GS_ship GS_address GS_file
 
     wm title . [mc "Efficiency Assist"]
     focus -force .
@@ -135,6 +136,10 @@ proc disthelperGUI {} {
         dropDest $frame2a.jobNumberEntry GS_job(Number)
         set GS_job(Number) ""
     
+    ttk::label $frame2a.jobNameField -text [mc "File Name"]   
+    ttk::label $frame2a.jobNameEntry -textvariable GS_file(Name)
+        set GS_file(Name) "" ;# Initialize variable with dummy data, until we import a file.
+    
     ttk::button $frame2a.jobNumberButton -text [mc "Import File"] -state active -command { Disthelper_Helper::getAutoOpenFile $GS_job(Number) }
     
    
@@ -144,6 +149,8 @@ proc disthelperGUI {} {
 #
     grid $frame2a.jobNumberField -column 0 -row 0 -sticky nse -padx 5p -pady 5p
     grid $frame2a.jobNumberEntry -column 1 -row 0 -sticky news -padx 5p -pady 5p
+    grid $frame2a.jobNameField -column 0 -row 1 -sticky nse -padx 5p -pady 5p
+    grid $frame2a.jobNameEntry -column 1 -row 1 -sticky news -padx 5p -pady 5p
     
     grid $frame2a.jobNumberButton -column 2 -row 0 -sticky news -padx 5p -pady 5p
     

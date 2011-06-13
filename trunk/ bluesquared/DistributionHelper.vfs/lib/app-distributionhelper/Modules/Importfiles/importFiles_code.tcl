@@ -242,7 +242,7 @@ proc Disthelper_Code::writeOutPut {} {
         3rdParty    [lsearch $GL_file(Header) $GS_job(3rdParty)]
     "
 
-    # Make sure we only activate the following two variables if they data actually exists.
+    # Make sure we only activate the following two variables if the data actually exists.
     if {$importFile(Email) != -1} {set EmailGateway Y} else {set EmailGateway .}
     if {$importFile(3rdParty) != -1} {set PaymentTerms 3} else {set PaymentTerms .}
     
@@ -258,23 +258,28 @@ proc Disthelper_Code::writeOutPut {} {
         
         # Map data to variable
         foreach name [array names importFile] {
+        ##
+        ## This should be changed to a switch not [if-elseif]
+        ##
             if {[lindex $l_line $importFile($name)] eq ""} {
                 # we need a placeholder if there isn't any data
                 set $name .
             } elseif {$name eq "shipVia"} {
                 # add a zero to the front because SmartLinc requires it.
-                set $name 0[list [string toupper [lindex $l_line $importFile($name)]]]
+                set $name 0[list [lindex $l_line $importFile($name)]]
+                if {$name eq "067"} {
+                  set 3rdParty $GS_job(3rdParty)
+                  set PaymentTerms 3
+                }
             } elseif {$name eq "Zip"} {
-                'debug Zip --- name - $name
                     # Make sure that leading zero's are present when required.
                     if {[string length [lindex $l_line $importFile($name)]] == 4} {
                         set $name 0[list [lindex $l_line $importFile($name)]]
-                        'debug reset Zip $name
                     } else {
-                        set $name [list [string toupper [lindex $l_line $importFile($name)]]]
+                        set $name [list [lindex $l_line $importFile($name)]]
                         }
             } else {
-                set $name [list [string toupper [lindex $l_line $importFile($name)]]]
+                set $name [list [lindex $l_line $importFile($name)]]
             }
             
             #lappend printVariables $importFile($name)
@@ -320,7 +325,7 @@ proc Disthelper_Code::writeOutPut {} {
                 set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
                 
                 #'debug "FullBoxes_err: $err_1"
-                'debug [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) PaymentTerms $3rdParty $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
+                'debug [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $PaymentTerms $3rdParty $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
                 chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $PaymentTerms $3rdParty $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
             
             } elseif {($x == $totalBoxes) || ($onlyFullBoxes eq no)} {

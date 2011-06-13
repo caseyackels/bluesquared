@@ -56,13 +56,16 @@ proc Disthelper_Helper::resetVars {args} {
     # SEE ALSO
     #
     #***
-    global GL_file GS_address GS_job GS_ship tempVars
+    global GL_file GS_file GS_address GS_job GS_ship tempVars
     
     switch -- $args {
 	-resetGUI {
 		    # Clear out all the variables (We need this so we don't have to keep exiting the app to make more import files)
 		    foreach name [array names GL_file] {
 			set GL_file($name) ""
+		    }
+                    foreach name [array names GS_file] {
+			set GS_file($name) ""
 		    }
 		    foreach name [array names GS_address] {
 			set GS_address($name) ""
