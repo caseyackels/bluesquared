@@ -245,11 +245,6 @@ proc Disthelper_Code::writeOutPut {} {
     # Make sure we only activate the following two variables if they data actually exists.
     if {$importFile(Email) != -1} {set EmailGateway Y} else {set EmailGateway .}
     if {$importFile(3rdParty) != -1} {set PaymentTerms 3} else {set PaymentTerms .}
-
-    # Make sure that leading zero's are present when required.
-    if {[string length $importFile(Zip)] == 4} {
-        set importFile(Zip) [concat 0$importFile(Zip)]
-    }
     
     
     # Open the destination file for writing
@@ -269,6 +264,15 @@ proc Disthelper_Code::writeOutPut {} {
             } elseif {$name eq "shipVia"} {
                 # add a zero to the front because SmartLinc requires it.
                 set $name 0[list [string toupper [lindex $l_line $importFile($name)]]]
+            } elseif {$name eq "Zip"} {
+                'debug Zip --- name - $name
+                    # Make sure that leading zero's are present when required.
+                    if {[string length [lindex $l_line $importFile($name)]] == 4} {
+                        set $name 0[list [lindex $l_line $importFile($name)]]
+                        'debug reset Zip $name
+                    } else {
+                        set $name [list [string toupper [lindex $l_line $importFile($name)]]]
+                        }
             } else {
                 set $name [list [string toupper [lindex $l_line $importFile($name)]]]
             }
