@@ -269,7 +269,9 @@ proc Disthelper_Code::writeOutPut {} {
                                 }
                             # Add code to guard against the user not putting in an actual 3rd party code!!
                             if {($shipVia eq "067") && ($GS_job(3rdParty) ne "")} { set 3rdParty $GS_job(3rdParty); set PaymentTerms 3
-                                                        } else {'debug No 3rd Party acct was given! ; return }
+                                                        } else {
+                                                            Error_Message::errorMsg 3rdParty1 ; return
+                                                        }
                 }
                 Zip     { 'debug Fix the Zip Codes
                         if {[string length [lindex $l_line $importFile($name)]] == 4} {
