@@ -205,6 +205,7 @@ proc Disthelper_Code::writeOutPut {} {
     #   GS_ship / shipVia
     #   GS_address / Consignee, Company, addrThree, addrTwo, deliveryAddr, City, State, Zip, Phone
     #   settings / BoxTareWeight
+    #   GS_internal / progressBarLength
     #
     #   Set: Global Arrays
     #
@@ -212,7 +213,7 @@ proc Disthelper_Code::writeOutPut {} {
     #	
     #
     #***
-    global GS_job GS_ship GS_address GL_file GS_file settings
+    global GS_job GS_ship GS_address GL_file GS_file settings GS_internal
 
     # Error checking
     # Delivery Address
@@ -249,13 +250,18 @@ proc Disthelper_Code::writeOutPut {} {
     
     # Open the destination file for writing
     set filesDestination [open [file join $settings(outFilePath) "$GS_file(Name) Copy.csv"] w]
+    
+    # Get total amount of records so we can make an accurate progressbar
+    set GS_internal(progressBarLength) [llength $GL_file(dataList)]
+    # Incr the variable at the end of the [foreach]
+    set GS_internal(progressBarIncr) 0
 
     # line = each address string
     # GL_file(dataList) = the entire shipping file
     foreach line $GL_file(dataList) {
         set l_line [csv::split $line]
         set l_line [join [split $l_line ,] ""] ;# remove all comma's
-        
+ 
         # Map data to variable
         # Name = individual name of array
         foreach name [array names importFile] {
@@ -267,7 +273,7 @@ proc Disthelper_Code::writeOutPut {} {
                                 } else {
                                     set $name [list [lindex $l_line $importFile($name)]]
                                 }
-                            # Add code to guard against the user not putting in an actual 3rd party code!!
+                            # Guard against the user not putting in an actual 3rd party code!!
                             if {($shipVia eq "067") && ($GS_job(3rdParty) ne "")} { set 3rdParty $GS_job(3rdParty); set PaymentTerms 3
                                                         } else {
                                                             Error_Message::errorMsg 3rdParty1 ; return
@@ -347,7 +353,7 @@ proc Disthelper_Code::writeOutPut {} {
                 chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion [lindex $val 1] $PaymentTerms $3rdParty $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
             }
         }
-        
+        incr GS_internal(progressBarIncr)
         'debug "--------------"
     }
     
