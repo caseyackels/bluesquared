@@ -239,12 +239,12 @@ proc Disthelper_Code::writeOutPut {} {
         Date        [lsearch $GL_file(Header) $GS_job(Date)]
         Contact     [lsearch $GL_file(Header) $GS_job(Contact)]
         Email       [lsearch $GL_file(Header) $GS_job(Email)]
-        3rdParty    [lsearch $GL_file(Header) $GS_job(3rdParty)]
     "
+    # Only imported values are listed here.
 
     # Make sure we only activate the following two variables if the data actually exists.
-    if {$importFile(Email) != -1} {set EmailGateway Y} else {set EmailGateway .}
-    if {$importFile(3rdParty) != -1} {set PaymentTerms 3} else {set PaymentTerms .}
+    if {$GS_job(Email) != ""} {set EmailGateway Y} else {set EmailGateway .}
+    set PaymentTerms . ;# Initialize with dummy data
     
     
     # Open the destination file for writing
@@ -257,31 +257,37 @@ proc Disthelper_Code::writeOutPut {} {
         set l_line [join [split $l_line ,] ""] ;# remove all comma's
         
         # Map data to variable
+        # Name = individual name of array
         foreach name [array names importFile] {
-        ##
-        ## This should be changed to a switch not [if-elseif]
-        ##
-            if {[lindex $l_line $importFile($name)] eq ""} {
-                # we need a placeholder if there isn't any data
-                set $name .
-            } elseif {$name eq "shipVia"} {
-                # add a zero to the front because SmartLinc requires it.
-                set $name 0[list [lindex $l_line $importFile($name)]]
-                if {$name eq "067"} {
-                  set 3rdParty $GS_job(3rdParty)
-                  set PaymentTerms 3
+        
+            switch $name {
+                shipVia { if {[string length [lindex $l_line $importFile($name)]] == 2} {
+                                set $name 0[list [lindex $l_line $importFile($name)]]
+                                'debug Fix Name: $shipVia
+                                } else {
+                                    set $name [list [lindex $l_line $importFile($name)]]
+                                }
+                            # Add code to guard against the user not putting in an actual 3rd party code!!
+                            if {($shipVia eq "067") && ($GS_job(3rdParty) ne "")} { set 3rdParty $GS_job(3rdParty); set PaymentTerms 3
+                                                        } else {'debug No 3rd Party acct was given! ; return }
                 }
-            } elseif {$name eq "Zip"} {
-                    # Make sure that leading zero's are present when required.
-                    if {[string length [lindex $l_line $importFile($name)]] == 4} {
-                        set $name 0[list [lindex $l_line $importFile($name)]]
-                    } else {
-                        set $name [list [lindex $l_line $importFile($name)]]
+                Zip     { 'debug Fix the Zip Codes
+                        if {[string length [lindex $l_line $importFile($name)]] == 4} {
+                                set $name 0[list [lindex $l_line $importFile($name)]]
+                        } else {
+                            set $name [list [lindex $l_line $importFile($name)]]
                         }
-            } else {
-                set $name [list [lindex $l_line $importFile($name)]]
-            }
-            
+                }
+                default {
+                         # we need a placeholder if there isn't any data, and reassign variable names.
+                        if {[lindex $l_line $importFile($name)] eq ""} {
+                            set $name .
+                        } else {
+                            set $name [list [lindex $l_line $importFile($name)]]
+                        }
+                        'debug NAME: $name
+                }
+            }  
             #lappend printVariables $importFile($name)
         }
         #'debug "(printVariables) $printVariables"
