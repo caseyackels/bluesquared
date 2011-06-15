@@ -245,7 +245,7 @@ proc Disthelper_Code::writeOutPut {} {
 
     # Make sure we only activate the following two variables if the data actually exists.
     if {$GS_job(Email) != ""} {set EmailGateway Y} else {set EmailGateway .}
-    set PaymentTerms . ;# Initialize with dummy data
+    #set PaymentTerms . ;# Initialize with dummy data
     
     
     # Open the destination file for writing
@@ -267,26 +267,36 @@ proc Disthelper_Code::writeOutPut {} {
         foreach name [array names importFile] {
         
             switch $name {
-                shipVia { if {[string length [lindex $l_line $importFile($name)]] == 2} {
+                shipVia { 'debug shipVia/$name - Detect if its 3rd party or if we need to add a leading zero
+                        if {[string length [lindex $l_line $importFile($name)]] == 2} {
                                 set $name 0[list [lindex $l_line $importFile($name)]]
-                                'debug Fix Name: $shipVia
                                 } else {
                                     set $name [list [lindex $l_line $importFile($name)]]
                                 }
                             # Guard against the user not putting in an actual 3rd party code!!
-                            if {($shipVia eq "067") && ($GS_job(3rdParty) ne "")} { set 3rdParty $GS_job(3rdParty); set PaymentTerms 3
-                                                        } else {
-                                                            Error_Message::errorMsg 3rdParty1 ; return
-                                                        }
+                            if {$shipVia eq "067"} {
+                                   'debug We should only see this for 3rd party
+                                    if {$GS_job(3rdParty) != ""} {
+                                        'debug Checking if we have a 3rd party acct
+                                        set 3rdParty $GS_job(3rdParty); set PaymentTerms 3
+                                        } else {
+                                            'debug No acct found, show the error message
+                                            Error_Message::errorMsg 3rdParty1
+                                            return
+                                    }
+                                } else {
+                                    'debug Not sending 3rd party, fill the variables with dummy data
+                                        set 3rdParty .; set PaymentTerms .
+                            }
                 }
-                Zip     { 'debug Fix the Zip Codes
+                Zip     { 'debug Zip/$name - Detect if we need to add a leading zero
                         if {[string length [lindex $l_line $importFile($name)]] == 4} {
                                 set $name 0[list [lindex $l_line $importFile($name)]]
                         } else {
                             set $name [list [lindex $l_line $importFile($name)]]
                         }
                 }
-                default {
+                default { 'debug default/$name - If no data is present we fill it with dummy data
                          # we need a placeholder if there isn't any data, and reassign variable names.
                         if {[lindex $l_line $importFile($name)] eq ""} {
                             set $name .
