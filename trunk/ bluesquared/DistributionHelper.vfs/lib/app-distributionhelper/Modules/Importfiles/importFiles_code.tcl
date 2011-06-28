@@ -94,6 +94,31 @@ proc Disthelper_Code::readFile {filename} {
         # If the file has headers, lets auto-insert the values to help the user.
         .container.frame1.listbox insert end $line
 
+        # Header spellings
+        set shipVia [list "ship via" shipvia]
+        set company [list company destination]
+        set consignee [list consignee contact]
+        set address1 [list address1 addr1 add "addres 1"]
+        set address2 [list address2 add2 addr2 "address 2"]
+        set address3 [list address3 add3 addr3 "address 3"]
+        set cityStateZip [list city-state-zip city-st-zip "city st zip" "city state zip"]
+        set state [list st st. state]
+        set quantity [list quantity qty]
+        set version [list version vers]
+        
+        # Find potential matches, and assign the correct value.
+        if {[lsearch $line $shipVia] != -1} {set line "Ship Via"} else {continue}
+        if {[lsearch $line $company] != -1} {set line Company} else {continue}
+        if {[lsearch $line $consignee] != -1} {set line consignee} else {continue}
+        if {[lsearch $line $address1] != -1} {set line address1} else {continue}
+        if {[lsearch $line $address2] != -1} {set line address2} else {continue}
+        if {[lsearch $line $address3] != -1} {set line address3} else {continue}
+        # Feature to be added; to split columns that contain city,state,zip
+        if {[lsearch $line $cityStateZip] != -1} {set line cityStateZip; 'debug Found a CityStateZip!} else {continue}
+        if {[lsearch $line $state] != -1} {set line state} else {continue}
+        if {[lsearch $line $quantity] != -1} {set line quantity} else {continue}
+        if {[lsearch $line $version ] != -1} {set line version} else {continue}
+
         switch -nocase $line {
             "Ship Via"          {set GS_ship(shipVia) $line}
             Company             {set GS_address(Company) $line}
