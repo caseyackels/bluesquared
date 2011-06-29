@@ -84,54 +84,48 @@ proc Disthelper_Code::readFile {filename} {
 
     chan close $fileName
     
-    set GL_file(Header) [csv::split [lindex $GL_file(dataList) 0]]
+    set GL_file(Header) [string toupper[csv::split [lindex $GL_file(dataList) 0]]]
     
 
     # Set the entry widgets to normal state, special handling for the Customer frame is required since they are not always used.
     Disthelper_Helper::getChildren normal
     
+    # Header spellings
+    set shipVia [list "SHIP VIA" SHIPVIA]
+    set company [list COMPANY DESTINATION]
+    set consignee [list CONSIGNEE CONTACT]
+    set address1 [list ADDRESS1 ADD1 ADDR1 "ADDRESS 1"]
+    set address2 [list ADDRESS2 ADD2 ADDR2 "ADDRESS 2"]
+    set address3 [list ADDRESS3 ADD3 ADDR3 "ADDRESS 3"]
+    set cityStateZip [list CITY-STATE-ZIP CITY-ST-ZIP "CITY ST ZIP" "CITY STATE ZIP" CSV]
+    set state [list ST ST. STATE]
+    set quantity [list QUANTITY QTY]
+    set version [list VERSION VERS]
+
     foreach line $GL_file(Header) {
         # If the file has headers, lets auto-insert the values to help the user.
         .container.frame1.listbox insert end $line
 
-        # Header spellings
-        #set shipVia [list "ship via" shipvia]
-        #set company [list company destination]
-        #set consignee [list consignee contact]
-        #set address1 [list address1 addr1 add "addres 1"]
-        #set address2 [list address2 add2 addr2 "address 2"]
-        #set address3 [list address3 add3 addr3 "address 3"]
-        #set cityStateZip [list city-state-zip city-st-zip "city st zip" "city state zip"]
-        #set state [list st st. state]
-        #set quantity [list quantity qty]
-        #set version [list version vers]
-        #
-        ## Find potential matches, and assign the correct value.
-        #if {[lsearch $line $shipVia] != -1} {set line "Ship Via"} else {continue}
-        #if {[lsearch $line $company] != -1} {set line Company} else {continue}
-        #if {[lsearch $line $consignee] != -1} {set line consignee} else {continue}
-        #if {[lsearch $line $address1] != -1} {set line address1} else {continue}
-        #if {[lsearch $line $address2] != -1} {set line address2} else {continue}
-        #if {[lsearch $line $address3] != -1} {set line address3} else {continue}
-        ## Feature to be added; to split columns that contain city,state,zip
-        #if {[lsearch $line $cityStateZip] != -1} {set line cityStateZip; 'debug Found a CityStateZip!} else {continue}
-        #if {[lsearch $line $state] != -1} {set line state} else {continue}
-        #if {[lsearch $line $quantity] != -1} {set line quantity} else {continue}
-        #if {[lsearch $line $version ] != -1} {set line version} else {continue}
 
+        # Find potential matches and assign the correct value.
+        if {[lsearch -nocase $shipVia $line] != -1} {set GS_ship(shipVia) $line}
+        if {[lsearch -nocase $company $line] != -1} {set GS_address(Company) $line}
+        if {[lsearch -nocase $consignee $line] != -1} {set GS_address(Consignee) $line}
+        if {[lsearch -nocase $address1 $line] != -1} {set GS_address(deliveryAddr) $line}
+        if {[lsearch -nocase $address2 $line] != -1} {set GS_address(addrTwo) $line}
+        if {[lsearch -nocase $address3 $line] != -1} {set GS_address(addrThree) $line}
+        # Feature to be added; to split columns that contain city,state,zip
+        if {[lsearch -nocase $cityStateZip $line] != -1} {set internal_line cityStateZip; 'debug Found a CityStateZip!}
+        #if {[lsearch -nocase $city $line] != -1} {set internal_line City}
+        if {[lsearch -nocase $state $line] != -1} {set GS_address(State) $line}
+        if {[lsearch -nocase $quantity $line] != -1} {set GS_job(Quantity) $line}
+        if {[lsearch -nocase $version $line] != -1} {set GS_job(Version) $line}
+
+        # Continue processing the list for potential matches where we don't need to search for possible alternate spellings
         switch -nocase $line {
-            "Ship Via"          {set GS_ship(shipVia) $line}
-            Company             {set GS_address(Company) $line}
-            Consignee           {set GS_address(Consignee) $line}
-            Address1            {set GS_address(deliveryAddr) $line}
-            Address2            {set GS_address(addrTwo) $line}
-            Address3            {set GS_address(addrThree) $line}
             City                {set GS_address(City) $line}
-            State               {set GS_address(State) $line}
             Zip                 {set GS_address(Zip) $line}
             Phone               {set GS_address(Phone) $line}
-            Quantity            {set GS_job(Quantity) $line}
-            Version             {set GS_job(Version) $line}
             "Ship Date"         {set GS_job(Date) $line}
             "3rd Party"         {set GS_job(3rdParty) $line}
             EmailContact        {set GS_job(Contact) $line}
@@ -303,7 +297,7 @@ proc Disthelper_Code::writeOutPut {} {
                                     set $name [list [lindex $l_line $importFile($name)]]
                                 }
                             # Guard against the user not putting in an actual 3rd party code!!
-                            if {$shipVia eq "067"} {
+                            if {$shipVia eq "067" || $shipVia eq "068"} {
                                    'debug We should only see this for 3rd party
                                     if {$GS_job(3rdParty) != ""} {
                                         'debug Checking if we have a 3rd party acct
