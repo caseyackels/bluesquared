@@ -95,29 +95,29 @@ proc Disthelper_Code::readFile {filename} {
         .container.frame1.listbox insert end $line
 
         # Header spellings
-        set shipVia [list "ship via" shipvia]
-        set company [list company destination]
-        set consignee [list consignee contact]
-        set address1 [list address1 addr1 add "addres 1"]
-        set address2 [list address2 add2 addr2 "address 2"]
-        set address3 [list address3 add3 addr3 "address 3"]
-        set cityStateZip [list city-state-zip city-st-zip "city st zip" "city state zip"]
-        set state [list st st. state]
-        set quantity [list quantity qty]
-        set version [list version vers]
-        
-        # Find potential matches, and assign the correct value.
-        if {[lsearch $line $shipVia] != -1} {set line "Ship Via"} else {continue}
-        if {[lsearch $line $company] != -1} {set line Company} else {continue}
-        if {[lsearch $line $consignee] != -1} {set line consignee} else {continue}
-        if {[lsearch $line $address1] != -1} {set line address1} else {continue}
-        if {[lsearch $line $address2] != -1} {set line address2} else {continue}
-        if {[lsearch $line $address3] != -1} {set line address3} else {continue}
-        # Feature to be added; to split columns that contain city,state,zip
-        if {[lsearch $line $cityStateZip] != -1} {set line cityStateZip; 'debug Found a CityStateZip!} else {continue}
-        if {[lsearch $line $state] != -1} {set line state} else {continue}
-        if {[lsearch $line $quantity] != -1} {set line quantity} else {continue}
-        if {[lsearch $line $version ] != -1} {set line version} else {continue}
+        #set shipVia [list "ship via" shipvia]
+        #set company [list company destination]
+        #set consignee [list consignee contact]
+        #set address1 [list address1 addr1 add "addres 1"]
+        #set address2 [list address2 add2 addr2 "address 2"]
+        #set address3 [list address3 add3 addr3 "address 3"]
+        #set cityStateZip [list city-state-zip city-st-zip "city st zip" "city state zip"]
+        #set state [list st st. state]
+        #set quantity [list quantity qty]
+        #set version [list version vers]
+        #
+        ## Find potential matches, and assign the correct value.
+        #if {[lsearch $line $shipVia] != -1} {set line "Ship Via"} else {continue}
+        #if {[lsearch $line $company] != -1} {set line Company} else {continue}
+        #if {[lsearch $line $consignee] != -1} {set line consignee} else {continue}
+        #if {[lsearch $line $address1] != -1} {set line address1} else {continue}
+        #if {[lsearch $line $address2] != -1} {set line address2} else {continue}
+        #if {[lsearch $line $address3] != -1} {set line address3} else {continue}
+        ## Feature to be added; to split columns that contain city,state,zip
+        #if {[lsearch $line $cityStateZip] != -1} {set line cityStateZip; 'debug Found a CityStateZip!} else {continue}
+        #if {[lsearch $line $state] != -1} {set line state} else {continue}
+        #if {[lsearch $line $quantity] != -1} {set line quantity} else {continue}
+        #if {[lsearch $line $version ] != -1} {set line version} else {continue}
 
         switch -nocase $line {
             "Ship Via"          {set GS_ship(shipVia) $line}
@@ -172,7 +172,7 @@ proc Disthelper_Code::doMath {totalQuantity maxPerBox} {
     # Do mathmatical equations, then double check to make sure it comes out to the value of totalQty
     
     # Guard against a mistake that we could make
-    if {$totalQuantity == "" || $totalQuantity == 0} {puts "I need a total qty argument!"; return}
+    if {$totalQuantity == "" || $totalQuantity == 0} {puts "I need a total qty argument!"; return failed}
     
     if {$totalQuantity < $maxPerBox} {
 	lappend partialBoxQTY
@@ -296,6 +296,10 @@ proc Disthelper_Code::writeOutPut {} {
                         if {[string length [lindex $l_line $importFile($name)]] == 2} {
                                 set $name 0[list [lindex $l_line $importFile($name)]]
                                 } else {
+                                    if {$name == ""} {
+                                        'debug String is not an integer - shipVia
+                                        return
+                                    }
                                     set $name [list [lindex $l_line $importFile($name)]]
                                 }
                             # Guard against the user not putting in an actual 3rd party code!!
@@ -323,7 +327,9 @@ proc Disthelper_Code::writeOutPut {} {
                 }
                 default { 'debug default/$name - If no data is present we fill it with dummy data
                          # we need a placeholder if there isn't any data, and reassign variable names.
-                        if {[lindex $l_line $importFile($name)] eq ""} {
+                         # Build a black list
+                        if {[lsearch [list "" " "] [lindex $l_line $importFile($name)]] != -1} {
+                        #if {[lindex $l_line $importFile($name)] eq ""} {}
                             set $name .
                         } else {
                             set $name [list [lindex $l_line $importFile($name)]]
@@ -331,9 +337,9 @@ proc Disthelper_Code::writeOutPut {} {
                         'debug NAME: $name
                 }
             }  
-            #lappend printVariables $importFile($name)
         }
-        #'debug "(printVariables) $printVariables"
+
+        'debug importFile(Quantity) [lindex $l_line $importFile(Quantity)]
         
         if {[string is integer [lindex $l_line $importFile(Quantity)]]} {
             set val [Disthelper_Code::doMath [lindex $l_line $importFile(Quantity)] $GS_job(fullBoxQty)]
@@ -344,6 +350,12 @@ proc Disthelper_Code::writeOutPut {} {
             'debug "String is not an integer. Skipping..."
             continue
         }
+        
+        # if the doMath proc returns the value 'failed', we skip that entry and continue until we reach the end of the file.
+        # this can occur if there is extra invisible formatting in the excel file, but in the .csv file there are extra lines of empty data.
+        if {$val == "failed"} {
+                            'debug no quantity, exiting
+                            continue}
         
         # Checking for amount of boxes per shipment
         # First we assume we have full boxes, and a partial
