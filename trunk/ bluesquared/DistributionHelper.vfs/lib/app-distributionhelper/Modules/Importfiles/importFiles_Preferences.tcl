@@ -59,7 +59,7 @@ proc Disthelper_Preferences::prefGUI {} {
     toplevel .preferences
     wm transient .preferences .
     wm title .preferences [mc "Preferences"]
-    wm geometry .preferences 640x300 ;# width X Height
+    #wm geometry .preferences 640x300 ;# width X Height
     
     set locX [expr {([winfo screenwidth .] - [winfo width .]) / 2}]
     set locY [expr {([winfo screenheight .] - [winfo height .]) / 2}]
@@ -82,7 +82,7 @@ proc Disthelper_Preferences::prefGUI {} {
 
     $nb add [ttk::frame $nb.f1] -text [mc "File Paths"]
     $nb add [ttk::frame $nb.f2] -text [mc "Miscellaneous"]
-    $nb add [ttk::frame $nb.f3] -text [mc "Headers"]
+    $nb add [ttk::frame $nb.f3] -text [mc "Header Names"]
     $nb select $nb.f1
 
     ttk::notebook::enableTraversal $nb
@@ -130,18 +130,21 @@ proc Disthelper_Preferences::prefGUI {} {
 
     
     ##
-    ## Tab 3 (Headers)
+    ## Tab 3 (Header Names)
     ##
     
-    set tab3 [ttk::labelframe $nb.f3.importOrder -text [mc "Import Order"]]
+    set tab3 [ttk::labelframe $nb.f3.importOrder -text [mc "Header Names"]]
     grid $tab3 -column 0 -row 0 -padx 5p -pady 5p
+    #pack $nb.f3.importOrder -expand yes -fill both -padx 5p -pady 3p
     
+    ttk::combobox $tab3.combo -width 20 \
+                            -values "Consignee Address1 Address2 Address3" \
+                            -state readonly \
+                            -textvariable currentHeader
+    
+ 
     ttk::entry $tab3.entry -textvariable -settings(AddEntry)
     ttk::button $tab3.add -text [mc "Add"] -command {}
-    
-    ttk::button $tab3.up -text [mc "Up"]
-    ttk::button $tab3.down -text [mc "Down"]
-    
     
     listbox $tab3.listbox \
                 -width 18 \
@@ -160,15 +163,20 @@ proc Disthelper_Preferences::prefGUI {} {
         $tab3.listbox insert end $printOrderName
     }
     
-    grid $tab3.entry -column 0 -row 0 -sticky news -padx 3p -pady 3p
-    grid $tab3.add -column 1 -row 0 -sticky news -padx 2p -pady 3p
+    ttk::button $tab3.del -text [mc "Delete"]    
+    #ttk::button $tab3.down -text [mc "Down"]
     
-    grid $tab3.listbox -column 0 -row 1 -sticky news ;#-padx 5p -pady 5p
-    grid $tab3.scrolly -column 0 -row 1 -sticky nse
-    grid $tab3.scrollx -column 0 -row 1 -sticky sew
+    grid $tab3.combo -column 0 -row 0 -sticky news -padx 3p -pady 3p
     
-    grid $tab3.up -column 1 -row 1 -sticky nse
-    grid $tab3.down -column 1 -row 2 -sticky nse
+    grid $tab3.entry -column 0 -row 1 -sticky news -padx 3p -pady 3p
+    grid $tab3.add -column 1 -row 1 -sticky news -padx 2p -pady 3p
+    
+    grid $tab3.listbox -column 0 -row 2 -sticky news ;#-padx 5p -pady 5p
+    grid $tab3.scrolly -column 0 -row 2 -sticky nse
+    grid $tab3.scrollx -column 0 -row 2 -sticky sew
+    
+    grid $tab3.del -column 1 -row 3 -sticky nse
+    #grid $tab3.down -column 1 -row 2 -sticky nse
     
     # Enable the 'autoscrollbar'
     ::autoscroll::autoscroll $tab3.scrolly
@@ -187,10 +195,18 @@ proc Disthelper_Preferences::prefGUI {} {
     grid $buttonbar.close -column 1 -row 3 -sticky nse
     pack $buttonbar -side bottom -anchor e -pady 8p -padx 5p
     
-    
+##
+## - Bindings
+##
+
+bind all <<ComboboxSelected>> "Disthelper_Preferences::testOutput [$tab3.combo get 0 end]"
+
 } ;# end Disthelper_Preferences::prefGUI
 
-
+proc Disthelper_Preferences::testOutput {args} {
+    puts "selection: $args"
+    
+}
 proc Disthelper_Preferences::chooseDir {target} { 
     #****f* chooseDir/Disthelper_Preferences
     # AUTHOR
@@ -276,3 +292,4 @@ proc Disthelper_Preferences::saveConfig {} {
     
     chan close $fd
 }
+

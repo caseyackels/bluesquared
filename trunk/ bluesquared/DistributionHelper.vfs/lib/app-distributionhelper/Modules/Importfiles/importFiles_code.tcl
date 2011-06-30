@@ -104,8 +104,9 @@ proc Disthelper_Code::readFile {filename} {
 
     foreach line $GL_file(Header) {
         # If the file has headers, lets auto-insert the values to help the user.
+        
+        # Insert all headers into the listbox
         .container.frame1.listbox insert end $line
-
 
         # Find potential matches and assign the correct value.
         if {[lsearch -nocase $shipVia $line] != -1} {set GS_ship(shipVia) $line}
