@@ -84,7 +84,7 @@ proc Disthelper_Code::readFile {filename} {
 
     chan close $fileName
     
-    set GL_file(Header) [string toupper[csv::split [lindex $GL_file(dataList) 0]]]
+    set GL_file(Header) [string toupper [csv::split [lindex $GL_file(dataList) 0]]]
     
 
     # Set the entry widgets to normal state, special handling for the Customer frame is required since they are not always used.
@@ -104,6 +104,10 @@ proc Disthelper_Code::readFile {filename} {
 
     foreach line $GL_file(Header) {
         # If the file has headers, lets auto-insert the values to help the user.
+        
+        # Remove extra whitespace
+        set line [string trimleft $line]
+        set line [string trimright $line]
         
         # Insert all headers into the listbox
         .container.frame1.listbox insert end $line
