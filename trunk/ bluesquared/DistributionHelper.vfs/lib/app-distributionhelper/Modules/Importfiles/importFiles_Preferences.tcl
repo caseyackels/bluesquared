@@ -54,7 +54,7 @@ proc Disthelper_Preferences::prefGUI {} {
     # SEE ALSO
     #
     #***
-    global settings
+    global settings tab3
     
     toplevel .preferences
     wm transient .preferences .
@@ -199,15 +199,23 @@ proc Disthelper_Preferences::prefGUI {} {
 ## - Bindings
 ##
 
-bind all <<ComboboxSelected>> "Disthelper_Preferences::testOutput [$tab3.combo get 0 end]"
+#bind all <<ComboboxSelected>> "Disthelper_Preferences::testOutput [$tab3.combo get 0 end]"
+
+bind all <<ComboboxSelected>> {
+    #'debug ComboBox - [$tab3.combo current]
+    Disthelper_Preferences::testOutput [$tab3.combo current]
+}
 
 } ;# end Disthelper_Preferences::prefGUI
+
 
 proc Disthelper_Preferences::testOutput {args} {
     puts "selection: $args"
     
 }
-proc Disthelper_Preferences::chooseDir {target} { 
+
+
+proc Disthelper_Preferences::chooseDir {target} {
     #****f* chooseDir/Disthelper_Preferences
     # AUTHOR
     #	Casey Ackels
