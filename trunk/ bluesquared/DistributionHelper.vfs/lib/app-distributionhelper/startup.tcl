@@ -195,8 +195,53 @@ proc 'distHelper_initVariables {} {
     }
     
     if {![info exists settings(importOrder)]} {
-        # Set default for headers
+        # Set default for headers; wording is used internally
         set settings(importOrder) [list shipVia Company Consignee delAddr delAddr2 delAddr3 City State Zip Phone Quantity Version Date Contact Email 3rdParty]
+    }
+
+    if {![info exists settings(header,shipvia)]} {
+        set settings(header,shipvia) [list "ship via" shipvia]
+    }
+    
+    if {![info exists settings(header,company)]} {
+        set settings(header,company) [list company destination "company name"]
+    }
+
+    if {![info exists settings(header,consignee)]} {
+        # Variations on spelling of consignee
+        set settings(header,consignee) [list consignee contact attention attn attn:]
+    }
+    
+    if {![info exists settings(header,address1)]} {
+        set settings(header,address1) [list address address1 "address 1" add add1 "add 1" addr addr1 "addr 1"]
+    }
+    
+    if {![info exists settings(header,address2)]} {
+        set settings(header,address2) [list address2 "address 2" add2 "add 2" addr2 "addr 2"]
+    }
+    
+    if {![info exists settings(header,address3)]} {
+        set settings(header,address3) [list address3 "address 3" add3 "add 3" addr3 "addr 3"]
+    }
+    
+    if {![info exists settings(header,csv)]} {
+        set settings(header,csv) [list city-state-zip city-st-zip "city state zip" "city st zip" csv state/region]
+    }
+    
+    if {![info exists settings(header,state)]} {
+        set settings(header,state) [list st st. state]
+    }
+    
+    if {![info exists settings(header,quantity)]} {
+        set settings(header,quantity) [list quantity qty]
+    }
+    
+    if {![info exists settings(header,version)]} {
+        set settings(header,version) [list version vers]
+    }
+    
+    if {![info exists settings(header,zip)]} {
+        set settings(header,zip) [list zip zipcode "zip code" postalcode "postal code" postal]
     }
     
     if {![info exists settings(BoxTareWeight)]} {
