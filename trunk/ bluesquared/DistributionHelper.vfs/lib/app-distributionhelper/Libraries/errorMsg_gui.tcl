@@ -30,14 +30,18 @@ proc Error_Message::detectError {windowPath} {
 }
 
 
-proc Error_Message::errorMsg {code} {
+proc Error_Message::errorMsg {code args} {
+    
+    set defaultTitle [mc "Missing Information"]
+    set dupeTitle [mc "Duplicate Information"]
     
     switch -- $code {
-        jobNumber1  {set message [mc "Please specify a job number."]; set message2 [mc "Error Location %s" $code]}
-        shipVia1    {set message [mc "Please specify how to ship your shipments."]; set message2 [mc "Error Locations %s" $code]}
-        pieceWeight1 {set message [mc "Please insert a value for your Piece Weight."]; set message2 [mc "Error Location: %s" $code]}
-        fullBoxQty1 {set message [mc "Please enter the full box amount."]; set message2 [mc "Error Location: %s" $code]}
-        3rdParty1 {set message [mc "Please enter a 3rd Party Account Number."]; set message2 [mc "Error Location: %s" $code]}
+        jobNumber1  {set message [mc "Please specify a job number."]; set message2 [mc "Error Location %s" $code]; set title $defaultTitle}
+        shipVia1    {set message [mc "Please specify how to ship your shipments."]; set message2 [mc "Error Locations %s" $code]; set title $defaultTitle}
+        pieceWeight1 {set message [mc "Please insert a value for your Piece Weight."]; set message2 [mc "Error Location: %s" $code]; set title $defaultTitle}
+        fullBoxQty1 {set message [mc "Please enter the full box amount."]; set message2 [mc "Error Location: %s" $code]; set title $defaultTitle}
+        3rdParty1 {set message [mc "Please enter a 3rd Party Account Number."]; set message2 [mc "Error Location: %s" $code]; set title $defaultTitle}
+        header1 {set message [mc "This name already exists and cannot be used twice.\nIt is located in the %s header" $args]; set message2 ""; set title $dupeTitle}
         default {set message [mc "Unknown Error Message"]; set message2 ""}
     }
     
@@ -45,7 +49,7 @@ proc Error_Message::errorMsg {code} {
         -parent . \
         -default ok \
         -icon warning \
-        -title [mc "Missing Information"] \
+        -title $title \
         -message "$message\n\nPlease fix this, then I can continue.\n\n$message2"
     
 } ;# end of errorMsg

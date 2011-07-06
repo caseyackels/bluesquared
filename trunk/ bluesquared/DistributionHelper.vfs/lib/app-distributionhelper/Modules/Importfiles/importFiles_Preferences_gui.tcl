@@ -54,7 +54,7 @@ proc Disthelper_Preferences::prefGUI {} {
     # SEE ALSO
     #
     #***
-    global settings tab3
+    global settings tab3 header header_sorted
     
     toplevel .preferences
     wm transient .preferences .
@@ -66,6 +66,8 @@ proc Disthelper_Preferences::prefGUI {} {
     wm geometry .preferences +${locX}+${locY}
     
     focus -force .preferences
+    
+    set header_sorted [lsort -dictionary [array names header]]
     
     ##
     ## Parent Frame
@@ -135,16 +137,17 @@ proc Disthelper_Preferences::prefGUI {} {
     
     set tab3 [ttk::labelframe $nb.f3.importOrder -text [mc "Header Names"]]
     grid $tab3 -column 0 -row 0 -padx 5p -pady 5p
-    #pack $nb.f3.importOrder -expand yes -fill both -padx 5p -pady 3p
     
     ttk::combobox $tab3.combo -width 20 \
-                            -values "Consignee Address1 Address2 Address3" \
+                            -values $header_sorted \
                             -state readonly \
-                            -textvariable currentHeader
+                            -textvariable parentHeader
     
+    # Start out with displaying a header
+    $tab3.combo set [lrange $header_sorted 0 0]
  
-    ttk::entry $tab3.entry -textvariable -settings(AddEntry)
-    ttk::button $tab3.add -text [mc "Add"] -command {}
+    ttk::entry $tab3.entry -textvariable subHeader
+    ttk::button $tab3.add -text [mc "Add"] -command {catch {Disthelper_Preferences::addSubHeader $parentHeader $subHeader}}
     
     listbox $tab3.listbox \
                 -width 18 \
@@ -159,24 +162,21 @@ proc Disthelper_Preferences::prefGUI {} {
     ttk::scrollbar $tab3.scrolly -orient v -command [list $tab3.listbox yview]
     ttk::scrollbar $tab3.scrollx -orient h -command [list $tab3.listbox xview]
     
-    foreach printOrderName $settings(importOrder) {
-        $tab3.listbox insert end $printOrderName
-    }
+    # Put the default values in
+    Disthelper_Preferences::displayHeader [$tab3.combo current]
     
-    ttk::button $tab3.del -text [mc "Delete"]    
-    #ttk::button $tab3.down -text [mc "Down"]
+    ttk::button $tab3.del -text [mc "Remove"] -command  {Disthelper_Preferences::removeSubHeader $parentHeader}
     
     grid $tab3.combo -column 0 -row 0 -sticky news -padx 3p -pady 3p
     
     grid $tab3.entry -column 0 -row 1 -sticky news -padx 3p -pady 3p
     grid $tab3.add -column 1 -row 1 -sticky news -padx 2p -pady 3p
     
-    grid $tab3.listbox -column 0 -row 2 -sticky news ;#-padx 5p -pady 5p
-    grid $tab3.scrolly -column 0 -row 2 -sticky nse
-    grid $tab3.scrollx -column 0 -row 2 -sticky sew
+    grid $tab3.listbox -column 0 -row 2 -rowspan 8 -padx 3p -pady 3p -sticky news ;#-padx 5p -pady 5p
+    grid $tab3.scrolly -column 0 -row 2 -rowspan 8 -sticky nse
+    grid $tab3.scrollx -column 0 -row 2 -rowspan 8 -sticky sew
     
-    grid $tab3.del -column 1 -row 3 -sticky nse
-    #grid $tab3.down -column 1 -row 2 -sticky nse
+    grid $tab3.del -column 1 -row 2 -sticky new -padx 2p -pady 3p
     
     # Enable the 'autoscrollbar'
     ::autoscroll::autoscroll $tab3.scrolly
@@ -188,31 +188,152 @@ proc Disthelper_Preferences::prefGUI {} {
     ##
     
     set buttonbar [ttk::frame .preferences.buttonbar]
-    ttk::button $buttonbar.ok -text [mc "Ok"] -command { Disthelper_Preferences::saveConfig; destroy .preferences }
-    ttk::button $buttonbar.close -text [mc "Cancel"] -command { destroy .preferences }
+    ttk::button $buttonbar.ok -text [mc "Save & Close"] -command { Disthelper_Preferences::saveConfig; destroy .preferences }
+    ttk::button $buttonbar.close -text [mc "Discard Changes"] -command { destroy .preferences }
     
-    grid $buttonbar.ok -column 0 -row 3 -sticky nse -padx 8p  
-    grid $buttonbar.close -column 1 -row 3 -sticky nse
+    grid $buttonbar.ok -column 0 -row 3 -sticky nse -padx 8p -ipadx 4p
+    grid $buttonbar.close -column 1 -row 3 -sticky nse -ipadx 4p
     pack $buttonbar -side bottom -anchor e -pady 8p -padx 5p
     
 ##
 ## - Bindings
 ##
 
-#bind all <<ComboboxSelected>> "Disthelper_Preferences::testOutput [$tab3.combo get 0 end]"
-
 bind all <<ComboboxSelected>> {
     #'debug ComboBox - [$tab3.combo current]
-    Disthelper_Preferences::testOutput [$tab3.combo current]
+    Disthelper_Preferences::displayHeader [$tab3.combo current]
 }
 
 } ;# end Disthelper_Preferences::prefGUI
 
 
-proc Disthelper_Preferences::testOutput {args} {
-    puts "selection: $args"
+proc Disthelper_Preferences::displayHeader {args} {
+    #****f* displayHeader/Disthelper_Preferences
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011 - Casey Ackels
+    #
+    # FUNCTION
+    #	Called with the indice of the value of the combobox; and returns the associated array with values, of that array variable.
+    #
+    # SYNOPSIS
+    #	N/A
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	Disthelper_Preferences::prefGUI
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global header header_sorted tab3
+
+    # Names listed in the header array, that matches what was selected in the combobox.
+    set headerCategory [lindex $header_sorted $args]
+
+    $tab3.listbox delete 0 end
     
-}
+    foreach headerName $header($headerCategory) {
+        $tab3.listbox insert end $headerName
+    }
+} ;# End Disthelper_Preferences::displayHeader
+
+
+proc Disthelper_Preferences::addSubHeader {parentHeader subHeader} {
+    #****f* addSubHeader/Disthelper_Preferences
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011 - Casey Ackels
+    #
+    # FUNCTION
+    #	Pass the parentHeader name and the new subHeader.
+    #
+    # SYNOPSIS
+    #	Allows the user to add a new subHeader to the list with the parentHeader
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	Disthelper_Preferences::prefGUI
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global tab3 header
+    'debug addSubHeader
+    
+    #if {![info exists parentHeader]} {return}
+    #if {![info exists subHeader]} {return}
+
+    #$tab3.listbox delete 0 end
+    
+    #foreach headerName $header($parentHeader) {
+    #    $tab3.listbox insert end $headerName
+    #}
+    
+    # Cycle through all header arrays to check for duplicates
+    #  We must allow only one instance of a word for all SubHeaders
+    foreach name [array names header] {
+        if {[lsearch $header($name) $subHeader] != -1} {
+            'debug Found duplicate in $name
+            Error_Message::errorMsg header1 $name
+            return
+        }
+    }
+    
+    # Now add the new subheader
+    $tab3.listbox insert end $subHeader
+    
+    set header($parentHeader) [$tab3.listbox get 0 end]
+} ;# End Disthelper_Preferences::addSubHeader
+
+
+
+proc Disthelper_Preferences::removeSubHeader {parentHeader} {
+    #****f* removeSubheader/Disthelper_Preferences
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011 - Casey Ackels
+    #
+    # FUNCTION
+    #	Supply the parentHeader name (from the textvariable)
+    #	removeSubHeader $parentHeader
+    #
+    # SYNOPSIS
+    #	Removes the selected SubHeader and updates the list of values for that particular parentHeader variable
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	Disthelper_Preferences::prefGUI
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global tab3 header
+    if {[$tab3.listbox curselection] == "" } {return}
+    
+    $tab3.listbox delete [$tab3.listbox curselection]
+    
+    # Set the new list of values to the array variable.
+    set header($parentHeader) [$tab3.listbox get 0 end]
+} ;# end Disthelper_Preferences::removeSubHeader
 
 
 proc Disthelper_Preferences::chooseDir {target} {
@@ -272,7 +393,7 @@ proc Disthelper_Preferences::saveConfig {} {
     #	(c) 2011 - Casey Ackels
     #
     # FUNCTION
-    #	
+    #	saveConfig
     #
     # SYNOPSIS
     #	Write settings to config.txt file.
@@ -288,14 +409,17 @@ proc Disthelper_Preferences::saveConfig {} {
     # SEE ALSO
     #
     #***
-    global settings
+    global settings header
     
-    
+    # We should use the path set in $settings(Home), instead of hard coding
     set fd [open config.txt w]
-        foreach value [array names settings] {
-            # Creating application defaults.
-            # Original installation, or the config.txt was deleted.
+    
+    foreach value [array names settings] {
             puts $fd "settings($value) $settings($value)"
+    }
+    
+    foreach value [array names header] {
+            puts $fd "header($value) $header($value)"
     }
     
     chan close $fd

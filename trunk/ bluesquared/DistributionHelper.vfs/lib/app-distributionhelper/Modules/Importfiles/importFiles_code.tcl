@@ -60,7 +60,7 @@ proc Disthelper_Code::readFile {filename} {
     #
     #
     #***
-    global GL_file GS_file GS_job GS_ship GS_address
+    global GL_file GS_file GS_job GS_ship GS_address header
 
     
     # Cleanse file name, and prepare it for when we create the output file.
@@ -91,16 +91,16 @@ proc Disthelper_Code::readFile {filename} {
     Disthelper_Helper::getChildren normal
     
     # Header spellings
-    set shipVia [list "SHIP VIA" SHIPVIA]
-    set company [list COMPANY DESTINATION]
-    set consignee [list ATTENTION ATTN ATTN: CONSIGNEE CONTACT]
-    set address1 [list ADDRESS ADDRESS1 ADD ADD1 "ADD 1" ADDR ADDR1 "ADDRESS 1"]
-    set address2 [list ADD2 "ADD 2" ADDR2 "ADDR 2" ADDRESS2 "ADDRESS 2"]
-    set address3 [list ADD3 "ADD 3" ADDR3 "ADDR 3" ADDRESS3 "ADDRESS 3"]
-    set cityStateZip [list CITY-STATE-ZIP CITY-ST-ZIP "CITY ST ZIP" "CITY STATE ZIP" CSV]
-    set state [list ST ST. STATE]
-    set quantity [list QUANTITY QTY]
-    set version [list VERSION VERS]
+    #set shipVia [list "SHIP VIA" SHIPVIA]
+    #set company [list COMPANY DESTINATION]
+    #set consignee [list ATTENTION ATTN ATTN: CONSIGNEE CONTACT]
+    #set address1 [list ADDRESS ADDRESS1 ADD ADD1 "ADD 1" ADDR ADDR1 "ADDRESS 1"]
+    #set address2 [list ADD2 "ADD 2" ADDR2 "ADDR 2" ADDRESS2 "ADDRESS 2"]
+    #set address3 [list ADD3 "ADD 3" ADDR3 "ADDR 3" ADDRESS3 "ADDRESS 3"]
+    #set cityStateZip [list CITY-STATE-ZIP CITY-ST-ZIP "CITY ST ZIP" "CITY STATE ZIP" CSV]
+    #set state [list ST ST. STATE]
+    #set quantity [list QUANTITY QTY]
+    #set version [list VERSION VERS]
 
     foreach line $GL_file(Header) {
         # If the file has headers, lets auto-insert the values to help the user.
@@ -113,23 +113,36 @@ proc Disthelper_Code::readFile {filename} {
         .container.frame1.listbox insert end $line
 
         # Find potential matches and assign the correct value.
-        if {[lsearch -nocase $shipVia $line] != -1} {set GS_ship(shipVia) $line}
-        if {[lsearch -nocase $company $line] != -1} {set GS_address(Company) $line}
-        if {[lsearch -nocase $consignee $line] != -1} {set GS_address(Consignee) $line}
-        if {[lsearch -nocase $address1 $line] != -1} {set GS_address(deliveryAddr) $line}
-        if {[lsearch -nocase $address2 $line] != -1} {set GS_address(addrTwo) $line}
-        if {[lsearch -nocase $address3 $line] != -1} {set GS_address(addrThree) $line}
+        #if {[lsearch -nocase $shipVia $line] != -1} {set GS_ship(shipVia) $line}
+        if {[lsearch -nocase $header(shipvia) $line] != -1} {set GS_ship(shipVia) $line}
+        #if {[lsearch -nocase $company $line] != -1} {set GS_address(Company) $line}
+        if {[lsearch -nocase $header(company) $line] != -1} {set GS_ship(company) $line}
+        #if {[lsearch -nocase $consignee $line] != -1} {set GS_address(Consignee) $line}
+        if {[lsearch -nocase $header(consignee) $line] != -1} {set GS_address(Consignee) $line}
+        #if {[lsearch -nocase $address1 $line] != -1} {set GS_address(deliveryAddr) $line}
+        if {[lsearch -nocase $header(address1) $line] != -1} {set GS_address(deliveryAddr) $line}
+        #if {[lsearch -nocase $address2 $line] != -1} {set GS_address(addrTwo) $line}
+        if {[lsearch -nocase $header(address2) $line] != -1} {set GS_address(addrTwo) $line}
+        #if {[lsearch -nocase $address3 $line] != -1} {set GS_address(addrThree) $line}
+        if {[lsearch -nocase $header(address3) $line] != -1} {set GS_address(addrThree) $line}
         # Feature to be added; to split columns that contain city,state,zip
-        if {[lsearch -nocase $cityStateZip $line] != -1} {set internal_line cityStateZip; 'debug Found a CityStateZip!}
+        #if {[lsearch -nocase $cityStateZip $line] != -1} {set internal_line cityStateZip; 'debug Found a CityStateZip!}
+        if {[lsearch -nocase $header(CityStateZip) $line] != -1} {set internal_line cityStateZip; 'debug Found a CityStateZip!}
+        
         #if {[lsearch -nocase $city $line] != -1} {set internal_line City}
-        if {[lsearch -nocase $state $line] != -1} {set GS_address(State) $line}
-        if {[lsearch -nocase $quantity $line] != -1} {set GS_job(Quantity) $line}
-        if {[lsearch -nocase $version $line] != -1} {set GS_job(Version) $line}
+        
+        #if {[lsearch -nocase $state $line] != -1} {set GS_address(State) $line}
+        if {[lsearch -nocase $header(state) $line] != -1} {set GS_address(State) $line}
+        #if {[lsearch -nocase $quantity $line] != -1} {set GS_job(Quantity) $line}
+        if {[lsearch -nocase $header(quantity) $line] != -1} {set GS_job(Quantity) $line}
+        #if {[lsearch -nocase $version $line] != -1} {set GS_job(Version) $line}
+        if {[lsearch -nocase $header(version) $line] != -1} {set GS_job(Version) $line}
+        
+        if {[lsearch -nocase $header(zip) $line] != -1} {set GS_address(Zip) $line}
 
         # Continue processing the list for potential matches where we don't need to search for possible alternate spellings
         switch -nocase $line {
             City                {set GS_address(City) $line}
-            Zip                 {set GS_address(Zip) $line}
             Phone               {set GS_address(Phone) $line}
             "Ship Date"         {set GS_job(Date) $line}
             "3rd Party"         {set GS_job(3rdParty) $line}
