@@ -199,10 +199,10 @@ proc Disthelper_Code::doMath {totalQuantity maxPerBox} {
     ## Use fullBoxQty as a starting point for the partial box.
     lappend partialBoxQTY [expr {round($totalQuantity - $fullBoxQTY)}]
     
-    puts "doMath::TotalQty: $totalQuantity"
-    puts "doMath::maxPerBox: $maxPerBox"
-    puts "doMath::totalFullBoxs: $totalFullBoxs"
-    puts "doMath::partialBoxQTY: $partialBoxQTY"
+    #puts "doMath::TotalQty: $totalQuantity"
+    #puts "doMath::maxPerBox: $maxPerBox"
+    #puts "doMath::totalFullBoxs: $totalFullBoxs"
+    #puts "doMath::partialBoxQTY: $partialBoxQTY"
     
     #totalFullBoxs = full box total for that shipment
     #partialBoxQty = the partial amount of that shipment. 

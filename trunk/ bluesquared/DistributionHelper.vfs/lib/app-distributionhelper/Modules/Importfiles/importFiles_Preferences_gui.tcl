@@ -240,7 +240,7 @@ proc Disthelper_Preferences::displayHeader {args} {
     $tab3.listbox delete 0 end
     
     foreach headerName $header($headerCategory) {
-        $tab3.listbox insert end $headerName
+        $tab3.listbox insert end [string totitle $headerName]
     }
 } ;# End Disthelper_Preferences::displayHeader
 
@@ -293,7 +293,7 @@ proc Disthelper_Preferences::addSubHeader {parentHeader subHeader} {
     }
     
     # Now add the new subheader
-    $tab3.listbox insert end $subHeader
+    $tab3.listbox insert end [string totitle $subHeader]
     
     set header($parentHeader) [$tab3.listbox get 0 end]
 } ;# End Disthelper_Preferences::addSubHeader
