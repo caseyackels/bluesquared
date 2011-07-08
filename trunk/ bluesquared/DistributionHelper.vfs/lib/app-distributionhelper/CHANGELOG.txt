@@ -1,0 +1,7 @@
+Efficiency Assist
+-----------------
+
+Version 1.0
+June 2011
+
+This was the first basic production ready version available.

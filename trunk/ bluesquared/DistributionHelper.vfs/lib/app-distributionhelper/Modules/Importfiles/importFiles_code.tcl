@@ -106,8 +106,8 @@ proc Disthelper_Code::readFile {filename} {
         # If the file has headers, lets auto-insert the values to help the user.
         
         # Remove extra whitespace
-        set line [string trimleft $line]
-        set line [string trimright $line]
+        #set line [string trimleft $line]
+        #set line [string trimright $line]
         
         # Insert all headers into the listbox
         .container.frame1.listbox insert end $line
@@ -279,6 +279,9 @@ proc Disthelper_Code::writeOutPut {} {
         Email       [lsearch $GL_file(Header) $GS_job(Email)]
     "
     # Only imported values are listed here.
+    'debug UI_Company: $GS_address(Company)
+    'debug Header: $GL_file(Header)
+    'debug Company: $importFile(Company)
 
     # Make sure we only activate the following two variables if the data actually exists.
     if {$GS_job(Email) != ""} {set EmailGateway Y} else {set EmailGateway .}
@@ -304,40 +307,40 @@ proc Disthelper_Code::writeOutPut {} {
         foreach name [array names importFile] {
         
             switch $name {
-                shipVia { 'debug shipVia/$name - Detect if its 3rd party or if we need to add a leading zero
+                shipVia { #'debug shipVia/$name - Detect if its 3rd party or if we need to add a leading zero
                         if {[string length [lindex $l_line $importFile($name)]] == 2} {
                                 set $name 0[list [lindex $l_line $importFile($name)]]
                                 } else {
                                     if {$name == ""} {
-                                        'debug String is not an integer - shipVia
+                                        #'debug String is not an integer - shipVia
                                         return
                                     }
                                     set $name [list [lindex $l_line $importFile($name)]]
                                 }
                             # Guard against the user not putting in an actual 3rd party code!!
                             if {$shipVia eq "067" || $shipVia eq "068"} {
-                                   'debug We should only see this for 3rd party
+                                   #'debug We should only see this for 3rd party
                                     if {$GS_job(3rdParty) != ""} {
-                                        'debug Checking if we have a 3rd party acct
+                                        #'debug Checking if we have a 3rd party acct
                                         set 3rdParty $GS_job(3rdParty); set PaymentTerms 3
                                         } else {
-                                            'debug No acct found, show the error message
+                                            #'debug No acct found, show the error message
                                             Error_Message::errorMsg 3rdParty1
                                             return
                                     }
                                 } else {
-                                    'debug Not sending 3rd party, fill the variables with dummy data
+                                    #'debug Not sending 3rd party, fill the variables with dummy data
                                         set 3rdParty .; set PaymentTerms .
                             }
                 }
-                Zip     { 'debug Zip/$name - Detect if we need to add a leading zero
+                Zip     { #'debug Zip/$name - Detect if we need to add a leading zero
                         if {[string length [lindex $l_line $importFile($name)]] == 4} {
                                 set $name 0[list [lindex $l_line $importFile($name)]]
                         } else {
                             set $name [list [lindex $l_line $importFile($name)]]
                         }
                 }
-                default { 'debug default/$name - If no data is present we fill it with dummy data
+                default { #'debug default/$name - If no data is present we fill it with dummy data
                          # we need a placeholder if there isn't any data, and reassign variable names.
                          # Build a black list
                         if {[lsearch [list "" " "] [lindex $l_line $importFile($name)]] != -1} {
@@ -346,16 +349,16 @@ proc Disthelper_Code::writeOutPut {} {
                         } else {
                             set $name [list [lindex $l_line $importFile($name)]]
                         }
-                        'debug NAME: $name
+                        #'debug NAME: $name
                 }
             }  
         }
 
-        'debug importFile(Quantity) [lindex $l_line $importFile(Quantity)]
+        #'debug importFile(Quantity) [lindex $l_line $importFile(Quantity)]
         
         if {[string is integer [lindex $l_line $importFile(Quantity)]]} {
             set val [Disthelper_Code::doMath [lindex $l_line $importFile(Quantity)] $GS_job(fullBoxQty)]
-            'debug "(val) $val"
+            #'debug "(val) $val"
         } else {
             # If we come across a quantity that isn't an integer, we will skip it.
             # I'm using this to skip the header (if there is one).

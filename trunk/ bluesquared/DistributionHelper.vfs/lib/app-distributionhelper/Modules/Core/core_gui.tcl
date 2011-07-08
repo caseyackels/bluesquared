@@ -78,13 +78,13 @@ proc disthelper::parentGUI {} {
     $mb add cascade -label [mc "Edit"] -menu $mb.edit
     
     $mb.edit add command -label [mc "Preferences"] -command { Disthelper_Preferences::prefGUI }
-    $mb.edit add command -label "Reset" -command {Disthelper_Helper::resetVars -resetGUI}
+    $mb.edit add command -label "Reset" -command { Disthelper_Helper::resetVars -resetGUI }
     
     ## Help
     menu $mb.help -tearoff 0 -relief raised -bd 2
     $mb add cascade -label [mc "Help"] -menu $mb.help
     
-    $mb.help add command -label [mc "About"] -command {}
+    $mb.help add command -label [mc "About"] -command { BlueSquared_About::aboutWindow }
     
 
     # Create Separator Frame

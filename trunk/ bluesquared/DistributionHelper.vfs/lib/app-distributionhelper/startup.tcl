@@ -77,6 +77,7 @@ proc 'distHelper_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries csv]
 	##lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.2]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
+        lappend ::auto_path [file join [file dirname [info script]] Libraries about]
 	
 	##
         ## Project built scripts
@@ -102,6 +103,7 @@ proc 'distHelper_sourceReqdFiles {} {
 	## Distribution Helper modules
 	package require disthelper_core
 	package require disthelper_importFiles
+        package require aboutwindow
 
 	
 	# Source files that are not in a package
