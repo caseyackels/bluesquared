@@ -86,6 +86,10 @@ proc BlueSquared_About::aboutWindow {} {
 
     ttk::notebook::enableTraversal $nb
     
+    ##
+    ## Tab 1 (File Paths)
+    ##
+    
     
     ##
     ## Button Bar
