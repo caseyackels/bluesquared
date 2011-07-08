@@ -28,10 +28,12 @@
 # - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
+package provide aboutwindow 0.1
+
 namespace eval BlueSquared_About {}
     
-    # Source Dependencies
-    source about_code.tcl
+    # Set About Window variables
+    set about(windowName) [mc "About - Efficiency Assist"]
 
 
 proc BlueSquared_About::aboutWindow {} {
@@ -59,6 +61,43 @@ proc BlueSquared_About::aboutWindow {} {
     # SEE ALSO
     #
     #***
+    global about
+    toplevel .about
+    wm title .about [mc $about(windowName)]
+    wm transient .about .
+    
+        ##
+    ## Parent Frame
+    ##
+    set frame0 [ttk::frame .about.frame0]
+    pack $frame0 -expand yes -fill both -pady 5p -padx 5p
+    
+    ##
+    ## Notebook
+    ##
+    set nb [ttk::notebook $frame0.nb]
+    pack $nb -expand yes -fill both
+    
+
+    $nb add [ttk::frame $nb.f1] -text [mc "About"]
+    $nb add [ttk::frame $nb.f2] -text [mc "Licenses"]
+    $nb add [ttk::frame $nb.f3] -text [mc "Change Log"]
+    $nb select $nb.f1
+
+    ttk::notebook::enableTraversal $nb
+    
+    
+    ##
+    ## Button Bar
+    ##
+    
+    set buttonbar [ttk::frame .about.buttonbar]
+    ttk::button $buttonbar.ok -text [mc "Save & Close"] -command {  }
+    ttk::button $buttonbar.close -text [mc "Discard Changes"] -command { destroy .about }
+    
+    grid $buttonbar.ok -column 0 -row 3 -sticky nse -padx 8p -ipadx 4p
+    grid $buttonbar.close -column 1 -row 3 -sticky nse -ipadx 4p
+    pack $buttonbar -side bottom -anchor e -pady 8p -padx 5p
     
     
 } ;# End aboutWindow
