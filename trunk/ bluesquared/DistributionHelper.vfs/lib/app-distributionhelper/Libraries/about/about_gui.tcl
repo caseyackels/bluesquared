@@ -1,6 +1,6 @@
 # Creator: Casey Ackels
 # Initial Date: April 8th, 2011
-# Dependencies: about_code.tcl, package.tcl
+# Dependencies: about_code.tcl, pkgIndex.tcl
 # Notes: This is a complete package to build your own About Window
 #-------------------------------------------------------------------------------
 #
@@ -31,9 +31,6 @@
 package provide aboutwindow 0.1
 
 namespace eval BlueSquared_About {}
-    
-    # Set About Window variables
-    set about(windowName) [mc "About - Efficiency Assist"]
 
 
 proc BlueSquared_About::aboutWindow {} {
@@ -61,9 +58,9 @@ proc BlueSquared_About::aboutWindow {} {
     # SEE ALSO
     #
     #***
-    global about
+    global about program
     toplevel .about
-    wm title .about [mc $about(windowName)]
+    wm title .about $program(Name)
     wm transient .about .
     
         ##

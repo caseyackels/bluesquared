@@ -63,9 +63,9 @@ proc disthelperGUI {} {
     #	TODO: List the other *GUI procs.
     #
     #***
-    global GS_job GS_ship GS_address GS_file
+    global GS_job GS_ship GS_address GS_file program
 
-    wm title . [mc "Efficiency Assist"]
+    wm title . $program(Name)
     focus -force .
     
 
@@ -169,9 +169,9 @@ proc disthelperGUI {} {
         dropDest $frame2b.addressCompanyEntry GS_address(Company)
         set GS_address(Company) ""
         
-    ttk::label $frame2b.addressConsigneeField -text [mc "Consignee / Attn To:"]
-    ttk::entry $frame2b.addressConsigneeEntry -textvariable GS_address(Consignee) -state disabled 
-        dropDest $frame2b.addressConsigneeEntry GS_address(Consignee)
+    ttk::label $frame2b.addressConsigneeField -text [mc "Attention"]
+    ttk::entry $frame2b.addressConsigneeEntry -textvariable GS_address(Attention) -state disabled 
+        dropDest $frame2b.addressConsigneeEntry GS_address(Attention)
         set GS_address(Consignee) ""
         
     ttk::label $frame2b.addressDelAddrField -text [mc "Delivery Address"]

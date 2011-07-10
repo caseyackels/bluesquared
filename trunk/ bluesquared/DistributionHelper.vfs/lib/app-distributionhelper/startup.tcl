@@ -77,6 +77,7 @@ proc 'distHelper_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries csv]
 	##lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.2]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
+        lappend ::auto_path [file join [file dirname [info script]] Libraries tcom3.9]
         lappend ::auto_path [file join [file dirname [info script]] Libraries about]
 	
 	##
@@ -99,6 +100,7 @@ proc 'distHelper_sourceReqdFiles {} {
 	package require tooltip
 	package require autoscroll
 	package require csv
+        package require tcom
 	
 	## Distribution Helper modules
 	package require disthelper_core
@@ -213,9 +215,9 @@ proc 'distHelper_initVariables {} {
         set header(company) [list company destination "company name"]
     }
 
-    if {![info exists header(consignee)]} {
+    if {![info exists header(attention)]} {
         # Variations on spelling of consignee
-        set header(consignee) [list consignee contact attention attn attn:]
+        set header(attention) [list contact attention attn attn:]
     }
     
     if {![info exists header(address1)]} {
@@ -279,11 +281,13 @@ proc 'distHelper_loadSettings {} {
     #	'distHelper_loadOptions
     #
     #***
-    global settings debug
+    global settings debug program
     
     # Enable / Disable Debugging
     # See 'distHelper_sourceReqdFiles for the [namespace import] command
     set debug(onOff) on
+    
+    set program(Name) [mc "Efficiency Assist"]
     
     # Theme setting for Tile
     #ttk::style theme use xpnative

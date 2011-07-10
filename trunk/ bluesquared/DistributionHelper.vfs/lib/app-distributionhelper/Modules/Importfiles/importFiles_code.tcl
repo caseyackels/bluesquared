@@ -118,7 +118,7 @@ proc Disthelper_Code::readFile {filename} {
         #if {[lsearch -nocase $company $line] != -1} {set GS_address(Company) $line}
         if {[lsearch -nocase $header(company) $line] != -1} {set GS_ship(company) $line}
         #if {[lsearch -nocase $consignee $line] != -1} {set GS_address(Consignee) $line}
-        if {[lsearch -nocase $header(consignee) $line] != -1} {set GS_address(Consignee) $line}
+        if {[lsearch -nocase $header(attention) $line] != -1} {set GS_address(Attention) $line}
         #if {[lsearch -nocase $address1 $line] != -1} {set GS_address(deliveryAddr) $line}
         if {[lsearch -nocase $header(address1) $line] != -1} {set GS_address(deliveryAddr) $line}
         #if {[lsearch -nocase $address2 $line] != -1} {set GS_address(addrTwo) $line}
@@ -264,7 +264,7 @@ proc Disthelper_Code::writeOutPut {} {
     array set importFile "
         shipVia     [lsearch $GL_file(Header) $GS_ship(shipVia)]
         Company     [lsearch $GL_file(Header) $GS_address(Company)]
-        Consignee   [lsearch $GL_file(Header) $GS_address(Consignee)]
+        Attention   [lsearch $GL_file(Header) $GS_address(Attention)]
         delAddr     [lsearch $GL_file(Header) $GS_address(deliveryAddr)]
         delAddr2    [lsearch $GL_file(Header) $GS_address(addrTwo)]
         delAddr3    [lsearch $GL_file(Header) $GS_address(addrThree)]
@@ -279,9 +279,9 @@ proc Disthelper_Code::writeOutPut {} {
         Email       [lsearch $GL_file(Header) $GS_job(Email)]
     "
     # Only imported values are listed here.
-    'debug UI_Company: $GS_address(Company)
-    'debug Header: $GL_file(Header)
-    'debug Company: $importFile(Company)
+    #'debug UI_Company: $GS_address(Company)
+    #'debug Header: $GL_file(Header)
+    #'debug Company: $importFile(Company)
 
     # Make sure we only activate the following two variables if the data actually exists.
     if {$GS_job(Email) != ""} {set EmailGateway Y} else {set EmailGateway .}
@@ -401,8 +401,8 @@ proc Disthelper_Code::writeOutPut {} {
                 set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
                 
                 #'debug "FullBoxes_err: $err_1"
-                'debug [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $PaymentTerms $3rdParty $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
-                chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $PaymentTerms $3rdParty $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
+                'debug [::csv::join "$shipVia $Company $Attention $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $PaymentTerms $3rdParty $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
+                chan puts $filesDestination [::csv::join "$shipVia $Company $Attention $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $PaymentTerms $3rdParty $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
             
             } elseif {($x == $totalBoxes) || ($onlyFullBoxes eq no)} {
                 'debug "boxes: $x - TotalBoxes (Partials): $totalBoxes"
@@ -411,8 +411,8 @@ proc Disthelper_Code::writeOutPut {} {
                 set boxWeight [::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
                 
                 #'debug "PartialBoxes_err: $err_2"
-                'debug [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion [lindex $val 1] $PaymentTerms $3rdParty $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
-                chan puts $filesDestination [::csv::join "$shipVia $Company $Consignee $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion [lindex $val 1] $PaymentTerms $3rdParty $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
+                'debug [::csv::join "$shipVia $Company $Attention $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion [lindex $val 1] $PaymentTerms $3rdParty $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
+                chan puts $filesDestination [::csv::join "$shipVia $Company $Attention $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion [lindex $val 1] $PaymentTerms $3rdParty $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
             }
         }
         incr GS_internal(progressBarIncr)
