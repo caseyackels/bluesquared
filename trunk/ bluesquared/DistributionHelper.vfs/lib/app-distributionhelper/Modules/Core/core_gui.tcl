@@ -60,7 +60,7 @@ proc disthelper::parentGUI {} {
     #
     #***
  
-    wm geometry . 640x600 ;# width x Height
+    #wm geometry . 640x600 ;# width x Height
     
     # Create the Menu's
     set mb [menu .mb]
@@ -109,7 +109,8 @@ proc disthelper::parentGUI {} {
     
     set btnBar [ttk::frame .btnBar]
     
-    ttk::button $btnBar.print -text [mc "Generate File"] -command { Disthelper_Code::writeOutPut } -state disabled
+    #ttk::button $btnBar.print -text [mc "Generate File"] -command { Disthelper_Code::writeOutPut } -state disabled
+    ttk::button $btnBar.print -text [mc "Progress Window"] -command { Disthelper_GUI::progressWindow } ;#-state disabled
     ttk::button $btnBar.close -text [mc "Exit"] -command {exit}
     
     grid $btnBar.print -column 0 -row 3 -sticky nse -padx 8p

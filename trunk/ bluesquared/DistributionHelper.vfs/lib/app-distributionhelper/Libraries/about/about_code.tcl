@@ -54,15 +54,15 @@ proc BlueSquared_About::aboutOpenFiles {} {
     #
     #***
     
-    # Open the ABOUT file
-    set fileName [open "$filename" RDONLY]
-      
-    # Make the data useful, and put it into lists
-    # While we are at it, make everything UPPER CASE
-    while { [gets $fileName line] >= 0 } {
-        lappend GL_file(dataList) [string toupper $line]
-        'debug "while: $line"
-    }
-
-    chan close $fileName
+    ## Open the ABOUT file
+    #set fileName [open "$filename" RDONLY]
+    #  
+    ## Make the data useful, and put it into lists
+    ## While we are at it, make everything UPPER CASE
+    #while { [gets $fileName line] >= 0 } {
+    #    lappend GL_file(dataList) [string toupper $line]
+    #    'debug "while: $line"
+    #}
+    #
+    #chan close $fileName
 }

@@ -5,7 +5,7 @@
 
 ##
 ## - Overview
-# This file holds the error messages for the List Display (Shipping).
+# This file holds the error messages for Efficiency Assist
 
 # Definitions for prefixes of Variables
 # G = Global

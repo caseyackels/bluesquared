@@ -1,5 +1,5 @@
 # Creator: Casey Ackels
-# Initial Date: March 12, 2011]
+# Initial Date: March 12, 2011
 # Dependencies: See Below
 #-------------------------------------------------------------------------------
 #
@@ -26,10 +26,6 @@
 
 # - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
 #   will be uppercase. I.E sourceFiles, sourceFileExample
-
-
-namespace eval dh_Debug {}
-namespace export debug
 
 
 proc 'debug {args} { 

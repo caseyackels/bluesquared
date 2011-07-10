@@ -287,7 +287,7 @@ proc 'distHelper_loadSettings {} {
     # See 'distHelper_sourceReqdFiles for the [namespace import] command
     set debug(onOff) on
     
-    set program(Name) [mc "Efficiency Assist"]
+    set program(Name) "Efficiency Assist"
     
     # Theme setting for Tile
     #ttk::style theme use xpnative

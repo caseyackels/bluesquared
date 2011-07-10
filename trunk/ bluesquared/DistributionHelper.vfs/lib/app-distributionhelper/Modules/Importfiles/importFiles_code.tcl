@@ -116,7 +116,7 @@ proc Disthelper_Code::readFile {filename} {
         #if {[lsearch -nocase $shipVia $line] != -1} {set GS_ship(shipVia) $line}
         if {[lsearch -nocase $header(shipvia) $line] != -1} {set GS_ship(shipVia) $line}
         #if {[lsearch -nocase $company $line] != -1} {set GS_address(Company) $line}
-        if {[lsearch -nocase $header(company) $line] != -1} {set GS_ship(company) $line}
+        if {[lsearch -nocase $header(company) $line] != -1} {set GS_address(Company) $line}
         #if {[lsearch -nocase $consignee $line] != -1} {set GS_address(Consignee) $line}
         if {[lsearch -nocase $header(attention) $line] != -1} {set GS_address(Attention) $line}
         #if {[lsearch -nocase $address1 $line] != -1} {set GS_address(deliveryAddr) $line}
@@ -250,7 +250,7 @@ proc Disthelper_Code::writeOutPut {} {
     #	
     #
     #***
-    global GS_job GS_ship GS_address GL_file GS_file settings GS_internal
+    global GS_job GS_ship GS_address GL_file GS_file settings program
 
     # Error checking
     # Delivery Address
@@ -291,14 +291,14 @@ proc Disthelper_Code::writeOutPut {} {
     # Open the destination file for writing
     set filesDestination [open [file join $settings(outFilePath) "$GS_file(Name) Copy.csv"] w]
     
-    # Get total amount of records so we can make an accurate progressbar
-    set GS_internal(progressBarLength) [llength $GL_file(dataList)]
     # Incr the variable at the end of the [foreach]
-    set GS_internal(progressBarIncr) 0
+    #set program(progressBarIncr) 0
+    #set program(totalBoxes) 0
 
     # line = each address string
     # GL_file(dataList) = the entire shipping file
     foreach line $GL_file(dataList) {
+        
         set l_line [csv::split $line]
         set l_line [join [split $l_line ,] ""] ;# remove all comma's
  
@@ -396,6 +396,8 @@ proc Disthelper_Code::writeOutPut {} {
         for {set x 1} {$x <= $totalBoxes} {incr x} {
             if {($x != $totalBoxes) || ($onlyFullBoxes eq yes)} {
                 'debug "boxes: $x - TotalBoxes: $totalBoxes"
+                incr program(totalBooks) $GS_job(fullBoxQty)
+                
                 if {[string match $Version .] == 1 } { set boxVersion $GS_job(fullBoxQty)} else { set boxVersion [list [join [concat $Version _ $GS_job(fullBoxQty)] ""]] }
                 #set boxWeight [catch {[::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]} err_1]
                 set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
@@ -406,6 +408,8 @@ proc Disthelper_Code::writeOutPut {} {
             
             } elseif {($x == $totalBoxes) || ($onlyFullBoxes eq no)} {
                 'debug "boxes: $x - TotalBoxes (Partials): $totalBoxes"
+                incr program(totalBooks) [lindex $val 1]
+                
                 if {[string match $Version .] == 1} { set boxVersion [lindex $val 1] } else { set boxVersion [list [join [concat $Version _ [lindex $val 1]] ""]] } 
                 #set boxWeight [catch {[::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]} err_2]
                 set boxWeight [::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
@@ -414,19 +418,23 @@ proc Disthelper_Code::writeOutPut {} {
                 'debug [::csv::join "$shipVia $Company $Attention $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion [lindex $val 1] $PaymentTerms $3rdParty $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
                 chan puts $filesDestination [::csv::join "$shipVia $Company $Attention $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion [lindex $val 1] $PaymentTerms $3rdParty $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
             }
+            incr program(totalBoxes)
+            
         }
-        incr GS_internal(progressBarIncr)
+        update 
+        incr program(ProgressBar)
         'debug "--------------"
     }
-    
+    # This is here to get the last address recorded
+    incr program(ProgressBar)
     chan close $filesDestination
     
     # Tell the user that the file has been generated once we close the channel
-    tk_messageBox -type ok \
-                    -message [mc "Your file has been generated!"] \
-                    -title [mc "Finished Creating File"] \
-                    -icon info \
-                    -parent .
+    #tk_messageBox -type ok \
+    #                -message [mc "Your file has been generated!"] \
+    #                -title [mc "Finished Creating File"] \
+    #                -icon info \
+    #                -parent .
 
 } ;# End of writeOutPut
 

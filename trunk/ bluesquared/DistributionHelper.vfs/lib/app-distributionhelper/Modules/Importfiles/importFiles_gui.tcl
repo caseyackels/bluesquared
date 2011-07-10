@@ -33,7 +33,7 @@ package provide disthelper_importFiles 1.0
 namespace eval Disthelper_GUI {
 
 proc disthelperGUI {} {
-    #****f* disthelperGUI/Disthelper_Gui
+    #****f* disthelperGUI/Disthelper_GUI
     # AUTHOR
     #	Casey Ackels
     #
