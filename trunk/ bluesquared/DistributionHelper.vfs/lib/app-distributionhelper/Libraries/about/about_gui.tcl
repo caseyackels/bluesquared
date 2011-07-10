@@ -6,9 +6,9 @@
 #
 # Subversion
 #
-# $Revision: 50 $
-# $LastChangedBy: casey.ackels $
-# $LastChangedDate: 2011-03-13 17:09:18 -0700 (Sun, 13 Mar 2011) $
+# $Revision$
+# $LastChangedBy$
+# $LastChangedDate$
 #
 ########################################################################################
 
@@ -63,7 +63,7 @@ proc BlueSquared_About::aboutWindow {} {
     wm title .about $program(Name)
     wm transient .about .
     
-        ##
+    ##
     ## Parent Frame
     ##
     set frame0 [ttk::frame .about.frame0]
@@ -77,15 +77,28 @@ proc BlueSquared_About::aboutWindow {} {
     
 
     $nb add [ttk::frame $nb.f1] -text [mc "About"]
-    $nb add [ttk::frame $nb.f2] -text [mc "Licenses"]
-    $nb add [ttk::frame $nb.f3] -text [mc "Change Log"]
+    $nb add [ttk::frame $nb.f2] -text [mc "Change Log"]
+    $nb add [ttk::frame $nb.f3] -text [mc "Licenses"]
     $nb select $nb.f1
 
     ttk::notebook::enableTraversal $nb
     
     ##
-    ## Tab 1 (File Paths)
+    ## Tab 1 (About)
     ##
+    
+    
+    
+    ##
+    ## Tab 2 (Change Log)
+    ##
+    
+    
+    
+    ##
+    ## Tab 3 (Licenses)
+    ##
+    
     
     
     ##
@@ -93,10 +106,8 @@ proc BlueSquared_About::aboutWindow {} {
     ##
     
     set buttonbar [ttk::frame .about.buttonbar]
-    ttk::button $buttonbar.ok -text [mc "Save & Close"] -command {  }
-    ttk::button $buttonbar.close -text [mc "Discard Changes"] -command { destroy .about }
+    ttk::button $buttonbar.close -text [mc "Close"] -command { destroy .about }
     
-    grid $buttonbar.ok -column 0 -row 3 -sticky nse -padx 8p -ipadx 4p
     grid $buttonbar.close -column 1 -row 3 -sticky nse -ipadx 4p
     pack $buttonbar -side bottom -anchor e -pady 8p -padx 5p
     
