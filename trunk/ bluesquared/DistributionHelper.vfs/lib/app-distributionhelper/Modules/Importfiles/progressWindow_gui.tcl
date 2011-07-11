@@ -58,6 +58,8 @@ proc Disthelper_GUI::progressWindow {} {
     wm title .progress [mc "Processing File"]
     wm transient .progress .
     
+    focus .progress
+    
     set locX [expr {([winfo screenwidth .] - [winfo width .]) / 2}]
     set locY [expr {([winfo screenheight .] - [winfo height .]) / 2}]
     wm geometry .progress +${locX}+${locY}
@@ -67,6 +69,7 @@ proc Disthelper_GUI::progressWindow {} {
     set program(totalAddress) 0
     set program(totalBoxes) 0
     set program(totalBooks) 0
+    set program(totalAddress) [llength $GL_file(dataList)]
     
     ##
     ## Parent Frame
@@ -94,11 +97,6 @@ proc Disthelper_GUI::progressWindow {} {
     ttk::label $frame2.txt3a -text [mc "Books"]
     ttk::label $frame2.txt3b -textvariable program(totalBooks)
     
-    ## Fill variables for test purposes.
-    set program(totalAddress) [llength $GL_file(dataList)]
-    #set program(totalBoxes) 9999
-    #set program(totalQuantity) 99999999
-    
     grid $frame2.txt1a -column 0 -row 0 -sticky nse -padx 4p
     grid $frame2.txt1b -column 1 -row 0 -sticky nsw
     
@@ -114,7 +112,6 @@ proc Disthelper_GUI::progressWindow {} {
     ttk::button $btnbar.close -text [mc "Close"] -command {destroy .progress}
 
     grid $btnbar.close -column 0 -row 0 -sticky nse
-    
     
     Disthelper_Code::writeOutPut
 }

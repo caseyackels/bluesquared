@@ -254,10 +254,10 @@ proc Disthelper_Code::writeOutPut {} {
 
     # Error checking
     # Delivery Address
-    if {$GS_job(Number) == ""} {Error_Message::errorMsg jobNumber1; return}
-    if {$GS_ship(shipVia) == ""} {Error_Message:errorMsg shipVia1; return}
-    if {$GS_job(pieceWeight) == ""} {Error_Message::errorMsg pieceWeight1; return}
-    if {$GS_job(fullBoxQty) == ""} {Error_Message::errorMsg fullBoxQty1; return}
+    #if {$GS_job(Number) == ""} {Error_Message::errorMsg jobNumber1; return}
+    #if {$GS_ship(shipVia) == ""} {Error_Message:errorMsg shipVia1; return}
+    #if {$GS_job(pieceWeight) == ""} {Error_Message::errorMsg pieceWeight1; return}
+    #if {$GS_job(fullBoxQty) == ""} {Error_Message::errorMsg fullBoxQty1; return}
 
 
     # Get the indices of each element of the address/shipment information. Later we will use this to map the data.

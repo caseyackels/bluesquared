@@ -459,3 +459,45 @@ proc Disthelper_Helper::detectData {args} {
 	if {![info exists tempVars(fullBoxTmp)]} {return}
 	if {($tempVars(pieceWeightTmp) == 1) && ($tempVars(fullBoxTmp) == 1)} {.btnBar.print configure -state enabled}
 } ;# Disthelper_Helper::detectData
+
+
+proc Disthelper_Helper::checkForErrors {} { 
+    #****f* getChildren/Disthelper_Helper
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011 - Casey Ackels
+    #
+    # FUNCTION
+    #	checkForErrors
+    #
+    # SYNOPSIS
+    #	Make sure we satisfy all requirements before going to the next stage of processing the file
+    #
+    # CHILDREN
+    #	Disthelper_GUI::progressWindow
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global GS_job GS_ship
+    
+    # These are required fields
+    if {$GS_job(Number) == ""} {Error_Message::errorMsg jobNumber1; return}
+    if {$GS_ship(shipVia) == ""} {Error_Message::errorMsg shipVia1; return}
+    if {$GS_job(pieceWeight) == ""} {Error_Message::errorMsg pieceWeight1; return}
+    if {$GS_job(fullBoxQty) == ""} {Error_Message::errorMsg fullBoxQty1; return}
+    
+    
+    # Everything is satisfied, lets continue processing
+    Disthelper_GUI::progressWindow
+    
+    
+    
+} ;# End Disthelper_Helper::checkForErrors
