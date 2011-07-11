@@ -148,6 +148,7 @@ proc Disthelper_Code::readFile {filename} {
             "3rd Party"         {set GS_job(3rdParty) $line}
             EmailContact        {set GS_job(Contact) $line}
             email               {set GS_job(Email) $line}
+            "piece weight"      {set GS_job(pieceWeight) $line}
             default             {puts "Didn't set anything"}
         }
     }
@@ -277,6 +278,7 @@ proc Disthelper_Code::writeOutPut {} {
         Date        [lsearch $GL_file(Header) $GS_job(Date)]
         Contact     [lsearch $GL_file(Header) $GS_job(Contact)]
         Email       [lsearch $GL_file(Header) $GS_job(Email)]
+        pieceWeight [lsearch $GL_file(Header) $GS_job(pieceWeight)]
     "
     # Only imported values are listed here.
     #'debug UI_Company: $GS_address(Company)
@@ -357,6 +359,7 @@ proc Disthelper_Code::writeOutPut {} {
         #'debug importFile(Quantity) [lindex $l_line $importFile(Quantity)]
         
         if {[string is integer [lindex $l_line $importFile(Quantity)]]} {
+            incr program(totalAddress)
             set val [Disthelper_Code::doMath [lindex $l_line $importFile(Quantity)] $GS_job(fullBoxQty)]
             #'debug "(val) $val"
         } else {
@@ -396,11 +399,13 @@ proc Disthelper_Code::writeOutPut {} {
         for {set x 1} {$x <= $totalBoxes} {incr x} {
             if {($x != $totalBoxes) || ($onlyFullBoxes eq yes)} {
                 'debug "boxes: $x - TotalBoxes: $totalBoxes"
+                'debug "Pieceweight: $pieceWeight"
                 incr program(totalBooks) $GS_job(fullBoxQty)
                 
                 if {[string match $Version .] == 1 } { set boxVersion $GS_job(fullBoxQty)} else { set boxVersion [list [join [concat $Version _ $GS_job(fullBoxQty)] ""]] }
                 #set boxWeight [catch {[::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]} err_1]
-                set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
+                #set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
+                set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $pieceWeight + $settings(BoxTareWeight)}]]
                 
                 #'debug "FullBoxes_err: $err_1"
                 'debug [::csv::join "$shipVia $Company $Attention $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $PaymentTerms $3rdParty $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
@@ -408,11 +413,13 @@ proc Disthelper_Code::writeOutPut {} {
             
             } elseif {($x == $totalBoxes) || ($onlyFullBoxes eq no)} {
                 'debug "boxes: $x - TotalBoxes (Partials): $totalBoxes"
+                'debug "Pieceweight: $pieceWeight"
                 incr program(totalBooks) [lindex $val 1]
                 
                 if {[string match $Version .] == 1} { set boxVersion [lindex $val 1] } else { set boxVersion [list [join [concat $Version _ [lindex $val 1]] ""]] } 
                 #set boxWeight [catch {[::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]} err_2]
-                set boxWeight [::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
+                #set boxWeight [::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
+                set boxWeight [::tcl::mathfunc::round [expr {[lindex $val 1] * $pieceWeight + $settings(BoxTareWeight)}]]
                 
                 #'debug "PartialBoxes_err: $err_2"
                 'debug [::csv::join "$shipVia $Company $Attention $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion [lindex $val 1] $PaymentTerms $3rdParty $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]

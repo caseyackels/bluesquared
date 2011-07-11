@@ -172,7 +172,7 @@ proc disthelperGUI {} {
     ttk::label $frame2b.addressConsigneeField -text [mc "Attention"]
     ttk::entry $frame2b.addressConsigneeEntry -textvariable GS_address(Attention) -state disabled 
         dropDest $frame2b.addressConsigneeEntry GS_address(Attention)
-        set GS_address(Consignee) ""
+        set GS_address(Attention) ""
         
     ttk::label $frame2b.addressDelAddrField -text [mc "Delivery Address"]
     ttk::entry $frame2b.addressDelAddrEntry -textvariable GS_address(deliveryAddr) -state disabled 

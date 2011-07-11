@@ -69,7 +69,8 @@ proc Disthelper_GUI::progressWindow {} {
     set program(totalAddress) 0
     set program(totalBoxes) 0
     set program(totalBooks) 0
-    set program(totalAddress) [llength $GL_file(dataList)]
+    set program(totalAddress) 0
+    #set program(totalAddress) [llength $GL_file(dataList)]
     
     ##
     ## Parent Frame
