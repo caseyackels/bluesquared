@@ -281,7 +281,7 @@ proc 'distHelper_loadSettings {} {
     #	'distHelper_loadOptions
     #
     #***
-    global settings debug program
+    global settings debug program header
     
     # Enable / Disable Debugging
     # See 'distHelper_sourceReqdFiles for the [namespace import] command

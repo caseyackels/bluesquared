@@ -85,63 +85,40 @@ proc Disthelper_Code::readFile {filename} {
     chan close $fileName
     
     set GL_file(Header) [string toupper [csv::split [lindex $GL_file(dataList) 0]]]
-    
 
     # Set the entry widgets to normal state, special handling for the Customer frame is required since they are not always used.
     Disthelper_Helper::getChildren normal
-    
-    # Header spellings
-    #set shipVia [list "SHIP VIA" SHIPVIA]
-    #set company [list COMPANY DESTINATION]
-    #set consignee [list ATTENTION ATTN ATTN: CONSIGNEE CONTACT]
-    #set address1 [list ADDRESS ADDRESS1 ADD ADD1 "ADD 1" ADDR ADDR1 "ADDRESS 1"]
-    #set address2 [list ADD2 "ADD 2" ADDR2 "ADDR 2" ADDRESS2 "ADDRESS 2"]
-    #set address3 [list ADD3 "ADD 3" ADDR3 "ADDR 3" ADDRESS3 "ADDRESS 3"]
-    #set cityStateZip [list CITY-STATE-ZIP CITY-ST-ZIP "CITY ST ZIP" "CITY STATE ZIP" CSV]
-    #set state [list ST ST. STATE]
-    #set quantity [list QUANTITY QTY]
-    #set version [list VERSION VERS]
 
     foreach line $GL_file(Header) {
-        # If the file has headers, lets auto-insert the values to help the user.
+        # If the file has headers, lets auto-insert the values in the GUI to help the user.
         
         # Remove extra whitespace
-        #set line [string trimleft $line]
-        #set line [string trimright $line]
+        set line1 [string trimleft $line]
+        set line1 [string trimright $line1]
         
-        # Insert all headers into the listbox
+        # Insert headers into the listbox (NOTE: Must keep original, if we don't we won't match the actual data)
         .container.frame1.listbox insert end $line
 
         # Find potential matches and assign the correct value.
-        #if {[lsearch -nocase $shipVia $line] != -1} {set GS_ship(shipVia) $line}
-        if {[lsearch -nocase $header(shipvia) $line] != -1} {set GS_ship(shipVia) $line}
-        #if {[lsearch -nocase $company $line] != -1} {set GS_address(Company) $line}
-        if {[lsearch -nocase $header(company) $line] != -1} {set GS_address(Company) $line}
-        #if {[lsearch -nocase $consignee $line] != -1} {set GS_address(Consignee) $line}
-        if {[lsearch -nocase $header(attention) $line] != -1} {set GS_address(Attention) $line}
-        #if {[lsearch -nocase $address1 $line] != -1} {set GS_address(deliveryAddr) $line}
-        if {[lsearch -nocase $header(address1) $line] != -1} {set GS_address(deliveryAddr) $line}
-        #if {[lsearch -nocase $address2 $line] != -1} {set GS_address(addrTwo) $line}
-        if {[lsearch -nocase $header(address2) $line] != -1} {set GS_address(addrTwo) $line}
-        #if {[lsearch -nocase $address3 $line] != -1} {set GS_address(addrThree) $line}
-        if {[lsearch -nocase $header(address3) $line] != -1} {set GS_address(addrThree) $line}
+        if {[lsearch -nocase $header(shipvia) $line1] != -1} {set GS_ship(shipVia) $line}
+        if {[lsearch -nocase $header(company) $line1] != -1} {set GS_address(Company) $line}
+        #if {[lsearch -nocase -glob $header(company) $line] != -1} {set GS_address(Company) $line}
+        if {[lsearch -nocase $header(attention) $line1] != -1} {set GS_address(Attention) $line}
+        if {[lsearch -nocase $header(address1) $line1] != -1} {set GS_address(deliveryAddr) $line}
+        if {[lsearch -nocase $header(address2) $line1] != -1} {set GS_address(addrTwo) $line}
+        if {[lsearch -nocase $header(address3) $line1] != -1} {set GS_address(addrThree) $line}
         # Feature to be added; to split columns that contain city,state,zip
-        #if {[lsearch -nocase $cityStateZip $line] != -1} {set internal_line cityStateZip; 'debug Found a CityStateZip!}
-        if {[lsearch -nocase $header(CityStateZip) $line] != -1} {set internal_line cityStateZip; 'debug Found a CityStateZip!}
+        if {[lsearch -nocase $header(CityStateZip) $line1] != -1} {set internal_line cityStateZip; 'debug Found a CityStateZip!}
         
         #if {[lsearch -nocase $city $line] != -1} {set internal_line City}
         
-        #if {[lsearch -nocase $state $line] != -1} {set GS_address(State) $line}
-        if {[lsearch -nocase $header(state) $line] != -1} {set GS_address(State) $line}
-        #if {[lsearch -nocase $quantity $line] != -1} {set GS_job(Quantity) $line}
-        if {[lsearch -nocase $header(quantity) $line] != -1} {set GS_job(Quantity) $line}
-        #if {[lsearch -nocase $version $line] != -1} {set GS_job(Version) $line}
-        if {[lsearch -nocase $header(version) $line] != -1} {set GS_job(Version) $line}
-        
-        if {[lsearch -nocase $header(zip) $line] != -1} {set GS_address(Zip) $line}
+        if {[lsearch -nocase $header(state) $line1] != -1} {set GS_address(State) $line}
+        if {[lsearch -nocase $header(quantity) $line1] != -1} {set GS_job(Quantity) $line}
+        if {[lsearch -nocase $header(version) $line1] != -1} {set GS_job(Version) $line}
+        if {[lsearch -nocase $header(zip) $line1] != -1} {set GS_address(Zip) $line}
 
         # Continue processing the list for potential matches where we don't need to search for possible alternate spellings
-        switch -nocase $line {
+        switch -nocase $line1 {
             City                {set GS_address(City) $line}
             Phone               {set GS_address(Phone) $line}
             "Ship Date"         {set GS_job(Date) $line}
@@ -149,7 +126,7 @@ proc Disthelper_Code::readFile {filename} {
             EmailContact        {set GS_job(Contact) $line}
             email               {set GS_job(Email) $line}
             "piece weight"      {set GS_job(pieceWeight) $line}
-            default             {puts "Didn't set anything"}
+            default             {'debug Didn't Set Any Headers}
         }
     }
 
@@ -253,14 +230,6 @@ proc Disthelper_Code::writeOutPut {} {
     #***
     global GS_job GS_ship GS_address GL_file GS_file settings program
 
-    # Error checking
-    # Delivery Address
-    #if {$GS_job(Number) == ""} {Error_Message::errorMsg jobNumber1; return}
-    #if {$GS_ship(shipVia) == ""} {Error_Message:errorMsg shipVia1; return}
-    #if {$GS_job(pieceWeight) == ""} {Error_Message::errorMsg pieceWeight1; return}
-    #if {$GS_job(fullBoxQty) == ""} {Error_Message::errorMsg fullBoxQty1; return}
-
-
     # Get the indices of each element of the address/shipment information. Later we will use this to map the data.
     array set importFile "
         shipVia     [lsearch $GL_file(Header) $GS_ship(shipVia)]
@@ -287,15 +256,9 @@ proc Disthelper_Code::writeOutPut {} {
 
     # Make sure we only activate the following two variables if the data actually exists.
     if {$GS_job(Email) != ""} {set EmailGateway Y} else {set EmailGateway .}
-    #set PaymentTerms . ;# Initialize with dummy data
-    
-    
+
     # Open the destination file for writing
     set filesDestination [open [file join $settings(outFilePath) "$GS_file(Name) Copy.csv"] w]
-    
-    # Incr the variable at the end of the [foreach]
-    #set program(progressBarIncr) 0
-    #set program(totalBoxes) 0
 
     # line = each address string
     # GL_file(dataList) = the entire shipping file
@@ -342,6 +305,10 @@ proc Disthelper_Code::writeOutPut {} {
                             set $name [list [lindex $l_line $importFile($name)]]
                         }
                 }
+                pieceWeight {
+                    # If this isn't set in the file, lets use what was set in the GUI
+                    if {$importFile($name) == -1} {set $name $GS_job(pieceWeight)}
+                }
                 default { #'debug default/$name - If no data is present we fill it with dummy data
                          # we need a placeholder if there isn't any data, and reassign variable names.
                          # Build a black list
@@ -373,7 +340,8 @@ proc Disthelper_Code::writeOutPut {} {
         # this can occur if there is extra invisible formatting in the excel file, but in the .csv file there are extra lines of empty data.
         if {$val == "failed"} {
                             'debug no quantity, exiting
-                            continue}
+                            continue
+        }
         
         # Checking for amount of boxes per shipment
         # First we assume we have full boxes, and a partial
@@ -399,7 +367,6 @@ proc Disthelper_Code::writeOutPut {} {
         for {set x 1} {$x <= $totalBoxes} {incr x} {
             if {($x != $totalBoxes) || ($onlyFullBoxes eq yes)} {
                 'debug "boxes: $x - TotalBoxes: $totalBoxes"
-                'debug "Pieceweight: $pieceWeight"
                 incr program(totalBooks) $GS_job(fullBoxQty)
                 
                 if {[string match $Version .] == 1 } { set boxVersion $GS_job(fullBoxQty)} else { set boxVersion [list [join [concat $Version _ $GS_job(fullBoxQty)] ""]] }
@@ -413,7 +380,6 @@ proc Disthelper_Code::writeOutPut {} {
             
             } elseif {($x == $totalBoxes) || ($onlyFullBoxes eq no)} {
                 'debug "boxes: $x - TotalBoxes (Partials): $totalBoxes"
-                'debug "Pieceweight: $pieceWeight"
                 incr program(totalBooks) [lindex $val 1]
                 
                 if {[string match $Version .] == 1} { set boxVersion [lindex $val 1] } else { set boxVersion [list [join [concat $Version _ [lindex $val 1]] ""]] } 

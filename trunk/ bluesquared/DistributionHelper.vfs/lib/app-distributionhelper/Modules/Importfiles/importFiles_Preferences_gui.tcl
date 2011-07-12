@@ -242,6 +242,7 @@ proc Disthelper_Preferences::displayHeader {args} {
     foreach headerName $header($headerCategory) {
         $tab3.listbox insert end [string totitle $headerName]
     }
+  
 } ;# End Disthelper_Preferences::displayHeader
 
 
