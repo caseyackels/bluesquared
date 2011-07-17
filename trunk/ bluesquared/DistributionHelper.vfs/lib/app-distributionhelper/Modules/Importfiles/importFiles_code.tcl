@@ -39,7 +39,7 @@ proc Disthelper_Code::readFile {filename} {
     #	(c) 2011 - Casey Ackels
     #
     # FUNCTION
-    #	Open the target file, and read it into Distribtion Helper
+    #	Open the target file and assign headers if available.
     #
     # SYNOPSIS
     #	N/A
@@ -85,28 +85,29 @@ proc Disthelper_Code::readFile {filename} {
     chan close $fileName
     
     set GL_file(Header) [string toupper [csv::split [lindex $GL_file(dataList) 0]]]
+    
 
     # Set the entry widgets to normal state, special handling for the Customer frame is required since they are not always used.
     Disthelper_Helper::getChildren normal
 
     foreach line $GL_file(Header) {
-        # If the file has headers, lets auto-insert the values in the GUI to help the user.
+        # If the file has headers, lets auto-insert the values to help the user.
         
         # Remove extra whitespace
         set line1 [string trimleft $line]
         set line1 [string trimright $line1]
         
-        # Insert headers into the listbox (NOTE: Must keep original, if we don't we won't match the actual data)
+        # Insert all headers into the listbox
         .container.frame1.listbox insert end $line
 
         # Find potential matches and assign the correct value.
         if {[lsearch -nocase $header(shipvia) $line1] != -1} {set GS_ship(shipVia) $line}
         if {[lsearch -nocase $header(company) $line1] != -1} {set GS_address(Company) $line}
-        #if {[lsearch -nocase -glob $header(company) $line] != -1} {set GS_address(Company) $line}
         if {[lsearch -nocase $header(attention) $line1] != -1} {set GS_address(Attention) $line}
         if {[lsearch -nocase $header(address1) $line1] != -1} {set GS_address(deliveryAddr) $line}
         if {[lsearch -nocase $header(address2) $line1] != -1} {set GS_address(addrTwo) $line}
         if {[lsearch -nocase $header(address3) $line1] != -1} {set GS_address(addrThree) $line}
+        
         # Feature to be added; to split columns that contain city,state,zip
         if {[lsearch -nocase $header(CityStateZip) $line1] != -1} {set internal_line cityStateZip; 'debug Found a CityStateZip!}
         
@@ -115,18 +116,18 @@ proc Disthelper_Code::readFile {filename} {
         if {[lsearch -nocase $header(state) $line1] != -1} {set GS_address(State) $line}
         if {[lsearch -nocase $header(quantity) $line1] != -1} {set GS_job(Quantity) $line}
         if {[lsearch -nocase $header(version) $line1] != -1} {set GS_job(Version) $line}
+        
         if {[lsearch -nocase $header(zip) $line1] != -1} {set GS_address(Zip) $line}
 
         # Continue processing the list for potential matches where we don't need to search for possible alternate spellings
-        switch -nocase $line1 {
+        switch -nocase -- $line1 {
             City                {set GS_address(City) $line}
             Phone               {set GS_address(Phone) $line}
             "Ship Date"         {set GS_job(Date) $line}
             "3rd Party"         {set GS_job(3rdParty) $line}
             EmailContact        {set GS_job(Contact) $line}
-            email               {set GS_job(Email) $line}
-            "piece weight"      {set GS_job(pieceWeight) $line}
-            default             {'debug Didn't Set Any Headers}
+            email               {set GS_job(Email) $line; 'debug Email Set: $GS_job(Email)}
+            default             {'debug Didn't set anything: $line}
         }
     }
 
@@ -247,7 +248,6 @@ proc Disthelper_Code::writeOutPut {} {
         Date        [lsearch $GL_file(Header) $GS_job(Date)]
         Contact     [lsearch $GL_file(Header) $GS_job(Contact)]
         Email       [lsearch $GL_file(Header) $GS_job(Email)]
-        pieceWeight [lsearch $GL_file(Header) $GS_job(pieceWeight)]
     "
     # Only imported values are listed here.
     #'debug UI_Company: $GS_address(Company)
@@ -255,24 +255,29 @@ proc Disthelper_Code::writeOutPut {} {
     #'debug Company: $importFile(Company)
 
     # Make sure we only activate the following two variables if the data actually exists.
-    if {$GS_job(Email) != ""} {set EmailGateway Y} else {set EmailGateway .}
-
+    #if {$GS_job(Email) != ""} {set EmailGateway Y} else {set EmailGateway .}
+    
+    
     # Open the destination file for writing
     set filesDestination [open [file join $settings(outFilePath) "$GS_file(Name) Copy.csv"] w]
+
 
     # line = each address string
     # GL_file(dataList) = the entire shipping file
     foreach line $GL_file(dataList) {
         
         set l_line [csv::split $line]
-        set l_line [join [split $l_line ,] ""] ;# remove all comma's
+        set l_line [join [split $l_line1 ,] ""] ;# remove all comma's
+        #'debug Line: $l_line
  
         # Map data to variable
         # Name = individual name of array
         foreach name [array names importFile] {
+            #'debug Name: $name
         
-            switch $name {
-                shipVia { #'debug shipVia/$name - Detect if its 3rd party or if we need to add a leading zero
+            switch -- $name {
+                shipVia {
+                        #'debug shipVia/$name - Detect if its 3rd party or if we need to add a leading zero
                         if {[string length [lindex $l_line $importFile($name)]] == 2} {
                                 set $name 0[list [lindex $l_line $importFile($name)]]
                                 } else {
@@ -298,20 +303,29 @@ proc Disthelper_Code::writeOutPut {} {
                                         set 3rdParty .; set PaymentTerms .
                             }
                 }
-                Zip     { #'debug Zip/$name - Detect if we need to add a leading zero
+                Zip     {
+                        #'debug Zip/$name - Detect if we need to add a leading zero
                         if {[string length [lindex $l_line $importFile($name)]] == 4} {
                                 set $name 0[list [lindex $l_line $importFile($name)]]
                         } else {
                             set $name [list [lindex $l_line $importFile($name)]]
                         }
                 }
-                pieceWeight {
-                    # If this isn't set in the file, lets use what was set in the GUI
-                    if {$importFile($name) == -1} {set $name $GS_job(pieceWeight)}
+                Email   {
+                        #'debug email/$importFile($name)
+                        #Make sure we only activate the following two variables if the data actually exists.
+                        if {[lindex $l_line $importFile($name)] != ""} {
+                            set $name [list [lindex $l_line $importFile($name)]]
+                            set EmailGateway Y
+                        } else {
+                                set EmailGateway N
+                                set $name .
+                            }
                 }
-                default { #'debug default/$name - If no data is present we fill it with dummy data
-                         # we need a placeholder if there isn't any data, and reassign variable names.
-                         # Build a black list
+                default {
+                        #'debug default/$name - If no data is present we fill it with dummy data
+                        # we need a placeholder if there isn't any data, and reassign variable names.
+                        # Build a black list
                         if {[lsearch [list "" " "] [lindex $l_line $importFile($name)]] != -1} {
                         #if {[lindex $l_line $importFile($name)] eq ""} {}
                             set $name .
@@ -326,7 +340,6 @@ proc Disthelper_Code::writeOutPut {} {
         #'debug importFile(Quantity) [lindex $l_line $importFile(Quantity)]
         
         if {[string is integer [lindex $l_line $importFile(Quantity)]]} {
-            incr program(totalAddress)
             set val [Disthelper_Code::doMath [lindex $l_line $importFile(Quantity)] $GS_job(fullBoxQty)]
             #'debug "(val) $val"
         } else {
@@ -340,8 +353,7 @@ proc Disthelper_Code::writeOutPut {} {
         # this can occur if there is extra invisible formatting in the excel file, but in the .csv file there are extra lines of empty data.
         if {$val == "failed"} {
                             'debug no quantity, exiting
-                            continue
-        }
+                            continue}
         
         # Checking for amount of boxes per shipment
         # First we assume we have full boxes, and a partial
@@ -371,8 +383,7 @@ proc Disthelper_Code::writeOutPut {} {
                 
                 if {[string match $Version .] == 1 } { set boxVersion $GS_job(fullBoxQty)} else { set boxVersion [list [join [concat $Version _ $GS_job(fullBoxQty)] ""]] }
                 #set boxWeight [catch {[::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]} err_1]
-                #set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
-                set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $pieceWeight + $settings(BoxTareWeight)}]]
+                set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
                 
                 #'debug "FullBoxes_err: $err_1"
                 'debug [::csv::join "$shipVia $Company $Attention $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $PaymentTerms $3rdParty $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
@@ -384,8 +395,7 @@ proc Disthelper_Code::writeOutPut {} {
                 
                 if {[string match $Version .] == 1} { set boxVersion [lindex $val 1] } else { set boxVersion [list [join [concat $Version _ [lindex $val 1]] ""]] } 
                 #set boxWeight [catch {[::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]} err_2]
-                #set boxWeight [::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
-                set boxWeight [::tcl::mathfunc::round [expr {[lindex $val 1] * $pieceWeight + $settings(BoxTareWeight)}]]
+                set boxWeight [::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
                 
                 #'debug "PartialBoxes_err: $err_2"
                 'debug [::csv::join "$shipVia $Company $Attention $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion [lindex $val 1] $PaymentTerms $3rdParty $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
