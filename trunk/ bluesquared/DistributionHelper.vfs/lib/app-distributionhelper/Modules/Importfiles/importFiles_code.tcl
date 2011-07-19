@@ -267,7 +267,7 @@ proc Disthelper_Code::writeOutPut {} {
     foreach line $GL_file(dataList) {
         
         set l_line [csv::split $line]
-        set l_line [join [split $l_line1 ,] ""] ;# remove all comma's
+        set l_line [join [split $l_line ,] ""] ;# remove all comma's
         #'debug Line: $l_line
  
         # Map data to variable
@@ -302,6 +302,15 @@ proc Disthelper_Code::writeOutPut {} {
                                     #'debug Not sending 3rd party, fill the variables with dummy data
                                         set 3rdParty .; set PaymentTerms .
                             }
+                }
+                Attention {
+                        'debug Attention/$name
+                        'debug Attention/$GS_address(Attention)
+                        if {[lindex $l_line $importFile($name)] == ""} {
+                            set $name $GS_address(Attention)
+                        } else {
+                            set $name [list [lindex $l_line $importFile($name)]]
+                        }
                 }
                 Zip     {
                         #'debug Zip/$name - Detect if we need to add a leading zero
@@ -406,6 +415,7 @@ proc Disthelper_Code::writeOutPut {} {
         }
         update 
         incr program(ProgressBar)
+        incr program(totalAddress)
         'debug "--------------"
     }
     # This is here to get the last address recorded
