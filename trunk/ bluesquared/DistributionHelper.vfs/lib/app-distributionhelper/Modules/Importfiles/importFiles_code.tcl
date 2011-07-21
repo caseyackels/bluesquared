@@ -60,7 +60,7 @@ proc Disthelper_Code::readFile {filename} {
     #
     #
     #***
-    global GL_file GS_file GS_job GS_ship GS_address header
+    global GL_file GS_file GS_job GS_ship GS_address header program
 
     
     # Cleanse file name, and prepare it for when we create the output file.
@@ -248,6 +248,7 @@ proc Disthelper_Code::writeOutPut {} {
         Date        [lsearch $GL_file(Header) $GS_job(Date)]
         Contact     [lsearch $GL_file(Header) $GS_job(Contact)]
         Email       [lsearch $GL_file(Header) $GS_job(Email)]
+        3rdParty    [lsearch $GL_file(Header) $GS_job(3rdParty)]
     "
     # Only imported values are listed here.
     #'debug UI_Company: $GS_address(Company)
@@ -259,7 +260,7 @@ proc Disthelper_Code::writeOutPut {} {
     
     
     # Open the destination file for writing
-    set filesDestination [open [file join $settings(outFilePath) "$GS_file(Name) Copy.csv"] w]
+    set filesDestination [open [file join $settings(outFilePath) "$GS_file(Name) EA GENERATED.csv"] w]
 
 
     # line = each address string
@@ -280,37 +281,40 @@ proc Disthelper_Code::writeOutPut {} {
                         #'debug shipVia/$name - Detect if its 3rd party or if we need to add a leading zero
                         if {[string length [lindex $l_line $importFile($name)]] == 2} {
                                 set $name 0[list [lindex $l_line $importFile($name)]]
-                                } else {
-                                    if {$name == ""} {
+                                } elseif {$name == ""} {
                                         #'debug String is not an integer - shipVia
                                         return
-                                    }
+                                } else {
                                     set $name [list [lindex $l_line $importFile($name)]]
                                 }
                             # Guard against the user not putting in an actual 3rd party code!!
-                            if {$shipVia eq "067" || $shipVia eq "068"} {
-                                   #'debug We should only see this for 3rd party
-                                    if {$GS_job(3rdParty) != ""} {
-                                        #'debug Checking if we have a 3rd party acct
-                                        set 3rdParty $GS_job(3rdParty); set PaymentTerms 3
-                                        } else {
-                                            #'debug No acct found, show the error message
-                                            Error_Message::errorMsg 3rdParty1
-                                            return
-                                    }
-                                } else {
-                                    #'debug Not sending 3rd party, fill the variables with dummy data
-                                        set 3rdParty .; set PaymentTerms .
-                            }
-                }
-                Attention {
-                        'debug Attention/$name
-                        'debug Attention/$GS_address(Attention)
-                        if {[lindex $l_line $importFile($name)] == ""} {
-                            set $name $GS_address(Attention)
+                        if {[lsearch $settings(shipvia3P) [lindex $l_line $importFile($name)]] != -1} {
+                                'debug 3rdParty: $name
+                               set 3rdParty [lindex $l_line $importFile(3rdParty)]; set PaymentTerms 3
                         } else {
-                            set $name [list [lindex $l_line $importFile($name)]]
+                            'debug Did not detect 3P
+                                set 3rdParty .; set PaymentTerms . 
                         }
+                            #if {$shipVia eq "067" || $shipVia eq "068" || $shipVia eq "154" || $shipVia eq "166"} {
+                            #       #'debug We should only see this for 3rd party
+                            #        if {$GS_job(3rdParty) eq "3rd Party"} {
+                            #            #'debug Checking if we have a 3rd party acct
+                            #            'debug 3rdParty: [lindex $l_line "3rd Party"]
+                            #            set 3rdParty [lindex $l_line "3rd Party"]; set PaymentTerms 3
+                            #            #set 3rdParty $GS_job(3rdParty); set PaymentTerms 3
+                            #            } elseif {$GS_job(3rdParty) != ""} {
+                            #                set 3rdParty $GS_job(3rdParty); set PaymentTerms 3
+                            #            } else {
+                            #                #'debug No acct found, show the error message
+                            #                Error_Message::errorMsg 3rdParty1
+                            #                return
+                            #        }
+                            #    } else {
+                            #        #'debug Not sending 3rd party, fill the variables with dummy data
+                            #        'debug shipvia: $importFile($name)
+                            #        'debug 3rdParty: [lindex $l_line $importFile(3rdParty)]
+                            #            set 3rdParty .; set PaymentTerms .
+                            #}
                 }
                 Zip     {
                         #'debug Zip/$name - Detect if we need to add a leading zero
@@ -413,9 +417,14 @@ proc Disthelper_Code::writeOutPut {} {
             incr program(totalBoxes)
             
         }
-        update 
+        update
+        'debug Max. Addresses: $program(maxAddress)
+        
         incr program(ProgressBar)
+        'debug ProgressBar: $program(ProgressBar)
+        
         incr program(totalAddress)
+        'debug totalAddress: $program(totalAddress)
         'debug "--------------"
     }
     # This is here to get the last address recorded

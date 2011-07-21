@@ -70,7 +70,7 @@ proc Disthelper_GUI::progressWindow {} {
     set program(totalBoxes) 0
     set program(totalBooks) 0
     set program(totalAddress) 0
-    #set program(totalAddress) [llength $GL_file(dataList)]
+    set program(maxAddress) [expr {[llength $GL_file(dataList)] - 1}]
     
     ##
     ## Parent Frame
@@ -82,7 +82,7 @@ proc Disthelper_GUI::progressWindow {} {
     pack $frame1 -expand yes -fill both -pady 5p -padx 5p
     
     #ttk::progressbar $frame1.bar -length [llength $GL_file(dataList)]
-    ttk::progressbar $frame1.bar -mode determinate -variable program(ProgressBar) -maximum [llength $GL_file(dataList)]
+    ttk::progressbar $frame1.bar -mode determinate -variable program(ProgressBar) -maximum $program(maxAddress)
     pack $frame1.bar -fill x -expand 1 -padx 4p -pady 10p
     
     
