@@ -202,6 +202,11 @@ proc 'distHelper_initVariables {} {
         set settings(importOrder) [list shipVia Company Consignee delAddr delAddr2 delAddr3 City State Zip Phone Quantity Version Date Contact Email 3rdParty]
     }
     
+    if {![info exists settings(shipvia3P)]} {
+        # Set possible 3rd party shipvia codes
+        set settings(shipvia3P) [list 018 068 154 166]
+    }
+    
     if {![info exists settings(BoxTareWeight)]} {
         # Box Tare Weight
         set settings(BoxTareWeight) .566

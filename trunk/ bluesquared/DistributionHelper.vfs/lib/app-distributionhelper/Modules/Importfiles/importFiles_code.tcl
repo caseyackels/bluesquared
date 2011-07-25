@@ -279,21 +279,24 @@ proc Disthelper_Code::writeOutPut {} {
             switch -- $name {
                 shipVia {
                         #'debug shipVia/$name - Detect if its 3rd party or if we need to add a leading zero
-                        if {[string length [lindex $l_line $importFile($name)]] == 2} {
-                                set $name 0[list [lindex $l_line $importFile($name)]]
+                        if {[string is alpha [lindex $l_line $importFile($name)]] == 0} {
+                                if {[string length [lindex $l_line $importFile($name)]] == 2} {
+                                    set $name 0[list [lindex $l_line $importFile($name)]]
                                 } elseif {$name == ""} {
-                                        #'debug String is not an integer - shipVia
                                         return
                                 } else {
                                     set $name [list [lindex $l_line $importFile($name)]]
                                 }
                             # Guard against the user not putting in an actual 3rd party code!!
-                        if {[lsearch $settings(shipvia3P) [lindex $l_line $importFile($name)]] != -1} {
-                                'debug 3rdParty: $name
-                               set 3rdParty [lindex $l_line $importFile(3rdParty)]; set PaymentTerms 3
-                        } else {
-                            'debug Did not detect 3P
+                            if {[lsearch $settings(shipvia3P) $shipVia] != -1} {
+                                    'debug 3rdParty: $shipVia
+                                    # need code to detect if a 3rd party account number was supplied, or if its in the file.
+                                    set 3rdParty [lindex $l_line $importFile(3rdParty)]; set PaymentTerms 3
+                            } else {
                                 set 3rdParty .; set PaymentTerms . 
+                            }
+                        } else {
+                            'debug Ship Via Failed: [lindex $l_line $importFile($name)]/$shipVia
                         }
                             #if {$shipVia eq "067" || $shipVia eq "068" || $shipVia eq "154" || $shipVia eq "166"} {
                             #       #'debug We should only see this for 3rd party
@@ -342,8 +345,10 @@ proc Disthelper_Code::writeOutPut {} {
                         if {[lsearch [list "" " "] [lindex $l_line $importFile($name)]] != -1} {
                         #if {[lindex $l_line $importFile($name)] eq ""} {}
                             set $name .
+                            'debug default/$name
                         } else {
                             set $name [list [lindex $l_line $importFile($name)]]
+                            'debug default/$name
                         }
                         #'debug NAME: $name
                 }
