@@ -147,16 +147,16 @@ proc disthelperGUI {} {
 #
 ## Grid Frame2a
 #
-    grid $frame2a.jobNameField -column 0 -row 0 -sticky nse -padx 5p -pady 3p
-    grid $frame2a.jobNameEntry -column 1 -row 0 -sticky news -padx 5p -pady 3p
+    grid $frame2a.jobNameField -column 0 -row 0 -sticky nse -padx 3p -pady 3p
+    grid $frame2a.jobNameEntry -column 1 -row 0 -sticky news -padx 3p -pady 3p
 
-    grid $frame2a.jobNumberField -column 0 -row 1 -sticky nse -padx 5p -pady 3p
-    grid $frame2a.jobNumberEntry -column 1 -row 1 -sticky news -padx 5p -pady 3p
+    grid $frame2a.jobNumberField -column 0 -row 1 -sticky nse -padx 3p -pady 3p
+    grid $frame2a.jobNumberEntry -column 1 -row 1 -sticky news -padx 3p -pady 3p
 
-    grid $frame2a.jobNumberButton -column 2 -row 1 -sticky news -padx 5p -pady 3p
+    grid $frame2a.jobNumberButton -column 2 -row 1 -sticky news -padx 3p -ipadx 2p -pady 3p
 
-    #grid columnspan $frame2a.jobNameField 2
-    #grid columnconfigure $frame2a 2 -weight 1
+    grid configure $frame2a.jobNameEntry -columnspan 2
+    grid columnconfigure $frame2a 1 -weight 1
 
 
 #
@@ -215,22 +215,22 @@ proc disthelperGUI {} {
 #
 ## Grid Frame2b
 #
-    grid $frame2b.addressCompanyField -column 0 -row 0 -sticky nse -padx 5p -pady 3p
+    grid $frame2b.addressCompanyField -column 0 -row 0 -sticky nse -padx 3p -pady 3p
     grid $frame2b.addressCompanyEntry -column 1 -row 0 -columnspan 5 -sticky news -padx 3p -pady 3p
 
-    grid $frame2b.addressConsigneeField -column 0 -row 1 -sticky nse -padx 5p -pady 3p
+    grid $frame2b.addressConsigneeField -column 0 -row 1 -sticky nse -padx 3p -pady 3p
     grid $frame2b.addressConsigneeEntry -column 1 -row 1 -columnspan 5 -sticky news -padx 3p -pady 3p
 
-    grid $frame2b.addressDelAddrField -column 0 -row 2 -sticky nse -padx 5p -pady 3p
+    grid $frame2b.addressDelAddrField -column 0 -row 2 -sticky nse -padx 3p -pady 3p
     grid $frame2b.addressDelAddrEntry -column 1 -row 2 -columnspan 5 -sticky news -padx 3p -pady 3p
 
-    grid $frame2b.addressAddr2Field -column 0 -row 3 -sticky nse -padx 5p -pady 3p
+    grid $frame2b.addressAddr2Field -column 0 -row 3 -sticky nse -padx 3p -pady 3p
     grid $frame2b.addressAddr2Entry -column 1 -row 3 -columnspan 5 -sticky news -padx 3p -pady 3p
 
-    grid $frame2b.addressAddr3Field -column 0 -row 4 -sticky nse -padx 5p -pady 3p
+    grid $frame2b.addressAddr3Field -column 0 -row 4 -sticky nse -padx 3p -pady 3p
     grid $frame2b.addressAddr3Entry -column 1 -row 4 -columnspan 5 -sticky news -padx 3p -pady 3p
 
-    grid $frame2b.addressCityField -column 0 -row 5 -sticky nse -padx 5p -pady 3p
+    grid $frame2b.addressCityField -column 0 -row 5 -sticky nse -padx 3p -pady 3p
     grid $frame2b.addressCityEntry -column 1 -row 5 -sticky news -padx 2p -pady 3p
 
     grid $frame2b.addressStateField -column 2 -row 5 -sticky nse -padx 0p -pady 3p
@@ -239,7 +239,7 @@ proc disthelperGUI {} {
     grid $frame2b.addressZipField -column 4 -row 5 -sticky nse -padx 0p -pady 3p
     grid $frame2b.addressZipEntry -column 5 -row 5 -sticky news -padx 3p -pady 3p
 
-    grid $frame2b.addressPhoneField -column 0 -row 6 -sticky nse -padx 5p -pady 3p
+    grid $frame2b.addressPhoneField -column 0 -row 6 -sticky nse -padx 3p -pady 3p
     grid $frame2b.addressPhoneEntry -column 1 -row 6 -columnspan 5 -sticky news -padx 3p -pady 3p
 
     grid columnconfigure $frame2b 1 -weight 1
@@ -268,14 +268,14 @@ proc disthelperGUI {} {
         set GS_job(Email) ""
 
 
-    grid $frame2c.contactField -column 0 -row 0 -sticky nse -padx 5p -pady 3p
-    grid $frame2c.contactEntry -column 1 -row 0 -sticky ew -padx 5p
+    grid $frame2c.contactField -column 0 -row 0 -sticky nse -padx 3p -pady 3p
+    grid $frame2c.contactEntry -column 1 -row 0 -sticky ew -padx 3p
 
-    grid $frame2c.emailField -column 0 -row 1 -sticky nse -padx 5p -pady 5p
-    grid $frame2c.emailEntry -column 1 -row 1 -sticky ew -padx 5p
+    grid $frame2c.emailField -column 0 -row 1 -sticky nse -padx 3p -pady 5p
+    grid $frame2c.emailEntry -column 1 -row 1 -sticky ew -padx 3p
 
-    grid $frame2c.thirdPartyField -column 2 -row 0 -sticky nse -padx 5p -pady 3p
-    grid $frame2c.thirdPartyEntry -column 3 -row 0 -sticky ew -padx 5p
+    grid $frame2c.thirdPartyField -column 2 -row 0 -sticky nse -padx 3p -pady 3p
+    grid $frame2c.thirdPartyEntry -column 3 -row 0 -sticky ew -padx 3p
 
     grid columnconfigure $frame2c 1 -weight 1
 
@@ -318,23 +318,23 @@ proc disthelperGUI {} {
 #
 ## Grid Frame2b
 #
-    grid $frame2d.shipmentDateField -column 0 -row 0 -sticky nse -padx 5p -pady 3p
+    grid $frame2d.shipmentDateField -column 0 -row 0 -sticky nse -padx 3p -pady 3p
     grid $frame2d.shipmentDateEntry -column 1 -row 0 -sticky ew
 
-    grid $frame2d.shipmentVersionField -column 2 -row 0 -sticky nse -padx 5p -pady 3p
-    grid $frame2d.shipmentVersionEntry -column 3 -row 0 -sticky ew -padx 5p
+    grid $frame2d.shipmentVersionField -column 2 -row 0 -sticky nse -padx 3p -pady 3p
+    grid $frame2d.shipmentVersionEntry -column 3 -row 0 -sticky ew -padx 3p
 
-    grid $frame2d.shipmentShipViaField -column 0 -row 1 -sticky nse -padx 5p -pady 5p
+    grid $frame2d.shipmentShipViaField -column 0 -row 1 -sticky nse -padx 3p -pady 5p
     grid $frame2d.shipmentShipViaEntry -column 1 -row 1 -sticky ew
 
-    grid $frame2d.shipmentQuantityField -column 2 -row 1 -sticky nse -padx 5p -pady 5p
-    grid $frame2d.shipmentQuantityEntry -column 3 -row 1 -sticky ew -padx 5p
+    grid $frame2d.shipmentQuantityField -column 2 -row 1 -sticky nse -padx 3p -pady 5p
+    grid $frame2d.shipmentQuantityEntry -column 3 -row 1 -sticky ew -padx 3p
 
-    grid $frame2d.shipmentPieceWeightField -column 0 -row 2 -sticky nse -padx 5p -pady 5p
+    grid $frame2d.shipmentPieceWeightField -column 0 -row 2 -sticky nse -padx 3p -pady 5p
     grid $frame2d.shipmentPieceWeightEntry -column 1 -row 2 -sticky ew
 
-    grid $frame2d.shipmentFullBoxField -column 2 -row 2 -sticky nse -padx 5p -pady 5p
-    grid $frame2d.shipmentFullBoxEntry -column 3 -row 2 -sticky ew -padx 5p
+    grid $frame2d.shipmentFullBoxField -column 2 -row 2 -sticky nse -padx 3p -pady 5p
+    grid $frame2d.shipmentFullBoxEntry -column 3 -row 2 -sticky ew -padx 3p
 
     grid columnconfigure $frame2d 1 -weight 1
 
