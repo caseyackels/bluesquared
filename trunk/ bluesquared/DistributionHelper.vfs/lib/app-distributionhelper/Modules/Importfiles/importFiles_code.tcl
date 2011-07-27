@@ -22,7 +22,7 @@
 # I = Integer (Do not use this unless you are certain it is an Integer and not a plain string)
 
 ## Coding Conventions
-# - Namespaces: 
+# - Namespaces:
 
 # - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
 #   will be uppercase. I.E sourceFiles, sourceFileExample
@@ -62,19 +62,19 @@ proc Disthelper_Code::readFile {filename} {
     #***
     global GL_file GS_file GS_job GS_ship GS_address header
 
-    
+
     # Cleanse file name, and prepare it for when we create the output file.
     set GS_file(Name) [join [lrange [file rootname [file tail $filename]] 0 end]]
     'debug "GS_file(Name): $GS_file(Name)"
-    
+
     set GS_job(Number) [join [lrange [split $GS_file(Name)] 0 0]]
     set GS_job(Number) [string trimleft $GS_job(Number) #]
     'debug "Job Number: $GS_job(Number)"
     'debug "filename: $filename"
-    
+
     # Open the file
     set fileName [open "$filename" RDONLY]
-      
+
     # Make the data useful, and put it into lists
     # While we are at it, make everything UPPER CASE
     while { [gets $fileName line] >= 0 } {
@@ -83,21 +83,24 @@ proc Disthelper_Code::readFile {filename} {
     }
 
     chan close $fileName
-    
+
     # Only retrieve the first record. We use this as the 'header' row.
     set GL_file(Header) [string toupper [csv::split [lindex $GL_file(dataList) 0]]]
-    
+
 
     # Set the entry widgets to normal state, special handling for the Customer frame is required since they are not always used.
     Disthelper_Helper::getChildren normal
 
     foreach line $GL_file(Header) {
         # If the file has headers, lets auto-insert the values to help the user.
-        
+
         # Remove extra whitespace
         set line1 [string trimleft $line]
         set line1 [string trimright $line1]
-        
+
+        # If this stays 'no', we will assume we have no headers in the file.
+        set header(haveHeaders) no
+
         # Insert all headers into the listbox
         .container.frame1.listbox insert end $line
 
@@ -108,30 +111,40 @@ proc Disthelper_Code::readFile {filename} {
         if {[lsearch -nocase $header(address1) $line1] != -1} {set GS_address(deliveryAddr) $line}
         if {[lsearch -nocase $header(address2) $line1] != -1} {set GS_address(addrTwo) $line}
         if {[lsearch -nocase $header(address3) $line1] != -1} {set GS_address(addrThree) $line}
-        
+
         # Feature to be added; to split columns that contain city,state,zip
         if {[lsearch -nocase $header(CityStateZip) $line1] != -1} {set internal_line cityStateZip; 'debug Found a CityStateZip!}
-        
+
         #if {[lsearch -nocase $city $line] != -1} {set internal_line City}
-        
+
         if {[lsearch -nocase $header(state) $line1] != -1} {set GS_address(State) $line}
-        if {[lsearch -nocase $header(quantity) $line1] != -1} {set GS_job(Quantity) $line}
+        if {[lsearch -nocase $header(quantity) $line1] != -1} {set GS_job(Quantity) $line; set header(haveHeaders) yes}
         if {[lsearch -nocase $header(version) $line1] != -1} {set GS_job(Version) $line}
-        
+
         if {[lsearch -nocase $header(zip) $line1] != -1} {set GS_address(Zip) $line}
+        if {[lsearch -nocase $header(3rdPartyNumber) $line1] != -1} {set GS_job(3rdParty) $line}
 
         # Continue processing the list for potential matches where we don't need to search for possible alternate spellings
         switch -nocase -- $line1 {
             City                {set GS_address(City) $line}
             Phone               {set GS_address(Phone) $line}
             "Ship Date"         {set GS_job(Date) $line}
-            "3rd Party"         {set GS_job(3rdParty) $line}
             EmailContact        {set GS_job(Contact) $line}
             email               {set GS_job(Email) $line; 'debug Email Set: $GS_job(Email)}
             default             {'debug Didn't set anything: $line}
         }
     }
 
+    if {$header(haveHeaders) eq "yes"} {
+        # We have headers, so lets skip the first line.
+        #'debug "Headers Found"
+        set GL_file(dataList_modified) [lrange $GL_file(dataList) 1 end]
+        'debug dataList: $GL_file(dataList_modified)
+    } else {
+        # not modified, but we need to save as the same name
+        #'debug "No Headers Found"
+        set GL_file(dataList_modified) $GL_file(dataList)
+    }
 
 } ;# Disthelper_Code::readFile
 
@@ -162,34 +175,37 @@ proc Disthelper_Code::doMath {totalQuantity maxPerBox} {
     #
     #***
     # Do mathmatical equations, then double check to make sure it comes out to the value of totalQty
-    
+
     # Guard against a mistake that we could make
-    if {$totalQuantity == "" || $totalQuantity == 0} {puts "I need a total qty argument!"; return failed}
-    
+    if {$totalQuantity == "" || $totalQuantity == 0} {
+        puts "I need a total qty argument!"
+        return failed
+    }
+
     if {$totalQuantity < $maxPerBox} {
 	lappend partialBoxQTY
     }
-    
+
     set divideTotalQuantity [expr {$totalQuantity/$maxPerBox}]
     'debug "divideTotalQuantity: $divideTotalQuantity"
-    
+
     set totalFullBoxs [expr {round($divideTotalQuantity)}]
     set fullBoxQTY [expr {round(floor($divideTotalQuantity) * $maxPerBox)}]
-    
+
     ## Use fullBoxQty as a starting point for the partial box.
     lappend partialBoxQTY [expr {round($totalQuantity - $fullBoxQTY)}]
-    
+
     #puts "doMath::TotalQty: $totalQuantity"
     #puts "doMath::maxPerBox: $maxPerBox"
     #puts "doMath::totalFullBoxs: $totalFullBoxs"
     #puts "doMath::partialBoxQTY: $partialBoxQTY"
-    
+
     #totalFullBoxs = full box total for that shipment
-    #partialBoxQty = the partial amount of that shipment. 
+    #partialBoxQty = the partial amount of that shipment.
     return [list $totalFullBoxs $partialBoxQTY]
 
     #puts "Ending doMath"
-    
+
 } ;# End of doMath
 
 
@@ -208,7 +224,7 @@ proc Disthelper_Code::writeOutPut {} {
     #	N/A
     #
     # CHILDREN
-    #	
+    #
     #
     # PARENTS
     #	disthelper::parentGUI
@@ -227,10 +243,10 @@ proc Disthelper_Code::writeOutPut {} {
     #   Set: Global Arrays
     #
     # SEE ALSO
-    #	
+    #
     #
     #***
-    global GS_job GS_ship GS_address GL_file GS_file settings program
+    global GS_job GS_ship GS_address GL_file GS_file settings program importFile
 
     # Get the indices of each element of the address/shipment information. Later we will use this to map the data.
     array set importFile "
@@ -249,60 +265,39 @@ proc Disthelper_Code::writeOutPut {} {
         Date        [lsearch $GL_file(Header) $GS_job(Date)]
         Contact     [lsearch $GL_file(Header) $GS_job(Contact)]
         Email       [lsearch $GL_file(Header) $GS_job(Email)]
+        3rdParty    [lsearch $GL_file(Header) $GS_job(3rdParty)]
     "
     # Only imported values are listed here.
     #'debug UI_Company: $GS_address(Company)
     #'debug Header: $GL_file(Header)
     #'debug Company: $importFile(Company)
 
-    # Make sure we only activate the following two variables if the data actually exists.
-    #if {$GS_job(Email) != ""} {set EmailGateway Y} else {set EmailGateway .}
-    
-    
     # Open the destination file for writing
-    set filesDestination [open [file join $settings(outFilePath) "$GS_file(Name) Copy.csv"] w]
-
+    set filesDestination [open [file join $settings(outFilePath) "$GS_file(Name) EA GENERATED.csv"] w]
 
     # line = each address string
     # GL_file(dataList) = the entire shipping file
-    foreach line $GL_file(dataList) {
-        
+    foreach line $GL_file(dataList_modified) {
+        #'debug "Start Processing List..."
+
         set l_line [csv::split $line]
         set l_line [join [split $l_line ,] ""] ;# remove all comma's
         #'debug Line: $l_line
- 
+
         # Map data to variable
         # Name = individual name of array
         foreach name [array names importFile] {
             #'debug Name: $name
-        
+            # if we come across a line with no data, exit right away
+            if {[lindex $l_line $importFile(shipVia)] == ""} {return}
+
             switch -- $name {
                 shipVia {
-                        #'debug shipVia/$name - Detect if its 3rd party or if we need to add a leading zero
-                        if {[string length [lindex $l_line $importFile($name)]] == 2} {
-                                set $name 0[list [lindex $l_line $importFile($name)]]
-                                } else {
-                                    if {$name == ""} {
-                                        #'debug String is not an integer - shipVia
-                                        return
-                                    }
-                                    set $name [list [lindex $l_line $importFile($name)]]
-                                }
-                            # Guard against the user not putting in an actual 3rd party code!!
-                            if {$shipVia eq "067" || $shipVia eq "068"} {
-                                   #'debug We should only see this for 3rd party
-                                    if {$GS_job(3rdParty) != ""} {
-                                        #'debug Checking if we have a 3rd party acct
-                                        set 3rdParty $GS_job(3rdParty); set PaymentTerms 3
-                                        } else {
-                                            #'debug No acct found, show the error message
-                                            Error_Message::errorMsg 3rdParty1
-                                            return
-                                    }
-                                } else {
-                                    #'debug Not sending 3rd party, fill the variables with dummy data
-                                        set 3rdParty .; set PaymentTerms .
-                            }
+                    set ship_via [Disthelper_Helper::shipVia $l_line $name]
+
+                    set shipVia [lindex $ship_via 0]
+                    set 3rd_Party [lindex $ship_via 1]
+                    set PaymentTerms [lindex $ship_via 2]
                 }
                 Zip     {
                         #'debug Zip/$name - Detect if we need to add a leading zero
@@ -335,11 +330,11 @@ proc Disthelper_Code::writeOutPut {} {
                         }
                         #'debug NAME: $name
                 }
-            }  
+            }
         }
 
         #'debug importFile(Quantity) [lindex $l_line $importFile(Quantity)]
-        
+
         if {[string is integer [lindex $l_line $importFile(Quantity)]]} {
             set val [Disthelper_Code::doMath [lindex $l_line $importFile(Quantity)] $GS_job(fullBoxQty)]
             #'debug "(val) $val"
@@ -349,60 +344,60 @@ proc Disthelper_Code::writeOutPut {} {
             'debug "String is not an integer. Skipping..."
             continue
         }
-        
+
         # if the doMath proc returns the value 'failed', we skip that entry and continue until we reach the end of the file.
         # this can occur if there is extra invisible formatting in the excel file, but in the .csv file there are extra lines of empty data.
         if {$val == "failed"} {
                             'debug no quantity, exiting
                             continue}
-        
+
         # Checking for amount of boxes per shipment
         # First we assume we have full boxes, and a partial
         if {([lindex $val 0] != 0) && ([lindex $val 1] != 0)} {
             set totalBoxes [expr [lindex $val 0]+1]
             set onlyFullBoxes no
             'debug "(boxes1) $totalBoxes - Full boxes and Partials"
-            
+
         # Now we check to see if we have full boxes, and no partials
         } elseif {([lindex $val 0] != 0) && ([lindex $val 1] == 0)} {
             set totalBoxes [lindex $val 0]
             set onlyFullBoxes yes ;# now we can process like a full box in a multiple box shipment
             'debug "(boxes2) $totalBoxes - Full boxes only"
-        
+
         # Now we check to see if we have zero full boxes, and a partial
         } elseif {([lindex $val 0] == 0) && ([lindex $val 1] != 0)} {
             set onlyFullBoxes no
             set totalBoxes 1
             'debug "(boxes3) $totalBoxes - Partial Only"
         }
-        
+
         for {set x 1} {$x <= $totalBoxes} {incr x} {
             if {($x != $totalBoxes) || ($onlyFullBoxes eq yes)} {
                 'debug "boxes: $x - TotalBoxes: $totalBoxes"
                 incr program(totalBooks) $GS_job(fullBoxQty)
-                
+
                 if {[string match $Version .] == 1 } { set boxVersion $GS_job(fullBoxQty)} else { set boxVersion [list [join [concat $Version _ $GS_job(fullBoxQty)] ""]] }
                 set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
-                
+
                 #'debug "FullBoxes_err: $err_1"
-                'debug [::csv::join "$shipVia $Company $Attention $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $PaymentTerms $3rdParty $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
-                chan puts $filesDestination [::csv::join "$shipVia $Company $Attention $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $PaymentTerms $3rdParty $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
-            
+                'debug [::csv::join "$shipVia $Company $Attention $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $PaymentTerms $3rd_Party $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
+                chan puts $filesDestination [::csv::join "$shipVia $Company $Attention $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $PaymentTerms $3rd_Party $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
+
             } elseif {($x == $totalBoxes) || ($onlyFullBoxes eq no)} {
                 'debug "boxes: $x - TotalBoxes (Partials): $totalBoxes"
                 incr program(totalBooks) [lindex $val 1]
-                
-                if {[string match $Version .] == 1} { set boxVersion [lindex $val 1] } else { set boxVersion [list [join [concat $Version _ [lindex $val 1]] ""]] } 
+
+                if {[string match $Version .] == 1} { set boxVersion [lindex $val 1] } else { set boxVersion [list [join [concat $Version _ [lindex $val 1]] ""]] }
                 set boxWeight [::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
-                
+
                 #'debug "PartialBoxes_err: $err_2"
-                'debug [::csv::join "$shipVia $Company $Attention $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion [lindex $val 1] $PaymentTerms $3rdParty $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
-                chan puts $filesDestination [::csv::join "$shipVia $Company $Attention $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion [lindex $val 1] $PaymentTerms $3rdParty $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
+                'debug [::csv::join "$shipVia $Company $Attention $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion [lindex $val 1] $PaymentTerms $3rd_Party $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
+                chan puts $filesDestination [::csv::join "$shipVia $Company $Attention $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion [lindex $val 1] $PaymentTerms $3rd_Party $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
             }
             incr program(totalBoxes)
-            
+
         }
-        update 
+        update
         incr program(ProgressBar)
         incr program(totalAddress)
         'debug "--------------"
@@ -412,4 +407,3 @@ proc Disthelper_Code::writeOutPut {} {
     chan close $filesDestination
 
 } ;# End of writeOutPut
-
