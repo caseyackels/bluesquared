@@ -60,7 +60,7 @@ proc Disthelper_Code::readFile {filename} {
     #
     #
     #***
-    global GL_file GS_file GS_job GS_ship GS_address header program
+    global GL_file GS_file GS_job GS_ship GS_address header
 
     
     # Cleanse file name, and prepare it for when we create the output file.
@@ -72,7 +72,7 @@ proc Disthelper_Code::readFile {filename} {
     'debug "Job Number: $GS_job(Number)"
     'debug "filename: $filename"
     
-    # Open File the file
+    # Open the file
     set fileName [open "$filename" RDONLY]
       
     # Make the data useful, and put it into lists
@@ -84,6 +84,7 @@ proc Disthelper_Code::readFile {filename} {
 
     chan close $fileName
     
+    # Only retrieve the first record. We use this as the 'header' row.
     set GL_file(Header) [string toupper [csv::split [lindex $GL_file(dataList) 0]]]
     
 
@@ -248,7 +249,6 @@ proc Disthelper_Code::writeOutPut {} {
         Date        [lsearch $GL_file(Header) $GS_job(Date)]
         Contact     [lsearch $GL_file(Header) $GS_job(Contact)]
         Email       [lsearch $GL_file(Header) $GS_job(Email)]
-        3rdParty    [lsearch $GL_file(Header) $GS_job(3rdParty)]
     "
     # Only imported values are listed here.
     #'debug UI_Company: $GS_address(Company)
@@ -260,7 +260,7 @@ proc Disthelper_Code::writeOutPut {} {
     
     
     # Open the destination file for writing
-    set filesDestination [open [file join $settings(outFilePath) "$GS_file(Name) EA GENERATED.csv"] w]
+    set filesDestination [open [file join $settings(outFilePath) "$GS_file(Name) Copy.csv"] w]
 
 
     # line = each address string
@@ -279,45 +279,30 @@ proc Disthelper_Code::writeOutPut {} {
             switch -- $name {
                 shipVia {
                         #'debug shipVia/$name - Detect if its 3rd party or if we need to add a leading zero
-                        if {[string is alpha [lindex $l_line $importFile($name)]] == 0} {
-                                if {[string length [lindex $l_line $importFile($name)]] == 2} {
-                                    set $name 0[list [lindex $l_line $importFile($name)]]
-                                } elseif {$name == ""} {
-                                        return
+                        if {[string length [lindex $l_line $importFile($name)]] == 2} {
+                                set $name 0[list [lindex $l_line $importFile($name)]]
                                 } else {
+                                    if {$name == ""} {
+                                        #'debug String is not an integer - shipVia
+                                        return
+                                    }
                                     set $name [list [lindex $l_line $importFile($name)]]
                                 }
                             # Guard against the user not putting in an actual 3rd party code!!
-                            if {[lsearch $settings(shipvia3P) $shipVia] != -1} {
-                                    'debug 3rdParty: $shipVia
-                                    # need code to detect if a 3rd party account number was supplied, or if its in the file.
-                                    set 3rdParty [lindex $l_line $importFile(3rdParty)]; set PaymentTerms 3
-                            } else {
-                                set 3rdParty .; set PaymentTerms . 
+                            if {$shipVia eq "067" || $shipVia eq "068"} {
+                                   #'debug We should only see this for 3rd party
+                                    if {$GS_job(3rdParty) != ""} {
+                                        #'debug Checking if we have a 3rd party acct
+                                        set 3rdParty $GS_job(3rdParty); set PaymentTerms 3
+                                        } else {
+                                            #'debug No acct found, show the error message
+                                            Error_Message::errorMsg 3rdParty1
+                                            return
+                                    }
+                                } else {
+                                    #'debug Not sending 3rd party, fill the variables with dummy data
+                                        set 3rdParty .; set PaymentTerms .
                             }
-                        } else {
-                            'debug Ship Via Failed: [lindex $l_line $importFile($name)]/$shipVia
-                        }
-                            #if {$shipVia eq "067" || $shipVia eq "068" || $shipVia eq "154" || $shipVia eq "166"} {
-                            #       #'debug We should only see this for 3rd party
-                            #        if {$GS_job(3rdParty) eq "3rd Party"} {
-                            #            #'debug Checking if we have a 3rd party acct
-                            #            'debug 3rdParty: [lindex $l_line "3rd Party"]
-                            #            set 3rdParty [lindex $l_line "3rd Party"]; set PaymentTerms 3
-                            #            #set 3rdParty $GS_job(3rdParty); set PaymentTerms 3
-                            #            } elseif {$GS_job(3rdParty) != ""} {
-                            #                set 3rdParty $GS_job(3rdParty); set PaymentTerms 3
-                            #            } else {
-                            #                #'debug No acct found, show the error message
-                            #                Error_Message::errorMsg 3rdParty1
-                            #                return
-                            #        }
-                            #    } else {
-                            #        #'debug Not sending 3rd party, fill the variables with dummy data
-                            #        'debug shipvia: $importFile($name)
-                            #        'debug 3rdParty: [lindex $l_line $importFile(3rdParty)]
-                            #            set 3rdParty .; set PaymentTerms .
-                            #}
                 }
                 Zip     {
                         #'debug Zip/$name - Detect if we need to add a leading zero
@@ -345,10 +330,8 @@ proc Disthelper_Code::writeOutPut {} {
                         if {[lsearch [list "" " "] [lindex $l_line $importFile($name)]] != -1} {
                         #if {[lindex $l_line $importFile($name)] eq ""} {}
                             set $name .
-                            'debug default/$name
                         } else {
                             set $name [list [lindex $l_line $importFile($name)]]
-                            'debug default/$name
                         }
                         #'debug NAME: $name
                 }
@@ -378,7 +361,6 @@ proc Disthelper_Code::writeOutPut {} {
         if {([lindex $val 0] != 0) && ([lindex $val 1] != 0)} {
             set totalBoxes [expr [lindex $val 0]+1]
             set onlyFullBoxes no
-            #set boxAndVersion "$totalBoxes$Version"
             'debug "(boxes1) $totalBoxes - Full boxes and Partials"
             
         # Now we check to see if we have full boxes, and no partials
@@ -400,7 +382,6 @@ proc Disthelper_Code::writeOutPut {} {
                 incr program(totalBooks) $GS_job(fullBoxQty)
                 
                 if {[string match $Version .] == 1 } { set boxVersion $GS_job(fullBoxQty)} else { set boxVersion [list [join [concat $Version _ $GS_job(fullBoxQty)] ""]] }
-                #set boxWeight [catch {[::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]} err_1]
                 set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
                 
                 #'debug "FullBoxes_err: $err_1"
@@ -412,7 +393,6 @@ proc Disthelper_Code::writeOutPut {} {
                 incr program(totalBooks) [lindex $val 1]
                 
                 if {[string match $Version .] == 1} { set boxVersion [lindex $val 1] } else { set boxVersion [list [join [concat $Version _ [lindex $val 1]] ""]] } 
-                #set boxWeight [catch {[::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]} err_2]
                 set boxWeight [::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
                 
                 #'debug "PartialBoxes_err: $err_2"
@@ -422,26 +402,14 @@ proc Disthelper_Code::writeOutPut {} {
             incr program(totalBoxes)
             
         }
-        update
-        'debug Max. Addresses: $program(maxAddress)
-        
+        update 
         incr program(ProgressBar)
-        'debug ProgressBar: $program(ProgressBar)
-        
         incr program(totalAddress)
-        'debug totalAddress: $program(totalAddress)
         'debug "--------------"
     }
     # This is here to get the last address recorded
     incr program(ProgressBar)
     chan close $filesDestination
-    
-    # Tell the user that the file has been generated once we close the channel
-    #tk_messageBox -type ok \
-    #                -message [mc "Your file has been generated!"] \
-    #                -title [mc "Finished Creating File"] \
-    #                -icon info \
-    #                -parent .
 
 } ;# End of writeOutPut
 

@@ -131,14 +131,14 @@ proc disthelperGUI {} {
     pack $frame2a -expand yes -fill both -anchor n ;#-padx 5p -pady 5p
     
     
+    ttk::label $frame2a.jobNameField -text [mc "File Name"]   
+    ttk::label $frame2a.jobNameEntry -textvariable GS_file(Name)
+        set GS_file(Name) "" ;# Initialize variable with dummy data, until we import a file.
+        
     ttk::label $frame2a.jobNumberField -text [mc "Job Number"]
     ttk::entry $frame2a.jobNumberEntry -textvariable GS_job(Number)
         dropDest $frame2a.jobNumberEntry GS_job(Number)
         set GS_job(Number) ""
-    
-    ttk::label $frame2a.jobNameField -text [mc "File Name"]   
-    ttk::label $frame2a.jobNameEntry -textvariable GS_file(Name)
-        set GS_file(Name) "" ;# Initialize variable with dummy data, until we import a file.
     
     ttk::button $frame2a.jobNumberButton -text [mc "Import File"] -state active -command { Disthelper_Helper::getAutoOpenFile $GS_job(Number) }
     
@@ -147,15 +147,16 @@ proc disthelperGUI {} {
 #
 ## Grid Frame2a
 #
-    grid $frame2a.jobNumberField -column 0 -row 0 -sticky nse -padx 5p -pady 5p
-    grid $frame2a.jobNumberEntry -column 1 -row 0 -sticky news -padx 5p -pady 5p
-    grid $frame2a.jobNameField -column 0 -row 1 -sticky nse -padx 5p -pady 5p
-    grid $frame2a.jobNameEntry -column 1 -row 1 -sticky news -padx 5p -pady 5p
+    grid $frame2a.jobNameField -column 0 -row 0 -sticky nse -padx 5p -pady 5p
+    grid $frame2a.jobNameEntry -column 1 -row 0 -sticky news -padx 5p -pady 5p
+    
+    grid $frame2a.jobNumberField -column 0 -row 1 -sticky nse -padx 5p -pady 5p
+    grid $frame2a.jobNumberEntry -column 1 -row 1 -sticky news -padx 5p -pady 5p
     
     grid $frame2a.jobNumberButton -column 2 -row 0 -sticky news -padx 5p -pady 5p
     
-    grid columnconfigure $frame2a 1 -weight 1
-    grid columnconfigure $frame2a 2 -weight 1
+    grid columnspan $frame2a.jobNameField 2
+    #grid columnconfigure $frame2a 2 -weight 1
 
     
 #    
