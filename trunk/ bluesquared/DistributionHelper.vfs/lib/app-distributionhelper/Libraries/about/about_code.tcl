@@ -23,12 +23,12 @@
 # I = Integer (Do not use this unless you are certain it is an Integer and not a plain string)
 
 ## Coding Conventions
-# - Namespaces: 
+# - Namespaces:
 
 # - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
-proc BlueSquared_About::aboutOpenFiles {} {
+proc BlueSquared_About::aboutOpenFiles {about_Text changeLog_Text} {
     #****f* aboutOpenFiles/BlueSquared_About
     # AUTHOR
     #	Casey Ackels
@@ -37,32 +37,54 @@ proc BlueSquared_About::aboutOpenFiles {} {
     #	(c) 2011 - Casey Ackels
     #
     # FUNCTION
-    #	
+    #
     #
     # SYNOPSIS
     #	Open the text files: ABOUT, CHANGES, and the LICENSES files that we find
     #
     # CHILDREN
-    #	
+    #
     #
     # PARENTS
-    #	
+    #
     #
     # NOTES
     #
     # SEE ALSO
     #
     #***
-    
-    ## Open the ABOUT file
-    #set fileName [open "$filename" RDONLY]
-    #  
-    ## Make the data useful, and put it into lists
-    ## While we are at it, make everything UPPER CASE
-    #while { [gets $fileName line] >= 0 } {
-    #    lappend GL_file(dataList) [string toupper $line]
-    #    'debug "while: $line"
-    #}
+
+    # About Window
+    set fileAbout [file join $starkit::topdir lib app-distributionhelper about.txt]
+    set openFileAbout [open $fileAbout RDONLY]
+
+
+    while { [gets $openFileAbout line] >= 0 } {
+        $about_Text insert end $line\n
+    }
+
+    # Since we inserted our text, lets disable the widget to prevent the deletion of text (not that it matters, but adds a bit of professionalism)
+    $about_Text configure -state disabled
+
+    chan close $openFileAbout
+
     #
-    #chan close $fileName
+    # Change Log
+    #
+    set fileChangeLog [file join $starkit::topdir lib app-distributionhelper CHANGELOG.txt]
+    set openChangeLog [open $fileChangeLog RDONLY]
+
+
+    while { [gets $openChangeLog line] >= 0 } {
+        $changeLog_Text insert end $line\n
+    }
+
+    # Since we inserted our text, lets disable the widget to prevent the deletion of text (not that it matters, but adds a bit of professionalism)
+    $changeLog_Text configure -state disabled
+
+    chan close $openChangeLog
+
+    #
+    # Licenses
+    #
 }
