@@ -26,7 +26,8 @@ o Will not add additional leading zero's. (i.e. 0993 vs 00993)
 
 
 ----------------------
-Version 1.0 (June 2011)
+Version 1.0 (June 7th, 2011)
 
 This was the first basic production ready version available.
 Basic features useable. Works on simple lists.
+Presented to Journal Graphics Management
