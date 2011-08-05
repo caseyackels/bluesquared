@@ -1,5 +1,5 @@
 = Version 2.0 (August 2011)
-+ Notes
+== Notes
 The big features on this release are:
 * Progress Window
 * User settable Headers
@@ -8,7 +8,7 @@ You will now see how far Efficiency Assist has processed your file with a progre
 
 You will now be able to set your own header values. Meaning, if you come across a header that is spelled differently for 'Address', you will now be able to insert that variation so EA will assign it to the correct field.
 
-+ New Features
+== New Features
 * Progress window and stat display
 * Enter or Import 3rd party codes
 * Changelog and About window has been implemented.
@@ -17,7 +17,7 @@ You will now be able to set your own header values. Meaning, if you come across 
 * Displays your current file name
 * Headers now are user-settable
 
-+ Bug Fixes
+== Bug Fixes
 * Correctly imports headers with spaces before or after the name.
 * Fixed Reset to work properly
 # Leading zero on zip codes partially works
@@ -25,7 +25,7 @@ You will now be able to set your own header values. Meaning, if you come across 
 
 
 
-----------------------
+--
 = Version 1.0 (June 7th, 2011)
 
 This was the first basic production ready version available.

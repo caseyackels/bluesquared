@@ -65,7 +65,7 @@ proc disthelperGUI {} {
     #***
     global GS_job GS_ship GS_address GS_file program
 
-    wm title . $program(Name)
+    wm title . "$program(Name) - [mc "Import Files"]"
     focus -force .
 
 

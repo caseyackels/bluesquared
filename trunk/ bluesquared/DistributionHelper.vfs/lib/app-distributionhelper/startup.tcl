@@ -207,6 +207,11 @@ proc 'distHelper_initVariables {} {
         set settings(shipvia3P) [list 068 067 154 166]
     }
 
+    if {![info exists settings(shipviaPP)]} {
+        # Set possible 3rd party shipvia codes
+        set settings(shipvia3P) [list 017 018]
+    }
+
     if {![info exists settings(BoxTareWeight)]} {
         # Box Tare Weight
         set settings(BoxTareWeight) .566
@@ -297,9 +302,12 @@ proc 'distHelper_loadSettings {} {
     set debug(onOff) on
 
     set program(Name) "Efficiency Assist"
+    tk appname $program(Name)
 
     # Theme setting for Tile
-    #ttk::style theme use xpnative
+    ttk::style theme use xpnative
+    puts "theme names: [ttk::style theme names]"
+
 
     # Import msgcat namespace so we only have to use [mc]
     namespace import msgcat::mc

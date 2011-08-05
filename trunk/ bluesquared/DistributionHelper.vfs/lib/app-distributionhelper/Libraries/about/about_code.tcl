@@ -76,10 +76,10 @@ proc BlueSquared_About::aboutOpenFiles {about_Text changeLog_Text} {
 
     # Make the markup tags
     $changeLog_Text tag config Heading1 -font {verdana 12 bold}
-    $changeLog_Text tag config Heading2 -font {verdana 10 bold}
-    $changeLog_Text tag config Normal -font {arial 10}
-    $changeLog_Text tag config List1 -font {verdana 9} -lmargin1 8 -lmargin2 12
-    $changeLog_Text tag config List2 -font {verdana 9} -lmargin1 8 -lmargin2 12
+    $changeLog_Text tag config Heading2 -font {verdana 10 bold} -lmargin1 2
+    $changeLog_Text tag config Normal -font {verdana 10} -lmargin1 12 -lmargin2 4
+    $changeLog_Text tag config List1 -font {verdana 9} -lmargin1 12 -lmargin2 24
+    $changeLog_Text tag config List2 -font {verdana 9} -lmargin1 12 -lmargin2 24
 
     ttk::separator $changeLog_Text.sep -orient horizontal
     #pack $changeLog_Text.sep
@@ -102,12 +102,12 @@ proc BlueSquared_About::aboutOpenFiles {about_Text changeLog_Text} {
         # \U2022 ;# unicode
 
         switch -- [string range $line 0 1] {
-            "= "    {set textFormat Heading1; set i 0 ;# Heading1}
-            "+ "    {set textFormat Heading2; set i 0 ;# Heading2}
-            "* "    {set stringFormat "\u2022 $stringFormat"; set textFormat List1; set i 0 ;# List1}
-            "# "    {set stringFormat "[incr i]: $stringFormat"; set textFormat List2;# List2}
-            "--"    {set stringFormat [$changeLog_Text window create $idx.end -window $changeLog_Text.sep -stretch yes]}
-            default {set stringFormat $line; set textFormat Normal; set i 0;# No markup detected}
+            "= "        {set textFormat Heading1; set i 0 ;# Heading1}
+            "=="        {set textFormat Heading2; set i 0 ;# Heading2}
+            "* "        {set stringFormat "\u2022 $stringFormat"; set textFormat List1; set i 0 ;# List1}
+            "# "        {set stringFormat "[incr i]. $stringFormat"; set textFormat List2;# List2}
+            "--"        {set stringFormat [$changeLog_Text window create $idx.0 -window $changeLog_Text.sep -stretch yes]}
+            default     {set stringFormat $line; set textFormat Normal; set i 0;# No markup detected}
         }
 
         $changeLog_Text insert end $stringFormat $textFormat

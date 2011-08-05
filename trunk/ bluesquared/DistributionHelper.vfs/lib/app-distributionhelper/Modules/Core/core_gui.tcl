@@ -80,6 +80,13 @@ proc disthelper::parentGUI {} {
     $mb.edit add command -label [mc "Preferences..."] -command { Disthelper_Preferences::prefGUI }
     $mb.edit add command -label "Reset" -command { Disthelper_Helper::resetVars -resetGUI }
 
+    ## Modules
+    menu $mb.module -tearoff 0 -relief raised -bd 2
+    $mb add cascade -label [mc "Module"] -menu $mb.module
+
+    $mb.module add command -label [mc "Import Files"] -command {}
+    $mb.module add command -label [mc "Distribution"] -command {destroy .container.frame1; destroy .container.frame1a; destroy .container.frame2}
+
     ## Help
     menu $mb.help -tearoff 0 -relief raised -bd 2
     $mb add cascade -label [mc "Help"] -menu $mb.help

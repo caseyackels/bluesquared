@@ -85,7 +85,7 @@ proc BlueSquared_About::aboutWindow {} {
 
 
     $nb add [ttk::frame $nb.f1] -text [mc "About"]
-    $nb add [ttk::frame $nb.f2] -text [mc "Change Log"]
+    $nb add [ttk::frame $nb.f2] -text [mc "Release Notes"]
     #$nb add [ttk::frame $nb.f3] -text [mc "Licenses"]
     $nb select $nb.f1
 
