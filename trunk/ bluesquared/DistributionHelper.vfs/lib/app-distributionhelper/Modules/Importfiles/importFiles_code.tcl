@@ -99,7 +99,7 @@ proc Disthelper_Code::readFile {filename} {
         set line1 [string trimright $line1]
 
         # If this stays 'no', we will assume we have no headers in the file.
-        set header(haveHeaders) no
+        set ea_header(haveHeaders) no
 
         # Insert all headers into the listbox
         .container.frame1.listbox insert end $line
@@ -118,7 +118,7 @@ proc Disthelper_Code::readFile {filename} {
         #if {[lsearch -nocase $city $line] != -1} {set internal_line City}
 
         if {[lsearch -nocase $header(state) $line1] != -1} {set GS_address(State) $line}
-        if {[lsearch -nocase $header(quantity) $line1] != -1} {set GS_job(Quantity) $line; set header(haveHeaders) yes}
+        if {[lsearch -nocase $header(quantity) $line1] != -1} {set GS_job(Quantity) $line; set ea_header(haveHeaders) yes}
         if {[lsearch -nocase $header(version) $line1] != -1} {set GS_job(Version) $line}
 
         if {[lsearch -nocase $header(zip) $line1] != -1} {set GS_address(Zip) $line}
@@ -135,7 +135,7 @@ proc Disthelper_Code::readFile {filename} {
         }
     }
 
-    if {$header(haveHeaders) eq "yes"} {
+    if {$ea_header(haveHeaders) eq "yes"} {
         # We have headers, so lets skip the first line.
         #'debug "Headers Found"
         set GL_file(dataList_modified) [lrange $GL_file(dataList) 1 end]

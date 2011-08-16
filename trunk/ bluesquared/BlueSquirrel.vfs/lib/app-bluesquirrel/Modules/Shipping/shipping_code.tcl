@@ -52,8 +52,8 @@ proc filterKeys {args} {
     #***
     # Set the default value
     set returnValue 0
-    
-    if {[string is integer $args] == 1} {set returnValue 1}   
+
+    if {[string is integer $args] == 1} {set returnValue 1}
 
     return $returnValue
 
@@ -94,36 +94,36 @@ proc controlFile {args} {
     #***
     global files
 
-    
+
     switch -- [lindex $args 0] {
 	destination {
             if {[lindex $args 1] eq "fileopen"} {
                 set files(destination) [open listdisplay.csv w]
-                # Insert Header row   
+                # Insert Header row
                 chan puts $files(destination) [::csv::join "Labels Quantity Line1 Line2 Line3 Line4 Line5"]
                 #return $files(destination)
-            
+
             } elseif {[lindex $args 1] eq "fileclose"} {
                 #flush $files(history)
                 chan close $files(destination)
 	    }
         }
-	
+
         history {
             if {[file exists history.csv] ne 1} {
                 set files(history) [open history.csv w]
             }
-            
+
             if {[lindex $args 1] eq "filewrite"} {
                 #set files(history_tmp) [open history_tmp.csv w+]
                 set files(history) [open history.csv w]
-            
+
             } elseif {[lindex $args 1] eq "fileappend"} {
                 set files(history) [open history.csv a+]
-            
+
             } elseif { [lindex $args 1] eq "fileread"} {
                 set files(history) [open history.csv r+]
-            
+
             } elseif {[lindex $args 1] eq "fileclose"} {
                 flush $files(history)
                 chan close $files(history)
@@ -136,9 +136,9 @@ proc controlFile {args} {
 
 proc writeText {labels quantity} {
     global files GS_textVar
-    
+
     ## ATTENTION: The Open/Close commands are in proc [controlFile]
-    
+
     # Use lappend so that if the text contains spaces ::csv::join will handle it correctly
     lappend textValues $labels $quantity "$GS_textVar(line1)" "$GS_textVar(line2)" "$GS_textVar(line3)" "$GS_textVar(line4)" "$GS_textVar(line5)"
     # Insert the values
@@ -156,31 +156,31 @@ proc insertInListbox {args} {
     #puts "qty $qty"
     set batch [lindex $args 1] ;# batch = how many shipments of $qty to enter. (i.e 5 shipments at 5 pieces each)
     #puts "batch $batch"
-    
+
     if {[string is integer $qty] == 1} {
 	if {$qty == 0} {return}
         if {($batch == 0) || ($batch == "")} {
             $frame2b.listbox insert end "0 $qty"
             #puts "insertInListbox: $qty"
-        
+
         } else {
             for {set x 0} {$x<$batch} {incr x} {
                 $frame2b.listbox insert end "0 $qty"
                 #puts "insertInListbox - BATCH: $qty"
                 }
         }
-        
+
     } else {
 	Error_Message::errorMsg insertInListBox1; return
     }
     # This way we can see incoming values
     $frame2b.listbox see end
-    
+
     ;# Add everything together for the running total
     addListboxNums
-    
 
-    
+
+
 } ;# insertInListbox
 
 
@@ -221,11 +221,11 @@ proc addListboxNums {{reset 0}} {
         set GI_textVar(labelsPartial2) ""
 
     }
-    
+
     # row,column
     catch {set S_rawNum [$frame2b.listbox getcells 0,1 end,1]} err
     puts "addListboxNums - catchErr: $err"
-    
+
     if {[info exist err] eq 1} {
 	if {[string is integer [lindex $err 0]] eq 1} {
             set GI_textVar(qty) [expr [join $err +]]
@@ -235,7 +235,7 @@ proc addListboxNums {{reset 0}} {
             set GS_textVar(labelsFull) ""
             set GS_textVar(labelsPartialLike) ""
             set GS_textVar(labelsPartialUnique) ""
-            
+
             if {[winfo exists .breakdown] == 1} {puts "addlistbox::Refreshing Break Down"; Shipping_Gui::breakDown}
         }
     }
@@ -244,27 +244,27 @@ proc addListboxNums {{reset 0}} {
 
 proc createList {} {
     global frame2b GS_textVar
-    
+
     puts "Start Createlist"
     if {[info exists GS_textVar(maxBoxQty)] == 0} {Error_Message::errorMsg createList1; return}
     if {$GS_textVar(maxBoxQty) == ""} {Error_Message::errorMsg createList1; return}
-    
+
     set L_rawEntries [split [join [$frame2b.listbox getcells 0,1 end,1]]]
 
     puts "L_rawEntries: $L_rawEntries"
-    
+
     # Make sure the variables are cleared out; we don't want any data to lag behind.
     set FullBoxes ""
     set PartialQty ""
-    
+
     # L_rawEntries holds each qty (i.e. 200 204 317)
     foreach entry $L_rawEntries {
 	set result [doMath $entry $GS_textVar(maxBoxQty)]
-        
+
         if {[lrange $result 0 0 ]!= 0} {
             puts "Result: [lrange $result 0 0] Label @ $GS_textVar(maxBoxQty)"
         }
-        
+
         if {[lrange $result 1 end] != 0} {
             puts "Result: 1 Label @ [lrange $result 1 end]"
         }
@@ -272,35 +272,35 @@ proc createList {} {
 	# Make sure the variables are cleared out; we don't want any data to lag behind.
 	set FullBoxes_text ""
 	set PartialQty_text ""
-	
+
 	if {[lrange $result 0 0] != 0} {lappend FullBoxes [lrange $result 0 0]; set FullBoxes_text [lrange $result 0 0]}
 	if {[lrange $result 1 1] != 0} {lappend PartialQty [lsort -decreasing [lrange $result 1 1]]; set PartialQty_text [lrange $result 1 1]}
     }
 
-    
+
     if {[info exists FullBoxes] == 1} {
 	if {![info exists PartialQty]} {set PartialQty ""}
-	
+
 	#Shipping_Gui::displayList [expr [join $FullBoxes +]] $PartialQty
 	displayListHelper $FullBoxes $PartialQty
         puts "DisplayListHelper_A: $FullBoxes $PartialQty"
-    
+
     } elseif {[info exists PartialQty] == 1} {
 	set FullBoxes ""
 	#Shipping_Gui::displayList $FullBoxes $PartialQty
 	displayListHelper $FullBoxes $PartialQty
         puts "DisplayListHelper_B: $FullBoxes $PartialQty"
-    
+
     } else {
 	Error_Message::errorMsg createList2
     }
-    
+
     set GS_textVar(labelsFull) $FullBoxes
     set GS_textVar(labelsPartial) $PartialQty
-    
+
     puts "LabelsFull: $GS_textVar(labelsFull)"
     #puts "LabelsPartial: $GS_textVar(labelsPartial)"
-    
+
     # Keep the breakdown window updated even if it is open
     if {[winfo exists .breakdown] == 1} {puts "refreshing Break Down"; Shipping_Gui::breakDown}
 
@@ -309,23 +309,23 @@ proc createList {} {
 
 proc doMath {totalQuantity maxPerBox} {
 # Do mathmatical equations, then double check to make sure it comes out to the value of totalQty
-    
+
     #puts "TOTALQUANTITY: $totalQuantity"
     if {($totalQuantity == "") || ($totalQuantity == 0) || $totalQuantity == {}} {return}
-    
+
     if {$totalQuantity < $maxPerBox} {
 	lappend partialBoxQTY
     }
-   
+
 
     set divideTotalQuantity [expr {$totalQuantity / $maxPerBox}]
-    
+
     set totalFullBoxs [expr {round($divideTotalQuantity)}]
     set fullBoxQTY [expr {round(floor($divideTotalQuantity) * $maxPerBox)}]
-    
+
     ## Use fullBoxQty as a starting point for the partial box.
     lappend partialBoxQTY [expr {round($totalQuantity - $fullBoxQTY)}]
-	
+
     if {[expr {$partialBoxQTY + $fullBoxQTY}] != $totalQuantity} {
     	bgerror "Incorrect sum."
     }
@@ -340,12 +340,12 @@ proc extractFromList {list} {
     # Cycle through the list and extract 'like' numbers. Put all non-'like' numbers in its own variable
     # Example: extractFromList {1 2 2 3 4 5 5 5 6 7 8 9 9 9}
     # Outputs: {8 4 1 6 7 3} {9 9 9} {5 5 5} {2 2}
-    
+
     foreach item $list {lappend a($item) $item}
-    
+
     set GI_uniques ""
     set GI_groups ""
-	
+
     #foreach key [array names a] {}
     # Make sure the list is sorted, so we present the numbers in an orderly way.
     foreach key [lsort -decreasing -integer [array names a]] {
@@ -356,14 +356,14 @@ proc extractFromList {list} {
 	}
     }
     linsert $GI_groups 0 $GI_uniques
-    
+
 } ;# extractFromList
 
 
 proc displayListHelper {fullboxes partialboxes {reset 0}} {
     # Insert values into final listbox/text widgets
     global GS_textVar GI_textVar frame2b
-    
+
     puts "starting displayListHelper"
     puts "reset: $reset"
     if {$reset ne 0} {
@@ -374,13 +374,13 @@ proc displayListHelper {fullboxes partialboxes {reset 0}} {
         set GI_textVar(labelsPartial2) ""
 
     }
-    
+
     controlFile destination fileopen
-    
+
     set GI_textVar(labels) ""
     set GI_textVar(labelsPartial1) ""
     set GI_textVar(labelsPartial2) ""
-    
+
     if {($fullboxes != "") && ($fullboxes != 0)} {
 	# This is only for FullBoxes!
             set fullboxes [expr [join "$fullboxes" +]]
@@ -392,20 +392,20 @@ proc displayListHelper {fullboxes partialboxes {reset 0}} {
                 set labels Boxes
                 #puts "plural - $fullboxes"
             }
-            
-	
+
+
         set GI_textVar(labels) "$fullboxes $labels @ $GS_textVar(maxBoxQty)"
-	    
+
 	writeText $fullboxes $GS_textVar(maxBoxQty)
     }
-    
+
     # Lets sort out the like groups, and the unique group/numbers.
     set valueLists [extractFromList $partialboxes]
     puts "valueLists1_1: $valueLists"
 
     # Sort out the 'like' number groups; start at 1, because the 'unique' numbers are always 0.
     set valueLists2 [lrange $valueLists 1 end]
-    
+
 
     set x 0
     set GS_textVar(labelsPartialLike) "" ;# clear it out
@@ -416,12 +416,12 @@ proc displayListHelper {fullboxes partialboxes {reset 0}} {
         #puts "valueLists2: $value"
         lappend GS_textVar(labelsPartialLike) $GI_textVar(labelsPartial1)
 
-        
+
 	writeText [llength [lindex $valueLists2 $x]] [lindex $valueLists2 $x end]
-	
+
 	incr x
     }
-    
+
     if {[info exists GS_textVar(labelsPartialLike)] == 1} {
     puts "Like Partials: $GS_textVar(labelsPartialLike)"
     }
@@ -434,15 +434,15 @@ proc displayListHelper {fullboxes partialboxes {reset 0}} {
     set GS_textVar(labelsPartialUnique) $valueLists ;# get clean list with no other text
      foreach value $valueLists {
 	set GI_textVar(labelsPartial2) "1 Box @ $valueLists"
-        
+
 	writeText 1 $value
     }
 
     puts "qty: $GI_textVar(qty)"
 
     controlFile destination fileclose
-} ;# End of displayListHelper proc    
-    
+} ;# End of displayListHelper proc
+
 
 proc printLabels {} {
     global GS_textVar programPath
@@ -451,11 +451,12 @@ proc printLabels {} {
 	    Error_Message::errorMsg printLabels1
 	    return
 	}
-	
+
 	Shipping_Code::createList
 	Shipping_Code::writeHistory $GS_textVar(maxBoxQty)
+        #Shipping_Code::openHistory
 	Shipping_Code::setTips
-        
+
             #Figure out how many Lines are being used and load the appropriate label
             #set programPath(Bartend) [file join C:// "Program Files" Seagull "BarTender 7.10" Enterprise Bartend.exe]
             #set programPath(LabelPath) {C:\\"Documents and Settings"\\Shipping\\Desktop\\Labels\\"SPECIAL LABELS"}
@@ -464,14 +465,14 @@ proc printLabels {} {
             #    puts "$Bartend /F=$LabelPath/6LINEDB.btw /P /S /CLOSE"
             #    #$Bartend /F=$LabelPath/6LINEDB.btw /P /S /CLOSE
             #} else
-	
+
 	if {$GS_textVar(line5) != ""} {
 	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
 		    Error_Message::errorMsg seattleMet1; return
 		} else {
 		    exec $programPath(Bartend) /AF=$programPath(LabelPath)\\6LINEDB.btw /P /CLOSE
 	    }
-	
+
 	} elseif {$GS_textVar(line4) != ""} {
 	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
                         Error_Message::errorMsg seattleMet1; return
@@ -485,14 +486,14 @@ proc printLabels {} {
 		} else {
 		    exec $programPath(Bartend) /AF=$programPath(LabelPath)\\4LINEDB.btw /P /CLOSE
 	    }
-	
+
 	} elseif {$GS_textVar(line2) != ""} {
 	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
                         Error_Message::errorMsg seattleMet2; return
 	    } else {
 		exec $programPath(Bartend) /AF=$programPath(LabelPath)\\3LINEDB.btw /P /CLOSE
 	    }
-	    
+
 	} elseif {$GS_textVar(line1) != ""} {
 	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
                         Error_Message::errorMsg seattleMet2; return
@@ -500,7 +501,7 @@ proc printLabels {} {
 		exec $programPath(Bartend) /AF=$programPath(LabelPath)\\2LINEDB.btw /P /CLOSE
 	    }
 	}
-        
+
         #C:/path/to/bartend.exe /F=C:/Labels/path/to/format /P /S /CLOSE
 } ;# printLabels
 
@@ -534,12 +535,12 @@ proc truncateHistory {} {
     #***
     global files GS_textVar frame1
     #puts "start Truncate"
-    
+
     controlFile history fileread
     set history_data [read $files(history)]
     controlFile history fileclose
     set lines [split $history_data \n]
-    
+
     #puts "truncateHistory_data: [llength $lines]"
     ;# Keep the history file trimmed down
     if {[llength $lines] >= 16} {
@@ -556,12 +557,12 @@ proc truncateHistory {} {
         }
         controlFile history close
     }
-    
+
     if {[winfo exists .container] eq 1} {
         puts "config textVar"
         $frame1.entry1 configure -values $GS_textVar(history)
     }
-    
+
 } ;# truncateHistory
 
 
@@ -593,24 +594,25 @@ proc writeHistory {maxBoxQty} {
     #
     #***
     global GS_textVar files
-    
+
     #puts "lsearch: [lsearch -glob -inline $GS_textVar(history) $GS_textVar(line1)]"
-    
+
     if {[lsearch -glob -inline $GS_textVar(history) $GS_textVar(line1)] eq ""} {
         ;# Save only an entry if it is unique. Otherwise, discard it.
         ;# Use lappend so that if the text contains spaces ::csv::join will handle it correctly
         lappend textHistory "$GS_textVar(line1)" "$GS_textVar(line2)" "$GS_textVar(line3)" "$GS_textVar(line4)" "$GS_textVar(line5)" $maxBoxQty
-        
+
         ;# Insert the values
         controlFile history fileappend
         chan puts $files(history) [::csv::join $textHistory]
         #puts "text: $textHistory"
         controlFile history fileclose
+        puts "saved $GS_textVar(line1)"
     }
-    
+
     #;# After we add the new labels, lets make sure we trim the file back down to the allotted amount.
     truncateHistory
-    
+
 } ;# writeHistory
 
 
@@ -642,27 +644,28 @@ proc openHistory {} {
     #
     #***
     global GS_textVar files frame1
-    #puts "openHistory: Starting"
-    
+    puts "openHistory: Starting"
+
     controlFile history fileread
     set history_data [read $files(history)]
     controlFile history fileclose
-    
+
     #puts "historyData: $history_data"
     ;# Guard against an empty history file. If nothing is found set the *(history) variable with an empty string
     if {$history_data eq ""} {
         set GS_textVar(history) ""
-        
+
     } else {
         set lines [split $history_data \n]
         #set lines [lrange [split $history_data \n] end-5 end] ;# This means we'll have 5 labels, and one "empty label"
-        puts "openHistory_lines: $lines"
+        #puts "openHistory_lines: $lines"
         set GS_textVar(history) "" ;# make sure the variable is cleared out.
-        
+
         foreach line $lines {
             lappend GS_textVar(history) [lindex [::csv::split $line] 0]
         }
     }
+
     #puts "openHistory: Ending"
 } ;#openHistory
 
@@ -700,12 +703,13 @@ proc readHistory {args} {
     controlFile history fileread
     set history_data [read $files(history)]
     set lines [split $history_data \n]
+    puts "history lines: $lines"
     controlFile history fileclose
-    
-    
+
+
     set text [lindex $lines $args]
     puts "text: $text"
-    
+
     set x 1
     foreach line [::csv::split $text] {
         #puts "retrieve: $line"
@@ -716,12 +720,12 @@ proc readHistory {args} {
             set GS_textVar(maxBoxQty) $line
             }
     }
-    # If text holds no data, clear all lines    
+    # If text holds no data, clear all lines
       if {$text eq ""} {
         for {set x 1} {$x<6} {incr x} {set GS_textVar(line$x) ""}
         set GS_textVar(maxBoxQty) ""
     }
-    
+
     ;# clear the listbox
     Shipping_Code::clearList
 } ;# readHistory
@@ -756,21 +760,21 @@ proc addMaster {destQty batch} {
     #
     #***
     global GS_textVar
-    
+
     Shipping_Code::insertInListbox $destQty $batch
-    
+
     ;# Reset the variables
     set GS_textVar(destQty) ""
     set GS_textVar(batch) ""
     #set GS_textVar(labelsFull) ""
     #set GS_textVar(labelsPartialLike) ""
     #set GS_textVar(labelsPartialUnique) ""
-    
+
     ;# Display the updated amount of entries that we have
     Shipping_Code::createList
     #Shipping_Gui::breakdDown
-    
-    
+
+
 } ;# addMaster
 
 
@@ -802,7 +806,7 @@ proc clearList {} {
     #
     #***
     global frame2b
-    
+
     #puts clearList
     #puts "clearList: [$frame2b.listbox delete 0 end]"
     catch {$frame2b.listbox delete 0 end} ;# This always generates "0,0 cell not in range" error
@@ -841,7 +845,7 @@ proc setTips {} {
     #***
     global GS_textVar
 
-    
+
     set masterTipList [list \
                   "You are Number 1. Don't let anyone take that away from you!" \
                   "Double-Click in the 'count' field to delete an entry" \
@@ -852,7 +856,7 @@ proc setTips {} {
                   "Press Ctrl+N to insert next Months' name" \
                   "Press Ctrl+K to delete all text within the active entry field" \
                   "You can use the Enter key to switch fields in the Label Information area."]
-    
+
     #set getTipNumber [llength $masterTipList]
     set GS_textVar(tips) [lindex $masterTipList [expr {int(rand()*[llength $masterTipList])}]]
     #set GS_textVar(tips) [lindex $masterTipList [expr {int(10* rand())}]]
