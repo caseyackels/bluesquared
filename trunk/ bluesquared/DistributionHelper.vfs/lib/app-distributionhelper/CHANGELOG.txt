@@ -3,6 +3,7 @@
 The big features on this release are:
 * Progress Window
 * User settable Headers
+* Importable piece weights; the header to use is 'pieceweight'
 
 You will now see how far Efficiency Assist has processed your file with a progress bar. Once EA has finished, the total quantity and total quantity of boxes will be displayed
 

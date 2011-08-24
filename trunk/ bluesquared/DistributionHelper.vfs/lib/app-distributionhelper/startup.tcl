@@ -209,7 +209,7 @@ proc 'distHelper_initVariables {} {
 
     if {![info exists settings(shipviaPP)]} {
         # Set possible 3rd party shipvia codes
-        set settings(shipvia3P) [list 017 018]
+        set settings(shipviaPP) [list 017 018]
     }
 
     if {![info exists settings(BoxTareWeight)]} {

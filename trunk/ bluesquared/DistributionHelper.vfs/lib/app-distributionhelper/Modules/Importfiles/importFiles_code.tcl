@@ -78,6 +78,8 @@ proc Disthelper_Code::readFile {filename} {
     # Make the data useful, and put it into lists
     # While we are at it, make everything UPPER CASE
     while { [gets $fileName line] >= 0 } {
+        #if {[string match *,,,* $line] eq ""} {'debug "blank: $line"}
+        'debug "blank: [string match ,,,,,,,,,,,,, $line]"
         lappend GL_file(dataList) [string toupper $line]
         'debug "while: $line"
     }
@@ -131,6 +133,7 @@ proc Disthelper_Code::readFile {filename} {
             "Ship Date"         {set GS_job(Date) $line}
             EmailContact        {set GS_job(Contact) $line}
             email               {set GS_job(Email) $line; 'debug Email Set: $GS_job(Email)}
+            pieceweight         {set GS_job(pieceWeight) $line}
             default             {'debug Didn't set anything: $line}
         }
     }
@@ -139,7 +142,8 @@ proc Disthelper_Code::readFile {filename} {
         # We have headers, so lets skip the first line.
         #'debug "Headers Found"
         set GL_file(dataList_modified) [lrange $GL_file(dataList) 1 end]
-        'debug dataList: $GL_file(dataList_modified)
+
+        #'debug dataList: $GL_file(dataList_modified)
     } else {
         # not modified, but we need to save as the same name
         #'debug "No Headers Found"
@@ -266,6 +270,7 @@ proc Disthelper_Code::writeOutPut {} {
         Contact     [lsearch $GL_file(Header) $GS_job(Contact)]
         Email       [lsearch $GL_file(Header) $GS_job(Email)]
         3rdParty    [lsearch $GL_file(Header) $GS_job(3rdParty)]
+        pieceweight [lsearch $GL_file(Header) $GS_job(pieceWeight)]
     "
     # Only imported values are listed here.
     #'debug UI_Company: $GS_address(Company)
@@ -316,6 +321,17 @@ proc Disthelper_Code::writeOutPut {} {
                         } else {
                                 set EmailGateway N
                                 set $name .
+                            }
+                }
+                pieceweight {
+                            #'debug pieceweight/$importFile($name)
+                            # Use this so we can import the pieceweight. Useful if we have multiple versions with different pieceweights
+                            if {[lindex $l_line $importFile($name)] != ""} {
+                                'debug "pieceweight: located in header"
+                                set $name [list [lindex $l_line $importFile($name)]]
+                            } else {
+                                'debug "pieceweight: no header, user set: $GS_job(pieceWeight)"
+                                set $name $GS_job(pieceWeight)
                             }
                 }
                 default {
@@ -377,7 +393,8 @@ proc Disthelper_Code::writeOutPut {} {
                 incr program(totalBooks) $GS_job(fullBoxQty)
 
                 if {[string match $Version .] == 1 } { set boxVersion $GS_job(fullBoxQty)} else { set boxVersion [list [join [concat $Version _ $GS_job(fullBoxQty)] ""]] }
-                set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
+                #set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
+                set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $pieceweight + $settings(BoxTareWeight)}]]
 
                 #'debug "FullBoxes_err: $err_1"
                 'debug [::csv::join "$shipVia $Company $Attention $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $PaymentTerms $3rd_Party $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
@@ -388,7 +405,8 @@ proc Disthelper_Code::writeOutPut {} {
                 incr program(totalBooks) [lindex $val 1]
 
                 if {[string match $Version .] == 1} { set boxVersion [lindex $val 1] } else { set boxVersion [list [join [concat $Version _ [lindex $val 1]] ""]] }
-                set boxWeight [::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
+                #set boxWeight [::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
+                set boxWeight [::tcl::mathfunc::round [expr {[lindex $val 1] * $pieceweight + $settings(BoxTareWeight)}]]
 
                 #'debug "PartialBoxes_err: $err_2"
                 'debug [::csv::join "$shipVia $Company $Attention $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion [lindex $val 1] $PaymentTerms $3rd_Party $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
