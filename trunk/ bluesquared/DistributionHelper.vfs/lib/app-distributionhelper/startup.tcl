@@ -305,8 +305,8 @@ proc 'distHelper_loadSettings {} {
     tk appname $program(Name)
 
     # Theme setting for Tile
-    ttk::style theme use xpnative
-    puts "theme names: [ttk::style theme names]"
+    #ttk::style theme use xpnative
+    #puts "theme names: [ttk::style theme names]"
 
 
     # Import msgcat namespace so we only have to use [mc]

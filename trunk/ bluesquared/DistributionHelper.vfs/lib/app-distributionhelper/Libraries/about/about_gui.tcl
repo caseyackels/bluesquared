@@ -101,10 +101,12 @@ proc BlueSquared_About::aboutWindow {} {
 
 
     ##
-    ## Tab 2 (Change Log)
+    ## Tab 2 (Release Notes)
     ##
 
-    text $nb.f2.text -wrap word
+    text $nb.f2.text -wrap word \
+                    -tabs 4 \
+                    -tabstyle wordprocessor
 
     pack $nb.f2.text -expand yes -fill both -padx 5p -pady 5p
 
@@ -125,7 +127,13 @@ proc BlueSquared_About::aboutWindow {} {
 
     grid $buttonbar.close -column 1 -row 3 -sticky nse -ipadx 4p
     pack $buttonbar -side bottom -anchor e -pady 8p -padx 5p
+    
+    bind $nb.f2.text <Configure> "$nb.f2.text.hr configure -width %w"
+    
+    frame $nb.f2.text.hr -relief raised -height 2 -background gray
 
     BlueSquared_About::aboutOpenFiles $nb.f1.text $nb.f2.text
+    
+    
 
 } ;# End aboutWindow
