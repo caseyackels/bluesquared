@@ -60,7 +60,7 @@ proc Disthelper_Code::readFile {filename} {
     #
     #
     #***
-    global GL_file GS_file GS_job GS_ship GS_address header
+    global GL_file GS_file GS_job GS_ship GS_address header tempVars
 
 
     # Cleanse file name, and prepare it for when we create the output file.
@@ -133,7 +133,7 @@ proc Disthelper_Code::readFile {filename} {
             "Ship Date"         {set GS_job(Date) $line}
             EmailContact        {set GS_job(Contact) $line}
             email               {set GS_job(Email) $line; 'debug Email Set: $GS_job(Email)}
-            pieceweight         {set GS_job(pieceWeight) $line}
+            pieceweight         {set GS_job(pieceWeight) $line; .container.frame2.frame2d.shipmentPieceWeightField configure -foreground black; set tempVars(pieceWeightTmp) 1}
             default             {'debug Didn't set anything: $line}
         }
     }
