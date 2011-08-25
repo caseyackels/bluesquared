@@ -133,7 +133,8 @@ proc Disthelper_Code::readFile {filename} {
             "Ship Date"         {set GS_job(Date) $line}
             EmailContact        {set GS_job(Contact) $line}
             email               {set GS_job(Email) $line; 'debug Email Set: $GS_job(Email)}
-            pieceweight         {set GS_job(pieceWeight) $line; .container.frame2.frame2d.shipmentPieceWeightField configure -foreground black; set tempVars(pieceWeightTmp) 1}
+            pieceweight         {set GS_job(pieceWeight) $line; Disthelper_Helper::detectData .container.frame2.frame2d.shipmentPieceWeightEntry .container.frame2.frame2d.shipmentPieceWeightField pieceWeight}
+            fullbox             {set GS_job(fullBoxQty) $line; Disthelper_Helper::detectData .container.frame2.frame2d.shipmentFullBoxEntry .container.frame2.frame2d.shipmentFullBoxField fullBox}
             default             {'debug Didn't set anything: $line}
         }
     }
@@ -198,11 +199,6 @@ proc Disthelper_Code::doMath {totalQuantity maxPerBox} {
 
     ## Use fullBoxQty as a starting point for the partial box.
     lappend partialBoxQTY [expr {round($totalQuantity - $fullBoxQTY)}]
-
-    #puts "doMath::TotalQty: $totalQuantity"
-    #puts "doMath::maxPerBox: $maxPerBox"
-    #puts "doMath::totalFullBoxs: $totalFullBoxs"
-    #puts "doMath::partialBoxQTY: $partialBoxQTY"
 
     #totalFullBoxs = full box total for that shipment
     #partialBoxQty = the partial amount of that shipment.
@@ -271,6 +267,7 @@ proc Disthelper_Code::writeOutPut {} {
         Email       [lsearch $GL_file(Header) $GS_job(Email)]
         3rdParty    [lsearch $GL_file(Header) $GS_job(3rdParty)]
         pieceweight [lsearch $GL_file(Header) $GS_job(pieceWeight)]
+        fullbox     [lsearch $GL_file(Header) $GS_job(fullBoxQty)]
     "
     # Only imported values are listed here.
     #'debug UI_Company: $GS_address(Company)
@@ -334,6 +331,19 @@ proc Disthelper_Code::writeOutPut {} {
                                 set $name $GS_job(pieceWeight)
                             }
                 }
+                fullbox     {
+                            'debug fullbox/[lindex $l_line $importFile($name)]
+                            # Import the fullbox qty per version. Useful if we have multiple versions with various full box qty's.
+                            if {[lindex $l_line $importFile($name)] != ""} {
+                                'debug "fullbox: located in header"
+                                set $name [list [lindex $l_line $importFile($name)]]
+                                'debug "fullbox1: $name/$fullbox"
+                            } else {
+                                debug "fullbox: no header, user set: $GS_job(fullBoxQty)"
+                                set $name $GS_job(fullBoxQty)
+                                'debug "fullbox2: $name/$fullbox"
+                            }
+                }
                 default {
                         #'debug default/$name - If no data is present we fill it with dummy data
                         # we need a placeholder if there isn't any data, and reassign variable names.
@@ -352,7 +362,8 @@ proc Disthelper_Code::writeOutPut {} {
         #'debug importFile(Quantity) [lindex $l_line $importFile(Quantity)]
 
         if {[string is integer [lindex $l_line $importFile(Quantity)]]} {
-            set val [Disthelper_Code::doMath [lindex $l_line $importFile(Quantity)] $GS_job(fullBoxQty)]
+            #set val [Disthelper_Code::doMath [lindex $l_line $importFile(Quantity)] $GS_job(fullBoxQty)]
+            set val [Disthelper_Code::doMath [lindex $l_line $importFile(Quantity)] $fullbox]
             #'debug "(val) $val"
         } else {
             # If we come across a quantity that isn't an integer, we will skip it.
@@ -390,15 +401,21 @@ proc Disthelper_Code::writeOutPut {} {
         for {set x 1} {$x <= $totalBoxes} {incr x} {
             if {($x != $totalBoxes) || ($onlyFullBoxes eq yes)} {
                 'debug "boxes: $x - TotalBoxes: $totalBoxes"
-                incr program(totalBooks) $GS_job(fullBoxQty)
+                #incr program(totalBooks) $GS_job(fullBoxQty)
+                incr program(totalBooks) $fullbox
 
-                if {[string match $Version .] == 1 } { set boxVersion $GS_job(fullBoxQty)} else { set boxVersion [list [join [concat $Version _ $GS_job(fullBoxQty)] ""]] }
+                if {[string match $Version .] == 1 } { set boxVersion $fullbox} else { set boxVersion [list [join [concat $Version _ $fullbox] ""]] }
                 #set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
-                set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $pieceweight + $settings(BoxTareWeight)}]]
+                #set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $pieceweight + $settings(BoxTareWeight)}]]
+                set boxWeight [::tcl::mathfunc::round [expr {$fullbox * $pieceweight + $settings(BoxTareWeight)}]]
+                'debug "fullbox-3: $fullbox"
 
                 #'debug "FullBoxes_err: $err_1"
-                'debug [::csv::join "$shipVia $Company $Attention $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $PaymentTerms $3rd_Party $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
-                chan puts $filesDestination [::csv::join "$shipVia $Company $Attention $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $PaymentTerms $3rd_Party $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
+                #'debug [::csv::join "$shipVia $Company $Attention $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $PaymentTerms $3rd_Party $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
+                #chan puts $filesDestination [::csv::join "$shipVia $Company $Attention $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $GS_job(fullBoxQty) $PaymentTerms $3rd_Party $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
+
+                'debug [::csv::join "$shipVia $Company $Attention $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $fullbox $PaymentTerms $3rd_Party $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
+                chan puts $filesDestination [::csv::join "$shipVia $Company $Attention $delAddr $delAddr2 $delAddr3 $City $State $Zip $Phone $GS_job(Number) $boxVersion $fullbox $PaymentTerms $3rd_Party $boxWeight $x $totalBoxes $EmailGateway $Email $Contact"]
 
             } elseif {($x == $totalBoxes) || ($onlyFullBoxes eq no)} {
                 'debug "boxes: $x - TotalBoxes (Partials): $totalBoxes"
