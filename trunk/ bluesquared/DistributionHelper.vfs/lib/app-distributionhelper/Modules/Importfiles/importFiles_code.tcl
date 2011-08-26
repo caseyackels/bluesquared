@@ -339,7 +339,7 @@ proc Disthelper_Code::writeOutPut {} {
                                 set $name [list [lindex $l_line $importFile($name)]]
                                 'debug "fullbox1: $name/$fullbox"
                             } else {
-                                debug "fullbox: no header, user set: $GS_job(fullBoxQty)"
+                                'debug "fullbox: no header, user set: $GS_job(fullBoxQty)"
                                 set $name $GS_job(fullBoxQty)
                                 'debug "fullbox2: $name/$fullbox"
                             }
