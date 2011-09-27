@@ -32,7 +32,6 @@ package provide aboutwindow 0.1
 
 namespace eval BlueSquared_About {}
 
-
 proc BlueSquared_About::aboutWindow {} {
     #****f* aboutWindow/BlueSquared_About
     # AUTHOR
@@ -100,11 +99,14 @@ proc BlueSquared_About::aboutWindow {} {
 
     ttk::scrollbar $nb.f1.scrolly -orient v -command [list $nb.f1.listbox yview]
     ttk::scrollbar $nb.f1.scrollx -orient h -command [list $nb.f1.listbox xview]
-    
+
     pack $nb.f1.text -expand yes -fill both -padx 5p -pady 5p
-       
-    grid $nb.f1.scrolly -column 1 -row 0 -sticky nse
-    grid $nb.f1.scrollx -column 0 -row 1 -sticky ews
+    #grid $nb.f1.text -column 0 -row 0 -sticky news -padx 5p -pady 5p
+
+    #grid $nb.f1.scrolly -column 1 -row 0 -sticky nse
+    #grid $nb.f1.scrollx -column 0 -row 1 -sticky ews
+    pack $nb.f1.scrolly
+    pack $nb.f1.scrollx
 
     # Enable the 'autoscrollbar'
     ::autoscroll::autoscroll $nb.f1.scrolly
@@ -121,15 +123,16 @@ proc BlueSquared_About::aboutWindow {} {
                     -tabstyle wordprocessor \
                     -yscrollcommand [list $nb.f1.scrolly set] \
                     -xscrollcommand [list $nb.f1.scrollx set]
-    
+
     ttk::scrollbar $nb.f2.scrolly -orient v -command [list $nb.f2.listbox yview]
     ttk::scrollbar $nb.f2.scrollx -orient h -command [list $nb.f2.listbox xview]
 
-    pack $nb.f2.text -expand yes -fill both -padx 5p -pady 5p
-    
+    #pack $nb.f2.text -expand yes -fill both -padx 5p -pady 5p
+    grid $nb.f2.text -column 0 -row 0 -sticky news -padx 5p -pady 5p
+
     grid $nb.f2.scrolly -column 1 -row 0 -sticky nse
     grid $nb.f2.scrollx -column 0 -row 1 -sticky ews
-    
+
     # Enable the 'autoscrollbar'
     ::autoscroll::autoscroll $nb.f2.scrolly
     ::autoscroll::autoscroll $nb.f2.scrollx
@@ -151,13 +154,13 @@ proc BlueSquared_About::aboutWindow {} {
 
     grid $buttonbar.close -column 1 -row 3 -sticky nse -ipadx 4p
     pack $buttonbar -side bottom -anchor e -pady 8p -padx 5p
-    
+
     bind $nb.f2.text <Configure> "$nb.f2.text.hr configure -width %w"
-    
+
     frame $nb.f2.text.hr -relief raised -height 2 -background gray
 
     BlueSquared_About::aboutOpenFiles $nb.f1.text $nb.f2.text
-    
-    
+
+
 
 } ;# End aboutWindow

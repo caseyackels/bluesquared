@@ -78,8 +78,9 @@ proc Disthelper_Code::readFile {filename} {
     # Make the data useful, and put it into lists
     # While we are at it, make everything UPPER CASE
     while { [gets $fileName line] >= 0 } {
-        #if {[string match *,,,* $line] eq ""} {'debug "blank: $line"}
-        'debug "blank: [string match ,,,,,,,,,,,,, $line]"
+        # Guard against lines of comma's, this will not be viewable in excel. Only if a text editor.
+        if {[string is punc $line] eq 1} {continue}
+
         lappend GL_file(dataList) [string toupper $line]
         'debug "while: $line"
     }
@@ -282,9 +283,14 @@ proc Disthelper_Code::writeOutPut {} {
     foreach line $GL_file(dataList_modified) {
         #'debug "Start Processing List..."
 
+        # escape if we have 'blank' lines
+        # It will show up as a string of ,,,,,,,,,
+        if {[string is punc $line] == 1} {continue}
+
         set l_line [csv::split $line]
         set l_line [join [split $l_line ,] ""] ;# remove all comma's
-        #'debug Line: $l_line
+        'debug Line: $l_line
+
 
         # Map data to variable
         # Name = individual name of array
@@ -404,7 +410,8 @@ proc Disthelper_Code::writeOutPut {} {
                 #incr program(totalBooks) $GS_job(fullBoxQty)
                 incr program(totalBooks) $fullbox
 
-                if {[string match $Version .] == 1 } { set boxVersion $fullbox} else { set boxVersion [list [join [concat $Version _ $fullbox] ""]] }
+                #if {[string match $Version .] == 1 } { set boxVersion $fullbox} else { set boxVersion [list [join [concat $Version _ $fullbox] ""]] }
+                if {[string match $Version .] == 1 } { set boxVersion $fullbox} else { set boxVersion [list [concat $Version / $fullbox]]}
                 #set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
                 #set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $pieceweight + $settings(BoxTareWeight)}]]
                 set boxWeight [::tcl::mathfunc::round [expr {$fullbox * $pieceweight + $settings(BoxTareWeight)}]]

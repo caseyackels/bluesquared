@@ -1,9 +1,20 @@
+= Version 2.0.1b (September 2011)
+== Notes
+Minor maintenance update.
+
+== Bug Fixes
+* No longer need to exit EA for the completed file to be written
+* Progressbar works as it should
+
+--
+
 = Version 2.0 (August 2011)
 == Notes
 The big features on this release are:
 * Progress Window
 * User settable Headers
 * Importable piece weights; the header to use is 'pieceweight'
+* Importable Full Box quantities; the header to use is 'fullbox'
 
 You will now see how far Efficiency Assist has processed your file with a progress bar. Once EA has finished, the total quantity and total quantity of boxes will be displayed
 

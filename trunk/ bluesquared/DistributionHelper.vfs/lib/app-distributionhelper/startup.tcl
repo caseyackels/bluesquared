@@ -208,7 +208,7 @@ proc 'distHelper_initVariables {} {
     }
 
     if {![info exists settings(shipviaPP)]} {
-        # Set possible 3rd party shipvia codes
+        # Set possible pre paid shipvia codes
         set settings(shipviaPP) [list 017 018]
     }
 
