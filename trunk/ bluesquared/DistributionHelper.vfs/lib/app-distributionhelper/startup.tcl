@@ -302,6 +302,7 @@ proc 'distHelper_loadSettings {} {
     set debug(onOff) on
 
     set program(Name) "Efficiency Assist"
+    set program(Version) "2.0.2 Beta 1"
     tk appname $program(Name)
 
     # Theme setting for Tile
