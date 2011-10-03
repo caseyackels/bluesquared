@@ -71,7 +71,7 @@ proc disthelperGUI {} {
 
 
 # Frame 1 - Listbox only
-    set frame1 [ttk::labelframe .container.frame1 -text [mc "File Headers"]]
+    set frame1 [ttk::labelframe .container.frame1 -text [mc "Unassigned File Headers"]]
     pack $frame1 -fill both -padx 5p -pady 5p -ipady 2p -anchor nw -side left
 
     listbox $frame1.listbox \

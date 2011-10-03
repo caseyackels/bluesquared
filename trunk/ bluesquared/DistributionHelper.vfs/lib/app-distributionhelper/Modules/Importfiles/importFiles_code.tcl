@@ -108,37 +108,69 @@ proc Disthelper_Code::readFile {filename} {
         .container.frame1.listbox insert end $line
 
         # Find potential matches and assign the correct value.
-        if {[lsearch -nocase $header(shipvia) $line1] != -1} {set GS_ship(shipVia) $line}
-        if {[lsearch -nocase $header(company) $line1] != -1} {set GS_address(Company) $line}
-        if {[lsearch -nocase $header(attention) $line1] != -1} {set GS_address(Attention) $line}
-        if {[lsearch -nocase $header(address1) $line1] != -1} {set GS_address(deliveryAddr) $line}
-        if {[lsearch -nocase $header(address2) $line1] != -1} {set GS_address(addrTwo) $line}
-        if {[lsearch -nocase $header(address3) $line1] != -1} {set GS_address(addrThree) $line}
-
-        # Feature to be added; to split columns that contain city,state,zip
-        if {[lsearch -nocase $header(CityStateZip) $line1] != -1} {set internal_line cityStateZip; 'debug Found a CityStateZip!}
-
-        #if {[lsearch -nocase $city $line] != -1} {set internal_line City}
-
-        if {[lsearch -nocase $header(state) $line1] != -1} {set GS_address(State) $line}
-        if {[lsearch -nocase $header(quantity) $line1] != -1} {set GS_job(Quantity) $line; set ea_header(haveHeaders) yes}
-        if {[lsearch -nocase $header(version) $line1] != -1} {set GS_job(Version) $line}
-
-        if {[lsearch -nocase $header(zip) $line1] != -1} {set GS_address(Zip) $line}
-        if {[lsearch -nocase $header(3rdPartyNumber) $line1] != -1} {set GS_job(3rdParty) $line}
+        if { [lsearch -nocase $header(shipvia) $line1] != -1} {
+            set GS_ship(shipVia) $line
+            Disthelper_RemoveListBoxItem $line
+            
+            } elseif { [lsearch -nocase $header(company) $line1] != -1} {
+                set GS_address(Company) $line
+                Disthelper_RemoveListBoxItem $line
+            
+            } elseif { [lsearch -nocase $header(attention) $line1] != -1} {
+                set GS_address(Attention) $line
+                Disthelper_RemoveListBoxItem $line
+            
+            } elseif { [lsearch -nocase $header(address1) $line1] != -1} {
+                set GS_address(deliveryAddr) $line
+                Disthelper_RemoveListBoxItem $line
+            
+            } elseif { [lsearch -nocase $header(address2) $line1] != -1} {
+                set GS_address(addrTwo) $line
+                Disthelper_RemoveListBoxItem $line
+            
+            } elseif { [lsearch -nocase $header(address3) $line1] != -1} {
+                set GS_address(addrThree) $line
+                Disthelper_RemoveListBoxItem $line
+            
+            # Feature to be added; to split columns that contain city,state,zip
+            #elseif {[lsearch -nocase $header(CityStateZip) $line1] != -1} {set internal_line cityStateZip; 'debug Found a CityStateZip!}
+            #if {[lsearch -nocase $city $line] != -1} {set internal_line City}
+            } elseif { [lsearch -nocase $header(state) $line1] != -1} {
+                set GS_address(State) $line
+                Disthelper_RemoveListBoxItem $line
+            
+            } elseif {[lsearch -nocase $header(quantity) $line1] != -1} {
+                set GS_job(Quantity) $line; set ea_header(haveHeaders) yes
+                Disthelper_RemoveListBoxItem $line
+            
+            } elseif {[lsearch -nocase $header(version) $line1] != -1} {
+                set GS_job(Version) $line
+                Disthelper_RemoveListBoxItem $line
+            
+            } elseif {[lsearch -nocase $header(zip) $line1] != -1} {
+                set GS_address(Zip) $line
+                Disthelper_RemoveListBoxItem $line
+            
+            } elseif {[lsearch -nocase $header(3rdPartyNumber) $line1] != -1} {
+                set GS_job(3rdParty) $line
+                Disthelper_RemoveListBoxItem $line
+            }
 
         # Continue processing the list for potential matches where we don't need to search for possible alternate spellings
         switch -nocase -- $line1 {
-            City                {set GS_address(City) $line}
-            Phone               {set GS_address(Phone) $line}
-            "Ship Date"         {set GS_job(Date) $line}
-            EmailContact        {set GS_job(Contact) $line}
-            email               {set GS_job(Email) $line; 'debug Email Set: $GS_job(Email)}
-            pieceweight         {set GS_job(pieceWeight) $line; Disthelper_Helper::detectData .container.frame2.frame2d.shipmentPieceWeightEntry .container.frame2.frame2d.shipmentPieceWeightField pieceWeight}
-            fullbox             {set GS_job(fullBoxQty) $line; Disthelper_Helper::detectData .container.frame2.frame2d.shipmentFullBoxEntry .container.frame2.frame2d.shipmentFullBoxField fullBox}
-            default             {'debug Didn't set anything: $line}
+            City                {set GS_address(City) $line; Disthelper_RemoveListBoxItem $line}
+            Phone               {set GS_address(Phone) $line; Disthelper_RemoveListBoxItem $line}
+            "Ship Date"         {set GS_job(Date) $line; Disthelper_RemoveListBoxItem $line}
+            EmailContact        {set GS_job(Contact) $line; Disthelper_RemoveListBoxItem $line}
+            email               {set GS_job(Email) $line; 'debug Email Set: $GS_job(Email); Disthelper_RemoveListBoxItem $line}
+            pieceweight         {set GS_job(pieceWeight) $line; Disthelper_RemoveListBoxItem $line; Disthelper_Helper::detectData .container.frame2.frame2d.shipmentPieceWeightEntry .container.frame2.frame2d.shipmentPieceWeightField pieceWeight}
+            fullbox             {set GS_job(fullBoxQty) $line; Disthelper_RemoveListBoxItem $line; Disthelper_Helper::detectData .container.frame2.frame2d.shipmentFullBoxEntry .container.frame2.frame2d.shipmentFullBoxField fullBox}
+            default             {'debug Inserted Unidentified Header: $line}
         }
     }
+    
+    # Highlight list elements if they exist to raise visiblity that they are there.
+    Disthelper_HighlightListBoxItem
 
     if {$ea_header(haveHeaders) eq "yes"} {
         # We have headers, so lets skip the first line.

@@ -42,6 +42,7 @@ proc Error_Message::errorMsg {code args} {
         fullBoxQty1     {set message [mc "Please enter the full box amount."]; set message2 [mc "Error Location: %s" $code]; set title $defaultTitle}
         3rdParty1       {set message [mc "Please enter a 3rd Party Account Number."]; set message2 [mc "Error Location: %s" $code]; set title $defaultTitle}
         header1         {set message [mc "This name already exists and cannot be used twice.\nIt is located in the %s header" $args]; set message2 ""; set title $dupeTitle}
+        quantity1       {set message [mc "Please enter the Shipment Quantity."]; set message2 [mc "Error Location: %s" $code]; set title $defaultTitle}
         default         {set message [mc "Unknown Error Message"]; set message2 ""}
     }
     

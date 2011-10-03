@@ -487,12 +487,17 @@ proc Disthelper_Helper::checkForErrors {} {
     #
     #***
     global GS_job GS_ship
+    
+    'debug Job Number: $GS_job(Number)
+    'debug ShipVia: $GS_ship(shipVia)
+    'debug FullBoxQty: $GS_job(fullBoxQty)
 
     # These are required fields
-    if {$GS_job(Number) == ""} {Error_Message::errorMsg jobNumber1; return}
-    if {$GS_ship(shipVia) == ""} {Error_Message::errorMsg shipVia1; return}
-    if {$GS_job(pieceWeight) == ""} {Error_Message::errorMsg pieceWeight1; return}
-    if {$GS_job(fullBoxQty) == ""} {Error_Message::errorMsg fullBoxQty1; return}
+    if {$GS_job(Number) == ""} {'debug No Job Number; Error_Message::errorMsg jobNumber1; return}
+    if {$GS_ship(shipVia) == ""} {'debug No ShipVia; Error_Message::errorMsg shipVia1; return}
+    if {$GS_job(pieceWeight) == ""} {'debug No pieceWeight; Error_Message::errorMsg pieceWeight1; return}
+    if {$GS_job(fullBoxQty) == ""} {'debug No fullbox; Error_Message::errorMsg fullBoxQty1; return}
+    if {GS_job(Quantity == ""} {'debug No Quantity; Error_message::errorMsg quantity1; return}
 
 
     # Everything is satisfied, lets continue processing
@@ -580,3 +585,73 @@ proc Disthelper_Helper::shipVia {l_line name} {
     return [list $shipVia $3rd_Party $PaymentTerms]
 
 } ;# End Disthelper_Helper::shipVia
+
+proc Disthelper_RemoveListBoxItem {item} { 
+    #****f* RemoveListBoxItem/Disthelper
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011 - Casey Ackels
+    #
+    # FUNCTION
+    #	Remove the matched element from the listbox, leaving elements that the user must specify what it is.
+    #
+    # SYNOPSIS
+    #	N/A
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    
+    set listBoxElements [.container.frame1.listbox get 0 end]
+    set deleteBoxElements [lsearch $listBoxElements $item]
+    .container.frame1.listbox delete $deleteBoxElements
+} ;# End Disthelper_RemoveListBoxItem
+
+proc Disthelper_HighlightListBoxItem {} { 
+    #****f* HighlightListBoxItem/Disthelper
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011 - Casey Ackels
+    #
+    # FUNCTION
+    #	For items that have not been matched, lets highlight them for more visiblity.
+    #
+    # SYNOPSIS
+    #	Used internally. No argument is given.
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    # Get indices of elements
+    #set listBoxElements [.container.frame1.listbox get 0 end]
+    set listBoxIndices [expr {[.container.frame1.listbox index end]} -1]
+    #.container.frame1.listbox itemconfigure 0 -background red
+    for {set x 0} {$listBoxIndices >= $x} {incr x} {
+	.container.frame1.listbox itemconfigure $x -background red
+    }
+   
+    #foreach index $listBoxElements {
+    #.container.frame1.listbox itemconfigure $index -background red
+    #}
+    
+} ;# End Disthelper_HighlightListBoxItem
