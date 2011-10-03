@@ -65,7 +65,8 @@ proc shippingGUI {} {
         }
     }
 
-    wm title . "Box Labels - 1.6.2 (June 2011)"
+    wm title . "Box Labels - 1.6.3 (October 2011)"
+
 
 # Frame 1
     set frame1 [ttk::labelframe .container.frame1 -text "Label Information"]
@@ -288,6 +289,7 @@ bind all <Escape> {exit}
 bind all <F1> {console show}
 bind all <F2> {console hide}
 
+
 } ;# End of shippingGUI
 
 
@@ -377,6 +379,9 @@ proc breakDown {} {
         toplevel .breakdown
         wm title .breakdown "Break Down"
         wm withdraw .breakdown
+
+        # Now we don't destroy the window if someone closes it by the "X" button at the top of the screen.
+        wm protocol .breakdown WM_DELETE_WINDOW {wm withdraw .breakdown}
         puts "breakdown window created"
 
         text .breakdown.txt
@@ -427,6 +432,71 @@ proc breakDown {} {
 
 } ;# End of breakDown
 
+
+proc chooseLabel {} {
+    #****f* chooseLabel/Shipping_Gui
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011 - Casey Ackels
+    #
+    # FUNCTION
+    #	If the text "Seattle Met" is detected, we launch this window so that use can choose what type of label they want to use.
+    #
+    # SYNOPSIS
+    #	chooseLabel $line (Where line is a value between 1 and 6; referring to how many lines the label is using)
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #
+    #
+    # NOTES
+    #	None
+    #
+    # SEE ALSO
+    #
+    #
+    #***
+    global GS_textVar GS_widget labels
+
+    toplevel .chooseLabel
+    wm title .chooseLabel "Choose your Label"
+    wm transient .chooseLabel .
+
+    # x = horizontal
+    # y = vertical
+    # Put the window in the center of the parent window
+    set locX [expr {[winfo width . ] / 3 + [winfo x .]}]
+    set locY [expr {[winfo height . ] / 3 + [winfo y .]}]
+
+    wm geometry .chooseLabel +$locX+$locY
+
+    focus -force .chooseLabel
+
+    set frame0 [ttk::labelframe .chooseLabel.frame0 -text "Choose your Label"]
+    grid $frame0 -padx 5p -pady 5p
+
+    ttk::radiobutton $frame0.white -text "White Label - Standard" -variable labels -value LINEDB.btw
+    ttk::radiobutton $frame0.green -text "Green Label - Special" -variable labels -value LINEDB_Seattle.btw
+    $frame0.white invoke ;# set the default
+
+    grid $frame0.white -column 0 -row 0 -padx 5p -pady 5p -sticky w
+    grid $frame0.green -column 0 -row 1 -padx 5p -pady 5p -sticky w
+
+    set frame1 [ttk::frame .chooseLabel.frame1]
+    grid $frame1 -padx 5p -pady 5p
+
+    ttk::button $frame1.print -text "Print" -command "set labelType $labels; destroy .chooseLabel"
+    ttk::button $frame1.close -text "Close" -command {destroy .chooseLabel}
+
+    grid $frame1.print -column 0 -row 0 -sticky ne
+    grid $frame1.close -column 1 -row 0 -sticky ne
+
+
+} ;# End of chooseLabel
 
 
 } ;# End of Shipping_Gui namespace

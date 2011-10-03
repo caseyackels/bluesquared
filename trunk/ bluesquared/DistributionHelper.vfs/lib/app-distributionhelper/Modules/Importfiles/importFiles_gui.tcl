@@ -369,7 +369,7 @@ focus $frame2a.jobNumberEntry
 bind $frame2a.jobNumberEntry <Return> "$frame2a.jobNumberButton invoke"
 bind $frame2a.jobNumberButton <Return> "$frame2a.jobNumberButton invoke"
 
-ttk::style map TEntry -fieldbackground [list focus yellow]
+#ttk::style map TEntry -fieldbackground [list focus yellow]
 
 
 } ;# End of disthelperGUI

@@ -487,7 +487,7 @@ proc Disthelper_Helper::checkForErrors {} {
     #
     #***
     global GS_job GS_ship
-    
+
     'debug Job Number: $GS_job(Number)
     'debug ShipVia: $GS_ship(shipVia)
     'debug FullBoxQty: $GS_job(fullBoxQty)
@@ -497,7 +497,7 @@ proc Disthelper_Helper::checkForErrors {} {
     if {$GS_ship(shipVia) == ""} {'debug No ShipVia; Error_Message::errorMsg shipVia1; return}
     if {$GS_job(pieceWeight) == ""} {'debug No pieceWeight; Error_Message::errorMsg pieceWeight1; return}
     if {$GS_job(fullBoxQty) == ""} {'debug No fullbox; Error_Message::errorMsg fullBoxQty1; return}
-    if {GS_job(Quantity == ""} {'debug No Quantity; Error_message::errorMsg quantity1; return}
+    if {$GS_job(Quantity) == ""} {'debug No Quantity; Error_Message::errorMsg quantity1; return}
 
 
     # Everything is satisfied, lets continue processing
@@ -586,7 +586,7 @@ proc Disthelper_Helper::shipVia {l_line name} {
 
 } ;# End Disthelper_Helper::shipVia
 
-proc Disthelper_RemoveListBoxItem {item} { 
+proc Disthelper_RemoveListBoxItem {item} {
     #****f* RemoveListBoxItem/Disthelper
     # AUTHOR
     #	Casey Ackels
@@ -604,20 +604,20 @@ proc Disthelper_RemoveListBoxItem {item} {
     #	N/A
     #
     # PARENTS
-    #	
+    #
     #
     # NOTES
     #
     # SEE ALSO
     #
     #***
-    
+
     set listBoxElements [.container.frame1.listbox get 0 end]
     set deleteBoxElements [lsearch $listBoxElements $item]
     .container.frame1.listbox delete $deleteBoxElements
 } ;# End Disthelper_RemoveListBoxItem
 
-proc Disthelper_HighlightListBoxItem {} { 
+proc Disthelper_HighlightListBoxItem {} {
     #****f* HighlightListBoxItem/Disthelper
     # AUTHOR
     #	Casey Ackels
@@ -635,7 +635,7 @@ proc Disthelper_HighlightListBoxItem {} {
     #	N/A
     #
     # PARENTS
-    #	
+    #
     #
     # NOTES
     #
@@ -649,9 +649,9 @@ proc Disthelper_HighlightListBoxItem {} {
     for {set x 0} {$listBoxIndices >= $x} {incr x} {
 	.container.frame1.listbox itemconfigure $x -background red
     }
-   
+
     #foreach index $listBoxElements {
     #.container.frame1.listbox itemconfigure $index -background red
     #}
-    
+
 } ;# End Disthelper_HighlightListBoxItem

@@ -445,7 +445,7 @@ proc displayListHelper {fullboxes partialboxes {reset 0}} {
 
 
 proc printLabels {} {
-    global GS_textVar programPath
+    global GS_textVar programPath labelType
 
 	if {[info exists GS_textVar(maxBoxQty)] == 0} {
 	    Error_Message::errorMsg printLabels1
@@ -454,7 +454,7 @@ proc printLabels {} {
 
 	Shipping_Code::createList
 	Shipping_Code::writeHistory $GS_textVar(maxBoxQty)
-        #Shipping_Code::openHistory
+        Shipping_Code::openHistory
 	Shipping_Code::setTips
 
             #Figure out how many Lines are being used and load the appropriate label
@@ -468,22 +468,31 @@ proc printLabels {} {
 
 	if {$GS_textVar(line5) != ""} {
 	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
-		    Error_Message::errorMsg seattleMet1; return
+                    Shipping_Gui::chooseLabel
+                    tkwait window .chooseLabel
+                    exec $programPath(Bartend) /AF=$programPath(LabelPath)\\6$labelType /P /CLOSE
+
 		} else {
 		    exec $programPath(Bartend) /AF=$programPath(LabelPath)\\6LINEDB.btw /P /CLOSE
 	    }
 
 	} elseif {$GS_textVar(line4) != ""} {
 	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
-                        Error_Message::errorMsg seattleMet1; return
-		} else {
+                    Shipping_Gui::chooseLabel
+                    tkwait window .chooseLabel
+                    exec $programPath(Bartend) /AF=$programPath(LabelPath)\\5$labelType /P /CLOSE
+
+                } else {
 		    exec $programPath(Bartend) /AF=$programPath(LabelPath)\\5LINEDB.btw /P /CLOSE
 	    }
 
 	} elseif {$GS_textVar(line3) != ""} {
 	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
-		    exec $programPath(Bartend) /AF=$programPath(LabelPath)\\4LINEDB_Seattle.btw /P /CLOSE
-		} else {
+                    Shipping_Gui::chooseLabel
+                    tkwait window .chooseLabel
+                    exec $programPath(Bartend) /AF=$programPath(LabelPath)\\4$labelType /P /CLOSE
+
+                } else {
 		    exec $programPath(Bartend) /AF=$programPath(LabelPath)\\4LINEDB.btw /P /CLOSE
 	    }
 
