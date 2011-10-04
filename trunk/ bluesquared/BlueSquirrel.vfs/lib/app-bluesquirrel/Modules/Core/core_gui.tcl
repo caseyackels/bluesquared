@@ -85,12 +85,6 @@ proc blueSquirrel::parentGUI {} {
     #$mb.edit add command -label "Breakdown" -command { Shipping_Gui::breakDown }
     $mb.edit add command -label "Breakdown" -command { wm deiconify .breakdown }
 
-    ## Mode
-    #menu $mb.mode -tearoff 0 -relief raised -bd 2
-    #$mb add cascade -label "Mode" -menu $mb.mode
-
-    #$mb.mode add command -label "Box Labels" -command {Shipping_Gui::shippingGUI}
-
     ## Help
     menu $mb.help -tearoff 0 -relief raised -bd 2
     $mb add cascade -label "Help" -menu $mb.help
@@ -111,10 +105,10 @@ proc blueSquirrel::parentGUI {} {
     pack .container -expand yes -fill both
 
     # Start the Default GUI - ShippingGUI
-        # All frames that make up the GUI are children to .container
+    # All frames that make up the GUI are children to .container
     Shipping_Gui::shippingGUI
 
-    # Start the breakDown window, and immediately withdraw it (code in [breakDown])
+    # Start the breakDown window, and immediately withdraw it)
     Shipping_Gui::breakDown
 
 
@@ -124,15 +118,15 @@ proc blueSquirrel::parentGUI {} {
 
     set btnBar [ttk::frame .btnBar]
 
-    ttk::button $btnBar.printb -text "Print Breakdown" -command Shipping_Gui::chooseLabel ;#Shipping_Gui::printbreakDown
+    ttk::button $btnBar.printb -text "Print Breakdown" -command Shipping_Gui::printbreakDown
     ttk::button $btnBar.print -text "Print Labels" -command Shipping_Code::printLabels
     ttk::button $btnBar.close -text "Close" -command exit
     #ttk::label $btnBar.copy -text "\u00a9 Casey Ackels - 2007"
 
     grid $btnBar.printb -column 0 -row 3 -sticky nse -padx 8p
     grid $btnBar.print -column 1 -row 3 -sticky nse -padx 8p
-    grid $btnBar.close -column 2 -row 3 -sticky nse ;#-padx 2p
-    #grid $btnBar.copy -columnspan 2 -row 4 -sticky nse -pady 2p;#-padx 2p
+    grid $btnBar.close -column 2 -row 3 -sticky nse
+
 
     pack $btnBar -side bottom -anchor se -pady 4p -padx 5p
 
@@ -150,9 +144,8 @@ proc blueSquirrel::about {} {
 
     toplevel .about
     wm transient .about .
-    #wm geometry .about 420x430
     wm title .about About
-    focus
+    focus .about
 
     ttk::frame .about.parent
 

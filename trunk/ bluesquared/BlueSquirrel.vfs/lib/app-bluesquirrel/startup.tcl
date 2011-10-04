@@ -62,24 +62,24 @@ proc 'blueSquirrel_sourceReqdFiles {} {
     #***
 #console show
 	## All files that need to be sourced should go here. That way if any of them fail to load, we'll catch it.
-	
+
 	#Modify the Auto_path so our 'package requires' work.
 	lappend ::auto_path [file join [file dirname [info script]]]
-        
+
         lappend ::auto_path [file join [file dirname [info script]] Binaries]
         #lappend ::auto_path [file join [file dirname [info script]] Binaries sqlite3.3.8]
-        
+
 	lappend ::auto_path [file join [file dirname [info script]] Libraries]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist4.8]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries autoscroll]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries csv]
-	
-	
+
+
 	lappend ::auto_path [file join [file dirname [info script]] Modules]
 	lappend ::auto_path [file join [file dirname [info script]] Modules Core]
-	
-	
+
+
 	# Start the Package Require
 	    ## ** NOTE **
 	    # The file tablelistEdit.tcl has been edited for the binding of <Return> and <KP_Enter>
@@ -88,11 +88,11 @@ proc 'blueSquirrel_sourceReqdFiles {} {
 	package require tooltip
 	package require autoscroll
 	package require csv
-	
+
 	package require shipping
 	package require bluesquirrel_core
         #package require sqlite3
-	
+
 	# Source the required files
 	#source [file join [file dirname [info script]] Modules Core core_gui.tcl]
 	#source [file join [file dirname [info script]] Modules Shipping shipping_window_gui.tcl]
@@ -128,23 +128,23 @@ proc 'blueSquirrel_sourceOtherFiles {} {
     #
     #***
     catch {
-	
+
 	#lappend ::auto_path [file join [file dirname [info script]] Libraries csv]
-	
-	
+
+
 	#package require csv
-    
+
     	#source [file join [file dirname [info script]] Modules Shipping inventory_window_gui.tcl]
 	#source [file join [file dirname [info script]] Modules Shipping rollstock_window_gui.tcl]
-	
+
 	# Source the Error files
 	source [file join [file dirname [info script]] Libraries errorMsg_gui.tcl]
-	
+
 	# Source the Backend_Code files
 	#source [file join [file dirname [info script]] Modules Shipping shipping_code.tcl]
-    
+
     } S_errMsg
-    
+
     if {([info exists S_errMsg]) && ($S_errMsg != "")} {
 	tk_messageBox \
             -parent . \
@@ -152,7 +152,7 @@ proc 'blueSquirrel_sourceOtherFiles {} {
             -icon warning \
             -title "Couldn't find File" \
             -message "I'm sorry, but I need a file to start. Can you please locate it, and put it here:\n[pwd]\n\n$S_errMsg"
-	   
+
 	unset S_errMsg
 	exit ;# Don't even open the GUI. Exit right away.
     }
@@ -188,7 +188,7 @@ proc 'blueSquirrel_loadOptions {} {
     #***
     #option add *font {tahoma 10}
     option add *Listbox.font {tahoma 12}
-    
+
     # Theme setting for Tile
     ttk::style theme use $ttk::currentTheme
     #ttk::style theme use xpnative
@@ -226,14 +226,14 @@ proc 'blueSquirrel_loadSettings {} {
     #
     #***
     global programPath
-    
+
     if {[catch {open LD_Defaults.txt r} fd]} {
 	puts "unable to load defaults"
-    
+
     } else {
 	set settings [split [read $fd] \n]
 	catch {close $fd}
-	
+
 	foreach line $settings {
 	    if {$line == ""} {continue}
 	    set l_line [split $line " "]
@@ -241,10 +241,7 @@ proc 'blueSquirrel_loadSettings {} {
 	}
     }
     
-    #source [file join [file dirname [info script]] Modules Core core_gui.tcl]
-    #set g_changeNotes [split [read [open changenotes.txt r]] \n]
-    #close $g_changeNotes
-    
+
 }
 # Load required files / packages
 'blueSquirrel_sourceReqdFiles

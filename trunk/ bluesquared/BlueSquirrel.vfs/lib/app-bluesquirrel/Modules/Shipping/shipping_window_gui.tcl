@@ -34,7 +34,7 @@ proc shippingGUI {} {
     #	Casey Ackels
     #
     # COPYRIGHT
-    #	(c) 2006 - 2008 - Casey Ackels
+    #	(c) 2006 - 20011 - Casey Ackels
     #
     # FUNCTION
     #	Builds the GUI of the shipping Module, with bindings
@@ -65,7 +65,7 @@ proc shippingGUI {} {
         }
     }
 
-    wm title . "Box Labels - 1.6.3 (October 2011)"
+    wm title . "Box Labels - 1.6.4 (October 2011)"
 
 
 # Frame 1
@@ -196,18 +196,12 @@ proc shippingGUI {} {
     grid $frame2b.scrolly -column 1 -row 0 -sticky nse
 
     ::autoscroll::autoscroll $frame2b.scrolly ;# Enable the 'autoscrollbar'
-    # Tooltip: The tooltip code is in shippin_code.tcl, in the displayListHelper proc.
+    # Tooltip: The tooltip code is in shipping_code.tcl, in the displayListHelper proc.
 
 
 #Frame3
-    #set frame3 [ttk::labelframe .container.frame3 -text "Did you know?" -width 4.5i -labelanchor nw]
     set frame3 [ttk::frame .container.frame3]
     pack $frame3 -side right -padx 5p -pady 5p
-
-    #ttk::checkbutton $frame3.checkbutton -text "Print Manifest?" -variable GS_textVar(printManifest)
-
-    #grid $frame3.checkbutton -column 0 -row 0 -sticky nse
-
 
 ##
 ## - Bindings
@@ -460,7 +454,7 @@ proc chooseLabel {} {
     #
     #
     #***
-    global GS_textVar GS_widget labels
+    global GS_textVar GS_widget lineNumber
 
     toplevel .chooseLabel
     wm title .chooseLabel "Choose your Label"
@@ -474,10 +468,11 @@ proc chooseLabel {} {
 
     wm geometry .chooseLabel +$locX+$locY
 
-    focus -force .chooseLabel
+    focus .chooseLabel
 
     set frame0 [ttk::labelframe .chooseLabel.frame0 -text "Choose your Label"]
     grid $frame0 -padx 5p -pady 5p
+
 
     ttk::radiobutton $frame0.white -text "White Label - Standard" -variable labels -value LINEDB.btw
     ttk::radiobutton $frame0.green -text "Green Label - Special" -variable labels -value LINEDB_Seattle.btw
@@ -489,7 +484,7 @@ proc chooseLabel {} {
     set frame1 [ttk::frame .chooseLabel.frame1]
     grid $frame1 -padx 5p -pady 5p
 
-    ttk::button $frame1.print -text "Print" -command "set labelType $labels; destroy .chooseLabel"
+    ttk::button $frame1.print -text "Print" -command {Shipping_Code::printCustomLabels $lineNumber$labels; destroy .chooseLabel}
     ttk::button $frame1.close -text "Close" -command {destroy .chooseLabel}
 
     grid $frame1.print -column 0 -row 0 -sticky ne

@@ -59,10 +59,10 @@ proc Disthelper_Preferences::prefGUI {} {
     toplevel .preferences
     wm transient .preferences .
     wm title .preferences [mc "Preferences"]
-    #wm geometry .preferences 640x300 ;# width X Height
 
-    set locX [expr {([winfo screenwidth .] - [winfo width .]) / 2}]
-    set locY [expr {([winfo screenheight .] - [winfo height .]) / 2}]
+    # Put the window in the center of the parent window
+    set locX [expr {[winfo width . ] / 3 + [winfo x .]}]
+    set locY [expr {[winfo height . ] / 3 + [winfo y .]}]
     wm geometry .preferences +${locX}+${locY}
 
     focus -force .preferences

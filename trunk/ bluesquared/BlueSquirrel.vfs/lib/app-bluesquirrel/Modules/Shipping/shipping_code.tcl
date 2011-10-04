@@ -445,12 +445,14 @@ proc displayListHelper {fullboxes partialboxes {reset 0}} {
 
 
 proc printLabels {} {
-    global GS_textVar programPath labelType
+    global GS_textVar programPath lineNumber
 
 	if {[info exists GS_textVar(maxBoxQty)] == 0} {
 	    Error_Message::errorMsg printLabels1
 	    return
 	}
+
+        set lineNumber "" ;# Make sure we're cleared
 
 	Shipping_Code::createList
 	Shipping_Code::writeHistory $GS_textVar(maxBoxQty)
@@ -468,9 +470,9 @@ proc printLabels {} {
 
 	if {$GS_textVar(line5) != ""} {
 	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
+                    set lineNumber 5
+                    # Redirect for special print options
                     Shipping_Gui::chooseLabel
-                    tkwait window .chooseLabel
-                    exec $programPath(Bartend) /AF=$programPath(LabelPath)\\6$labelType /P /CLOSE
 
 		} else {
 		    exec $programPath(Bartend) /AF=$programPath(LabelPath)\\6LINEDB.btw /P /CLOSE
@@ -478,9 +480,9 @@ proc printLabels {} {
 
 	} elseif {$GS_textVar(line4) != ""} {
 	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
+                    set lineNumber 4
+                    # Redirect for special print options
                     Shipping_Gui::chooseLabel
-                    tkwait window .chooseLabel
-                    exec $programPath(Bartend) /AF=$programPath(LabelPath)\\5$labelType /P /CLOSE
 
                 } else {
 		    exec $programPath(Bartend) /AF=$programPath(LabelPath)\\5LINEDB.btw /P /CLOSE
@@ -488,9 +490,9 @@ proc printLabels {} {
 
 	} elseif {$GS_textVar(line3) != ""} {
 	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
+                    set lineNumber 3
+                    # Redirect for special print options
                     Shipping_Gui::chooseLabel
-                    tkwait window .chooseLabel
-                    exec $programPath(Bartend) /AF=$programPath(LabelPath)\\4$labelType /P /CLOSE
 
                 } else {
 		    exec $programPath(Bartend) /AF=$programPath(LabelPath)\\4LINEDB.btw /P /CLOSE
@@ -511,9 +513,40 @@ proc printLabels {} {
 	    }
 	}
 
-        #C:/path/to/bartend.exe /F=C:/Labels/path/to/format /P /S /CLOSE
 } ;# printLabels
 
+proc printCustomLabels {args} {
+    #****f* printCustomLabels/Shipping_Code
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011 - Casey Ackels
+    #
+    # FUNCTION
+    #	Prints custom labels
+    #
+    # SYNOPSIS
+    #	printCustomLabels 3|4|5|6
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	Shipping_Code::writeHistory
+    #
+    # NOTES
+    #	N/A
+    #
+    # SEE ALSO
+    #	N/A
+    #
+    #***
+    global programPath
+
+    #exec $programPath(Bartend) /AF=$programPath(LabelPath)\\$args /P /CLOSE
+    puts "programPath(Bartend) /AF=programPath(LabelPath)\\$args /P /CLOSE"
+}
 
 proc truncateHistory {} {
     #****f* truncateHistory/Shipping_Code
@@ -543,7 +576,7 @@ proc truncateHistory {} {
     #
     #***
     global files GS_textVar frame1
-    #puts "start Truncate"
+    puts "start Truncate"
 
     controlFile history fileread
     set history_data [read $files(history)]
@@ -554,21 +587,22 @@ proc truncateHistory {} {
     ;# Keep the history file trimmed down
     if {[llength $lines] >= 16} {
         ;# llength starts at 1
-        puts "starting truncate"
+
         controlFile history filewrite
         set GS_textVar(history) "" ;# clear out the variable
         foreach line [lrange $lines end-15 end] {
             if {$line != ""} {
             #puts "truncate_csv: [::csv::join $line]"
             chan puts $files(history) $line
+            puts "truncate lines: $line"
             }
             lappend GS_textVar(history) [lindex [::csv::split $line] 0]
         }
-        controlFile history close
+        controlFile history fileclose
     }
 
     if {[winfo exists .container] eq 1} {
-        puts "config textVar"
+        puts "config textVar: $GS_textVar(history)"
         $frame1.entry1 configure -values $GS_textVar(history)
     }
 
@@ -659,7 +693,7 @@ proc openHistory {} {
     set history_data [read $files(history)]
     controlFile history fileclose
 
-    #puts "historyData: $history_data"
+    puts "Open historyData: $history_data"
     ;# Guard against an empty history file. If nothing is found set the *(history) variable with an empty string
     if {$history_data eq ""} {
         set GS_textVar(history) ""
@@ -674,6 +708,7 @@ proc openHistory {} {
             lappend GS_textVar(history) [lindex [::csv::split $line] 0]
         }
     }
+    puts "historyData: $GS_textVar(history)"
 
     #puts "openHistory: Ending"
 } ;#openHistory
@@ -712,7 +747,7 @@ proc readHistory {args} {
     controlFile history fileread
     set history_data [read $files(history)]
     set lines [split $history_data \n]
-    puts "history lines: $lines"
+    puts "Read history lines: $lines"
     controlFile history fileclose
 
 
