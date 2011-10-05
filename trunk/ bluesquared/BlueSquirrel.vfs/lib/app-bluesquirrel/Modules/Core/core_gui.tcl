@@ -65,7 +65,8 @@ proc blueSquirrel::parentGUI {} {
     set GS_windows ".frame1 .frame2 .frame3"
     #array set GS_widget breakdown
 
-    wm geometry . 420x430
+    #wm geometry . 390x420
+    wm geometry . 390x415
 
     # Create the Menu's
     set mb [menu .mb]
@@ -75,6 +76,7 @@ proc blueSquirrel::parentGUI {} {
     menu $mb.file -tearoff 0 -relief raised -bd 2
 
     $mb add cascade -label "File" -menu $mb.file
+    $mb.file add command -label "Preferences..." -command {blueSquirrel::preferences}
     $mb.file add command -label "Exit" -command {exit}
 
     ## Edit
@@ -102,13 +104,13 @@ proc blueSquirrel::parentGUI {} {
 
     # Create the container frame
     ttk::frame .container
-    pack .container -expand yes -fill both
+    pack .container -expand yes -fill both -anchor n -side top
 
     # Start the Default GUI - ShippingGUI
     # All frames that make up the GUI are children to .container
     Shipping_Gui::shippingGUI
 
-    # Start the breakDown window, and immediately withdraw it)
+    # Start the breakDown window (The window will be immediately iconified
     Shipping_Gui::breakDown
 
 
@@ -121,14 +123,13 @@ proc blueSquirrel::parentGUI {} {
     ttk::button $btnBar.printb -text "Print Breakdown" -command Shipping_Gui::printbreakDown
     ttk::button $btnBar.print -text "Print Labels" -command Shipping_Code::printLabels
     ttk::button $btnBar.close -text "Close" -command exit
-    #ttk::label $btnBar.copy -text "\u00a9 Casey Ackels - 2007"
 
-    grid $btnBar.printb -column 0 -row 3 -sticky nse -padx 8p
+    grid $btnBar.printb -column 0 -row 3 -sticky nsw -padx 30p
     grid $btnBar.print -column 1 -row 3 -sticky nse -padx 8p
     grid $btnBar.close -column 2 -row 3 -sticky nse
 
 
-    pack $btnBar -side bottom -anchor se -pady 4p -padx 5p
+    pack $btnBar -side bottom -expand yes -anchor se -pady 10p -padx 5p
 
     # ToolTips
     tooltip::tooltip $btnBar.close "Close (Esc)"

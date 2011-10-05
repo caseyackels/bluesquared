@@ -65,7 +65,7 @@ proc Disthelper_Preferences::prefGUI {} {
     set locY [expr {[winfo height . ] / 3 + [winfo y .]}]
     wm geometry .preferences +${locX}+${locY}
 
-    focus -force .preferences
+    focus .preferences
 
     set header_sorted [lsort -dictionary [array names header]]
 

@@ -70,26 +70,40 @@ proc shippingGUI {} {
 
 # Frame 1
     set frame1 [ttk::labelframe .container.frame1 -text "Label Information"]
-    pack $frame1 -expand yes -fill both -padx 5p -pady 3p -ipady 2p ;#-ipadx 5p
+    pack $frame1 -expand yes -fill both -padx 5p -pady 3p -ipady 2p
 
 
     ttk::label $frame1.text1 -text "Line 1"
     ;# NOTE: We populate the *(history) variable just under [openHistory]
     ttk::combobox $frame1.entry1 -textvariable GS_textVar(line1) \
-                                -values $GS_textVar(history)
-                                ;#-width 43
+                                -values $GS_textVar(history) \
+                                -validate key \
+                                -validatecommand {Shipping_Code::filterKeys %S -textLength %W}
+    ttk::label $frame1.data1 -textvariable lineText(data1) -width 2
 
     ttk::label $frame1.text2 -text "Line 2"
-    ttk::entry $frame1.entry2 -textvariable GS_textVar(line2) ;#-width 43
+    ttk::entry $frame1.entry2 -textvariable GS_textVar(line2) \
+                            -validate key \
+                            -validatecommand {Shipping_Code::filterKeys %S -textLength %W} ;#-width 33
+    ttk::label $frame1.data2 -textvariable lineText(data2) -width 2
 
     ttk::label $frame1.text3 -text "Line 3"
-    ttk::entry $frame1.entry3 -textvariable GS_textVar(line3) ;#-width 43
+    ttk::entry $frame1.entry3 -textvariable GS_textVar(line3) \
+                            -validate key \
+                            -validatecommand {Shipping_Code::filterKeys %S -textLength %W} ;#-width 33
+    ttk::label $frame1.data3 -textvariable lineText(data3) -width 2
 
     ttk::label $frame1.text4 -text "Line 4"
-    ttk::entry $frame1.entry4 -textvariable GS_textVar(line4) ;#-width 43
+    ttk::entry $frame1.entry4 -textvariable GS_textVar(line4) \
+                            -validate key \
+                            -validatecommand {Shipping_Code::filterKeys %S -textLength %W} ;#-width 33
+    ttk::label $frame1.data4 -textvariable lineText(data4) -width 2
 
     ttk::label $frame1.text5 -text "Line 5"
-    ttk::entry $frame1.entry5 -textvariable GS_textVar(line5) ;#-width 43
+    ttk::entry $frame1.entry5 -textvariable GS_textVar(line5) \
+                            -validate key \
+                            -validatecommand {Shipping_Code::filterKeys %S -textLength %W}
+    ttk::label $frame1.data5 -textvariable lineText(data5) -width 2
 
     # With ttk widgets, we need to populate the variables or else we get an error. :(
     foreach num {1 2 3 4 5} {
@@ -98,21 +112,26 @@ proc shippingGUI {} {
 
 
     grid $frame1.text1 -column 0 -row 2 -sticky nes -padx 5p
-    grid $frame1.entry1 -column 1 -row 2 -sticky news -pady 2p -padx 5p
+    grid $frame1.entry1 -column 1 -row 2 -sticky news -pady 2p -padx 4p
+    grid $frame1.data1 -column 2 -row 2 -sticky nws -padx 3p
 
     grid $frame1.text2 -column 0 -row 3 -sticky nes -padx 5p
-    grid $frame1.entry2 -column 1 -row 3 -sticky news -pady 2p -padx 5p
+    grid $frame1.entry2 -column 1 -row 3 -sticky news -pady 2p -padx 4p
+    grid $frame1.data2 -column 2 -row 3 -sticky nws -padx 3p
 
     grid $frame1.text3 -column 0 -row 4 -sticky nes -padx 5p
-    grid $frame1.entry3 -column 1 -row 4 -sticky news -pady 2p -padx 5p
+    grid $frame1.entry3 -column 1 -row 4 -sticky news -pady 2p -padx 4p
+    grid $frame1.data3 -column 2 -row 4 -sticky nws -padx 3p
 
     grid $frame1.text4 -column 0 -row 5 -sticky nes -padx 5p
-    grid $frame1.entry4 -column 1 -row 5 -sticky news -pady 2p -padx 5p
+    grid $frame1.entry4 -column 1 -row 5 -sticky news -pady 2p -padx 4p
+    grid $frame1.data4 -column 2 -row 5 -sticky nws -padx 3p
 
     grid $frame1.text5 -column 0 -row 6 -sticky nes -padx 5p
-    grid $frame1.entry5 -column 1 -row 6 -sticky news -pady 2p -padx 5p
+    grid $frame1.entry5 -column 1 -row 6 -sticky news -pady 2p -padx 4p
+    grid $frame1.data5 -column 2 -row 6 -sticky nws -padx 3p
 
-    grid columnconfigure $frame1 1 -weight 1
+    grid columnconfigure $frame1 1 -weight 2
     focus $frame1.entry1
 
 # Frame 2 (This is a container for two frames)
@@ -128,18 +147,18 @@ proc shippingGUI {} {
     ttk::entry $frame2a.entry -textvariable GS_textVar(maxBoxQty) \
                         -width 25 \
                         -validate key \
-                        -validatecommand {Shipping_Code::filterKeys %S}
+                        -validatecommand {Shipping_Code::filterKeys %S -numeric %W}
 
     ttk::label $frame2a.text1 -text "Quantity / Shipments"
     ttk::entry $frame2a.entry1 -textvariable GS_textVar(destQty) \
                         -width 15 \
                         -validate key \
-                        -validatecommand {Shipping_Code::filterKeys %S}
+                        -validatecommand {Shipping_Code::filterKeys %S -numeric %W}
 
     ttk::entry $frame2a.entry2 -textvariable GS_textVar(batch) \
                         -width 5 \
                         -validate key \
-                        -validatecommand {Shipping_Code::filterKeys %S}
+                        -validatecommand {Shipping_Code::filterKeys %S -numeric %W}
     set GS_textVar(batch) ""
 
 
@@ -200,8 +219,8 @@ proc shippingGUI {} {
 
 
 #Frame3
-    set frame3 [ttk::frame .container.frame3]
-    pack $frame3 -side right -padx 5p -pady 5p
+#    set frame3 [ttk::frame .container.frame3]
+#    pack $frame3 -side right -padx 5p -pady 5p
 
 ##
 ## - Bindings
@@ -222,29 +241,36 @@ foreach window "$frame2a.add $frame2a.entry1 $frame2a.entry2" {
     }
 }
 
+# Data counter so we know how many characters are on the line
+bind $frame1.entry1 <KeyRelease> {set lineText(data1) [string length $GS_textVar(line1)]}
+bind $frame1.entry2 <KeyRelease> {set lineText(data2) [string length $GS_textVar(line2)]}
+bind $frame1.entry3 <KeyRelease> {set lineText(data3) [string length $GS_textVar(line3)]}
+bind $frame1.entry4 <KeyRelease> {set lineText(data4) [string length $GS_textVar(line4)]}
+bind $frame1.entry5 <KeyRelease> {set lineText(data5) [string length $GS_textVar(line5)]}
 
-foreach window "entry1 entry2 entry3 entry4 entry5" {
+foreach window [list 1 2 3 4 5] {
+    # We must use %% because the %b identifier is used by [bind] and [clock format]
     ;# Insert the current month
-    bind $frame1.$window <Control-KeyPress-m-> "
-        $frame1.$window insert insert {[clock format [clock seconds] -format %B]}
-    "
+    bind $frame1.entry$window <Control-KeyPress-m-> {
+        %W insert end [clock format [clock seconds] -format %%B]
+    }
 
     ;# Insert the next month (i.e. this month is October, next month is November)
-    bind $frame1.$window <Control-KeyPress-n> "
-        $frame1.$window insert insert {[clock format [clock scan month] -format %B]}
-    "
+    bind $frame1.entry$window <Control-KeyPress-n> {
+        %W insert end [clock format [clock scan month] -format %%B]
+    }
 
     ;# Insert the current year
-    bind $frame1.$window <Control-KeyPress-y> "
-        $frame1.$window insert insert {[clock format [clock seconds] -format %Y]}
-    "
+    bind $frame1.entry$window <Control-KeyPress-y> {
+        %W insert end [clock format [clock seconds] -format %%Y]
+    }
 
     ;# Bind the Enter key to traverse through the entry fields like <Tab>
-    bind $frame1.$window <Return> {tk::TabToWindow [tk_focusNext %W]}
-    bind $frame1.$window <Shift-Return> {tk::TabToWindow [tk_focusPrev %W]}
+    bind $frame1.entry$window <Return> {tk::TabToWindow [tk_focusNext %W]}
+    bind $frame1.entry$window <Shift-Return> {tk::TabToWindow [tk_focusPrev %W]}
 
-    bind $frame1.$window <Control-KeyPress-k> {%W delete 0 end}
-    bind $frame1.$window <ButtonPress-3> {tk_popup .editPopup %X %Y}
+    bind $frame1.entry$window <Control-KeyPress-k> {%W delete 0 end}
+    bind $frame1.entry$window <ButtonPress-3> {tk_popup .editPopup %X %Y}
 
 }
 
@@ -285,7 +311,6 @@ bind all <F2> {console hide}
 
 
 } ;# End of shippingGUI
-
 
 proc printbreakDown {} {
     #****f* printbreakDown/Shipping_Gui

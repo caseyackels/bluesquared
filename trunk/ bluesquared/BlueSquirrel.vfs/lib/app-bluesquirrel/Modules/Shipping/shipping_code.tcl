@@ -52,11 +52,20 @@ proc filterKeys {args} {
     #***
     # Set the default value
     set returnValue 0
+    puts "args: $args"
+    set entryValue [lindex $args 0]
+    set type [lindex $args 1]
+    set window [lindex $args 2]
+    puts "window: $window"
+    puts "type: $type"
+    puts "entry: $entryValue"
 
-    if {[string is integer $args] == 1} {set returnValue 1}
+    switch -- $type {
+        -numeric    {if {[string is integer $entryValue] == 1} {set returnValue 1}}
+        -textLength {if {[string length [$window get]] <= 33} {set returnValue 1}}
+    }
 
     return $returnValue
-
 } ;# filterKeys
 
 
