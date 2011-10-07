@@ -65,7 +65,7 @@ proc shippingGUI {} {
         }
     }
 
-    wm title . "Box Labels - 1.6.4 (October 2011)"
+    wm title . "Box Labels - 1.6.6 (October 2011)"
 
 
 # Frame 1
@@ -78,31 +78,31 @@ proc shippingGUI {} {
     ttk::combobox $frame1.entry1 -textvariable GS_textVar(line1) \
                                 -values $GS_textVar(history) \
                                 -validate key \
-                                -validatecommand {Shipping_Code::filterKeys %S -textLength %W}
+                                -validatecommand {Shipping_Code::filterKeys -textLength %S %W %P}
     ttk::label $frame1.data1 -textvariable lineText(data1) -width 2
 
     ttk::label $frame1.text2 -text "Line 2"
     ttk::entry $frame1.entry2 -textvariable GS_textVar(line2) \
                             -validate key \
-                            -validatecommand {Shipping_Code::filterKeys %S -textLength %W} ;#-width 33
+                            -validatecommand {Shipping_Code::filterKeys -textLength %S %W %P} ;#-width 33
     ttk::label $frame1.data2 -textvariable lineText(data2) -width 2
 
     ttk::label $frame1.text3 -text "Line 3"
     ttk::entry $frame1.entry3 -textvariable GS_textVar(line3) \
                             -validate key \
-                            -validatecommand {Shipping_Code::filterKeys %S -textLength %W} ;#-width 33
+                            -validatecommand {Shipping_Code::filterKeys -textLength %S %W %P} ;#-width 33
     ttk::label $frame1.data3 -textvariable lineText(data3) -width 2
 
     ttk::label $frame1.text4 -text "Line 4"
     ttk::entry $frame1.entry4 -textvariable GS_textVar(line4) \
                             -validate key \
-                            -validatecommand {Shipping_Code::filterKeys %S -textLength %W} ;#-width 33
+                            -validatecommand {Shipping_Code::filterKeys -textLength %S %W %P} ;#-width 33
     ttk::label $frame1.data4 -textvariable lineText(data4) -width 2
 
     ttk::label $frame1.text5 -text "Line 5"
     ttk::entry $frame1.entry5 -textvariable GS_textVar(line5) \
                             -validate key \
-                            -validatecommand {Shipping_Code::filterKeys %S -textLength %W}
+                            -validatecommand {Shipping_Code::filterKeys -textLength %S %W %P}
     ttk::label $frame1.data5 -textvariable lineText(data5) -width 2
 
     # With ttk widgets, we need to populate the variables or else we get an error. :(
@@ -147,25 +147,25 @@ proc shippingGUI {} {
     ttk::entry $frame2a.entry -textvariable GS_textVar(maxBoxQty) \
                         -width 25 \
                         -validate key \
-                        -validatecommand {Shipping_Code::filterKeys %S -numeric %W}
+                        -validatecommand {Shipping_Code::filterKeys -numeric %S %W %P}
 
     ttk::label $frame2a.text1 -text "Quantity / Shipments"
     ttk::entry $frame2a.entry1 -textvariable GS_textVar(destQty) \
                         -width 15 \
                         -validate key \
-                        -validatecommand {Shipping_Code::filterKeys %S -numeric %W}
+                        -validatecommand {Shipping_Code::filterKeys -numeric %S %W %P}
 
     ttk::entry $frame2a.entry2 -textvariable GS_textVar(batch) \
                         -width 5 \
                         -validate key \
-                        -validatecommand {Shipping_Code::filterKeys %S -numeric %W}
+                        -validatecommand {Shipping_Code::filterKeys -numeric %S %W %P}
     set GS_textVar(batch) ""
 
 
 
     ttk::button $frame2a.add -text "Add to List" -command {
             ;# Guard against the user inadvertantly hitting <Enter> or "Add" button without anything in the entry fields
-            if {[info exists GS_textVar(destQty)] eq 0} {return}
+            if {([info exists GS_textVar(destQty)] eq 0) || ($GS_textVar(destQty) eq "")} {return}
 
             Shipping_Code::addMaster $GS_textVar(destQty) $GS_textVar(batch)
     }
@@ -219,8 +219,11 @@ proc shippingGUI {} {
 
 
 #Frame3
-#    set frame3 [ttk::frame .container.frame3]
-#    pack $frame3 -side right -padx 5p -pady 5p
+    set frame3 [ttk::frame .container.frame3]
+
+    ttk::label $frame3.totala -text Total:
+    ttk::label $frame3.totalb -textvariable grandTotal
+    pack $frame3 ;#-side right -padx 5p -pady 5p
 
 ##
 ## - Bindings
@@ -427,24 +430,34 @@ proc breakDown {} {
         # Make sure that it has 2 or more values
         if {[llength $GS_textVar(labelsFull)] >= 2} {
             puts "LabelsFull <=: $GS_textVar(labelsFull)"
-            $GS_widget(breakdown) insert end "Full Boxes: [expr [join $GS_textVar(labelsFull) +]] @ $GS_textVar(maxBoxQty)\n"
+            $GS_widget(breakdown) insert end "Full Boxes:\n"
+            $GS_widget(breakdown) insert end "-----------\n"
+            $GS_widget(breakdown) insert end "[expr [join $GS_textVar(labelsFull) +]] @ $GS_textVar(maxBoxQty)\n\n"
         } else {
             # If we have less than 2 values, just insert what the full boxes are.
-            $GS_widget(breakdown) insert end "Full Box: $GS_textVar(labelsFull) @ $GS_textVar(maxBoxQty)\n"
+            $GS_widget(breakdown) insert end "Full Box:\n"
+            $GS_widget(breakdown) insert end "---------\n"
+            $GS_widget(breakdown) insert end "$GS_textVar(labelsFull) @ $GS_textVar(maxBoxQty)\n\n"
         }
     }
 
     # Like Numbers
     if {[info exists GS_textVar(labelsPartialLike)] == 1} {
+            $GS_widget(breakdown) insert end "Partial:\n"
+            $GS_widget(breakdown) insert end "--------\n"
+
         foreach value $GS_textVar(labelsPartialLike) {
-            $GS_widget(breakdown) insert end "Partial: $value\n"
+            $GS_widget(breakdown) insert end "$value\n\n"
         }
     }
 
     # Unique Numbers
-    if {[info exists GS_textVar(labelsPartialUnique)] == 1} {
+    if {([info exists GS_textVar(labelsPartialUnique)] == 1) && ($GS_textVar(labelsPartialUnique) != "")} {
+            $GS_widget(breakdown) insert end "Partial (Unique):\n"
+            $GS_widget(breakdown) insert end "-----------------\n"
+
         foreach value $GS_textVar(labelsPartialUnique) {
-            $GS_widget(breakdown) insert end "Partial: 1 Box @ $value\n"
+            $GS_widget(breakdown) insert end "1 Box @ $value\n"
         }
     }
 

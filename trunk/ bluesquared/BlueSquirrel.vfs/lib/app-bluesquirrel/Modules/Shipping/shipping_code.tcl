@@ -35,7 +35,7 @@ proc filterKeys {args} {
     #	Only allows numeric values to be inserted
     #
     # SYNOPSIS
-    #	filterKeys <args>
+    #	filterKeys %S -textLength %W %d %i %P %s %v %V
     #
     # CHILDREN
     #	N/A
@@ -45,24 +45,24 @@ proc filterKeys {args} {
     #
     # NOTES
     #	This should really be a library; as it is useful for different parts of the application, and not just the Shipping module
+    #   %P = current string; %i = current index
     #
     # SEE ALSO
     #	N/A
     #
     #***
-    # Set the default value
+    global GS_textVar
+    # Set the default value to passing
     set returnValue 0
-    puts "args: $args"
-    set entryValue [lindex $args 0]
-    set type [lindex $args 1]
+
+    set type [lindex $args 0]
+    set entryValue [lindex $args 1]
     set window [lindex $args 2]
-    puts "window: $window"
-    puts "type: $type"
-    puts "entry: $entryValue"
+    set validate_P [lindex $args 3]
 
     switch -- $type {
         -numeric    {if {[string is integer $entryValue] == 1} {set returnValue 1}}
-        -textLength {if {[string length [$window get]] <= 33} {set returnValue 1}}
+        -textLength {if {[string length $validate_P] <= 33} {set returnValue 1}}
     }
 
     return $returnValue
@@ -420,7 +420,7 @@ proc displayListHelper {fullboxes partialboxes {reset 0}} {
     set GS_textVar(labelsPartialLike) "" ;# clear it out
     foreach value $valueLists2 {
 	# This is for the groups of "like numbers"
-        set GI_textVar(labelsPartial1) "[llength [lindex $valueLists2 $x]] Labels @ [lindex $valueLists2 $x end]"
+        set GI_textVar(labelsPartial1) "[llength [lindex $valueLists2 $x]] Boxes @ [lindex $valueLists2 $x end]"
         #set GI_textVar(labelsPartial_noTextLike) [lindex $valueLists2 $x end]
         #puts "valueLists2: $value"
         lappend GS_textVar(labelsPartialLike) $GI_textVar(labelsPartial1)
@@ -813,6 +813,8 @@ proc addMaster {destQty batch} {
     #
     #***
     global GS_textVar
+
+    if {$GS_textVar(destQty) eq ""} {return}
 
     Shipping_Code::insertInListbox $destQty $batch
 
