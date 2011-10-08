@@ -240,6 +240,9 @@ foreach window "$frame2a.add $frame2a.entry1 $frame2a.entry2" {
         ;# Guard against the user inadvertantly hitting <Enter> or "Add" button without anything in the entry fields
         if {[info exists GS_textVar(destQty)] eq 0} {return}
         Shipping_Code::addMaster $GS_textVar(destQty) $GS_textVar(batch)
+        
+        bind $frame1.entry$window <KeyPress-Right> {tk::TabToWindow [tk_focusNext %W]}
+        bind $frame1.entry$window <KeyPress-Left> {tk::TabToWindow [tk_focusNext %W]}
 
     }
 }
@@ -270,11 +273,14 @@ foreach window [list 1 2 3 4 5] {
 
     ;# Bind the Enter key to traverse through the entry fields like <Tab>
     bind $frame1.entry$window <Return> {tk::TabToWindow [tk_focusNext %W]}
+    bind $frame1.entry$window <KeyPress-Down> {tk::TabToWindow [tk_focusNext %W]}
+    
     bind $frame1.entry$window <Shift-Return> {tk::TabToWindow [tk_focusPrev %W]}
+    bind $frame1.entry$window <KeyPress-Up> {tk::TabToWindow [tk_focusNext %W]}
 
     bind $frame1.entry$window <Control-KeyPress-k> {%W delete 0 end}
+    
     bind $frame1.entry$window <ButtonPress-3> {tk_popup .editPopup %X %Y}
-
 }
 
 
