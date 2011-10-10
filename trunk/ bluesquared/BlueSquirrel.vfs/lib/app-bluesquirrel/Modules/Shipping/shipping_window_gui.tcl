@@ -234,18 +234,18 @@ ttk::style map TCombobox -fieldbackground [list focus yellow]
 ttk::style map TEntry -fieldbackground [list focus yellow]
 
 
-
 foreach window "$frame2a.add $frame2a.entry1 $frame2a.entry2" {
     bind $window <Return> {
         ;# Guard against the user inadvertantly hitting <Enter> or "Add" button without anything in the entry fields
         if {[info exists GS_textVar(destQty)] eq 0} {return}
         Shipping_Code::addMaster $GS_textVar(destQty) $GS_textVar(batch)
-        
+
         bind $frame1.entry$window <KeyPress-Right> {tk::TabToWindow [tk_focusNext %W]}
         bind $frame1.entry$window <KeyPress-Left> {tk::TabToWindow [tk_focusNext %W]}
 
     }
 }
+
 
 # Data counter so we know how many characters are on the line
 bind $frame1.entry1 <KeyRelease> {set lineText(data1) [string length $GS_textVar(line1)]}
@@ -273,13 +273,22 @@ foreach window [list 1 2 3 4 5] {
 
     ;# Bind the Enter key to traverse through the entry fields like <Tab>
     bind $frame1.entry$window <Return> {tk::TabToWindow [tk_focusNext %W]}
+<<<<<<< .mine
+    #bind $frame1.entry$window <downarrow> {tk:TabToWindow [tk_focusNext %W]}
+    #bind $frame1.entry$window <Key-downarrow> {puts yay}
+=======
     bind $frame1.entry$window <KeyPress-Down> {tk::TabToWindow [tk_focusNext %W]}
-    
+
+>>>>>>> .r162
     bind $frame1.entry$window <Shift-Return> {tk::TabToWindow [tk_focusPrev %W]}
     bind $frame1.entry$window <KeyPress-Up> {tk::TabToWindow [tk_focusNext %W]}
 
     bind $frame1.entry$window <Control-KeyPress-k> {%W delete 0 end}
-    
+<<<<<<< .mine
+
+=======
+
+>>>>>>> .r162
     bind $frame1.entry$window <ButtonPress-3> {tk_popup .editPopup %X %Y}
 }
 
