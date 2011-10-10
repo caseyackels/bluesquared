@@ -253,7 +253,15 @@ foreach window "$frame2a.add $frame2a.entry1 $frame2a.entry2" {
 
 
 # Data counter so we know how many characters are on the line
+#for {set x 1} {$x<6} {incr x} {
+#    bind $frame1.entry$x <KeyRelease> {
+#        puts "upvar: [upvar x]"
+#        set lineText(data$x) [string length $GS_textVar(line$x)]
+#        }
+#    }
 bind $frame1.entry1 <KeyRelease> {set lineText(data1) [string length $GS_textVar(line1)]}
+bind $frame1.entry1 <Control-KeyPress-m-> {%W insert end [clock format [clock seconds] -format %%B]}
+
 bind $frame1.entry2 <KeyRelease> {set lineText(data2) [string length $GS_textVar(line2)]}
 bind $frame1.entry3 <KeyRelease> {set lineText(data3) [string length $GS_textVar(line3)]}
 bind $frame1.entry4 <KeyRelease> {set lineText(data4) [string length $GS_textVar(line4)]}
@@ -325,6 +333,7 @@ bind all <F1> {console show}
 bind all <F2> {console hide}
 
 
+
 } ;# End of shippingGUI
 
 proc printbreakDown {} {
@@ -367,7 +376,7 @@ proc printbreakDown {} {
     puts $file $GS_textVar(line5)\n
     puts $file $myBreakDownText
 
-    close $file
+    chan close $file
 
     ##
     ## This needs to be a user set option!!
@@ -418,17 +427,29 @@ proc breakDown {} {
         wm protocol .breakdown WM_DELETE_WINDOW {wm withdraw .breakdown}
         puts "breakdown window created"
 
-        text .breakdown.txt
-        set GS_widget(breakdown) .breakdown.txt
-        #ttk::button .breakdown.refresh -text "Close" -command { destroy .breakdown } printbreakDown
-        ttk::button .breakdown.refresh -text "Print" -command {Shipping_Gui::printbreakDown}
+        set frame1 [ttk::frame .breakdown.frame1]
+        pack $frame1 -fill both -expand yes -pady 5p
 
-        pack $GS_widget(breakdown)
-        pack .breakdown.refresh
+        set GS_widget(breakdown) $frame1.txt
+        text $frame1.txt -width 30
+
+        grid $frame1.txt -column 1 -row 0 -sticky news -padx 5p
+
+        set frame2 [ttk::frame .breakdown.frame2]
+        pack $frame2 -pady 10p -anchor se
+
+        ttk::button $frame2.print -text "Print" -command {Shipping_Gui::printbreakDown}
+        ttk::button $frame2.close -text "Close" -command {wm withdraw .breakdown}
+
+        grid $frame2.print -column 0 -row 0 -padx 3p
+        grid $frame2.close -column 1 -row 0 -padx 5p
+
+
         focus $GS_widget(breakdown)
 
         bind $GS_widget(breakdown) <KeyPress> {break} ;# Prevent people from entering/removing anything
-        #bind $GS_widget(breakdown) <Button-1> {break} ;# Prevent people from entering/removing anything
+
+        puts "winfo x [winfo x .breakdown]"
 
     } else {
         # Refreshing

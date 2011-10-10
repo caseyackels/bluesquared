@@ -751,7 +751,7 @@ proc readHistory {args} {
     #	N/A
     #
     #***
-    global GS_textVar files
+    global GS_textVar files lineText
 
     controlFile history fileread
     set history_data [read $files(history)]
@@ -768,6 +768,7 @@ proc readHistory {args} {
         #puts "retrieve: $line"
         if {$x <= 5} {
             set GS_textVar(line$x) $line
+            set lineText(data$x) [string length $GS_textVar(line$x)]
             incr x
         } else {
             set GS_textVar(maxBoxQty) $line
@@ -775,13 +776,23 @@ proc readHistory {args} {
     }
     # If text holds no data, clear all lines
       if {$text eq ""} {
-        for {set x 1} {$x<6} {incr x} {set GS_textVar(line$x) ""}
+        for {set x 1} {$x<6} {incr x} {
+            set GS_textVar(line$x) ""
+            set lineText(data$x) [string length $GS_textVar(line$x)]
+        }
         set GS_textVar(maxBoxQty) ""
     }
 
     ;# clear the listbox
     Shipping_Code::clearList
 } ;# readHistory
+
+proc countLength {args} {
+    # arg1 = Line Number
+    # arg2 =
+    global lineLength
+    [string length $GS_textVar(line1)]
+}
 
 
 proc addMaster {destQty batch} {
@@ -827,8 +838,6 @@ proc addMaster {destQty batch} {
 
     ;# Display the updated amount of entries that we have
     Shipping_Code::createList
-    #Shipping_Gui::breakdDown
-
 
 } ;# addMaster
 
@@ -871,55 +880,7 @@ proc clearList {} {
 }
 
 
-proc setTips {} {
-    #****f* setTips/Shipping_Code
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2008 - Casey Ackels
-    #
-    # FUNCTION
-    #	Initiate (sets) the tips
-    #
-    # SYNOPSIS
-    #	setTips
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #	N/A
-    #
-    # NOTES
-    #	The tips are listed within the proc, and extracted by using [lindex] and rand()
-    #
-    # SEE ALSO
-    #	N/A
-    #
-    #***
-    global GS_textVar
-
-
-    set masterTipList [list \
-                  "You are Number 1. Don't let anyone take that away from you!" \
-                  "Double-Click in the 'count' field to delete an entry" \
-		  "Hover the mouse cursor over the distribution list to see an overview" \
-                  "Press Ctrl+X/C/V to Cut/Copy/Paste" \
-                  "Press Ctrl+M to insert the current Month" \
-                  "Press Ctrl+Y to insert the current Year" \
-                  "Press Ctrl+N to insert next Months' name" \
-                  "Press Ctrl+K to delete all text within the active entry field" \
-                  "You can use the Enter key to switch fields in the Label Information area."]
-
-    #set getTipNumber [llength $masterTipList]
-    set GS_textVar(tips) [lindex $masterTipList [expr {int(rand()*[llength $masterTipList])}]]
-    #set GS_textVar(tips) [lindex $masterTipList [expr {int(10* rand())}]]
-}
-
-
 } ;# End of Shipping_Code namespace
 
-Shipping_Code::setTips ;# Set the 'Tip' variable upon startup.
 Shipping_Code::openHistory ;# Populate the variable so we don't get errors upon startup.
 Shipping_Popup::editPopup ;# Initiate the popup's
