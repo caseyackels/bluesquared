@@ -526,7 +526,7 @@ proc chooseLabel {} {
 
     ttk::radiobutton $frame0.white -text "White Label - Standard" -variable labels -value LINEDB.btw
     ttk::radiobutton $frame0.green -text "Green Label - Special" -variable labels -value LINEDB_Seattle.btw
-    $frame0.white invoke ;# set the default
+    #$frame0.white invoke ;# set the default
 
     grid $frame0.white -column 0 -row 0 -padx 5p -pady 5p -sticky w
     grid $frame0.green -column 0 -row 1 -padx 5p -pady 5p -sticky w

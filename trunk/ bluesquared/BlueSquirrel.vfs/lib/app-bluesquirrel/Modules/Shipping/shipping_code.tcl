@@ -479,7 +479,7 @@ proc printLabels {} {
 
 	if {$GS_textVar(line5) != ""} {
 	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
-                    set lineNumber 5
+                    set lineNumber 6
                     # Redirect for special print options
                     Shipping_Gui::chooseLabel
 
@@ -489,7 +489,7 @@ proc printLabels {} {
 
 	} elseif {$GS_textVar(line4) != ""} {
 	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
-                    set lineNumber 4
+                    set lineNumber 5
                     # Redirect for special print options
                     Shipping_Gui::chooseLabel
 
@@ -499,7 +499,7 @@ proc printLabels {} {
 
 	} elseif {$GS_textVar(line3) != ""} {
 	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
-                    set lineNumber 3
+                    set lineNumber 4
                     # Redirect for special print options
                     Shipping_Gui::chooseLabel
 
