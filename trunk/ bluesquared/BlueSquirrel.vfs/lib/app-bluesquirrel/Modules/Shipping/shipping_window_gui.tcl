@@ -448,7 +448,7 @@ proc breakDown {} {
     }
 
     # Like Numbers
-    if {[info exists GS_textVar(labelsPartialLike)] == 1} {
+    if {([info exists GS_textVar(labelsPartialLike)] == 1) && ($GS_textVar(labelsPartialLike) != "")} {
             $GS_widget(breakdown) insert end "Partial:\n"
             $GS_widget(breakdown) insert end "--------\n"
 
