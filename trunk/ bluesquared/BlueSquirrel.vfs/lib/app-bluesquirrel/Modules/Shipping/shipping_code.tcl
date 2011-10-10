@@ -554,7 +554,7 @@ proc printCustomLabels {args} {
     global programPath
 
     exec $programPath(Bartend) /AF=$programPath(LabelPath)\\$args /P /CLOSE
-    puts "programPath(Bartend) /AF=programPath(LabelPath)\\$args /P /CLOSE"
+    #puts "programPath(Bartend) /AF=programPath(LabelPath)\\$args /P /CLOSE"
 }
 
 proc truncateHistory {} {

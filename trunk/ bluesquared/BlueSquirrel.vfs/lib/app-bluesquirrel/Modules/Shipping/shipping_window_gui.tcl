@@ -65,7 +65,7 @@ proc shippingGUI {} {
         }
     }
 
-    wm title . "Box Labels - 1.6.6 (October 2011)"
+    wm title . "Box Labels - 1.6.7 (October 2011)"
 
 
 # Frame 1
@@ -219,11 +219,13 @@ proc shippingGUI {} {
 
 
 #Frame3
-    set frame3 [ttk::frame .container.frame3]
+    #set frame3 [ttk::frame .container.frame3]
 
-    ttk::label $frame3.totala -text Total:
-    ttk::label $frame3.totalb -textvariable grandTotal
-    pack $frame3 ;#-side right -padx 5p -pady 5p
+    #ttk::label $frame3.totala -text Total:
+    #ttk::label $frame3.totalb -textvariable grandTotal
+
+    #pack $frame3.totala $frame3.totalb
+    #pack $frame3 ;#-side right -padx 5p -pady 5p
 
 ##
 ## - Bindings
@@ -233,16 +235,19 @@ proc shippingGUI {} {
 ttk::style map TCombobox -fieldbackground [list focus yellow]
 ttk::style map TEntry -fieldbackground [list focus yellow]
 
+bind $frame2a.entry <KeyPress-Down> {tk::TabToWindow [tk_focusNext %W]}
+bind $frame2a.entry <KeyPress-Up> {tk::TabToWindow [tk_focusPrev %W]}
 
 foreach window "$frame2a.add $frame2a.entry1 $frame2a.entry2" {
+    bind $window <KeyPress-Right> {tk::TabToWindow [tk_focusNext %W]}
+    bind $window <KeyPress-Left> {tk::TabToWindow [tk_focusPrev %W]}
+    bind $window <KeyPress-Up> {tk::TabToWindow [tk_focusPrev %W]}
+    bind $window <KeyPress-Down> {tk::TabToWindow [tk_focusPrev %W]}
+
     bind $window <Return> {
         ;# Guard against the user inadvertantly hitting <Enter> or "Add" button without anything in the entry fields
         if {[info exists GS_textVar(destQty)] eq 0} {return}
         Shipping_Code::addMaster $GS_textVar(destQty) $GS_textVar(batch)
-
-        bind $frame1.entry$window <KeyPress-Right> {tk::TabToWindow [tk_focusNext %W]}
-        bind $frame1.entry$window <KeyPress-Left> {tk::TabToWindow [tk_focusNext %W]}
-
     }
 }
 
@@ -273,22 +278,14 @@ foreach window [list 1 2 3 4 5] {
 
     ;# Bind the Enter key to traverse through the entry fields like <Tab>
     bind $frame1.entry$window <Return> {tk::TabToWindow [tk_focusNext %W]}
-<<<<<<< .mine
-    #bind $frame1.entry$window <downarrow> {tk:TabToWindow [tk_focusNext %W]}
-    #bind $frame1.entry$window <Key-downarrow> {puts yay}
-=======
+
     bind $frame1.entry$window <KeyPress-Down> {tk::TabToWindow [tk_focusNext %W]}
 
->>>>>>> .r162
     bind $frame1.entry$window <Shift-Return> {tk::TabToWindow [tk_focusPrev %W]}
     bind $frame1.entry$window <KeyPress-Up> {tk::TabToWindow [tk_focusNext %W]}
 
     bind $frame1.entry$window <Control-KeyPress-k> {%W delete 0 end}
-<<<<<<< .mine
 
-=======
-
->>>>>>> .r162
     bind $frame1.entry$window <ButtonPress-3> {tk_popup .editPopup %X %Y}
 }
 
@@ -447,28 +444,28 @@ proc breakDown {} {
             puts "LabelsFull <=: $GS_textVar(labelsFull)"
             $GS_widget(breakdown) insert end "Full Boxes:\n"
             $GS_widget(breakdown) insert end "-----------\n"
-            $GS_widget(breakdown) insert end "[expr [join $GS_textVar(labelsFull) +]] @ $GS_textVar(maxBoxQty)\n\n"
+            $GS_widget(breakdown) insert end "[expr [join $GS_textVar(labelsFull) +]] @ $GS_textVar(maxBoxQty)\n"
         } else {
             # If we have less than 2 values, just insert what the full boxes are.
             $GS_widget(breakdown) insert end "Full Box:\n"
             $GS_widget(breakdown) insert end "---------\n"
-            $GS_widget(breakdown) insert end "$GS_textVar(labelsFull) @ $GS_textVar(maxBoxQty)\n\n"
+            $GS_widget(breakdown) insert end "$GS_textVar(labelsFull) @ $GS_textVar(maxBoxQty)\n"
         }
     }
 
     # Like Numbers
     if {([info exists GS_textVar(labelsPartialLike)] == 1) && ($GS_textVar(labelsPartialLike) != "")} {
-            $GS_widget(breakdown) insert end "Partial:\n"
+            $GS_widget(breakdown) insert end "\nPartial:\n"
             $GS_widget(breakdown) insert end "--------\n"
 
         foreach value $GS_textVar(labelsPartialLike) {
-            $GS_widget(breakdown) insert end "$value\n\n"
+            $GS_widget(breakdown) insert end "$value\n"
         }
     }
 
     # Unique Numbers
     if {([info exists GS_textVar(labelsPartialUnique)] == 1) && ($GS_textVar(labelsPartialUnique) != "")} {
-            $GS_widget(breakdown) insert end "Partial (Unique):\n"
+            $GS_widget(breakdown) insert end "\nPartial (Unique):\n"
             $GS_widget(breakdown) insert end "-----------------\n"
 
         foreach value $GS_textVar(labelsPartialUnique) {
