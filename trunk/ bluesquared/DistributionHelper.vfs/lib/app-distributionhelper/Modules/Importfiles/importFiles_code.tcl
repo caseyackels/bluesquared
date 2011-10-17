@@ -111,46 +111,46 @@ proc Disthelper_Code::readFile {filename} {
         if { [lsearch -nocase $header(shipvia) $line1] != -1} {
             set GS_ship(shipVia) $line
             Disthelper_RemoveListBoxItem $line
-            
+
             } elseif { [lsearch -nocase $header(company) $line1] != -1} {
                 set GS_address(Company) $line
                 Disthelper_RemoveListBoxItem $line
-            
+
             } elseif { [lsearch -nocase $header(attention) $line1] != -1} {
                 set GS_address(Attention) $line
                 Disthelper_RemoveListBoxItem $line
-            
+
             } elseif { [lsearch -nocase $header(address1) $line1] != -1} {
                 set GS_address(deliveryAddr) $line
                 Disthelper_RemoveListBoxItem $line
-            
+
             } elseif { [lsearch -nocase $header(address2) $line1] != -1} {
                 set GS_address(addrTwo) $line
                 Disthelper_RemoveListBoxItem $line
-            
+
             } elseif { [lsearch -nocase $header(address3) $line1] != -1} {
                 set GS_address(addrThree) $line
                 Disthelper_RemoveListBoxItem $line
-            
+
             # Feature to be added; to split columns that contain city,state,zip
             #elseif {[lsearch -nocase $header(CityStateZip) $line1] != -1} {set internal_line cityStateZip; 'debug Found a CityStateZip!}
             #if {[lsearch -nocase $city $line] != -1} {set internal_line City}
             } elseif { [lsearch -nocase $header(state) $line1] != -1} {
                 set GS_address(State) $line
                 Disthelper_RemoveListBoxItem $line
-            
+
             } elseif {[lsearch -nocase $header(quantity) $line1] != -1} {
                 set GS_job(Quantity) $line; set ea_header(haveHeaders) yes
                 Disthelper_RemoveListBoxItem $line
-            
+
             } elseif {[lsearch -nocase $header(version) $line1] != -1} {
                 set GS_job(Version) $line
                 Disthelper_RemoveListBoxItem $line
-            
+
             } elseif {[lsearch -nocase $header(zip) $line1] != -1} {
                 set GS_address(Zip) $line
                 Disthelper_RemoveListBoxItem $line
-            
+
             } elseif {[lsearch -nocase $header(3rdPartyNumber) $line1] != -1} {
                 set GS_job(3rdParty) $line
                 Disthelper_RemoveListBoxItem $line
@@ -168,7 +168,7 @@ proc Disthelper_Code::readFile {filename} {
             default             {'debug Inserted Unidentified Header: $line}
         }
     }
-    
+
     # Highlight list elements if they exist to raise visiblity that they are there.
     Disthelper_HighlightListBoxItem
 
@@ -443,7 +443,7 @@ proc Disthelper_Code::writeOutPut {} {
                 incr program(totalBooks) $fullbox
 
                 #if {[string match $Version .] == 1 } { set boxVersion $fullbox} else { set boxVersion [list [join [concat $Version _ $fullbox] ""]] }
-                if {[string match $Version .] == 1 } { set boxVersion $fullbox} else { set boxVersion [list [concat $Version / $fullbox]]}
+                if {[string match $Version .] == 1 } { set boxVersion $fullbox} else { set boxVersion [list [concat [join $Version] / $fullbox]] }
                 #set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
                 #set boxWeight [::tcl::mathfunc::round [expr {$GS_job(fullBoxQty) * $pieceweight + $settings(BoxTareWeight)}]]
                 set boxWeight [::tcl::mathfunc::round [expr {$fullbox * $pieceweight + $settings(BoxTareWeight)}]]
@@ -460,7 +460,7 @@ proc Disthelper_Code::writeOutPut {} {
                 'debug "boxes: $x - TotalBoxes (Partials): $totalBoxes"
                 incr program(totalBooks) [lindex $val 1]
 
-                if {[string match $Version .] == 1} { set boxVersion [lindex $val 1] } else { set boxVersion [list [join [concat $Version _ [lindex $val 1]] ""]] }
+                if {[string match $Version .] == 1} { set boxVersion [lindex $val 1] } else { set boxVersion [list [concat [join $Version] / [lindex $val 1]]] }
                 #set boxWeight [::tcl::mathfunc::round [expr {[lindex $val 1] * $GS_job(pieceWeight) + $settings(BoxTareWeight)}]]
                 set boxWeight [::tcl::mathfunc::round [expr {[lindex $val 1] * $pieceweight + $settings(BoxTareWeight)}]]
 

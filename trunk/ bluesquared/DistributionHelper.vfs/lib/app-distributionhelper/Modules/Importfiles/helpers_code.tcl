@@ -643,15 +643,10 @@ proc Disthelper_HighlightListBoxItem {} {
     #
     #***
     # Get indices of elements
-    #set listBoxElements [.container.frame1.listbox get 0 end]
     set listBoxIndices [expr {[.container.frame1.listbox index end]} -1]
-    #.container.frame1.listbox itemconfigure 0 -background red
-    for {set x 0} {$listBoxIndices >= $x} {incr x} {
-	.container.frame1.listbox itemconfigure $x -background red
-    }
 
-    #foreach index $listBoxElements {
-    #.container.frame1.listbox itemconfigure $index -background red
-    #}
+    for {set x 0} {$listBoxIndices >= $x} {incr x} {
+	.container.frame1.listbox itemconfigure $x -background grey
+    }
 
 } ;# End Disthelper_HighlightListBoxItem
