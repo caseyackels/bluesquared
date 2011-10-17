@@ -114,7 +114,7 @@ proc Disthelper_GUI::progressWindow {} {
     set btnbar [ttk::frame .progress.btnbar]
     pack $btnbar -padx 4p -pady 10p -side right
 
-    ttk::button $btnbar.close -text [mc "Close"] -command {destroy .progress}
+    ttk::button $btnbar.close -text [mc "Close"] -command {Disthelper_Helper::resetVars -resetGUI; destroy .progress}
 
     grid $btnbar.close -column 0 -row 0 -sticky nse
 
