@@ -187,7 +187,7 @@ proc 'blueSquirrel_loadOptions {} {
     #
     #***
     #option add *font {tahoma 10}
-    option add *Listbox.font {tahoma 12}
+    #option add *Listbox.font {tahoma 12}
 
     # Theme setting for Tile
     ttk::style theme use $ttk::currentTheme
@@ -240,7 +240,7 @@ proc 'blueSquirrel_loadSettings {} {
 	    set [lindex $l_line 0] [join [lrange $l_line 1 end] " "]
 	}
     }
-    
+
 
 }
 # Load required files / packages

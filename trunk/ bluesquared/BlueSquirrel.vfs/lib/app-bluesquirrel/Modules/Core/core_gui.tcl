@@ -59,14 +59,21 @@ proc blueSquirrel::parentGUI {} {
     #	N/A
     #
     #***
-    global GI_textVar GS_textVar frame1 frame2b genResults GS_windows GS_widget
+    global GI_textVar GS_textVar frame1 frame2b genResults GS_windows GS_widget GS_winGeom
 
     # List of frames within this proc
     set GS_windows ".frame1 .frame2 .frame3"
     #array set GS_widget breakdown
 
+    # Make the window appear in a certain location every time.
+    set GS_winGeom(main,x) [expr {[winfo screenwidth .]/3}]
+    set GS_winGeom(main,y) [expr {[winfo screenheight .]/3}]
+    puts "actual x: $GS_winGeom(main,x)"
+    puts "actual y: $GS_winGeom(main,y)"
+
     #wm geometry . 390x420
-    wm geometry . 390x415
+    wm geometry . 390x415-$GS_winGeom(main,x)-$GS_winGeom(main,y)
+    update
 
     # Create the Menu's
     set mb [menu .mb]
@@ -76,24 +83,21 @@ proc blueSquirrel::parentGUI {} {
     menu $mb.file -tearoff 0 -relief raised -bd 2
 
     $mb add cascade -label "File" -menu $mb.file
-    $mb.file add command -label "Preferences..." -command {blueSquirrel::preferences}
+    $mb.file add command -label "Import File" -command {}
+    $mb.file add command -label "Breakdown" -command { wm deiconify .breakdown }
     $mb.file add command -label "Exit" -command {exit}
 
     ## Edit
     menu $mb.edit -tearoff 0 -relief raised -bd 2
     $mb add cascade -label "Edit" -menu $mb.edit
-
+    $mb.edit add command -label "Preferences..." -command {blueSquirrel::preferences}
     $mb.edit add command -label "Clear List" -command { Shipping_Code::clearList }
-    #$mb.edit add command -label "Breakdown" -command { Shipping_Gui::breakDown }
-    $mb.edit add command -label "Breakdown" -command { wm deiconify .breakdown }
 
     ## Help
     menu $mb.help -tearoff 0 -relief raised -bd 2
     $mb add cascade -label "Help" -menu $mb.help
 
     $mb.help add command -label "About" -command {blueSquirrel::about}
-    #$mb.help add command -label "v0.4" -command {}
-
 
     # Create Separator Frame
     set frame0 [ttk::frame .frame0]
@@ -132,11 +136,11 @@ proc blueSquirrel::parentGUI {} {
     pack $btnBar -side bottom -expand yes -anchor se -pady 10p -padx 5p
 
     # ToolTips
-    tooltip::tooltip $btnBar.close "Close (Esc)"
+    #tooltip::tooltip $btnBar.close "Close (Esc)"
 
     # Bindings
-    bind $btnBar.close <Return> {exit}
     bind all <Control-p> "Shipping_Code::printLabels"
+    focus .
 
 } ;# End of parentGUI
 
@@ -151,7 +155,6 @@ proc blueSquirrel::about {} {
     ttk::frame .about.parent
 
     ttk::label .about.parent.version -text "Version: 1.5.1 (Released February 2011)"
-    #ttk::label .about.parent.label -text "About" -font {Arial 12}
     text .about.parent.txt -wrap word
     ttk::button .about.parent.close -text "Close" -command {destroy .about}
     ttk::label .about.parent.copy -text "\u00a9 2007-2011 Casey Ackels"
@@ -171,12 +174,12 @@ proc blueSquirrel::about {} {
     bind .about.parent.txt <Button-1> {break} ;# Prevent people from entering/removing anything
 
     grid .about.parent.version -column 0 -row 0
-    #grid .about.parent.label -column 0 -row 1
+
     grid .about.parent.txt -column 0 -row 2 -sticky news -padx 5p -pady 5p
     grid .about.parent.close -column 0 -row 3 -sticky ns -padx 5p -pady 5p
     grid .about.parent.copy -column 0 -row 4 -padx 5p -pady 5p
 
     grid rowconfigure .about.parent 2 -weight 1
     pack .about.parent -expand yes -fill both
-    #grid .about.parent -column 0 -row 0 -sticky news
+
 }

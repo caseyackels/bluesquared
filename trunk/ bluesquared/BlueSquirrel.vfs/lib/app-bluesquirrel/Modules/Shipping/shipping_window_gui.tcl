@@ -66,6 +66,7 @@ proc shippingGUI {} {
     }
 
     wm title . "Box Labels - 1.6.7 (October 2011)"
+    focus -force .
 
 
 # Frame 1
@@ -416,11 +417,14 @@ proc breakDown {} {
     #	TODO: List the other *GUI procs.
     #
     #***
-    global GS_textVar GS_widget
+    global GS_textVar GS_widget GS_winGeom
 
     if {![winfo exists .breakdown]} {
         toplevel .breakdown
         wm title .breakdown "Break Down"
+
+        puts "winfo geom: [winfo geometry .]"
+        wm geometry .breakdown +854+214
         wm withdraw .breakdown
 
         # Now we don't destroy the window if someone closes it by the "X" button at the top of the screen.
@@ -445,7 +449,7 @@ proc breakDown {} {
         grid $frame2.close -column 1 -row 0 -padx 5p
 
 
-        focus $GS_widget(breakdown)
+        #focus $GS_widget(breakdown)
 
         bind $GS_widget(breakdown) <KeyPress> {break} ;# Prevent people from entering/removing anything
 
@@ -453,7 +457,7 @@ proc breakDown {} {
 
     } else {
         # Refreshing
-        .breakdown.txt delete 0.0 end
+        .breakdown.frame1.txt delete 0.0 end
     }
 
 
