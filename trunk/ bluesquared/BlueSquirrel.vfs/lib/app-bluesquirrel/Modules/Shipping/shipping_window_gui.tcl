@@ -65,7 +65,7 @@ proc shippingGUI {} {
         }
     }
 
-    wm title . "Box Labels - 1.6.7 (October 2011)"
+    wm title . "Box Labels - 1.6.8 (November 2011)"
     focus -force .
 
 
@@ -81,6 +81,7 @@ proc shippingGUI {} {
                                 -validate key \
                                 -validatecommand {Shipping_Code::filterKeys -textLength %S %W %P}
     ttk::label $frame1.data1 -textvariable lineText(data1) -width 2
+    tooltip::tooltip $frame1.data1 "33 Chars Max."
 
     ttk::label $frame1.text2 -text "Line 2"
     ttk::entry $frame1.entry2 -textvariable GS_textVar(line2) \
@@ -252,21 +253,45 @@ foreach window "$frame2a.add $frame2a.entry1 $frame2a.entry2" {
     }
 }
 
+bind $frame1.entry1 <KeyRelease> {
+    if {[string length $GS_textVar(line1)] != 0} {
+        set lineText(data1) [string length $GS_textVar(line1)]
+        } else {
+            set lineText(data1) ""
+    }
+}
 
-# Data counter so we know how many characters are on the line
-#for {set x 1} {$x<6} {incr x} {
-#    bind $frame1.entry$x <KeyRelease> {
-#        puts "upvar: [upvar x]"
-#        set lineText(data$x) [string length $GS_textVar(line$x)]
-#        }
-#    }
-bind $frame1.entry1 <KeyRelease> {set lineText(data1) [string length $GS_textVar(line1)]}
 bind $frame1.entry1 <Control-KeyPress-m-> {%W insert end [clock format [clock seconds] -format %%B]}
 
-bind $frame1.entry2 <KeyRelease> {set lineText(data2) [string length $GS_textVar(line2)]}
-bind $frame1.entry3 <KeyRelease> {set lineText(data3) [string length $GS_textVar(line3)]}
-bind $frame1.entry4 <KeyRelease> {set lineText(data4) [string length $GS_textVar(line4)]}
-bind $frame1.entry5 <KeyRelease> {set lineText(data5) [string length $GS_textVar(line5)]}
+bind $frame1.entry2 <KeyRelease> {
+    if {[string length $GS_textVar(line2)] != 0} {
+        set lineText(data2) [string length $GS_textVar(line2)]
+        } else {
+            set lineText(data2) ""
+    }
+}
+
+bind $frame1.entry3 <KeyRelease> {
+    if {[string length $GS_textVar(line3)] != 0} {
+        set lineText(data3) [string length $GS_textVar(line3)]
+        } else {
+            set lineText(data3) ""
+    }
+}
+bind $frame1.entry4 <KeyRelease> {
+    if {[string length $GS_textVar(line4)] != 0} {
+        set lineText(data4) [string length $GS_textVar(line4)]
+        } else {
+            set lineText(data4) ""
+    }
+}
+bind $frame1.entry5 <KeyRelease> {
+    if {[string length $GS_textVar(line5)] != 0} {
+        set lineText(data5) [string length $GS_textVar(line5)]
+        } else {
+            set lineText(data5) ""
+    }
+}
 
 foreach window [list 1 2 3 4 5] {
     # We must use %% because the %b identifier is used by [bind] and [clock format]

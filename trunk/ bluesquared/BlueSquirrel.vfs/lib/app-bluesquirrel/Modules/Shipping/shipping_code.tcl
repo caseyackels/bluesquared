@@ -768,7 +768,12 @@ proc readHistory {args} {
         #puts "retrieve: $line"
         if {$x <= 5} {
             set GS_textVar(line$x) $line
-            set lineText(data$x) [string length $GS_textVar(line$x)]
+            #set lineText(data$x) [string length $GS_textVar(line$x)]
+            if {[string length $GS_textVar(line$x)] != 0} {
+                set lineText(data$x) [string length $GS_textVar(line$x)]
+                    } else {
+                set lineText(data$x) ""
+            }
             incr x
         } else {
             set GS_textVar(maxBoxQty) $line
@@ -778,7 +783,12 @@ proc readHistory {args} {
       if {$text eq ""} {
         for {set x 1} {$x<6} {incr x} {
             set GS_textVar(line$x) ""
-            set lineText(data$x) [string length $GS_textVar(line$x)]
+            #set lineText(data$x) [string length $GS_textVar(line$x)]
+            if {[string length $GS_textVar(line$x)] != 0} {
+                set lineText(data$x) [string length $GS_textVar(line$x)]
+                    } else {
+                set lineText(data$x) ""
+            }
         }
         set GS_textVar(maxBoxQty) ""
     }

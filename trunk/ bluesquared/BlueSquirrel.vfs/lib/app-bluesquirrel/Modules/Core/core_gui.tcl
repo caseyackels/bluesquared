@@ -154,11 +154,12 @@ proc blueSquirrel::about {} {
 
     ttk::frame .about.parent
 
-    ttk::label .about.parent.version -text "Version: 1.5.1 (Released February 2011)"
+    ttk::label .about.parent.version -text "Version: 1.6.8 (Released November 2011)"
     text .about.parent.txt -wrap word
     ttk::button .about.parent.close -text "Close" -command {destroy .about}
     ttk::label .about.parent.copy -text "\u00a9 2007-2011 Casey Ackels"
 
+    .about.parent.txt insert end "Many small changes. Now you are no longer able to enter more characters than can be printed on a label."
     .about.parent.txt insert end "I wrote this program so that we would not have to repeatedly do mundane math for each job that required box labels.\n"
     .about.parent.txt insert end "\n\n"
     .about.parent.txt insert end "Release 1.6.0 (June 2011)\n1. Ability to print what is listed in the Breakdown window"
