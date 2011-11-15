@@ -482,6 +482,7 @@ proc printLabels {} {
                     set lineNumber 6
                     # Redirect for special print options
                     Shipping_Gui::chooseLabel
+                    puts "6 Line Label"
 
 		} else {
 		    exec $programPath(Bartend) /AF=$programPath(LabelPath)\\6LINEDB.btw /P /CLOSE
@@ -492,6 +493,7 @@ proc printLabels {} {
                     set lineNumber 5
                     # Redirect for special print options
                     Shipping_Gui::chooseLabel
+                    puts "5 Line Label"
 
                 } else {
 		    exec $programPath(Bartend) /AF=$programPath(LabelPath)\\5LINEDB.btw /P /CLOSE
@@ -502,6 +504,7 @@ proc printLabels {} {
                     set lineNumber 4
                     # Redirect for special print options
                     Shipping_Gui::chooseLabel
+                    puts "4 Line Label"
 
                 } else {
 		    exec $programPath(Bartend) /AF=$programPath(LabelPath)\\4LINEDB.btw /P /CLOSE
