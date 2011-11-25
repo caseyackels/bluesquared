@@ -70,7 +70,7 @@ proc 'blueSquirrel_sourceReqdFiles {} {
         #lappend ::auto_path [file join [file dirname [info script]] Binaries sqlite3.3.8]
 
 	lappend ::auto_path [file join [file dirname [info script]] Libraries]
-	lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist4.8]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.4]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries autoscroll]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries csv]
@@ -84,7 +84,7 @@ proc 'blueSquirrel_sourceReqdFiles {} {
 	    ## ** NOTE **
 	    # The file tablelistEdit.tcl has been edited for the binding of <Return> and <KP_Enter>
 	    # Lines 87-89; the original code is commented out.
-	    package require Tablelist_tile 4.8
+	    package require Tablelist_tile 5.4
 	package require tooltip
 	package require autoscroll
 	package require csv
