@@ -165,11 +165,13 @@ proc insertInListbox {args} {
     #puts "qty $qty"
     set batch [lindex $args 1] ;# batch = how many shipments of $qty to enter. (i.e 5 shipments at 5 pieces each)
     #puts "batch $batch"
+    set shipvia [lindex $args 2] ;# shipvia = How the shipment will ship (i.e. Import or Freight)
 
     if {[string is integer $qty] == 1} {
 	if {$qty == 0} {return}
         if {($batch == 0) || ($batch == "")} {
             $frame2b.listbox insert end "0 $qty"
+	    $frame2b.listbox insert end "1 $shipvia"
             #puts "insertInListbox: $qty"
 
         } else {
@@ -466,7 +468,7 @@ proc printLabels {} {
 	Shipping_Code::createList
 	Shipping_Code::writeHistory $GS_textVar(maxBoxQty)
         Shipping_Code::openHistory
-	Shipping_Code::setTips
+	#Shipping_Code::setTips
 
             #Figure out how many Lines are being used and load the appropriate label
             #set programPath(Bartend) [file join C:// "Program Files" Seagull "BarTender 7.10" Enterprise Bartend.exe]
@@ -808,7 +810,7 @@ proc countLength {args} {
 }
 
 
-proc addMaster {destQty batch} {
+proc addMaster {destQty batch shipvia} {
     #****f* addmaster/Shipping_Code
     # AUTHOR
     #	Casey Ackels
@@ -838,9 +840,10 @@ proc addMaster {destQty batch} {
     #***
     global GS_textVar
 
-    if {$GS_textVar(destQty) eq ""} {return}
+    # This shouldn't be needed, we have existing code in the [bind]ing, and in the button command
+    #if {$GS_textVar(destQty) eq ""} {return}
 
-    Shipping_Code::insertInListbox $destQty $batch
+    Shipping_Code::insertInListbox $destQty $batch $shipvia
 
     ;# Reset the variables
     set GS_textVar(destQty) ""

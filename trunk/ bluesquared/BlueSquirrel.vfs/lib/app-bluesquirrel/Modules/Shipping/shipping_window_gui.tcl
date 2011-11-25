@@ -150,37 +150,47 @@ proc shippingGUI {} {
                         -width 25 \
                         -validate key \
                         -validatecommand {Shipping_Code::filterKeys -numeric %S %W %P}
-
-    ttk::label $frame2a.text1 -text "Quantity / Shipments"
-    ttk::entry $frame2a.entry1 -textvariable GS_textVar(destQty) \
-                        -width 15 \
-                        -validate key \
-                        -validatecommand {Shipping_Code::filterKeys -numeric %S %W %P}
-
-    ttk::entry $frame2a.entry2 -textvariable GS_textVar(batch) \
+    
+    ttk::label $frame2a.text1 -text "Shipments"
+    ttk::entry $frame2a.entry1 -textvariable GS_textVar(batch) \
                         -width 5 \
                         -validate key \
                         -validatecommand {Shipping_Code::filterKeys -numeric %S %W %P}
     set GS_textVar(batch) ""
 
 
+    ttk::label $frame2a.text2 -text "Quantity"
+    ttk::entry $frame2a.entry2 -textvariable GS_textVar(destQty) \
+                        -width 15 \
+                        -validate key \
+                        -validatecommand {Shipping_Code::filterKeys -numeric %S %W %P}
+    
+    ttk::combobox $frame2a.cbox -textvar GS_textVar(shipvia) \
+                                -width 7 \
+                                -values [list "Freight" "Import"] \
+                                -validate key \
+                                -validatecommand {Shipping_Code::filterKeys -textLength %S %W %P}
+
 
     ttk::button $frame2a.add -text "Add to List" -command {
             ;# Guard against the user inadvertantly hitting <Enter> or "Add" button without anything in the entry fields
             if {([info exists GS_textVar(destQty)] eq 0) || ($GS_textVar(destQty) eq "")} {return}
 
-            Shipping_Code::addMaster $GS_textVar(destQty) $GS_textVar(batch)
+            Shipping_Code::addMaster $GS_textVar(destQty) $GS_textVar(batch) $GS_textVar(shipvia)
     }
 
-    grid $frame2a.text -column 0 -row 0
-    grid $frame2a.entry -column 1 -row 0 -columnspan 2 -sticky news -padx 3p -pady 2p
+    grid $frame2a.text -column 0 -row 0 -sticky e
+    grid $frame2a.entry -column 1 -row 0 -columnspan 2 -sticky w -padx 3p -pady 2p
     #grid columnconfigure $frame2a $frame2a.entry -weight 1
 
-    grid $frame2a.text1 -column 0 -row 1 -sticky w
-    grid $frame2a.entry1 -column 1 -row 1 -sticky ew -padx 2p -pady 2p
-    grid $frame2a.entry2 -column 2 -row 1 -sticky ew -padx 4p -pady 2p
-
-    grid $frame2a.add -column 3 -row 1 -sticky nes -padx 5p
+    grid $frame2a.text1 -column 0 -row 1 -sticky e
+    grid $frame2a.entry1 -column 1 -row 1 -columnspan 2 -sticky w -padx 3p -pady 2p
+    
+    grid $frame2a.text2 -column 0 -row 2 -sticky e
+    grid $frame2a.entry2 -column 1 -row 2 -sticky w -padx 3p
+    grid $frame2a.cbox -column 2 -row 2
+    
+    grid $frame2a.add -column 3 -row 2 -sticky nes -padx 5p
     tooltip::tooltip $frame2a.add "Add to List (Enter)"
 
 
@@ -190,7 +200,7 @@ proc shippingGUI {} {
     set frame2b [ttk::frame $frame2.frame2b]
     grid $frame2b -column 0 -row 1 -sticky news -padx 5p -pady 3p
 
-    tablelist::tablelist $frame2b.listbox -columns {2 "Count" 0 "Shipments"} \
+    tablelist::tablelist $frame2b.listbox -columns {0 "..." 2 "Shipments" 0 "Ship Via" } \
                 -showlabels yes \
                 -stretch all \
                 -height 5 \
@@ -204,6 +214,9 @@ proc shippingGUI {} {
         $frame2b.listbox columnconfigure 0 -showlinenumbers 1 \
                                             -labelalign center \
                                             -align center
+        
+        #$frame2b.listbox columnconfigure 2 -editable yes \
+                                            -editwindow ttk::combobox
 
         # This is not in use now because we need to figure out how to update the ToolTip to reflect changes.
         #$frame2b.listbox columnconfigure 1 -editable yes \
@@ -249,7 +262,7 @@ foreach window "$frame2a.add $frame2a.entry1 $frame2a.entry2" {
     bind $window <Return> {
         ;# Guard against the user inadvertantly hitting <Enter> or "Add" button without anything in the entry fields
         if {[info exists GS_textVar(destQty)] eq 0} {return}
-        Shipping_Code::addMaster $GS_textVar(destQty) $GS_textVar(batch)
+        Shipping_Code::addMaster $GS_textVar(destQty) $GS_textVar(batch) $GS_textVar(shipvia)
     }
 }
 
@@ -584,7 +597,7 @@ proc chooseLabel {} {
     set frame1 [ttk::frame .chooseLabel.frame1]
     grid $frame1 -padx 5p -pady 5p
 
-    ttk::button $frame1.print -text "Print" -command {Shipping_Code::printCustomLabels $lineNumber$labels; destroy .chooseLabel}
+    ttk::button $frame1.print -text "Print" -command {puts "line $lineNumber$labels"};#Shipping_Code::printCustomLabels $lineNumber$labels; destroy .chooseLabel
     ttk::button $frame1.close -text "Close" -command {destroy .chooseLabel}
 
     grid $frame1.print -column 0 -row 0 -sticky ne
