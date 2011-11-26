@@ -55,7 +55,7 @@ proc BlueSquared_About::aboutOpenFiles {about_Text changeLog_Text} {
     #***
 
     # About Window
-    set fileAbout [$starkit::topdir [string tolower about.txt]]
+    set fileAbout [file join $starkit::topdir about.txt]
     set openFileAbout [open $fileAbout RDONLY]
 
 
@@ -71,7 +71,7 @@ proc BlueSquared_About::aboutOpenFiles {about_Text changeLog_Text} {
     #
     # Change Log
     #
-    set fileChangeLog [$starkit::topdir [string tolower CHANGELOG.txt]]
+    set fileChangeLog [file join $starkit::topdir CHANGELOG.txt]
     set openChangeLog [open $fileChangeLog RDONLY]
 
     # Make the markup tags
