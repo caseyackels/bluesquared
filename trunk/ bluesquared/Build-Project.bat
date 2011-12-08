@@ -9,18 +9,22 @@ REM - LABEL INDICATING THE BEGINNING OF THE DOCUMENT.
 CLS
 Title Project Builder
 REM - Build our Builds dir
+
 IF NOT EXIST Builds\ (MKDIR Builds)
+::mkdir builds
 
 REM Find out what project the user wants to build
-CHOICE /C:123 /M "1=BoxLabels 2=Efficiency Assist 3=NextGen-RM" %1
+::CHOICE /C:123 /M "1=BoxLabels 2=Efficiency Assist 3=NextGen-RM" %1
+set /p project= 1=BoxLabels 2=Efficiency Assist 3=NextGen-RM -^>
+set /p wrap= Do you want to build an executable? y/n -^>
 
 :: Create a blank line
 ECHO.
 
 REM - Whatever number the user presses, we will then go to that category
-IF ERRORLEVEL == 3 GOTO NEXTGEN-RM
-IF ERRORLEVEL == 2 GOTO EA
-IF ERRORLEVEL == 1 GOTO BLUESQUIRREL
+IF %project% == 3 GOTO NEXTGEN-RM
+IF %project% == 2 GOTO EA
+IF %project% == 1 GOTO BLUESQUIRREL
 GOTO END
 
 ECHO.
@@ -49,14 +53,14 @@ GOTO BUILDPROJECT
 set programName=BlueSquirrel
 set programEXE=BlueSquirrel.vfs
 
-set thirdparty=about autoscroll csv debugtablelist5.4 tooltip
+set thirdparty=about autoscroll csv debug tablelist5.4 tooltip
 
 GOTO BUILDPROJECT
 
 
 :BUILDPROJECT
 rem - Get the version number
-set /p version= %programName% Version-^>
+if %wrap% == y (set /p version= %programName% Version-^>) ELSE (ECHO No Version Needed)
 
 :: Create the directory structure. Basically just copy the source files, then add in the 3rd party components.
 ECHO Removing old files ...
@@ -88,15 +92,17 @@ ECHO.
 rem - Insert a delay
 ping -n 3 127.0.0.1>nul
 
-:: Now we give the option to wrap it.
-CHOICE /M "Do you want to wrap it?" %1
-IF ERRORLEVEL == 2 GOTO NOWRAP
-IF ERRORLEVEL == 1 GOTO WRAP
-GOTO END
+
+GOTO :WRAP
 
 
 :WRAP
 ECHO.
+
+:: Now we give the option to wrap it.
+:: CHOICE /M "Do you want to wrap it?" %1
+IF %wrap% == n GOTO NOWRAP
+
 ECHO Generating executable file ...
 ECHO Please wait.
 cd Builds
@@ -127,4 +133,3 @@ ping -n 10 127.0.0.1>nul
 GOTO END
 
 :END
-
