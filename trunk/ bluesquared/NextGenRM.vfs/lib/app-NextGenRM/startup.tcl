@@ -96,19 +96,19 @@ proc 'nextGenRM_sourceReqdFiles {} {
 	#package require tkdnd
 	#package require Tablelist_tile 5.2
 	#package require tooltip
-	package require autoscroll
+	#package require autoscroll
 	#package require csv
 
 	## Distribution Helper modules
 	#package require disthelper_core
 	#package require disthelper_importFiles
-        package require aboutwindow
+        #package require aboutwindow
 
 
 	# Source files that are not in a package
-        source [file join [file dirname [info script]] Libraries popups.tcl]
-        source [file join [file dirname [info script]] Libraries errorMsg_gui.tcl]
-        source [file join [file dirname [info script]] Libraries debug.tcl]
+        #source [file join [file dirname [info script]] Libraries popups.tcl]
+        #source [file join [file dirname [info script]] Libraries errorMsg_gui.tcl]
+        #source [file join [file dirname [info script]] Libraries debug.tcl]
 
         #namespace import dh_Debug::debug
         'debug "Loaded"
