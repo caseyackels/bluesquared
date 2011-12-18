@@ -31,12 +31,12 @@ ECHO.
 
 :NEXTGEN-RM
 :: Set program name
-set programName=distributionhelper
-set programEXE=DistributionHelper.vfs
+set programName=NextGenRM
+set programEXE=NextGenRM.vfs
 
-set thirdparty=about autoscroll debug
+set thirdparty=about autoscroll debug tablelist5.4 autoscroll
 
-GOTO END
+GOTO BUILDPROJECT
 
 
 :EA
@@ -60,7 +60,7 @@ GOTO BUILDPROJECT
 
 :BUILDPROJECT
 rem - Get the version number
-if %wrap% == y (set /p version= %programName% Version-^>) ELSE (ECHO No Version Needed)
+if %wrap% == y (set /p version= %programName% Version-^>) ELSE (ECHO No version needed, skipping...)
 
 :: Create the directory structure. Basically just copy the source files, then add in the 3rd party components.
 ECHO Removing old files ...
@@ -68,19 +68,19 @@ ECHO.
 IF EXIST Builds\%programEXE% (RMDIR /S /Q Builds\%programEXE%) ELSE (ECHO No files detected, continuing...)
 ECHO.
 rem - Insert a delay
-ping -n 3 127.0.0.1>nul
+ping -n 1 127.0.0.1>nul
 
 ECHO Building %programName% - Starting...
 ECHO Copying project files
 
 rem - Insert a delay
-ping -n 3 127.0.0.1>nul
+ping -n 1 127.0.0.1>nul
 xcopy /E /I /Y %programEXE% Builds\%programEXE% /S
 
 
 ECHO.
-rem - Insert a 3 second delay
-ping -n 3 127.0.0.1>nul
+rem - Insert a second delay
+ping -n 1 127.0.0.1>nul
 ECHO Copying 3rd Party Files...
 
 :: Cycle through the 'generic' variable of 3rdparty to add in the libraries that the project needs. This will be set in the individual
@@ -90,7 +90,7 @@ ECHO.
 ECHO Building %programName% - Finished!
 ECHO.
 rem - Insert a delay
-ping -n 3 127.0.0.1>nul
+ping -n 1 127.0.0.1>nul
 
 
 GOTO :WRAP
@@ -118,16 +118,16 @@ ping -n 3 127.0.0.1>nul
 move /Y Builds\%programName%-%version%.exe .
 
 
-ECHO Your project has been built: %programName%-%version%.exe
+ECHO %time%: Your project has been built: %programName%-%version%.exe
 :: Time Delay
-ping -n 3 127.0.0.1>nul
+ping -n 1 127.0.0.1>nul
 
 GOTO END
 
 
 :NOWRAP
 ECHO.
-ECHO Your finished project (%programName%) has been exported to Builds\%programName%
+ECHO %time%: Your finished project (%programName%) has been exported to Builds\%programName%
 ping -n 10 127.0.0.1>nul
 
 GOTO END
