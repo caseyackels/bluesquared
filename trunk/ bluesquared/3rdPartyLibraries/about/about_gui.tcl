@@ -28,7 +28,7 @@
 # - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
-package provide aboutwindow 0.1
+package provide aboutwindow 1.0
 
 namespace eval BlueSquared_About {}
 
