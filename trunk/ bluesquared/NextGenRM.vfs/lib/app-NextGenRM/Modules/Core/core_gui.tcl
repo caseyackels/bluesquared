@@ -1,5 +1,5 @@
 # Creator: Casey Ackels
-# Initial Date: March 12, 2011]
+# Initial Date: November 26, 2011]
 # Dependencies: See Below
 #-------------------------------------------------------------------------------
 #
@@ -28,7 +28,7 @@
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
 # Start GUI
-package provide nextgenrm_core 1.0
+package provide nextgenrm1 1.0
 
 namespace eval nextgenrm {}
 
@@ -59,7 +59,7 @@ proc nextgenrm::parentGUI {} {
     #
     #***
 
-    wm geometry . 640x600 ;# width x Height
+    #wm geometry . 640x600 ;# width x Height
 
     # Create the Menu's
     set mb [menu .mb]
@@ -69,6 +69,7 @@ proc nextgenrm::parentGUI {} {
     menu $mb.file -tearoff 0 -relief raised -bd 2
 
     $mb add cascade -label [mc "File"] -menu $mb.file
+    $mb.file add command -label [mc "Add/Edit Profile"] -command {nextgenrm_GUI::addEditWindow}
     $mb.file add command -label [mc "Exit"] -command {exit}
 
     ## Edit
@@ -87,11 +88,11 @@ proc nextgenrm::parentGUI {} {
 
 
     # Create Separator Frame
-    set frame0 [ttk::frame .frame0]
-    ttk::separator $frame0.separator -orient horizontal
+    #set frame0 [ttk::frame .frame0]
+    #ttk::separator $frame0.separator -orient horizontal
 
-    grid $frame0.separator - -sticky ew -ipadx 4i
-    pack $frame0 -anchor n -fill x -expand yes
+    #grid $frame0.separator - -sticky ew -ipadx 4i
+    #pack $frame0 -anchor n -fill x -expand yes -pady 3p
 
     # Create the container frame
     ttk::frame .container

@@ -1,3 +1,4 @@
-package ifneeded nextgenrm_core 1.0 [list source [file join $dir core_gui.tcl] \
-                                     [file join $dir mainWindow_gui.tcl]
-]
+package ifneeded nextgenrm1 1.0 "[list source [file join $dir core_gui.tcl]]
+                                [list source [file join $dir mainWindow_gui.tcl]]
+                                [list source [file join $dir profile_gui.tcl]]
+                                "

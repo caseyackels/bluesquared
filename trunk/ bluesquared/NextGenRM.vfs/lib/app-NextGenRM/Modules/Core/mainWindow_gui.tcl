@@ -26,9 +26,11 @@
 # - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
-namespace eval NextgenRM_GUI {
+package provide nextgenrm1 1.0
 
-proc nextgenrmGUI {} {
+namespace eval nextgenrm_GUI {}
+
+proc nextgenrm_GUI::nextgenrmGUI {} {
     #****f* nextgenrmGUI/NextgenRM_GUI
     # AUTHOR
     #	PickleJuice
@@ -54,22 +56,24 @@ proc nextgenrmGUI {} {
     # SEE ALSO
     #
     #***
-    global GS_profile GS_textVar
+    global GS_profile GS_textVar program
 
     wm title . "$program(Name) - $program(Version)"
     focus -force .
     
-
-# Frame 1 - Select store profile, date, purchased list
-    set frame1 [ttk::labelframe .container.frame1 -text [mc "Store Data"]]
-    pack $frame1 -fill both -padx 5p -pady 5p -ipady 2p -anchor nw -side left
+##
+## Frame 1 - Select store profile, date, purchased list
+##
+    set frame1 [ttk::labelframe .container.frame1 -text [mc "Receipt Data"]]
+    pack $frame1 -fill both -padx 5p -pady 5p -ipady 2p -anchor n
     
     ttk::label $frame1.store -text [mc "Store Profile"]
     ttk::combobox $frame1.storeCombo -textvariable GS_textVar(storelist) \
                                     -values [list Safeway "Fred Meyer" Albertsons]
+    #ttk::button $frame1.profile -text [mc "New/Edit Profile..."] -command {}
     
     ttk::label $frame1.date -text [mc "Date"]
-    ttk::entry $frame1.entry
+    ttk::entry $frame1.entry -width 20
     
     ttk::label $frame1.pList -text [mc "Purchased List"]
     ttk::combobox $frame1.plistCombo -textvariable GS_textVar(purchasedlist) \
@@ -77,13 +81,59 @@ proc nextgenrmGUI {} {
     
     
     
-    grid $frame1.store -column 0 -row 0 -padx 5p -pady 5p -sticky e
-    grid $frame1.storeCombo -column 1 -row 0 -padx 5p -pady 5p -sticky w
+    grid $frame1.store -column 0 -row 0 -padx 3p -pady 5p -sticky e
+    grid $frame1.storeCombo -column 1 -row 0 -padx 2p -pady 5p -sticky w
+    #grid $frame1.profile -column 2 -row 0 -padx 3p -pady 5p -sticky news
     
-    grid $frame1.date -column 0 -row 1 -sticky e
-    grid $frame1.entry -column 1 -row 1 -sticky w
+    grid $frame1.date -column 0 -row 1 -padx 3p -pady 2p -sticky e
+    grid $frame1.entry -column 1 -row 1 -padx 2p -pady 3p -sticky news
     
-    grid $frame1.pList -column 0 -row 2 -sticky e
-    grid $frame1.plistCombo -column 1 -row 2 -sticky w
+    grid $frame1.pList -column 0 -row 2 -padx 3p -pady 2p -sticky e
+    grid $frame1.plistCombo -column 1 -row 2 -padx 2p -pady 3p -sticky w
     
-} ;# End of NextgenRM_GUI namespace
+    
+##
+## Frame 2 - Enter products, quantities, and price
+##
+
+    set frame2 [ttk::labelframe .container.frame2 -text [mc "Product Information"]]
+    pack $frame2 -fill both -padx 5p -pady 5p -ipadx 5p -ipady 2p -anchor n
+    
+    # Header Row
+    ttk::label $frame2.header1 -text [mc "Product"]
+    ttk::label $frame2.header2 -text [mc "Quantity"]
+    ttk::label $frame2.header3 -text [mc "Price"]
+    
+    grid $frame2.header1 -column 1 -row 0
+    grid $frame2.header2 -column 2 -row 0
+    grid $frame2.header3 -column 3 -row 0
+    
+    # Lines 1 - 10
+    set col 0
+    set row 1
+    for {set x 1} {11 > $x} {incr x} {
+        set child_col 0
+        ttk::label $frame2.line$x -text "[mc Line] $x"
+        ttk::entry $frame2.productline$x -textvariable GS_product(product,line$x) -width 25
+        ttk::entry $frame2.quantityline$x -textvariable GS_product(quantity,line$x) -width 3
+        ttk::entry $frame2.priceline$x -textvariable GS_product(price,line$x) -width 6
+        
+        # Grid the widgets
+        grid $frame2.line$x -column $child_col -row $row -padx 3p -pady 2p -sticky e
+        grid $frame2.productline$x -column [incr child_col] -row $row -padx 2p -pady 2p -sticky news
+        grid $frame2.quantityline$x -column [incr child_col] -row $row -padx 2p -pady 2p -sticky news
+        grid $frame2.priceline$x -column [incr child_col] -row $row -padx 2p -pady 2p -sticky news
+        
+        incr col
+        incr row
+    }
+    
+    # Create Separator Frame
+    #set sep_frame1 [ttk::frame .container.sep_frame1]
+    #ttk::separator $sep_frame1.separator -orient horizontal
+
+    #grid $sep_frame1.separator - -sticky ew -ipadx 1i
+    #grid $sep_frame1.separator - -ipadx 1i
+    #pack $sep_frame1 ;#-fill x -expand yes
+    
+}

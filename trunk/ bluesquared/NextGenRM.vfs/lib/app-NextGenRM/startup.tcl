@@ -74,9 +74,10 @@ proc 'nextGenRM_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries autoscroll]
 	#lappend ::auto_path [file join [file dirname [info script]] Libraries csv]
-	##lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.2]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.4]
 	#lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
         lappend ::auto_path [file join [file dirname [info script]] Libraries about]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries debug]
 
 	##
         ## Project built scripts
@@ -87,30 +88,28 @@ proc 'nextGenRM_sourceReqdFiles {} {
 
 	#
 	## Start the Package Require
-	#
-
 	## System Packages
 	package require msgcat
 
 	## 3rd Party modules
 	#package require tkdnd
-	#package require Tablelist_tile 5.2
+	package require Tablelist_tile 5.4
 	#package require tooltip
-	#package require autoscroll
+	package require autoscroll
 	#package require csv
+	package require debug
+	package require aboutwindow
 
-	## Distribution Helper modules
+	## NextGen RM
 	#package require disthelper_core
 	#package require disthelper_importFiles
-        #package require aboutwindow
+        package require nextgenrm1
 
 
 	# Source files that are not in a package
         #source [file join [file dirname [info script]] Libraries popups.tcl]
         #source [file join [file dirname [info script]] Libraries errorMsg_gui.tcl]
-        #source [file join [file dirname [info script]] Libraries debug.tcl]
 
-        #namespace import dh_Debug::debug
         'debug "Loaded"
 }
 
@@ -197,9 +196,10 @@ proc 'nextGenRM_loadSettings {} {
     # Enable / Disable Debugging
     # See 'nextGenRM_sourceReqdFiles for the [namespace import] command
     set debug(onOff) on
+    console show
 
-    set program(Name) "NextGen - RM"
-    set program(Version) ".01"
+    set program(Name) "Receipt Maker NG"
+    set program(Version) "Alpha"
     tk appname $program(Name)
 
     # Theme setting for Tile
@@ -247,7 +247,7 @@ proc 'nextGenRM_loadSettings {} {
 #'nextGenRM_loadOptions
 
 # Start the GUI
-disthelper::parentGUI
-
+#disthelper::parentGUI
+nextgenrm::parentGUI
 # Load the rest of the files
 #'nextGenRM_sourceOtherFiles
