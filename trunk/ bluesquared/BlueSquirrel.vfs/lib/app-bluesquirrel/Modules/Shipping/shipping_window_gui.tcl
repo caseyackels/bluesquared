@@ -150,7 +150,7 @@ proc shippingGUI {} {
                         -width 25 \
                         -validate key \
                         -validatecommand {Shipping_Code::filterKeys -numeric %S %W %P}
-    
+
     ttk::label $frame2a.text1 -text "Shipments"
     ttk::entry $frame2a.entry1 -textvariable GS_textVar(batch) \
                         -width 5 \
@@ -164,7 +164,7 @@ proc shippingGUI {} {
                         -width 15 \
                         -validate key \
                         -validatecommand {Shipping_Code::filterKeys -numeric %S %W %P}
-    
+
     ttk::combobox $frame2a.cbox -textvar GS_textVar(shipvia) \
                                 -width 7 \
                                 -values [list "Freight" "Import"] \
@@ -185,11 +185,11 @@ proc shippingGUI {} {
 
     grid $frame2a.text1 -column 0 -row 1 -sticky e
     grid $frame2a.entry1 -column 1 -row 1 -columnspan 2 -sticky w -padx 3p -pady 2p
-    
+
     grid $frame2a.text2 -column 0 -row 2 -sticky e
     grid $frame2a.entry2 -column 1 -row 2 -sticky w -padx 3p
     grid $frame2a.cbox -column 2 -row 2
-    
+
     grid $frame2a.add -column 3 -row 2 -sticky nes -padx 5p
     tooltip::tooltip $frame2a.add "Add to List (Enter)"
 
@@ -200,21 +200,21 @@ proc shippingGUI {} {
     set frame2b [ttk::frame $frame2.frame2b]
     grid $frame2b -column 0 -row 1 -sticky news -padx 5p -pady 3p
 
-    tablelist::tablelist $frame2b.listbox -columns {0 "..." 2 "Shipments" 0 "Ship Via" } \
+    tablelist::tablelist $frame2b.listbox -columns {3 "..." 0 "Shipments" 0 "Ship Via" } \
                 -showlabels yes \
-                -stretch all \
                 -height 5 \
                 -selectbackground yellow \
                 -selectforeground black \
                 -stripebackground lightblue \
                 -exportselection yes \
                 -showseparators yes \
+                -fullseparators yes \
                 -yscrollcommand [list $frame2b.scrolly set]
 
         $frame2b.listbox columnconfigure 0 -showlinenumbers 1 \
                                             -labelalign center \
                                             -align center
-        
+
         #$frame2b.listbox columnconfigure 2 -editable yes \
                                             -editwindow ttk::combobox
 

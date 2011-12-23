@@ -170,8 +170,8 @@ proc insertInListbox {args} {
     if {[string is integer $qty] == 1} {
 	if {$qty == 0} {return}
         if {($batch == 0) || ($batch == "")} {
-            $frame2b.listbox insert end "0 $qty"
-	    $frame2b.listbox insert end "1 $shipvia"
+            $frame2b.listbox insert end "1 $qty"
+	    $frame2b.listbox insert end "2 $shipvia"
             #puts "insertInListbox: $qty"
 
         } else {
