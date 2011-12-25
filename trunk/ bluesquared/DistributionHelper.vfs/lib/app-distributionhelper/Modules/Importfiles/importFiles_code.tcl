@@ -77,6 +77,7 @@ proc Disthelper_Code::readFile {filename} {
 
     # Make the data useful, and put it into lists
     # While we are at it, make everything UPPER CASE
+    #while {-1 != [gets $fp line]}
     while { [gets $fileName line] >= 0 } {
         # Guard against lines of comma's, this will not be viewable in excel. Only in a text editor.
         if {[string is punc [string trim $line]] eq 1} {continue}
