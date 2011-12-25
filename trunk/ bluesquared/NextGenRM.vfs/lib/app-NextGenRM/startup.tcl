@@ -110,7 +110,7 @@ proc 'nextGenRM_sourceReqdFiles {} {
         #source [file join [file dirname [info script]] Libraries popups.tcl]
         #source [file join [file dirname [info script]] Libraries errorMsg_gui.tcl]
 
-        'debug "Loaded"
+        #'debug "Loaded"
 }
 
 
@@ -192,11 +192,16 @@ proc 'nextGenRM_loadSettings {} {
     #
     #***
     global settings debug program header
+    
+    # Import namespace commands 
+    namespace import 'debug::*
+    namespace import msgcat::mc
 
-    # Enable / Disable Debugging
-    # See 'nextGenRM_sourceReqdFiles for the [namespace import] command
+	# Enable / Disable Debugging
+     #'debug -on
     set debug(onOff) on
-    console show
+
+    #console show
 
     set program(Name) "Receipt Maker NG"
     set program(Version) "Alpha"
@@ -207,8 +212,6 @@ proc 'nextGenRM_loadSettings {} {
     #puts "theme names: [ttk::style theme names]"
 
 
-    # Import msgcat namespace so we only have to use [mc]
-    namespace import msgcat::mc
 
     if {[catch {open config.txt r} fd]} {
 	puts "unable to load defaults"
@@ -237,11 +240,11 @@ proc 'nextGenRM_loadSettings {} {
 }
 
 
-# Load the config file
-'nextGenRM_loadSettings
-
 # Load required files / packages
 'nextGenRM_sourceReqdFiles
+
+# Load the config file
+'nextGenRM_loadSettings
 
 # Load the Option Database options
 #'nextGenRM_loadOptions

@@ -61,6 +61,8 @@ proc nextgenrm_GUI::nextgenrmGUI {} {
     wm title . "$program(Name) - $program(Version)"
     focus -force .
     
+    'debug Testing
+    
 ##
 ## Frame 1 - Select store profile, date, purchased list
 ##
