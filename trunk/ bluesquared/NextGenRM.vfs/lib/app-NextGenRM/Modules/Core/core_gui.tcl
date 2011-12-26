@@ -28,7 +28,7 @@
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
 # Start GUI
-package provide nextgenrm1 1.0
+package provide rm_ng 1.0
 
 namespace eval nextgenrm {}
 
@@ -110,7 +110,7 @@ proc nextgenrm::parentGUI {} {
 
     set btnBar [ttk::frame .btnBar]
 
-    ttk::button $btnBar.print -text [mc "Print"] -command { nextgenrm_Helper::checkForErrors }
+    ttk::button $btnBar.print -text [mc "Print"] -command { exit }
 
     grid $btnBar.print -column 0 -row 3 -sticky nse -padx 8p
     pack $btnBar -side bottom -anchor e -pady 13p -padx 5p

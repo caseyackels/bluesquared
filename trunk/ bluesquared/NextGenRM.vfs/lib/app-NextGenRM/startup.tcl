@@ -101,7 +101,7 @@ proc 'nextGenRM_sourceReqdFiles {} {
 	package require aboutwindow
 
 	## NextGen RM
-    package require nextgenrm1
+    package require rm_ng
 
 
 	# Source files that are not in a package

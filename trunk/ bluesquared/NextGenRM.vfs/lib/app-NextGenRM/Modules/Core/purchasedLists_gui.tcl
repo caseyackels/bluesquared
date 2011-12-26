@@ -55,13 +55,13 @@ proc nextgenrm_GUI::pclWindow {} {
     #***
 
     # Make sure the window has been destroyed before creating.
-    if {[winfo exists .pclwindow]} {destroy .pclwindow}
+    #if {[winfo exists .pclwindow]} {destroy .pclwindow}
 ##
 ## Window Manager
 ##
     
     toplevel .pclwindow
-    wm title .pclwindow [mc "Purchased Lists"]
+    wm title .pclwindow [mc "Purchased List Editor"]
     wm transient .pclwindow .
     focus -force .pclwindow
 
@@ -72,34 +72,33 @@ proc nextgenrm_GUI::pclWindow {} {
     set locY [expr {[winfo height . ] / 4 + [winfo y .]}]
 
     wm geometry .pclwindow +$locX+$locY
-    #set tab3 [ttk::frame $nb.f3.frame1]
-    #pack $tab3 -expand yes -fill both -padx 5p -pady 5p
-    #
-    #set frame2 [ttk::frame $tab3.frame2]
-    #pack $frame2 -expand yes -fill both -padx 5p -pady 5p
-    
+
+##
+## Frame 1
+##    
     set frame1 [ttk::frame .pclwindow.frame1]
-    pack $frame1 -fill both -expand yes -pady 5p
+    pack $frame1 -fill both -expand yes -pady 8p -padx 5p
     
     ttk::label $frame1.pclText -text [mc "Purchased Lists"]
     ttk::combobox $frame1.pclBox -textvariable profile(store,pcl)
     
-    grid $frame1.pclText -column 0 -row 0
-    grid $frame1.pclBox -column 1 -row 0
+    grid $frame1.pclText -column 0 -row 0 -sticky e -padx 5p -pady 5p
+    grid $frame1.pclBox -column 1 -row 0 -sticky news -padx 5p -pady 5p
     
-    # container for listbox
-    set pcl [ttk::frame $frame1.listbox]
-    pack $pcl -expand yes -fill both
+    
+    set pcl [ttk::frame .pclwindow.frame2]
+    pack $pcl -fill both -expand yes -padx 5p
     
     set scrolly $pcl.scrolly
     tablelist::tablelist $pcl.listbox \
-                -columns {0  "Item"     center
-                        8    "Quantity"  center
+                -columns {
+                        15  "Item"    left
                         5    "Price"    center
-                        15   "Taxable"   center } \
+                        15   "Taxable"  center
+                        } \
                 -showlabels yes \
                 -stretch 0 \
-                -height 5 \
+                -height 15 \
                 -selectbackground yellow \
                 -selectforeground black \
                 -stripebackground lightblue \
@@ -111,18 +110,15 @@ proc nextgenrm_GUI::pclWindow {} {
                 -yscrollcommand [list $scrolly set]
         
         $pcl.listbox columnconfigure 0 -name item \
+                                            -labelalign center \
                                             -editable yes \
                                             -editwindow ttk::entry
         
-        $pcl.listbox columnconfigure 1 -name quantity \
+        $pcl.listbox columnconfigure 1 -name price \
                                             -editable yes \
                                             -editwindow ttk::entry
         
-        $pcl.listbox columnconfigure 2 -name price \
-                                            -editable yes \
-                                            -editwindow ttk::entry
-        
-        $pcl.listbox columnconfigure 3 -name taxable \
+        $pcl.listbox columnconfigure 2 -name taxable \
                                             -editable yes \
                                             -editwindow ttk::combobox
         
@@ -141,17 +137,17 @@ proc nextgenrm_GUI::pclWindow {} {
         ::autoscroll::autoscroll $scrolly ;# Enable the 'autoscrollbar'
         
 # Separator Frame
-    set sep_frame1 [ttk::frame .pclwindow.sep_frame1]
-    ttk::separator $sep_frame1.separator -orient horizontal
-
-    grid $sep_frame1.separator - -ipadx 1i
-    pack $sep_frame1
+    #set sep_frame1 [ttk::frame .pclwindow.sep_frame1]
+    #ttk::separator $sep_frame1.separator -orient horizontal
+    #
+    #grid $sep_frame1.separator - -ipadx 1i
+    #pack $sep_frame1
     
 # Button frame
     set button_frame [ttk::frame .pclwindow.button]
     pack $button_frame -side right
     
-    ttk::button $button_frame.close -text [mc "Close"] -command {destroy .add}
+    ttk::button $button_frame.close -text [mc "Close"] -command {destroy .pclwindow}
     grid $button_frame.close -column 0 -row 0 -padx 5p -pady 5p
 }
 
