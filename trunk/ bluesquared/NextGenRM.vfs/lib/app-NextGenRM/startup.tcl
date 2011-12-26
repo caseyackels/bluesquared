@@ -101,9 +101,7 @@ proc 'nextGenRM_sourceReqdFiles {} {
 	package require aboutwindow
 
 	## NextGen RM
-	#package require disthelper_core
-	#package require disthelper_importFiles
-        package require nextgenrm1
+    package require nextgenrm1
 
 
 	# Source files that are not in a package
@@ -200,8 +198,7 @@ proc 'nextGenRM_loadSettings {} {
 	# Enable / Disable Debugging
      #'debug -on
     set debug(onOff) on
-
-    #console show
+	console show
 
     set program(Name) "Receipt Maker NG"
     set program(Version) "Alpha"

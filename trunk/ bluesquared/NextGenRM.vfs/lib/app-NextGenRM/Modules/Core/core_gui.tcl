@@ -69,7 +69,8 @@ proc nextgenrm::parentGUI {} {
     menu $mb.file -tearoff 0 -relief raised -bd 2
 
     $mb add cascade -label [mc "File"] -menu $mb.file
-    $mb.file add command -label [mc "Add/Edit Profile"] -command {nextgenrm_GUI::addEditWindow}
+    $mb.file add command -label [mc "Store Profile..."] -command {nextgenrm_GUI::addEditWindow}
+    $mb.file add command -label [mc "Purchased Lists..."] -command {nextgenrm_GUI::pclWindow}
     $mb.file add command -label [mc "Exit"] -command {exit}
 
     ## Edit

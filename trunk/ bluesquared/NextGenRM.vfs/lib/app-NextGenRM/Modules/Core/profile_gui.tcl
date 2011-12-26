@@ -134,14 +134,14 @@ proc nextgenrm_GUI::profile {} {
     #***
     
     # Make sure the window has been destroyed before creating.
-    #if {[winfo exists .profile]} {destroy .profile}
+    if {[winfo exists .profile]} {destroy .profile}
     
 ##
 ## Window Manager
 ##
     
     toplevel .profile
-    wm title .profile [mc "Store Profiles"]
+    wm title .profile [mc "Store Profile"]
     wm transient .profile .
     focus -force .profile
 
@@ -191,7 +191,7 @@ proc nextgenrm_GUI::profile {} {
     
     $nb add [ttk::frame $nb.f1] -text [mc "Header"]
     $nb add [ttk::frame $nb.f2] -text [mc "Miscellaneous"]
-    $nb add [ttk::frame $nb.f3] -text [mc "Purchased Lists"]
+    #$nb add [ttk::frame $nb.f3] -text [mc "Purchased Lists"]
     $nb select $nb.f1
     
     ttk::notebook::enableTraversal $nb
