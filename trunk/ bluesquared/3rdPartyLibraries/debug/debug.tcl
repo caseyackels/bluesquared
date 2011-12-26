@@ -61,6 +61,8 @@ proc 'debug::'debug {args} {
     #***
     global debug
     
+    if {$debug(onOff) eq "Off"} {return}
+    
     # Configuration parameters
     #switch -- [lindex [string tolower $args] 0] {
     #    -on {
@@ -86,9 +88,9 @@ proc 'debug::'debug {args} {
     #        # Same as L3
     #    }
     #}
-    #puts "[info level 1]: $args"
+    puts "[info level 1]: $args"
     #'debug::debugWindow [info level 1] $args
-    .debug.container.frame1.txt insert end [info level 1](L1) $args
+    #.debug.container.frame1.txt insert end [info level 1](L1) $args
 
     
 } ;# End 'debug::'debug
