@@ -73,11 +73,11 @@ proc nextgenrm::parentGUI {} {
     $mb.file add command -label [mc "Exit"] -command {exit}
 
     ## Edit
-    menu $mb.edit -tearoff 0 -relief raised -bd 2
-    $mb add cascade -label [mc "Edit"] -menu $mb.edit
+    #menu $mb.edit -tearoff 0 -relief raised -bd 2
+    #$mb add cascade -label [mc "Edit"] -menu $mb.edit
 
-    $mb.edit add command -label [mc "Preferences..."] -command { nextgenrm_Preferences::prefGUI }
-    $mb.edit add command -label "Reset" -command { nextgenrm_Helper::resetVars -resetGUI }
+    #$mb.edit add command -label [mc "Preferences..."] -command { nextgenrm_Preferences::prefGUI }
+    #$mb.edit add command -label "Reset" -command { nextgenrm_Helper::resetVars -resetGUI }
 
 
     ## Help
