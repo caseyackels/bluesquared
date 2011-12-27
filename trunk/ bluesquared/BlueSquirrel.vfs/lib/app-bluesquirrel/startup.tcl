@@ -74,6 +74,7 @@ proc 'blueSquirrel_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries autoscroll]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries csv]
+        lappend ::auto_path [file join [file dirname [info script]] about csv]
 
 
 	lappend ::auto_path [file join [file dirname [info script]] Modules]
@@ -85,13 +86,16 @@ proc 'blueSquirrel_sourceReqdFiles {} {
 	    # The file tablelistEdit.tcl has been edited for the binding of <Return> and <KP_Enter>
 	    # Lines 87-89; the original code is commented out.
 	    package require Tablelist_tile 5.4
+        package require msgcat
 	package require tooltip
 	package require autoscroll
 	package require csv
 
+
 	package require shipping
 	package require bluesquirrel_core
-        #package require sqlite3
+
+        package require aboutwindow
 
 	# Source the required files
 	#source [file join [file dirname [info script]] Modules Core core_gui.tcl]
@@ -225,7 +229,11 @@ proc 'blueSquirrel_loadSettings {} {
     #	'blueSquirrel_loadOptions
     #
     #***
-    global programPath
+    global programPath program
+    # Import msgcat namespace so we only have to use [mc]
+    namespace import msgcat::mc
+
+    set program(Name) "Box Labels - 1.7.0 (January 2012)"
 
     if {[catch {open LD_Defaults.txt r} fd]} {
 	puts "unable to load defaults"

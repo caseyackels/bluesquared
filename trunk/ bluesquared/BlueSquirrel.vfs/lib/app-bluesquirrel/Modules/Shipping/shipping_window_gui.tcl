@@ -55,7 +55,9 @@ proc shippingGUI {} {
     #	TODO: List the other *GUI procs.
     #
     #***
-    global GI_textVar GS_textVar frame1 frame2b genResults GS_windows
+    global GI_textVar GS_textVar frame1 frame2b genResults GS_windows program
+
+    
 
     # Destroy frames
     # NOTE: GS_windows is set in core_gui.tcl
@@ -65,7 +67,7 @@ proc shippingGUI {} {
         }
     }
 
-    wm title . "Box Labels - 1.6.8 (November 2011)"
+    wm title . $program(Name)
     focus -force .
 
 
@@ -167,9 +169,9 @@ proc shippingGUI {} {
 
     ttk::combobox $frame2a.cbox -textvar GS_textVar(shipvia) \
                                 -width 7 \
-                                -values [list "Freight" "Import"] \
-                                -validate key \
-                                -validatecommand {Shipping_Code::filterKeys -textLength %S %W %P}
+                                -values [list "Freight" "Import"]
+                                #-validate key \
+                                #-validatecommand {Shipping_Code::filterKeys -textLength %S %W %P}
 
 
     ttk::button $frame2a.add -text "Add to List" -command {
@@ -200,27 +202,28 @@ proc shippingGUI {} {
     set frame2b [ttk::frame $frame2.frame2b]
     grid $frame2b -column 0 -row 1 -sticky news -padx 5p -pady 3p
 
-    tablelist::tablelist $frame2b.listbox -columns {3 "..." 0 "Shipments" 0 "Ship Via" } \
-                -showlabels yes \
-                -height 5 \
-                -selectbackground yellow \
-                -selectforeground black \
-                -stripebackground lightblue \
-                -exportselection yes \
-                -showseparators yes \
-                -fullseparators yes \
-                -yscrollcommand [list $frame2b.scrolly set]
+    tablelist::tablelist $frame2b.listbox -columns {
+                                                    3   "..."       center
+                                                    0   "Shipments" center
+                                                    0   "Ship Via"  center
+                                                    } \
+                                        -showlabels yes \
+                                        -height 5 \
+                                        -selectbackground yellow \
+                                        -selectforeground black \
+                                        -stripebackground lightblue \
+                                        -exportselection yes \
+                                        -showseparators yes \
+                                        -fullseparators yes \
+                                        -yscrollcommand [list $frame2b.scrolly set]
 
         $frame2b.listbox columnconfigure 0 -showlinenumbers 1 \
-                                            -labelalign center \
-                                            -align center
+                                            -name count
 
-        #$frame2b.listbox columnconfigure 2 -editable yes \
-                                            -editwindow ttk::combobox
+        $frame2b.listbox columnconfigure 1 -name shipments
 
-        # This is not in use now because we need to figure out how to update the ToolTip to reflect changes.
-        #$frame2b.listbox columnconfigure 1 -editable yes \
-                                            -editwindow ttk::entry
+        $frame2b.listbox columnconfigure 2 -name shipvia
+
 
     ttk::scrollbar $frame2b.scrolly -orient v -command [list $frame2b.listbox yview]
 
@@ -361,10 +364,17 @@ bind [$frame2b.listbox bodytag] <Double-1> {
 
 
 
-bind all <<ComboboxSelected>> {
+#bind all <<ComboboxSelected>> {
+#    Shipping_Code::readHistory [$frame1.entry1 current]
+#    $frame1.entry1 configure -values $GS_textVar(history) ;# Refresh the data in the comobobox
+#}
+
+bind $frame1.entry1 <<ComboboxSelected>> {
     Shipping_Code::readHistory [$frame1.entry1 current]
     $frame1.entry1 configure -values $GS_textVar(history) ;# Refresh the data in the comobobox
 }
+
+
 
 
 bind all <Escape> {exit}

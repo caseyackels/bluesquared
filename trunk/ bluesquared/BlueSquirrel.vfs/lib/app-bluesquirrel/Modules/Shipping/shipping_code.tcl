@@ -160,7 +160,7 @@ proc insertInListbox {args} {
     # Insert the numbers into the listbox
     global frame2b
 
-    #puts $args
+    puts "insertInListbox: $args"
     set qty [lindex $args 0] ;# qty = piece qty
     #puts "qty $qty"
     set batch [lindex $args 1] ;# batch = how many shipments of $qty to enter. (i.e 5 shipments at 5 pieces each)
@@ -170,13 +170,11 @@ proc insertInListbox {args} {
     if {[string is integer $qty] == 1} {
 	if {$qty == 0} {return}
         if {($batch == 0) || ($batch == "")} {
-            $frame2b.listbox insert end "1 $qty"
-	    $frame2b.listbox insert end "2 $shipvia"
-            #puts "insertInListbox: $qty"
+            $frame2b.listbox insert end [list "" "$qty" "$shipvia"]
 
         } else {
             for {set x 0} {$x<$batch} {incr x} {
-                $frame2b.listbox insert end "0 $qty"
+                $frame2b.listbox insert end [list "" "$qty" "$shipvia"]
                 #puts "insertInListbox - BATCH: $qty"
                 }
         }

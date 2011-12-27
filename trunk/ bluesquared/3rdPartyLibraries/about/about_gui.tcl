@@ -118,24 +118,29 @@ proc BlueSquared_About::aboutWindow {} {
     ## Tab 2 (Release Notes)
     ##
 
-    text $nb.f2.text -wrap word \
+    set tab2 [ttk::frame $nb.f2.frame1]
+    pack $tab2 -expand yes -fill both -padx 5p -pady 5p
+
+
+    text $tab2.text -wrap word \
                     -tabs 4 \
                     -tabstyle wordprocessor \
-                    -yscrollcommand [list $nb.f1.scrolly set] \
-                    -xscrollcommand [list $nb.f1.scrollx set]
+                    -yscrollcommand [list $tab2.scrolly set] \
+                    -xscrollcommand [list $tab2.scrollx set]
 
-    ttk::scrollbar $nb.f2.scrolly -orient v -command [list $nb.f2.listbox yview]
-    ttk::scrollbar $nb.f2.scrollx -orient h -command [list $nb.f2.listbox xview]
+    ttk::scrollbar $tab2.scrolly -orient v -command [list $tab2.text yview]
+    ttk::scrollbar $tab2.scrollx -orient h -command [list $tab2.text xview]
 
     #pack $nb.f2.text -expand yes -fill both -padx 5p -pady 5p
-    grid $nb.f2.text -column 0 -row 0 -sticky news -padx 5p -pady 5p
+    grid $tab2.text -column 0 -row 0 -sticky news;# -padx 5p -pady 5p
+    grid columnconfigure $tab2 $tab2.text -weight 1
 
-    grid $nb.f2.scrolly -column 1 -row 0 -sticky nse
-    grid $nb.f2.scrollx -column 0 -row 1 -sticky ews
+    grid $tab2.scrolly -column 1 -row 0 -sticky nse
+    grid $tab2.scrollx -column 0 -row 1 -sticky ews
 
     # Enable the 'autoscrollbar'
-    ::autoscroll::autoscroll $nb.f2.scrolly
-    ::autoscroll::autoscroll $nb.f2.scrollx
+    ::autoscroll::autoscroll $tab2.scrolly
+    ::autoscroll::autoscroll $tab2.scrollx
 
 
 
@@ -155,11 +160,10 @@ proc BlueSquared_About::aboutWindow {} {
     grid $buttonbar.close -column 1 -row 3 -sticky nse -ipadx 4p
     pack $buttonbar -side bottom -anchor e -pady 8p -padx 5p
 
-    bind $nb.f2.text <Configure> "$nb.f2.text.hr configure -width %w"
+    #bind $tab2.text <Configure> "$tab2.text.hr configure -width %w"
+    #frame $tab2.text.hr -relief raised -height 2 -background gray
 
-    frame $nb.f2.text.hr -relief raised -height 2 -background gray
-
-    BlueSquared_About::aboutOpenFiles $nb.f1.text $nb.f2.text
+    BlueSquared_About::aboutOpenFiles $nb.f1.text $tab2.text
 
 
 

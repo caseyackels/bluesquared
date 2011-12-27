@@ -72,7 +72,7 @@ proc blueSquirrel::parentGUI {} {
     puts "actual y: $GS_winGeom(main,y)"
 
     #wm geometry . 390x420
-    wm geometry . 390x415-$GS_winGeom(main,x)-$GS_winGeom(main,y)
+    wm geometry . 390x425-$GS_winGeom(main,x)-$GS_winGeom(main,y)
     update
 
     # Create the Menu's
@@ -97,7 +97,7 @@ proc blueSquirrel::parentGUI {} {
     menu $mb.help -tearoff 0 -relief raised -bd 2
     $mb add cascade -label "Help" -menu $mb.help
 
-    $mb.help add command -label "About" -command {blueSquirrel::about}
+    $mb.help add command -label "About" -command {BlueSquared_About::aboutWindow}
 
     # Create Separator Frame
     set frame0 [ttk::frame .frame0]
@@ -126,11 +126,11 @@ proc blueSquirrel::parentGUI {} {
 
     ttk::button $btnBar.printb -text "Print Breakdown" -command Shipping_Gui::printbreakDown
     ttk::button $btnBar.print -text "Print Labels" -command Shipping_Code::printLabels
-    ttk::button $btnBar.close -text "Close" -command exit
+    #ttk::button $btnBar.close -text "Close" -command exit
 
     grid $btnBar.printb -column 0 -row 3 -sticky nsw -padx 30p
-    grid $btnBar.print -column 1 -row 3 -sticky nse -padx 8p
-    grid $btnBar.close -column 2 -row 3 -sticky nse
+    grid $btnBar.print -column 1 -row 3 -sticky nse
+    #grid $btnBar.close -column 2 -row 3 -sticky nse
 
 
     pack $btnBar -side bottom -expand yes -anchor se -pady 10p -padx 5p

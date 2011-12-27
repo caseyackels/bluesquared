@@ -100,12 +100,18 @@ proc BlueSquared_About::aboutOpenFiles {about_Text changeLog_Text} {
         # \u00B7 ;# Small
         # \U2022 ;# unicode
 
+
+
         switch -- [string range $line 0 1] {
             "= "        {set textFormat Heading1; set i 0 ;# Heading1}
             "=="        {set textFormat Heading2; set i 0 ;# Heading2}
             "* "        {set stringFormat "\u0009 \u2022 $stringFormat"; set textFormat List1; set i 0 ;# List1}
             "# "        {set stringFormat "\u0009 [incr i]. $stringFormat"; set textFormat List2;# List2}
-            "--"        {$changeLog_Text window create insert -window $changeLog_Text.hr}
+            "--"        {
+                        bind $changeLog_Text <Configure> "$changeLog_Text.hr$idx configure -width %w"
+                        frame $changeLog_Text.hr$idx -relief raised -height 2 -background gray
+                        $changeLog_Text window create insert -window $changeLog_Text.hr$idx
+                        }
             default     {set stringFormat $line; set textFormat Normal; set i 0;# No markup detected}
         }
 
