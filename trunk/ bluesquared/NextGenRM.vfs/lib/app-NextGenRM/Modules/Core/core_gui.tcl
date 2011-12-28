@@ -58,6 +58,7 @@ proc nextgenrm::parentGUI {} {
     #	N/A
     #
     #***
+    global profile
 
     #wm geometry . 640x600 ;# width x Height
 
@@ -110,7 +111,7 @@ proc nextgenrm::parentGUI {} {
 
     set btnBar [ttk::frame .btnBar]
 
-    ttk::button $btnBar.print -text [mc "Print"] -command { exit }
+    ttk::button $btnBar.print -text [mc "Exit"] -command { 'debug [array names profile] }
 
     grid $btnBar.print -column 0 -row 3 -sticky nse -padx 8p
     pack $btnBar -side bottom -anchor e -pady 13p -padx 5p

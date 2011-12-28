@@ -26,9 +26,8 @@
 # - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
-package provide nextgenrm1 1.0
-
 namespace eval nextgenrm_GUI {}
+namespace eval nextgenrm_Code {}
 
 proc nextgenrm_GUI::nextgenrmGUI {} {
     #****f* nextgenrmGUI/NextgenRM_GUI

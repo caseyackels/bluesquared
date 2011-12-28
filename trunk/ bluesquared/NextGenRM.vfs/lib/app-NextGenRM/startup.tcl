@@ -137,28 +137,14 @@ proc 'nextGenRM_initVariables {} {
     # SEE ALSO
     #
     #***
-    global settings header
+    global program
 
-    # hackish, but this will allow us to add new defaults/settings without killing an existing config file.
-    if {![info exists settings(Home)]} {
-        # Application location
-        set settings(Home) [pwd]
-    }
+	set program(Profiles) [file join $program(path) Profiles]
+	
+	# Create the directories
+	file mkdir $program(Profiles)
+	
 
-    if {![info exists settings(outFilePath)]} {
-        # Location for saving the file
-        set settings(outFilePath) [file dirname $settings(Home)]
-    }
-
-    if {![info exists settings(outFilePathCopy)]} {
-        # Location for saving a copy of the file (this should just be up one directory)
-        set settings(outFilePathCopy) [file dirname $settings(Home)]
-    }
-
-    if {![info exists settings(sourceFiles)]} {
-        # Default for finding the source import files
-        set settings(sourceFiles) [file dirname $settings(Home)]
-    }
 }
 
 
@@ -203,6 +189,8 @@ proc 'nextGenRM_loadSettings {} {
     set program(Name) "Receipt Maker NG"
     set program(Version) "Alpha"
     tk appname $program(Name)
+	
+	set program(path) [pwd]
 
     # Theme setting for Tile
     #ttk::style theme use xpnative
