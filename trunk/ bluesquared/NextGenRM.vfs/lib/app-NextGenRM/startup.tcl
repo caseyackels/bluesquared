@@ -100,10 +100,13 @@ proc 'nextGenRM_sourceReqdFiles {} {
 	package require debug
 	package require aboutwindow
 
-	## NextGen RM
+	## ReceiptMaker NG
     package require rm_ng
-
-
+	
+	# Import namespace commands 
+    namespace import 'debug::*
+    namespace import msgcat::mc
+	
 	# Source files that are not in a package
         #source [file join [file dirname [info script]] Libraries popups.tcl]
         #source [file join [file dirname [info script]] Libraries errorMsg_gui.tcl]
@@ -139,10 +142,7 @@ proc 'nextGenRM_initVariables {} {
     #***
     global program
 
-	set program(Profiles) [file join $program(path) Profiles]
-	
-	# Create the directories
-	file mkdir $program(Profiles)
+
 	
 
 }
@@ -176,52 +176,51 @@ proc 'nextGenRM_loadSettings {} {
     #
     #***
     global settings debug program header
-    
-    # Import namespace commands 
-    namespace import 'debug::*
-    namespace import msgcat::mc
 
 	# Enable / Disable Debugging
-     #'debug -on
     set debug(onOff) on
 	console show
 
     set program(Name) "Receipt Maker NG"
     set program(Version) "Alpha"
     tk appname $program(Name)
+
+	set program(Path) [pwd]
+	#'debug pwd [pwd]
 	
-	set program(path) [pwd]
+	set program(Profiles) [file join $program(Path) Profiles]
+	
+	# Create the directories
+	file mkdir $program(Profiles)
+	
+	# Files
+	set program(Settings) [file join $program(Path) settings.txt]
+	
+		# Determine if settings file has been created
+		# If file exists, read the variables (settings)
+		if {![file exists $program(Settings)]} {
+		'debug settings.txt doesn't exist. Creating...
+		set Settings [open $program(Settings) w]
+		chan close $Settings
+	
+		} else {
+				'debug settings.txt exists. Opening...
+				set Settings [open $program(Settings) r]
+				'debug Settings: $Settings
 
-    # Theme setting for Tile
-    #ttk::style theme use xpnative
-    #puts "theme names: [ttk::style theme names]"
+				set readSettings [split [read $Settings] \n]
+				chan close $Settings
+			
+				foreach line $readSettings {
+						if {$line eq ""} {continue}
+						set l_line [split $line " "]
+						set [lindex $l_line 0] [join [lrange $l_line 1 end] " "]
+				}
+		# Check to see if we have new default settings
+		'nextGenRM_initVariables
 
-
-
-    if {[catch {open config.txt r} fd]} {
-	puts "unable to load defaults"
-        puts "execute initVariables"
-
-        # Initialize default values
-        'nextGenRM_initVariables
-
-        #Disthelper_Preferences::saveConfig
-
-    } else {
-	set configFile [split [read $fd] \n]
-	catch {chan close $fd}
-
-	foreach line $configFile {
-	    if {$line == ""} {continue}
-	    set l_line [split $line " "]
-	    set [lindex $l_line 0] [join [lrange $l_line 1 end] " "]
-	}
-
-        # Check to see if we have new default settings
-        'nextGenRM_initVariables
-
-        puts "Loaded variables"
-    }
+		puts "Loaded variables"
+		}
 }
 
 

@@ -48,7 +48,8 @@ proc nextgenrm_GUI::addEditWindow {} {
     # SEE ALSO
     #
     #***
-    
+    global program
+	
     # Make sure the window has been destroyed before creating.
     if {[winfo exists .add]} {destroy .add}
         
@@ -87,6 +88,15 @@ proc nextgenrm_GUI::addEditWindow {} {
     grid $frame1.add -column 1 -row 0 -sticky new -padx 5p -pady 3p
     grid $frame1.edit -column 1 -row 1 -sticky new -padx 5p -pady 3p
     grid $frame1.del -column 1 -row 2 -sticky new -padx 5p -pady 3p
+	
+	# Fill listbox with store profiles
+	nextgenrm_Code::showProfiles -listbox $frame1.lbox
+	#set profileList [glob -directory [file join $program(Path) Profiles] *]
+	#'debug profileList: $profileList
+	#
+	#foreach profile $profileList {
+	#	eval [$frame1.lbox insert end [file tail [file rootname $profile]]]
+	#}
     
     
 # Separator Frame
@@ -168,9 +178,10 @@ proc nextgenrm_GUI::profile {} {
     set frame1 [ttk::frame $container.frame1]
     pack $frame1 -expand yes -fill both -pady 5p
     
-    set profile(store) newStore
-    ttk::label $frame1.profileTxt -text [mc "Profile Name"]
-    ttk::entry $frame1.profileEnt -textvariable profile(store)
+    set profile(Store) newStore
+    
+	ttk::label $frame1.profileTxt -text [mc "Profile Name"]
+    ttk::entry $frame1.profileEnt -textvariable profile(Store)
 
     
     grid $frame1.profileTxt -column 0 -row 0 -padx 3p -pady 2p
@@ -275,7 +286,7 @@ proc nextgenrm_GUI::profile {} {
     set button_frame [ttk::frame $container.button]
     pack $button_frame -side right
     
-    ttk::button $button_frame.close -text [mc "Close"] -command {destroy .profile}
+    ttk::button $button_frame.close -text [mc "Close"] -command {nextgenrm_Code::save; destroy .profile}
     grid $button_frame.close -column 0 -row 0 -padx 5p -pady 5p
 
 
@@ -290,7 +301,7 @@ proc nextgenrm_GUI::profile {} {
     ttk::combobox $tab2.printCombo -width 10 \
                                     -values "Large Medium Small" \
                                     -state readonly \
-                                    -textvariable profile($profile(store),bodySize)
+                                    -textvariable profile($profile(Store),bodySize)
     
     grid $tab2.printText -column 0 -row 0 -sticky e -padx 3p -pady 2p
     grid $tab2.printCombo -column 1 -row 0 -sticky news -padx 2p -pady 2p
@@ -299,15 +310,15 @@ proc nextgenrm_GUI::profile {} {
     ttk::combobox $tab2.dataCombo1 -width 10 \
                                     -values "Top Bottom" \
                                     -state readonly \
-                                    -textvariable profile($profile(store),date_pos1)
+                                    -textvariable profile($profile(Store),date_pos1)
     ttk::combobox $tab2.dataCombo2 -width 10 \
                                     -values "Left Center Right" \
                                     -state readonly \
-                                    -textvariable profile($profile(store),date_pos2)
+                                    -textvariable profile($profile(Store),date_pos2)
     ttk::combobox $tab2.dataCombo3 -width 10 \
                                     -values "Large Medium Small" \
                                     -state readonly \
-                                    -textvariable profile($profile(store),date_size)
+                                    -textvariable profile($profile(Store),date_size)
     
     grid $tab2.dataText -column 0 -row 1 -padx 3p -pady 2p -sticky e
     grid $tab2.dataCombo1 -column 1 -row 1 -padx 2p -pady 2p -sticky news
@@ -315,7 +326,7 @@ proc nextgenrm_GUI::profile {} {
     grid $tab2.dataCombo3 -column 3 -row 1 -padx 2p -pady 2p -sticky news
     
     ttk::label $tab2.taxFoodTxt -text [mc "Tax (Food)"] 
-    ttk::entry $tab2.taxFoodEnt -width 3 -textvariable profile($profile(store),taxFood)
+    ttk::entry $tab2.taxFoodEnt -width 3 -textvariable profile($profile(Store),taxFood)
     ttk::label $tab2.taxFoodPct -text %
     
     grid $tab2.taxFoodTxt -column 0 -row 2 -padx 3p -pady 2p -sticky e
@@ -323,7 +334,7 @@ proc nextgenrm_GUI::profile {} {
     grid $tab2.taxFoodPct -column 2 -row 2 -pady 2p -sticky w
     
     ttk::label $tab2.taxOtherTxt -text [mc "Tax (Other)"]
-    ttk::entry $tab2.taxOtherEnt -width 3 -textvariable profile($profile(store),taxOther)
+    ttk::entry $tab2.taxOtherEnt -width 3 -textvariable profile($profile(Store),taxOther)
     ttk::label $tab2.taxOtherPct -text %
     
     grid $tab2.taxOtherTxt -column 0 -row 3 -padx 3p -pady 2p -sticky e
@@ -366,26 +377,26 @@ proc nextgenrm_GUI::startCmdHeader {tbl row col text} {
         
         switch -- [$tbl columncget $col -name] {
             htext {
-                $w configure -textvariable profile($profile(store),$row,htext)
+                $w configure -textvariable profile($profile(Store),$row,htext)
             }
             position {
                     # Populate and make it readonly, and insert another line.
                     $w configure -values {"Left" "Center" "Right"} \
                                 -state readonly \
-                                -textvariable profile($profile(store),$row,hpos)
+                                -textvariable profile($profile(Store),$row,hpos)
 
             }
             size {
                 # Populate and make it readonly, and insert another line.
                 $w configure -values {"Large" "Medium" "Small"} \
                             -state readonly \
-                            -textvariable profile($profile(store),$row,hsize)
+                            -textvariable profile($profile(Store),$row,hsize)
             }
             spacing {
                 # Populate and make it readonly, and insert another line.
                 $w configure -values {"Single" "Double"} \
                             -state readonly \
-                            -textvariable profile($profile(store),$row,hspacing)
+                            -textvariable profile($profile(Store),$row,hspacing)
                 
                 set myRow [expr {[$tbl index end] - 1}]
                 if {$row == 0} {$tbl insert end ""; 'debug Inserting 2nd Row}
@@ -431,16 +442,16 @@ proc nextgenrm_GUI::endCmdHeader {tbl row col text} {
     
     switch -- [$tbl columncget $col -name] {
         htext {
-            'debug htext: $profile($profile(store),$row,htext)
+            'debug htext: $profile($profile(Store),$row,htext)
         }
         position {
-            'debug pos: $profile($profile(store),$row,hpos)
+            'debug pos: $profile($profile(Store),$row,hpos)
         }
         size {
-            'debug size: $profile($profile(store),$row,hsize)
+            'debug size: $profile($profile(Store),$row,hsize)
         }
         spacing {
-            'debug spacing: $profile($profile(store),$row,hspacing)
+            'debug spacing: $profile($profile(Store),$row,hspacing)
         }
         default {}
     }

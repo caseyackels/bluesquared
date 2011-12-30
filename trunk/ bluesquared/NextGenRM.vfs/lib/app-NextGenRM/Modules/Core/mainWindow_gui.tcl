@@ -55,24 +55,27 @@ proc nextgenrm_GUI::nextgenrmGUI {} {
     # SEE ALSO
     #
     #***
-    global GS_profile GS_textVar program
+    global profile GS_textVar program
 
     wm title . "$program(Name) - $program(Version)"
     focus -force .
     
-    'debug Testing
     
 ##
 ## Frame 1 - Select store profile, date, purchased list
 ##
+
     set frame1 [ttk::labelframe .container.frame1 -text [mc "Receipt Data"]]
     pack $frame1 -fill both -padx 5p -pady 5p -ipady 2p -anchor n
     
     ttk::label $frame1.store -text [mc "Store Profile"]
+		set program(profileList) " " ;# initialize variable
     ttk::combobox $frame1.storeCombo -textvariable GS_textVar(storelist) \
-                                    -values [list Safeway "Fred Meyer" Albertsons]
-    #ttk::button $frame1.profile -text [mc "New/Edit Profile..."] -command {}
-    
+									-values $program(profileList) \
+									-state readonly \
+									-postcommand "nextgenrm_Code::showProfiles -combobox $frame1.storeCombo"
+
+	
     ttk::label $frame1.date -text [mc "Date"]
     ttk::entry $frame1.entry -width 20
     
