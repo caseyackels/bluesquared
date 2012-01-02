@@ -5,9 +5,9 @@
 #
 # Subversion
 #
-# $Revision: 50 $
-# $LastChangedBy: casey.ackels $
-# $LastChangedDate: 2011-03-13 17:09:18 -0700 (Sun, 13 Mar 2011) $
+# $Revision$
+# $LastChangedBy$
+# $LastChangedDate$
 #
 ########################################################################################
 
@@ -91,8 +91,8 @@ proc nextgenrm_GUI::pclWindow {} {
     ttk::button $frame1.pclRename -image rename16x16 -command {'debug rename: Rename Profile}
     ttk::button $frame1.pclDelete -image del16x16 -command {'debug delete: Delete Profile}
     
-    grid $frame1.pclText -column 0 -row 0 -padx 3p -pady 2p
-    grid $frame1.pclBox -column 1 -row 0 -padx 2p -pady 2p
+    grid $frame1.pclText -column 0 -row 0 -padx 3p -pady 2p -sticky w
+    grid $frame1.pclBox -column 1 -row 0 -padx 2p -pady 2p -sticky news
     grid $frame1.pclNew -column 2 -row 0 -padx 2p -pady 2p
     grid $frame1.pclRename -column 3 -row 0 -padx 2p -pady 2p
     grid $frame1.pclDelete -column 4 -row 0 -padx 2p -pady 2p
