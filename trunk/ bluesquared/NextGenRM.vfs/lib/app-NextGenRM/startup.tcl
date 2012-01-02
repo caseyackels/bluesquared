@@ -189,9 +189,11 @@ proc 'nextGenRM_loadSettings {} {
 	#'debug pwd [pwd]
 	
 	set program(Profiles) [file join $program(Path) Profiles]
+	set program(PCL) [file join $program(Path) PurchasedList]
 	
 	# Create the directories
 	file mkdir $program(Profiles)
+	file mkdir $program(PCL)
 	
 	# Files
 	set program(Settings) [file join $program(Path) settings.txt]
@@ -221,6 +223,8 @@ proc 'nextGenRM_loadSettings {} {
 
 		puts "Loaded variables"
 		}
+		
+		nextgenrm_Icons::InitializeIcons
 }
 
 
