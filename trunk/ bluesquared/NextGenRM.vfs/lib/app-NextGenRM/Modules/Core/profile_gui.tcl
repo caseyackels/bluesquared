@@ -22,8 +22,8 @@
 # - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
-
-proc nextgenrm_GUI::addEditWindow {} {
+#### THIS IS CURRENTLY NOT USED 1-1-12 ####
+proc nextgenrm_GUI::addWindow {} {
     #****f* addEditWindow/nextgenrm_GUI
     # AUTHOR
     #	Picklejuice
@@ -59,7 +59,7 @@ proc nextgenrm_GUI::addEditWindow {} {
 ##
     
     toplevel .add
-    wm title .add [mc "Add/Edit Profile"]
+    wm title .add [mc "Add Profile"]
     wm transient .add .
     focus -force .add
 
@@ -78,25 +78,25 @@ proc nextgenrm_GUI::addEditWindow {} {
     set frame1 [ttk::frame .add.frame1]
     pack $frame1 -fill both -expand yes -pady 5p
     
-    listbox $frame1.lbox
-    ttk::button $frame1.add -text [mc "Add"] -command {nextgenrm_GUI::profile; destroy .add}
-    ttk::button $frame1.edit -text [mc "Edit"]
-    ttk::button $frame1.del -text [mc "Delete"]
+    ttk::label $frame1.name -text [mc "Profile Name"]
+    ttk::entry $frame1.nameEntry
     
-    grid $frame1.lbox -column 0 -row 0 -rowspan 15 -sticky news -padx 5p -pady 5p
+    ttk::radiobutton $frame1.blank -text [mc "Create blank profile"] -value blank -variable addProfile
+    #ttk::entry $frame1.blankEntry
     
-    grid $frame1.add -column 1 -row 0 -sticky new -padx 5p -pady 3p
-    grid $frame1.edit -column 1 -row 1 -sticky new -padx 5p -pady 3p
-    grid $frame1.del -column 1 -row 2 -sticky new -padx 5p -pady 3p
-	
-	# Fill listbox with store profiles
-	nextgenrm_Code::showProfiles -listbox $frame1.lbox
-	#set profileList [glob -directory [file join $program(Path) Profiles] *]
-	#'debug profileList: $profileList
-	#
-	#foreach profile $profileList {
-	#	eval [$frame1.lbox insert end [file tail [file rootname $profile]]]
-	#}
+    ttk::radiobutton $frame1.duplicate -text [mc "Duplicate"] -value duplicate -variable addProfile
+        set program(profileList) " " ;# initialize variable	
+    ttk::combobox $frame1.storeCombo -textvariable profile_Store \
+									-values $program(profileList) \
+									-state disabled \
+									-postcommand "nextgenrm_Code::showProfiles -comboProfile $frame1.storeCombo"
+    
+    grid $frame1.name       -column 0 -row 0 -sticky w -padx 5p -pady 5p
+    grid $frame1.nameEntry  -column 1 -row 0 -sticky news -padx 5p -pady 5p
+    grid $frame1.blank      -column 0 -row 1 -columnspan 2 -sticky w -pady 2p -padx 5p
+    #grid $frame1.blankEntry -column 1 -row 1 -sticky news
+    grid $frame1.duplicate  -column 0 -row 2 -sticky w -pady 2p -padx 5p
+    grid $frame1.storeCombo -column 1 -row 2 -sticky news -pady 2p -padx 5p
     
     
 # Separator Frame
@@ -110,8 +110,11 @@ proc nextgenrm_GUI::addEditWindow {} {
     set button_frame [ttk::frame .add.button]
     pack $button_frame -side right
     
-    ttk::button $button_frame.close -text [mc "Close"] -command {destroy .add}
-    grid $button_frame.close -column 0 -row 0 -padx 5p -pady 5p
+    ttk::button $button_frame.ok -text [mc "OK"] -command {destroy .add}
+    ttk::button $button_frame.cancel -text [mc "Cancel"] -command {destroy .add}
+    
+    grid $button_frame.ok -column 0 -row 0 -padx 2p -pady 5p
+    grid $button_frame.cancel -column 1 -row 0 -padx 5p -pady 5p
     
 } ;# End nextgenrm_GUI::addEditWindow
 
@@ -141,7 +144,7 @@ proc nextgenrm_GUI::profile {} {
     # SEE ALSO
     #
     #***
-    global profile
+    global profile program
     
     # Make sure the window has been destroyed before creating.
     if {[winfo exists .profile]} {destroy .profile}
@@ -181,11 +184,21 @@ proc nextgenrm_GUI::profile {} {
     set profile(Store) newStore
     
 	ttk::label $frame1.profileTxt -text [mc "Profile Name"]
-    ttk::entry $frame1.profileEnt -textvariable profile(Store)
+    ttk::combobox $frame1.profileEnt -textvariable profile_Store \
+                                    -values $program(profileList) \
+									-state readonly \
+									-postcommand "nextgenrm_Code::showProfiles -comboProfile $frame1.profileEnt"
+    
+    ttk::button $frame1.profileNew -image add16x16 -command {'debug new; nextgenrm_GUI::addWindow}
+    ttk::button $frame1.profileRename -image rename16x16 -command {'debug rename: Rename Profile}
+    ttk::button $frame1.profileDelete -image del16x16 -command {'debug delete: Delete Profile}
 
     
     grid $frame1.profileTxt -column 0 -row 0 -padx 3p -pady 2p
     grid $frame1.profileEnt -column 1 -row 0 -padx 2p -pady 2p
+    grid $frame1.profileNew -column 2 -row 0 -padx 2p -pady 2p
+    grid $frame1.profileRename -column 3 -row 0 -padx 2p -pady 2p
+    grid $frame1.profileDelete -column 4 -row 0 -padx 2p -pady 2p
     
 #
 # Separator Frame
@@ -207,6 +220,18 @@ proc nextgenrm_GUI::profile {} {
     $nb select $nb.f1
     
     ttk::notebook::enableTraversal $nb
+
+#    
+# Button frame
+#
+    set button_frame [ttk::frame .profile.button]
+    pack $button_frame -side right
+    
+    ttk::button $button_frame.ok -text [mc "OK"] -command {nextgenrm_Code::save; destroy .profile}
+    ttk::button $button_frame.cancel -text [mc "Cancel"] -command {destroy .profile}
+    
+    grid $button_frame.ok -column 0 -row 0 -padx 2p -pady 5p
+    grid $button_frame.cancel -column 1 -row 0 -padx 5p -pady 5p
     
     
 #
@@ -280,14 +305,6 @@ proc nextgenrm_GUI::profile {} {
     grid $sep_frame2.separator - -ipadx 1.5i
     pack $sep_frame2 -pady 2p
 
-#    
-# Button frame
-#
-    set button_frame [ttk::frame $container.button]
-    pack $button_frame -side right
-    
-    ttk::button $button_frame.close -text [mc "Close"] -command {nextgenrm_Code::save; destroy .profile}
-    grid $button_frame.close -column 0 -row 0 -padx 5p -pady 5p
 
 
 #

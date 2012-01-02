@@ -73,7 +73,7 @@ proc nextgenrm_GUI::nextgenrmGUI {} {
     ttk::combobox $frame1.storeCombo -textvariable GS_textVar(storelist) \
 									-values $program(profileList) \
 									-state readonly \
-									-postcommand "nextgenrm_Code::showProfiles -combobox $frame1.storeCombo"
+									-postcommand "nextgenrm_Code::showProfiles -comboProfile $frame1.storeCombo"
 
 	
     ttk::label $frame1.date -text [mc "Date"]

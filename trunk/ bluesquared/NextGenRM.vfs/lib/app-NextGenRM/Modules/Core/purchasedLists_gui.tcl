@@ -79,11 +79,23 @@ proc nextgenrm_GUI::pclWindow {} {
     set frame1 [ttk::frame .pclwindow.frame1]
     pack $frame1 -fill both -expand yes -pady 8p -padx 5p
     
+    #Initialize variable
+    set program(purchasedList) ""
     ttk::label $frame1.pclText -text [mc "Purchased Lists"]
-    ttk::combobox $frame1.pclBox -textvariable profile(store,pcl)
+    ttk::combobox $frame1.pclBox -textvariable profile(store_pcl) \
+                                    -values $program(purchasedList) \
+									-state readonly \
+									-postcommand "nextgenrm_Code::showProfiles -combobox $frame1.pclBox"
     
-    grid $frame1.pclText -column 0 -row 0 -sticky e -padx 5p -pady 5p
-    grid $frame1.pclBox -column 1 -row 0 -sticky news -padx 5p -pady 5p
+    ttk::button $frame1.pclNew -image add16x16 -command {'debug new: New Profile}
+    ttk::button $frame1.pclRename -image rename16x16 -command {'debug rename: Rename Profile}
+    ttk::button $frame1.pclDelete -image del16x16 -command {'debug delete: Delete Profile}
+    
+    grid $frame1.pclText -column 0 -row 0 -padx 3p -pady 2p
+    grid $frame1.pclBox -column 1 -row 0 -padx 2p -pady 2p
+    grid $frame1.pclNew -column 2 -row 0 -padx 2p -pady 2p
+    grid $frame1.pclRename -column 3 -row 0 -padx 2p -pady 2p
+    grid $frame1.pclDelete -column 4 -row 0 -padx 2p -pady 2p
     
     
     set pcl [ttk::frame .pclwindow.frame2]
@@ -143,12 +155,15 @@ proc nextgenrm_GUI::pclWindow {} {
     #grid $sep_frame1.separator - -ipadx 1i
     #pack $sep_frame1
     
-# Button frame
+# Button frame   
     set button_frame [ttk::frame .pclwindow.button]
     pack $button_frame -side right
     
-    ttk::button $button_frame.close -text [mc "Close"] -command {destroy .pclwindow}
-    grid $button_frame.close -column 0 -row 0 -padx 5p -pady 5p
+    ttk::button $button_frame.ok -text [mc "OK"] -command {destroy .pclwindow}
+    ttk::button $button_frame.cancel -text [mc "Cancel"] -command {destroy .pclwindow}
+    
+    grid $button_frame.ok -column 0 -row 0 -padx 2p -pady 5p
+    grid $button_frame.cancel -column 1 -row 0 -padx 5p -pady 5p
 }
 
 

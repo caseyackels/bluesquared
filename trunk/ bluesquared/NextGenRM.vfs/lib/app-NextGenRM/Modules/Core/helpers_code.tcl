@@ -56,20 +56,34 @@ proc nextgenrm_Code::showProfiles {args} {
     global program
 	'debug widget: $args
 	
-	set profileList [glob -directory [file join $program(Path) Profiles] *]
+	# use the catch because it will return an error if no files are found. It is ok to use [catch], because on first startup, there won't be any files.
+	set profileList [glob -directory $program(Profiles) *]
+	set purchasedList [catch {[glob -directory $program(PCL) *]} pclError]
 	
 	switch -- [lindex $args 0] {
 		-listbox {
+			'debug $profileList
 			foreach profile $profileList {
 				eval [[lindex $args 1] insert end [file tail [file rootname $profile]]]
 			}
 		}
-		-combobox {
+		-comboProfile {
+			# Clear variable before adding to it
+			set program(profileList) ""
 			foreach profile $profileList {
 				lappend program(profileList) [file tail [file rootname $profile]]
 			}
 			'debug profileList: $program(profileList)
 			[lindex $args 1] configure -values $program(profileList)
+		}
+		-comboPCL {
+			# Clear variable before adding to it
+			set program(purchasedList) ""
+			foreach pcl $purchasedList {
+				lappend program(purchasedList) [file tail [file rootname $pcl]]
+			}
+			'debug profileList: $program(purchasedeList)
+			[lindex $args 1] configure -values $program(purchasedList)
 		}
 		default {}
 	}
