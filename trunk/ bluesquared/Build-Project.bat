@@ -34,7 +34,7 @@ ECHO.
 set programName=NextGenRM
 set programEXE=NextGenRM.vfs
 
-set thirdparty=about autoscroll debug tablelist5.4 autoscroll
+set thirdparty=about autoscroll debug tablelist5.4 autoscroll tooltip
 
 GOTO BUILDPROJECT
 
