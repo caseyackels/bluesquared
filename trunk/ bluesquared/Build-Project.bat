@@ -15,8 +15,8 @@ IF NOT EXIST Builds\ (MKDIR Builds)
 
 REM Find out what project the user wants to build
 ::CHOICE /C:123 /M "1=BoxLabels 2=Efficiency Assist 3=NextGen-RM" %1
-set /p project= 1=BoxLabels 2=Efficiency Assist 3=NextGen-RM -^>
-set /p wrap= Do you want to build an executable? y/n -^>
+set /p project= 1=BoxLabels 2=Efficiency Assist 3=ReceiptMaker NG ^>
+set /p wrap= Do you want to build an executable? y/n ^>
 
 :: Create a blank line
 ECHO.
@@ -103,8 +103,8 @@ ECHO.
 :: CHOICE /M "Do you want to wrap it?" %1
 IF %wrap% == n GOTO NOWRAP
 
-ECHO Generating executable file ...
-ECHO Please wait.
+ECHO Generating executable file...
+ECHO Please wait...
 cd Builds
 ..\tclkitsh858.exe ..\sdx.kit wrap %programName%.exe -runtime ..\tclkit-858.exe
 rename %programName%.exe %programName%-%version%.exe
@@ -112,7 +112,7 @@ cd ..
 ECHO Finished Wrapping!
 ECHO Moving executable to %cd%
 rem - Insert a delay
-ping -n 3 127.0.0.1>nul
+ping -n 1 127.0.0.1>nul
 
 :: Move the exe file to the main dir.
 move /Y Builds\%programName%-%version%.exe .
