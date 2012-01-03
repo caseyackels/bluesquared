@@ -22,17 +22,17 @@
 # - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
-#### THIS IS CURRENTLY NOT USED 1-1-12 ####
+
 proc nextgenrm_GUI::addWindow {} {
-    #****f* addEditWindow/nextgenrm_GUI
+    #****f* addWindow/nextgenrm_GUI
     # AUTHOR
-    #	Picklejuice
+    #	Casey Ackels
     #
     # COPYRIGHT
-    #	(c) 2011 - Picklejuice
+    #	(c) 2011 - Casey Ackels
     #
     # FUNCTION
-    #	Gateway to the main profile window, here we see the profiles that we already have, and are able to add/edit or delete them.
+    #	Add new profile
     #
     # SYNOPSIS
     #	N/A
@@ -66,8 +66,8 @@ proc nextgenrm_GUI::addWindow {} {
     # x = horizontal
     # y = vertical
     # Put the window in the center of the parent window
-    set locX [expr {[winfo width . ] / 4 + [winfo x .]}]
-    set locY [expr {[winfo height . ] / 4 + [winfo y .]}]
+    set locX [expr {[winfo width .profile ] / 4 + [winfo x .profile]}]
+    set locY [expr {[winfo height .profile ] / 4 + [winfo y .profile]}]
 
     wm geometry .add +$locX+$locY
     
@@ -82,9 +82,8 @@ proc nextgenrm_GUI::addWindow {} {
     ttk::entry $frame1.nameEntry
     
     ttk::radiobutton $frame1.blank -text [mc "Create blank profile"] -value blank -variable addProfile
-    #ttk::entry $frame1.blankEntry
     
-    ttk::radiobutton $frame1.duplicate -text [mc "Duplicate"] -value duplicate -variable addProfile
+    ttk::radiobutton $frame1.duplicate -text [mc "Clone"] -value clone -variable addProfile
         set program(profileList) " " ;# initialize variable	
     ttk::combobox $frame1.storeCombo -textvariable profile_Store \
 									-values $program(profileList) \
@@ -94,7 +93,6 @@ proc nextgenrm_GUI::addWindow {} {
     grid $frame1.name       -column 0 -row 0 -sticky w -padx 5p -pady 5p
     grid $frame1.nameEntry  -column 1 -row 0 -sticky news -padx 5p -pady 5p
     grid $frame1.blank      -column 0 -row 1 -columnspan 2 -sticky w -pady 2p -padx 5p
-    #grid $frame1.blankEntry -column 1 -row 1 -sticky news
     grid $frame1.duplicate  -column 0 -row 2 -sticky w -pady 2p -padx 5p
     grid $frame1.storeCombo -column 1 -row 2 -sticky news -pady 2p -padx 5p
     
@@ -161,8 +159,8 @@ proc nextgenrm_GUI::profile {} {
     # x = horizontal
     # y = vertical
     # Put the window in the center of the parent window
-    set locX [expr {[winfo width . ] / 4 + [winfo x .]}]
-    set locY [expr {[winfo height . ] / 4 + [winfo y .]}]
+    set locX [expr {[winfo width . ] / 16 + [winfo x .]}]
+    set locY [expr {[winfo height . ] / 6 + [winfo y .]}]
 
     wm geometry .profile +$locX+$locY
     
@@ -200,6 +198,10 @@ proc nextgenrm_GUI::profile {} {
     grid $frame1.profileRename -column 3 -row 0 -padx 2p -pady 2p
     grid $frame1.profileDelete -column 4 -row 0 -padx 2p -pady 2p
     
+    tooltip::tooltip $frame1.profileNew [mc "New"]
+    tooltip::tooltip $frame1.profileRename [mc "Rename"]
+    tooltip::tooltip $frame1.profileDelete [mc "Delete"]
+    
 #
 # Separator Frame
 #
@@ -227,12 +229,12 @@ proc nextgenrm_GUI::profile {} {
     set button_frame [ttk::frame .profile.button]
     pack $button_frame -side right
     
-    ttk::button $button_frame.ok -text [mc "OK"] -command {nextgenrm_Code::save; destroy .profile}
+    ttk::button $button_frame.ok -text [mc "OK"] -command {nextgenrm_Code::save profile $profile_Store; destroy .profile}
     ttk::button $button_frame.cancel -text [mc "Cancel"] -command {destroy .profile}
     
     grid $button_frame.ok -column 0 -row 0 -padx 2p -pady 5p
     grid $button_frame.cancel -column 1 -row 0 -padx 5p -pady 5p
-    
+  
     
 #
 # Tab 1 - Header
@@ -248,7 +250,8 @@ proc nextgenrm_GUI::profile {} {
     
     set scrolly $pcl.scrolly
     tablelist::tablelist $pcl.listbox \
-                -columns {0  "Header Text"     
+                -columns {
+                        0  "Header Text"     
                         10    "Position"  center
                         10    "Size"    center
                         10   "Spacing"   center } \

@@ -12,21 +12,13 @@
 
 ##
 ## - Overview
-# This file holds the launch code for Distribution Helper.
+# This file holds the launch code for Receipt Maker NG
 
-# Definitions for prefixes of Variables
-# G = Global
-# S = String
-# L = List
-# I = Integer (Do not use this unless you are certain it is an Integer and not a plain string)
+# We prefix these procedures with ' because we are in the global namespace now, and we don't want to pollute it.
 
-## Coding Conventions
-# - Namespaces: These should have two parts, a _gui and a _code. Both words should be capitalized. i.e. Example_Code
-
-# - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
-#   will be uppercase. I.E sourceFiles, sourceFileExample
-
-# We use the prefix 'blueSquirrel_ because we are in the global namespace now, and we don't want to pollute it.
+## Main Arrays
+# program
+# profile
 
 package provide app-nextgenrm 1.0
 
@@ -75,8 +67,8 @@ proc 'nextGenRM_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries autoscroll]
 	#lappend ::auto_path [file join [file dirname [info script]] Libraries csv]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.4]
-	#lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
-        lappend ::auto_path [file join [file dirname [info script]] Libraries about]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries about]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries debug]
 
 	##
@@ -84,9 +76,8 @@ proc 'nextGenRM_sourceReqdFiles {} {
         ##
 	lappend ::auto_path [file join [file dirname [info script]] Modules]
 	lappend ::auto_path [file join [file dirname [info script]] Modules Core]
-	#lappend ::auto_path [file join [file dirname [info script]] Modules Importfiles]
 
-	#
+	
 	## Start the Package Require
 	## System Packages
 	package require msgcat
@@ -94,7 +85,7 @@ proc 'nextGenRM_sourceReqdFiles {} {
 	## 3rd Party modules
 	#package require tkdnd
 	package require Tablelist_tile 5.4
-	#package require tooltip
+	package require tooltip
 	package require autoscroll
 	#package require csv
 	package require debug

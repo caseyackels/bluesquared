@@ -28,7 +28,7 @@
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
 
-proc nextgenrm_Code::save {} {
+proc nextgenrm_Code::save {args} {
 	#****f* save/nextgenrm_Code
     # AUTHOR
     #	Casey Ackels
@@ -37,7 +37,7 @@ proc nextgenrm_Code::save {} {
     #	(c) 2011 - Casey Ackels
     #
     # FUNCTION
-    #	
+    #	arg1 = profile|purchased; arg2 = file name
     #
     # SYNOPSIS
     #	N/A
@@ -55,25 +55,27 @@ proc nextgenrm_Code::save {} {
     #***
     global profile program
 	
-    # Open the file
+    # Open the file (Could be Profiles/Purchased list)
 
-	set Profile [open [file join $program(Path) Profiles $profile(Store).txt] w]
-	
-	#chan configure $Profile -buffering line
+	switch -- [lindex $args 0] {
+		profile {
+			set type profile ;# Array name
+			set myFile [open [file join $program(Profile) [lindex $args 1].txt] w]
+		}
+		pcl		{
+			set type purchased ;# Array name
+			set myFile [open [file join $program(Purchased) [lindex $args 1].txt] w]
+		}
+		default	{
+			return -code error
+		}
+	}
 
     # Write out profile array
-    foreach value [array names profile] {
-            chan puts $Profile "profile($value) $profile($value)"
+    foreach value [array names $type] {
+            chan puts $myFile "profile($value) $profile($value)"
     }
-	chan flush $Profile
-	chan close $Profile
+	chan flush $myFile
+	chan close $myFile
 
-	
-#	set Settings [open $program(Settings) w]
-#    # Write out program array
-#    foreach value [array names program] {
-#            puts $Settings "program($value) $program($value)"
-#    }
-#
-#    chan close $Settings
-}
+} ;# nextgenrm_Code::save

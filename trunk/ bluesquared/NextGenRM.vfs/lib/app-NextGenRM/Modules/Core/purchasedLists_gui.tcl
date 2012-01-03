@@ -28,6 +28,100 @@
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
 
+proc nextgenrm_GUI::addPCLWindow {} {
+    #****f* addPCLWindow/nextgenrm_GUI
+    # AUTHOR
+    #	Picklejuice
+    #
+    # COPYRIGHT
+    #	(c) 2011 - 2012 - Casey Ackels
+    #
+    # FUNCTION
+    #	Add a new Purchased List
+    #
+    # SYNOPSIS
+    #	N/A
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global program
+	
+    # Make sure the window has been destroyed before creating.
+    if {[winfo exists .addPCL]} {destroy .addPCL}
+        
+     
+##
+## Window Manager
+##
+    
+    toplevel .addPCL
+    wm title .addPCL [mc "Add Purchased List"]
+    wm transient .addPCL .
+    focus -force .addPCL
+
+    # x = horizontal
+    # y = vertical
+    # Put the window in the center of the parent window
+    set locX [expr {[winfo width .pclwindow ] / 4 + [winfo x .pclwindow]}]
+    set locY [expr {[winfo height .pclwindow ] / 4 + [winfo y .pclwindow]}]
+
+    wm geometry .addPCL +$locX+$locY
+    
+##
+## Frames
+##
+    
+    set frame1 [ttk::frame .addPCL.frame1]
+    pack $frame1 -fill both -expand yes -pady 5p
+    
+    ttk::label $frame1.name -text [mc "Purchased List"]
+    
+    ttk::entry $frame1.nameEntry
+    
+    ttk::radiobutton $frame1.blank -text [mc "Create blank list"] -value blank -variable addPurchased -command {.addPCL.frame1.pclCombo configure -state disabled}
+    
+    ttk::radiobutton $frame1.duplicate -text [mc "Clone"] -value clone -variable addPurchased -command {.addPCL.button.ok configure -state normal; .addPCL.frame1.pclCombo configure -state normal}
+    ttk::combobox $frame1.pclCombo -textvariable purchased_List \
+									-state disabled \
+									-postcommand "nextgenrm_Code::showProfiles -comboPCL $frame1.pclCombo"
+    
+    grid $frame1.name       -column 0 -row 0 -sticky w -padx 5p -pady 5p
+    grid $frame1.nameEntry  -column 1 -row 0 -sticky news -padx 5p -pady 5p
+    grid $frame1.blank      -column 0 -row 1 -columnspan 2 -sticky w -pady 2p -padx 5p
+    grid $frame1.duplicate  -column 0 -row 2 -sticky w -pady 2p -padx 5p
+    grid $frame1.pclCombo   -column 1 -row 2 -sticky news -pady 2p -padx 5p
+    
+    
+# Separator Frame
+    set sep_frame1 [ttk::frame .addPCL.sep_frame1]
+    ttk::separator $sep_frame1.separator -orient horizontal
+
+    grid $sep_frame1.separator - -ipadx 1i
+    pack $sep_frame1
+    
+# Button frame
+    set button_frame [ttk::frame .addPCL.button]
+    pack $button_frame -side right
+    
+    ttk::button $button_frame.ok -text [mc "OK"] -command {destroy .addPCL} -state disabled
+    ttk::button $button_frame.cancel -text [mc "Cancel"] -command {destroy .addPCL}
+    
+    grid $button_frame.ok -column 0 -row 0 -padx 2p -pady 5p
+    grid $button_frame.cancel -column 1 -row 0 -padx 5p -pady 5p
+    
+} ;# End nextgenrm_GUI::addPCLWindow
+
+
+
 proc nextgenrm_GUI::pclWindow {} {
     #****f* pclWindow/nextgenrm_GUI
     # AUTHOR
@@ -53,9 +147,10 @@ proc nextgenrm_GUI::pclWindow {} {
     # SEE ALSO
     #
     #***
+    global purchased
 
     # Make sure the window has been destroyed before creating.
-    #if {[winfo exists .pclwindow]} {destroy .pclwindow}
+    if {[winfo exists .pclwindow]} {destroy .pclwindow}
 ##
 ## Window Manager
 ##
@@ -68,8 +163,8 @@ proc nextgenrm_GUI::pclWindow {} {
     # x = horizontal
     # y = vertical
     # Put the window in the center of the parent window
-    set locX [expr {[winfo width . ] / 4 + [winfo x .]}]
-    set locY [expr {[winfo height . ] / 4 + [winfo y .]}]
+    set locX [expr {[winfo width . ] / 15 + [winfo x .]}]
+    set locY [expr {[winfo height . ] / 6 + [winfo y .]}]
 
     wm geometry .pclwindow +$locX+$locY
 
@@ -82,12 +177,13 @@ proc nextgenrm_GUI::pclWindow {} {
     #Initialize variable
     set program(purchasedList) ""
     ttk::label $frame1.pclText -text [mc "Purchased Lists"]
-    ttk::combobox $frame1.pclBox -textvariable profile(store_pcl) \
+        set purchased(Name) defaultList
+    ttk::combobox $frame1.pclBox -textvariable purchased(Name) \
                                     -values $program(purchasedList) \
 									-state readonly \
 									-postcommand "nextgenrm_Code::showProfiles -combobox $frame1.pclBox"
     
-    ttk::button $frame1.pclNew -image add16x16 -command {'debug new: New Profile}
+    ttk::button $frame1.pclNew -image add16x16 -command {'debug new: New Profile; nextgenrm_GUI::addPCLWindow}
     ttk::button $frame1.pclRename -image rename16x16 -command {'debug rename: Rename Profile}
     ttk::button $frame1.pclDelete -image del16x16 -command {'debug delete: Delete Profile}
     
@@ -159,7 +255,7 @@ proc nextgenrm_GUI::pclWindow {} {
     set button_frame [ttk::frame .pclwindow.button]
     pack $button_frame -side right
     
-    ttk::button $button_frame.ok -text [mc "OK"] -command {destroy .pclwindow}
+    ttk::button $button_frame.ok -text [mc "OK"] -command {nextgenrm_Code::save profile $purchased(Name); destroy .pclwindow}
     ttk::button $button_frame.cancel -text [mc "Cancel"] -command {destroy .pclwindow}
     
     grid $button_frame.ok -column 0 -row 0 -padx 2p -pady 5p
@@ -192,31 +288,32 @@ proc nextgenrm_GUI::startCmd {tbl row col text} {
     # SEE ALSO
     #
     #***
-    
+    global purchased
         set w [$tbl editwinpath]
         
         #'debug index: [$w index bottom]
         
         switch -- [$tbl columncget $col -name] {
-            quantity {
-                # Allow only 2 numbers
-                $w configure -invalidcommand bell \
-                              -validate key \
-                              -validatecommand {expr {[string length %P] <= 2 && [regexp {^[0-9]*$} %S]}}
+            item {
+                # 
+                $w configure -textvariable purchased($purchased(Name),$row,item)
             }
             price {
                 # Allow only 4 numbers, and the . character. (ex. 1.04)
                 $w configure -invalidcommand bell \
                               -validate key \
-                              -validatecommand {expr {[string length %P] <= 4 && [regexp {^[0-9.]*$} %S]}}
+                              -validatecommand {expr {[string length %P] <= 4 && [regexp {^[0-9.]*$} %S]}} \
+                                -textvariable purchased($purchased(Name),$row,price)
             }
             taxable {
                 # Populate and make it readonly, and insert another line.
-                $w configure -values {"Tax (Food)" "Tax (Other)" None} -state readonly
+                $w configure -values {"Tax (Food)" "Tax (Other)" None} \
+                            -state readonly \
+                            -textvariable purchased($purchased(Name),$row,tax)
 
-                'debug INDEX: [expr {[$tbl index end] - 1}] # Using index-end, and subtracting 1
-                'debug INDEX: [$tbl index end] # Using the standard index-end
-                'debug ROW: $row # If row and INDEX-end match, insert a row.
+                #'debug INDEX: [expr {[$tbl index end] - 1}] # Using index-end, and subtracting 1
+                #'debug INDEX: [$tbl index end] # Using the standard index-end
+                #'debug ROW: $row # If row and INDEX-end match, insert a row.
                 set myRow [expr {[$tbl index end] - 1}]
                 if {$row == 0} {$tbl insert end ""; 'debug Inserting 2nd Row}
                 # See tablelist help for using 'end' as an index point.

@@ -15,15 +15,8 @@
 ## - Overview
 # This file holds generic helper procedures
 
-# Definitions for prefixes of Variables
-# G = Global
-# S = String
-# L = List
-# I = Integer (Do not use this unless you are certain it is an Integer and not a plain string)
 
 ## Coding Conventions
-# - Namespaces: 
-
 # - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
@@ -88,4 +81,44 @@ proc nextgenrm_Code::showProfiles {args} {
 		default {}
 	}
 
-}
+} ;# nextgenrm_Code::showProfiles
+
+
+proc nextgenrm_Code::controlWidgetState {} {
+	#****f* controlWidgetState/nextgenrm_Code
+	# AUTHOR
+	#	Casey Ackels
+	#
+	# COPYRIGHT
+	#	(c) 2012 - Casey Ackels
+	#
+	# FUNCTION
+	#	Helper for the Add Profile/Add Purchased List window's - Control's GUI elements of disabling/enabling controls
+	#
+	# SYNOPSIS
+	#	-type [pcl|profile] -path [root path to widgets] 
+	#
+	# CHILDREN
+	#	N/A
+	#
+	# PARENTS
+	#	
+	#
+	# NOTES
+	#
+	# SEE ALSO
+	#
+	#***
+	
+	# Disable combobox because we are creating a blank list
+	.addPCL.frame1.pclCombo configure -state disabled
+	
+	# Enable combobox because we want to clone an existing list
+	.addPCL.frame1.pclCombo configure -state normal
+	
+	# Check that we have something in the entry widget, if we do, enable the button.
+	.addPCL.button.ok configure -state normal
+	
+	
+} ;# nextgenrm_Code::controlWidgetState
+

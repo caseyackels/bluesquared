@@ -15,18 +15,6 @@
 ## - Overview
 # This file holds the parent GUI frame, buttons and menu for Distribution Helper
 
-# Definitions for prefixes of Variables
-# G = Global
-# S = String
-# L = List
-# I = Integer (Do not use this unless you are certain it is an Integer and not a plain string)
-
-## Coding Conventions
-# - Namespaces:
-
-# - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
-#   will be uppercase. I.E sourceFiles, sourceFileExample
-
 # Start GUI
 package provide rm_ng 1.0
 
@@ -41,7 +29,7 @@ proc nextgenrm::parentGUI {} {
     #	(c) 20011 Casey Ackels
     #
     # FUNCTION
-    #	Generate the parent GUI container and buttons (Cancel / Generate File)
+    #	Generate the parent GUI container and buttons
     #
     # SYNOPSIS
     #	N/A
