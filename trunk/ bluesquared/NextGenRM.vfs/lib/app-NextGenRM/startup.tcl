@@ -70,6 +70,7 @@ proc 'nextGenRM_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries about]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries debug]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries img_png1.4.1]
 
 	##
         ## Project built scripts
@@ -87,6 +88,7 @@ proc 'nextGenRM_sourceReqdFiles {} {
 	package require Tablelist_tile 5.4
 	package require tooltip
 	package require autoscroll
+	package require img::png
 	#package require csv
 	package require debug
 	package require aboutwindow

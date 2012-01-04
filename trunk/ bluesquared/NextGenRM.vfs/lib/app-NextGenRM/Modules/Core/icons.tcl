@@ -46,28 +46,33 @@ proc nextgenrm_Icons::InitializeIcons {args} {
     global program
 	
 	#set iconList [glob -directory [file join $starkit::topdir lib app-NextGenRM icons] *]
-	set iconDir16x16 [file join $starkit::topdir lib app-NextGenRM Themes lightgrey icons16x16]
-	set iconDir24x24 [file join $starkit::topdir lib app-NextGenRM Themes lightgrey icons24x24]
+	set program(themeName) led
+	#set program(theme,add) 
+	set iconDir16x16 [file join $starkit::topdir lib app-NextGenRM Themes $program(themeName) icons16x16]
+	#set iconDir24x24 [file join $starkit::topdir lib app-NextGenRM Themes $program(themeName) icons24x24]
 	
 	## 16x16 Images
 	# Add
-	image create photo add16x16 -file [file join $iconDir16x16 Plus.gif]
+	#image create photo add16x16 -file [file join $iconDir16x16 Plus.gif]
+	image create photo add16x16 -file [file join $iconDir16x16 page.png]
+	
 	# Delete
-	image create photo del16x16 -file [file join $iconDir16x16 Cancel.gif]
-	# New
-	image create photo new16x16 -file [file join $iconDir16x16 "Document New.gif"]
+	#image create photo del16x16 -file [file join $iconDir16x16 Cancel.gif]
+	image create photo del16x16 -file [file join $iconDir16x16 page_white_delete.png]
+	
 	# Rename
-	image create photo rename16x16 -file [file join $iconDir16x16 Write2.gif]
+	#image create photo rename16x16 -file [file join $iconDir16x16 Write2.gif]
+	image create photo rename16x16 -file [file join $iconDir16x16 page_white_edit.png.gif]
 
 	
 	## 24x24 Images
 	# Delete
-	image create photo add24x24 -file [file join $iconDir24x24 Plus.gif]
+	#image create photo add24x24 -file [file join $iconDir24x24 Plus.gif]
 	# Delete
-	image create photo del24x24 -file [file join $iconDir24x24 Cancel.gif]
+	#image create photo del24x24 -file [file join $iconDir24x24 Cancel.gif]
 	# New
-	image create photo new24x24 -file [file join $iconDir24x24 "Document New.gif"]
+	#image create photo new24x24 -file [file join $iconDir24x24 "Document New.gif"]
 	# Rename
-	image create photo rename24x24 -file [file join $iconDir24x24 Write2.gif]
+	#image create photo rename24x24 -file [file join $iconDir24x24 Write2.gif]
 	
 } ;# nextgenrm_Icons::InitializeIcons
