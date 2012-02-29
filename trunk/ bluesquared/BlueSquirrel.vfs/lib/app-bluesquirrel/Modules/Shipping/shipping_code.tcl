@@ -259,8 +259,10 @@ proc createList {} {
     if {$GS_textVar(maxBoxQty) == ""} {Error_Message::errorMsg createList1; return}
 
     set L_rawEntries [split [join [$frame2b.listbox getcells 0,1 end,1]]]
+    set L_rawShipVia [split [join [$frame2b.listbox getcells 0,2 end,2]]]
 
-    puts "L_rawEntries: $L_rawEntries"
+    puts "L_rawEntries1: $L_rawEntries"
+    puts "L_rawEntries2: [$frame2b.listbox getcells 0,1 end,1]"
 
     # Make sure the variables are cleared out; we don't want any data to lag behind.
     set FullBoxes ""
