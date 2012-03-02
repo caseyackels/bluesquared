@@ -62,7 +62,7 @@ proc nextgenrm_Icons::InitializeIcons {args} {
 	
 	# Rename
 	#image create photo rename16x16 -file [file join $iconDir16x16 Write2.gif]
-	image create photo rename16x16 -file [file join $iconDir16x16 page_white_edit.png.gif]
+	image create photo rename16x16 -file [file join $iconDir16x16 page_white_edit.png]
 
 	
 	## 24x24 Images

@@ -70,7 +70,7 @@ proc 'nextGenRM_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries about]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries debug]
-	lappend ::auto_path [file join [file dirname [info script]] Libraries img_png1.4.1]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries img]
 
 	##
         ## Project built scripts
@@ -133,9 +133,27 @@ proc 'nextGenRM_initVariables {} {
     # SEE ALSO
     #
     #***
-    global program
+    global settings debug program header profile
 
 
+
+    set program(Name) "Receipt Maker NG"
+    set program(Version) "Alpha"
+    tk appname $program(Name)
+
+	#'debug pwd [pwd]
+	
+	set program(Profiles) [file join $program(Path) Profiles]
+	set program(PCL) [file join $program(Path) PurchasedList]
+	
+	# Create the directories
+	file mkdir $program(Profiles)
+	file mkdir $program(PCL)
+	
+
+	
+	# Defaults
+	set profile(Store) Default
 	
 
 }
@@ -169,33 +187,23 @@ proc 'nextGenRM_loadSettings {} {
     #
     #***
     global settings debug program header
-
-	# Enable / Disable Debugging
-    set debug(onOff) on
-	console show
-
-    set program(Name) "Receipt Maker NG"
-    set program(Version) "Alpha"
-    tk appname $program(Name)
-
-	set program(Path) [pwd]
-	#'debug pwd [pwd]
-	
-	set program(Profiles) [file join $program(Path) Profiles]
-	set program(PCL) [file join $program(Path) PurchasedList]
-	
-	# Create the directories
-	file mkdir $program(Profiles)
-	file mkdir $program(PCL)
-	
-	# Files
-	set program(Settings) [file join $program(Path) settings.txt]
+		# Basic variable initialization
+		
+		# Enable / Disable Debugging
+		set debug(onOff) on
+		console show
+		
+		# Files
+		set program(Path) [pwd]
+		set program(Settings) [file join $program(Path) settings.txt]
 	
 		# Determine if settings file has been created
 		# If file exists, read the variables (settings)
 		if {![file exists $program(Settings)]} {
 		'debug settings.txt doesn't exist. Creating...
-		set Settings [open $program(Settings) w]
+		set Settings [open $program(Settings) w+]
+		# Create default profile
+		'debug $Settings "profile(Store) DefaultStore"
 		chan close $Settings
 	
 		} else {
@@ -210,13 +218,12 @@ proc 'nextGenRM_loadSettings {} {
 						if {$line eq ""} {continue}
 						set l_line [split $line " "]
 						set [lindex $l_line 0] [join [lrange $l_line 1 end] " "]
+						'debug $[lindex $l_line 0]
 				}
+		}
 		# Check to see if we have new default settings
 		'nextGenRM_initVariables
-
 		puts "Loaded variables"
-		}
-		
 		nextgenrm_Icons::InitializeIcons
 }
 

@@ -16,7 +16,7 @@ IF NOT EXIST Builds\ (MKDIR Builds)
 REM Find out what project the user wants to build
 ::CHOICE /C:123 /M "1=BoxLabels 2=Efficiency Assist 3=NextGen-RM" %1
 set /p project= 1=BoxLabels 2=Efficiency Assist 3=ReceiptMaker NG ^>
-set /p wrap= Do you want to build an executable? y/n ^>
+set /p wrap= Do you want to build an executable? 1/0 ^>
 
 :: Create a blank line
 ECHO.
@@ -34,7 +34,7 @@ ECHO.
 set programName=NextGenRM
 set programEXE=NextGenRM.vfs
 
-set thirdparty=about autoscroll debug tablelist5.4 autoscroll tooltip img_png1.4.1
+set thirdparty=about autoscroll debug tablelist5.4 autoscroll tooltip img
 
 GOTO BUILDPROJECT
 
@@ -60,7 +60,7 @@ GOTO BUILDPROJECT
 
 :BUILDPROJECT
 rem - Get the version number
-if %wrap% == y (set /p version= %programName% Version-^>) ELSE (ECHO No version needed, skipping...)
+if %wrap% == 1 (set /p version= %programName% Version-^>) ELSE (ECHO No version needed, skipping...)
 
 :: Create the directory structure. Basically just copy the source files, then add in the 3rd party components.
 ECHO Removing old files ...

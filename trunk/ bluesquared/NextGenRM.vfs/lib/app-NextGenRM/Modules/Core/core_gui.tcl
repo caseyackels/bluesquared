@@ -103,6 +103,12 @@ proc nextgenrm::parentGUI {} {
 
     grid $btnBar.print -column 0 -row 3 -sticky nse -padx 8p
     pack $btnBar -side bottom -anchor e -pady 13p -padx 5p
+    
+    ##
+    ## Global Bindings
+    ##
+    ttk::style map TCombobox -fieldbackground [list focus yellow]
+    ttk::style map TEntry -fieldbackground [list focus yellow]
 
 
 } ;# End of parentGUI
