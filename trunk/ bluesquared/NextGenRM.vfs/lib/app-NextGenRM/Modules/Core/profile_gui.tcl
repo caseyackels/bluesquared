@@ -192,12 +192,7 @@ proc nextgenrm_GUI::profile {} {
     ttk::button $frame1.profileRename -image rename16x16 -state disabled -command "'debug Rename Profile; nextgenrm_GUI::renameListWindow profile .profile $frame1.profileEnt"
     ttk::button $frame1.profileDelete -image del16x16 -state disabled -command {'debug Delete Profile}
     
-    bind $frame1.profileEnt <<ComboboxSelected>> {
-    #Shipping_Code::readHistory [$frame1.entry1 current]
-    #$frame1.entry1 configure -values $GS_textVar(history) ;# Refresh the data in the comobobox
-    nextgenrm_Code::showProfiles -comboProfile $frame1.profileEnt $frame1.profileRename $frame1.profileDelete
-    'debug CurrentName: [$frame1.profileEnt current]
-    }
+
     
     grid $frame1.profileTxt -column 0 -row 0 -padx 3p -pady 2p
     grid $frame1.profileEnt -column 1 -row 0 -padx 2p -pady 2p
@@ -255,6 +250,7 @@ proc nextgenrm_GUI::profile {} {
     # container for listbox
     set pcl [ttk::frame $tab1.listbox]
     pack $pcl -expand yes -fill both
+    
     
     set scrolly $pcl.scrolly
     tablelist::tablelist $pcl.listbox \
@@ -369,9 +365,17 @@ proc nextgenrm_GUI::profile {} {
     grid $tab2.taxOtherEnt -column 1 -row 3 -padx 2p -pady 2p -sticky news
     grid $tab2.taxOtherPct -column 2 -row 3 -pady 2p -sticky w
 
+bind .profile.container.frame1.profileEnt <<ComboboxSelected>> {
+    # Get the current profile name, so we can load it.
+    'debug GetName: [.profile.container.frame1.profileEnt get]
+    nextgenrm_Code::openFile [.profile.container.frame1.profileEnt get]
+}
+
 } ;# End nextgenrm_GUI::profile
 
 
+
+    
 proc nextgenrm_GUI::startCmdHeader {tbl row col text} { 
     #****f* startCmd/nextgenrm_GUI
     # AUTHOR

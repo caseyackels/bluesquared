@@ -202,6 +202,7 @@ proc 'nextGenRM_loadSettings {} {
 		if {![file exists $program(Settings)]} {
 		'debug settings.txt doesn't exist. Creating...
 		set Settings [open $program(Settings) w+]
+		
 		# Create default profile
 		'debug $Settings "profile(Store) DefaultStore"
 		chan close $Settings
@@ -211,7 +212,7 @@ proc 'nextGenRM_loadSettings {} {
 				set Settings [open $program(Settings) r]
 				'debug Settings: $Settings
 
-				set readSettings [split [read $Settings] \n]
+				set readSettings [split [chan read $Settings] \n]
 				chan close $Settings
 			
 				foreach line $readSettings {

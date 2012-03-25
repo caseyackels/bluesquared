@@ -65,8 +65,8 @@ proc nextgenrm_Code::showProfiles {args} {
 		-comboProfile {
 			# Clear variable before adding to it
 			set program(profileList) ""
-			foreach profile $profileList {
-				lappend program(profileList) [file tail [file rootname $profile]]
+			foreach profile_list $profileList {
+				lappend program(profileList) [file tail [file rootname $profile_list]]
 			}
 			'debug profileList_B: $program(profileList)
 			[lindex $args 1] configure -values $program(profileList)
@@ -255,8 +255,63 @@ proc nextgenrm_Code::save {args} {
     }
 	chan flush $myFile
 	chan close $myFile
+	
+	'debug Table Contents: [.profile.container.nb.f1.frame1.listbox.listbox get 0 end]
 
 } ;# nextgenrm_Code::save
+
+
+
+proc nextgenrm_Code::openFile {args} {
+	#****f* open/nextgenrm_Code
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2012 - Casey Ackels
+    #
+    # FUNCTION
+    #	args = profile name
+    #
+    # SYNOPSIS
+    #	Open the profile or purchased list for editing
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global profile program
+	
+	set fileName [file join $program(Profiles) $args.txt]
+	set myFile [open $fileName r]
+	
+	set readProfile [split [chan read $myFile] \n]
+	chan close $myFile
+	
+	'debug readProfile: $readProfile
+			
+	foreach line $readProfile {
+		if {$line eq ""} {continue}
+	
+		set l_line [split $line " "]
+		set [lindex $l_line 0] [join [lrange $l_line 1 end] " "]
+		#.profile.container.nb.f1.frame1.listbox.listbox insert end $[lindex $l_line 0]
+		nextgenrm_GUI::startCmdHeader
+		'debug $[lindex $l_line 0]
+	}
+	'debug array: [array names profile]
+	
+	#.profile.container.nb.f1.frame1.listbox.listbox insert end [list "$profile(newStore,0,hspacing)" "$profile(newStore,0,htext)" "$profile(newStore,0,hpos)" "$profile(newStore,0,hsize)"]
+	 
+	
+} ;# End nextgenrm_Code::openFile
 
 
 proc nextgenrm_Code::create {args} {
