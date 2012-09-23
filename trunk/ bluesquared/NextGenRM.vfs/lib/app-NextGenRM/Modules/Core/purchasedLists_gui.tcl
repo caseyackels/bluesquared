@@ -15,111 +15,11 @@
 ## - Overview
 # This file holds the parent GUI frame, buttons and menu for Distribution Helper
 
-# Definitions for prefixes of Variables
-# G = Global
-# S = String
-# L = List
-# I = Integer (Do not use this unless you are certain it is an Integer and not a plain string)
-
 ## Coding Conventions
 # - Namespaces: 
 
 # - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
 #   will be uppercase. I.E sourceFiles, sourceFileExample
-
-
-#proc nextgenrm_GUI::addPCLWindow {} {
-#    #****f* addPCLWindow/nextgenrm_GUI
-#    # AUTHOR
-#    #	Picklejuice
-#    #
-#    # COPYRIGHT
-#    #	(c) 2011 - 2012 - Casey Ackels
-#    #
-#    # FUNCTION
-#    #	Add a new Purchased List
-#    #
-#    # SYNOPSIS
-#    #	N/A
-#    #
-#    # CHILDREN
-#    #	N/A
-#    #
-#    # PARENTS
-#    #	
-#    #
-#    # NOTES
-#    #
-#    # SEE ALSO
-#    #
-#    #***
-#    global program
-#	
-#    # Make sure the window has been destroyed before creating.
-#    if {[winfo exists .addPCL]} {destroy .addPCL}
-#        
-#     
-###
-### Window Manager
-###
-#    
-#    toplevel .addPCL
-#    wm title .addPCL [mc "Add Purchased List"]
-#    wm transient .addPCL .
-#    focus -force .addPCL
-#
-#    # x = horizontal
-#    # y = vertical
-#    # Put the window in the center of the parent window
-#    set locX [expr {[winfo width .pclwindow ] / 4 + [winfo x .pclwindow]}]
-#    set locY [expr {[winfo height .pclwindow ] / 4 + [winfo y .pclwindow]}]
-#
-#    wm geometry .addPCL +$locX+$locY
-#    
-###
-### Frames
-###
-#    
-#    set frame1 [ttk::frame .addPCL.frame1]
-#    pack $frame1 -fill both -expand yes -pady 5p
-#    
-#    ttk::label $frame1.name -text [mc "Purchased List"]
-#    
-#    ttk::entry $frame1.nameEntry
-#    
-#    ttk::radiobutton $frame1.blank -text [mc "Create blank list"] -value blank -variable addPurchased -command {nextgenrm_Code::controlComboState .addPCL.frame1.nameEntry .addPCL.frame1.pclCombo .addPCL.button.ok}
-#    
-#    ttk::radiobutton $frame1.duplicate -text [mc "Clone"] -value clone -variable addPurchased -command {.addPCL.button.ok configure -state normal; .addPCL.frame1.pclCombo configure -state normal}
-#    ttk::combobox $frame1.pclCombo -textvariable purchased_List \
-#									-state disabled \
-#									-postcommand "nextgenrm_Code::showProfiles -comboPCL $frame1.pclCombo"
-#    
-#    grid $frame1.name       -column 0 -row 0 -sticky w -padx 5p -pady 5p
-#    grid $frame1.nameEntry  -column 1 -row 0 -sticky news -padx 5p -pady 5p
-#    grid $frame1.blank      -column 0 -row 1 -columnspan 2 -sticky w -pady 2p -padx 5p
-#    grid $frame1.duplicate  -column 0 -row 2 -sticky w -pady 2p -padx 5p
-#    grid $frame1.pclCombo   -column 1 -row 2 -sticky news -pady 2p -padx 5p
-#    
-#    
-## Separator Frame
-#    set sep_frame1 [ttk::frame .addPCL.sep_frame1]
-#    ttk::separator $sep_frame1.separator -orient horizontal
-#
-#    grid $sep_frame1.separator - -ipadx 1i
-#    pack $sep_frame1
-#    
-## Button frame
-#    set button_frame [ttk::frame .addPCL.button]
-#    pack $button_frame -side right
-#    
-#    ttk::button $button_frame.ok -text [mc "OK"] -command {destroy .addPCL} -state disabled
-#    ttk::button $button_frame.cancel -text [mc "Cancel"] -command {destroy .addPCL}
-#    
-#    grid $button_frame.ok -column 0 -row 0 -padx 2p -pady 5p
-#    grid $button_frame.cancel -column 1 -row 0 -padx 5p -pady 5p
-#    
-#} ;# End nextgenrm_GUI::addPCLWindow
-
 
 
 proc nextgenrm_GUI::pclWindow {} {

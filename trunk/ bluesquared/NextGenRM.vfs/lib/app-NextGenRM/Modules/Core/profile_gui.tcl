@@ -10,112 +10,11 @@
 #
 ########################################################################################
 
-# Definitions for prefixes of Variables
-# G = Global
-# S = String
-# L = List
-# I = Integer (Do not use this unless you are certain it is an Integer and not a plain string)
-
 ## Coding Conventions
 # - Namespaces:
 
 # - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
 #   will be uppercase. I.E sourceFiles, sourceFileExample
-
-
-#proc nextgenrm_GUI::addWindow {} {
-#    #****f* addWindow/nextgenrm_GUI
-#    # AUTHOR
-#    #	Casey Ackels
-#    #
-#    # COPYRIGHT
-#    #	(c) 2011 - Casey Ackels
-#    #
-#    # FUNCTION
-#    #	Add new profile
-#    #
-#    # SYNOPSIS
-#    #	N/A
-#    #
-#    # CHILDREN
-#    #	N/A
-#    #
-#    # PARENTS
-#    #	
-#    #
-#    # NOTES
-#    #
-#    # SEE ALSO
-#    #
-#    #***
-#    global program
-#	
-#    # Make sure the window has been destroyed before creating.
-#    if {[winfo exists .add]} {destroy .add}
-#        
-#     
-###
-### Window Manager
-###
-#    
-#    toplevel .add
-#    wm title .add [mc "Add Profile"]
-#    wm transient .add .
-#    focus -force .add
-#
-#    # x = horizontal
-#    # y = vertical
-#    # Put the window in the center of the parent window
-#    set locX [expr {[winfo width .profile ] / 4 + [winfo x .profile]}]
-#    set locY [expr {[winfo height .profile ] / 4 + [winfo y .profile]}]
-#
-#    wm geometry .add +$locX+$locY
-#    
-###
-### Frames
-###
-#    
-#    set frame1 [ttk::frame .add.frame1]
-#    pack $frame1 -fill both -expand yes -pady 5p
-#    
-#    ttk::label $frame1.name -text [mc "Profile Name"]
-#    ttk::entry $frame1.nameEntry
-#    
-#    ttk::radiobutton $frame1.blank -text [mc "Create blank profile"] -value blank -variable addProfile
-#    
-#    ttk::radiobutton $frame1.duplicate -text [mc "Clone"] -value clone -variable addProfile
-#        set program(profileList) " " ;# initialize variable	
-#    ttk::combobox $frame1.storeCombo -textvariable profile_Store \
-#									-values $program(profileList) \
-#									-state disabled \
-#									-postcommand "nextgenrm_Code::showProfiles -comboProfile $frame1.storeCombo"
-#    
-#    grid $frame1.name       -column 0 -row 0 -sticky w -padx 5p -pady 5p
-#    grid $frame1.nameEntry  -column 1 -row 0 -sticky news -padx 5p -pady 5p
-#    grid $frame1.blank      -column 0 -row 1 -columnspan 2 -sticky w -pady 2p -padx 5p
-#    grid $frame1.duplicate  -column 0 -row 2 -sticky w -pady 2p -padx 5p
-#    grid $frame1.storeCombo -column 1 -row 2 -sticky news -pady 2p -padx 5p
-#    
-#    
-## Separator Frame
-#    set sep_frame1 [ttk::frame .add.sep_frame1]
-#    ttk::separator $sep_frame1.separator -orient horizontal
-#
-#    grid $sep_frame1.separator - -ipadx 1i
-#    pack $sep_frame1
-#    
-## Button frame
-#    set button_frame [ttk::frame .add.button]
-#    pack $button_frame -side right
-#    
-#    ttk::button $button_frame.ok -text [mc "OK"] -command {destroy .add}
-#    ttk::button $button_frame.cancel -text [mc "Cancel"] -command {destroy .add}
-#    
-#    grid $button_frame.ok -column 0 -row 0 -padx 2p -pady 5p
-#    grid $button_frame.cancel -column 1 -row 0 -padx 5p -pady 5p
-#    
-#} ;# End nextgenrm_GUI::addEditWindow
-
 
 proc nextgenrm_GUI::profile {} {
     #****f* profile/nextgenrm_GUI
