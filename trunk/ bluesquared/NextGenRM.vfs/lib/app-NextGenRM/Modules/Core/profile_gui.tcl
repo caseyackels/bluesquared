@@ -78,12 +78,10 @@ proc nextgenrm_GUI::profile {} {
     set frame1 [ttk::frame $container.frame1]
     pack $frame1 -expand yes -fill both -pady 5p
     
-    #set profile(Store) newStore
-    #set profile(_Store) default
     
 	ttk::label $frame1.profileTxt -text [mc "Profile Name"]
-    ttk::combobox $frame1.profileEnt -textvariable profile(Store) \
-                                    -values $program(profileList) \
+    #-textvariable profile(Store)
+    ttk::combobox $frame1.profileEnt -values $program(profileList) \
 									-state readonly \
 									-postcommand "nextgenrm_Code::showProfiles -comboProfile $frame1.profileEnt $frame1.profileRename $frame1.profileDelete"
     

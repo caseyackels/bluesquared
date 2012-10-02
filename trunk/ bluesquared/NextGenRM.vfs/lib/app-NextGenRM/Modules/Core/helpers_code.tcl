@@ -247,7 +247,7 @@ proc nextgenrm_Code::save {args} {
 		}
 		pcl		{
 			set type purchased ;# Array name
-			set myFile [open [file join $program(Purchased) [lindex $args 1].txt] w]
+			set myFile [open [file join $program(PCL) [lindex $args 1].txt] w]
 		}
 		default	{
 			return -code error
@@ -266,6 +266,67 @@ proc nextgenrm_Code::save {args} {
 } ;# nextgenrm_Code::save
 
 
+proc nextgenrm_Code::saveAs {args} {
+	#****f* save/nextgenrm_Code
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2012 - Casey Ackels
+    #
+    # FUNCTION
+    #	
+    #
+    # SYNOPSIS
+    #	Save the data from Profile or a PurchasedList as a new file
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+	global program
+	puts "args: $args"
+	set txtWidget [lindex $args 3]
+	
+	switch -- [lindex $args 0] {
+		profile {
+			#puts "From [lindex $args 1].txt"
+			#puts "To [[lindex $args 2] get].txt"
+			file copy -- [file join $program(Profiles) [lindex $args 1].txt] [file join $program(Profiles) [[lindex $args 2] get].txt]
+			
+			#Clear combobox widget
+			$txtWidget set [[lindex $args 2] get]
+			
+			# Delete old file.
+			#puts "Deleting [lindex $args 1].txt"
+			file delete -- [file join $program(Profiles) [lindex $args 1].txt]
+		}
+		pcl		{
+			#puts "From [lindex $args 1].txt"
+			#puts "To [[lindex $args 2] get].txt"
+			file copy -- [file join $program(PCL) [lindex $args 1].txt] [file join $program(PCL) [[lindex $args 2] get].txt]
+			
+			#Clear combobox widget
+			$txtWidget set [[lindex $args 2] get]
+			
+			# Delete old file.
+			#puts "Deleting [lindex $args 1].txt"
+			file delete -- [file join $program(PCL) [lindex $args 1].txt]
+		}
+		default	{
+			return -code error
+		}
+	}
+	
+	
+} ;# nextgenrm_Code::saveAs
 
 proc nextgenrm_Code::openFile {args} {
 	#****f* open/nextgenrm_Code
@@ -308,7 +369,7 @@ proc nextgenrm_Code::openFile {args} {
 		set l_line [split $line " "]
 		set [lindex $l_line 0] [join [lrange $l_line 1 end] " "]
 		#.profile.container.nb.f1.frame1.listbox.listbox insert end $[lindex $l_line 0]
-		nextgenrm_GUI::startCmdHeader
+		#nextgenrm_GUI::startCmdHeader
 		'debug $[lindex $l_line 0]
 	}
 	'debug array: [array names profile]

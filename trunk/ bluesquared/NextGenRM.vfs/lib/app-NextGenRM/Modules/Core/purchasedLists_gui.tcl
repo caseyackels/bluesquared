@@ -78,13 +78,13 @@ proc nextgenrm_GUI::pclWindow {} {
     set program(purchasedList) ""
     ttk::label $frame1.pclText -text [mc "Purchased Lists"]
         #set purchased(Name) defaultList
-    ttk::combobox $frame1.pclBox -textvariable purchased(Name) \
-                                    -values $program(purchasedList) \
+        #-textvariable purchased(Name)
+    ttk::combobox $frame1.pclBox  -values $program(purchasedList) \
 									-state readonly \
 									-postcommand "nextgenrm_Code::showProfiles -comboPCL $frame1.pclBox"
     
     ttk::button $frame1.pclNew -image add16x16 -command {'debug _new New Profile; nextgenrm_GUI::addListWindow pcl .pclwindow}
-    ttk::button $frame1.pclRename -image rename16x16 -command {'debug _rename Rename Profile; nextgenrm_GUI::renameListWindow pcl .pclwindow}
+    ttk::button $frame1.pclRename -image rename16x16 -command "nextgenrm_GUI::renameListWindow pcl .pclwindow $frame1.pclBox"
     ttk::button $frame1.pclDelete -image del16x16 -command {'debug _delete Delete Profile}
     
     grid $frame1.pclText -column 0 -row 0 -padx 3p -pady 2p -sticky w
