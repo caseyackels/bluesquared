@@ -200,12 +200,12 @@ proc 'nextGenRM_loadSettings {} {
 		# Determine if settings file has been created
 		# If file exists, read the variables (settings)
 		if {![file exists $program(Settings)]} {
-		'debug settings.txt doesn't exist. Creating...
-		set Settings [open $program(Settings) w+]
+				'debug settings.txt doesn't exist. Creating...
+				set Settings [open $program(Settings) w+]
 		
-		# Create default profile
-		'debug $Settings "profile(Store) DefaultStore"
-		chan close $Settings
+				# Create default profile
+				'debug $Settings "profile(Store) DefaultStore"
+				chan close $Settings
 	
 		} else {
 				'debug settings.txt exists. Opening...

@@ -52,8 +52,10 @@ proc nextgenrm_Code::showProfiles {args} {
 	# use the catch because it will return an error if no files are found. It is ok to use [catch], because on first startup, there won't be any files.
 	set profileList [glob -directory $program(Profiles) *]
 	'debug profileList_A: $profileList
-	set purchasedList [catch {[glob -directory $program(PCL) *]} pclError]
-	'debug purchasedList_A: $purchasedList
+	
+	#set purchasedList [catch {[glob -directory $program(PCL) *]} pclError]
+	set purchasedList [glob -directory $program(PCL) *]
+	'debug purchasedList_Ab: $purchasedList
 	
 	switch -- [lindex $args 0] {
 		-listbox {
@@ -68,10 +70,12 @@ proc nextgenrm_Code::showProfiles {args} {
 			foreach profile_list $profileList {
 				lappend program(profileList) [file tail [file rootname $profile_list]]
 			}
+			
 			'debug profileList_B: $program(profileList)
 			[lindex $args 1] configure -values $program(profileList)
 			[lindex $args 2] configure -state normal
 			[lindex $args 3] configure -state normal
+			
 			'debug profile $profile(Store)
 		}
 		-comboPCL {
@@ -80,6 +84,7 @@ proc nextgenrm_Code::showProfiles {args} {
 			foreach pcl $purchasedList {
 				lappend program(purchasedList) [file tail [file rootname $pcl]]
 			}
+			
 			'debug purchasedList_B: $program(purchasedList)
 			[lindex $args 1] configure -values $program(purchasedList)			
 		}
