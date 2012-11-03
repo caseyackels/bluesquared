@@ -81,8 +81,8 @@ proc nextgenrm_GUI::profile {} {
     
 	ttk::label $frame1.profileTxt -text [mc "Profile Name"]
     #-textvariable profile(Store)
-    ttk::combobox $frame1.profileEnt -values $program(profileList) \
-									-state readonly \
+    #-values $program(profileList)
+    ttk::combobox $frame1.profileEnt -state readonly \
 									-postcommand "nextgenrm_Code::showProfiles -comboProfile $frame1.profileEnt $frame1.profileRename $frame1.profileDelete"
     
     ttk::button $frame1.profileNew -image add16x16 -command {nextgenrm_GUI::addListWindow profile .profile}
@@ -269,6 +269,7 @@ bind .profile.container.frame1.profileEnt <<ComboboxSelected>> {
     # Get the current profile name, so we can load it.
     'debug GetName: [.profile.container.frame1.profileEnt get]
     nextgenrm_Code::openFile [.profile.container.frame1.profileEnt get]
+    nextgenrm_Code::displayProfileSettings .profile.container.frame1.profileEnt
 }
 
 } ;# End nextgenrm_GUI::profile

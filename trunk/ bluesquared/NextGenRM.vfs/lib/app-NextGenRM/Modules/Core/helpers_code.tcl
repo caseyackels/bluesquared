@@ -51,7 +51,7 @@ proc nextgenrm_Code::showProfiles {args} {
 	
 	# use the catch because it will return an error if no files are found. It is ok to use [catch], because on first startup, there won't be any files.
 	set profileList [glob -directory $program(Profiles) *]
-	'debug profileList_A: $profileList
+	#'debug profileList_A: $profileList
 	
 	#set purchasedList [catch {[glob -directory $program(PCL) *]} pclError]
 	set purchasedList [glob -directory $program(PCL) *]
@@ -73,19 +73,12 @@ proc nextgenrm_Code::showProfiles {args} {
 			}
 			
 			'debug profileList_B: $program(profileList)
+			# List the available profile's that exist already, and enable the rename, and delete buttons.
 			[lindex $args 1] configure -values $program(profileList)
-			[lindex $args 2] configure -state normal
-			[lindex $args 3] configure -state normal
-			
-			'debug profile $profile(Store)
-			if {[info exists profile($profile(Store),table)]} {
-				if {[string match $profile($profile(Store),table) [.profile.container.nb.f1.frame1.listbox.listbox get 0 end]] eq 0} {
-					foreach storeOptions $profile($profile(Store),table) {
-					    .profile.container.nb.f1.frame1.listbox.listbox insert end $storeOptions
-					}
-				}
-			} else {
-				.profile.container.nb.f1.frame1.listbox.listbox insert end ""
+			if {$profile_list != ""} {
+				# Guard against the list being blank, and enabling editing commands unncessarily.
+				[lindex $args 2] configure -state normal
+				[lindex $args 3] configure -state normal
 			}
 		}
 		-comboPCL {
@@ -94,14 +87,13 @@ proc nextgenrm_Code::showProfiles {args} {
 			foreach pcl $purchasedList {
 				lappend program(purchasedList) [file tail [file rootname $pcl]]
 			}
-			
-			'debug purchasedList_B: $program(purchasedList)
 			[lindex $args 1] configure -values $program(purchasedList)			
 		}
 		default {}
 	}
 
 } ;# nextgenrm_Code::showProfiles
+
 
 
 proc nextgenrm_Code::controlComboState {entryWidget comboWidget buttonWidget checkWidget clone} {

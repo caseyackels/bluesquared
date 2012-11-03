@@ -28,4 +28,54 @@
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
 
+proc nextgenrm_Code::displayProfileSettings {comboPath} {
+		#****f* displayProfileSettings/nextgenrm_Code
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2012 - Casey Ackels
+    #
+    # FUNCTION
+    #	
+    #
+    # SYNOPSIS
+    #	N/A
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+	global profile
+	set oldValue ""
+	
 
+	set currentValue [$comboPath current]
+	
+	if {[string match $currentValue $oldValue] eq 0} {
+		.profile.container.nb.f1.frame1.listbox.listbox delete 0 end
+	
+		if {[info exists profile($profile(Store),table)]} {
+			if {[string match $profile($profile(Store),table) [.profile.container.nb.f1.frame1.listbox.listbox get 0 end]] eq 0} {
+				foreach storeOptions $profile($profile(Store),table) {
+					.profile.container.nb.f1.frame1.listbox.listbox insert end $storeOptions
+				}
+			}
+		} else {
+			.profile.container.nb.f1.frame1.listbox.listbox delete 0 end
+			.profile.container.nb.f1.frame1.listbox.listbox insert end ""
+		}
+	} else {
+		'debug "Items match, not reinserting"
+	}
+	
+	
+	set oldValue $currentValue
+}
