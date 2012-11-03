@@ -41,7 +41,7 @@ proc nextgenrm_GUI::profile {} {
     # SEE ALSO
     #
     #***
-    global profile program
+    global profile program internal
     
     # Make sure the window has been destroyed before creating.
     if {[winfo exists .profile]} {destroy .profile}
@@ -51,7 +51,7 @@ proc nextgenrm_GUI::profile {} {
 ##
     
     toplevel .profile
-    wm title .profile [mc "Store Profile"]
+    wm title .profile [mc "Store Profile Editor"]
     wm transient .profile .
     focus -force .profile
 
@@ -145,12 +145,12 @@ proc nextgenrm_GUI::profile {} {
 
     
     # container for listbox
-    set pcl [ttk::frame $tab1.listbox]
-    pack $pcl -expand yes -fill both
+    set storeList [ttk::frame $tab1.listbox]
+    pack $storeList -expand yes -fill both
     
     
-    set scrolly $pcl.scrolly
-    tablelist::tablelist $pcl.listbox \
+    set scrolly $storeList.scrolly
+    tablelist::tablelist $storeList.listbox \
                 -columns {
                         0  "Header Text"     
                         10    "Position"  center
@@ -169,36 +169,39 @@ proc nextgenrm_GUI::profile {} {
                 -editendcommand nextgenrm_GUI::endCmdHeader \
                 -yscrollcommand [list $scrolly set]
         
-        $pcl.listbox columnconfigure 0 -name htext \
+        $storeList.listbox columnconfigure 0 -name htext \
                                             -editable yes \
                                             -labelalign center \
                                             -editwindow ttk::entry
         
-        $pcl.listbox columnconfigure 1 -name position \
+        $storeList.listbox columnconfigure 1 -name position \
                                             -editable yes \
                                             -editwindow ttk::combobox
         
-        $pcl.listbox columnconfigure 2 -name size \
+        $storeList.listbox columnconfigure 2 -name size \
                                             -editable yes \
                                             -editwindow ttk::combobox
         
-        $pcl.listbox columnconfigure 3 -name spacing \
+        $storeList.listbox columnconfigure 3 -name spacing \
                                             -editable yes \
                                             -editwindow ttk::combobox
         
-        # Create the first line
-        $pcl.listbox insert end ""
+        #$storeList.listbox insert end ""
         
-        ttk::scrollbar $scrolly -orient v -command [list $pcl.listbox yview]
+        ttk::scrollbar $scrolly -orient v -command [list $storeList.listbox yview]
         
-        grid $pcl.listbox -column 0 -row 0 -sticky news
+        grid $storeList.listbox -column 0 -row 0 -sticky news
         grid $scrolly -column 1 -row 0 -sticky ns
     
         # This is needed so the scrollbar displays properly
-        grid columnconfigure    $pcl 0 -weight 1
-        grid rowconfigure       $pcl 0 -weight 1
+        grid columnconfigure    $storeList 0 -weight 1
+        grid rowconfigure       $storeList 0 -weight 1
         
         ::autoscroll::autoscroll $scrolly ;# Enable the 'autoscrollbar'
+        
+        $storeList.listbox selection set 0
+        $storeList.listbox activate 0
+        $storeList.listbox see 0
 
 
  # Separator Frame
@@ -311,21 +314,21 @@ proc nextgenrm_GUI::startCmdHeader {tbl row col text} {
             position {
                     # Populate and make it readonly, and insert another line.
                     $w configure -values {"Left" "Center" "Right"} \
-                                -state readonly \
-                                -textvariable profile($profile(Store),$row,hpos)
+                                -state readonly
+                                #-textvariable profile($profile(Store),$row,hpos)
 
             }
             size {
                 # Populate and make it readonly, and insert another line.
                 $w configure -values {"Large" "Medium" "Small"} \
-                            -state readonly \
-                            -textvariable profile($profile(Store),$row,hsize)
+                            -state readonly 
+                            #-textvariable profile($profile(Store),$row,hsize)
             }
             spacing {
                 # Populate and make it readonly, and insert another line.
                 $w configure -values {"Single" "Double"} \
-                            -state readonly \
-                            -textvariable profile($profile(Store),$row,hspacing)
+                            -state readonly 
+                            #-textvariable profile($profile(Store),$row,hspacing)
                 
                 set myRow [expr {[$tbl index end] - 1}]
                 if {$row == 0} {$tbl insert end ""; 'debug Inserting 2nd Row}
