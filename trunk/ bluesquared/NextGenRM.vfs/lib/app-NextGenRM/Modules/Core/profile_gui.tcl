@@ -129,7 +129,7 @@ proc nextgenrm_GUI::profile {} {
     pack $button_frame -side right
     
     #ttk::button $button_frame.ok -text [mc "OK"] -command {nextgenrm_Code::save profile $profile_Store; destroy .profile}
-    ttk::button $button_frame.ok -text [mc "OK"] -command {nextgenrm_Code::save profile $profile(Store); destroy .profile}
+    ttk::button $button_frame.ok -text [mc "OK"] -command "nextgenrm_GUI::endCmdHeader .profile.container.nb.f1.frame1.listbox.listbox {} {} {}; nextgenrm_Code::save profile $profile(Store); destroy .profile"
     ttk::button $button_frame.cancel -text [mc "Cancel"] -command {destroy .profile}
     
     grid $button_frame.ok -column 0 -row 0 -padx 2p -pady 5p
@@ -155,7 +155,8 @@ proc nextgenrm_GUI::profile {} {
                         0  "Header Text"     
                         10    "Position"  center
                         10    "Size"    center
-                        10   "Spacing"   center } \
+                        10   "Spacing"   center
+                        3   "..."       center} \
                 -showlabels yes \
                 -stretch 0 \
                 -height 10 \
@@ -166,7 +167,6 @@ proc nextgenrm_GUI::profile {} {
                 -showseparators yes \
                 -fullseparators yes \
                 -editstartcommand nextgenrm_GUI::startCmdHeader \
-                -editendcommand nextgenrm_GUI::endCmdHeader \
                 -yscrollcommand [list $scrolly set]
         
         $storeList.listbox columnconfigure 0 -name htext \
@@ -185,6 +185,9 @@ proc nextgenrm_GUI::profile {} {
         $storeList.listbox columnconfigure 3 -name spacing \
                                             -editable yes \
                                             -editwindow ttk::combobox
+        
+        $storeList.listbox columnconfigure 4 -name delete \
+                                            -editable no
         
         #$storeList.listbox insert end ""
         
@@ -310,7 +313,7 @@ proc nextgenrm_GUI::startCmdHeader {tbl row col text} {
         
         switch -- [$tbl columncget $col -name] {
             htext {
-                $w configure -textvariable profile($profile(Store),$row,htext)
+                #$w configure -textvariable profile($profile(Store),$row,htext)
             }
             position {
                     # Populate and make it readonly, and insert another line.
@@ -335,6 +338,7 @@ proc nextgenrm_GUI::startCmdHeader {tbl row col text} {
                 if {$row == 0} {$tbl insert end ""; 'debug Inserting 2nd Row}
                 # See tablelist help for using 'end' as an index point.
                 if {($row != 0) && ($row == $myRow)} {$tbl insert end ""; 'debug Inserting Row}
+                
             }
             default {}
         }
@@ -374,18 +378,7 @@ proc nextgenrm_GUI::endCmdHeader {tbl row col text} {
     set w [$tbl editwinpath]
     
     switch -- [$tbl columncget $col -name] {
-        htext {
-            'debug htext: $profile($profile(Store),$row,htext)
-        }
-        position {
-            'debug pos: $profile($profile(Store),$row,hpos)
-        }
-        size {
-            'debug size: $profile($profile(Store),$row,hsize)
-        }
-        spacing {
-            'debug spacing: $profile($profile(Store),$row,hspacing)
-        }
+        spacing {puts "Leaving Spacing: $text"}
         default {}
     }
     return $text
