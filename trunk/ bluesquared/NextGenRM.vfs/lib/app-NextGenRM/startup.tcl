@@ -153,7 +153,7 @@ proc 'nextGenRM_initVariables {} {
 
 	
 	# Defaults
-	set profile(Store) Default
+	#set profile(Store) "nolist"
 	
 
 }

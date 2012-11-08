@@ -43,7 +43,7 @@ proc nextgenrm_GUI::profile {} {
     #***
     global profile program internal
     
-    # Make sure the window has been destroyed before creating.
+    # Make sure the window doesn't already exist
     if {[winfo exists .profile]} {destroy .profile}
     
 ##
@@ -77,13 +77,16 @@ proc nextgenrm_GUI::profile {} {
     
     set frame1 [ttk::frame $container.frame1]
     pack $frame1 -expand yes -fill both -pady 5p
-    
+      
     
 	ttk::label $frame1.profileTxt -text [mc "Profile Name"]
     #-textvariable profile(Store)
     #-values $program(profileList)
+    # Get the list of Profiles from ::showProfiles, and list them in the combobox
     ttk::combobox $frame1.profileEnt -state readonly \
-									-postcommand "nextgenrm_Code::showProfiles -comboProfile $frame1.profileEnt $frame1.profileRename $frame1.profileDelete"
+                                    -textvariable profile(Store) \
+                                    -values $program(profileList)
+									#-postcommand "nextgenrm_Code::showProfiles -comboProfile $frame1.profileEnt $frame1.profileRename $frame1.profileDelete"
     
     ttk::button $frame1.profileNew -image add16x16 -command {nextgenrm_GUI::addListWindow profile .profile}
     ttk::button $frame1.profileRename -image rename16x16 -state disabled -command "'debug Rename Profile; nextgenrm_GUI::renameListWindow profile .profile $frame1.profileEnt"
@@ -128,8 +131,7 @@ proc nextgenrm_GUI::profile {} {
     set button_frame [ttk::frame .profile.button]
     pack $button_frame -side right
     
-    #ttk::button $button_frame.ok -text [mc "OK"] -command {nextgenrm_Code::save profile $profile_Store; destroy .profile}
-    ttk::button $button_frame.ok -text [mc "OK"] -command "nextgenrm_GUI::endCmdHeader .profile.container.nb.f1.frame1.listbox.listbox {} {} {}; nextgenrm_Code::save profile $profile(Store); destroy .profile"
+    ttk::button $button_frame.ok -text [mc "OK"] -command { nextgenrm_Code::save profile $profile(Store); destroy .profile }
     ttk::button $button_frame.cancel -text [mc "Cancel"] -command {destroy .profile}
     
     grid $button_frame.ok -column 0 -row 0 -padx 2p -pady 5p
@@ -167,6 +169,7 @@ proc nextgenrm_GUI::profile {} {
                 -showseparators yes \
                 -fullseparators yes \
                 -editstartcommand nextgenrm_GUI::startCmdHeader \
+                -editendcommand nextgenrm_GUI::endCmdHeader \
                 -yscrollcommand [list $scrolly set]
         
         $storeList.listbox columnconfigure 0 -name htext \
@@ -189,7 +192,7 @@ proc nextgenrm_GUI::profile {} {
         $storeList.listbox columnconfigure 4 -name delete \
                                             -editable no
         
-        #$storeList.listbox insert end ""
+        $storeList.listbox insert end ""
         
         ttk::scrollbar $scrolly -orient v -command [list $storeList.listbox yview]
         
@@ -228,7 +231,7 @@ proc nextgenrm_GUI::profile {} {
     ttk::combobox $tab2.printCombo -width 10 \
                                     -values "Large Medium Small" \
                                     -state readonly \
-                                    -textvariable profile($profile(Store),bodySize)
+                                    -textvariable profile(bodySize)
     
     grid $tab2.printText -column 0 -row 0 -sticky e -padx 3p -pady 2p
     grid $tab2.printCombo -column 1 -row 0 -sticky news -padx 2p -pady 2p
@@ -237,15 +240,15 @@ proc nextgenrm_GUI::profile {} {
     ttk::combobox $tab2.dataCombo1 -width 10 \
                                     -values "Top Bottom" \
                                     -state readonly \
-                                    -textvariable profile($profile(Store),date_pos1)
+                                    -textvariable profile(date_pos1)
     ttk::combobox $tab2.dataCombo2 -width 10 \
                                     -values "Left Center Right" \
                                     -state readonly \
-                                    -textvariable profile($profile(Store),date_pos2)
+                                    -textvariable profile(date_pos2)
     ttk::combobox $tab2.dataCombo3 -width 10 \
                                     -values "Large Medium Small" \
                                     -state readonly \
-                                    -textvariable profile($profile(Store),date_size)
+                                    -textvariable profile(date_size)
     
     grid $tab2.dataText -column 0 -row 1 -padx 3p -pady 2p -sticky e
     grid $tab2.dataCombo1 -column 1 -row 1 -padx 2p -pady 2p -sticky news
@@ -253,7 +256,7 @@ proc nextgenrm_GUI::profile {} {
     grid $tab2.dataCombo3 -column 3 -row 1 -padx 2p -pady 2p -sticky news
     
     ttk::label $tab2.taxFoodTxt -text [mc "Tax (Food)"] 
-    ttk::entry $tab2.taxFoodEnt -width 3 -textvariable profile($profile(Store),taxFood)
+    ttk::entry $tab2.taxFoodEnt -width 3 -textvariable profile(taxFood)
     ttk::label $tab2.taxFoodPct -text %
     
     grid $tab2.taxFoodTxt -column 0 -row 2 -padx 3p -pady 2p -sticky e
@@ -261,19 +264,31 @@ proc nextgenrm_GUI::profile {} {
     grid $tab2.taxFoodPct -column 2 -row 2 -pady 2p -sticky w
     
     ttk::label $tab2.taxOtherTxt -text [mc "Tax (Other)"]
-    ttk::entry $tab2.taxOtherEnt -width 3 -textvariable profile($profile(Store),taxOther)
+    ttk::entry $tab2.taxOtherEnt -width 3 -textvariable profile(taxOther)
     ttk::label $tab2.taxOtherPct -text %
     
     grid $tab2.taxOtherTxt -column 0 -row 3 -padx 3p -pady 2p -sticky e
     grid $tab2.taxOtherEnt -column 1 -row 3 -padx 2p -pady 2p -sticky news
     grid $tab2.taxOtherPct -column 2 -row 3 -pady 2p -sticky w
 
-bind .profile.container.frame1.profileEnt <<ComboboxSelected>> {
-    # Get the current profile name, so we can load it.
-    'debug GetName: [.profile.container.frame1.profileEnt get]
-    nextgenrm_Code::openFile [.profile.container.frame1.profileEnt get]
-    nextgenrm_Code::displayProfileSettings .profile.container.frame1.profileEnt
-}
+    ##
+    ## - Code to process after GUI is built
+    ##
+    # Get list of profiles
+    nextgenrm_Code::showProfiles -comboProfile $frame1.profileEnt $frame1.profileRename $frame1.profileDelete
+    
+    ##
+    ## - Bindings
+    ##
+
+    bind .profile.container.frame1.profileEnt <<ComboboxSelected>> {
+        # Get the current profile name, so we can load it.
+        'debug GetName: [.profile.container.frame1.profileEnt get]
+        set GetName [.profile.container.frame1.profileEnt get]
+        set profile(Store) $GetName
+        nextgenrm_Code::openFile [.profile.container.frame1.profileEnt get] ;# Open the store profile
+        nextgenrm_Code::displayProfileSettings .profile.container.frame1.profileEnt ;# Remove existing data, and update it with new newly selected store
+    }
 
 } ;# End nextgenrm_GUI::profile
 
