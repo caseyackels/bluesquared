@@ -58,21 +58,22 @@ proc nextgenrm_Code::displayProfileSettings {comboPath} {
 	
 
 	set currentValue [$comboPath current]
+	puts "Table: Current file: $currentValue"
 	
 	if {[string match $currentValue $oldValue] eq 0} {
 		.profile.container.nb.f1.frame1.listbox.listbox delete 0 end
 		puts "Table: Deleting Values"
 	
 		if {[info exists profile(table)]} {
-			puts "Table: info exists"
-			#if {[string match $profile(table) [.profile.container.nb.f1.frame1.listbox.listbox get 0 end]] eq 1} {}
-			#	puts "Table: Info Doesn't match, merge"
+			puts "Table: variable exists"
+			if {[string match $profile(table) [.profile.container.nb.f1.frame1.listbox.listbox get 0 end]] eq 0} {
+				puts "Table: Inserting existing data"
 				foreach storeOptions $profile(table) {
 					.profile.container.nb.f1.frame1.listbox.listbox insert end $storeOptions
 				}
-			#{}
+			}
 		} else {
-			puts "Table: No info, deleting"
+			puts "Table: No existing data, deleting"
 			.profile.container.nb.f1.frame1.listbox.listbox delete 0 end
 		}
 	} else {

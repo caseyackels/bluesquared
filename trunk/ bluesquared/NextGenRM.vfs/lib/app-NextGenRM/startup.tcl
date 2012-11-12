@@ -145,6 +145,7 @@ proc 'nextGenRM_initVariables {} {
 	
 	set program(Profiles) [file join $program(Path) Profiles]
 	set program(PCL) [file join $program(Path) PurchasedList]
+	set program(fileGateway) "" ;# Used to determine if need to create a new profile/purchased list, or clone an existing file
 	
 	# Create the directories
 	file mkdir $program(Profiles)

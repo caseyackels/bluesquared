@@ -84,9 +84,8 @@ proc nextgenrm_GUI::profile {} {
     #-values $program(profileList)
     # Get the list of Profiles from ::showProfiles, and list them in the combobox
     ttk::combobox $frame1.profileEnt -state readonly \
-                                    -textvariable profile(Store) \
-                                    -values $program(profileList)
-									#-postcommand "nextgenrm_Code::showProfiles -comboProfile $frame1.profileEnt $frame1.profileRename $frame1.profileDelete"
+                                    -textvariable profile_store \
+									-postcommand "nextgenrm_Code::showProfiles -comboProfile $frame1.profileEnt $frame1.profileRename $frame1.profileDelete"
     
     ttk::button $frame1.profileNew -image add16x16 -command {nextgenrm_GUI::addListWindow profile .profile}
     ttk::button $frame1.profileRename -image rename16x16 -state disabled -command "'debug Rename Profile; nextgenrm_GUI::renameListWindow profile .profile $frame1.profileEnt"
@@ -130,9 +129,17 @@ proc nextgenrm_GUI::profile {} {
 #
     set button_frame [ttk::frame .profile.button]
     pack $button_frame -side right
-    
-    ttk::button $button_frame.ok -text [mc "OK"] -command { nextgenrm_Code::save profile $profile(Store); destroy .profile }
-    ttk::button $button_frame.cancel -text [mc "Cancel"] -command {destroy .profile}
+    # *** finishediting is a Tablelist subcommand which forces the editing of the cell to close, even if it still has focus.
+    ttk::button $button_frame.ok -text [mc "OK"] -command {
+                                                    .profile.container.nb.f1.frame1.listbox.listbox finishediting
+                                                    nextgenrm_Code::save profile $profile_store
+                                                    unset profile_store
+                                                    destroy .profile
+                                                    }
+    ttk::button $button_frame.cancel -text [mc "Cancel"] -command {
+                                                            unset profile_store
+                                                            destroy .profile
+                                                            }
     
     grid $button_frame.ok -column 0 -row 0 -padx 2p -pady 5p
     grid $button_frame.cancel -column 1 -row 0 -padx 5p -pady 5p
@@ -152,6 +159,7 @@ proc nextgenrm_GUI::profile {} {
     
     
     set scrolly $storeList.scrolly
+    puts "table path: $storeList.listbox"
     tablelist::tablelist $storeList.listbox \
                 -columns {
                         0  "Header Text"     
@@ -168,6 +176,8 @@ proc nextgenrm_GUI::profile {} {
                 -exportselection yes \
                 -showseparators yes \
                 -fullseparators yes \
+                -tooltipaddcommand nextgenrm_GUI::tooltipAddCmd \
+                -tooltipdelcommand "tooltip::tooltip clear" \
                 -editstartcommand nextgenrm_GUI::startCmdHeader \
                 -editendcommand nextgenrm_GUI::endCmdHeader \
                 -yscrollcommand [list $scrolly set]
@@ -192,7 +202,7 @@ proc nextgenrm_GUI::profile {} {
         $storeList.listbox columnconfigure 4 -name delete \
                                             -editable no
         
-        $storeList.listbox insert end ""
+        #$storeList.listbox insert end "" ;# This should be added when we create a new profile.
         
         ttk::scrollbar $scrolly -orient v -command [list $storeList.listbox yview]
         
@@ -288,6 +298,10 @@ proc nextgenrm_GUI::profile {} {
         set profile(Store) $GetName
         nextgenrm_Code::openFile [.profile.container.frame1.profileEnt get] ;# Open the store profile
         nextgenrm_Code::displayProfileSettings .profile.container.frame1.profileEnt ;# Remove existing data, and update it with new newly selected store
+    }
+    
+    bind [$storeList.listbox bodytag] <Double-1> {
+        .profile.container.nb.f1.frame1.listbox.listbox  delete [.profile.container.nb.f1.frame1.listbox.listbox  curselection]
     }
 
 } ;# End nextgenrm_GUI::profile

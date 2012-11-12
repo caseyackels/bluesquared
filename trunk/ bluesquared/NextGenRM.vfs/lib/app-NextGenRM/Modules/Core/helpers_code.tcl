@@ -50,7 +50,7 @@ proc nextgenrm_Code::showProfiles {args} {
 	'debug widget: $args
 
 	set profileList [glob -nocomplain -directory $program(Profiles) *]
-	#'debug profileList_A: $profileList
+	puts "profileList: $profileList"
 	
 	set purchasedList [glob -directory $program(PCL) *]
 	#'debug purchasedList_Ab: $purchasedList
@@ -69,8 +69,9 @@ proc nextgenrm_Code::showProfiles {args} {
 			}
 		}
 		-comboProfile {
-			# Clear variable before adding to it
+			# Clear variables before adding to it
 			set program(profileList) ""
+			set profile_list ""
 			foreach profile_list $profileList {
 				lappend program(profileList) [file tail [file rootname $profile_list]]
 			}
@@ -92,6 +93,17 @@ proc nextgenrm_Code::showProfiles {args} {
 			}
 			[lindex $args 1] configure -values $program(purchasedList)			
 		}
+		-comboProfileClone {
+			# Clear variables before adding to it
+			set program(profileList) ""
+			set profile_list ""
+			foreach profile_list $profileList {
+				lappend program(profileList) [file tail [file rootname $profile_list]]
+			}
+			puts "-comboClone (list of profiles): $program(profileList)"
+			puts "args: $args"
+			[lindex $args 1] configure -values $program(profileList)
+		}
 		default {}
 	}
 
@@ -108,7 +120,7 @@ proc nextgenrm_Code::controlComboState {entryWidget comboWidget buttonWidget che
 	#	(c) 2012 - Casey Ackels
 	#
 	# FUNCTION
-	#	paths to the various widgets
+	#	Control the state of the combobox. If the checkbutton "Clone" is checked we enable the combobox.
 	#
 	# SYNOPSIS
 	#	entryWidget comboWidget buttonWidget clone (on|off)
@@ -125,36 +137,45 @@ proc nextgenrm_Code::controlComboState {entryWidget comboWidget buttonWidget che
 	# SEE ALSO
 	#
 	#***
+	global program
 	
 	set entryWidgetText [$entryWidget get]
-	'debug cstate: $entryWidgetText
+	#'debug cstate: $entryWidgetText
 
 	# If no text in the entry field, exit.
-	if {$entryWidgetText eq ""} {set state disabled; return}
+	if {$entryWidgetText eq ""} {set state disabled; set combo_state disabled; return}
 	
 	# If the checkbutton isn't turned on, disable widgets
 	if {$clone eq "0"} {
 		if {$entryWidgetText ne ""} {
-			'debug 1a: Entry Widget returned: $entryWidgetText
-			set state disabled	
+			#'debug 1a: Entry Widget returned: $entryWidgetText
+			set state disabled
+			set combo_state disabled
+			set program(fileGateway) fileCreate
 		} else {
-			'debug 2a: Entry Widget returned: $entryWidgetText
+			#'debug 2a: Entry Widget returned: $entryWidgetText
 			set state normal
+			set combo_state readonly
+			set program(fileGatway) fileRename
 		}
 	} else {
 		if {$entryWidgetText eq ""} {
-			'debug 1b: Entry Widget returned: $entryWidgetText
-			set state disabled	
+			#'debug 1b: Entry Widget returned: $entryWidgetText
+			set state disabled
+			set combo_state disabled
+			set program(fileGateway) fileCreate
 		} else {
-			'debug 2b: Entry Widget returned: $entryWidgetText
+			#'debug 2b: Entry Widget returned: $entryWidgetText
 			set state normal
+			set combo_state readonly
+			set program(fileGateway) fileRename
 		}
 	}
 	
-	'debug State: $state
+	#'debug State: $state
 
 	# Enable combobox because we want to clone an existing list
-	$comboWidget configure -state $state
+	$comboWidget configure -state $combo_state
 	
 	# Allow the user to press Ok
 	$buttonWidget configure -state $state
@@ -274,7 +295,7 @@ proc nextgenrm_Code::save {args} {
 
 
 proc nextgenrm_Code::saveAs {args} {
-	#****f* save/nextgenrm_Code
+	#****f* saveAs/nextgenrm_Code
     # AUTHOR
     #	Casey Ackels
     #
@@ -282,7 +303,7 @@ proc nextgenrm_Code::saveAs {args} {
     #	(c) 2012 - Casey Ackels
     #
     # FUNCTION
-    #	
+    #	This RENAMES the file.
     #
     # SYNOPSIS
     #	Save the data from Profile or a PurchasedList as a new file
@@ -362,6 +383,13 @@ proc nextgenrm_Code::openFile {args} {
     #***
     global profile program
 	
+	# Clear out all the profile variables
+	set profStore_tmp $profile(Store) ;# Remember current store name before clearing everything out.
+	array unset profile
+	set profile(Store) $profStore_tmp
+	
+	
+	
 	set fileName [file join $program(Profiles) $args.txt]
 	set myFile [open $fileName r]
 	
@@ -393,6 +421,8 @@ proc nextgenrm_Code::create {args} {
     #
     # FUNCTION
     #	create [-rename|-create] [profile|pcl] ?name?
+	#	usage: create -rename profile|pcl newFileName oldFileName
+	#	usage: create -create profile|pcl newFileName
     #
     # SYNOPSIS
     #	Create will: Rename an existing profile/purchased list, Initiate a new profile/purchased list.
@@ -414,7 +444,9 @@ proc nextgenrm_Code::create {args} {
 	'debug $args
 	set type [lindex $args 0]
 	set fileType [lindex $args 1]
-	set fileName $program(newName)
+	#set fileName $program(newName
+	set newFileName [lindex $args 2]
+	set oldFileName [lindex $args 3]
 	
 	# Setup path to contain the correct file path
 	switch -- $fileType {
@@ -430,11 +462,16 @@ proc nextgenrm_Code::create {args} {
 	}
 
 	switch -- $type {
-		-rename	{
-			
+		fileRename	{
+			#file copy -- [file join $program(Profiles) [lindex $args 1].txt] [file join $program(Profiles) [[lindex $args 2] get].txt]
+			file copy -- [file join $path $oldFileName.txt] [file join $path $newFileName.txt]
+			puts "Args: $args"
+			puts "CLONED: [file join $path $oldFileName.txt] [file join $path $newFileName.txt]"
+			puts "File Cloned: $oldFileName/$newFileName"
 		}
-		-create	{
-			set new [open [file join $path $fileName].txt w+]
+		fileCreate	{
+			set new [open [file join $path $newFileName].txt w+]
+			puts $new "" ;# Insert a blank line in the file
 			chan flush $new
 			chan close $new
 			}
@@ -448,5 +485,6 @@ proc nextgenrm_Code::create {args} {
 	foreach profile_list $profileList {
 				lappend program(profileList) [file tail [file rootname $profile_list]]
 	}
+	
 
 } ;# nextgenrm_Code::create
