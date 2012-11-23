@@ -75,17 +75,15 @@ proc nextgenrm_GUI::pclWindow {} {
     pack $frame1 -fill both -expand yes -pady 8p -padx 5p
     
     #Initialize variable
-    set program(purchasedList) ""
+    #set program(purchasedList) ""
     ttk::label $frame1.pclText -text [mc "Purchased Lists"]
-        #set purchased(Name) defaultList
-        #-textvariable purchased(Name)
-    ttk::combobox $frame1.pclBox  -values $program(purchasedList) \
-									-state readonly \
-									-postcommand "nextgenrm_Code::showProfiles -comboPCL $frame1.pclBox"
+    ttk::combobox $frame1.pclBox  	-state readonly \
+                                    -textvariable purchased_list \
+									-postcommand "nextgenrm_Code::showProfiles -comboPCL $frame1.pclBox $frame1.pclRename $frame1.pclDelete"
     
-    ttk::button $frame1.pclNew -image add16x16 -command {'debug _new New Profile; nextgenrm_GUI::addListWindow pcl .pclwindow}
+    ttk::button $frame1.pclNew -image add16x16 -command {'debug _new New PurchasedList; nextgenrm_GUI::addListWindow pcl .pclwindow}
     ttk::button $frame1.pclRename -image rename16x16 -command "nextgenrm_GUI::renameListWindow pcl .pclwindow $frame1.pclBox"
-    ttk::button $frame1.pclDelete -image del16x16 -command {'debug _delete Delete Profile}
+    ttk::button $frame1.pclDelete -image del16x16 -command {'debug Delete Purchased List}
     
     grid $frame1.pclText -column 0 -row 0 -padx 3p -pady 2p -sticky w
     grid $frame1.pclBox -column 1 -row 0 -padx 2p -pady 2p -sticky news
@@ -103,7 +101,7 @@ proc nextgenrm_GUI::pclWindow {} {
                         15  "Item"    left
                         5    "Price"    center
                         15   "Taxable"  center
-                        } \
+                        3   "..."   center} \
                 -showlabels yes \
                 -stretch 0 \
                 -height 15 \
@@ -113,6 +111,8 @@ proc nextgenrm_GUI::pclWindow {} {
                 -exportselection yes \
                 -showseparators yes \
                 -fullseparators yes \
+                -tooltipaddcommand nextgenrm_GUI::tooltipAddCmd \
+                -tooltipdelcommand "tooltip::tooltip clear" \
                 -editstartcommand nextgenrm_GUI::startCmd \
                 -editendcommand nextgenrm_GUI::endCmd \
                 -yscrollcommand [list $scrolly set]
@@ -130,8 +130,11 @@ proc nextgenrm_GUI::pclWindow {} {
                                             -editable yes \
                                             -editwindow ttk::combobox
         
+        $pcl.listbox columnconfigure 3 -name delete \
+                                            -editable no
+        
         # Create the first line
-        $pcl.listbox insert end ""
+        #$pcl.listbox insert end "" ;# this is added when we create a new Purchased List
         
         ttk::scrollbar $scrolly -orient v -command [list $pcl.listbox yview]
         
@@ -144,6 +147,10 @@ proc nextgenrm_GUI::pclWindow {} {
         
         ::autoscroll::autoscroll $scrolly ;# Enable the 'autoscrollbar'
         
+        $pcl.listbox selection set 0
+        $pcl.listbox activate 0
+        $pcl.listbox see 0
+        
 # Separator Frame
     #set sep_frame1 [ttk::frame .pclwindow.sep_frame1]
     #ttk::separator $sep_frame1.separator -orient horizontal
@@ -154,12 +161,43 @@ proc nextgenrm_GUI::pclWindow {} {
 # Button frame   
     set button_frame [ttk::frame .pclwindow.button]
     pack $button_frame -side right
-    
-    ttk::button $button_frame.ok -text [mc "OK"] -command {nextgenrm_Code::save profile $purchased(Name); destroy .pclwindow}
-    ttk::button $button_frame.cancel -text [mc "Cancel"] -command {destroy .pclwindow}
+    ttk::button $button_frame.ok -text [mc "OK"] -command {
+                                                    .pclwindow.frame2.listbox finishediting
+                                                    nextgenrm_Code::save pcl purchased_list
+                                                    set purchased_list ""
+                                                    destroy .pclwindow
+                                                    }
+    ttk::button $button_frame.cancel -text [mc "Cancel"] -command {
+                                                            set purchaed_list ""
+                                                            destroy .pclwindow
+                                                            }
     
     grid $button_frame.ok -column 0 -row 0 -padx 2p -pady 5p
     grid $button_frame.cancel -column 1 -row 0 -padx 5p -pady 5p
+    
+    
+    ##
+    ## - Code to process after GUI is built
+    ##
+    # Get list of profiles
+    nextgenrm_Code::showProfiles -comboPCL $frame1.pclBox $frame1.pclRename $frame1.pclDelete
+    
+    ##
+    ## - Bindings
+    ##
+
+    bind $frame1.pclBox <<ComboboxSelected>> {
+        # Get the current profile name, so we can load it.
+        'debug GetName: [.pclwindow.frame2.listbox get]
+        set GetName [.pclwindow.frame2.listbox get]
+        #set profile(Store) $GetName
+        nextgenrm_Code::openFile [.pclwindow.frame2.listbox get] ;# Open the store profile
+        nextgenrm_Code::displayProfileSettings .pclwindow.frame2.listbox ;# Remove existing data, and update it with new newly selected purchased list
+    }
+    
+    bind [$pcl.listbox bodytag] <Double-1> {
+        .pclwindow.frame2.listbox delete [.pclwindow.frame2.listbox  curselection]
+    }
 }
 
 

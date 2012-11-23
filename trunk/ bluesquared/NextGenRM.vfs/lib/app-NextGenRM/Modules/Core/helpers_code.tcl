@@ -50,16 +50,9 @@ proc nextgenrm_Code::showProfiles {args} {
 	'debug widget: $args
 
 	set profileList [glob -nocomplain -directory $program(Profiles) *]
-	puts "profileList: $profileList"
+	set purchasedList [glob -nocomplain -directory $program(PCL) *]
 	
-	set purchasedList [glob -directory $program(PCL) *]
-	#'debug purchasedList_Ab: $purchasedList
-	
-	# If we have no files; lets immediately open the "Add Profile|Purchased List" window.
-	if {$profileList == ""} {nextgenrm_GUI::addListWindow profile .profile; return}
-	
-	#---- Everything Ok, keep processing ...
-	
+
 	set gate_profile 0 ;# Keep control on if we have already inserted the information
 	switch -- [lindex $args 0] {
 		-listbox {
@@ -69,6 +62,8 @@ proc nextgenrm_Code::showProfiles {args} {
 			}
 		}
 		-comboProfile {
+			# Get files, if none exist launch the Add Window
+			if {$profileList == ""} {nextgenrm_GUI::addListWindow profile .profile; return}
 			# Clear variables before adding to it
 			set program(profileList) ""
 			set profile_list ""
@@ -79,6 +74,7 @@ proc nextgenrm_Code::showProfiles {args} {
 			'debug profileList_B: $program(profileList)
 			# List the available profile's that exist already, and enable the rename, and delete buttons.
 			[lindex $args 1] configure -values $program(profileList)
+			
 			if {$profile_list != ""} {
 				# Guard against the list being blank, and enabling editing commands unncessarily.
 				[lindex $args 2] configure -state normal
@@ -86,12 +82,21 @@ proc nextgenrm_Code::showProfiles {args} {
 			}
 		}
 		-comboPCL {
+			# Get files, if none exist launch the Add Window
+			if {$purchasedList == ""} {nextgenrm_GUI::addListWindow pcl .pclwindow; return}
 			# Clear variable before adding to it
 			set program(purchasedList) ""
-			foreach pcl $purchasedList {
-				lappend program(purchasedList) [file tail [file rootname $pcl]]
+			set purchased_list ""
+			foreach purchased_list $purchasedList {
+				lappend program(purchasedList) [file tail [file rootname $purchased_list]]
 			}
-			[lindex $args 1] configure -values $program(purchasedList)			
+			[lindex $args 1] configure -values $program(purchasedList)
+			
+			if {$purchased_list != ""} {
+				# Guard against the list being blank, and enabling editing commands unncessarily.
+				[lindex $args 2] configure -state normal
+				[lindex $args 3] configure -state normal
+			}
 		}
 		-comboProfileClone {
 			# Clear variables before adding to it
@@ -168,7 +173,7 @@ proc nextgenrm_Code::controlComboState {entryWidget comboWidget buttonWidget che
 			#'debug 2b: Entry Widget returned: $entryWidgetText
 			set state normal
 			set combo_state readonly
-			set program(fileGateway) fileRename
+			set program(fileGateway) fileCreate
 		}
 	}
 	
@@ -217,6 +222,7 @@ proc nextgenrm_Code::controlCheck {txtString checkWidget comboWidget buttonWidge
 	
 	# enable the checkbutton if there is anything but ""
 	if {$txtString ne ""} {
+		# TODO: if there is no other purchased list or profile the checkbutton should NOT even be allowed to be checked.
 		'debug $txtString != ""
 		set returnValue 1
 		$checkWidget configure -state normal
@@ -350,6 +356,7 @@ proc nextgenrm_Code::saveAs {args} {
 		}
 		default	{
 			return -code error
+			puts "error in saveAs proc"
 		}
 	}
 	
@@ -440,11 +447,12 @@ proc nextgenrm_Code::create {args} {
     #***
     global profile program
 	
+	#puts "Started to Create: $args"
+	#return
+	
     # Open the file (Could be Profiles/Purchased list)
-	'debug $args
 	set type [lindex $args 0]
 	set fileType [lindex $args 1]
-	#set fileName $program(newName
 	set newFileName [lindex $args 2]
 	set oldFileName [lindex $args 3]
 	
@@ -452,12 +460,15 @@ proc nextgenrm_Code::create {args} {
 	switch -- $fileType {
 		profile {
 			set path $program(Profiles)
+			set fileList profileList
 		}
 		pcl 	{
 			set path $program(PCL)
+			set fileList purchasedList
 		}
 		default {
 			return -code error
+			puts "error #1 in create proc"
 		}
 	}
 
@@ -477,13 +488,15 @@ proc nextgenrm_Code::create {args} {
 			}
 		default	{
 			return -code error
+			puts "error #2 in create proc"
 		}
 	}
 	
 	# Update the combobox that holds the profile names
-	set profileList [glob -nocomplain -directory $program(Profiles) *]
-	foreach profile_list $profileList {
-				lappend program(profileList) [file tail [file rootname $profile_list]]
+	set file_list [glob -nocomplain -directory $path *]
+	foreach myFile $file_list {
+				# See above for linking information on the $fileList variable
+				lappend program($fileList) [file tail [file rootname $myFile]]
 	}
 	
 

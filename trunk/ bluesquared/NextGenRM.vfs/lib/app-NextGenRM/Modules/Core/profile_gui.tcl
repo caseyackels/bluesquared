@@ -133,11 +133,11 @@ proc nextgenrm_GUI::profile {} {
     ttk::button $button_frame.ok -text [mc "OK"] -command {
                                                     .profile.container.nb.f1.frame1.listbox.listbox finishediting
                                                     nextgenrm_Code::save profile $profile_store
-                                                    unset profile_store
+                                                    set profile_store ""
                                                     destroy .profile
                                                     }
     ttk::button $button_frame.cancel -text [mc "Cancel"] -command {
-                                                            unset profile_store
+                                                            set profile_store ""
                                                             destroy .profile
                                                             }
     
