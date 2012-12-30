@@ -84,6 +84,7 @@ proc BlueSquared_About::aboutOpenFiles {about_Text changeLog_Text} {
 
     set i 0
     set idx 0
+    set idx2 0
     while { [gets $openChangeLog line] >= 0 } {
         # Keep track of how many lines we insert
         incr idx
@@ -108,9 +109,12 @@ proc BlueSquared_About::aboutOpenFiles {about_Text changeLog_Text} {
             "* "        {set stringFormat "\u0009 \u2022 $stringFormat"; set textFormat List1; set i 0 ;# List1}
             "# "        {set stringFormat "\u0009 [incr i]. $stringFormat"; set textFormat List2;# List2}
             "--"        {
-                        bind $changeLog_Text <Configure> "$changeLog_Text.hr$idx configure -width %w"
-                        frame $changeLog_Text.hr$idx -relief raised -height 2 -background gray
-                        $changeLog_Text window create insert -window $changeLog_Text.hr$idx
+                        incr idx2
+                        bind $changeLog_Text <Configure> "$changeLog_Text.hr$idx2 configure -width %w"
+                        frame $changeLog_Text.hr$idx2 -relief raised -height 2 -background gray
+                        $changeLog_Text window create insert -window $changeLog_Text.hr$idx2
+                        puts "about: HR IDX- $idx2"
+                        puts "string: $line"
                         }
             default     {set stringFormat $line; set textFormat Normal; set i 0;# No markup detected}
         }
