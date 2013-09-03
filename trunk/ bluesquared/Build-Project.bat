@@ -34,16 +34,16 @@ ECHO.
 set programName=NextGenRM
 set programEXE=NextGenRM.vfs
 
-set thirdparty=about autoscroll debug tablelist5.4 tcom3.9 tooltip img
+set thirdparty=about autoscroll debug tablelist5.4 autoscroll tooltip img
 
 GOTO BUILDPROJECT
 
 
 :EA
-set programName=distributionhelper
-set programEXE=DistributionHelper.vfs
+set programName=EfficiencyAssist
+set programEXE=EfficiencyAssist.vfs
 
-set thirdparty=about autoscroll csv debug tablelist5.4 tkdnd2.2 tooltip
+set thirdparty=about autoscroll csv debug tablelist5.4 tkdnd2.2 tooltip twapi tcom3.9
 
 GOTO BUILDPROJECT
 
