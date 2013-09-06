@@ -63,7 +63,12 @@ proc eAssistGUI {} {
     #	TODO: List the other *GUI procs.
     #
     #***
-    global GS_job GS_ship GS_address GS_file program customer3P settings
+    global GS_job GS_ship GS_address GS_file program customer3P settings currentModule
+    
+    set currentModule Addresses
+    
+    # Clear the frames before continuing
+    eAssist_Global::resetFrames 
 
 
 

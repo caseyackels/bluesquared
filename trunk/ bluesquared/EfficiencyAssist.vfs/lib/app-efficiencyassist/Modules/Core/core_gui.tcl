@@ -59,7 +59,7 @@ proc eAssist::parentGUI {} {
     #	N/A
     #
     #***
-    global settings program mySettings
+    global settings program mySettings currentModule
 
     wm geometry . 640x575 ;# width x Height
     
@@ -88,9 +88,9 @@ proc eAssist::parentGUI {} {
     menu $mb.module -tearoff 0 -relief raised -bd 2
     $mb add cascade -label [mc "Module"] -menu $mb.module
 
-    $mb.module add command -label [mc "Box Labels"] -command {eAssist_Global::resetFrames Shipping_Gui::shippingGUI}
-    $mb.module add command -label [mc "Batch Imports"] -command {eAssist_Global::resetFrames eAssist_GUI::eAssistGUI}
-    $mb.module add command -label [mc "Setup"] -command {eAssist_Global::resetFrames eAssistSetup::eAssistSetup}
+    $mb.module add command -label [mc "Box Labels"] -command {Shipping_Gui::shippingGUI}
+    $mb.module add command -label [mc "Batch Imports"] -command {eAssist_GUI::eAssistGUI}
+    $mb.module add command -label [mc "Setup"] -command {eAssistSetup::eAssistSetup}
 
     ## Help
     menu $mb.help -tearoff 0 -relief raised -bd 2
@@ -99,16 +99,16 @@ proc eAssist::parentGUI {} {
     $mb.help add command -label [mc "About..."] -command { BlueSquared_About::aboutWindow }
 
 
-    # Create Separator Frame
-    set frame0 [ttk::frame .frame0]
-    ttk::separator $frame0.separator -orient horizontal
-
-    grid $frame0.separator - -sticky ew -ipadx 4i
-    pack $frame0 -anchor n -fill x -expand yes
+    ## Create Separator Frame
+    #set frame0 [ttk::frame .frame0]
+    #ttk::separator $frame0.separator -orient horizontal
+    #
+    #grid $frame0.separator - -sticky ew -ipadx 4i
+    #pack $frame0 -anchor n -fill x
 
     # Create the container frame
     ttk::frame .container
-    pack .container -expand yes -fill both -anchor n -side top
+    pack .container -expand yes -fill both
 
     # Start the gui
     # All frames that make up the GUI are children to .container
@@ -119,23 +119,33 @@ proc eAssist::parentGUI {} {
     ##
     ## Control Buttons
     ##
-
     set btnBar [ttk::frame .btnBar]
-
-    ttk::button $btnBar.print -text [mc "Generate File"] -command { eAssist_Helper::checkForErrors } -state disabled
-    ttk::button $btnBar.close -text [mc "Exit"] -command {exit}
-
-    grid $btnBar.print -column 0 -row 3 -sticky nse -padx 8p
-    grid $btnBar.close -column 1 -row 3 -sticky nse
     pack $btnBar -side bottom -anchor e -pady 13p -padx 5p
-
-
-    # ToolTips
-    tooltip::tooltip $btnBar.close "Close (Esc)"
-
-    # Bindings
-
-    bind $btnBar.close <Return> {exit}
+    
+    switch -- $currentModule {
+        BoxLabels   {
+            ttk::button $btnBar.print -text [mc "Generate File"] -command { eAssist_Helper::checkForErrors } -state disabled
+            ttk::button $btnBar.close -text [mc "Exit"] -command {exit}
+            
+            grid $btnBar.print -column 0 -row 3 -sticky nse -padx 8p
+            grid $btnBar.close -column 1 -row 3 -sticky nse
+        }
+        Addresses   {
+            ttk::button $btnBar.print -text [mc "Generate File"] -command { eAssist_Helper::checkForErrors } -state disabled
+            ttk::button $btnBar.close -text [mc "Exit"] -command {exit}
+            
+            grid $btnBar.print -column 0 -row 3 -sticky nse -padx 8p
+            grid $btnBar.close -column 1 -row 3 -sticky nse
+            }
+        Setup       {
+            ttk::button $btnBar.print -text [mc "Save"] -command { eAssistSetup::SaveGlobalSettings }
+            ttk::button $btnBar.close -text [mc "Exit"] -command {exit}
+            
+            grid $btnBar.print -column 0 -row 3 -sticky nse -padx 8p
+            grid $btnBar.close -column 1 -row 3 -sticky nse
+        }
+        default     {}
+    }
     
     eAssist_GUI::editPopup
     
@@ -162,3 +172,45 @@ proc eAssist::parentGUI {} {
     #}
 
 } ;# End of parentGUI
+
+
+proc eAssist::buttonBarGUI {} {
+    #****f* buttonBarGUI/eAssist
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2013 Casey Ackels
+    #
+    # FUNCTION
+    #	
+    #
+    # SYNOPSIS
+    #	N/A
+    #
+    # CHILDREN
+    #	
+    #
+    # PARENTS
+    #	None
+    #
+    # NOTES
+    #	None
+    #
+    # SEE ALSO
+    #	N/A
+    #
+    #***
+    global currentModule
+    
+    set btnBar [ttk::frame .btnBar]
+
+    ttk::button $btnBar.print -text [mc "Generate File"] -command { eAssist_Helper::checkForErrors } -state disabled
+    ttk::button $btnBar.close -text [mc "Exit"] -command {exit}
+    
+    grid $btnBar.print -column 0 -row 3 -sticky nse -padx 8p
+    grid $btnBar.close -column 1 -row 3 -sticky nse
+    pack $btnBar -side bottom -anchor e -pady 13p -padx 5p
+    
+    
+} ;# buttonBarGUI

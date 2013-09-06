@@ -59,6 +59,7 @@ proc 'eAssist_sourceReqdFiles {} {
     #	'eAssist_sourceOtherFiles
     #
     #***
+	global log logSettings
 	## All files that need to be sourced should go here. That way if any of them fail to load, we'll catch it.
 
 	#Modify the Auto_path so our 'package requires' work.
@@ -83,6 +84,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
     lappend ::auto_path [file join [file dirname [info script]] Libraries about]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries debug]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries log]
 
 	##
     ## Project built scripts
@@ -108,6 +110,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	package require autoscroll
 	package require csv
 	package require debug
+	package require logger
 	
 
 	## Efficiency Assist modules
@@ -129,9 +132,12 @@ proc 'eAssist_sourceReqdFiles {} {
     
     load [file join [file dirname [info script]] Libraries twapi twapi-x86-3.1.17.dll]
     #source [file join [file dirname [info script]] Libraries debug.tcl]
+	
+	# initialize logging service
+	set log [logger::init eAssist_svc]
+	${log}::notice "Initialized eAssist_svc logging"
+		
 
-        namespace import 'debug::'debug
-        'debug "Loaded"
 }
 
 proc 'eAssist_initVariables {} {
@@ -159,23 +165,25 @@ proc 'eAssist_initVariables {} {
     # SEE ALSO
     #
     #***
-    global settings header mySettings env intl ship
+    global settings header mySettings env intl ship program
 
-    # hackish, but this will allow us to add new defaults/settings without killing an existing config file.
-    
+	#-------- CORE SETTINGS   
     # Create personal settings file %appdata%
     if {[file isdirectory [file join $env(APPDATA) eAssistSettings]] == 0} {
         file mkdir [file join $env(APPDATA) eAssistSettings]
     }
     
     # Find out where we are in the system
-    set settings(Home) [pwd]
+    set program(Home) [pwd]
+	set settings(Home) [pwd]
+	
+    if {![info exists program(lastFrame)]} {
+        # Set default last frame for Setup
+        set program(lastFrame) company_GUI
+    }
     
-    #if {![info exists settings(Home)]} {
-    #    # Application location
-    #    set settings(Home) [pwd]
-    #    'debug Settings(Home) $settings(Home)
-    #}
+
+	#-------- MISC SETTINGS
 	
     if {![info exists mySettings(outFilePath)]} {
         # Location for saving the file
@@ -359,13 +367,12 @@ proc 'eAssist_loadSettings {} {
     #	'eAssist_loadOptions
     #
     #***
-    global settings debug program header customer3P env mySettings international company shipVia3P tcl_platform
-
-    # Enable / Disable Debugging
-    # See 'distHelper_sourceReqdFiles for the [namespace import] command
-    set debug(onOff) on
+    global settings debug program header customer3P env mySettings international company shipVia3P tcl_platform setup logSettings
+	set debug(onOff) on
+	set logSettings(loglevel) debug
     console show
-    puts "Platform: $tcl_platform(osVersion)"
+    
+	puts "Platform: $tcl_platform(osVersion)"
     puts [parray tcl_platform]
 
     
