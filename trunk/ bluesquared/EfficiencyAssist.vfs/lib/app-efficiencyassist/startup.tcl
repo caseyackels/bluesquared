@@ -84,7 +84,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
     lappend ::auto_path [file join [file dirname [info script]] Libraries about]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries debug]
-	lappend ::auto_path [file join [file dirname [info script]] Libraries log]
+
 
 	##
     ## Project built scripts
@@ -110,7 +110,6 @@ proc 'eAssist_sourceReqdFiles {} {
 	package require autoscroll
 	package require csv
 	package require debug
-	package require logger
 	
 
 	## Efficiency Assist modules
@@ -133,10 +132,6 @@ proc 'eAssist_sourceReqdFiles {} {
     load [file join [file dirname [info script]] Libraries twapi twapi-x86-3.1.17.dll]
     #source [file join [file dirname [info script]] Libraries debug.tcl]
 	
-	# initialize logging service
-	set log [logger::init eAssist_svc]
-	${log}::notice "Initialized eAssist_svc logging"
-		
 
 }
 
@@ -165,7 +160,7 @@ proc 'eAssist_initVariables {} {
     # SEE ALSO
     #
     #***
-    global settings header mySettings env intl ship program
+    global settings header mySettings env intl ship program boxLabelInfo log
 
 	#-------- CORE SETTINGS   
     # Create personal settings file %appdata%
@@ -181,7 +176,13 @@ proc 'eAssist_initVariables {} {
         # Set default last frame for Setup
         set program(lastFrame) company_GUI
     }
-    
+
+	if {![info exists boxLabelInfo(labelNames)]} {
+        # Setup variable for holding list of box label names
+        set boxLabelInfo(labelNames) ""
+		${log}::debug boxLabelInfo(labelNames) variable not found, initiating...
+		
+    }	
 
 	#-------- MISC SETTINGS
 	
@@ -320,6 +321,8 @@ proc 'eAssist_initVariables {} {
         # Customer Code within Process Shipper
         set header(3rdPartyCode) [list ThirdPartyID]
     }
+	
+
     #
     # - These are used internally
     # 8/28/2013 - Move this so we see them within Efficiency
@@ -367,13 +370,21 @@ proc 'eAssist_loadSettings {} {
     #	'eAssist_loadOptions
     #
     #***
-    global settings debug program header customer3P env mySettings international company shipVia3P tcl_platform setup logSettings
+    global settings debug program header customer3P env mySettings international company shipVia3P tcl_platform setup logSettings log boxSettings boxLabelInfo
+	
 	set debug(onOff) on
 	set logSettings(loglevel) debug
     console show
+	
+	# Startup the logging package
+	lappend ::auto_path [file join [file dirname [info script]] Libraries log]
+	package require logger
+	# initialize logging service
+	set log [logger::init eAssist_svc]
+	${log}::notice "Initialized eAssist_svc logging"
     
-	puts "Platform: $tcl_platform(osVersion)"
-    puts [parray tcl_platform]
+	${log}::notice "Platform: $tcl_platform(osVersion)"
+    ${log}::notice [parray tcl_platform]
 
     
     set program(Version) 4
@@ -390,8 +401,8 @@ proc 'eAssist_loadSettings {} {
     #config file - these variables are "system wide"; and are not to be personalized.
 	# Initialize variables
     if {[catch {open config.txt r} fd]} {
-        puts "unable to load defaults"
-        puts "execute initVariables"
+        ${log}::notice "unable to load defaults"
+        ${log}::notice "execute initVariables"
     
 	} else {
 	
@@ -402,14 +413,15 @@ proc 'eAssist_loadSettings {} {
             if {$line == ""} {continue}
             set l_line [split $line " "]
             set [lindex $l_line 0] [join [lrange $l_line 1 end] " "]
+			${log}::notice "Loaded variables: $l_line"
         }
-        puts "Loaded variables"
+        ${log}::notice "Loaded variables: Complete!"
     }
     
     set fd "" ;# Make sure we are cleared out before reusing.
     # Load Personalized settings
     if {[catch {open [file join $env(APPDATA) eAssistSettings settings.txt] r} fd]} {
-        puts "Cannot find settings.txt; loading defaults"
+        ${log}::notice "Cannot find settings.txt; loading defaults"
         #set settings(newSettingsTxt) no
         
         'eAssist_initVariables ;# load defaults
@@ -423,7 +435,7 @@ proc 'eAssist_loadSettings {} {
                 if {$line == ""} {continue}
                 set l_line [split $line " "]
                 set [lindex $l_line 0] [join [lrange $l_line 1 end] " "]
-                puts "line: $line"
+                ${log}::notice "line: $line"
         }
     }
     # Initialize default values

@@ -177,7 +177,7 @@ proc eAssistSetup::SaveGlobalSettings {} {
     #	N/A
     #
     # PARENTS
-    #	eAssistSetup::
+    #	eAssistSetup::saveBoxLabels
     #
     # NOTES
     #
@@ -185,7 +185,8 @@ proc eAssistSetup::SaveGlobalSettings {} {
     #
     #
     #***
-    global GS_filePaths program company setup logSettings
+    global GS_filePaths program company setup logSettings boxLabelInfo GS_label
+    
     
     # Global Settings - saved to the server
     set fd [open [file join $program(Home) config.txt] w]
@@ -204,6 +205,10 @@ proc eAssistSetup::SaveGlobalSettings {} {
     
     foreach value [array names logSettings] {
             puts $fd "logSettings($value) $logSettings($value)"
+    }
+    
+    foreach value [array names boxLabelInfo] {
+            puts $fd "boxLabelInfo($value) $boxLabelInfo($value)"
     }
 
 
@@ -226,6 +231,43 @@ proc eAssistSetup::SaveGlobalSettings {} {
     chan close $fd   
 } ;# eAssistSetup::SaveGlobalSettings
 
+
+proc eAssistSetup::saveBoxLabels {args} {
+    #****f* saveBoxLabels/eAssistSetup
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2013 Casey Ackels
+    #
+    # FUNCTION
+    #	Preprocessor to save the box label configurations. Calls SaveGlobalSettings once the preprocessing is complete.
+    #
+    # SYNOPSIS
+    #   eAssistSetup::saveBoxLabels $GS_label(name) $GS_label(numberOfFields) $GS_filePathSetup(labelDirectory)
+    #
+    # CHILDREN
+    #	eAssistSetup::SaveGlobalSettings
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log boxLabelInfo
+    
+    lappend boxLabelInfo(labelNames) [lindex $args 0]
+    set boxLabelInfo($boxLabelInfo(labelNames),labelSetup) [lrange $args 1 end]
+    
+    ${log}::debug boxLabels_labelNames: $boxLabelInfo(labelNames)
+    ${log}::debug boxLabels_labelSetup: $boxLabelInfo($boxLabelInfo(labelNames),labelSetup)
+    
+    eAssistSetup::SaveGlobalSettings
+    
+} ;#eAssistSetup::saveBoxLabels
 
 proc eAssistSetup::startCmd {tbl row col text} { 
     #****f* startCmd/eAssistSetup
@@ -353,6 +395,70 @@ proc eAssistSetup::endCmd {tbl row col text} {
     
     return $text
 } ;# eAssistSetup::endCmd
+
+
+proc eAssistSetup::startCmdBoxLabels {tbl row col text} { 
+    #****f* startCmd/eAssistSetup
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2012 - Casey Ackels
+    #
+    # FUNCTION
+    #	Configuration options when the user enters the listbox
+    #
+    # SYNOPSIS
+    #	N/A
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global internal boxLabels log
+        set w [$tbl editwinpath]
+        
+        #'debug index: [$w index bottom]
+        
+        switch -- [$tbl columncget $col -name] {
+            field {
+                ## Populate and make it readonly, and insert another line.
+                #set myRow [expr {[$tbl index end] - 1}]
+                #if {$row == 0} {$tbl insert end ""}
+                ## See tablelist help for using 'end' as an index point.
+                #if {($row != 0) && ($row == $myRow)} {$tbl insert end ""}
+                }
+            fieldname {
+                #puts "tbl: $tbl"
+                #$w configure -values {UPS FedEX} -state readonly
+            }
+            Delete {}
+            default {}
+        }
+        
+    set boxLabels(boxLabelConfig) [.container.setup.frame2.listbox get 0 end]
+    ${log}::debug BoxLabels: $boxLabels(boxLabelConfig)
+    
+    set boxLabels(boxLabelConfig) [lrange $boxLabels(boxLabelConfig) 0 end-1]
+    
+    set boxLabels(boxLabelConfigNames) "" ;# Always generate a new list
+    
+    foreach boxlabels $boxLabels(boxLabelConfig) {
+        lappend boxLabels(boxLabelConfig) [join [lrange $boxlabels 0 0]]
+    }
+    ${log}::debug boxLabelConfigNames: $boxLabels(boxLabelConfigNames)
+    ${log}::debug boxLabelConfig: $boxLabels(boxLabelConfig)
+    
+        
+        return $text
+} ;# eAssistSetup::startCmdBoxLabels
 
 
 proc eAssistSetup::changeLogLevel {args} { 
