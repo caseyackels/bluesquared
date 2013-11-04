@@ -90,7 +90,8 @@ proc eAssistSetup::selectionChanged {tbl} {
     #
     #
     #***
-    global G_currentSetupFrame program
+    global G_currentSetupFrame log GS
+    ${log}::debug --START-- selectionChanged
     
      set rowList [$tbl curselection] 
      if {[llength $rowList] == 0} { 
@@ -99,26 +100,26 @@ proc eAssistSetup::selectionChanged {tbl} {
 
     set row [lindex $rowList 0]
     set G_currentSetupFrame [$tbl get $rowList]
-
-     #puts "The current selection is: $G_currentSetupFrame" ;# Get the name
-     #puts "The currently selected row is: $row." ;# Get the row number
      
      switch -- $G_currentSetupFrame {
-        Paths       {eAssistSetup::selectFilePaths_GUI ; set program(lastFrame) selectFilePaths_GUI ; puts $G_currentSetupFrame}
-        Labels      {eAssistSetup::boxLabels_GUI ; set program(lastFrame) boxLabels_GUI ; puts $G_currentSetupFrame}
-        Delimiters  {}
-        Headers     {}
-        ShipMethod  {}
-        Misc.       {}
-        Setup       {eAssistSetup::setup_GUI ; set program(lastFrame) setup_GUI ; puts $G_currentSetupFrame}
-        Company     {eAssistSetup::company_GUI ; set program(lastFrame) company_GUI ; puts $G_currentSetupFrame}
-        default     {puts "no items selected"}
+        Paths           {eAssistSetup::selectFilePaths_GUI ; set GS(gui,lastFrame) selectFilePaths_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
+        Labels          {eAssistSetup::boxLabels_GUI ; set GS(gui,lastFrame) boxLabels_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
+        Delimiters      {}
+        ShipMethod      {}
+        Misc.           {}
+        International   {eAssistSetup::international_GUI ; set GS(gui,lastFrame) international_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
+        AddressHeaders  {eAssistSetup::addressHeaders_GUI ; set GS(gui,lastFrame) addressHeaders_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
+        DistTypes       {eAssistSetup::distributionTypes_GUI ; set GS(gui,lastFrame) distributionTypes_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
+        Company         {eAssistSetup::company_GUI ; set GS(gui,lastFrame) company_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
+        Logging         {eAssistSetup::logging_GUI ; set GS(gui,lastFrame) logging_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
+        default         {${log}::notice $G_currentSetupFrame does not match any configured frames.}
      }
-     
+    
+    ${log}::debug --END-- selectionChanged
 } ;# eAssistSetup::selectionChanged
 
 
-proc eAssistSetup::controlState {var entryWidget buttonWidget} {
+proc eAssistSetup::controlState {} {
     #****f* controlState/eAssistSetup
     # AUTHOR
     #	Casey Ackels
@@ -144,18 +145,19 @@ proc eAssistSetup::controlState {var entryWidget buttonWidget} {
     #
     #
     #***
-    global GS_filePaths
+    global log GS_filePathSetup w
+    ${log}::debug --START-- controlState
     
-    if {$var == 1} {
-        $entryWidget state disabled
-        $buttonWidget state disabled
+    ${log}::debug Change entry_variable to: $GS_filePathSetup(lookInDirectory)
+    ${log}::debug Check Toggle is: $GS_filePathSetup(checkToggle)
+    
+    if {$GS_filePathSetup(checkToggle) == 1} {
+        set GS_filePathSetup(labelDirectory) $GS_filePathSetup(lookInDirectory)
     } else {
-        $entryWidget configure -state enable
-        $buttonWidget configure -state enable
+        set GS_filePathSetup(labelDirectory) ""
     }
-    
-    
-    
+
+    ${log}::debug --END-- controlState
 };# eAssistSetup::controlState
 
 
@@ -169,6 +171,7 @@ proc eAssistSetup::SaveGlobalSettings {} {
     #
     # FUNCTION
     #	Save the Gloal Settings to a file. These settings are what affect everyone's usage of Efficiency Assist.
+    #	If "yes" is passed as an argument, we will also save the User Preferences
     #
     # SYNOPSIS
     #	N/A
@@ -185,35 +188,77 @@ proc eAssistSetup::SaveGlobalSettings {} {
     #
     #
     #***
-    global GS_filePaths program company setup logSettings boxLabelInfo GS_label
+    global log GS_filePaths GS_filePathSetup program company logSettings boxLabelInfo intlSetup headerParams headerParent headerAddress headerBoxes setup GS
+    global currentModule dist w
     
+    # Assemble the header parameters
+    #set cCount [$w(hdr_frame1a).listbox columncount]
+    #for {set x 0} {$cCount < $x} {${log}::debug cCount:$cCount, x:$x}
+    #set headerList [$w(hdr_frame1a).listbox getcells 0,1 end,1]
     
     # Global Settings - saved to the server
     set fd [open [file join $program(Home) config.txt] w]
     
-    foreach value [array names GS_filePaths] {
-            puts $fd "GS_filePaths($value) $GS_filePaths($value)"
+    chan puts $fd "#**** Program Specific ****#"
+    ${log}::debug Inserting Current Module: $program(currentModule)
+    if {[info exists program(currentModule)] == 1} {
+        chan puts $fd "program(currentModule) $program(currentModule)"
     }
     
-    foreach value [array names program] {
-            puts $fd "program($value) $program($value)"
+    chan puts $fd "program(Version) $program(Version)"
+    chan puts $fd "program(PatchLevel) $program(PatchLevel)"
+    chan puts $fd "program(beta) $program(beta)"
+    
+    foreach value [array names GS_filePaths] {
+            chan puts $fd "GS_filePaths($value) $GS_filePaths($value)"
     }
-     
+    
+    foreach value [array names GS_filePathSetup] {
+            chan puts $fd "GS_filePathSetup($value) $GS_filePathSetup($value)"
+    }
+    
+    foreach value [array names GS] {
+            chan puts $fd "GS($value) $GS($value)"
+    }
+    
+    chan puts $fd "#**** Setup Specific ****#"
     foreach value [array names company] {
-            puts $fd "company($value) $company($value)"
+            chan puts $fd "company($value) $company($value)"
     }
     
     foreach value [array names logSettings] {
-            puts $fd "logSettings($value) $logSettings($value)"
+            chan puts $fd "logSettings($value) $logSettings($value)"
     }
     
     foreach value [array names boxLabelInfo] {
-            puts $fd "boxLabelInfo($value) $boxLabelInfo($value)"
+        ${log}::debug boxLabelInfo: $value
+            chan puts $fd "boxLabelInfo($value) $boxLabelInfo($value)"
     }
-
-
     
+    foreach value [array names intlSetup] {
+            chan puts $fd "intlSetup($value) $intlSetup($value)"
+    }
     
+    foreach value [array names headerParent] {
+            chan puts $fd "headerParent($value) $headerParent($value)"
+    }
+    
+    foreach value [array names headerAddress] {
+            chan puts $fd "headerAddress($value) $headerAddress($value)"
+    }
+    
+    foreach value [array names headerParams] {
+            chan puts $fd "headerParams($value) $headerParams($value)"
+    }
+    
+    foreach value [array names headerBoxes] {
+            chan puts $fd "headerBoxes($value) $headerBoxes($value)"
+    }
+    
+    foreach value [array names dist] {
+            chan puts $fd "dist($value) $dist($value)"
+    }
+ 
     #set setup(smallPackageCarriers) [.container.setup.frame2.listbox get 0 end]
         #puts "carriers1: $setup(smallPackageCarriers)"
     
@@ -225,14 +270,24 @@ proc eAssistSetup::SaveGlobalSettings {} {
     #    lappend setup(smallPackageCarrierName) [join [lrange $carrier 0 0] ]
     #}
     
-    puts $fd "setup(smallPackageCarriers) $setup(smallPackageCarriers)"
-    puts $fd "setup(smallPackageCarrierName) $setup(smallPackageCarrierName)"
-
-    chan close $fd   
+    if {[info exists setup(smallPackageCarrierName)] == 1} {
+        chan puts $fd "setup(smallPackageCarrierName) $setup(smallPackageCarrierName)"
+        ${log}::debug smallPackageCarrierName: [lrange $setup(smallPackageCarriers) 0 end-1]
+    }
+    
+    if {[info exists setup(smallPackageCarriers)] == 1} {
+        chan puts $fd "setup(smallPackageCarriers) $setup(smallPackageCarriers)"
+        foreach carrier $setup(smallPackageCarriers) {
+            lappend testCarrier [join [lrange $carrier 0 0]]
+        }
+        ${log}::debug carriers: $testCarrier
+    }
+    
+    chan close $fd
 } ;# eAssistSetup::SaveGlobalSettings
 
 
-proc eAssistSetup::saveBoxLabels {args} {
+proc eAssistSetup::saveBoxLabels {} {
     #****f* saveBoxLabels/eAssistSetup
     # AUTHOR
     #	Casey Ackels
@@ -244,7 +299,7 @@ proc eAssistSetup::saveBoxLabels {args} {
     #	Preprocessor to save the box label configurations. Calls SaveGlobalSettings once the preprocessing is complete.
     #
     # SYNOPSIS
-    #   eAssistSetup::saveBoxLabels $GS_label(name) $GS_label(numberOfFields) $GS_filePathSetup(labelDirectory)
+    #   eAssistSetup::saveBoxLabels $boxLabelInfo(currentBoxLabel) $GS_label(numberOfFields) $GS_filePathSetup(labelDirectory)
     #
     # CHILDREN
     #	eAssistSetup::SaveGlobalSettings
@@ -257,17 +312,30 @@ proc eAssistSetup::saveBoxLabels {args} {
     # SEE ALSO
     #
     #***
-    global log boxLabelInfo
+    global log boxLabelInfo GS_label GS_filePathSetup
+    ${log}::debug --START-- boxLabels
     
-    lappend boxLabelInfo(labelNames) [lindex $args 0]
-    set boxLabelInfo($boxLabelInfo(labelNames),labelSetup) [lrange $args 1 end]
+    ${log}::debug Duplicate Name? [lsearch $boxLabelInfo(labelNames) $boxLabelInfo(currentBoxLabel)]
     
-    ${log}::debug boxLabels_labelNames: $boxLabelInfo(labelNames)
-    ${log}::debug boxLabels_labelSetup: $boxLabelInfo($boxLabelInfo(labelNames),labelSetup)
+    # Cancel if there is no label name
+    if {$boxLabelInfo(currentBoxLabel) == ""} {return}
+    
+    if {[lsearch $boxLabelInfo(labelNames) $boxLabelInfo(currentBoxLabel)] == -1} {
+        lappend boxLabelInfo(labelNames) $boxLabelInfo(currentBoxLabel)
+    }
+    
+    #set boxLabelInfo($boxLabelInfo(labelNames),labelSetup) [lrange $args 1 end]
+    set boxLabelInfo($boxLabelInfo(currentBoxLabel),labelSetup) [list $GS_label(numberOfFields) $GS_filePathSetup(labelDirectory)]
+    
+    #${log}::debug labelNames: $boxLabelInfo(labelNames)
+    #${log}::debug currentLabel: $boxLabelInfo(currentBoxLabel)
+    #${log}::debug labelSetup: $boxLabelInfo($boxLabelInfo(currentBoxLabel),labelSetup)
     
     eAssistSetup::SaveGlobalSettings
     
+    ${log}::debug --END-- boxLabels
 } ;#eAssistSetup::saveBoxLabels
+
 
 proc eAssistSetup::startCmd {tbl row col text} { 
     #****f* startCmd/eAssistSetup
@@ -461,35 +529,4 @@ proc eAssistSetup::startCmdBoxLabels {tbl row col text} {
 } ;# eAssistSetup::startCmdBoxLabels
 
 
-proc eAssistSetup::changeLogLevel {args} { 
-    #****f* changeLogLevel/eAssistSetup
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2013 Casey Ackels
-    #
-    # FUNCTION
-    #	Change the logging level on the fly
-    #
-    # SYNOPSIS
-    #	N/A
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #	eAssistSetup::setup_GUI
-    #
-    # NOTES
-    #
-    # SEE ALSO
-    #
-    #***
-    global log logSettings
-        
-        logger::setlevel [string tolower [lindex $logSettings(levels) $args]]
-        ${log}::notice [mc "Logging level has been set to: ${log}::currentloglevel"]
-    
 
-} ;#eAssistSetup::changeLogLevel 

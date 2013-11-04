@@ -1,5 +1,5 @@
 # Creator: Casey Ackels
-# Initial Date: March 12, 2011]
+# Initial Date: September, 2013]
 # Dependencies: See Below
 #-------------------------------------------------------------------------------
 #
@@ -13,7 +13,7 @@
 
 ##
 ## - Overview
-# This file holds the parent GUI for Distribution Helper
+# This file holds the setup GUI for Efficiency Assist
 
 # Definitions for prefixes of Variables
 # G = Global
@@ -29,7 +29,12 @@
 
 package provide eAssist_setup 1.0
 
-namespace eval eAssistSetup {}
+namespace eval eAssistSetup {
+    global program
+    # List of namespace variables
+        # w - Useage: Array, w(module_frame).widget
+            variable GUI
+}
 
 
 proc eAssistSetup::eAssistSetup {} {
@@ -58,12 +63,13 @@ proc eAssistSetup::eAssistSetup {} {
     #
     #
     #***
-    global G_setupFrame currentModule tree log program
+    global G_setupFrame program currentModule tree log GS
     
+    set program(currentModule) Setup
     set currentModule Setup
     
     # Reset frames before continuing
-    eAssist_Global::resetFrames
+    eAssist_Global::resetFrames parent
     
     # Create tree for Setup
     set tbl [ttk::frame .container.tree]
@@ -76,12 +82,12 @@ proc eAssistSetup::eAssistSetup {} {
     # Create groups and children
     # 
     # *** Add your new options to: eAssistSetup::selectionChanged
-    set tree(groups) {BoxLabels BatchAddresses Setup Company}
+    set tree(groups) {BoxLabels BatchAddresses DistTypes Company Logging}
     
-    set tree(BoxLabelsChildren) [list Paths Labels Delimiters Headers ShipMethod Misc.] ;# when changing these, also change them in eAssistSetup::selectionChanged
+    set tree(BoxLabelsChildren) [list Paths Labels Delimiters BoxHeaders ShipMethod Misc.] ;# when changing these, also change them in eAssistSetup::selectionChanged
         set BoxLabelsChildren_length [llength $tree(BoxLabelsChildren)] ;# so we can add new tree items without having to adjust manually. Used in following childLists.
     
-    set tree(BatchAddressesChildren) [list row2 row2 another2]
+    set tree(BatchAddressesChildren) [list International AddressHeaders]
         set BatchAddressesChildren_length [llength $tree(BatchAddressesChildren)]
     
 
@@ -123,9 +129,14 @@ proc eAssistSetup::eAssistSetup {} {
     ##
     
     # Default window
-    ${log}::notice currentSetupFrame: [info exists $program(lastFrame)]
+    #${log}::notice currentSetupFrame: [info exists $program(lastFrame)]
+    ${log}::notice currentSetupFrame: [info exists GS(gui,lastFrame)]
 
-    eAssistSetup::$program(lastFrame)
+    #eAssistSetup::$program(lastFrame)
+    if {[info exists GS(gui,lastFrame)] == 0} {
+        set GS(gui,lastFrame) selectFilePaths_GUI
+    }
+    eAssistSetup::$GS(gui,lastFrame)
     
     #$tbl.t selection set 1
     #$tbl.t activate 1
@@ -138,7 +149,8 @@ proc eAssistSetup::eAssistSetup {} {
     # For Tree widget
     bind $tbl.t <<TablelistSelect>> {eAssistSetup::selectionChanged %W} 
 
-}
+} ;# eAssistSetup::eAssistSetup
+
 
 proc eAssistSetup::selectFilePaths_GUI {} {
     #****f* eAssistSetup/selectFilePaths_GUI
@@ -169,7 +181,7 @@ proc eAssistSetup::selectFilePaths_GUI {} {
     global G_setupFrame GS_filePathSetup savePage
     # Default settings, but can be overridden at the user settings level.
     
-    eAssist_Global::resetSetupFrames selectFilePaths_GUI ;# Reset all frames so we start clean
+    eAssist_Global::resetSetupFrames ;#selectFilePaths_GUI ;# Reset all frames so we start clean
     
     set frame1 [ttk::labelframe $G_setupFrame.frame1 -text [mc "File Paths"]]
     pack $frame1 -expand yes -fill both ;#-side top -anchor n -expand yes -fill both -padx 5p -pady 5p -ipady 2p
@@ -210,6 +222,7 @@ proc eAssistSetup::selectFilePaths_GUI {} {
     grid columnconfigure $frame1 1 -weight 1 
 } ;# eAssistSetup::selectFilePaths_GUI
 
+
 proc eAssistSetup::boxLabels_GUI {} {
     #****f* eAssistSetup/boxLabels_GUI
     # AUTHOR
@@ -231,185 +244,211 @@ proc eAssistSetup::boxLabels_GUI {} {
     #	eAssist::parentGUI
     #
     # NOTES
+    #   Widgets that end with:
+    #   _1 (state is always enabled)
+    #   _2 (state can change between disabled/enabled)
+    #   _3 (state is controlled by a separate method)
+    #   _4 (state fluctuates between Readonly and Enabled)
     #
     # SEE ALSO
     #
     #
     #***
-    global G_setupFrame internal log boxLabelInfo
+    global G_setupFrame internal log boxLabelInfo w GS_filePathSetup GS_label
     
-    eAssist_Global::resetSetupFrames boxLabels_GUI ;# Reset all frames so we start clean
+    eAssist_Global::resetSetupFrames ;# boxLabels_GUI ;# Reset all frames so we start clean
     
-    set frame1 [ttk::labelframe $G_setupFrame.frame1 -text [mc "Define Box Labels"]]
-    pack $frame1 -expand yes -fill both ;#-side top -anchor n -expand yes -fill both -padx 5p -pady 5p -ipady 2p
+    #set w(bxFR1) [ttk::labelframe $G_setupFrame.frame1 -text [mc "Define Box Labels"]]
+    #pack $w(bxFR1) -expand yes -fill x -anchor n;#-side top -anchor n -expand yes -fill both -padx 5p -pady 5p -ipady 2p
+    #
+    #
+    #${log}::debug box label names: $boxLabelInfo(labelNames)
+    #
+    #ttk::combobox $w(bxFR1).cbox1 -width 20 \
+    #                            -values $boxLabelInfo(labelNames) \
+    #                            -state readonly \
+    #                            -textvariable boxLabelInfo(currentBoxLabel)
+    #
+    ##ttk::label $frame1.txt1 -text [mc "Label Directory"]
+    ##ttk::entry $frame1.entry1 -textvariable GS_filePaths(labelDirectory)
+    ##ttk::button $frame1.button1 -text [mc "Browse..."] -command {set GS_filePaths(labelDirectory) [eAssist_Global::OpenFile [mc "Set default Save-to Directory"] [pwd] dir]}
+    ##
+    ##ttk::checkbutton $frame1.checkbutton1 -text [mc "Use global path"] -variable globalPath
+    ##    $frame1.checkbutton1 invoke ;# lets preselect this
+    ##
+    ##ttk::label $frame1.txt2 -text [mc "Label Name"]
+    ##ttk::entry $frame1.entry2 -textvariable GS_label(name)
+    ##
+    ##ttk::label $frame1.txt3 -text [mc "Number of Fields"]
+    ##spinbox $frame1.spin -from 1 -to 20 -increment 1 -textvariable GS_label(numberOfFields) -command {eAssistSetup::createRows .container.frame2.listbox $GS_label(numberOfFields)}
+    #
+    ##------------- Grid Frame 1
+    #
+    #grid $w(bxFR1).cbox1 -column 0 -row 0 -padx 2p -pady 2p -sticky news
+  
+   ##
+   ## Frame 2
+   ##
     
-    ttk::button $frame1.btn -text [mc "Add New Label..."] -command {eAssistSetup::addLabel}
+    set w(bxFR2) [ttk::labelframe $G_setupFrame.frame2 -text [mc "Add/Modify Box Labels"]]
+    pack $w(bxFR2) -expand yes -fill both -side top -anchor n ;#-pady 5p -padx 5p
     
-    ttk::label $frame1.txt -text [mc "Select Label"]
-    ${log}::debug box label names: $boxLabelInfo(labelNames)
-    
-    ttk::combobox $frame1.cbox -width 20 \
+    ttk::label $w(bxFR2).txt0_1 -text [mc "Label Name"]
+    ttk::combobox $w(bxFR2).cbox1_4 -width 20 \
                                 -values $boxLabelInfo(labelNames) \
                                 -state readonly \
-                                -textvariable boxLabelInfo(currentBoxLabel)
+                                -textvariable boxLabelInfo(currentBoxLabel) \
+                                -postcommand {eAssistSetup::viewBoxLabel $boxLabelInfo(currentBoxLabel)}
     
-
-    
-    #ttk::label $frame1.txt1 -text [mc "Label Directory"]
-    #ttk::entry $frame1.entry1 -textvariable GS_filePaths(labelDirectory)
-    #ttk::button $frame1.button1 -text [mc "Browse..."] -command {set GS_filePaths(labelDirectory) [eAssist_Global::OpenFile [mc "Set default Save-to Directory"] [pwd] dir]}
-    #
-    #ttk::checkbutton $frame1.checkbutton1 -text [mc "Use global path"] -variable globalPath
-    #    $frame1.checkbutton1 invoke ;# lets preselect this
-    #
-    #ttk::label $frame1.txt2 -text [mc "Label Name"]
-    #ttk::entry $frame1.entry2 -textvariable GS_label(name)
-    #
-    #ttk::label $frame1.txt3 -text [mc "Number of Fields"]
-    #spinbox $frame1.spin -from 1 -to 20 -increment 1 -textvariable GS_label(numberOfFields) -command {eAssistSetup::createRows .container.frame2.listbox $GS_label(numberOfFields)}
-    
-    #------------------------------
-    
-    grid $frame1.btn -column 0 -row 0 -padx 2p -pady 2p  -sticky ew
-    grid $frame1.txt -column 0 -row 1 -padx 2p -pady 2p -sticky nse
-    grid $frame1.cbox -column 1 -row 1 -padx 2p -pady 2p -sticky news
-    
-    #grid $frame1.txt1 -column 0 -row 1 -padx 2p -pady 2p -sticky nse
-    #grid $frame1.entry1 -column 1 -row 1 -padx 2p -pady 2p -sticky news
-    #grid $frame1.button1 -column 2 -row 1 -padx 2p -pady 2p -sticky ew
-    #grid $frame1.checkbutton1 -column 1 -row 2 -sticky nsw
-    #
-    #grid $frame1.txt2 -column 0 -row 3 -padx 2p -pady 2p -sticky nse
-    #grid $frame1.entry2 -column 1 -row 3 -padx 2p -pady 2p -sticky news
-    #
-    #grid $frame1.txt3 -column 0 -row 5 -padx 2p -pady 2p -sticky nse
-    #grid $frame1.spin -column 1 -row 5 -padx 2p -pady 2p -sticky news
-    #
-    #grid columnconfigure $frame1 1 -weight 1
-    
-   #------------------------------
-    
-    set frame2 [ttk::labelframe $G_setupFrame.frame2 -text [mc "Define Box Labels Headers"]]
-    pack $frame2 -expand yes -fill both ;#-side top -anchor n -expand yes -fill both -padx 5p -pady 5p -ipady 2p
-    
-    tablelist::tablelist $frame2.listbox -columns {
-                                                    0   "..."       center
-                                                    0   "Field" center
-                                                    0   "Field Name"  center
-                                                    0   "Num of Chars"  center
-                                                    0   "Import Header" center
-                                                    0   "Delimter"
-                                                    } \
-                                        -showlabels yes \
-                                        -height 5 \
-                                        -selectbackground yellow \
-                                        -selectforeground black \
-                                        -stripebackground lightblue \
-                                        -exportselection yes \
-                                        -showseparators yes \
-                                        -fullseparators yes \
-                                        -yscrollcommand [list $frame2.scrolly set] \
-                                        -editstartcommand {eAssistSetup::startCmdBoxLabels} \
-                                        -editendcommand {eAssistSetup::endCmdBoxLabels}
-
-        $frame2.listbox columnconfigure 0 -name "count" \
-                                            -showlinenumbers 1
-
-        $frame2.listbox columnconfigure 1 -name "field" \
-                                            -editable yes \
-                                            -editwindow ttk::combobox
-        $frame2.listbox columnconfigure 2 -name "fieldName" \
-                                            -editable yes \
-                                            -editwindow ttk::entry
-        $frame2.listbox columnconfigure 3 -name "numOfChars" \
-                                            -editable yes \
-                                            -editwindow ttk::entry
-        $frame2.listbox columnconfigure 4 -name "importHeader" \
-                                            -editable yes \
-                                            -editwindow ttk::entry
-        $frame2.listbox columnconfigure 5 -name "delimter" \
-                                            -editable yes \
-                                            -editwindow ttk::entry
-        
-    set internal(table2,currentRow) 0
-        
-        if {[info exists setup(boxLabelConfig)]} {
-            #'debug Populate listobx - data exists
-                foreach boxlabel $setup(boxLabelConfig) {
-                    #'debug inserting $customer
-                    $frame2.listbox insert end $boxlabel
-                    incr internal(table2,currentRow)
-                }
+        # Display the current label; guard against a label not being there.
+        if {[info exists boxLabelInfo(currentBoxLabel)] == 1} {
+            eAssistSetup::viewBoxLabel $boxLabelInfo(currentBoxLabel)
+        } else {
+            set boxLabelInfo(currentBoxLabel) ""
         }
+    
+    ttk::button $w(bxFR2).del_1 -text [mc "Delete"] -command {eAssistSetup::deleteBoxLabel $boxLabelInfo(currentBoxLabel)}
+    
+    ttk::label $w(bxFR2).txt1_1 -text [mc "Label Folder"]
+        set GS_filePathSetup(labelDirectory) "" ;# initialize variable
+    ttk::entry $w(bxFR2).entry1_2 -textvariable GS_filePathSetup(labelDirectory) -state disabled
 
-    # Create the first line
-    $frame2.listbox insert end ""
+        
+    ttk::button $w(bxFR2).button1_2 -text [mc "Browse..."] \
+            -command {set GS_filePathSetup(labelDirectory) [eAssist_Global::OpenFile [mc "Set default Save-to Folder"] [pwd] dir]} \
+            -state disabled
+    
+        set GS_filePathSetup(checkToggle) 0
+    ttk::checkbutton $w(bxFR2).checkbutton1 -text [mc "Use global path"] -variable GS_filePathSetup(useGlobalPath) \
+                                            -state disabled \
+                                            -variable GS_filePathSetup(checkToggle) \
+                                            -command {eAssistSetup::controlState}
+    #command set GS_filePathSetup(labelDirectory) $GS_filePathSetup(lookInDirectory)
+    #eAssistSetup::controlState $GS_filePathSetup(useGlobalPath) $w(bxFR2).entry1_2 $w(bxFR2).button1_2
+        
 
+       
+    
+    ttk::label $w(bxFR2).txt3_1 -text [mc "Number of Fields"]
+    ttk::entry $w(bxFR2).entry3_2 -textvariable GS_label(numberOfFields) -state disabled
+    
+    ttk::button $w(bxFR2).cncl_2 -text [mc "Cancel"] -command {eAssistSetup::cancelBoxLabel} -state disabled
+    ttk::button $w(bxFR2).add_1 -text [mc "Add"] -command {eAssistSetup::addBoxLabel}
+    ttk::button $w(bxFR2).ok_1 -text [mc "Change"] -command {eAssistSetup::changeBoxLabel}
+    
+    #------- GUI Calculations
+    #if {$GS_filePathSetup(useGlobalPath) == 1} {
+    #    focus $w(bxFR2).entry2_2
+    #} else {
+    #    focus $w(bxFR2).entry1_2
+    #}
 
-    ttk::scrollbar $frame2.scrolly -orient v -command [list $frame2.listbox yview]
-
-    grid $frame2.listbox -column 0 -row 0 -sticky news
-    grid columnconfigure $frame2 $frame2.listbox -weight 1
-
-    grid $frame2.scrolly -column 1 -row 0 -sticky nse
-
-    ::autoscroll::autoscroll $frame2.scrolly ;# Enable the 'autoscrollbar'
+    #---- Snippets of GUI Code
+    #if {[info exists GS_filePathSetup(lookInDirectory)] == 1 && $GS_filePathSetup(lookInDirectory) ne "" } {
+    #    # Lets make sure that we have a default setup, before we enable this option.
+    #    $w(bxFR2).checkbutton1 configure -state enable
+    #    $w(bxFR2).checkbutton1 invoke
+    #}
+    
+    #------------- Grid Frame2
+    
+    grid $w(bxFR2).txt0_1 -column 0 -row 0 -padx 2p -pady 2p -sticky nse
+    grid $w(bxFR2).cbox1_4 -column 1 -row 0 -padx 2p -pady 2p -sticky news
+    grid $w(bxFR2).del_1 -column 2 -row 0 -padx 2p -pady 2p -sticky news
+    
+    grid $w(bxFR2).txt1_1 -column 0 -row 1 -padx 2p -pady 2p -sticky nse
+    grid $w(bxFR2).entry1_2 -column 1 -columnspan 2 -row 1 -padx 2p -pady 2p -sticky news
+        
+    grid $w(bxFR2).button1_2 -column 3 -row 1 -padx 2p -pady 2p -sticky ew
+    grid $w(bxFR2).checkbutton1 -column 1 -row 2 -sticky nsw
+    
+    grid $w(bxFR2).txt3_1 -column 0 -row 5 -padx 2p -pady 2p -sticky nse
+    grid $w(bxFR2).entry3_2 -column 1 -row 5 -padx 2p -pady 2p -sticky news
+    
+    grid $w(bxFR2).cncl_2 -column 1 -row 6 -padx 2p -pady 2p -sticky nse
+    grid $w(bxFR2).add_1 -column 2 -row 6 -padx 2p -pady 2p -sticky nse
+    grid $w(bxFR2).ok_1 -column 3 -row 6 -padx 2p -pady 2p -sticky nse
+    
+    
+    
+    #grid columnconfigure $w(bxFR2) 1 -weight 1
+    #------------- Tooltips
+    tooltip::tooltip $w(bxFR2).entry3_2 [mc "Total number of fields in the label, not including the Qty field."]
+    
+    #------------- Bindings
+    bind all <<ComboboxSelected>> {
+        #eAssistSetup::viewBoxLabel [$w(bxFR2).cbox1_4 current]
+        eAssistSetup::viewBoxLabel $boxLabelInfo(currentBoxLabel)
+    }
+    
+    #set frame2 [ttk::labelframe $G_setupFrame.frame2 -text [mc "Define Box Labels Headers"]]
+    #pack $frame2 -expand yes -fill both ;#-side top -anchor n -expand yes -fill both -padx 5p -pady 5p -ipady 2p
+    #
+    #tablelist::tablelist $frame2.listbox -columns {
+    #                                                0   "..."       center
+    #                                                0   "Field" center
+    #                                                0   "Field Name"  center
+    #                                                0   "Num of Chars"  center
+    #                                                0   "Import Header" center
+    #                                                0   "Delimter"
+    #                                                } \
+    #                                    -showlabels yes \
+    #                                    -height 5 \
+    #                                    -selectbackground yellow \
+    #                                    -selectforeground black \
+    #                                    -stripebackground lightblue \
+    #                                    -exportselection yes \
+    #                                    -showseparators yes \
+    #                                    -fullseparators yes \
+    #                                    -yscrollcommand [list $frame2.scrolly set] \
+    #                                    -editstartcommand {eAssistSetup::startCmdBoxLabels} \
+    #                                    -editendcommand {eAssistSetup::endCmdBoxLabels}
+    #
+    #    $frame2.listbox columnconfigure 0 -name "count" \
+    #                                        -showlinenumbers 1
+    #
+    #    $frame2.listbox columnconfigure 1 -name "field" \
+    #                                        -editable yes \
+    #                                        -editwindow ttk::combobox
+    #    $frame2.listbox columnconfigure 2 -name "fieldName" \
+    #                                        -editable yes \
+    #                                        -editwindow ttk::entry
+    #    $frame2.listbox columnconfigure 3 -name "numOfChars" \
+    #                                        -editable yes \
+    #                                        -editwindow ttk::entry
+    #    $frame2.listbox columnconfigure 4 -name "importHeader" \
+    #                                        -editable yes \
+    #                                        -editwindow ttk::entry
+    #    $frame2.listbox columnconfigure 5 -name "delimter" \
+    #                                        -editable yes \
+    #                                        -editwindow ttk::entry
+    #    
+    #set internal(table2,currentRow) 0
+    #    
+    #    if {[info exists setup(boxLabelConfig)]} {
+    #        #'debug Populate listobx - data exists
+    #            foreach boxlabel $setup(boxLabelConfig) {
+    #                #'debug inserting $customer
+    #                $frame2.listbox insert end $boxlabel
+    #                incr internal(table2,currentRow)
+    #            }
+    #    }
+    #
+    ## Create the first line
+    #$frame2.listbox insert end ""
+    #
+    #
+    #ttk::scrollbar $frame2.scrolly -orient v -command [list $frame2.listbox yview]
+    #
+    #grid $frame2.listbox -column 0 -row 0 -sticky news
+    #grid columnconfigure $frame2 $frame2.listbox -weight 1
+    #
+    #grid $frame2.scrolly -column 1 -row 0 -sticky nse
+    #
+    #::autoscroll::autoscroll $frame2.scrolly ;# Enable the 'autoscrollbar'
     
     
 } ;# eAssistSetup::boxLabels_GUI
-
-
-proc eAssistSetup::setup_GUI {} {
-    #****f* eAssistSetup/setup_GUI
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2013 Casey Ackels
-    #
-    # FUNCTION
-    #	Setup core program information
-    #
-    # SYNOPSIS
-    #	N/A
-    #
-    # CHILDREN
-    #	
-    #
-    # PARENTS
-    #	
-    #
-    # NOTES
-    #
-    # SEE ALSO
-    #
-    #
-    #***
-    global G_setupFrame GS_program log logSettings s
-    
-    eAssist_Global::resetSetupFrames setup_GUI;# Reset all frames so we start clean
-    
-    set s(frame1) [ttk::labelframe $G_setupFrame.frame1 -text [mc "Log Settings"]]
-    pack $s(frame1) -expand yes -fill both
-    
-    set logSettings(levels) [list Debug Info Notice Warn Error Critical Alert Emergency]
-    
-    ttk::label $s(frame1).text1 -text [mc "Log Level"]
-    ttk::combobox $s(frame1).cbox1 -width 20 \
-                            -values $logSettings(levels) \
-                            -state readonly \
-                            -textvariable logSettings(currentLogLevel)
-    
-    #----------- Grid
-    grid $s(frame1).text1 -column 0 -row 0 -padx 5p -pady 5p
-    grid $s(frame1).cbox1 -column 1 -row 0 -padx 5p -pady 5p
-    
-    bind all <<ComboboxSelected>> { 
-    ${log}::debug [$s(frame1).cbox1 current]
-        eAssistSetup::changeLogLevel [$s(frame1).cbox1 current]
-    }
-    
-} ;# eAssistSetup::setup_GUI
 
 
 proc eAssistSetup::company_GUI {} {
@@ -440,7 +479,7 @@ proc eAssistSetup::company_GUI {} {
     #***
     global G_setupFrame GS_program company internal currentModule setup
     
-    set currentModule Setup
+    #set currentModule company
     eAssist_Global::resetSetupFrames ;# Reset all frames so we start clean
     
     set frame1 [ttk::labelframe $G_setupFrame.frame1 -text [mc "Company Information"]]
@@ -569,118 +608,4 @@ proc eAssistSetup::company_GUI {} {
         }
     }
   
-} ;# eAssistSetup::setup_GUI
-
-
-##
-## Helper Windows
-##
-
-proc eAssistSetup::addLabel {} {
-    #****f* eAssistSetup/addLabel
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2013 Casey Ackels
-    #
-    # FUNCTION
-    #	Add labels to Efficiency Assist
-    #
-    # SYNOPSIS
-    #	N/A
-    #
-    # CHILDREN
-    #	
-    #
-    # PARENTS
-    #	eAssistSetup::boxLabels_GUI
-    #
-    # NOTES
-    #   GS_filePath - Do not write this to the settings.txt file, this is data that will be inserted into a table, which will then be saved to the settings.txt file
-    #   GS_filePathSetup - Settings to be written to the file.
-    #
-    # SEE ALSO
-    #
-    #
-    #***
-    global GS_filePathSetup GS_filePath log GS_label
-    
-    toplevel .addLabel
-    wm transient .addLabel .
-    wm title .addLabel [mc "Add Box Label"]
-
-    # Put the window in the center of the parent window
-    set locX [expr {[winfo width . ] / 3 + [winfo x .]}]
-    set locY [expr {[winfo height . ] / 3 + [winfo y .]}]
-    wm geometry .addLabel +${locX}+${locY}
-
-
-    ##
-    ## Parent Frame
-    ##
-    set frame1 [ttk::frame .addLabel.frame1]
-    pack $frame1 -expand yes -fill both -pady 5p -padx 5p
-    
-    ttk::label $frame1.txt1 -text [mc "Label Directory"]
-    ttk::entry $frame1.entry1 -textvariable GS_filePathSetup(labelDirectory)
-    ttk::button $frame1.button1 -text [mc "Browse..."] -command {set GS_filePathSetup(labelDirectory) [eAssist_Global::OpenFile [mc "Set default Save-to Directory"] [pwd] dir]}
-    
-        set GS_filePathSetup(useGlobalPath) 0
-    ttk::checkbutton $frame1.checkbutton1 -text [mc "Use global path"] -variable GS_filePathSetup(useGlobalPath) \
-                                            -state disabled \
-                                            -command {
-                                                set GS_filePathSetup(labelDirectory) $GS_filePathSetup(lookInDirectory)
-                                                eAssistSetup::controlState $GS_filePathSetup(useGlobalPath) .addLabel.frame1.entry1 .addLabel.frame1.button1}
-        
-        if {[info exists GS_filePathSetup(lookInDirectory)] == 1 && $GS_filePathSetup(lookInDirectory) ne "" } {
-            # Lets make sure that we have a default setup, before we disable this option.
-            $frame1.checkbutton1 configure -state enable
-            $frame1.checkbutton1 invoke
-        }
-    
-    ttk::label $frame1.txt2 -text [mc "Label Name"]
-    ttk::entry $frame1.entry2 -textvariable GS_label(name)
-        
-    
-    ttk::label $frame1.txt3 -text [mc "Number of Fields"]
-    ttk::entry $frame1.entry3 -textvariable GS_label(numberOfFields)
-    
-    ttk::button $frame1.cncl -text [mc "Cancel"] -command {destroy .addLabel}
-    ttk::button $frame1.ok -text [mc "OK"] -command {
-                                                    eAssistSetup::saveBoxLabels $GS_label(name) $GS_label(numberOfFields) $GS_filePathSetup(labelDirectory)
-                                                    destroy .addLabel
-                                                    }
-    
-    #------- GUI Calculations
-    #focus $frame1.entry2
-    if {$GS_filePathSetup(useGlobalPath) == 1} {
-        focus $frame1.entry2
-    } else {
-        focus $frame1.entry1
-    }
-    
-    #------------- Grid
-    
-    grid $frame1.txt1 -column 0 -row 1 -padx 2p -pady 2p -sticky nse
-    grid $frame1.entry1 -column 1 -columnspan 2 -row 1 -padx 2p -pady 2p -sticky news
-    grid $frame1.button1 -column 3 -row 1 -padx 2p -pady 2p -sticky ew
-    grid $frame1.checkbutton1 -column 1 -row 2 -sticky nsw
-    
-    grid $frame1.txt2 -column 0 -row 3 -padx 2p -pady 2p -sticky nse
-    grid $frame1.entry2 -column 1 -columnspan 2 -row 3 -padx 2p -pady 2p -sticky news
-    
-    grid $frame1.txt3 -column 0 -row 5 -padx 2p -pady 2p -sticky nse
-    grid $frame1.entry3 -column 1 -row 5 -padx 2p -pady 2p -sticky news
-    
-    grid $frame1.cncl -column 2 -row 6 -padx 2p -pady 2p -sticky nse
-    grid $frame1.ok -column 3 -row 6 -padx 2p -pady 2p -sticky nse
-    
-    
-    
-    grid columnconfigure $frame1 1 -weight 1
-    
-    tooltip::tooltip $frame1.entry3 [mc "Total number of fields in the label, not including the Qty field."]
-    
-    
-} ;# eAssistSetup::boxLabels_GUI
+} ;# eAssistSetup::company_GUI

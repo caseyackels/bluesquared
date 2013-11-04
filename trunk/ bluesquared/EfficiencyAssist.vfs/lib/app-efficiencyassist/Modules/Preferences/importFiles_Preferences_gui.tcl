@@ -56,7 +56,7 @@ proc eAssist_Preferences::prefGUI {} {
     # SEE ALSO
     #
     #***
-    global settings tab3 header header_sorted customer3P internal mySettings international company shipVia3P
+    global settings tab3 header header_sorted customer3P internal mySettings international company shipVia3P intlSetup
 
     toplevel .preferences
     wm transient .preferences .
@@ -86,9 +86,9 @@ proc eAssist_Preferences::prefGUI {} {
 
     $nb add [ttk::frame $nb.f1] -text [mc "File Paths"]
     $nb add [ttk::frame $nb.f2] -text [mc "Miscellaneous"]
-    $nb add [ttk::frame $nb.f3] -text [mc "Header Names"]
+    #$nb add [ttk::frame $nb.f3] -text [mc "Header Names"]
     $nb add [ttk::frame $nb.f4] -text [mc "3P Accounts"]
-    $nb add [ttk::frame $nb.f5] -text [mc "Company"]
+    #$nb add [ttk::frame $nb.f5] -text [mc "Company"]
     $nb add [ttk::frame $nb.f6] -text [mc "Int'l Defaults"]
     $nb select $nb.f1
 
@@ -211,52 +211,52 @@ proc eAssist_Preferences::prefGUI {} {
     ## Tab 3 (Header Names)
     ##
 
-    set tab3 [ttk::labelframe $nb.f3.importOrder -text [mc "Header Names"]]
-    grid $tab3 -column 0 -row 0 -padx 5p -pady 5p
-
-    ttk::combobox $tab3.combo -width 20 \
-                            -values $header_sorted \
-                            -state readonly \
-                            -textvariable parentHeader
-
-    # Start out with displaying a header
-    $tab3.combo set [lrange $header_sorted 0 0]
-
-    ttk::entry $tab3.entry -textvariable subHeader
-    ttk::button $tab3.add -text [mc "Add"] -command {catch {eAssist_Preferences::addSubHeader $parentHeader $subHeader}}
-
-    listbox $tab3.listbox \
-                -width 18 \
-                -height 10 \
-                -selectbackground yellow \
-                -selectforeground black \
-                -exportselection yes \
-                -selectmode single \
-                -yscrollcommand [list $tab3.scrolly set] \
-                -xscrollcommand [list $tab3.scrollx set]
-
-    ttk::scrollbar $tab3.scrolly -orient v -command [list $tab3.listbox yview]
-    ttk::scrollbar $tab3.scrollx -orient h -command [list $tab3.listbox xview]
-
-    # Put the default values in
-    eAssist_Preferences::displayHeader [$tab3.combo current]
-
-    ttk::button $tab3.del -text [mc "Remove"] -command  {eAssist_Preferences::removeSubHeader $parentHeader}
-
-    grid $tab3.combo -column 0 -row 0 -sticky news -padx 3p -pady 3p
-
-    grid $tab3.entry -column 0 -row 1 -sticky news -padx 3p -pady 3p
-    grid $tab3.add -column 1 -row 1 -sticky news -padx 2p -pady 3p
-
-    grid $tab3.listbox -column 0 -row 2 -rowspan 8 -padx 3p -pady 3p -sticky news ;#-padx 5p -pady 5p
-    grid $tab3.scrolly -column 0 -row 2 -rowspan 8 -sticky nse
-    grid $tab3.scrollx -column 0 -row 2 -rowspan 8 -sticky sew
-
-    grid $tab3.del -column 1 -row 2 -sticky new -padx 2p -pady 3p
-
-    # Enable the 'autoscrollbar'
-    ::autoscroll::autoscroll $tab3.scrolly
-    ::autoscroll::autoscroll $tab3.scrollx
+    #set tab3 [ttk::labelframe $nb.f3.importOrder -text [mc "Header Names"]]
+    #grid $tab3 -column 0 -row 0 -padx 5p -pady 5p
+    #
+    #ttk::combobox $tab3.combo -width 20 \
+    #                        -values $header_sorted \
+    #                        -state readonly \
+    #                        -textvariable parentHeader
+    #
+    ## Start out with displaying a header
+    #$tab3.combo set [lrange $header_sorted 0 0]
+    #
+    #ttk::entry $tab3.entry -textvariable subHeader
+    #ttk::button $tab3.add -text [mc "Add"] -command {catch {eAssist_Preferences::addSubHeader $parentHeader $subHeader}}
+    #
+    #listbox $tab3.listbox \
+    #            -width 18 \
+    #            -height 10 \
+    #            -selectbackground yellow \
+    #            -selectforeground black \
+    #            -exportselection yes \
+    #            -selectmode single \
+    #            -yscrollcommand [list $tab3.scrolly set] \
+    #            -xscrollcommand [list $tab3.scrollx set]
+    #
+    #ttk::scrollbar $tab3.scrolly -orient v -command [list $tab3.listbox yview]
+    #ttk::scrollbar $tab3.scrollx -orient h -command [list $tab3.listbox xview]
+    #
+    ## Put the default values in
+    #eAssist_Preferences::displayHeader [$tab3.combo current]
+    #
+    #ttk::button $tab3.del -text [mc "Remove"] -command  {eAssist_Preferences::removeSubHeader $parentHeader}
+    #
+    #grid $tab3.combo -column 0 -row 0 -sticky news -padx 3p -pady 3p
+    #
+    #grid $tab3.entry -column 0 -row 1 -sticky news -padx 3p -pady 3p
+    #grid $tab3.add -column 1 -row 1 -sticky news -padx 2p -pady 3p
+    #
+    #grid $tab3.listbox -column 0 -row 2 -rowspan 8 -padx 3p -pady 3p -sticky news ;#-padx 5p -pady 5p
+    #grid $tab3.scrolly -column 0 -row 2 -rowspan 8 -sticky nse
+    #grid $tab3.scrollx -column 0 -row 2 -rowspan 8 -sticky sew
+    #
+    #grid $tab3.del -column 1 -row 2 -sticky new -padx 2p -pady 3p
+    #
+    ## Enable the 'autoscrollbar'
+    #::autoscroll::autoscroll $tab3.scrolly
+    #::autoscroll::autoscroll $tab3.scrollx
     
 
     ##
@@ -339,73 +339,73 @@ proc eAssist_Preferences::prefGUI {} {
     ##
     ## Tab 5 (Company Info)
     ##
-    set tab5 [ttk::labelframe $nb.f5.company -text [mc "Company Information"]]
-    pack $tab5 -expand yes -fill both -pady 5p -padx 5p
-    
-    ttk::label $tab5.companyText -text [mc "Company Name"]
-    ttk::entry $tab5.companyEntry -textvariable company(name)
-    
-    ttk::label $tab5.contactText -text [mc "Contact"]
-    ttk::entry $tab5.contactEntry -textvariable company(contact)
-    
-    ttk::label $tab5.addr1Text -text [mc "AddressLine1"]
-    ttk::entry $tab5.addr1Entry -textvariable company(addr1)
-    
-    set company(addr2) ""
-    ttk::label $tab5.addr2Text -text [mc "AddressLine2"]
-    ttk::entry $tab5.addr2Entry -textvariable company(addr2)
-    
-    set company(addr3) ""
-    ttk::label $tab5.addr3Text -text [mc "AddressLine3"]
-    ttk::entry $tab5.addr3Entry -textvariable company(addr3)
-    
-    ttk::label $tab5.cityText -text [mc "City"]
-    ttk::entry $tab5.cityEntry -textvariable company(city)
-    
-    ttk::label $tab5.stateText -text [mc "State"]
-    ttk::entry $tab5.stateEntry -textvariable company(state)
-    
-    ttk::label $tab5.zipText -text [mc "Zip"]
-    ttk::entry $tab5.zipEntry -textvariable company(zip)
-    
-    ttk::label $tab5.phoneText -text [mc "Phone"]
-    ttk::entry $tab5.phoneEntry -textvariable company(phone)
-    
-    #set company(country) "US"
-    ttk::label $tab5.countryText -text [mc "Country"]
-    ttk::entry $tab5.countryEntry -textvariable company(country)
-    
-    
-    # Grid
-    grid $tab5.companyText -column 0 -row 0 -sticky e -pady 3p -padx 5p
-    grid $tab5.companyEntry -column 1 -row 0 -sticky ew
-    
-    grid $tab5.contactText -column 0 -row 1 -sticky e -pady 3p -padx 5p
-    grid $tab5.contactEntry -column 1 -row 1 -sticky ew
-    
-    grid $tab5.addr1Text -column 0 -row 2 -sticky e -pady 3p -padx 5p
-    grid $tab5.addr1Entry -column 1 -row 2 -sticky ew
-    
-    grid $tab5.addr2Text -column 0 -row 3 -sticky e -pady 3p -padx 5p
-    grid $tab5.addr2Entry -column 1 -row 3 -sticky ew
-    
-    grid $tab5.addr3Text -column 0 -row 4 -sticky e -pady 3p -padx 5p
-    grid $tab5.addr3Entry -column 1 -row 4 -sticky ew
-    
-    grid $tab5.cityText -column 0 -row 5 -sticky e -pady 3p -padx 5p
-    grid $tab5.cityEntry -column 1 -row 5 -sticky ew
-    
-    grid $tab5.stateText -column 0 -row 6 -sticky e -pady 3p -padx 5p
-    grid $tab5.stateEntry -column 1 -row 6 -sticky ew
-
-    grid $tab5.zipText -column 0 -row 7 -sticky e -pady 3p -padx 5p
-    grid $tab5.zipEntry -column 1 -row 7 -sticky ew
-    
-    grid $tab5.phoneText -column 0 -row 8 -sticky e -pady 3p -padx 5p
-    grid $tab5.phoneEntry -column 1 -row 8 -sticky ew
-    
-    grid $tab5.countryText -column 0 -row 9 -sticky e -pady 3p -padx 5p
-    grid $tab5.countryEntry -column 1 -row 9 -sticky ew
+    #set tab5 [ttk::labelframe $nb.f5.company -text [mc "Company Information"]]
+    #pack $tab5 -expand yes -fill both -pady 5p -padx 5p
+    #
+    #ttk::label $tab5.companyText -text [mc "Company Name"]
+    #ttk::entry $tab5.companyEntry -textvariable company(name)
+    #
+    #ttk::label $tab5.contactText -text [mc "Contact"]
+    #ttk::entry $tab5.contactEntry -textvariable company(contact)
+    #
+    #ttk::label $tab5.addr1Text -text [mc "AddressLine1"]
+    #ttk::entry $tab5.addr1Entry -textvariable company(addr1)
+    #
+    #set company(addr2) ""
+    #ttk::label $tab5.addr2Text -text [mc "AddressLine2"]
+    #ttk::entry $tab5.addr2Entry -textvariable company(addr2)
+    #
+    #set company(addr3) ""
+    #ttk::label $tab5.addr3Text -text [mc "AddressLine3"]
+    #ttk::entry $tab5.addr3Entry -textvariable company(addr3)
+    #
+    #ttk::label $tab5.cityText -text [mc "City"]
+    #ttk::entry $tab5.cityEntry -textvariable company(city)
+    #
+    #ttk::label $tab5.stateText -text [mc "State"]
+    #ttk::entry $tab5.stateEntry -textvariable company(state)
+    #
+    #ttk::label $tab5.zipText -text [mc "Zip"]
+    #ttk::entry $tab5.zipEntry -textvariable company(zip)
+    #
+    #ttk::label $tab5.phoneText -text [mc "Phone"]
+    #ttk::entry $tab5.phoneEntry -textvariable company(phone)
+    #
+    ##set company(country) "US"
+    #ttk::label $tab5.countryText -text [mc "Country"]
+    #ttk::entry $tab5.countryEntry -textvariable company(country)
+    #
+    #
+    ## Grid
+    #grid $tab5.companyText -column 0 -row 0 -sticky e -pady 3p -padx 5p
+    #grid $tab5.companyEntry -column 1 -row 0 -sticky ew
+    #
+    #grid $tab5.contactText -column 0 -row 1 -sticky e -pady 3p -padx 5p
+    #grid $tab5.contactEntry -column 1 -row 1 -sticky ew
+    #
+    #grid $tab5.addr1Text -column 0 -row 2 -sticky e -pady 3p -padx 5p
+    #grid $tab5.addr1Entry -column 1 -row 2 -sticky ew
+    #
+    #grid $tab5.addr2Text -column 0 -row 3 -sticky e -pady 3p -padx 5p
+    #grid $tab5.addr2Entry -column 1 -row 3 -sticky ew
+    #
+    #grid $tab5.addr3Text -column 0 -row 4 -sticky e -pady 3p -padx 5p
+    #grid $tab5.addr3Entry -column 1 -row 4 -sticky ew
+    #
+    #grid $tab5.cityText -column 0 -row 5 -sticky e -pady 3p -padx 5p
+    #grid $tab5.cityEntry -column 1 -row 5 -sticky ew
+    #
+    #grid $tab5.stateText -column 0 -row 6 -sticky e -pady 3p -padx 5p
+    #grid $tab5.stateEntry -column 1 -row 6 -sticky ew
+    #
+    #grid $tab5.zipText -column 0 -row 7 -sticky e -pady 3p -padx 5p
+    #grid $tab5.zipEntry -column 1 -row 7 -sticky ew
+    #
+    #grid $tab5.phoneText -column 0 -row 8 -sticky e -pady 3p -padx 5p
+    #grid $tab5.phoneEntry -column 1 -row 8 -sticky ew
+    #
+    #grid $tab5.countryText -column 0 -row 9 -sticky e -pady 3p -padx 5p
+    #grid $tab5.countryEntry -column 1 -row 9 -sticky ew
 
     
     ##
@@ -463,8 +463,8 @@ proc eAssist_Preferences::prefGUI {} {
         # Set default
         set international(uom) Each
     ttk::combobox $tab6_left.uomCombo -textvariable international(uom) \
-                                        -values [list   Each \
-                                                        Box]
+                                        -values $intlSetup(UOMList)
+    
     $tab6_left.uomCombo configure -state readonly
 
 
@@ -477,9 +477,7 @@ proc eAssist_Preferences::prefGUI {} {
         # set default
         set international(dutiesPayer) SENDER
     ttk::combobox $tab6_left.dutiesPayerCombo -textvariable international(dutiesPayer) \
-                                        -values [list SENDER \
-                                                RECIPIENT \
-                                                THIRDPARTY]
+                                        -values $intlSetup(PAYERList)
     $tab6_left.dutiesPayerCombo configure -state readonly
 
     
@@ -487,8 +485,8 @@ proc eAssist_Preferences::prefGUI {} {
     grid $tab6_left.dutiesPayerCombo -column 1 -row 4 -sticky ew
     
     #DutiesPayerAccountNumber
-    ttk::label $tab6_left.dutiesPayerAcctText -text [mc "Duties Payer Account Number"]
-    ttk::entry $tab6_left.dutiesPayerAcctEntry -textvariable international(dutiesPayerAcct)
+    ttk::label $tab6_left.dutiesPayerAcctText -text [mc "Duties Payer Account Number"] -state disable
+    ttk::entry $tab6_left.dutiesPayerAcctEntry -textvariable international(dutiesPayerAcct) -state disable
     
     grid $tab6_left.dutiesPayerAcctText -column 0 -row 5 -sticky e -padx 2p -pady 2p
     grid $tab6_left.dutiesPayerAcctEntry -column 1 -row 5 -sticky ew
@@ -500,7 +498,7 @@ proc eAssist_Preferences::prefGUI {} {
         set international(license) "NLR"
     ttk::combobox $tab6_right.licenseCombo -width 10 \
                                         -textvariable international(license) \
-                                        -values [list "NLR"]
+                                        -values $intlSetup(LICENSEList)
     $tab6_right.licenseCombo configure -state readonly
 
     
@@ -533,15 +531,7 @@ proc eAssist_Preferences::prefGUI {} {
     ttk::label $tab6_right.termsOfShipmentText -text [mc "Terms of Shipment"]
     ttk::combobox $tab6_right.termsOfSHipmentEntry -width 10 \
                                                     -textvariable international(termsOfShipment) \
-                                                    -values [list DDP \
-                                                                    DDU \
-                                                                    CFR \
-                                                                    CIP \
-                                                                    CPT \
-                                                                    CIF \
-                                                                    EXW \
-                                                                    FOB \
-                                                                    FCA]
+                                                    -values $intlSetup(TERMSList)
     $tab6_right.termsOfSHipmentEntry configure -state readonly
     
     grid $tab6_right.termsOfShipmentText -column 0 -row 3 -sticky e -padx 2p -pady 2p

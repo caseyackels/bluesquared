@@ -129,7 +129,7 @@ proc eAssist_Preferences::endCmd {tbl row col text} {
     # SEE ALSO
     #
     #***
-    global internal customer3P
+    global internal customer3P 
     'debug Starting endCmd
    
     set w [$tbl editwinpath]

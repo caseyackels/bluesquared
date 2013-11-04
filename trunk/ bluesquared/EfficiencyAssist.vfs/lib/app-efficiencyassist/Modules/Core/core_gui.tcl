@@ -59,9 +59,9 @@ proc eAssist::parentGUI {} {
     #	N/A
     #
     #***
-    global settings program mySettings currentModule
+    global settings program mySettings currentModule btn log
 
-    wm geometry . 640x575 ;# width x Height
+    wm geometry . 640x610 ;# Width x Height
     
     wm title . $program(FullName)
     focus -force .
@@ -81,16 +81,16 @@ proc eAssist::parentGUI {} {
     menu $mb.edit -tearoff 0 -relief raised -bd 2
     $mb add cascade -label [mc "Edit"] -menu $mb.edit
 
-    $mb.edit add command -label [mc "Preferences..."] -command { eAssist_Preferences::prefGUI }
+    $mb.edit add command -label [mc "Preferences..."] -command {eAssistPref::launchPreferences}
     $mb.edit add command -label "Reset" -command { eAssist_Helper::resetVars -resetGUI }
 
     ## Modules
     menu $mb.module -tearoff 0 -relief raised -bd 2
     $mb add cascade -label [mc "Module"] -menu $mb.module
 
-    $mb.module add command -label [mc "Box Labels"] -command {Shipping_Gui::shippingGUI}
-    $mb.module add command -label [mc "Batch Imports"] -command {eAssist_GUI::eAssistGUI}
-    $mb.module add command -label [mc "Setup"] -command {eAssistSetup::eAssistSetup}
+    $mb.module add command -label [mc "Box Labels"] -command {eAssist::buttonBarGUI BoxLabels}
+    $mb.module add command -label [mc "Batch Imports"] -command {eAssist::buttonBarGUI Addresses}
+    $mb.module add command -label [mc "Setup"] -command {eAssist::buttonBarGUI Setup}
 
     ## Help
     menu $mb.help -tearoff 0 -relief raised -bd 2
@@ -112,40 +112,25 @@ proc eAssist::parentGUI {} {
 
     # Start the gui
     # All frames that make up the GUI are children to .container
-    #eAssist_GUI::eAssistGUI
-    eAssistSetup::eAssistSetup
-
-
+    ${log}::debug current module : $program(currentModule)
+    
+    if {![info exists program(currentModule)]} {
+        set program(currentModule) Setup
+    }
+ 
     ##
     ## Control Buttons
     ##
-    set btnBar [ttk::frame .btnBar]
-    pack $btnBar -side bottom -anchor e -pady 13p -padx 5p
+    set btn(Bar) [ttk::frame .btnBar]
+    pack $btn(Bar) -side bottom -anchor e -pady 13p -padx 5p
     
-    switch -- $currentModule {
-        BoxLabels   {
-            ttk::button $btnBar.print -text [mc "Generate File"] -command { eAssist_Helper::checkForErrors } -state disabled
-            ttk::button $btnBar.close -text [mc "Exit"] -command {exit}
-            
-            grid $btnBar.print -column 0 -row 3 -sticky nse -padx 8p
-            grid $btnBar.close -column 1 -row 3 -sticky nse
-        }
-        Addresses   {
-            ttk::button $btnBar.print -text [mc "Generate File"] -command { eAssist_Helper::checkForErrors } -state disabled
-            ttk::button $btnBar.close -text [mc "Exit"] -command {exit}
-            
-            grid $btnBar.print -column 0 -row 3 -sticky nse -padx 8p
-            grid $btnBar.close -column 1 -row 3 -sticky nse
-            }
-        Setup       {
-            ttk::button $btnBar.print -text [mc "Save"] -command { eAssistSetup::SaveGlobalSettings }
-            ttk::button $btnBar.close -text [mc "Exit"] -command {exit}
-            
-            grid $btnBar.print -column 0 -row 3 -sticky nse -padx 8p
-            grid $btnBar.close -column 1 -row 3 -sticky nse
-        }
-        default     {}
-    }
+    ttk::button $btn(Bar).print
+    ttk::button $btn(Bar).close
+    grid $btn(Bar).print -column 0 -row 3 -sticky nse -padx 8p
+    grid $btn(Bar).close -column 1 -row 3 -sticky nse
+    
+    eAssist::buttonBarGUI $program(currentModule)
+
     
     eAssist_GUI::editPopup
     
@@ -174,7 +159,7 @@ proc eAssist::parentGUI {} {
 } ;# End of parentGUI
 
 
-proc eAssist::buttonBarGUI {} {
+proc eAssist::buttonBarGUI {module} {
     #****f* buttonBarGUI/eAssist
     # AUTHOR
     #	Casey Ackels
@@ -183,7 +168,7 @@ proc eAssist::buttonBarGUI {} {
     #	(c) 2011-2013 Casey Ackels
     #
     # FUNCTION
-    #	
+    #	re-configure the button bar as needed, depending on what 'mode' we are in, or going to.
     #
     # SYNOPSIS
     #	N/A
@@ -201,16 +186,30 @@ proc eAssist::buttonBarGUI {} {
     #	N/A
     #
     #***
-    global currentModule
+    global btn
+  
+    switch -- $module {
+        BoxLabels   {
+            Shipping_Gui::shippingGUI
+            eAssistSetup::SaveGlobalSettings
+            $btn(Bar).print configure -text [mc "Print Labels"] -command {} -state disabled
+            $btn(Bar).close configure -text [mc "Exit"] -command {exit}
+        }
+        Addresses   {
+            importFiles::eAssistGUI
+            eAssistSetup::SaveGlobalSettings
+            $btn(Bar).print configure -text [mc "Import File"] -command {eAssist_Helper::checkForErrors} -state disabled
+            $btn(Bar).close configure -text [mc "Exit"] -command {exit}
+            }
+        Setup       {
+            eAssistSetup::eAssistSetup
+            eAssistSetup::SaveGlobalSettings
+            $btn(Bar).print configure -text [mc "Save"] -command {eAssistSetup::SaveGlobalSettings} -state enable
+            $btn(Bar).close configure -text [mc "Exit"] -command {exit}
+        }
+        default     {}
+    }
     
-    set btnBar [ttk::frame .btnBar]
 
-    ttk::button $btnBar.print -text [mc "Generate File"] -command { eAssist_Helper::checkForErrors } -state disabled
-    ttk::button $btnBar.close -text [mc "Exit"] -command {exit}
-    
-    grid $btnBar.print -column 0 -row 3 -sticky nse -padx 8p
-    grid $btnBar.close -column 1 -row 3 -sticky nse
-    pack $btnBar -side bottom -anchor e -pady 13p -padx 5p
-    
     
 } ;# buttonBarGUI

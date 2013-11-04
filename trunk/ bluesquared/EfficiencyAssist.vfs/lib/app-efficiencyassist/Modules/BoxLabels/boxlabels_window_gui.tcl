@@ -57,10 +57,11 @@ proc shippingGUI {} {
     #***
     global GI_textVar GS_textVar frame1 frame2b genResults GS_windows program currentModule
     
+    set program(currentModule) BoxLabels
     set currentModule BoxLabels
 
     # Clear the frames before continuing
-    eAssist_Global::resetFrames 
+    eAssist_Global::resetFrames parent
 
 # Frame 1
     set frame1 [ttk::labelframe .container.frame1 -text "Label Information"]

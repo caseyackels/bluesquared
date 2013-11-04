@@ -83,7 +83,7 @@ proc 'eAssist_sourceReqdFiles {} {
     #lappend ::auto_path [file join [file dirname [info script]] Libraries twapi]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
     lappend ::auto_path [file join [file dirname [info script]] Libraries about]
-	lappend ::auto_path [file join [file dirname [info script]] Libraries debug]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries debug] ;# Deprecated
 
 
 	##
@@ -111,10 +111,13 @@ proc 'eAssist_sourceReqdFiles {} {
 	package require csv
 	package require debug
 	
+	
+	# Logger; MD5 are [package require]'d below.
+	
 
 	## Efficiency Assist modules
-	package require eAssist_Preferences
-	package require eAssist_core
+	#package require eAssist_Preferences
+	package require eAssist_core ;# Includes Preferences, and Setup mode
 	package require eAssist_importFiles
 	package require aboutwindow
 	package require boxlabels
@@ -132,6 +135,10 @@ proc 'eAssist_sourceReqdFiles {} {
     load [file join [file dirname [info script]] Libraries twapi twapi-x86-3.1.17.dll]
     #source [file join [file dirname [info script]] Libraries debug.tcl]
 	
+	if {[info exists logSettings(displayConsole)]} {
+        # Setup variable for holding list of box label names
+        eAssistSetup::toggleConsole $logSettings(displayConsole)
+    }	
 
 }
 
@@ -160,7 +167,7 @@ proc 'eAssist_initVariables {} {
     # SEE ALSO
     #
     #***
-    global settings header mySettings env intl ship program boxLabelInfo log
+    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup
 
 	#-------- CORE SETTINGS   
     # Create personal settings file %appdata%
@@ -170,7 +177,7 @@ proc 'eAssist_initVariables {} {
     
     # Find out where we are in the system
     set program(Home) [pwd]
-	set settings(Home) [pwd]
+	set mySettings(Home) [file join $env(APPDATA) eAssistSettings]
 	
     if {![info exists program(lastFrame)]} {
         # Set default last frame for Setup
@@ -180,25 +187,29 @@ proc 'eAssist_initVariables {} {
 	if {![info exists boxLabelInfo(labelNames)]} {
         # Setup variable for holding list of box label names
         set boxLabelInfo(labelNames) ""
-		${log}::debug boxLabelInfo(labelNames) variable not found, initiating...
-		
-    }	
+    }
+	
+	#if {![info exists intlSetup(UOMList)]} {
+	#	# Used in Setup/International (UOM Listbox)
+	#	set intlSetup(UOMList) ""
+	#}
+
 
 	#-------- MISC SETTINGS
 	
     if {![info exists mySettings(outFilePath)]} {
         # Location for saving the file
-        set mySettings(outFilePath) [file dirname $settings(Home)]
+        set mySettings(outFilePath) [file dirname $mySettings(Home)]
     }
 
     if {![info exists mySettings(outFilePathCopy)]} {
         # Location for saving a copy of the file (this should just be up one directory)
-        set mySettings(outFilePathCopy) [file dirname $settings(Home)]
+        set mySettings(outFilePathCopy) [file dirname $mySettings(Home)]
     }
    
     if {![info exists mySettings(sourceFiles)]} {
         # Default for finding the source import files
-        set mySettings(sourceFiles) [file dirname $settings(Home)]
+        set mySettings(sourceFiles) [file dirname $mySettings(Home)]
     }
 
     if {![info exists settings(importOrder)]} {
@@ -370,17 +381,26 @@ proc 'eAssist_loadSettings {} {
     #	'eAssist_loadOptions
     #
     #***
-    global settings debug program header customer3P env mySettings international company shipVia3P tcl_platform setup logSettings log boxSettings boxLabelInfo
+    global settings debug program header customer3P env mySettings international company shipVia3P tcl_platform setup logSettings log boxSettings boxLabelInfo intlSetup
+	global headerParent headerAddress headerParams headerBoxes GS_filePathSetup GS currentModule pref dist
 	
-	set debug(onOff) on
-	set logSettings(loglevel) debug
-    console show
+	set debug(onOff) on ;# Old - Still exists so we don't receive errors, on the instances where it still exists
+	set logSettings(loglevel) notice ;# Default to debug, over ridden if the user selects a different option
+	set logSettings(displayConsole) 0 ;# disable by default, same as above
 	
 	# Startup the logging package
 	lappend ::auto_path [file join [file dirname [info script]] Libraries log]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries md5]
+	package require md5
+	package require log
 	package require logger
+	package require logger::appender
+	package require logger::utils
+	
+	#
 	# initialize logging service
 	set log [logger::init eAssist_svc]
+	logger::utils::applyAppender -appender colorConsole
 	${log}::notice "Initialized eAssist_svc logging"
     
 	${log}::notice "Platform: $tcl_platform(osVersion)"
@@ -389,7 +409,7 @@ proc 'eAssist_loadSettings {} {
     
     set program(Version) 4
     set program(PatchLevel) 0.0 ;# Leading decimal is not needed
-    set program(beta) ""
+    set program(beta) "Alpha"
     set program(Name) "Efficiency Assist"
     set program(FullName) "$program(Name) - $program(Version).$program(PatchLevel) $program(beta)"
     
@@ -400,34 +420,35 @@ proc 'eAssist_loadSettings {} {
 
     #config file - these variables are "system wide"; and are not to be personalized.
 	# Initialize variables
-    if {[catch {open config.txt r} fd]} {
-        ${log}::notice "unable to load defaults"
-        ${log}::notice "execute initVariables"
+	foreach myFile [list profile_imports.txt config.txt] {
+    #if {[catch {open config.txt r} fd]} {}
+		if {[catch {open $myFile r} fd]} {
+	     ${log}::notice "unable to load defaults: $myFile"
+	     ${log}::notice "execute initVariables: $myFile"
     
-	} else {
+		} else {
 	
-    set configFile [split [read $fd] \n]
-	catch {chan close $fd}
+		set configFile [split [read $fd] \n]
+		catch {chan close $fd}
 
         foreach line $configFile {
             if {$line == ""} {continue}
             set l_line [split $line " "]
             set [lindex $l_line 0] [join [lrange $l_line 1 end] " "]
-			${log}::notice "Loaded variables: $l_line"
+			${log}::notice "Loaded variables ($myFile): $l_line"
         }
-        ${log}::notice "Loaded variables: Complete!"
-    }
+        ${log}::notice "Loaded variables ($myFile): Complete!"
+		}
+	}
     
     set fd "" ;# Make sure we are cleared out before reusing.
     # Load Personalized settings
-    if {[catch {open [file join $env(APPDATA) eAssistSettings settings.txt] r} fd]} {
-        ${log}::notice "Cannot find settings.txt; loading defaults"
-        #set settings(newSettingsTxt) no
-        
+    if {[catch {open [file join $env(APPDATA) eAssistSettings mySettings.txt] r} fd]} {
+        ${log}::notice "Cannot find mySettings.txt; loading defaults"
+
         'eAssist_initVariables ;# load defaults
         
     } else {
-        #set settings(newSettingsTxt) yes
         set settingsFile [split [read $fd] \n]
         catch {chan close $fd}
         
