@@ -48,7 +48,7 @@ proc eAssistSetup::addressHeaders_GUI {} {
     # SEE ALSO
     #
     #***
-    global log G_setupFrame currentModule program headerParent headerParams
+    global log G_setupFrame currentModule program headerParams headerParent
     global GUI w filters
     #variable GUI
     
@@ -88,6 +88,9 @@ proc eAssistSetup::addressHeaders_GUI {} {
                                         -exportselection yes \
                                         -showseparators yes \
                                         -fullseparators yes \
+                                        -movablecolumns yes \
+                                        -movablerows yes \
+                                        -editselectedonly 1 \
                                         -yscrollcommand [list $w(hdr_frame1a).scrolly set] \
                                         -xscrollcommand [list $w(hdr_frame1a).scrollx set] \
                                         -editstartcommand {eAssistSetup::startCmdHdr} \
@@ -128,7 +131,8 @@ proc eAssistSetup::addressHeaders_GUI {} {
         
     if {[array exists headerParams] == 1} {
         #'debug Populate listobx - data exists
-            foreach hdrInfo [lsort [array names headerParams]] {
+            #foreach hdrInfo [array names headerParams] {}
+            foreach hdrInfo $headerParent(headerList) {
                 #'debug inserting $customer
                 #$w(hdr_frame1a).listbox insert end [list "" $hdrInfo [lindex $headerParams($hdrInfo) 0] $params]
                 $w(hdr_frame1a).listbox insert end "{} $hdrInfo $headerParams($hdrInfo)"

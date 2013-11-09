@@ -486,19 +486,19 @@ proc eAssistSetup::company_GUI {} {
     pack $frame1 -expand yes -fill both
     
     ttk::label $frame1.companyText -text [mc "Company Name"]
-    ttk::entry $frame1.companyEntry -textvariable company(name)
+    ttk::entry $frame1.companyEntry -textvariable company(company)
     
     ttk::label $frame1.contactText -text [mc "Contact"]
     ttk::entry $frame1.contactEntry -textvariable company(contact)
     
     ttk::label $frame1.addr1Text -text [mc "Addr1/Addr2"]
-    ttk::entry $frame1.addr1Entry -textvariable company(addr1)
+    ttk::entry $frame1.addr1Entry -textvariable company(address1)
     set company(addr2) ""
-    ttk::entry $frame1.addr2Entry -textvariable company(addr2)
+    ttk::entry $frame1.addr2Entry -textvariable company(address2)
     
     set company(addr3) ""
     ttk::label $frame1.addr3Text -text [mc "Address 3"]
-    ttk::entry $frame1.addr3Entry -textvariable company(addr3)
+    ttk::entry $frame1.addr3Entry -textvariable company(address3)
     
     ttk::label $frame1.cityText -text [mc "City/State/Zip"]
     ttk::entry $frame1.cityEntry -textvariable company(city)

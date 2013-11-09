@@ -59,11 +59,11 @@ proc importFiles::eAssistGUI {} {
     #	
     #
     #***
-    global log program currentModule w headerParent files mySettings process dist filter
+    global log program currentModule w headerParent files mySettings process dist filter w options csmpls
     
     set program(currentModule) Addresses
     set currentModule Addresses
-    
+      
     # Clear the frames before continuing
     eAssist_Global::resetFrames parent
     
@@ -79,27 +79,27 @@ proc importFiles::eAssistGUI {} {
     ##
     ## Notebook
     ##
-    set nbk [ttk::notebook $frame0.nbk]
-    pack $nbk -expand yes -fill both
+    set w(nbk) [ttk::notebook $frame0.nbk]
+    pack $w(nbk) -expand yes -fill both
 
     # Tab setup is in the corresponding proc
-    ttk::notebook::enableTraversal $nbk
+    ttk::notebook::enableTraversal $w(nbk)
 
     #
     # Create the notebook
     #
-    $nbk add [ttk::frame $nbk.f1] -text [mc "Import Files"]
-    $nbk add [ttk::frame $nbk.f2] -text [mc "Process Batch Files"]
-    $nbk add [ttk::frame $nbk.f3] -text [mc "Process Planner Files"]
+    $w(nbk) add [ttk::frame $w(nbk).f1] -text [mc "Import Files"]
+    $w(nbk) add [ttk::frame $w(nbk).f2] -text [mc "Process Batch Files"] -state disabled
+    $w(nbk) add [ttk::frame $w(nbk).f3] -text [mc "Process Planner Files"] -state disabled
 
-    $nbk select $nbk.f1
+    $w(nbk) select $w(nbk).f1
     
     ##
     ## - TAB 1
     ##
     
     #------------- Frame 1a - Top frame
-    set frame1a [ttk::labelframe $nbk.f1.top -text [mc "Open file"]]
+    set frame1a [ttk::labelframe $w(nbk).f1.top -text [mc "Open file"]]
     pack $frame1a -side top -fill both -padx 5p -pady 5p
     
     ttk::label $frame1a.txt1 -text [mc "File Name:"]
@@ -109,12 +109,17 @@ proc importFiles::eAssistGUI {} {
     grid $frame1a.entry1 -column 1 -row 0 -pady 5p -sticky ew ;#-padx 2p
     
     ttk::button $frame1a.btn1 -text [mc "Open File"] -command {importFiles::readFile [eAssist_Global::OpenFile "Open File" $mySettings(sourceFiles) file csv]}
-    ttk::button $frame1a.btn2 -text [mc "Reset"] -command {importFiles::processFile ;#eAssistHelper::unMapHeader}
-    grid $frame1a.btn1 -column 2 -row 0 ;#-padx 5p -pady 5p
-    grid $frame1a.btn2 -column 3 -row 0 ;#-padx 5p -pady 5p
+    ttk::button $frame1a.btn2 -text [mc "Import"] -command {importFiles::processFile 2} -state disabled ;# The "2" designates the tab id.
+    #ttk::button $frame1a.btn3 -text [mc "Reset"] -command {{$log}::debug Reset Interface} -state disabled
     
-    ttk::checkbutton $frame1a.chkbtn1 -text [mc "Auto-Assign header names"]
+    grid $frame1a.btn1 -column 2 -row 0 -padx 5p
+    grid $frame1a.btn2 -column 3 -row 0 -padx 3p
+    #grid $frame1a.btn3 -column 4 -row 0 -padx 3p
+    
+    ttk::checkbutton $frame1a.chkbtn1 -text [mc "Auto-Assign header names"] -variable options(AutoAssignHeader)
     grid $frame1a.chkbtn1 -column 0 -columnspan 2 -row 1 -sticky w
+    
+    $frame1a.chkbtn1 invoke
     
     #ttk::label $frame1a.txt2 -text [mc "Number of Records:"]
     #ttk::label $frame1a.entry2 -textvariable process(numOfRecords) -relief flat
@@ -123,7 +128,7 @@ proc importFiles::eAssistGUI {} {
     #grid $frame1a.entry2 -column 1 -row 2 -sticky ew
     
     #------------- Frame 1 - Listbox for unassigned file headers
-    set files(tab1f1) [ttk::labelframe $nbk.f1.lbox1 -text [mc "Unassigned Columns"]]
+    set files(tab1f1) [ttk::labelframe $w(nbk).f1.lbox1 -text [mc "Unassigned Columns"]]
     pack $files(tab1f1) -side left -fill both -padx 5p -pady 5p ;#-ipady 2p -anchor nw -side left
 
     listbox $files(tab1f1).listbox \
@@ -153,7 +158,7 @@ proc importFiles::eAssistGUI {} {
     ::autoscroll::autoscroll $files(tab1f1).scrollx
     
     #-------------- Frame 2 - Listbox, available headers to map to.
-    set files(tab1f2) [ttk::labelframe $nbk.f1.lbox2 -text [mc "Available Columns"]]
+    set files(tab1f2) [ttk::labelframe $w(nbk).f1.lbox2 -text [mc "Available Columns"]]
     pack $files(tab1f2) -side left -fill both -padx 5p -pady 5p
     
     listbox $files(tab1f2).listbox \
@@ -190,17 +195,17 @@ proc importFiles::eAssistGUI {} {
     
 
     #--------------- Frame 2a - Buttons
-    set files(tab1f2a) [ttk::frame $nbk.f1.btns]
+    set files(tab1f2a) [ttk::frame $w(nbk).f1.btns]
     pack $files(tab1f2a) -side left -fill both -padx 5p -pady 5p
     
-    ttk::button $files(tab1f2a).btn1 -text [mc "Add >"] -command {eAssistHelper::mapHeader}
-    ttk::button $files(tab1f2a).btn2 -text [mc "< Remove"] -command {eAssistHelper::unMapHeader}
+    ttk::button $files(tab1f2a).btn1 -text [mc "Add >"] -command {eAssistHelper::mapHeader} -state disabled
+    ttk::button $files(tab1f2a).btn2 -text [mc "< Remove"] -command {eAssistHelper::unMapHeader} -state disabled
     
     grid $files(tab1f2a).btn1 -column 0 -row 0 -sticky n -pady 5p
     grid $files(tab1f2a).btn2 -column 0 -row 1 -sticky n -pady 5p
 
     #--------------- Frame 3 - Listbox, mapped headers
-    set files(tab1f3) [ttk::labelframe $nbk.f1.lbox3 -text [mc "Mapped Columns"]]
+    set files(tab1f3) [ttk::labelframe $w(nbk).f1.lbox3 -text [mc "Mapped Columns"]]
     pack $files(tab1f3) -side left -fill both -padx 5p -pady 5p
     
     listbox $files(tab1f3).listbox \
@@ -233,7 +238,7 @@ proc importFiles::eAssistGUI {} {
     ##
     ## Notebook 2
     ##
-    set nb [ttk::notebook $nbk.f3.nb]
+    set nb [ttk::notebook $w(nbk).f3.nb]
     pack $nb -expand yes -fill both
 
     ttk::notebook::enableTraversal $nb
@@ -242,7 +247,7 @@ proc importFiles::eAssistGUI {} {
     # Create the notebook
     #
     $nb add [ttk::frame $nb.f1] -text [mc "Destinations"]
-    $nb add [ttk::frame $nb.f2] -text [mc "Samples / Customer Copies"]
+    $nb add [ttk::frame $nb.f2] -text [mc "Samples / Customer Copies"] -state hidden
 
     
     $nb select $nb.f1
@@ -274,7 +279,7 @@ proc importFiles::eAssistGUI {} {
     ::autoscroll::autoscroll $scrolly_lbox1
     ::autoscroll::autoscroll $scrollx_lbox1
     
-    ttk::button $files(tab3f1a).btn1 -text [mc "Add"] -command {eAssistHelper::addColumns}
+    ttk::button $files(tab3f1a).btn1 -text [mc "Add"] -command {eAssistHelper::unHideColumns}
     
     
     #------------- Grid Frame 1  
@@ -288,15 +293,27 @@ proc importFiles::eAssistGUI {} {
     ##
     ##------------- Frame 1b
     ##
-    set files(tab3f1b) [ttk::labelframe $nb.f1.f1.b -text [mc "Options"]]
-    pack $files(tab3f1b) -fill both -padx 5p -pady 5p
+    set files(tab3f1b) [ttk::labelframe $nb.f1.f1.b -text [mc "Internal Samples"]]
+    pack $files(tab3f1b) -fill both -padx 2p -pady 5p
 
-    ttk::button $files(tab3f1b).btn1 -text [mc "Split"] -command {}
-    ttk::button $files(tab3f1b).btn2 -text [mc "Filters"] -command {eAssistHelper::filters}
+    ttk::label $files(tab3f1b).txt1 -text [mc "Ticket"]
+    ttk::label $files(tab3f1b).txt1a -textvariable csmpls(TicketTotal)
+    ttk::label $files(tab3f1b).txt2 -text [mc "CSR"]
+    ttk::label $files(tab3f1b).txt2a -textvariable csmpls(CSRTotal)
+    ttk::label $files(tab3f1b).txt3 -text [mc "Sample Room"]
+    ttk::label $files(tab3f1b).txt3a -textvariable csmpls(SmplRoomTotal)
+    ttk::label $files(tab3f1b).txt4 -text [mc "Sales"]
+    ttk::label $files(tab3f1b).txt4a -textvariable csmpls(SalesTotal)
     
-    #------------- Grid Frame 1a
-    grid $files(tab3f1b).btn1 -column 1 -row 0 -sticky new
-    grid $files(tab3f1b).btn2 -column 2 -row 0 -sticky new
+    #------------- Grid Frame 1b
+    grid $files(tab3f1b).txt1 -column 0 -row 0 -sticky new -padx 2p
+    grid $files(tab3f1b).txt1a -column 1 -row 0 -sticky new -padx 3p
+    grid $files(tab3f1b).txt2 -column 0 -row 1 -sticky new -padx 2p
+    grid $files(tab3f1b).txt2a -column 1 -row 1 -sticky new -padx 3p
+    grid $files(tab3f1b).txt3 -column 0 -row 2 -sticky new -padx 2p
+    grid $files(tab3f1b).txt3a -column 1 -row 2 -sticky new -padx 3p
+    grid $files(tab3f1b).txt4 -column 0 -row 3 -sticky new -padx 2p
+    grid $files(tab3f1b).txt4a -column 1 -row 3 -sticky new -padx 3p
     
     ##
     #------------- Frame 2, Tablelist Notebook
@@ -319,13 +336,10 @@ proc importFiles::eAssistGUI {} {
                                     -movablerows yes \
                                     -editselectedonly 1 \
                                     -editstartcommand {importFiles::startCmd} \
-                                    -editendcommand {} \
+                                    -editendcommand {importFiles::endCmd} \
                                     -yscrollcommand [list $scrolly set] \
                                     -xscrollcommand [list $scrollx set]
 
-    #if {[$files(tab3f2).tbl cget -selectborderwidth] == 0} {
-    #    $files(tab3f2).tbl configure -spacing 1
-    #}
 
     ttk::scrollbar $scrolly -orient v -command [list $files(tab3f2).tbl yview]
     ttk::scrollbar $scrollx -orient h -command [list $files(tab3f2).tbl xview]
@@ -346,3 +360,46 @@ proc importFiles::eAssistGUI {} {
 
 
 } ;# importFiles::eAssistGUI
+
+
+proc importFiles::initMenu {} {
+    #****f* initMenu/importFiles
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2013 Casey Ackels
+    #
+    # FUNCTION
+    #	Initialize menus for the Addresses module
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log mb
+    ${log}::debug --START -- [info level 1]
+    
+    $mb delete 2
+    menu $mb.dist -tearoff 0 -relief raised -bd 2
+    $mb insert 2 cascade -label [mc "Distribution"] -menu $mb.dist
+    
+    
+    $mb.dist add command -label [mc "Filters"] -command {eAssistHelper::filters}
+    $mb.dist add command -label [mc "Internal Samples"] -command {eAssistHelper::addCompanySamples}
+    $mb.dist add command -label [mc "Split"] -command {eAssistHelper::splitVersions}
+    $mb.dist add separator
+    $mb.dist add command -label [mc "Preferences"] -command {eAssistPref::launchPreferences}
+	
+    ${log}::debug --END -- [info level 1]
+} ;# importFiles::initMenu

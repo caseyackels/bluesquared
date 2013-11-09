@@ -153,6 +153,57 @@ proc eAssist_Global::OpenFile {title initDir type args} {
 } ;# eAssist_Global::OpenFile
 
 
+proc eAssist_Global::detectWin {args} {
+    #****f* detectWin/eAssist_Global
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2013 Casey Ackels
+    #
+    # FUNCTION
+    #	eAssist_Global <win>
+    #
+    # SYNOPSIS
+    #   Checks to make sure that the window doesn't exist. If it does, that window will be destroyed before creating it again.
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log
+    ${log}::debug --START-- [info level 1]
+    
+    set vSwitch [lindex $args 0]
+    set vWindow [lindex $args 1]
+    
+    if {[winfo exists $vWindow] == 1} {
+    # -s, serialize instead of destroying. Multiple instances are ok.
+    # -k, destroy the window. We only want one instance active.
+        switch -- $vSwitch {
+            -s  {#serialize, strip out the first 2 chars, because one of them contain a '.'
+                    append vWindow [string range [tcl::mathfunc::rand] 2 end]
+                    }
+            -k  {#destroy window if it exist
+                    destroy $vWindow
+                    }
+            default { ${log}::notice Arg: $arg, not a valid argument use, -s (serialize), or -k (kill)}
+        }
+    }
+        
+    return $vWindow
+	
+    ${log}::debug --END-- [info level 1]
+} ;# eAssist_Global::detectWin
+
+
 proc eAssist_Global::launchFilters {} {
     #****f* launchFilters/eAssist_Global
     # AUTHOR

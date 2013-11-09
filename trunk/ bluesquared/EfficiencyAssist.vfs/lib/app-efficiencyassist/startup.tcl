@@ -78,7 +78,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries autoscroll]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries csv]
-	lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.4]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.10]
     lappend ::auto_path [file join [file dirname [info script]] Libraries tcom3.9]
     #lappend ::auto_path [file join [file dirname [info script]] Libraries twapi]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
@@ -167,7 +167,7 @@ proc 'eAssist_initVariables {} {
     # SEE ALSO
     #
     #***
-    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup
+    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls
 
 	#-------- CORE SETTINGS   
     # Create personal settings file %appdata%
@@ -189,13 +189,19 @@ proc 'eAssist_initVariables {} {
         set boxLabelInfo(labelNames) ""
     }
 	
-	#if {![info exists intlSetup(UOMList)]} {
-	#	# Used in Setup/International (UOM Listbox)
-	#	set intlSetup(UOMList) ""
-	#}
 
 
-	#-------- MISC SETTINGS
+	#-------- Initialize variables
+	
+	# Address Module
+	array set csmpls [list startTicket "" \
+					  TicketTotal 0 \
+					  startCSR "" \
+					  CSRTotal 0 \
+					  startSmpl "" \
+					  SmplRoomTotal 0 \
+					  startSales "" \
+					  SalesTotal 0]
 	
     if {![info exists mySettings(outFilePath)]} {
         # Location for saving the file

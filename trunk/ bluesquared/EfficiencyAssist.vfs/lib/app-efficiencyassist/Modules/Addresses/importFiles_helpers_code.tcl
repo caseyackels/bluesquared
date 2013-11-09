@@ -30,6 +30,60 @@
 namespace eval eAssistHelper {}
 
 
+proc eAssistHelper::autoMap {masterHeader fileHeader} {
+    #****f* autoMap/eAssistHelper
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2013 Casey Ackels
+    #
+    # FUNCTION
+    #	Automatically maps File Headers to the corresponding Master Header
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log files process position headerParent
+    ${log}::debug --START -- [info level 1]
+	
+    # Insert mapped headers into the Mapped headers listbox
+	$files(tab1f3).listbox insert end "$fileHeader > $masterHeader"
+	
+	# Color the mapped headers
+	$files(tab1f1).listbox itemconfigure end -foreground lightgrey -selectforeground grey
+	
+	foreach item $headerParent(headerList) {
+		if {[string compare -nocase $item $masterHeader] != -1} {
+			$files(tab1f2).listbox itemconfigure [lsearch $headerParent(headerList) $masterHeader] -foreground lightgrey -selectforeground grey
+		}
+	}
+	
+	set cSelection [lsearch -nocase $process(Header) $fileHeader]
+	
+	if {[string length $cSelection] <= 1} {
+		set cSelection "0$cSelection"
+	} else {
+		${log}::debug cSelection has two digits: $cSelection
+	}
+	
+	set position([join [list $cSelection $masterHeader] _]) ""
+		
+    ${log}::debug --END -- [info level 1]
+} ;# eAssistHelper::autoMap
+
+
 proc eAssistHelper::mapHeader {} {
     #****f* mapHeader/eAssistHelper
     # AUTHOR
@@ -58,30 +112,30 @@ proc eAssistHelper::mapHeader {} {
     global log files position
 	${log}::debug --START-- [info level 1]
     
-	${log}::debug textvar: [$files(tab1f1).listbox get [$files(tab1f1).listbox curselection]] > [$files(tab1f2).listbox get [$files(tab1f2).listbox curselection]]
+	#${log}::debug textvar: [$files(tab1f1).listbox get [$files(tab1f1).listbox curselection]] > [$files(tab1f2).listbox get [$files(tab1f2).listbox curselection]]
 	
 	# Insert the two mapped headers into the "Mapped" listbox.
     $files(tab1f3).listbox insert end "[$files(tab1f1).listbox get [$files(tab1f1).listbox curselection]] > [$files(tab1f2).listbox get [$files(tab1f2).listbox curselection]]"
 
-	# User if we need to strip white spaces from the array name
+	# 
 	if {[string length [$files(tab1f1).listbox curselection]] <= 1 } {
 			set cSelection 0[$files(tab1f1).listbox curselection]
 			${log}::debug selection $cSelection
 	} else {
 		set cSelection [$files(tab1f1).listbox curselection]
+		${log}::debug selection $cSelection
 	}
 	
 	# cSelection = index; header Name = 01_Address
 	set header [join [join [split [list [$files(tab1f2).listbox get [$files(tab1f2).listbox curselection] ] ] ] ""]]
+	${log}::debug header: $header
 	
 	set position([join [list $cSelection $header] _]) ""
 	
 	# Delete "un-assigned column" entry
-	#$files(tab1f1).listbox delete [$files(tab1f1).listbox curselection]
 	$files(tab1f1).listbox itemconfigure [$files(tab1f1).listbox curselection] -foreground lightgrey -selectforeground grey
 	
 	# Delete "available column" entry
-	#$files(tab1f2).listbox delete [$files(tab1f2).listbox curselection]
 	$files(tab1f2).listbox itemconfigure [$files(tab1f2).listbox curselection] -foreground lightgrey -selectforeground grey
 	
 	${log}::debug --END-- [info level 1]
@@ -118,28 +172,28 @@ proc eAssistHelper::unMapHeader {} {
 	
 	set hdr [$files(tab1f3).listbox get [$files(tab1f3).listbox curselection]]
 	set hdr [join [join [lrange [split $hdr >] 1 end]]]
-	${log}::debug hdr $hdr
+	#${log}::debug hdr $hdr
 	
 	set hdr1 [lsearch -glob [array names position] *$hdr]
-	${log}::debug hdr1a $hdr1
+	#${log}::debug hdr1a $hdr1
 	set hdr1 [lindex [array names position] $hdr1]
-	${log}::debug hdr1b $hdr1
+	#${log}::debug hdr1b $hdr1
 	
-	${log}::debug Deleting Record: [$files(tab1f3).listbox curselection]
-	${log}::debug Remove Header: [string trim $hdr]
-	${log}::debug Real Header: position($hdr1)
+	#${log}::debug Deleting Record: [$files(tab1f3).listbox curselection]
+	#${log}::debug Remove Header: [string trim $hdr]
+	#${log}::debug Real Header: position($hdr1)
 
 	# Remove the header from the array, so we can re-assign if neccessary.
 	unset position($hdr1) 
 	$files(tab1f3).listbox delete [$files(tab1f3).listbox curselection]
 	
-	parray position
+	#parray position
 	
 	${log}::debug --END-- [info level 1]
 } ;# ::unMapHeader
 
 
-proc eAssistHelper::addColumns {} {
+proc eAssistHelper::unHideColumns {} {
     #****f* addColumns/eAssistHelper
     # AUTHOR
     #	Casey Ackels
@@ -164,12 +218,19 @@ proc eAssistHelper::addColumns {} {
     # SEE ALSO
     #
     #***
-    global log files process dist
+    global log files process dist headerParent
     ${log}::debug --START -- [info level 1]
 	
-	set currentColumnCount [$files(tab3f2).tbl columncount]
-		
-	$files(tab3f2).tbl columnconfigure [expr $currentColumnCount -1] -name "[$files(tab3f1).lbox1 curselection]" -labelalign center -editable yes -editwindow ttk::entry
+	set col [lsearch $headerParent(headerList) [$files(tab3f1a).lbox1 get [$files(tab3f1a).lbox1 curselection]]]
+	
+	if {$col != ""} {
+		$files(tab3f2).tbl columnconfigure $col -hide no
+	} else {
+		${log}::debug Add Columns did not receive a selection
+	}
+	
+	# Delete the entry
+	$files(tab3f1a).lbox1 delete [$files(tab3f1a).lbox1 curselection]
 	
     ${log}::debug --END -- [info level 1]
 } ;# eAssistHelper::addColumns
@@ -277,38 +338,12 @@ proc eAssistHelper::filters {} {
 						}
 					}
 					${log}::debug Street Suffix Changes: $cellData
-					
-					#set cellData [string map $filter(secondaryUnits) $cellData]
-					#${log}::debug Street Secondary Units: $cellData
-					
-					# This will need to be added in as an optional filter, because there will be pre-requisites before running.
-					#foreach element $filter(secondaryUnits) {
-					#	set secondaryUnit [lsearch $cellData $element]
-					#	if {$secondaryUnit != -1} {
-					#		set cellData [lrange $cellData 0 $secondaryUnit]
-					#		set secondaryUnitData [lrange $cellData $secondaryUnit end]
-					#		${log}::debug **Found a secondary Unit**: $secondaryUnitData
-					#	
-					#		${log}::debug Does Address2 exist? $haveAddress2
-					#		${log}::debug Does Address3 exist? $haveAddress3
-					#	}
-					#}
-					
-					#if {$secondaryUnit != -1} {
-					#	${log}:debug **Found a secondary Unit**: [lrange $cellData $secondaryUnit end]
-					#}
-					#set cellData [string map $filter(addrDirectionals) $cellData]
-					#${log}::debug Directional Changes: $cellData
-					#set cellData [string map $filter(addrStreetSuffix) $cellData]
-					#${log}::debug Street Suffix Changes: $cellData
-					#set cellData [string map $filter(secondaryUnits) $cellData]
-					#${log}::debug Street Secondary Units: $cellData
 				}
 				
 				# No need to cycle over lists that probably would never apply....
-				#if {$ColumnName eq "Address2"} {
-				#	set cellData [string map $filter(secondaryUnits) $cellData]
-				#}
+				if {$ColumnName eq "Address2"} {
+					set cellData [string map $filter(secondaryUnits) $cellData]
+				}
 				
 				if {$ColumnName eq "State"} {
 					#if {[lsearch $filter(State) $cellData] == -1} {${log}::debug State doesn't exist $cellData}
@@ -357,3 +392,56 @@ proc eAssistHelper::filters {} {
     ${log}::debug --END -- [info level 1]
 } ;# eAssistHelper::filters
 
+
+proc eAssistHelper::resetImportInterface {} {
+    #****f* resetImportInterface/eAssistHelper
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2013 Casey Ackels
+    #
+    # FUNCTION
+    #	Resets the import file interface
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log w process position
+    ${log}::debug --START -- [info level 1]
+    
+	#Enable the widgets
+	#$w(nbk) tab 1 -state normal
+	$w(nbk) tab 2 -state disable
+	
+	$w(nbk).f1.top.btn2 configure -state normal
+	$w(nbk).f1.btns.btn1 configure -state normal
+	$w(nbk).f1.btns.btn2 configure -state normal
+	
+	# Clear out the listboxes and tables
+	$w(nbk).f1.lbox1.listbox delete 0 end
+	$w(nbk).f1.lbox3.listbox delete 0 end
+	$w(nbk).f3.nb.f1.f2.tbl delete 0 end
+	
+	# Clear out the variables
+	if {[array exists process] == 1} {
+		unset process
+	}
+	
+	if {[array exists position] == 1} {
+		unset position
+	}
+	
+    ${log}::debug --END -- [info level 1]
+} ;# eAssistHelper::resetImportInterface

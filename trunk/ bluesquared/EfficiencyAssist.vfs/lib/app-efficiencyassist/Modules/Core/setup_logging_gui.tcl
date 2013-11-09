@@ -65,17 +65,19 @@ proc eAssistSetup::logging_GUI {} {
                             -textvariable logSettings(currentLogLevel)
     
         
-    ttk::checkbutton $s(frame1).checkbutton1 -text [mc "Display Console"] -variable logSettings(displayConsole) -command {eAssistSetup::toggleConsole $logSettings(displayConsole)}
+    ttk::checkbutton $s(frame1).checkbutton1 -text [mc "Show console on next startup"] -variable logSettings(displayConsole) 
+    ttk::button $s(frame1).btn1 -text [mc "Show Console"] -command {console show}
     
     #----------- Grid
     grid $s(frame1).text1 -column 0 -row 0 -padx 5p -pady 5p
     grid $s(frame1).cbox1 -column 1 -row 0 -padx 5p -pady 5p
     
     grid $s(frame1).checkbutton1 -column 0 -columnspan 2 -row 2 -padx 5p -pady 5p
+    grid $s(frame1).btn1 -column 0 -row 3 -padx 5p -pady 5p
     
     #---------- Bindings
     
-    bind all <<ComboboxSelected>> { 
+    bind $s(frame1).cbox1 <<ComboboxSelected>> { 
     ${log}::debug [$s(frame1).cbox1 current]
         eAssistSetup::changeLogLevel [$s(frame1).cbox1 current]
     }

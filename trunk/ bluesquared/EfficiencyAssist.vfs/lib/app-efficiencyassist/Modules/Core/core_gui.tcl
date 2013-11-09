@@ -59,7 +59,7 @@ proc eAssist::parentGUI {} {
     #	N/A
     #
     #***
-    global settings program mySettings currentModule btn log
+    global settings program mySettings currentModule btn log mb
 
     wm geometry . 640x610 ;# Width x Height
     
@@ -74,15 +74,14 @@ proc eAssist::parentGUI {} {
     menu $mb.file -tearoff 0 -relief raised -bd 2
 
     $mb add cascade -label [mc "File"] -menu $mb.file
-    $mb.file add command -label [mc "Import File"] -command { eAssist_Helper::getOpenFile }
+    #$mb.file add command -label [mc "Preferences..."] -command {eAssistPref::launchPreferences}
+    #$mb.file add command -label [mc "Import File"] -command { eAssist_Helper::getOpenFile }
     $mb.file add command -label [mc "Exit"] -command {exit}
 
-    ## Edit
-    menu $mb.edit -tearoff 0 -relief raised -bd 2
-    $mb add cascade -label [mc "Edit"] -menu $mb.edit
+    ## Module Menu - This is a dynamic menu for the active module.
+    menu $mb.modMenu -tearoff 0 -relief raised -bd 2
+    $mb add cascade -label [mc "Menu"] -menu $mb.modMenu
 
-    $mb.edit add command -label [mc "Preferences..."] -command {eAssistPref::launchPreferences}
-    $mb.edit add command -label "Reset" -command { eAssist_Helper::resetVars -resetGUI }
 
     ## Modules
     menu $mb.module -tearoff 0 -relief raised -bd 2
@@ -112,9 +111,9 @@ proc eAssist::parentGUI {} {
 
     # Start the gui
     # All frames that make up the GUI are children to .container
-    ${log}::debug current module : $program(currentModule)
-    
+       
     if {![info exists program(currentModule)]} {
+        #${log}::debug current module : $program(currentModule)
         set program(currentModule) Setup
     }
  
@@ -198,6 +197,7 @@ proc eAssist::buttonBarGUI {module} {
         Addresses   {
             importFiles::eAssistGUI
             eAssistSetup::SaveGlobalSettings
+            importFiles::initMenu
             $btn(Bar).print configure -text [mc "Import File"] -command {eAssist_Helper::checkForErrors} -state disabled
             $btn(Bar).close configure -text [mc "Exit"] -command {exit}
             }
