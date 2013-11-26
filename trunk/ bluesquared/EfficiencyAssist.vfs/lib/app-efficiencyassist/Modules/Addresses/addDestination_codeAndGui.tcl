@@ -44,7 +44,7 @@ proc eAssistHelper::addDestination {tblPath} {
     #   If an address is selected, it is only inserted into the table, unless it is modified; then the original address is removed from the  
     #
     # CHILDREN
-    #	N/A
+    #	eAssistHelper::detectData
     #
     # PARENTS
     #	
@@ -56,6 +56,8 @@ proc eAssistHelper::addDestination {tblPath} {
     #***
     global log dist w
     ${log}::debug --START -- [info level 1]
+    #ttk::style map TCombobox -fieldbackground [list focus yellow]
+    #ttk::style map TEntry -fieldbackground [list focus yellow]
     
     set win [eAssist_Global::detectWin -k .dest]
     ${log}::debug Current Window: $win
@@ -75,83 +77,231 @@ proc eAssistHelper::addDestination {tblPath} {
 	pack $w(dest) -fill both -expand yes  -pady 5p -padx 5p
     
     ttk::button $w(dest).btn1 -text [mc "Select an Address..."] -command {} -state disabled
-	
-    ttk::label $w(dest).txt1 -text [mc "Attention"]
-	ttk::entry $w(dest).getAttention -textvariable newAddr(Attention)
-	
-	ttk::label $w(dest).txt2 -text [mc "Company"] -fg red
-	ttk::entry $w(dest).getCompany -textvariable newAddr(Company)
-	
-	ttk::label $w(dest).txt3 -text [mc "Address1/Address2"] -fg red
-	ttk::entry $w(dest).getAddress1 -textvariable newAddr(Address1)
-	ttk::entry $w(dest).getAddress2 -textvariable newAddr(Address2)
-	
-	ttk::label $w(dest).txt4 -text [mc "Address3"]
-	ttk::entry $w(dest).getAddress3 -textvariable newAddr(Address3)
-	
-	ttk::label $w(dest).txt5 -text [mc "City/State/Zip"] -fg red
-	ttk::entry $w(dest).getCity -textvariable newAddr(City)
-	ttk::entry $w(dest).getState -textvariable newAddr(State) -width 3
-	ttk::entry $w(dest).getZip -textvariable newAddr(Zip) -width 10
-	
-	ttk::label $w(dest).txt6 -text [mc "Phone/Country"]
-	ttk::entry $w(dest).getPhone -textvariable newAddr(Phone)
-	ttk::entry $w(dest).getCountry -textvariable newAddr(Country) -width 3
-    
-    ttk::label $w(dest).txt7 -text [mc "Distribution Type"] -fg red
+    ttk::checkbutton $w(dest).chkbtn1 -text [mc "Save to Address Book"]
+
+    ttk::label $w(dest).reqDistType -text [mc "Distribution Type"] -foreground red
     ttk::combobox $w(dest).cbox1 -values $dist(distributionTypes) \
                                 -width 40 \
                                 -state readonly \
                                 -textvariable newAddr(distType) \
                                 -postcommand {}
     
+    ttk::label $w(dest).txt1 -text [mc "Attention"]
+	ttk::entry $w(dest).getAttention -textvariable newAddr(Attention)
+	
+	ttk::label $w(dest).reqCompany -text [mc "Company"] -foreground red
+	ttk::entry $w(dest).getCompany -textvariable newAddr(Company)
+	
+	ttk::label $w(dest).reqAddress1 -text [mc "Address1"] -foreground red
+	ttk::entry $w(dest).getAddress1 -textvariable newAddr(Address1)
+    
+    ttk::label $w(dest).txt3a -text [mc "Address2"]
+	ttk::entry $w(dest).getAddress2 -textvariable newAddr(Address2)
+	
+	ttk::label $w(dest).txt4 -text [mc "Address3"]
+	ttk::entry $w(dest).getAddress3 -textvariable newAddr(Address3)
+	
+	ttk::label $w(dest).reqCity -text [mc "City"] -foreground red
+	ttk::entry $w(dest).getCity -textvariable newAddr(City)
+    
+    ttk::label $w(dest).reqState -text [mc "State"] -foreground red
+	ttk::entry $w(dest).getState -textvariable newAddr(State) -width 3
+    
+    ttk::label $w(dest).reqZip -text [mc "Zip"] -foreground red
+	ttk::entry $w(dest).getZip -textvariable newAddr(Zip) -width 10
+	
+	ttk::label $w(dest).txt6 -text [mc "Phone/Country"]
+	ttk::entry $w(dest).getPhone -textvariable newAddr(Phone)
+	ttk::entry $w(dest).getCountry -textvariable newAddr(Country) -width 3
+    
     ttk::label $w(dest).txt8 -text [mc "Email"]
     ttk::entry $w(dest).getEmail -textvariable newAddr(Email)
 	
 	#----- Grid
-    grid $w(dest).btn1 -column 1 -row 0 -sticky w
-	grid $w(dest).txt1 -column 0 -row 1 -sticky nes -padx 3p -pady 2p
-	grid $w(dest).getAttention -column 1 -row 1 -sticky news
+    grid $w(dest).btn1 -column 1 -row 0 -sticky w -padx 3p -pady 3p
+    grid $w(dest).chkbtn1 -column 2 -row 0 -sticky w -padx 3p -pady 1p
+    
+    grid $w(dest).reqDistType -column 0 -row 1 -sticky nes -padx 3p -pady 2p
+    grid $w(dest).cbox1 -column 1 -row 1 -columnspan 3 -padx 2p -pady 1p -sticky news
+    
+	grid $w(dest).txt1 -column 0 -row 2 -sticky nes -padx 3p -pady 2p
+	grid $w(dest).getAttention -column 1 -columnspan 3 -row 2 -padx 2p -pady 1p -sticky news
 		
-	grid $w(dest).txt2 -column 0 -row 2 -sticky nes -padx 3p -pady 2p
-	grid $w(dest).getCompany -column 1 -row 2 -sticky news
+	grid $w(dest).reqCompany -column 0 -row 3 -sticky nes -padx 3p -pady 2p
+	grid $w(dest).getCompany -column 1 -columnspan 3 -row 3 -padx 2p -pady 1p -sticky news
 	
-	grid $w(dest).txt3 -column 0 -row 3 -sticky nes -padx 3p -pady 2p
-	grid $w(dest).getAddress1 -column 1 -row 3 -sticky news
-	grid $w(dest).getAddress2 -column 2 -columnspan 2 -row 3 -sticky news
-	
-	grid $w(dest).txt4 -column 0 -row 4 -sticky nes -padx 3p -pady 2p
-	grid $w(dest).getAddress3 -column 1 -columnspan 3 -row 4 -sticky news
-	
-	grid $w(dest).txt5 -column 0 -row 5 -sticky nes -padx 3p -pady 2p
-	grid $w(dest).getCity -column 1 -row 5 -sticky news
-	grid $w(dest).getState -column 2 -row 5 -sticky news 
-	grid $w(dest).getZip -column 3 -columnspan 1 -row 5 -sticky news
-	
-	grid $w(dest).txt6 -column 0 -row 6 -sticky nes -padx 3p -pady 2p
-	grid $w(dest).getPhone -column 1 -row 6 -sticky news
-	grid $w(dest).getCountry -column 2 -row 6 -sticky news
+	grid $w(dest).reqAddress1 -column 0 -row 4 -sticky nes -padx 3p -pady 2p
+	grid $w(dest).getAddress1 -column 1 -columnspan 3 -row 4 -padx 2p -pady 1p -sticky news
     
-    grid $w(dest).txt7 -column 0 -row 7 -sticky nes -padx 3p -pady 2p
-    grid $w(dest).cbox1 -column 1 -row 7 -sticky news
+    grid $w(dest).txt3a -column 0 -row 5 -sticky nes -padx 2p -pady 2p
+	grid $w(dest).getAddress2 -column 1 -columnspan 3 -row 5 -padx 2p -pady 1p -sticky news
+	
+	grid $w(dest).txt4 -column 0 -row 6 -sticky nes -padx 3p -pady 2p
+	grid $w(dest).getAddress3 -column 1 -columnspan 3 -row 6 -padx 2p -pady 1p -sticky news
+	
+	grid $w(dest).reqCity -column 0 -row 7 -sticky nes -padx 3p -pady 2p
+	grid $w(dest).getCity -column 1 -columnspan 3 -row 7 -padx 1p -pady 1p -sticky news
     
-    grid $w(dest).txt8 -column 0 -row 8 -sticky nes -padx 3p -pady 2p
-    grid $w(dest).getEmail -column 1 -row 8 -sticky news
+    grid $w(dest).reqState -column 0 -row 8 -padx 3p -pady 2p -sticky nes
+	grid $w(dest).getState -column 1 -columnspan 3 -row 8 -padx 1p -pady 1p -sticky w
+    
+    grid $w(dest).reqZip -column 0 -row 9 -padx 3p -pady 2p -sticky nes
+	grid $w(dest).getZip -column 1 -row 9 -columnspan 3 -padx 1p -pady 1p -sticky w
+	
+	grid $w(dest).txt6 -column 0 -row 10 -sticky nes -padx 3p -pady 2p
+	grid $w(dest).getPhone -column 1 -row 10 -padx 1p -pady 1p -sticky news
+	grid $w(dest).getCountry -column 2 -row 10 -pady 1p -sticky news
+        
+    grid $w(dest).txt8 -column 0 -row 11 -sticky nes -padx 3p -pady 2p
+    grid $w(dest).getEmail -column 1 -columnspan 3 -row 11 -padx 2p -pady 1p -sticky news
 	
     # ---- BUTTON BAR
     set btnbar [ttk::frame $win.btnbar]
-    pack $btnbar -pady 5 -padx 5p -anchor se
+    pack $btnbar -pady 5 -padx 10p -anchor se
     
 	ttk::button $btnbar.close -text [mc "Close"] -command [list destroy $win]
-    ttk::button $btnbar.save -text [mc "Save"] -command [list eAssistHelper::saveNewDest $w(dest) $tblPath]
+    ttk::button $btnbar.save -text [mc "Save"] -command [list eAssistHelper::saveNewDest $w(dest) $tblPath] -state disabled
 	
     #--------- Grid
-    grid $btnbar.close -column 0 -row 0 -sticky news
-    grid $btnbar.save -column 1 -row 0 -sticky news
+    grid $btnbar.close -column 0 -row 0 -sticky news -padx 5p -pady 5p
+    grid $btnbar.save -column 1 -row 0 -sticky news -pady 5p
 	
-    ${log}::debug --END -- [info level 1]
     
+    #------- Bindings
+    set reqWin [list getCompany getAddress1 getCity getState getZip]
+    foreach win $reqWin {
+        bind $w(dest).$win <KeyRelease> "eAssistHelper::detectData $win $btnbar.save"
+        ${log}::debug BIND - $w(dest).$win <KeyRelease> "eAssistHelper::detectData $win"
+    }
+    
+    bind $w(dest).cbox1 <<ComboboxSelected>> "eAssistHelper::detectData cbox1 $btnbar.save"
+    
+    ${log}::debug --END -- [info level 1]
 } ;# End eAssistHelper::addDestination
+
+
+
+proc eAssistHelper::detectData {args} {
+    #****f* detectData/eAssistHelper
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2013 Casey Ackels
+    #
+    # FUNCTION
+    #	eAssistHelper:detectData <args> ?args...?
+    #
+    # SYNOPSIS
+    #   This is used in a Binding
+    #
+    # CHILDREN
+    #	eAssistHelper::setBGColor
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log unlockBtn
+    ${log}::debug --START-- [info level 1]
+    
+    #if {[info exists tempVars]} {unset tempVars}
+    #
+    ## Setup the tmp array
+    #if {![info exists tempVars]} {
+    #    # Detect if we exist, if not set the array.
+    #    array set tempVars {
+    #        getCompany ""
+    #        getAddress1 ""
+    #        getCity ""
+    #        getState ""
+    #        getZip ""
+    #        getCbox ""
+    #    }
+    #    set unlockBtn 0
+    #}
+    
+    set args1 [lindex $args 0]
+    set btnPath [lindex $args 1]
+    
+    switch -- $args1 {
+        getCompany     {eAssistHelper::setBGColor getCompany reqCompany $btnPath}
+        getAddress1    {eAssistHelper::setBGColor getAddress1 reqAddress1 $btnPath}
+        getCity        {eAssistHelper::setBGColor getCity reqCity $btnPath}
+        getState       {eAssistHelper::setBGColor getState reqState $btnPath}
+        getZip         {eAssistHelper::setBGColor getZip reqZip $btnPath}
+        cbox1          {eAssistHelper::setBGColor cbox1 reqDistType $btnPath}
+        default        {${log}::debug No known args founds, received this instead: $args}
+    }
+	
+    
+    ${log}::debug --END-- [info level 1]
+} ;# eAssistHelper::detectData
+
+
+proc eAssistHelper::setBGColor {args} {
+    #****f* setBGColor/eAssistHelper
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2013 Casey Ackels
+    #
+    # FUNCTION
+    #	eAssistHelper::setBGColor <win>
+    #
+    # SYNOPSIS
+    #   Set the foreground color on the text for the required fields
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	eAssistHelper::detectData
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log w
+    ${log}::debug --START-- [info level 1]
+    set bgFilled "configure -foreground black"
+    set bgEmpty "configure -foreground red"
+    
+    set win [lindex $args 0]
+    set txt [lindex $args 1]
+    set btnPath [lindex $args 2]
+    
+    #${log}::debug win: $win
+    #${log}::debug [$w(dest).$win get]
+    
+    if {[$w(dest).$win get] != ""} {
+        ${log}::debug Entry has data, turn txt to black.
+        $w(dest).$txt configure -foreground black
+    } else {
+        ${log}::debug Entry does NOT have data
+        $w(dest).$txt configure -foreground red
+    }
+    
+    set fail no
+    foreach child [winfo children $w(dest)] {
+        if {[string match -nocase *req* $child] == 1} {
+            if {[$child cget -foreground] eq "red"} {
+                set fail yes
+            }
+        }
+    }
+    
+    if {$fail eq "no"} {$btnPath configure -state normal}
+    
+	
+    ${log}::debug --END-- [info level 1]
+} ;# eAssistHelper::setBGColor
 
 
 proc eAssistHelper::saveNewDest {win tblPath} {

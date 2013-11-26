@@ -172,11 +172,29 @@ proc eAssistHelper::editStartSplit {tbl row col text} {
     ${log}::debug --START-- [info level 1]
         
 		set w [$tbl editwinpath]
+        set calc no
         switch -glob [string tolower [$tbl columncget $col -name]] {
-            "quantity"		{ set splitVers(splitQtyStart) $text}
+            "quantity"		{ set splitVers(splitQtyStart) $text; set calc yes
+                            ${log}::debug Column Data START: [$tbl getcolumns $col]
+                            set colCount [$tbl getcolumns $col]
+                            }
             "distributiontype"  {$w configure -values $dist(distributionTypes) -state readonly}
 			default	{}
         }
+        
+    if {[info exists numTotal]} {unset numTotal}
+    if {$calc eq "yes"} {
+        foreach num $colCount {
+            if {$num ne {}} {
+                ${log}::debug String should be integer: $num
+                lappend numTotal $num
+            }
+        }
+    if {[info exists numTotal]} {
+        ${log}::debug total count: $numTotal
+        }
+    #${log}::debug total count: [expr [join [split $numTotal ""] +]]
+    }
 
     return $text
 
@@ -217,7 +235,7 @@ proc eAssistHelper::editEndSplit {tbl row col text} {
 
     #${log}::debug Column Name: [$tbl columncget $col -name]
     switch -glob [string tolower [$tbl columncget $col -name]] {
-            "quantity"		{ set calc yes; set splitVers(allocated) [eAssistHelper::calcSamples $splitVers(splitQtyStart) $text $splitVers(allocated)] }
+            "quantity"		{set calc yes; set splitVers(allocated) [eAssistHelper::calcSamples $splitVers(splitQtyStart) $text $splitVers(allocated)]}
 			default	{}
     }
     
