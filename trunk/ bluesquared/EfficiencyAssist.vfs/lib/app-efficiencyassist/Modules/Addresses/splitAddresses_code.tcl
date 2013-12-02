@@ -174,8 +174,8 @@ proc eAssistHelper::editStartSplit {tbl row col text} {
 		set w [$tbl editwinpath]
         set calc no
         switch -glob [string tolower [$tbl columncget $col -name]] {
-            "quantity"		{ set splitVers(splitQtyStart) $text; set calc yes
-                            ${log}::debug Column Data START: [$tbl getcolumns $col]
+            "quantity"		{ set calc yes
+                            #${log}::debug Column Data START: [$tbl getcolumns $col]
                             set colCount [$tbl getcolumns $col]
                             }
             "distributiontype"  {$w configure -values $dist(distributionTypes) -state readonly}
@@ -186,14 +186,18 @@ proc eAssistHelper::editStartSplit {tbl row col text} {
     if {$calc eq "yes"} {
         foreach num $colCount {
             if {$num ne {}} {
-                ${log}::debug String should be integer: $num
+                #${log}::debug String should be integer: $num
                 lappend numTotal $num
             }
         }
-    if {[info exists numTotal]} {
-        ${log}::debug total count: $numTotal
-        }
-    #${log}::debug total count: [expr [join [split $numTotal ""] +]]
+		
+		if {[info exists numTotal]} {
+			#${log}::debug total count: $numTotal
+			#${log}::debug [join $numTotal +]
+			#${log}::debug [expr [join $numTotal +]]
+			set splitVers(allocated) [expr [join $numTotal +]]
+			set splitVers(unallocated) [expr $splitVers(totalVersionQty) - $splitVers(allocated)]
+		}
     }
 
     return $text
@@ -231,21 +235,13 @@ proc eAssistHelper::editEndSplit {tbl row col text} {
     ${log}::debug --START-- [info level 1]
         
 	set w [$tbl editwinpath]
-    set calc no
 
     #${log}::debug Column Name: [$tbl columncget $col -name]
     switch -glob [string tolower [$tbl columncget $col -name]] {
-            "quantity"		{set calc yes; set splitVers(allocated) [eAssistHelper::calcSamples $splitVers(splitQtyStart) $text $splitVers(allocated)]}
+            "quantity"		{}
 			default	{}
     }
-    
-    if {$calc ne "no"} { 
-        if {$splitVers(unallocated) == ""} {
-            set splitVers(unallocated) $splitVers(totalVersionQty)
-        }
-        set splitVers(unallocated) [expr {$splitVers(totalVersionQty) - $splitVers(allocated)}]
-    }
-    
+	
     return $text
 
     ${log}::debug --END-- [info level 1]

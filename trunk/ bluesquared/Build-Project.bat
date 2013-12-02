@@ -43,7 +43,7 @@ GOTO BUILDPROJECT
 set programName=EfficiencyAssist
 set programEXE=EfficiencyAssist.vfs
 
-set thirdparty=about autoscroll csv debug IconThemes img log sqlite3 tablelist5.4 tcom3.9 tkdnd2.2 tooltip twapi  
+set thirdparty=about autoscroll csv debug IconThemes img log md5 sqlite3 tablelist5.10 tcom3.9 tkdnd2.2 tooltip twapi
 
 GOTO BUILDPROJECT
 
