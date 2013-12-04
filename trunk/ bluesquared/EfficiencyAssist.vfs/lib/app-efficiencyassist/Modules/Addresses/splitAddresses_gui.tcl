@@ -92,7 +92,9 @@ proc eAssistHelper::splitVersions {} {
     set splitVers(activeVersion) [lindex $process(versionList) 0]
     
     bind $f1.cbox1 <<ComboboxSelected>> {
+		${log}::debug SaveData [$w(sVersf2).tbl get 0 end]
         eAssistHelper::displayVerQty $splitVers(activeVersion)
+		eAssistHelper::calcColumn $w(sVersf2).tbl quantity
     }
     
     grid $f1.txt1 -column 0 -row 0 -sticky e -padx 2p -pady 2p
@@ -116,11 +118,11 @@ proc eAssistHelper::splitVersions {} {
     pack $f2b -fill both -pady 5p -padx 5p 
 
     ttk::label $f2b.txt5 -text [mc "Allocated"]
-        set splitVers(allocated) ""
+        set splitVers(allocated) 0
     ttk::label $f2b.txt6 -textvariable splitVers(allocated)
     
     ttk::label $f2b.txt7 -text [mc "Unallocated"]
-        set splitVers(unallocated) ""
+        set splitVers(unallocated) $splitVers(totalVersionQty)
     ttk::label $f2b.txt8 -textvariable splitVers(unallocated)
     
     #---- Grid
@@ -168,13 +170,11 @@ proc eAssistHelper::splitVersions {} {
 	set w(sVersBtn) [ttk::frame .splitVersions.btn]
 	pack $w(sVersBtn) -side bottom -anchor se -pady 8p -padx 5p
     
-    ttk::button $w(sVersBtn).btn1 -text [mc "Close"] -command {destroy .splitVersions}
-    ttk::button $w(sVersBtn).btn2 -text [mc "Add"]
-    ttk::button $w(sVersBtn).btn3 -text [mc "Add -> Next"]
+    ttk::button $w(sVersBtn).btn1 -text [mc "Cancel"] -command {destroy .splitVersions}
+    ttk::button $w(sVersBtn).btn2 -text [mc "OK"]
     
     grid $w(sVersBtn).btn1 -column 0 -row 0 -padx 2p -pady 2p
 	grid $w(sVersBtn).btn2 -column 1 -row 0 -padx 2p -pady 2p
-    grid $w(sVersBtn).btn3 -column 2 -row 0 -padx 2p -pady 2p
     
     ${log}::debug --END -- [info level 1]
 } ;# eAssistHelper::splitVersions

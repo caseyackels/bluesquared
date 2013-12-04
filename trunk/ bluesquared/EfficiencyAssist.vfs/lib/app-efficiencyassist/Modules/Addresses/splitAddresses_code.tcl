@@ -110,7 +110,7 @@ proc eAssistHelper::splitInsertData {splitTable mainTable} {
             distributiontype    {set vHide no; set vEditable yes; set vWindow ttk::combobox}
             default         {set vHide yes; set vEditable no; set vWindow ttk::entry}
         }
-        ${log}::debug ColumnName: $ColumnName, hide: $vHide, editable: $vEditable, window: $vWindow
+        #${log}::debug ColumnName: $ColumnName, hide: $vHide, editable: $vEditable, window: $vWindow
         $w(sVersf2).tbl columnconfigure $x -name $ColumnName -labelalign center -editable $vEditable -hide $vHide -editwindow $vWindow      
     }
 
@@ -174,31 +174,12 @@ proc eAssistHelper::editStartSplit {tbl row col text} {
 		set w [$tbl editwinpath]
         set calc no
         switch -glob [string tolower [$tbl columncget $col -name]] {
-            "quantity"		{ set calc yes
-                            #${log}::debug Column Data START: [$tbl getcolumns $col]
-                            set colCount [$tbl getcolumns $col]
-                            }
+            "quantity"		{ set calc yes}
             "distributiontype"  {$w configure -values $dist(distributionTypes) -state readonly}
 			default	{}
         }
         
-    if {[info exists numTotal]} {unset numTotal}
-    if {$calc eq "yes"} {
-        foreach num $colCount {
-            if {$num ne {}} {
-                #${log}::debug String should be integer: $num
-                lappend numTotal $num
-            }
-        }
-		
-		if {[info exists numTotal]} {
-			#${log}::debug total count: $numTotal
-			#${log}::debug [join $numTotal +]
-			#${log}::debug [expr [join $numTotal +]]
-			set splitVers(allocated) [expr [join $numTotal +]]
-			set splitVers(unallocated) [expr $splitVers(totalVersionQty) - $splitVers(allocated)]
-		}
-    }
+
 
     return $text
 
@@ -238,11 +219,83 @@ proc eAssistHelper::editEndSplit {tbl row col text} {
 
     #${log}::debug Column Name: [$tbl columncget $col -name]
     switch -glob [string tolower [$tbl columncget $col -name]] {
-            "quantity"		{}
-			default	{}
+            "quantity"	{eAssistHelper::calcColumn $tbl $col}
+			default		{}
     }
 	
     return $text
 
     ${log}::debug --END-- [info level 1]
 } ;# eAssistHelper::editEndSplit
+
+
+proc eAssistHelper::calcColumn {tbl args} {
+    #****f* calcColumn/eAssistHelper
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2013 Casey Ackels
+    #
+    # FUNCTION
+    #	eAssistHelper::calcColumn <args>
+    #
+    # SYNOPSIS
+	#	Calculates a column of data. If it contains data other than numerics this proc will choke on it.
+	#	Args must be either: $col -or- "quantity"
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+	#	To be used in conjunction with a start or end edit command for a tablelist
+	#	This has a dependency on the global variable: splitVers
+	#	**This will only work with the Split Quantity Table!**
+    #
+    # SEE ALSO
+    #
+    #***
+    global log splitVers
+    ${log}::debug --START-- [info level 1]
+	
+	if {[info exists numTotal]} {unset numTotal}
+    
+	# Check to see if the vars contain data, if they don't, then we'll cycle through to find which column contains the Quantity column.
+	if {$args ne "quantity"} {
+	
+		set colCount [$tbl getcolumns $args]
+		
+	} else {
+		for {set x 0} {[$tbl columncount] > $x} {incr x} {
+			if {[string tolower [$tbl columncget $x -name]] eq $args} {
+				#${log}::debug "Found: [$tbl columncget $x -name]"
+				set colCount [$tbl getcolumns $x]
+			}
+		}
+	}
+	
+	foreach num $colCount {
+		if {$num ne {}} {
+			#${log}::debug String should be integer: $num
+			lappend numTotal $num
+		}
+	}
+	
+	if {[info exists numTotal]} {
+		${log}::debug total count: $numTotal
+		#${log}::debug [join $numTotal +]
+		#${log}::debug [expr [join $numTotal +]]
+		set splitVers(allocated) [expr [join $numTotal +]]
+		set splitVers(unallocated) [expr $splitVers(totalVersionQty) - $splitVers(allocated)]
+	} else {
+		#${log}::debug No data found, set Unallocated to TotalVersionQty
+		set splitVers(unallocated) $splitVers(totalVersionQty)
+	}
+	
+
+	
+    ${log}::debug --END-- [info level 1]
+} ;# eAssistHelper::calcColumn
