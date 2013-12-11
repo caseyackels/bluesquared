@@ -152,7 +152,7 @@ proc eAssistHelper::editStartSplit {tbl row col text} {
     #	(c) 2011-2013 Casey Ackels
     #
     # FUNCTION
-    #	Start Command for editing the Company Sample table
+    #	Start Command for editing the Split table
     #
     # SYNOPSIS
     #
@@ -168,18 +168,20 @@ proc eAssistHelper::editStartSplit {tbl row col text} {
     # SEE ALSO
     #
     #***
-    global log splitVers dist
+    global log splitVers dist w
     ${log}::debug --START-- [info level 1]
         
-		set w [$tbl editwinpath]
-        set calc no
+		set win [$tbl editwinpath]
         switch -glob [string tolower [$tbl columncget $col -name]] {
-            "quantity"		{ set calc yes}
-            "distributiontype"  {$w configure -values $dist(distributionTypes) -state readonly}
+            "quantity"		{eAssistHelper::calcColumn $tbl $col; ${log}::debug calculating ...}
+            "distributiontype"  {$win configure -values $dist(distributionTypes) -state readonly}
 			default	{}
         }
-        
-
+	
+		#${log}::debug SaveData-vers $splitVers(activeVersion)
+		#${log}::debug SaveData-data [$w(sVersf2).tbl get 0 end]
+		# set array to save the data per version
+		set splitVers(data,$splitVers(activeVersion)) [$w(sVersf2).tbl get 0 end]
 
     return $text
 
@@ -215,15 +217,15 @@ proc eAssistHelper::editEndSplit {tbl row col text} {
     global log splitQty splitVers
     ${log}::debug --START-- [info level 1]
         
-	set w [$tbl editwinpath]
+	#set w [$tbl editwinpath]
 
     #${log}::debug Column Name: [$tbl columncget $col -name]
     switch -glob [string tolower [$tbl columncget $col -name]] {
-            "quantity"	{eAssistHelper::calcColumn $tbl $col}
+            "quantity"	{eAssistHelper::calcColumn $tbl $col; ${log}::debug calculating ...}
 			default		{}
     }
-	
-    return $text
+    
+	return $text
 
     ${log}::debug --END-- [info level 1]
 } ;# eAssistHelper::editEndSplit
@@ -295,7 +297,12 @@ proc eAssistHelper::calcColumn {tbl args} {
 		set splitVers(unallocated) $splitVers(totalVersionQty)
 	}
 	
-
+	# Check to see if the splitVers(unallocated) version contains a negative number, if it does turn the text to red.
+	if {$splitVers(unallocated) < 0} {
+		${log}::debug Unallocated is less than zero, change to red!
+		.splitVersions.f2.f2b.txt8 configure -foreground red
+	}
+	
 	
     ${log}::debug --END-- [info level 1]
 } ;# eAssistHelper::calcColumn

@@ -49,7 +49,7 @@ proc eAssistHelper::splitVersions {} {
     #
     #***
     global log w process splitVers files
-    ${log}::debug --START -- [info level 1]
+    ${log}::debug --START-- [info level 1]
     
     if {[winfo exists .splitVersions] == 1} {destroy .splitVersions}
     if {[winfo exists .mb1] == 1} {destroy .mb1}
@@ -91,9 +91,8 @@ proc eAssistHelper::splitVersions {} {
     
     set splitVers(activeVersion) [lindex $process(versionList) 0]
     
-    bind $f1.cbox1 <<ComboboxSelected>> {
-		${log}::debug SaveData [$w(sVersf2).tbl get 0 end]
-        eAssistHelper::displayVerQty $splitVers(activeVersion)
+    bind $f1.cbox1 <<ComboboxSelected>> {      
+		eAssistHelper::displayVerQty $splitVers(activeVersion)
 		eAssistHelper::calcColumn $w(sVersf2).tbl quantity
     }
     
@@ -106,8 +105,9 @@ proc eAssistHelper::splitVersions {} {
     set f2a [ttk::frame $f2.f2a -relief ridge]
     pack $f2a -side left -fill both -pady 5p -padx 5p
     
-    ttk::label $f2a.txt1 -text [mc "Total Version Quantity"]
+	ttk::label $f2a.txt1 -text [mc "Total Version Quantity"]
     ttk::label $f2a.txt2 -textvariable splitVers(totalVersionQty)
+
 
     #---- Grid    
     grid $f2a.txt1 -column 0 -row 0 -sticky e -padx 2p -pady 2p
@@ -123,7 +123,8 @@ proc eAssistHelper::splitVersions {} {
     
     ttk::label $f2b.txt7 -text [mc "Unallocated"]
         set splitVers(unallocated) $splitVers(totalVersionQty)
-    ttk::label $f2b.txt8 -textvariable splitVers(unallocated)
+    ttk::label $f2b.txt8 -textvariable splitVers(unallocated) ;# ;# This is hardcoded in [eAssistHelper::calcColumn]
+	${log}::debug Unallocated $f2b.txt8
     
     #---- Grid
     grid $f2b.txt5 -column 0 -row 0 -sticky e -padx 2p -pady 2p
