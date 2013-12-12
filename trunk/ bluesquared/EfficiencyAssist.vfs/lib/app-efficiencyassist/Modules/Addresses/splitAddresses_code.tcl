@@ -289,7 +289,7 @@ proc eAssistHelper::calcColumn {tbl args} {
 	if {[info exists numTotal]} {
 		${log}::debug total count: $numTotal
 		#${log}::debug [join $numTotal +]
-		#${log}::debug [expr [join $numTotal +]]
+		${log}::debug [expr [join $numTotal +]]
 		set splitVers(allocated) [expr [join $numTotal +]]
 		set splitVers(unallocated) [expr $splitVers(totalVersionQty) - $splitVers(allocated)]
 	} else {
@@ -301,6 +301,8 @@ proc eAssistHelper::calcColumn {tbl args} {
 	if {$splitVers(unallocated) < 0} {
 		${log}::debug Unallocated is less than zero, change to red!
 		.splitVersions.f2.f2b.txt8 configure -foreground red
+	} else {
+		.splitVersions.f2.f2b.txt8 configure -foreground black
 	}
 	
 	
