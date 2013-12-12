@@ -318,6 +318,7 @@ proc importFiles::startCmd {tbl row col text} {
     ${log}::debug --END-- [info level 1]
 } ;#importFiles::startCmd
 
+
 proc importFiles::endCmd {tbl row col text} {
     #****f* endCmd/importFiles
     # AUTHOR
@@ -344,7 +345,7 @@ proc importFiles::endCmd {tbl row col text} {
     #
     #***
     global log headerParams headerParent files
-    ${log}::debug --START -- [info level 1]
+    ${log}::debug --START-- [info level 1]
     
     set ColName [$tbl columncget $col -name]
     
@@ -367,5 +368,5 @@ proc importFiles::endCmd {tbl row col text} {
     
     
 	return $text
-    ${log}::debug --END -- [info level 1]
+    ${log}::debug --END-- [info level 1]
 } ;# importFiles::endCmd

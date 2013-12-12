@@ -50,13 +50,13 @@ proc eAssistHelper::displayVerQty {cVersion} {
     #
     #***
     global log process files splitVers
-    ${log}::debug --START -- [info level 1]
+    ${log}::debug --START-- [info level 1]
     
     set qty [$files(tab3f2).tbl getcolumn Quantity]
     set vPos [lsearch $process(versionList) $cVersion]    
     set splitVers(totalVersionQty) [lindex $qty $vPos]
 
-    ${log}::debug --END -- [info level 1]
+    ${log}::debug --END-- [info level 1]
 } ;# eAssistHelper::displayVerQty
 
 
@@ -86,7 +86,7 @@ proc eAssistHelper::splitInsertData {splitTable mainTable} {
     #
     #***
     global log w files
-    ${log}::debug --START -- [info level 1]
+    ${log}::debug --START-- [info level 1]
     
     set ColumnCount [$files(tab3f2).tbl columncount]
     #set showColumns [list Company Contact Zip Quantity]
@@ -139,7 +139,7 @@ proc eAssistHelper::splitInsertData {splitTable mainTable} {
         incr z
     }
 
-    ${log}::debug --END -- [info level 1]
+    ${log}::debug --END-- [info level 1]
 } ;# eAssistHelper::splitInsertData
 
 
