@@ -267,8 +267,10 @@ proc eAssistHelper::calcColumn {tbl args} {
     
 	# Check to see if the vars contain data, if they don't, then we'll cycle through to find which column contains the Quantity column.
 	if {$args ne "quantity"} {
+		#${log}::debug wasn't called by a binding
 	
 		set colCount [$tbl getcolumns $args]
+		#${log}::debug column count: $colCount
 		
 	} else {
 		for {set x 0} {[$tbl columncount] > $x} {incr x} {
@@ -281,9 +283,12 @@ proc eAssistHelper::calcColumn {tbl args} {
 	
 	foreach num $colCount {
 		if {$num ne {}} {
-			#${log}::debug String should be integer: $num
+			${log}::debug String should be integer: $num
 			lappend numTotal $num
+		} else {
+			set numTotal 0
 		}
+		#${log}::debug numTotal: $numTotal
 	}
 	
 	if {[info exists numTotal]} {
