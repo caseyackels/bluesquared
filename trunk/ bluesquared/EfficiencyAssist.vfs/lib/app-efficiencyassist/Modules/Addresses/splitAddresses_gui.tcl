@@ -94,6 +94,7 @@ proc eAssistHelper::splitVersions {} {
     bind $f1.cbox1 <<ComboboxSelected>> {      
 		eAssistHelper::displayVerQty $splitVers(activeVersion)
 		eAssistHelper::calcColumn $w(sVersf2).tbl quantity
+		eAssistHelper::resetQuantityColumn $splitVers(activeVersion)
     }
     
     grid $f1.txt1 -column 0 -row 0 -sticky e -padx 2p -pady 2p

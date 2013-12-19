@@ -275,21 +275,25 @@ proc eAssistHelper::calcColumn {tbl args} {
 	} else {
 		for {set x 0} {[$tbl columncount] > $x} {incr x} {
 			if {[string tolower [$tbl columncget $x -name]] eq $args} {
+				set splitVers(idx,Quantity) $x
 				#${log}::debug "Found: [$tbl columncget $x -name]"
 				set colCount [$tbl getcolumns $x]
 			}
 		}
 	}
 	
+	set x 0
 	foreach num $colCount {
 		if {$num ne {}} {
 			${log}::debug String should be integer: $num
 			lappend numTotal $num
-		} else {
-			set numTotal 0
+			incr x
 		}
 		#${log}::debug numTotal: $numTotal
 	}
+	
+	#if $x = 0, we know that there is nothing in $colCount as far as integers go
+	if {$x == 0} {set numTotal 0}
 	
 	if {[info exists numTotal]} {
 		${log}::debug total count: $numTotal
@@ -310,6 +314,83 @@ proc eAssistHelper::calcColumn {tbl args} {
 		.splitVersions.f2.f2b.txt8 configure -foreground black
 	}
 	
+	eAssistHelper::saveSplitData
 	
     ${log}::debug --END-- [info level 1]
 } ;# eAssistHelper::calcColumn
+
+
+proc eAssistHelper::saveSplitData {} {
+    #****f* saveSplitData/eAssistHelper
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2013 Casey Ackels
+    #
+    # FUNCTION
+    #	eAssistHelper::saveSplitData
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log w splitVers
+    ${log}::debug --START-- [info level 1]
+    
+	${log}::debug $splitVers(activeVersion) - [$w(sVersf2).tbl get 0 end]
+	set splitVers(qty,$splitVers(activeVersion)) [$w(sVersf2).tbl get 0 end]
+	
+    ${log}::debug --END-- [info level 1]
+} ;# eAssistHelper::saveSplitData
+
+
+proc eAssistHelper::resetQuantityColumn {actVers} {
+    #****f* resetQuantityColumn/eAssistHelper
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2013 Casey Ackels
+    #
+    # FUNCTION
+    #	eAssistHelper::resetQuantityColumn
+    #
+    # SYNOPSIS
+    #	Reset column quantities if saved data doesn't exist, if it does insert the saved data.
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log w splitVers
+    ${log}::debug --START-- [info level 1]
+
+	# Remove all data
+	$w(sVersf2).tbl delete 0,$splitVers(idx,Quantity) end,$splitVers(idx,Quantity)
+
+	# if we've edited this version, lets insert what we've already put in.
+	if {[info exists $splitVers(qty,$actVers)]} {
+		$w(sVersf2).tbl insert $splitVers(qty,$actVers)
+	}
+	
+	
+    ${log}::debug --END-- [info level 1]
+} ;# eAssistHelper::resetQuantityColumn
