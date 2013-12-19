@@ -384,7 +384,11 @@ proc eAssistHelper::resetQuantityColumn {actVers} {
     ${log}::debug --START-- [info level 1]
 
 	# Remove all data
-	$w(sVersf2).tbl delete 0,$splitVers(idx,Quantity) end,$splitVers(idx,Quantity)
+	#$w(sVersf2).tbl delete 0,$splitVers(idx,Quantity) end,$splitVers(idx,Quantity)
+	
+	foreach rowIdx rows {
+		
+	}
 
 	# if we've edited this version, lets insert what we've already put in.
 	if {[info exists $splitVers(qty,$actVers)]} {
