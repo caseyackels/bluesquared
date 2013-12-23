@@ -7,9 +7,9 @@
 #
 # Subversion
 #
-# $Revision: 12 $
-# $LastChangedBy: casey $
-# $LastChangedDate: 2007-02-24 14:12:13 -0800 (Sat, 24 Feb 2007) $
+# $Revision$
+# $LastChangedBy$
+# $LastChangedDate$
 #
 ########################################################################################
 
