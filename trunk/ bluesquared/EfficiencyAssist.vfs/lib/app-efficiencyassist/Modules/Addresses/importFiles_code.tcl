@@ -1,7 +1,6 @@
 # Creator: Casey Ackels
 # Initial Date: March 12, 2011]
-# File Initial Date: 10 07,2013
-# Dependencies: 
+# File Initial Date: 10 07,2013 
 #-------------------------------------------------------------------------------
 #
 # Subversion

@@ -1,0 +1,12 @@
+#**** Program Specific ****#
+program(currentModule) Setup
+program(Version) 4
+program(PatchLevel) 0.0
+program(beta) Alpha
+GS_filePathSetup(enable,Bartender) 1
+GS(gui,lastFrame) logging_GUI
+#**** Setup Specific ****#
+logSettings(displayConsole) 1
+logSettings(loglevel) notice
+logSettings(levels) Debug Info Notice Warn Error Critical Alert Emergency
+boxLabelInfo(labelNames) 
