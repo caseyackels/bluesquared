@@ -107,6 +107,8 @@ ECHO Generating executable file...
 ECHO Please wait...
 cd Builds
 ..\tclkitsh858.exe ..\sdx.kit wrap %programName%.exe -runtime ..\tclkit-858.exe
+::..\tclkit-tcl-win64-86.exe ..\sdx.kit wrap %programName%.exe -runtime ..\tclkit-tk-win64-86.exe
+
 rename %programName%.exe %programName%-%version%.exe
 cd ..
 ECHO Finished Wrapping!

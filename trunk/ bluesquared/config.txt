@@ -1,12 +1,81 @@
 #**** Program Specific ****#
-program(currentModule) Setup
+program(currentModule) Addresses
 program(Version) 4
 program(PatchLevel) 0.0
 program(beta) Alpha
+GS_filePathSetup(checkToggle) 0
+GS_filePathSetup(lookInDirectory) C:/Users/Casey.Ackels/Downloads
+GS_filePathSetup(labelDirectory) 
 GS_filePathSetup(enable,Bartender) 1
-GS(gui,lastFrame) logging_GUI
+GS_filePathSetup(saveInDirectory) C:/Users/Casey.Ackels/Desktop
+GS(gui,lastFrame) selectFilePaths_GUI
 #**** Setup Specific ****#
+company(address2) 
+company(state) OR
+company(city) Portland
+company(address3) 
+company(phone) 503-790-9100
+company(zip) 97210
+company(country) US
+company(contact) Shipping Dept.
+company(addr2) 
+company(addr3) 
+company(address1) 2840 NW 35th Ave
+company(company) Journal Graphics
+logSettings(currentLogLevel) Debug
 logSettings(displayConsole) 1
-logSettings(loglevel) notice
+logSettings(loglevel) debug
 logSettings(levels) Debug Info Notice Warn Error Critical Alert Emergency
-boxLabelInfo(labelNames) 
+boxLabelInfo(currentBoxLabel) 4Line
+boxLabelInfo(labelNames) 4Line
+boxLabelInfo(4Line,labelSetup) 5 C:/Users/Casey.Ackels/Downloads
+intlSetup(PAYERList) SENDER THIRDPARTY
+intlSetup(UOMList) Each Box
+intlSetup(enterLicense) 
+intlSetup(enterTerms) 
+intlSetup(LICENSEList) NLR
+intlSetup(TERMSList) DDP
+intlSetup(enterUOM) 
+intlSetup(enterPayer) 
+headerParent(headerList) Company Attention Address1 Address2 Address3 City State Zip Country Phone Version Quantity Notes ShipDate DistributionType CarrierMethod 3rdPartyBilling ArriveDate
+headerParent(whiteList) DistributionType CarrierMethod
+headerAddress(Address2) addr2 add2 addressline2 {address line 2}
+headerAddress(State) state st st. province state/province
+headerAddress(Address3) add3 addr3 addressline3 {address line 3}
+headerAddress(City) city
+headerAddress(DistributionType) distributiontype {dist type}
+headerAddress(ShipDate) {ship date} ship shipdate
+headerAddress(Attention) Atten attn attention contact {contact name} name
+headerAddress(ShipTo) {Ship To}
+headerAddress(CarrierMethod) carrier carriermethod
+headerAddress(Notes) {user notes} notes
+headerAddress(3rdPartyBilling) 3rdpartybilling
+headerAddress(Phone) phone ph
+headerAddress(Zip) zip {postal code}
+headerAddress(Country) country
+headerAddress(Version) version vers
+headerAddress(ArriveDate) arrivedate
+headerAddress(Quantity) qty copies quantity
+headerAddress(Company) destination company {company name}
+headerAddress(Address1) add1 addr {Address Line 1} addressline1 Address addr1
+headerParams(Address2) 32 ShipToAddressLine2 ttk::entry {}
+headerParams(Address3) 32 ShipToAddressLine3 ttk::entry {}
+headerParams(City) 24 ShipToCity ttk::entry {}
+headerParams(State) 2 ShipToState ttk::entry {}
+headerParams(DistributionType) 32 DistributionType ttk::combobox {}
+headerParams(ShipDate) 10 ShipToDate ttk::entry {}
+headerParams(Attention) 24 ShipToAttention ttk::entry {}
+headerParams(CarrierMethod) 32 CarrierMethod ttk::combobox {}
+headerParams(Notes) 200 UserNotes ttk::entry {}
+headerParams(3rdPartyBilling) 20 3rdPartyBilling ttk::entry {}
+headerParams(Phone) 20 ShipToPhone ttk::entry {}
+headerParams(Zip) 10 ShipToPostalCode ttk::entry {}
+headerParams(Country) 24 ShipToCountry ttk::entry {}
+headerParams(Version) 30 Version ttk::combobox {}
+headerParams(Company) 32 ShipToCompany ttk::entry red
+headerParams(Quantity) 22 ShipQuantity ttk::entry {}
+headerParams(Address1) 32 ShipToAddressLine1 ttk::entry {}
+headerParams(ArriveDate) 10 ArriveDate ttk::entry {}
+dist(distributionTypes) {01. Customer Samples} {02. Internal Samples} {03. Customer Copies} {04. Freight} {05. Small Package} {06. JG Mail} {07. UPS Import} {08. JG Inventory} {09. USPS Import} {10. Overs} {11. Buy-Out Bindery} {12. Buy-Out Press} {13. FedEx Import}
+setup(smallPackageCarrierName) UPS FedEX UPS-NRI
+setup(smallPackageCarriers) {UPS 947919 {}} {FedEX 5555555 {}} {UPS-NRI 5656566 {}}
