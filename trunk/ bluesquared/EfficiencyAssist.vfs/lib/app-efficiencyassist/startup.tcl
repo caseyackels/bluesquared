@@ -103,7 +103,7 @@ proc 'eAssist_sourceReqdFiles {} {
 
 	## 3rd Party modules
 	package require tkdnd
-	package require Tablelist_tile 5.4
+	package require Tablelist_tile 5.10
     package require tcom
     #package require twapi
 	package require tooltip

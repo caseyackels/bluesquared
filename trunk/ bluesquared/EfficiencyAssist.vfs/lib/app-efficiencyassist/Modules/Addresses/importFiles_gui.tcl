@@ -391,15 +391,15 @@ proc importFiles::initMenu {} {
     ${log}::debug --START -- [info level 1]
     
     $mb delete 2
-    menu $mb.dist -tearoff 0 -relief raised -bd 2
+    #menu $mb.dist -tearoff 0 -relief raised -bd 2
     $mb insert 2 cascade -label [mc "Distribution"] -menu $mb.dist
     
     
-    $mb.dist add command -label [mc "Filters"] -command {eAssistHelper::filters}
-    $mb.dist add command -label [mc "Internal Samples"] -command {eAssistHelper::addCompanySamples}
-    $mb.dist add command -label [mc "Split"] -command {eAssistHelper::splitVersions}
-    $mb.dist add separator
-    $mb.dist add command -label [mc "Preferences"] -command {eAssistPref::launchPreferences}
+    #$mb.dist add command -label [mc "Filters"] -command {eAssistHelper::filters}
+    #$mb.dist add command -label [mc "Internal Samples"] -command {eAssistHelper::addCompanySamples}
+    #$mb.dist add command -label [mc "Split"] -command {eAssistHelper::splitVersions}
+    #$mb.dist add separator
+    #$mb.dist add command -label [mc "Preferences"] -command {eAssistPref::launchPreferences}
 	
     ${log}::debug --END -- [info level 1]
 } ;# importFiles::initMenu

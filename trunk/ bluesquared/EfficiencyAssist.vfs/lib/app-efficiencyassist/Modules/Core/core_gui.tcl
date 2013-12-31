@@ -88,7 +88,7 @@ proc eAssist::parentGUI {} {
     $mb add cascade -label [mc "Module"] -menu $mb.module
 
     $mb.module add command -label [mc "Box Labels"] -command {eAssist::buttonBarGUI BoxLabels}
-    $mb.module add command -label [mc "Batch Imports"] -command {eAssist::buttonBarGUI Addresses}
+    $mb.module add command -label [mc "Batch Maker"] -command {eAssist::buttonBarGUI Addresses}
     $mb.module add command -label [mc "Setup"] -command {eAssist::buttonBarGUI Setup}
 
     ## Help
