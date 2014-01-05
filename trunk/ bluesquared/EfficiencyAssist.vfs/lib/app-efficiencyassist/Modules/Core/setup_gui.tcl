@@ -82,7 +82,7 @@ proc eAssistSetup::eAssistSetup {} {
     # Create groups and children
     # 
     # *** Add your new options to: eAssistSetup::selectionChanged
-    set tree(groups) {BoxLabels BatchAddresses DistTypes Company Logging}
+    set tree(groups) {BoxLabels BatchMaker DistTypes Company Logging}
     
     set tree(BoxLabelsChildren) [list Paths Labels Delimiters BoxHeaders ShipMethod Misc.] ;# when changing these, also change them in eAssistSetup::selectionChanged
         set BoxLabelsChildren_length [llength $tree(BoxLabelsChildren)] ;# so we can add new tree items without having to adjust manually. Used in following childLists.

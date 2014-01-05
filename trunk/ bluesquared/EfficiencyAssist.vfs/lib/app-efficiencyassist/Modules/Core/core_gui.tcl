@@ -59,7 +59,7 @@ proc eAssist::parentGUI {} {
     #	N/A
     #
     #***
-    global settings program mySettings currentModule btn log mb
+    global settings program mySettings currentModule btn log mb wait
 
     wm geometry . 640x610 ;# Width x Height
     
@@ -123,10 +123,10 @@ proc eAssist::parentGUI {} {
     set btn(Bar) [ttk::frame .btnBar]
     pack $btn(Bar) -side bottom -anchor e -pady 13p -padx 5p
     
-    ttk::button $btn(Bar).print
-    ttk::button $btn(Bar).close
-    grid $btn(Bar).print -column 0 -row 3 -sticky nse -padx 8p
-    grid $btn(Bar).close -column 1 -row 3 -sticky nse
+    ttk::button $btn(Bar).btn1
+    ttk::button $btn(Bar).btn2
+    #grid $btn(Bar).print -column 0 -row 3 -sticky nse -padx 8p
+    #grid $btn(Bar).close -column 1 -row 3 -sticky nse
     
     eAssist::buttonBarGUI $program(currentModule)
 
@@ -164,7 +164,7 @@ proc eAssist::buttonBarGUI {module} {
     #	Casey Ackels
     #
     # COPYRIGHT
-    #	(c) 2011-2013 Casey Ackels
+    #	(c) 2011-2014 Casey Ackels
     #
     # FUNCTION
     #	re-configure the button bar as needed, depending on what 'mode' we are in, or going to.
@@ -189,27 +189,109 @@ proc eAssist::buttonBarGUI {module} {
   
     switch -- $module {
         BoxLabels   {
-            Shipping_Gui::shippingGUI
+            # .. save the settings as soon as we enter this mode
             eAssistSetup::SaveGlobalSettings
-            $btn(Bar).print configure -text [mc "Print Labels"] -command {} -state disabled
-            $btn(Bar).close configure -text [mc "Exit"] -command {exit}
+            # .. setup the buttons on the button bar
+            eAssist::remButtons $btn(Bar)
+            eAssist::addButtons [mc "Print Labels"] {} btn1 0 8p
+            eAssist::addButtons [mc "Exit"] exit btn2 1 0p
+            # .. launch the mode
+            Shipping_Gui::shippingGUI
         }
         Addresses   {
-            importFiles::eAssistGUI
+            # .. save the settings as soon as we enter this mode
             eAssistSetup::SaveGlobalSettings
+            # .. setup the buttons on the button bar
             importFiles::initMenu
-            $btn(Bar).print configure -text [mc "Import File"] -command {eAssist_Helper::checkForErrors} -state disabled
-            $btn(Bar).close configure -text [mc "Exit"] -command {exit}
+            eAssist::remButtons $btn(Bar)
+            eAssist::addButtons [mc "Export Files"] exit btn1 0 2p
+            # .. launch the mode
+            importFiles::eAssistGUI
             }
         Setup       {
-            eAssistSetup::eAssistSetup
+            # .. save the settings as soon as we enter this mode
             eAssistSetup::SaveGlobalSettings
-            $btn(Bar).print configure -text [mc "Save"] -command {eAssistSetup::SaveGlobalSettings} -state enable
-            $btn(Bar).close configure -text [mc "Exit"] -command {exit}
+            # .. setup the buttons on the button bar
+            eAssist::remButtons $btn(Bar)
+            eAssist::addButtons [mc "Save"] eAssistSetup::SaveGlobalSettings btn1 0 8p
+            eAssist::addButtons [mc "Exit"] exit btn2 1 0p
+            # .. launch the mode
+            eAssistSetup::eAssistSetup
         }
         default     {}
     }
     
-
-    
 } ;# buttonBarGUI
+
+
+proc eAssist::addButtons {text command btn1 column padX} {
+    #****f* addButtons/eAssist
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	Add one button for each invocation to the Button Bar
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log btn
+    ${log}::debug --START-- [info level 1]
+    
+    {*}$btn(Bar).$btn1 configure -text $text -command $command
+    grid $btn(Bar).$btn1 -column $column -row 3 -sticky nse -padx $padX
+	
+    ${log}::debug --END-- [info level 1]
+} ;# eAssist::addButtons
+
+
+proc eAssist::remButtons {path} {
+    #****f* remButtons/eAssist
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	Remove all widgets that exist in the slave, used in conjunction with eAssist::addButtons
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #   eAssist::addButtons
+    #***
+    global log
+    ${log}::debug --START-- [info level 1]
+
+    if {[grid slaves $path] != ""} { 
+        foreach value [grid slaves $path] {
+            grid forget $value
+        }
+    }
+	
+    ${log}::debug --END-- [info level 1]
+} ;# eAssist::remButtons
