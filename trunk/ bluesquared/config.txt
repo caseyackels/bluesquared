@@ -1,5 +1,5 @@
 #**** Program Specific ****#
-program(currentModule) Addresses
+program(currentModule) Setup
 program(Version) 4
 program(PatchLevel) 0.0
 program(beta) Alpha
@@ -8,7 +8,7 @@ GS_filePathSetup(lookInDirectory) C:/Users/Casey.Ackels/Downloads
 GS_filePathSetup(labelDirectory) 
 GS_filePathSetup(enable,Bartender) 1
 GS_filePathSetup(saveInDirectory) C:/Users/Casey.Ackels/Desktop
-GS(gui,lastFrame) selectFilePaths_GUI
+GS(gui,lastFrame) addressHeaders_GUI
 #**** Setup Specific ****#
 company(address2) 
 company(state) OR

@@ -121,6 +121,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	package require eAssist_importFiles
 	package require aboutwindow
 	package require boxlabels
+	package require eAssist_tools
     
 
 
