@@ -395,7 +395,7 @@ proc importFiles::initMenu {} {
     
     $mb insert 2 cascade -label [mc "Distribution"] -menu $mb.dist
     
-    $mb.dist add command -label [mc "Filters"] -command {eAssistHelper::filters}
+    #$mb.dist add command -label [mc "Filters"] -command {eAssistHelper::filters}
     $mb.dist add command -label [mc "Filter Editor"] -command {eAssist_tools::FilterEditor}
     $mb.dist add command -label [mc "Internal Samples"] -command {eAssistHelper::addCompanySamples}
     $mb.dist add command -label [mc "Split"] -command {eAssistHelper::splitVersions}

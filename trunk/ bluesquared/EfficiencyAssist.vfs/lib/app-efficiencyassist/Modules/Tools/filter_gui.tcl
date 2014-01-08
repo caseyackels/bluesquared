@@ -75,19 +75,20 @@ proc eAssist_tools::FilterEditor {} {
     pack $frame1
     
     set btnBar [ttk::frame .filterEditor.btnBar]
-    pack $btnBar
+    pack $btnBar -anchor se
     
     
     # .. Frame 1 - create the children widgets
-    ttk::checkbutton $frame1.chkbtn1 -text [mc "Remove Hi-Bit Characters"] -command {${log}::debug Removing Hi-Bit Characters}
-    ttk::checkbutton $frame1.chkbtn2 -text [mc "Remove Control Characters"] -command {${log}::debug Removing Control Characters}
-    ttk::checkbutton $frame1.chkbtn3 -text [mc "Remove Leading White Space"] -command {${log}::debug Removing Leading White Space}
-    ttk::checkbutton $frame1.chkbtn4 -text [mc "Remove Trailing White Space"] -command {${log}::debug Removing Trailing White Space}
+    ttk::checkbutton $frame1.chkbtn1 -text [mc "Remove Hi-Bit Characters"] ;#-command {${log}::debug Removing Hi-Bit Characters}
+    ttk::checkbutton $frame1.chkbtn2 -text [mc "Remove Control Characters"] ;#-command {${log}::debug Removing Control Characters}
+    ttk::checkbutton $frame1.chkbtn3 -text [mc "Remove Leading/Trailing White Space"] ;#-command {${log}::debug Removing Leading White Space}
+    ttk::checkbutton $frame1.chkbtn4 -text [mc "Abbreviate words in address"] ;#-commnd {${log}::debug Abbreviate words ...}
+        tooltip::tooltip $frame1.chkbtn4 [mc "Affects only the columns: Address1, Address2 and State"]
     
-    grid $frame1.chkbtn1 -column 0 -row 0 -pady 2p -padx 5p
-    grid $frame1.chkbtn2 -column 0 -row 1 -pady 2p -padx 5p
-    grid $frame1.chkbtn3 -column 0 -row 2 -pady 2p -padx 5p
-    grid $frame1.chkbtn4 -column 0 -row 3 -pady 2p -padx 5p
+    grid $frame1.chkbtn1 -column 0 -row 0 -pady 2p -padx 5p -sticky w
+    grid $frame1.chkbtn2 -column 0 -row 1 -pady 2p -padx 5p -sticky w
+    grid $frame1.chkbtn3 -column 0 -row 2 -pady 2p -padx 5p -sticky w
+    grid $frame1.chkbtn4 -column 0 -row 3 -pady 2p -padx 5p -sticky w
     
     
     
@@ -95,8 +96,8 @@ proc eAssist_tools::FilterEditor {} {
     ttk::button $btnBar.cancel -text [mc "Cancel"] -command {destroy .filterEditor}
     ttk::button $btnBar.ok -text [mc "Ok"] -command {destroy .filterEditor}
     
-    grid $btnBar.cancel -column 0 -row 0 -sticky se
-    grid $btnBar.ok -column 1 -row 0 -sticky se
+    grid $btnBar.cancel -column 0 -row 0 -pady 5p -padx 5p -sticky se
+    grid $btnBar.ok -column 1 -row 0 -pady 5p -padx 5p -sticky se
     
 	
     ${log}::debug --END-- [info level 1]
