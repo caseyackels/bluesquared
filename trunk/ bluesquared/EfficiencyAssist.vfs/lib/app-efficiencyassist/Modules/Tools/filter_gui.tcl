@@ -78,11 +78,18 @@ proc eAssist_tools::FilterEditor {} {
     pack $btnBar -anchor se
     
     
+    # Setup the array for the filters
+    array set filter {
+        run,stripASCII_CC 1
+        run,stripCC 1
+        run,stripUDL 1
+        run,abbrvAddrState 1
+    }
     # .. Frame 1 - create the children widgets
-    ttk::checkbutton $frame1.chkbtn1 -text [mc "Remove Hi-Bit Characters"] ;#-command {${log}::debug Removing Hi-Bit Characters}
-    ttk::checkbutton $frame1.chkbtn2 -text [mc "Remove Control Characters"] ;#-command {${log}::debug Removing Control Characters}
-    ttk::checkbutton $frame1.chkbtn3 -text [mc "Remove Leading/Trailing White Space"] ;#-command {${log}::debug Removing Leading White Space}
-    ttk::checkbutton $frame1.chkbtn4 -text [mc "Abbreviate words in address"] ;#-commnd {${log}::debug Abbreviate words ...}
+    ttk::checkbutton $frame1.chkbtn1 -text [mc "Remove Hi-Bit Characters"] -variable filter(run,stripASCII_CC) ;#-command {${log}::debug Removing Hi-Bit Characters}
+    ttk::checkbutton $frame1.chkbtn2 -text [mc "Remove Control Characters"] -variable filter(run,stripCC) ;#-command {${log}::debug Removing Control Characters}
+    ttk::checkbutton $frame1.chkbtn3 -text [mc "Remove Leading/Trailing White Space"] -variable filter(run,stripUDL) ;#-command {${log}::debug Removing Leading White Space}
+    ttk::checkbutton $frame1.chkbtn4 -text [mc "Abbreviate words in address"] -variable filter(run,abbrvAddrState) ;#-commnd {${log}::debug Abbreviate words ...}
         tooltip::tooltip $frame1.chkbtn4 [mc "Affects only the columns: Address1, Address2 and State"]
     
     grid $frame1.chkbtn1 -column 0 -row 0 -pady 2p -padx 5p -sticky w
@@ -94,7 +101,7 @@ proc eAssist_tools::FilterEditor {} {
     
     # .. Button Bar - create the children widgets
     ttk::button $btnBar.cancel -text [mc "Cancel"] -command {destroy .filterEditor}
-    ttk::button $btnBar.ok -text [mc "Ok"] -command {destroy .filterEditor}
+    ttk::button $btnBar.ok -text [mc "OK"] -command {eAssist_tools::executeFilters}
     
     grid $btnBar.cancel -column 0 -row 0 -pady 5p -padx 5p -sticky se
     grid $btnBar.ok -column 1 -row 0 -pady 5p -padx 5p -sticky se

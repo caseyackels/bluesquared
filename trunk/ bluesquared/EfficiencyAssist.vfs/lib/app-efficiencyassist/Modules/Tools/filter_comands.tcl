@@ -6,9 +6,9 @@
 #
 # Subversion
 #
-# $Revision: 169 $
-# $LastChangedBy: casey.ackels $
-# $LastChangedDate: 2011-10-17 16:11:20 -0700 (Mon, 17 Oct 2011) $
+# $Revision$
+# $LastChangedBy$
+# $LastChangedDate$
 #
 ########################################################################################
 
@@ -253,8 +253,8 @@ proc eAssistHelper::runFilters {} {
 	}
 	
 	${log}::debug ColumnNames: $ColumnName1
-	set haveAddress2 [lsearch $ColumnName1 Address2]
-	set haveAddress3 [lsearch $ColumnName1 Address3]
+	#set haveAddress2 [lsearch $ColumnName1 Address2]
+	#set haveAddress3 [lsearch $ColumnName1 Address3]
 
 	
 	set byPass ""
@@ -284,7 +284,7 @@ proc eAssistHelper::runFilters {} {
             
             # Start Filters
 
-			# Keep track of the cells which contain more data than they should
+			# Keep track of the cells which contain more data than they should, even after we filter them.
 			if {$byPass != 1} {
 				#${log}::debug Bypass is not activated - $cellData
 				if {[string length $cellData] > $maxChar} {
@@ -393,13 +393,14 @@ proc eAssist_tools::abbrvAddrState {cellData ColumnName} {
 } ;# eAssist_tools::abbrvAddrState
 
 
-Execute Filters
-            set cellData [eAssistHelper::filters $ColumnName $filter(sanitizeColumns)] ;# uses the filter array to figure out which columns to execute on
-            set cellData [eAssist_tools::stripASCII_CC $cellData]
-            set cellData [eAssist_tools::stripCC $cellData]
-            set cellData [eAssist_tools::stripUDL $cellData]
+#Execute Filters
+#            set cellData [eAssistHelper::filters $ColumnName $filter(sanitizeColumns)] ;# uses the filter array to figure out which columns to execute on
+#            set cellData [eAssist_tools::stripASCII_CC $cellData]
+#            set cellData [eAssist_tools::stripCC $cellData]
+#            set cellData [eAssist_tools::stripUDL $cellData]
+#            set cellData [eAssist_tools::abbrvAddrState $cellData $ColumnName]
             
-proc eAssist_tools::executeFilters {args} {
+proc eAssist_tools::executeFilters {} {
     #****f* executeFilters/eAssist_tools
     # AUTHOR
     #	Casey Ackels
@@ -429,7 +430,8 @@ proc eAssist_tools::executeFilters {args} {
     
     
     
-    lappend filter(RunList) $args
+    #lappend filter(RunList) $args
+    ${log}::debug Filter Array: [array names filter]
 	
     
     ${log}::debug --END-- [info level 1]
