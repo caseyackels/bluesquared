@@ -398,3 +398,39 @@ Execute Filters
             set cellData [eAssist_tools::stripASCII_CC $cellData]
             set cellData [eAssist_tools::stripCC $cellData]
             set cellData [eAssist_tools::stripUDL $cellData]
+            
+proc eAssist_tools::executeFilters {args} {
+    #****f* executeFilters/eAssist_tools
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	Assemble variable's that contain the name of the filters; that way the setupFilter command can execute them.
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log filter
+    ${log}::debug --START-- [info level 1]
+    
+    
+    
+    lappend filter(RunList) $args
+	
+    
+    ${log}::debug --END-- [info level 1]
+} ;# eAssist_tools::executeFilters
