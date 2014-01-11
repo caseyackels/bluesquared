@@ -116,10 +116,11 @@ proc importFiles::eAssistGUI {} {
     grid $frame1a.btn2 -column 3 -row 0 -padx 3p
     #grid $frame1a.btn3 -column 4 -row 0 -padx 3p
     
+    # This option should be saved, and read from the config file.
+        set options(AutoAssignHeader) 1
     ttk::checkbutton $frame1a.chkbtn1 -text [mc "Auto-Assign header names"] -variable options(AutoAssignHeader)
     grid $frame1a.chkbtn1 -column 0 -columnspan 2 -row 1 -sticky w
-    
-    $frame1a.chkbtn1 invoke
+
     
     #ttk::label $frame1a.txt2 -text [mc "Number of Records:"]
     #ttk::label $frame1a.entry2 -textvariable process(numOfRecords) -relief flat

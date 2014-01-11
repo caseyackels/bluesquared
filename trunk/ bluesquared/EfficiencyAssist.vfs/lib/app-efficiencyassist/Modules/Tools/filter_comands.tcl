@@ -393,6 +393,49 @@ proc eAssist_tools::abbrvAddrState {cellData ColumnName} {
 } ;# eAssist_tools::abbrvAddrState
 
 
+<<<<<<< .mine
+#Execute Filters
+#            set cellData [eAssistHelper::filters $ColumnName $filter(sanitizeColumns)] ;# uses the filter array to figure out which columns to execute on
+#            set cellData [eAssist_tools::stripASCII_CC $cellData]
+#            set cellData [eAssist_tools::stripCC $cellData]
+#            set cellData [eAssist_tools::stripUDL $cellData]
+
+proc eAssist_tools::executeFilters {} {
+    #****f* executeFilters/eAssist_tools
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	Assemble variable's that contain the name of the filters; that way the setupFilter command can execute them.
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log filter
+    ${log}::debug --START-- [info level 1]
+    
+    
+    
+    #lappend filter(RunList) $args
+    ${log}::debug Filter Array: [array names filter]
+	
+    
+    ${log}::debug --END-- [info level 1]
+} ;# eAssist_tools::executeFilters=======
 #Execute Filters
 #            set cellData [eAssistHelper::filters $ColumnName $filter(sanitizeColumns)] ;# uses the filter array to figure out which columns to execute on
 #            set cellData [eAssist_tools::stripASCII_CC $cellData]
@@ -436,3 +479,4 @@ proc eAssist_tools::executeFilters {} {
     
     ${log}::debug --END-- [info level 1]
 } ;# eAssist_tools::executeFilters
+>>>>>>> .r376

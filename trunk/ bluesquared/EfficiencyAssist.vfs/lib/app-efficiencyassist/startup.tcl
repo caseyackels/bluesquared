@@ -168,7 +168,7 @@ proc 'eAssist_initVariables {} {
     # SEE ALSO
     #
     #***
-    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls
+    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter
 
 	#-------- CORE SETTINGS   
     # Create personal settings file %appdata%
@@ -203,6 +203,12 @@ proc 'eAssist_initVariables {} {
 					  SmplRoomTotal 0 \
 					  startSales "" \
 					  SalesTotal 0]
+	
+	# Filters
+	array set filter [list run,stripASCII_CC "" \
+					  run,stripCC "" \
+					  run,stripUDL "" \
+					  run,abbrvAddrState ""]
 	
     if {![info exists mySettings(outFilePath)]} {
         # Location for saving the file
