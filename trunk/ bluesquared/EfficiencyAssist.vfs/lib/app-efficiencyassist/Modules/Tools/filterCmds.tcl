@@ -51,7 +51,7 @@ proc eAssist_tools::stripASCII_CC {args} {
     global log
     ${log}::debug --START-- [info level 1]
     
-    eAssist_tools::stripExtraSpaces [regsub -all {[\u0000-\u001f\u007f]+} $args ""]
+    return [eAssist_tools::stripExtraSpaces [regsub -all {[\u0000-\u001f\u007f]+} $args ""]]
 	
     ${log}::debug --END-- [info level 1]
 } ;# eAssist_tools::stripASCII_CC
@@ -86,7 +86,7 @@ proc eAssist_tools::stripCC {args} {
     global log
     ${log}::debug --START-- [info level 1]
     
-    eAssist_tools::stripExtraSpaces [regsub -all {[^\u0020-\u007e]+} $args ""]
+    return [eAssist_tools::stripExtraSpaces [regsub -all {[^\u0020-\u007e]+} $args ""]]
 
 	
     ${log}::debug --END-- [info level 1]
@@ -122,8 +122,9 @@ proc eAssist_tools::stripQuotes {args} {
     global log
     ${log}::debug --START-- [info level 1]
     
-    eAssist_tools::stripExtraSpaces [string map [list \" ""] $args]
+    return [eAssist_tools::stripExtraSpaces [string map [list \" ""] $args]]
 	
+    
     ${log}::debug --END-- [info level 1]
 } ;# eAssist_tools::stripQuotes
 
@@ -167,6 +168,7 @@ proc eAssist_tools::stripExtraSpaces {args} {
             }
     }
 	
+    return $newString
     ${log}::debug --END-- [info level 1]
 } ;# eAssist_tools::stripExtraSpaces
 
@@ -207,6 +209,8 @@ proc eAssist_tools::stripUDL {args} {
     foreach value $StripChars {
         set newString [eAssist_tools::stripExtraSpaces [string map [list [concat \ $value] ""] $newString]]
     }
+    
+    return $newString
     ${log}::debug --END-- [info level 1]
 } ;# eAssist_tools::stripUDL
 
@@ -237,7 +241,7 @@ proc eAssistHelper::runFilters {} {
     #
     #***
     global log files headerParams filter
-    ${log}::debug --START -- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
 	#${log}::debug Addresses: [$files(tab3f2).tbl getcells 0,end]
 	set ColumnCount [$files(tab3f2).tbl columncount]
@@ -255,6 +259,12 @@ proc eAssistHelper::runFilters {} {
 	${log}::debug ColumnNames: $ColumnName1
 	set haveAddress2 [lsearch $ColumnName1 Address2]
 	set haveAddress3 [lsearch $ColumnName1 Address3]
+    
+    # build the runlist to determine which filters to run
+    if {[info exists filter(runList)]} {unset filter(runList)}
+    foreach value [array names filter] {
+        lappend filter(runList) $value
+    }
 
 	
 	set byPass ""
@@ -280,9 +290,10 @@ proc eAssistHelper::runFilters {} {
 				}
 
 			set cellData [string tolower [join [$files(tab3f2).tbl getcells $x,$y $x,$y] ""]]
-			
             
             # Start Filters
+            #set cellData [eAssist_tools::executeFilters $cellData $ColumnName]
+            eAssist_tools::executeFilters $cellData $ColumnName
 
 			# Keep track of the cells which contain more data than they should
 			if {$byPass != 1} {
@@ -318,11 +329,11 @@ proc eAssistHelper::runFilters {} {
 		set byPass ""
 	}
 
-    ${log}::debug --END -- [info level 1]
+    ${log}::debug --END-- [info level 1]
 } ;# eAssistHelper::runFilters
 
 
-proc eAssist_tools::abbrvAddrState {cellData ColumnName} {
+proc eAssist_tools::abbrvAddrState {args} {
     #****f* abbrvAddrState/eAssist_tools
     # AUTHOR
     #	Casey Ackels
@@ -331,7 +342,8 @@ proc eAssist_tools::abbrvAddrState {cellData ColumnName} {
     #	(c) 2011-2014 Casey Ackels
     #
     # FUNCTION
-    #	Setup the frame work, and run the filters.
+    #	Abbreviate the addresses and states from most likely words to known abbreviations.
+    #   Args should contain: CellData then, ColumnNames - Passed down from [eAssistHelper::runFilters]
     #
     # SYNOPSIS
     #
@@ -340,7 +352,7 @@ proc eAssist_tools::abbrvAddrState {cellData ColumnName} {
     #	N/A
     #
     # PARENTS
-    #	
+    #	eAssistHelper::runFilters
     #
     # NOTES
     #
@@ -349,6 +361,10 @@ proc eAssist_tools::abbrvAddrState {cellData ColumnName} {
     #***
     global log filter
     ${log}::debug --START-- [info level 1]
+    
+    set cellData [lrange $args 0 0]
+    set ColumnName [lrange $args 1 1]
+    
     # Run the data through the filters only if it exists for the corresponding column name  
     # Address 1 and 2, need multiple passes.
     if {$ColumnName eq "Address1"} {
@@ -389,17 +405,14 @@ proc eAssist_tools::abbrvAddrState {cellData ColumnName} {
         set cellData [string map $filter(StateList) $cellData]
         ${log}::debug State After: $cellData
     }
+    
+    return $cellData
     ${log}::debug --END-- [info level 1]
 } ;# eAssist_tools::abbrvAddrState
 
 
-#Execute Filters
-#            set cellData [eAssistHelper::filters $ColumnName $filter(sanitizeColumns)] ;# uses the filter array to figure out which columns to execute on
-#            set cellData [eAssist_tools::stripASCII_CC $cellData]
-#            set cellData [eAssist_tools::stripCC $cellData]
-#            set cellData [eAssist_tools::stripUDL $cellData]
 
-proc eAssist_tools::executeFilters {} {
+proc eAssist_tools::executeFilters {args} {
     #****f* executeFilters/eAssist_tools
     # AUTHOR
     #	Casey Ackels
@@ -409,6 +422,7 @@ proc eAssist_tools::executeFilters {} {
     #
     # FUNCTION
     #	Assemble variable's that contain the name of the filters; that way the setupFilter command can execute them.
+    #	No checking is done, but we can accept multiple arguments, dependant upon what command we are executing.
     #
     # SYNOPSIS
     #
@@ -425,13 +439,22 @@ proc eAssist_tools::executeFilters {} {
     #
     #***
     global log filter
-    ${log}::debug --START-- [info level 1]
-    
-    
-    
-    #lappend filter(RunList) $args
-    ${log}::debug Filter Array: [array names filter]
+    #${log}::debug --START-- [info level 1]
+
+    foreach value $filter(runList) {
+        if {$filter($value) == 1} {
+            #${log}::debug Execute Filter: $value
+            switch -glob $value {
+                *stripASCII_CC  {set cellData [eAssist_tools::stripASCII_CC $args]}
+                *stripCC        {set cellData [eAssist_tools::stripCC $args]}
+                *stripUDL       {set cellData [eAssist_tools::stripUDL $args]}
+                *abbrvAddrState {set cellData [eAssist_tools::abbrvAddrState $args]}
+                default         {${log}::debug Execute Filter: $value}
+            }
+        }
+    }
 	
+    return $cellData
     
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# eAssist_tools::executeFilters

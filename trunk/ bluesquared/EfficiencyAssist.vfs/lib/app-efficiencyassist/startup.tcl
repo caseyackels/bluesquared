@@ -205,10 +205,10 @@ proc 'eAssist_initVariables {} {
 					  SalesTotal 0]
 	
 	# Filters
-	array set filter [list run,stripASCII_CC "" \
-					  run,stripCC "" \
-					  run,stripUDL "" \
-					  run,abbrvAddrState ""]
+	array set filter [list run,stripASCII_CC 1 \
+					  run,stripCC 1 \
+					  run,stripUDL 1 \
+					  run,abbrvAddrState 1]
 	
     if {![info exists mySettings(outFilePath)]} {
         # Location for saving the file
