@@ -6,4 +6,5 @@ package ifneeded eAssist_importFiles 1.0 "[list source [file join $dir importFil
                                             [list source [file join $dir internalSamples_code.tcl]]
                                             [list source [file join $dir splitAddresses_gui.tcl]]
                                             [list source [file join $dir splitAddresses_code.tcl]]
-                                            [list source [file join $dir addDestination_codeAndGui.tcl]]"
+                                            [list source [file join $dir addDestination_codeAndGui.tcl]]
+                                            [list source [file join $dir exportFiles_code.tcl]]"

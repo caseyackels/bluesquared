@@ -82,7 +82,9 @@ proc eAssist_tools::FilterEditor {} {
     # .. Frame 1 - create the children widgets
     ttk::checkbutton $frame1.chkbtn1 -text [mc "Remove Hi-Bit Characters"] -variable filter(run,stripASCII_CC) ;#-command {${log}::debug Removing Hi-Bit Characters}
     ttk::checkbutton $frame1.chkbtn2 -text [mc "Remove Control Characters"] -variable filter(run,stripCC) ;#-command {${log}::debug Removing Control Characters}
-    ttk::checkbutton $frame1.chkbtn3 -text [mc "Remove Leading/Trailing White Space"] -variable filter(run,stripUDL) ;#-command {${log}::debug Removing Leading White Space}
+    ttk::checkbutton $frame1.chkbtn3 -text [mc "Remove Punctuation"] -variable filter(run,stripUDL)
+    # Add in "Remove Leading/Trailing White Space"
+    # Add in "Remove Quotes"
     ttk::checkbutton $frame1.chkbtn4 -text [mc "Abbreviate words in address"] -variable filter(run,abbrvAddrState) ;#-commnd {${log}::debug Abbreviate words ...}
         tooltip::tooltip $frame1.chkbtn4 [mc "Affects only the columns: Address1, Address2 and State"]
     
