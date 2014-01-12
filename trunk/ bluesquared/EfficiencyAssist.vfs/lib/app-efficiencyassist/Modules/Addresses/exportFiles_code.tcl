@@ -6,9 +6,9 @@
 #
 # Subversion
 #
-# $Revision: 169 $
-# $LastChangedBy: casey.ackels $
-# $LastChangedDate: 2011-10-17 16:11:20 -0700 (Mon, 17 Oct 2011) $
+# $Revision$
+# $LastChangedBy$
+# $LastChangedDate$
 #
 ########################################################################################
 
@@ -39,7 +39,15 @@ proc importFiles::exportFiles {} {
     #***
     global log
     ${log}::debug --START-- [info level 1]
-    
+    # Requirements
+        # List of desired column headers
+            # Which order that they should be in
+            # ANSWER: Use all columns that were put into Setup; and in the order that they appear in Setup. (Future: should allow re-arranging)
+        # Desired output data format
+        # Preferences - path to save to
+        # Setup - the filepath parameters should be set, such as:
+            # <Title> <Edition> <date and time generated> <job #> 
+        # 
     
 	
     ${log}::debug --END-- [info level 1]
