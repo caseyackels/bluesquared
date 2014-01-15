@@ -236,10 +236,10 @@ proc eAssistSetup::startCmdHdr {tbl row col text} {
     # SEE ALSO
     #
     #***
-    global internal setup log
+    global internal setup log w headerParent
     ${log}::debug --START-- [info level 1]
    
-    set w [$tbl editwinpath]
+    set win [$tbl editwinpath]
     #$w(hdr_frame1a).listbox
     
     switch -- [$tbl columncget $col -name] {
@@ -248,9 +248,12 @@ proc eAssistSetup::startCmdHdr {tbl row col text} {
                 if {$row == 0} {$tbl insert end ""}
                 ## See tablelist help for using 'end' as an index point.
                 if {($row != 0) && ($row == $myRow)} {$tbl insert end ""}
+                
+                set headerParent(outPutHeader) [$w(hdr_frame1a).listbox getcells 0,3 end,3]
+                ${log}::debug Saving : [$w(hdr_frame1a).listbox getcells 0,3 end,3]
                 }
             Widget  {
-                $w configure -values [list ttk::entry ttk::combobox] -state readonly
+                $win configure -values [list ttk::entry ttk::combobox] -state readonly
                 }
             default {
             }

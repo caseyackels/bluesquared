@@ -130,11 +130,9 @@ proc eAssistSetup::addressHeaders_GUI {} {
         
         
     if {[array exists headerParams] == 1} {
-        #'debug Populate listobx - data exists
-            #foreach hdrInfo [array names headerParams] {}
+        #'debug Populate listbox - data exists
             foreach hdrInfo $headerParent(headerList) {
-                #'debug inserting $customer
-                #$w(hdr_frame1a).listbox insert end [list "" $hdrInfo [lindex $headerParams($hdrInfo) 0] $params]
+                #
                 $w(hdr_frame1a).listbox insert end "{} $hdrInfo $headerParams($hdrInfo)"
                
                 #${log}::debug HEADER: [list $hdrInfo [lindex $headerParams($hdrInfo) 0] [lindex $headerParams($hdrInfo) 1]]
@@ -151,14 +149,6 @@ proc eAssistSetup::addressHeaders_GUI {} {
         # Delete the entry
         $w(hdr_frame1a).listbox delete [$w(hdr_frame1a).listbox curselection]
     }
-        #if {[info exists setup(boxLabelConfig)]} {
-        #    #'debug Populate listobx - data exists
-        #        foreach boxlabel $setup(boxLabelConfig) {
-        #            #'debug inserting $customer
-        #            $frame2.listbox insert end $boxlabel
-        #            incr internal(table2,currentRow)
-        #        }
-        #}
     
     # Create the row counter and the first line
     set internal(addrHdr,currentRow) 0

@@ -251,6 +251,9 @@ proc eAssistSetup::SaveGlobalSettings {} {
             chan puts $fd "headerParams($value) $headerParams($value)"
     }
     
+    # Retrieve headers so that we can put them into a 
+    
+    
     foreach value [array names headerBoxes] {
             chan puts $fd "headerBoxes($value) $headerBoxes($value)"
     }

@@ -12,8 +12,10 @@
 #
 ########################################################################################
 
-proc importFiles::exportFiles {} {
-    #****f* exportFiles/importFiles
+namespace eval export {}
+
+proc export::DataToExport {} {
+    #****f* DataToExport/export
     # AUTHOR
     #	Casey Ackels
     #
@@ -21,7 +23,57 @@ proc importFiles::exportFiles {} {
     #	(c) 2011-2014 Casey Ackels
     #
     # FUNCTION
-    #	Export the data into a CSV file (eventually should allow the user to select the filetype that they want.)
+    #	Gather, and assemble the data to export. For Distribution.
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log headerParent files mySettings
+    ${log}::debug --START-- [info level 1]
+    
+    
+    set myFile(data) [open [file join $mySettings(outFilePath) Test_file.csv] w]
+    ${log}::debug Writing to file [file join $mySettings(outFilePath) Test_file.csv]
+    
+    
+    # HEADER: Write output
+    chan puts $myFile(data) [::csv::join $headerParent(outPutHeader)]
+    ${log}::debug [::csv::join $headerParent(outPutHeader)]
+
+    set rowCount [$files(tab3f2).tbl size]
+    for {set x 0} {$rowCount > $x} {incr x} {
+        # RECORDS: Write output one row at a time.
+        chan puts $myFile(data) [::csv::join [join [$files(tab3f2).tbl get $x $x]]]
+        ${log}::debug ROWS: [::csv::join [join [$files(tab3f2).tbl get $x $x]]]
+    }
+    
+	chan close $myFile(data)
+    ${log}::debug --END-- [info level 1]
+} ;# export::DataToExport
+
+
+
+proc export::BatchToCSV {} {
+    #****f* BatchToCSV/export
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	Export the data into a CSV file
     #
     # SYNOPSIS
     #
@@ -39,16 +91,9 @@ proc importFiles::exportFiles {} {
     #***
     global log
     ${log}::debug --START-- [info level 1]
-    # Requirements
-        # List of desired column headers
-            # Which order that they should be in
-            # ANSWER: Use all columns that were put into Setup; and in the order that they appear in Setup. (Future: should allow re-arranging)
-        # Desired output data format
-        # Preferences - path to save to
-        # Setup - the filepath parameters should be set, such as:
-            # <Title> <Edition> <date and time generated> <job #> 
-        # 
+    
+    
     
 	
     ${log}::debug --END-- [info level 1]
-} ;# importFiles::exportFiles
+} ;# export::BatchToCSV
