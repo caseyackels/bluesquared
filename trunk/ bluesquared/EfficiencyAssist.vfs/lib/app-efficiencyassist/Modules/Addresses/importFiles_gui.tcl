@@ -291,6 +291,31 @@ proc importFiles::eAssistGUI {} {
     
     grid $files(tab3f1a).btn1 -column 3 -row 0 -sticky new
 
+    
+    ##
+    ##------------- Frame 1a
+    ##
+    set files(tab1) [ttk::labelframe $nb.f1.f1.f3 -text [mc "Job Information"]]
+    pack $files(tab1) -fill both -padx 2p -pady 5p
+    
+    #ttk::label $files(tab1).txt1 -text [mc "Customer Name"]
+    #ttk::entry $files(tab1).entry1 ;#-textvariable
+    
+    ttk::label $files(tab1).txt2 -text [mc "Job Name"]
+    ttk::entry $files(tab1).entry2 ;#-textvariable
+    
+    ttk::label $files(tab1).txt3 -text [mc "Job Number"]
+    ttk::entry $files(tab1).entry3 ;#-textvariable
+    
+    # Grid frame f3
+    #grid $files(tab1).txt1 -column 0 -row 0 -sticky nes -padx 2p
+    #grid $files(tab1).entry1 -column 1 -row 0 -sticky news -padx 2p
+    grid $files(tab1).txt2 -column 0 -row 1 -sticky nes -padx 2p
+    grid $files(tab1).entry2 -column 1 -row 1 -sticky news -padx 2p
+    grid $files(tab1).txt3 -column 0 -row 2 -sticky nes -padx 2p
+    grid $files(tab1).entry3 -column 1 -row 2 -sticky news -padx 2p
+    
+    
     ##
     ##------------- Frame 1b
     ##

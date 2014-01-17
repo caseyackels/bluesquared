@@ -55,7 +55,6 @@ proc eAssist_tools::FilterEditor {} {
     ${log}::debug Launching Filter Editor ...
     
     if {[winfo exists .filterEditor] == 1} {destroy .filterEditor}
-    #if {[winfo exists .mb1] == 1} {destroy .mb1}
     
     # .. Create the dialog window
     toplevel .filterEditor
@@ -70,9 +69,16 @@ proc eAssist_tools::FilterEditor {} {
 
     focus .filterEditor
     
+    # reset the progressbar and Filter Message
+    set filter(progbarProgess) 0
+    set filter(progbarFilterName) [mc "Ready ..."]
+    
     # .. create the frames
     set frame1 [ttk::frame .filterEditor.frame1]
     pack $frame1
+    
+    set filter(f2) [ttk::frame .filterEditor.frame2]
+    pack $filter(f2)
     
     set btnBar [ttk::frame .filterEditor.btnBar]
     pack $btnBar -anchor se
@@ -92,6 +98,15 @@ proc eAssist_tools::FilterEditor {} {
     grid $frame1.chkbtn2 -column 0 -row 1 -pady 2p -padx 5p -sticky w
     grid $frame1.chkbtn3 -column 0 -row 2 -pady 2p -padx 5p -sticky w
     grid $frame1.chkbtn4 -column 0 -row 3 -pady 2p -padx 5p -sticky w
+    
+    # Progress bar
+    # .. Frame 2
+    ttk::label $filter(f2).txt -textvariable filter(progbarFilterName)
+    # Maximum is set in [runFilters] after we figure out how many filters we are running...
+    ttk::progressbar $filter(f2).progbar -length 200 -mode determinate -variable filter(progbarProgress)
+    
+    grid $filter(f2).txt -column 0 -row 0 -pady 5p -padx 5p -sticky w
+    grid $filter(f2).progbar -column 0 -row 1 -pady 5p -padx 5p -sticky ew
     
     
     

@@ -64,7 +64,7 @@ proc eAssistHelper::splitVersions {} {
     wm geometry .splitVersions 625x375+${locX}+${locY}
 
     focus .splitVersions
-    
+	  
     #Menu
     set mb1 [menu .mb1]
     .splitVersions configure -menu $mb1
@@ -78,7 +78,10 @@ proc eAssistHelper::splitVersions {} {
     
 	set f1 [ttk::frame .splitVersions.f1]
 	pack $f1 -fill both -pady 5p -padx 5p
-    
+
+	# // Get the most updated list of the versions
+	set process(versionList) [$files(tab3f2).tbl getcolumn Version]
+	
     ttk::label $f1.txt1 -text [mc "Version"]
     ttk::combobox $f1.cbox1 -values $process(versionList) \
                                 -width 40 \

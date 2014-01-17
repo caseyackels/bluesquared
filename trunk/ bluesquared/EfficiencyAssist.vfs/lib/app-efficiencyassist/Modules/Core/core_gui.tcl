@@ -75,7 +75,7 @@ proc eAssist::parentGUI {} {
 
     $mb add cascade -label [mc "File"] -menu $mb.file
     #$mb.file add command -label [mc "Preferences..."] -command {eAssistPref::launchPreferences}
-    #$mb.file add command -label [mc "Import File"] -command { eAssist_Helper::getOpenFile }
+    $mb.file add command -label [mc "Export File"] -command {export::DataToExport}
     $mb.file add command -label [mc "Exit"] -command {exit}
 
     ## Module Menu - This is a dynamic menu for the active module.
@@ -204,7 +204,7 @@ proc eAssist::buttonBarGUI {module} {
             # .. setup the buttons on the button bar
             importFiles::initMenu
             eAssist::remButtons $btn(Bar)
-            eAssist::addButtons [mc "Export Files"] exit btn1 0 2p
+            #eAssist::addButtons [mc "Export Files"] exit btn1 0 2p
             # .. launch the mode
             importFiles::eAssistGUI
             }

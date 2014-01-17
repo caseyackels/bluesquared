@@ -259,6 +259,10 @@ proc importFiles::processFile {tab} {
         unset newRow
         set x 0
     }
+    
+    # save the original version list as origVersionList, so we can keep the process(versionList) variable updated with user changed versions
+    set process(origVersionList) $process(versionList)
+    
     ${log}::debug --END-- [info level 1]
 } ;# importFiles::processFile
 
@@ -303,7 +307,7 @@ proc importFiles::startCmd {tbl row col text} {
                         $w configure -values $dist(distributionTypes) -state readonly
                         }
             *vers* {
-                        ${log}::debug Enter the Versions
+                        #${log}::debug Enter the Versions
                         $w configure -values $process(versionList) ;# Create a Versions list, as we read in the file, so we can populate this combobox.
                         }
             "carriermethod" {$w configure -values [list UPS FedEx Freight "Will Call"] -state readonly}

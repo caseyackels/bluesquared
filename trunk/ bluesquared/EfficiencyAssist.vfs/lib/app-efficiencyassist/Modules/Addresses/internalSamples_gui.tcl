@@ -48,7 +48,7 @@ proc eAssistHelper::addCompanySamples {} {
     # SEE ALSO
     #
     #***
-    global log process w csmpls
+    global log process w csmpls files
     ${log}::debug --START -- [info level 1]
     
 	toplevel .csmpls
@@ -60,6 +60,9 @@ proc eAssistHelper::addCompanySamples {} {
     set locY [expr {[winfo height . ] / 3 + [winfo y .]}]
     #wm geometry .csmpls 625x275+${locX}+${locY}
 	wm geometry .csmpls 625x400+${locX}+${locY}
+	
+	# // Get the most updated list of the versions
+	set process(versionList) [$files(tab3f2).tbl getcolumn Version]
 
     focus .csmpls
 	
@@ -130,6 +133,7 @@ proc eAssistHelper::addCompanySamples {} {
 	::autoscroll::autoscroll $scrolly ;# Enable the 'autoscrollbar'
 	::autoscroll::autoscroll $scrollx ;# Enable the 'autoscrollbar'
 	
+	# Insert the versions; we aren't allowing them to be renamed here either.
 	foreach version $process(versionList) {
 		$w(csmpls.f1).tbl insert end "{} [list $version]"
 	}
@@ -145,7 +149,7 @@ proc eAssistHelper::addCompanySamples {} {
 	pack $w(csmpls.btnbar) -side bottom -pady 13p -padx 5p -anchor se -pady 8p -padx 5p
 
 	ttk::button $w(csmpls.btnbar).btn1 -text [mc "Cancel"] -command {destroy .csmpls}
-	ttk::button $w(csmpls.btnbar).btn2 -text [mc "Ok"] -command {eAssistHelper::saveCSMPLS}
+	ttk::button $w(csmpls.btnbar).btn2 -text [mc "OK"] -command {eAssistHelper::saveCSMPLS}
 	
 	grid $w(csmpls.btnbar).btn1 -column 0 -row 0 -sticky nse -padx 8p
 	grid $w(csmpls.btnbar).btn2 -column 1 -row 0 -sticky nse
