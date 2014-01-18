@@ -266,3 +266,49 @@ proc eAssistHelper::insertSmpls {vers args} {
 
     ${log}::debug --END-- [info level 1]
 } ;# eAssistHelper::insertSmpls
+
+
+proc eAssistHelper::quickAddSmpls {win entryTxt} {
+    #****f* quickAddSmpls/eAssistHelper
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	Quickly add sample quantities into the selected columns
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log csmpls
+    ${log}::debug --START-- [info level 1]
+    
+	for {set x 0} {[$win columncount] > $x} {incr x} {
+		#${log}::debug Column Names [$win columncget $x -name]
+		set currentColumn [$win columncget $x -name]
+		
+		foreach value [array names csmpls] {
+			if {[string match $value $currentColumn] == 1} {
+				if {$csmpls($value) == 1} {
+					$win fillcolumn $x $entryTxt
+				}
+			}
+		}
+		
+	}
+
+    ${log}::debug --END-- [info level 1]
+} ;# eAssistHelper::quickAddSmpls
