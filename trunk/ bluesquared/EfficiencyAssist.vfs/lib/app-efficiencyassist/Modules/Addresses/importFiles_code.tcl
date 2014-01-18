@@ -294,11 +294,8 @@ proc importFiles::startCmd {tbl row col text} {
     #***
     global log dist process headerParent headerParams
     ${log}::debug --START-- [info level 1]
-    #${log}::debug distTypes: $dist(distributionTypes)
     set w [$tbl editwinpath]
 
-        #'debug index: [$w index bottom]
-        #${log}::debug Column Name: [$tbl columncget $col -name]
         switch -glob [string tolower [$tbl columncget $col -name]] {
             "distributiontype" {
                         ${log}::debug Enter the Distribution Types
@@ -307,8 +304,7 @@ proc importFiles::startCmd {tbl row col text} {
                         $w configure -values $dist(distributionTypes) -state readonly
                         }
             *vers* {
-                        #${log}::debug Enter the Versions
-                        $w configure -values $process(versionList) ;# Create a Versions list, as we read in the file, so we can populate this combobox.
+                        $w configure -values [$tbl getcolumn Version] ;# Create a Versions list, as we read in the file, so we can populate this combobox.
                         }
             "carriermethod" {$w configure -values [list UPS FedEx Freight "Will Call"] -state readonly}
             default {
