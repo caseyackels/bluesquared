@@ -70,19 +70,14 @@ proc eAssistHelper::addCompanySamples {} {
 	set w(csmpls.f2) [ttk::frame .csmpls.frame1a -relief groove]
 	pack $w(csmpls.f2) -expand yes -fill both -pady 5p -padx 5p -ipadx 3p
 	
-	# Setup variables
-	set csmpls(Ticket) 0
-	set csmpls(CSR) 0
-	set csmpls(SampleRoom) 0
-	set csmpls(Sales) 0
-	
+
 	# Variable's must match names that are listed in the Table, or else this will break.
-	ttk::checkbutton $w(csmpls.f2).ticket -text [mc "Ticket"] -variable csmpls(Ticket)
-	ttk::checkbutton $w(csmpls.f2).csr -text [mc "CSR"] -variable csmpls(CSR)
-	ttk::checkbutton $w(csmpls.f2).smplrm -text [mc "Sample Room"] -variable csmpls(SampleRoom)
-	ttk::checkbutton $w(csmpls.f2).sales -text [mc "Sales"] -variable csmpls(Sales)
-	ttk::entry $w(csmpls.f2).addEntry -textvariable entryTxt
-	ttk::button $w(csmpls.f2).btn -text [mc "Quick Add"] -command {eAssistHelper::quickAddSmpls $w(csmpls.f1).tbl $entryTxt}
+	ttk::checkbutton $w(csmpls.f2).ticket	-text [mc "Ticket"] -variable csmpls(Ticket)
+	ttk::checkbutton $w(csmpls.f2).csr		-text [mc "CSR"] -variable csmpls(CSR)
+	ttk::checkbutton $w(csmpls.f2).smplrm	-text [mc "Sample Room"] -variable csmpls(SampleRoom)
+	ttk::checkbutton $w(csmpls.f2).sales	-text [mc "Sales"] -variable csmpls(Sales)
+	ttk::entry $w(csmpls.f2).addEntry		-textvariable entryTxt
+	ttk::button $w(csmpls.f2).btn			-text [mc "Quick Add"] -command {eAssistHelper::quickAddSmpls $w(csmpls.f1).tbl $entryTxt}
 	
 	grid $w(csmpls.f2).ticket	-column 0 -row 0 -pady 1p -padx 2p -sticky w
 	grid $w(csmpls.f2).csr		-column 0 -row 1 -pady 1p -padx 2p -sticky w

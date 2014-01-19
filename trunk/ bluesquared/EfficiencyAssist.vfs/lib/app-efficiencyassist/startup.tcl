@@ -195,6 +195,10 @@ proc 'eAssist_initVariables {} {
 	#-------- Initialize variables
 	
 	# Address Module
+	# All are used in the Internal Samples window
+	# Totals, are of course Totals
+	# Start, is what they start out with (contains the totals)
+	# no prefix/suffix, Checkboxes for the quick add feature
 	array set csmpls [list startTicket "" \
 					  TicketTotal 0 \
 					  startCSR "" \
@@ -202,7 +206,11 @@ proc 'eAssist_initVariables {} {
 					  startSmpl "" \
 					  SmplRoomTotal 0 \
 					  startSales "" \
-					  SalesTotal 0]
+					  SalesTotal 0 \
+					  Ticket 0 \
+					  CSR 0 \
+					  SampleRoom 0 \
+					  Sales 0]
 	
 	# Filters
 	array set filter [list run,stripASCII_CC 1 \

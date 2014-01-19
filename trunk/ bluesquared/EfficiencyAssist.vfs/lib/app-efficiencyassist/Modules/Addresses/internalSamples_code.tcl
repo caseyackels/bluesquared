@@ -14,7 +14,7 @@
 
 ##
 ## - Overview
-# Split addresses code
+# Assign Internal (Company) samples.
 
 ## Coding Conventions
 # - Namespaces: Firstword_Secondword
@@ -48,20 +48,12 @@ proc eAssistHelper::editStartSmpl {tbl row col text} {
     # SEE ALSO
     #
     #***
-    global log csmpls
+    global log
     ${log}::debug --START-- [info level 1]
-        
-		set w [$tbl editwinpath]
 
-        switch -glob [string tolower [$tbl columncget $col -name]] {
-            "ticket"		{ set csmpls(startTicket) $text}
-            "csr"			{ set csmpls(startCSR) $text}
-            "sampleroom"	{ set csmpls(startSmpl) $text}
-			"sales"			{ set csmpls(startSales) $text}
-			default	{}
-        }
+	eAssistHelper::detectColumn $tbl $col
 
-        return $text
+    return $text
 
     ${log}::debug --END-- [info level 1]
 } ;# eAssistHelper::editStartSmpl
@@ -92,20 +84,10 @@ proc eAssistHelper::editEndSmpl {tbl row col text} {
     # SEE ALSO
     #
     #***
-    global log csmpls
+    global log
     ${log}::debug --START-- [info level 1]
-        
-	set w [$tbl editwinpath]
 
-    #${log}::debug Column Name: [$tbl columncget $col -name]
-    switch -glob [string tolower [$tbl columncget $col -name]] {
-            "ticket"		{ set csmpls(TicketTotal) [eAssistHelper::calcSamples $csmpls(startTicket) $text $csmpls(TicketTotal)] }
-            "csr"			{ set csmpls(CSRTotal) [eAssistHelper::calcSamples $csmpls(startCSR) $text $csmpls(CSRTotal)] }
-            "sampleroom"	{ set csmpls(SmplRoomTotal) [eAssistHelper::calcSamples $csmpls(startSmpl) $text $csmpls(SmplRoomTotal)] }
-			"sales"			{ set csmpls(SalesTotal) [eAssistHelper::calcSamples $csmpls(startSales) $text $csmpls(SalesTotal)]}
-			default	{}
-    }
-    
+	eAssistHelper::detectColumn $tbl $col 
     
     return $text
 
@@ -113,7 +95,47 @@ proc eAssistHelper::editEndSmpl {tbl row col text} {
 } ;# eAssistHelper::editEndSmpl
 
 
-proc eAssistHelper::calcSamples {startCount endCount totalVar} {
+proc eAssistHelper::detectColumn {tbl col} {
+    #****f* detectColumn/eAssistHelper
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	Figure out which column are are in, and [switch] accordingly
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log csmpls
+    ${log}::debug --START-- [info level 1]
+    
+	switch -glob [string tolower [$tbl columncget $col -name]] {
+            "ticket"		{ set csmpls(TicketTotal)	[eAssistHelper::calcSamples [$tbl columnindex Ticket] $tbl] }
+            "csr"			{ set csmpls(CSRTotal)		[eAssistHelper::calcSamples [$tbl columnindex CSR] $tbl] }
+            "sampleroom"	{ set csmpls(SmplRoomTotal) [eAssistHelper::calcSamples [$tbl columnindex SampleRoom] $tbl] }
+			"sales"			{ set csmpls(SalesTotal)	[eAssistHelper::calcSamples [$tbl columnindex Sales] $tbl]}
+			default			{ ${log}::notice -[info level 1]- Column -[$tbl columncget $col -name]- not found! }
+    }
+	
+    ${log}::debug --END-- [info level 1]
+} ;# eAssistHelper::detectColumn
+
+
+proc eAssistHelper::calcSamples {columnIndex winpath} {
     #****f* calcSamples/eAssistHelper
     # AUTHOR
     #	Casey Ackels
@@ -140,20 +162,64 @@ proc eAssistHelper::calcSamples {startCount endCount totalVar} {
     #***
     global log
     ${log}::debug --START -- [info level 1]
-	if {$startCount == ""} {set startCount 0}
-	if {$endCount == ""} {set endCount $startCount}
-    if {$totalVar == ""} {set totalVar 0}
+
+	set myList [string map [list \{\} 0] [$winpath getcolumn $columnIndex]]
+	set returnCount [expr [join $myList +]]
 	
-    # guard against the user removing the value completely, so lets subtract it, if they both equal themselves.
-	if {$startCount >= $endCount} {
-		set returnCount [ expr {$totalVar - $endCount}]
-		} else {
-			set returnCount [ expr {$totalVar + $endCount}]
-		}
 
 	return $returnCount
     ${log}::debug --END -- [info level 1]
 } ;# eAssistHelper::calcSamples
+
+
+proc eAssistHelper::quickAddSmpls {win entryTxt} {
+    #****f* quickAddSmpls/eAssistHelper
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	Quickly add sample quantities into the selected columns
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+	# 	This relies on the textvariable (of the samples (CSR, Sales, Ticket, SampleRoom) to be the same as the column name
+    #
+    # SEE ALSO
+    #
+    #***
+    global log csmpls
+    ${log}::debug --START-- [info level 1]
+    
+	for {set x 0} {[$win columncount] > $x} {incr x} {
+		#${log}::debug Column Names [$win columncget $x -name]
+		set currentColumn [$win columncget $x -name]
+		
+		foreach value [array names csmpls] {
+			if {[string match $value $currentColumn] == 1} {
+				if {$csmpls($value) == 1} {
+					$win fillcolumn $x $entryTxt
+					eAssistHelper::detectColumn $win $x
+					#set csmpls($value) [eAssistHelper::calcSamples $x $win]
+				}
+			}
+		}
+		
+		
+	}
+
+    ${log}::debug --END-- [info level 1]
+} ;# eAssistHelper::quickAddSmpls
 
 
 proc eAssistHelper::saveCSMPLS {} {
@@ -266,49 +332,3 @@ proc eAssistHelper::insertSmpls {vers args} {
 
     ${log}::debug --END-- [info level 1]
 } ;# eAssistHelper::insertSmpls
-
-
-proc eAssistHelper::quickAddSmpls {win entryTxt} {
-    #****f* quickAddSmpls/eAssistHelper
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2011-2014 Casey Ackels
-    #
-    # FUNCTION
-    #	Quickly add sample quantities into the selected columns
-    #
-    # SYNOPSIS
-    #
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #	
-    #
-    # NOTES
-    #
-    # SEE ALSO
-    #
-    #***
-    global log csmpls
-    ${log}::debug --START-- [info level 1]
-    
-	for {set x 0} {[$win columncount] > $x} {incr x} {
-		#${log}::debug Column Names [$win columncget $x -name]
-		set currentColumn [$win columncget $x -name]
-		
-		foreach value [array names csmpls] {
-			if {[string match $value $currentColumn] == 1} {
-				if {$csmpls($value) == 1} {
-					$win fillcolumn $x $entryTxt
-				}
-			}
-		}
-		
-	}
-
-    ${log}::debug --END-- [info level 1]
-} ;# eAssistHelper::quickAddSmpls
