@@ -130,6 +130,7 @@ proc 'eAssist_sourceReqdFiles {} {
     source [file join [file dirname [info script]] Libraries errorMsg_gui.tcl]
 	source [file join [file dirname [info script]] Libraries global_helpers.tcl]
     source [file join [file dirname [info script]] Libraries StreetSuffixState.tcl]
+	source [file join [file dirname [info script]] Libraries fileProperties.tcl]
     
     loadSuffix ;# Initialize variables from StreetSuffixState.tcl
     

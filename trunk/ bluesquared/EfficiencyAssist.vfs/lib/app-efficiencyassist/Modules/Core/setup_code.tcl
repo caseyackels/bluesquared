@@ -190,17 +190,24 @@ proc eAssistSetup::SaveGlobalSettings {} {
     #***
     global log GS_filePaths GS_filePathSetup program company logSettings boxLabelInfo intlSetup headerParams headerParent headerAddress headerBoxes setup GS
     global currentModule dist w
+
     
-    # Assemble the header parameters
-    #set cCount [$w(hdr_frame1a).listbox columncount]
-    #for {set x 0} {$cCount < $x} {${log}::debug cCount:$cCount, x:$x}
-    #set headerList [$w(hdr_frame1a).listbox getcells 0,1 end,1]
+    ${log}::debug Folder: [eAssist_Global::folderAccessibility $program(Home)]
+    ${log}::debug File: [eAssist_Global::fileAccessibility $program(Home) config.txt]
     
-    # Global Settings - saved to the server
-    set fd [open [file join $program(Home) config.txt] w]
+    # If we can't read or write, lets return.
+    if {[eAssist_Global::folderAccessibility $program(Home)] != 3} {return}
+    
+    # we only care if we can write to the file
+    if {[eAssist_Global::fileAccessibility $program(Home) config.txt] == 2} {
+        set fd [open [file join $program(Home) config.txt] w]
+    } else {
+        return
+    }
+    
+    # ******************************
     
     chan puts $fd "#**** Program Specific ****#"
-    ${log}::debug Inserting Current Module: $program(currentModule)
     if {[info exists program(currentModule)] == 1} {
         chan puts $fd "program(currentModule) $program(currentModule)"
     }

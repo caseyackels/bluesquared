@@ -56,7 +56,6 @@ proc eAssist_tools::stripASCII_CC {args} {
     set newString [eAssist_tools::stripExtraSpaces [regsub -all {[^\u0020-\u007e]+} $args ""]]
     set newString [join $newString]
 
-    #$filter(f2).progbar step
     return $newString
     #${log}::debug --END-- [info level 1]
 } ;# eAssist_tools::stripASCII_CC
@@ -213,8 +212,7 @@ proc eAssist_tools::stripUDL {args} {
     #***
     global log filter
     #${log}::debug --START-- [info level 1]
-    #if {$filter(run,stripUDL) != 1} {${log}::debug Filter not set; return}
-    
+
 	# This will need to reference a saved list from the users profile/preferences file.
     set StripChars [list ' ` ~ . ? ! _ , : | $ ! + = ( ) ~]
     
@@ -302,7 +300,7 @@ proc eAssistHelper::runFilters {} {
 	set filter(Address2) ""
 	set filter(State) ""
 
-    set filter(progbarFilterName) "Compiling the selected Filters"
+    set filter(progbarFilterName) [mc "Compiling the selected Filters"]
     incr filter(progbarProgress)
     update
     
@@ -322,27 +320,10 @@ proc eAssistHelper::runFilters {} {
                         set byPass 1
                     }
                     
-                ${log}::debug maxChar $maxChar
-                ${log}::debug bypass $byPass
+                #${log}::debug maxChar $maxChar
+                #${log}::debug bypass $byPass
                 set cellData [string tolower [join [$files(tab3f2).tbl getcells $x,$y $x,$y] ""]]
-                
-               
                 # Start Filters
-                #foreach value $filter(runList) {}
-                #    if {$filter($value) == 1} {}
-                #        set filter(progbarFilterName) "Running $value"
-                #    #${log}::debug Execute Filter: $value
-                #        incr filter(progbarProgress)
-                #        switch -glob $value {}
-                #        *stripASCII_CC  {set cellData [join [eAssist_tools::stripASCII_CC $cellData]]}
-                #        *stripCC        {set cellData [join [eAssist_tools::stripCC $cellData]]}
-                #        *stripUDL       {set cellData [join [eAssist_tools::stripUDL $cellData]]}
-                #        *abbrvAddrState {set cellData [join [eAssist_tools::abbrvAddrState $cellData $ColumnName]]}
-                #        default         {${log}::debug Execute Filter: $value}
-                #        {}
-                #    {}
-                #    update
-                #{}
                 if {$filter($value) == 1} {
                     switch -glob $value {
                             *stripASCII_CC  {set cellData [join [eAssist_tools::stripASCII_CC $cellData]]}
