@@ -426,7 +426,7 @@ proc importFiles::initMenu {} {
     $mb.dist add command -label [mc "Internal Samples"] -command {eAssistHelper::addCompanySamples}
     $mb.dist add command -label [mc "Split"] -command {eAssistHelper::splitVersions}
     $mb.dist add separator
-    $mb.dist add command -label [mc "Preferences"] -command {eAssistPref::launchPreferences}
+    $mb.dist add command -label [mc "Options"] -command {eAssistPref::launchPreferences}
 	
     ${log}::debug --END -- [info level 1]
 } ;# importFiles::initMenu

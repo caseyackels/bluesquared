@@ -79,10 +79,10 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries autoscroll]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries csv]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.10]
-    lappend ::auto_path [file join [file dirname [info script]] Libraries tcom3.9]
-    #lappend ::auto_path [file join [file dirname [info script]] Libraries twapi]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries tcom3.9]
+	#lappend ::auto_path [file join [file dirname [info script]] Libraries twapi]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
-    lappend ::auto_path [file join [file dirname [info script]] Libraries about]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries about]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries debug] ;# Deprecated
 
 
@@ -93,6 +93,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Modules Core]
 	lappend ::auto_path [file join [file dirname [info script]] Modules BoxLabels]
 	lappend ::auto_path [file join [file dirname [info script]] Modules Addresses]
+	lappend ::auto_path [file join [file dirname [info script]] Modules Tools]
 
 	#
 	## Start the Package Require
@@ -104,8 +105,8 @@ proc 'eAssist_sourceReqdFiles {} {
 	## 3rd Party modules
 	package require tkdnd
 	package require Tablelist_tile 5.10
-    package require tcom
-    #package require twapi
+	package require tcom
+	#package require twapi
 	package require tooltip
 	package require autoscroll
 	package require csv
@@ -122,6 +123,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	package require aboutwindow
 	package require boxlabels
 	package require eAssist_tools
+	
     
 
 
@@ -142,6 +144,25 @@ proc 'eAssist_sourceReqdFiles {} {
         eAssistSetup::toggleConsole $logSettings(displayConsole)
     }	
 
+}
+
+proc 'eAssist_bootStrap {} {
+	# enable packages that are required before the rest of the packages need to be loaded
+	# Project built packages
+	lappend ::auto_path [file join [file dirname [info script]] Modules Update]
+	
+	package require vUpdate
+	
+	# Third Party packages
+	lappend ::auto_path [file join [file dirname [info script]] Libraries log]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries md5]
+	
+	package require md5
+	package require log
+	package require logger
+	package require logger::appender
+	package require logger::utils
+	
 }
 
 proc 'eAssist_initVariables {} {
@@ -407,19 +428,12 @@ proc 'eAssist_loadSettings {} {
 	global headerParent headerAddress headerParams headerBoxes GS_filePathSetup GS currentModule pref dist
 	
 	set debug(onOff) on ;# Old - Still exists so we don't receive errors, on the instances where it still exists
-	set logSettings(loglevel) notice ;# Default to debug, over ridden if the user selects a different option
+	set logSettings(loglevel) notice ;# Default to notice, over ridden if the user selects a different option
 	set logSettings(displayConsole) 0 ;# disable by default, same as above
 	
-	# Startup the logging package
-	lappend ::auto_path [file join [file dirname [info script]] Libraries log]
-	lappend ::auto_path [file join [file dirname [info script]] Libraries md5]
-	package require md5
-	package require log
-	package require logger
-	package require logger::appender
-	package require logger::utils
-	
-	#
+	# Load required packages
+	'eAssist_bootStrap
+
 	# initialize logging service
 	set log [logger::init eAssist_svc]
 	logger::utils::applyAppender -appender colorConsole
@@ -434,6 +448,14 @@ proc 'eAssist_loadSettings {} {
     set program(beta) "Alpha"
     set program(Name) "Efficiency Assist"
     set program(FullName) "$program(Name) - $program(Version).$program(PatchLevel) $program(beta)"
+    
+    vUpdate::saveCurrentVersion $program(Version) $program(PatchLevel) $program(beta)
+    
+    # Set required configuration changes here, i.e.
+    # set cVersion(Setup,message) <informational message>
+    # set cVersion(Setup,newconfig) <setup page>, <setup page, ...
+    # set cVersion(Options,message) <informational message>
+    # set cVersion(Options,newconfig) <options page>, <options page>, ...
     
     tk appname $program(Name)
 
@@ -494,6 +516,9 @@ proc 'eAssist_loadSettings {} {
 
 # Load the Option Database options
 #'distHelper_loadOptions
+
+# Check the versions
+vUpdate::whatVersion
 
 # Start the GUI
 eAssist::parentGUI

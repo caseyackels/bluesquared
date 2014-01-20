@@ -60,7 +60,7 @@ proc eAssist_Preferences::prefGUI {} {
 
     toplevel .preferences
     wm transient .preferences .
-    wm title .preferences [mc "Preferences"]
+    wm title .preferences [mc "Options"]
 
     # Put the window in the center of the parent window
     set locX [expr {[winfo width . ] / 3 + [winfo x .]}]
