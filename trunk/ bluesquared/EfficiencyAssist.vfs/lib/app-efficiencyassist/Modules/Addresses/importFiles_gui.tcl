@@ -283,7 +283,7 @@ proc importFiles::eAssistGUI {} {
     ttk::button $files(tab3f1a).btn1 -text [mc "Add"] -command {eAssistHelper::unHideColumns}
     
     
-    #------------- Grid Frame 1  
+    #------------- Grid Frame 1a  
     #grid $files(tab3f1).txt1 -column 0 -row 0 -sticky new
     grid $files(tab3f1a).lbox1 -column 1 -row 0 -sticky news
     grid $scrollx_lbox1 -column 1 -row 1 -sticky ew
@@ -293,53 +293,81 @@ proc importFiles::eAssistGUI {} {
 
     
     ##
-    ##------------- Frame 1a
-    ##
-    set files(tab1) [ttk::labelframe $nb.f1.f1.f3 -text [mc "Job Information"]]
-    pack $files(tab1) -fill both -padx 2p -pady 5p
+    ##------------- Frame 3a
+    ## Container frame
+    set files(f3a) [ttk::frame $nb.f1.f1.b]
+    pack $files(f3a) -side left -fill both -expand yes -padx 2p -pady 5p
     
-    #ttk::label $files(tab1).txt1 -text [mc "Customer Name"]
-    #ttk::entry $files(tab1).entry1 ;#-textvariable
+    # --- Job Info Frame
+    set files(jobInfo) [ttk::labelframe $files(f3a).f1 -text [mc "Job Information"]]
+    grid $files(jobInfo) -column 0 -row 0 -sticky news -padx 2p ;#-pady 5p
     
-    ttk::label $files(tab1).txt2 -text [mc "Job Name"]
-    ttk::entry $files(tab1).entry2 ;#-textvariable
+    ttk::label $files(jobInfo).txt1 -text [mc "CSR"]
+    ttk::combobox $files(jobInfo).cbox1 -values [list Mary Lyn Linda Meredtih]
+    tooltip::tooltip $files(jobInfo).cbox1 [mc "This is hardcoded, need to fix!"]
     
-    ttk::label $files(tab1).txt3 -text [mc "Job Number"]
-    ttk::entry $files(tab1).entry3 ;#-textvariable
+    ttk::label $files(jobInfo).txt2 -text [mc "Name"]
+    ttk::entry $files(jobInfo).entry2 ;#-textvariable
+    tooltip::tooltip $files(jobInfo).entry2 [mc "Job Name"]
+    
+    ttk::label $files(jobInfo).txt3 -text [mc "Number"]
+    ttk::entry $files(jobInfo).entry3 ;#-textvariable
+    tooltip::tooltip $files(jobInfo).entry3 [mc "Job Number"]
+    
+    grid $files(jobInfo).txt1      -column 0 -row 0 -sticky nes -padx 3p -pady 2p
+    grid $files(jobInfo).cbox1     -column 1 -row 0 -sticky news -padx 3p -pady 2p
+    grid $files(jobInfo).txt2      -column 0 -row 1 -sticky nes -padx 3p -pady 2p
+    grid $files(jobInfo).entry2    -column 1 -row 1 -sticky news -padx 3p -pady 2p
+    grid $files(jobInfo).txt3      -column 0 -row 2 -sticky nes -padx 3p -pady 2p
+    grid $files(jobInfo).entry3    -column 1 -row 2 -sticky news -padx 3p -pady 2p
+    
+    # --- Piece Info Frame
+    set files(pieceInfo) [ttk::labelframe $files(f3a).f2 -text [mc "Piece Information"]]
+    grid $files(pieceInfo) -column 1 -row 0 -sticky news -padx 2p ;#-pady 5p
+    
+    # -- Widgets
+    ttk::label $files(pieceInfo).txt2 -text [mc "Weight"]
+    ttk::entry $files(pieceInfo).entry2 ;#-textvariable
+    tooltip::tooltip $files(pieceInfo).entry2 [mc "Piece Weight"]
+    
+    ttk::label $files(pieceInfo).txt3 -text [mc "Thickness"]
+    ttk::entry $files(pieceInfo).entry3 ;#-textvariable
+    tooltip::tooltip $files(pieceInfo).entry3 [mc "Piece Thickness"]
+    
+    ttk::button $files(pieceInfo).btn -text [mc "Auto Assign Carrier"] -state disabled
     
     # Grid frame f3
     #grid $files(tab1).txt1 -column 0 -row 0 -sticky nes -padx 2p
     #grid $files(tab1).entry1 -column 1 -row 0 -sticky news -padx 2p
-    grid $files(tab1).txt2 -column 0 -row 1 -sticky nes -padx 2p
-    grid $files(tab1).entry2 -column 1 -row 1 -sticky news -padx 2p
-    grid $files(tab1).txt3 -column 0 -row 2 -sticky nes -padx 2p
-    grid $files(tab1).entry3 -column 1 -row 2 -sticky news -padx 2p
+    grid $files(pieceInfo).txt2      -column 0 -row 1 -sticky nes -padx 3p -pady 2p
+    grid $files(pieceInfo).entry2    -column 1 -row 1 -sticky news -padx 3p -pady 2p
+    grid $files(pieceInfo).txt3      -column 0 -row 2 -sticky nes -padx 3p -pady 2p
+    grid $files(pieceInfo).entry3    -column 1 -row 2 -sticky news -padx 3p -pady 2p
+    grid $files(pieceInfo).btn       -column 0 -columnspan 2 -row 3 -sticky news -padx 3p -pady 2p
     
     
-    ##
-    ##------------- Frame 1b
-    ##
-    set files(tab3f1b) [ttk::labelframe $nb.f1.f1.b -text [mc "Internal Samples"]]
-    pack $files(tab3f1b) -fill both -padx 2p -pady 5p
+    # --- Internal Samples Frame
+    set files(internalSamples) [ttk::labelframe $files(f3a).f3 -text [mc "Internal Samples"]]
+    grid $files(internalSamples) -column 0 -row 1 -sticky news -padx 2p ;#-pady 5p
 
-    ttk::label $files(tab3f1b).txt1 -text [mc "Ticket"]
-    ttk::label $files(tab3f1b).txt1a -textvariable csmpls(TicketTotal)
-    ttk::label $files(tab3f1b).txt2 -text [mc "CSR"]
-    ttk::label $files(tab3f1b).txt2a -textvariable csmpls(CSRTotal)
-    ttk::label $files(tab3f1b).txt3 -text [mc "Sample Room"]
-    ttk::label $files(tab3f1b).txt3a -textvariable csmpls(SmplRoomTotal)
-    ttk::label $files(tab3f1b).txt4 -text [mc "Sales"]
-    ttk::label $files(tab3f1b).txt4a -textvariable csmpls(SalesTotal)
+    ttk::label $files(internalSamples).txt1     -text [mc "Ticket"]
+    ttk::label $files(internalSamples).txt1a    -textvariable csmpls(TicketTotal)
+    ttk::label $files(internalSamples).txt2     -text [mc "CSR"]
+    ttk::label $files(internalSamples).txt2a    -textvariable csmpls(CSRTotal)
+    ttk::label $files(internalSamples).txt3     -text [mc "Sample Room"]
+    ttk::label $files(internalSamples).txt3a    -textvariable csmpls(SmplRoomTotal)
+    ttk::label $files(internalSamples).txt4     -text [mc "Sales"]
+    ttk::label $files(internalSamples).txt4a    -textvariable csmpls(SalesTotal)
     
     #------------- Grid Frame 1b
-    grid $files(tab3f1b).txt1 -column 0 -row 0 -sticky new -padx 2p
-    grid $files(tab3f1b).txt1a -column 1 -row 0 -sticky new -padx 3p
-    grid $files(tab3f1b).txt2 -column 0 -row 1 -sticky new -padx 2p
-    grid $files(tab3f1b).txt2a -column 1 -row 1 -sticky new -padx 3p
-    grid $files(tab3f1b).txt3 -column 0 -row 2 -sticky new -padx 2p
-    grid $files(tab3f1b).txt3a -column 1 -row 2 -sticky new -padx 3p
-    grid $files(tab3f1b).txt4 -column 0 -row 3 -sticky new -padx 2p
-    grid $files(tab3f1b).txt4a -column 1 -row 3 -sticky new -padx 3p
+    grid $files(internalSamples).txt1   -column 0 -row 0 -sticky new -padx 2p
+    grid $files(internalSamples).txt1a  -column 1 -row 0 -sticky new -padx 3p
+    grid $files(internalSamples).txt2   -column 0 -row 1 -sticky new -padx 2p
+    grid $files(internalSamples).txt2a  -column 1 -row 1 -sticky new -padx 3p
+    grid $files(internalSamples).txt3   -column 0 -row 2 -sticky new -padx 2p
+    grid $files(internalSamples).txt3a  -column 1 -row 2 -sticky new -padx 3p
+    grid $files(internalSamples).txt4   -column 0 -row 3 -sticky new -padx 2p
+    grid $files(internalSamples).txt4a  -column 1 -row 3 -sticky new -padx 3p
     
     ##
     #------------- Frame 2, Tablelist Notebook

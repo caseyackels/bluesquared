@@ -109,6 +109,7 @@ proc eAssistSetup::selectionChanged {tbl} {
         Misc.           {}
         International   {eAssistSetup::international_GUI ; set GS(gui,lastFrame) international_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
         AddressHeaders  {eAssistSetup::addressHeaders_GUI ; set GS(gui,lastFrame) addressHeaders_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
+        CarrierMethod   {eAssistSetup::carrierMethod_GUI; set GS(gui,lastFrame) carrierMethod_GUI; ${log}::debug Current Frame: $G_currentSetupFrame}
         DistTypes       {eAssistSetup::distributionTypes_GUI ; set GS(gui,lastFrame) distributionTypes_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
         Company         {eAssistSetup::company_GUI ; set GS(gui,lastFrame) company_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
         Logging         {eAssistSetup::logging_GUI ; set GS(gui,lastFrame) logging_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}

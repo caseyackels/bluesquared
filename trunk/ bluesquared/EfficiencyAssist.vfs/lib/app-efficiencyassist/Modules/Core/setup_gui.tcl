@@ -87,7 +87,7 @@ proc eAssistSetup::eAssistSetup {} {
     set tree(BoxLabelsChildren) [list Paths Labels Delimiters BoxHeaders ShipMethod Misc.] ;# when changing these, also change them in eAssistSetup::selectionChanged
         set BoxLabelsChildren_length [llength $tree(BoxLabelsChildren)] ;# so we can add new tree items without having to adjust manually. Used in following childLists.
     
-    set tree(BatchAddressesChildren) [list International AddressHeaders]
+    set tree(BatchAddressesChildren) [list International AddressHeaders CarrierMethod]
         set BatchAddressesChildren_length [llength $tree(BatchAddressesChildren)]
     
 

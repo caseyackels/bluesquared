@@ -10,4 +10,5 @@ package ifneeded eAssist_core 1.0 "[list source [file join $dir core_gui.tcl]]
                                     [list source [file join $dir setup_headers_code.tcl]]
                                     [list source [file join $dir setup_headers_gui.tcl]]
                                     [list source [file join $dir setup_helpers.tcl]]
-                                    [list source [file join $dir setup_distribution.tcl]]"
+                                    [list source [file join $dir setup_distribution.tcl]]
+                                    [list source [file join $dir setup_carrierMethod_gui.tcl]]"
