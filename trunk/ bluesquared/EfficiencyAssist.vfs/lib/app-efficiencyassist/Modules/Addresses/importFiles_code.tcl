@@ -292,7 +292,7 @@ proc importFiles::startCmd {tbl row col text} {
     # SEE ALSO
     #
     #***
-    global log dist process headerParent headerParams
+    global log dist process headerParent headerParams carrierSetup
     ${log}::debug --START-- [info level 1]
     set w [$tbl editwinpath]
 
@@ -306,7 +306,7 @@ proc importFiles::startCmd {tbl row col text} {
             *vers* {
                         $w configure -values [$tbl getcolumn Version] ;# Create a Versions list, as we read in the file, so we can populate this combobox.
                         }
-            "carriermethod" {$w configure -values [list UPS FedEx Freight "Will Call"] -state readonly}
+            "carriermethod" {$w configure -values $carrierSetup(CarrierList) -state readonly}
             default {
                 #${log}::debug Column Name: [string tolower [$tbl columncget $col -name]]
             }

@@ -151,7 +151,7 @@ proc 'eAssist_bootStrap {} {
 	# Project built packages
 	lappend ::auto_path [file join [file dirname [info script]] Modules Update]
 	
-	package require vUpdate
+	#package require vUpdate
 	
 	# Third Party packages
 	lappend ::auto_path [file join [file dirname [info script]] Libraries log]
@@ -425,7 +425,7 @@ proc 'eAssist_loadSettings {} {
     #
     #***
     global settings debug program header customer3P env mySettings international company shipVia3P tcl_platform setup logSettings log boxSettings boxLabelInfo intlSetup
-	global headerParent headerAddress headerParams headerBoxes GS_filePathSetup GS currentModule pref dist
+	global headerParent headerAddress headerParams headerBoxes GS_filePathSetup GS currentModule pref dist carrierSetup CSR
 	
 	set debug(onOff) on ;# Old - Still exists so we don't receive errors, on the instances where it still exists
 	set logSettings(loglevel) notice ;# Default to notice, over ridden if the user selects a different option
@@ -449,7 +449,7 @@ proc 'eAssist_loadSettings {} {
     set program(Name) "Efficiency Assist"
     set program(FullName) "$program(Name) - $program(Version).$program(PatchLevel) $program(beta)"
     
-    vUpdate::saveCurrentVersion $program(Version) $program(PatchLevel) $program(beta)
+    #vUpdate::saveCurrentVersion $program(Version) $program(PatchLevel) $program(beta)
     
     # Set required configuration changes here, i.e.
     # set cVersion(Setup,message) <informational message>
@@ -518,7 +518,7 @@ proc 'eAssist_loadSettings {} {
 #'distHelper_loadOptions
 
 # Check the versions
-vUpdate::whatVersion
+#vUpdate::whatVersion
 
 # Start the GUI
 eAssist::parentGUI

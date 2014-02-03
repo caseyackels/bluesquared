@@ -1,5 +1,5 @@
 #**** Program Specific ****#
-program(currentModule) Addresses
+program(currentModule) Setup
 program(Version) 4
 program(PatchLevel) 0.0
 program(beta) Alpha
@@ -8,7 +8,7 @@ GS_filePathSetup(labelDirectory)
 GS_filePathSetup(lookInDirectory) C:/Users/Casey.Ackels/Downloads
 GS_filePathSetup(enable,Bartender) 1
 GS_filePathSetup(saveInDirectory) C:/Users/Casey.Ackels/Desktop
-GS(gui,lastFrame) addressHeaders_GUI
+GS(gui,lastFrame) customerService_GUI
 #**** Setup Specific ****#
 company(address2) 
 company(state) OR
@@ -80,3 +80,13 @@ headerParams(Company) 32 ShipToCompany ttk::entry red
 dist(distributionTypes) {01. Customer Samples} {02. Internal Samples} {03. Customer Copies} {04. Freight} {05. Small Package} {06. JG Mail} {07. UPS Import} {08. JG Inventory} {09. USPS Import} {10. Overs} {11. Buy-Out Bindery} {12. Buy-Out Press} {13. FedEx Import}
 setup(smallPackageCarrierName) UPS FedEX UPS-NRI
 setup(smallPackageCarriers) {UPS 947919 {}} {FedEX 5555555 {}} {UPS-NRI 5656566 {}}
+carrierSetup(enterShipmentType) 
+carrierSetup(enterRateType) 
+carrierSetup(PaymentType) Prepaid {Third Party}
+carrierSetup(CarrierList) Peninsula UPS {Oak Harbor}
+carrierSetup(enterPaymentType) 
+carrierSetup(enterCarrier) 
+carrierSetup(PAYMENT) 
+carrierSetup(ShipmentType) {Small Package} {Truck Load}
+carrierSetup(RateType) Pallet Volume
+CSR(Names) Meredith Lyn Mary Cyndi {Dan H} {Pam F} Tom Darlene Linda

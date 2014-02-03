@@ -303,6 +303,9 @@ proc eAssistHelper::insertSmpls {vers args} {
     #***
     global log company files process
     ${log}::debug --START-- [info level 1]
+	
+	#${log}::debug Vers: $vers, Args: $args
+	#return
     
     set args [join $args]
     if {$args == ""} {return}
@@ -311,21 +314,21 @@ proc eAssistHelper::insertSmpls {vers args} {
     set ColumnCount [$files(tab3f2).tbl columncount]
     set RowCount [llength [$files(tab3f2).tbl getcells 0,0 end,0]]
 
-		# Columns
-		for {set y 0} {$ColumnCount > $y} {incr y} {
-            set ColumnName [$files(tab3f2).tbl columncget $y -name]
-            set columnExists [lsearch -nocase $companyAddr $ColumnName]
-            if {$columnExists != -1} {
-                #${log}::debug Inserting into existing destination column: $ColumnName
-                lappend insertCompany [string toupper $company([lindex $companyAddr $columnExists])]
-            } else {
-                switch -nocase $ColumnName {
-                    version     {${log}::debug Inserting into column: $ColumnName - Vers: $vers; lappend insertCompany $vers}
-                    quantity    {${log}::debug Inserting into column: $ColumnName - Vers: $args; lappend insertCompany $args}
-                    default     {lappend insertCompany ""}
-                }
-            }
-        }
+	# Columns
+	for {set y 0} {$ColumnCount > $y} {incr y} {
+		set ColumnName [$files(tab3f2).tbl columncget $y -name]
+		set columnExists [lsearch -nocase $companyAddr $ColumnName]
+		if {$columnExists != -1} {
+			#${log}::debug Inserting into existing destination column: $ColumnName
+			lappend insertCompany [string toupper $company([lindex $companyAddr $columnExists])]
+		} else {
+			switch -nocase $ColumnName {
+				version     {${log}::debug Inserting into column: $ColumnName - Vers: $vers; lappend insertCompany $vers}
+				quantity    {${log}::debug Inserting into column: $ColumnName - Vers: $args; lappend insertCompany $args}
+				default     {lappend insertCompany ""}
+			}
+		}
+	}
     ${log}::debug INSERTING COMPANY $insertCompany
     #$files(tab3f2).tbl insert end $insertCompany
 

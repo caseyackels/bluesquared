@@ -92,6 +92,7 @@ proc eAssistPref::saveConfig {} {
     chan puts $fd "customer3P(table) $customer3P(table)"
     chan puts $fd "customer3P(name) $customer3P(name)"
     chan puts $fd "shipVia3P(table) $shipVia3P(table)"
+    chan puts $fd "mySettings(job,fileName) $mySettings(job,fileName)"
     
     chan close $fd
    

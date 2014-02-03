@@ -97,6 +97,7 @@ proc eAssist_Preferences::prefGUI {} {
     ##
     ## Tab 1 (File Paths)
     ##
+    if {![info exists settings(job,fileName)]} {set settings(job,fileName) "%number %title %name"}
 
     ttk::label $nb.f1.sourceText -text [mc "Source Import Files"]
     ttk::entry $nb.f1.sourceEntry -textvariable mySettings(sourceFiles)
@@ -110,6 +111,10 @@ proc eAssist_Preferences::prefGUI {} {
     ttk::entry $nb.f1.outFilesCopyEntry -textvariable mySettings(outFilePathCopy)
     ttk::button $nb.f1.outFilesCopyButton -text ... -command {eAssist_Preferences::chooseDir outFilePathCopy}
     
+    ttk::label $nb.f1.txt -text [mc "Output File Name"]
+    ttk::entry $nb.f1.entry -textvariable settings(job,fileName)
+    ttk::label $nb.f1.txt2 -text "%number (Job Number), %title (Job Title), %name (Job Name)"
+    
 
     grid $nb.f1.sourceText -column 0 -row 0 -sticky e -padx 5p -pady 5p
     grid $nb.f1.sourceEntry -column 1 -row 0 -sticky ew -padx 5p -pady 5p
@@ -122,6 +127,10 @@ proc eAssist_Preferences::prefGUI {} {
     grid $nb.f1.outFilesCopyText -column 0 -row 2 -sticky e -padx 5p -pady 5p
     grid $nb.f1.outFilesCopyEntry -column 1 -row 2 -sticky ew -padx 5p -pady 5p
     grid $nb.f1.outFilesCopyButton -column 2 -row 2 -sticky e -padx 5p -pady 5p
+    
+    grid $nb.f1.txt -column 0 -row 3 -sticky e -padx 5p -pady 5p
+    grid $nb.f1.entry -column 1 -row 3 -sticky ew -padx 5p -pady 5p
+    grid $nb.f1.txt2 -column 2 -row 3 -sticky e -padx 5p -pady 5p
 
     grid columnconfigure $nb.f1 1 -weight 2
 

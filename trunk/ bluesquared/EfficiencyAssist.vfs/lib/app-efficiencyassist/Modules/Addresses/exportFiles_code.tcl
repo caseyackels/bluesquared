@@ -39,13 +39,30 @@ proc export::DataToExport {} {
     # SEE ALSO
     #
     #***
-    global log headerParent files mySettings
+    global log headerParent files mySettings job
     ${log}::debug --START-- [info level 1]
     
     
-    set myFile(data) [open [file join $mySettings(outFilePath) Test_file.csv] w]
-    ${log}::debug Writing to file [file join $mySettings(outFilePath) Test_file.csv]
+    ${log}::debug File Name: $mySettings(job,fileName)
+	
+	if {[info exists fileName]} {unset fileName}
+	
+	foreach value $mySettings(job,fileName) {
+		switch -- $value {
+			%number	{lappend fileName $job(Number)}
+			%name	{lappend fileName $job(Name)}
+			%title	{lappend fileName $job(Title)}
+			default	{$log::notice Mapping for $value does not exist}
+		}
+	}
+	set fileName [join $fileName]
+	
+	${log}::debug File Name: $fileName
     
+    #set myFile(data) [open [file join [eAssist_Global::SaveFile $fileName]] w]
+    set myFile(data) [catch {[open [eAssist_Global::SaveFile $fileName] w]} err]
+    #${log}::debug Writing to file [file join $mySettings(outFilePath) Test_file.csv]
+    if {[info exists err]} {return}
     
     # HEADER: Write output
     chan puts $myFile(data) [::csv::join $headerParent(outPutHeader)]
@@ -63,7 +80,37 @@ proc export::DataToExport {} {
 } ;# export::DataToExport
 
 
-
+proc export::ExportToPath {} {
+    #****f* ExportToPath/export
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	What path do we want to save too
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log
+    ${log}::debug --START-- [info level 1]
+    
+	
+    ${log}::debug --END-- [info level 1]
+} ;# export::ExportToPath
 proc export::BatchToCSV {} {
     #****f* BatchToCSV/export
     # AUTHOR

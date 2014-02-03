@@ -138,6 +138,7 @@ proc eAssistPref::launchAddresses {} {
     ##
     ## - Tab1
     ##
+	if {![info exists mySettings(job,fileName)]} {set mySettings(job,fileName) "%number %title %name"}
     
     set tab1 [ttk::labelframe $pref(nb).f1.tab1 -text [mc "File Paths"]]
     pack $tab1 -expand yes -fill both -padx 5p -pady 5p
@@ -150,6 +151,11 @@ proc eAssistPref::launchAddresses {} {
     ttk::entry $tab1.outFilesEntry -textvariable mySettings(outFilePath)
     ttk::button $tab1.outFilesButton -text ... -command {set mySettings(outFilePath) [eAssist_Global::OpenFile [mc "Choose Directory"] [pwd] dir]; ${log}::debug OpenFile: $mySettings(outFilePath)} 
 
+    ttk::label $tab1.txt -text [mc "Output File Name"]
+    ttk::entry $tab1.entry -textvariable mySettings(job,fileName)
+    ttk::label $tab1.txt2 -text "%number (Job Number), %title (Job Title), %name (Job Name)"
+	
+	
     #---- Grid
     grid $tab1.sourceText -column 0 -row 0 -sticky e -padx 5p -pady 5p
     grid $tab1.sourceEntry -column 1 -row 0 -sticky ew -padx 5p -pady 5p
@@ -158,6 +164,10 @@ proc eAssistPref::launchAddresses {} {
     grid $tab1.outFilesText -column 0 -row 1 -sticky e -padx 5p -pady 5p
     grid $tab1.outFilesEntry -column 1 -row 1 -sticky ew -padx 5p -pady 5p
     grid $tab1.outFilesButton -column 2 -row 1 -sticky e -padx 5p -pady 5p
+	
+	grid $tab1.txt -column 0 -row 2 -sticky e -padx 5p -pady 5p
+	grid $tab1.entry -column 1 -row 2 -sticky ew -padx 5p -pady 5p
+	grid $tab1.txt2 -column 2 -row 2 -sticky ew -padx 5p -pady 5p
 
     grid columnconfigure $tab1 1 -weight 1
     

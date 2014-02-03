@@ -59,7 +59,7 @@ proc importFiles::eAssistGUI {} {
     #	
     #
     #***
-    global log program currentModule w headerParent files mySettings process dist filter w options csmpls
+    global log program currentModule w headerParent files mySettings process dist filter w options csmpls CSR job
     
     set program(currentModule) Addresses
     set currentModule Addresses
@@ -303,23 +303,29 @@ proc importFiles::eAssistGUI {} {
     grid $files(jobInfo) -column 0 -row 0 -sticky news -padx 2p ;#-pady 5p
     
     ttk::label $files(jobInfo).txt1 -text [mc "CSR"]
-    ttk::combobox $files(jobInfo).cbox1 -values [list Mary Lyn Linda Meredtih]
-    tooltip::tooltip $files(jobInfo).cbox1 [mc "This is hardcoded, need to fix!"]
+    ttk::combobox $files(jobInfo).cbox1 -values $CSR(Names) -textvariable job(CSRName)
+    #tooltip::tooltip $files(jobInfo).cbox1 [mc "This is hardcoded, need to fix!"]
+    
+    ttk::label $files(jobInfo).txt1a -text [mc "Title"]
+    ttk::entry $files(jobInfo).entry1a -textvariable job(Title)
+    tooltip::tooltip $files(jobInfo).entry1a [mc "Publication Title"]
     
     ttk::label $files(jobInfo).txt2 -text [mc "Name"]
-    ttk::entry $files(jobInfo).entry2 ;#-textvariable
+    ttk::entry $files(jobInfo).entry2 -textvariable job(Name)
     tooltip::tooltip $files(jobInfo).entry2 [mc "Job Name"]
     
     ttk::label $files(jobInfo).txt3 -text [mc "Number"]
-    ttk::entry $files(jobInfo).entry3 ;#-textvariable
+    ttk::entry $files(jobInfo).entry3 -textvariable job(Number)
     tooltip::tooltip $files(jobInfo).entry3 [mc "Job Number"]
     
     grid $files(jobInfo).txt1      -column 0 -row 0 -sticky nes -padx 3p -pady 2p
     grid $files(jobInfo).cbox1     -column 1 -row 0 -sticky news -padx 3p -pady 2p
-    grid $files(jobInfo).txt2      -column 0 -row 1 -sticky nes -padx 3p -pady 2p
-    grid $files(jobInfo).entry2    -column 1 -row 1 -sticky news -padx 3p -pady 2p
-    grid $files(jobInfo).txt3      -column 0 -row 2 -sticky nes -padx 3p -pady 2p
-    grid $files(jobInfo).entry3    -column 1 -row 2 -sticky news -padx 3p -pady 2p
+    grid $files(jobInfo).txt1a     -column 0 -row 1 -sticky nes -padx 3p -pady 2p
+    grid $files(jobInfo).entry1a   -column 1 -row 1 -sticky news -padx 3p -pady 2p
+    grid $files(jobInfo).txt2      -column 0 -row 2 -sticky nes -padx 3p -pady 2p
+    grid $files(jobInfo).entry2    -column 1 -row 2 -sticky news -padx 3p -pady 2p
+    grid $files(jobInfo).txt3      -column 0 -row 3 -sticky nes -padx 3p -pady 2p
+    grid $files(jobInfo).entry3    -column 1 -row 3 -sticky news -padx 3p -pady 2p
     
     # --- Piece Info Frame
     set files(pieceInfo) [ttk::labelframe $files(f3a).f2 -text [mc "Piece Information"]]
@@ -358,16 +364,18 @@ proc importFiles::eAssistGUI {} {
     ttk::label $files(internalSamples).txt3a    -textvariable csmpls(SmplRoomTotal)
     ttk::label $files(internalSamples).txt4     -text [mc "Sales"]
     ttk::label $files(internalSamples).txt4a    -textvariable csmpls(SalesTotal)
+    ttk::button $files(internalSamples).btn1    -text [mc "Edit"] -command {eAssistHelper::addCompanySamples}
     
     #------------- Grid Frame 1b
     grid $files(internalSamples).txt1   -column 0 -row 0 -sticky new -padx 2p
-    grid $files(internalSamples).txt1a  -column 1 -row 0 -sticky new -padx 3p
+    grid $files(internalSamples).txt1a  -column 1 -row 0 -sticky new -padx 2p
     grid $files(internalSamples).txt2   -column 0 -row 1 -sticky new -padx 2p
-    grid $files(internalSamples).txt2a  -column 1 -row 1 -sticky new -padx 3p
+    grid $files(internalSamples).txt2a  -column 1 -row 1 -sticky new -padx 2p
     grid $files(internalSamples).txt3   -column 0 -row 2 -sticky new -padx 2p
-    grid $files(internalSamples).txt3a  -column 1 -row 2 -sticky new -padx 3p
+    grid $files(internalSamples).txt3a  -column 1 -row 2 -sticky new -padx 2p
     grid $files(internalSamples).txt4   -column 0 -row 3 -sticky new -padx 2p
-    grid $files(internalSamples).txt4a  -column 1 -row 3 -sticky new -padx 3p
+    grid $files(internalSamples).txt4a  -column 1 -row 3 -sticky new -padx 2p
+    grid $files(internalSamples).btn1   -column 1 -row 4 -sticky new ;#-padx 3p
     
     ##
     #------------- Frame 2, Tablelist Notebook

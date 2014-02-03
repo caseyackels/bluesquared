@@ -153,6 +153,61 @@ proc eAssist_Global::OpenFile {title initDir type args} {
 } ;# eAssist_Global::OpenFile
 
 
+proc eAssist_Global::SaveFile {fileName} {
+    #****f* SaveFile/eAssist_Global
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	Save file to specified directory
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log mySettings
+    ${log}::debug --START-- [info level 1]
+	
+	if {$mySettings(outFilePath) == ""} {
+		set initDir [pwd]
+	} else {
+		set initDir $mySettings(outFilePath)
+	}
+	
+	set types {
+		{{Comma Separated Values}	{.csv}}
+	}
+
+	set filename [tk_getSaveFile \
+				  -filetypes $types \
+				  -defaultextension .csv \
+				  -initialdir $mySettings(outFilePath) \
+					-initialfile $fileName \
+					-parent . \
+					-title [mc "Choose where to save your file"] \
+				  ]
+	
+
+    # If we do not select a file name, and cancel out of the dialog, do not produce an error.
+    if {$filename eq ""} {return}
+	
+	return $filename
+    ${log}::debug --END-- [info level 1]
+} ;# eAssist_Global::SaveFile
+
 proc eAssist_Global::detectWin {args} {
     #****f* detectWin/eAssist_Global
     # AUTHOR
