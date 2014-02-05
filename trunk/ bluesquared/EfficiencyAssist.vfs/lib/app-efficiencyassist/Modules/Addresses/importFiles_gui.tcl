@@ -335,6 +335,7 @@ proc importFiles::eAssistGUI {} {
     ttk::label $files(pieceInfo).txt2 -text [mc "Weight"]
     ttk::entry $files(pieceInfo).entry2 ;#-textvariable
     tooltip::tooltip $files(pieceInfo).entry2 [mc "Piece Weight"]
+
     
     ttk::label $files(pieceInfo).txt3 -text [mc "Thickness"]
     ttk::entry $files(pieceInfo).entry3 ;#-textvariable
@@ -365,6 +366,7 @@ proc importFiles::eAssistGUI {} {
     ttk::label $files(internalSamples).txt4     -text [mc "Sales"]
     ttk::label $files(internalSamples).txt4a    -textvariable csmpls(SalesTotal)
     ttk::button $files(internalSamples).btn1    -text [mc "Edit"] -command {eAssistHelper::addCompanySamples}
+    
     
     #------------- Grid Frame 1b
     grid $files(internalSamples).txt1   -column 0 -row 0 -sticky new -padx 2p
@@ -411,6 +413,9 @@ proc importFiles::eAssistGUI {} {
         
     ::autoscroll::autoscroll $scrolly ;# Enable the 'autoscrollbar'
     ::autoscroll::autoscroll $scrollx ;# Enable the 'autoscrollbar'
+
+    set bodyTag [$files(tab3f2).tbl bodytag]
+    bind $bodyTag <<Button3>> +[list tk_popup .tblMenu %X %Y]
     
 
     #----- GRID
@@ -453,7 +458,8 @@ proc importFiles::initMenu {} {
     ${log}::debug --START -- [info level 1]
     
     catch {menu $mb.dist -tearoff 0 -relief raised -bd 2} err
-    if {$err != ""} {$mb delete 2}
+    #if {$err != ""} {$mb delete 2}
+    if {$err != ""} {$mb delete 1}
     
     $mb insert 2 cascade -label [mc "Distribution"] -menu $mb.dist
     

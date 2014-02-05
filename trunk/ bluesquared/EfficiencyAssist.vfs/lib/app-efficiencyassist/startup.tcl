@@ -505,6 +505,11 @@ proc 'eAssist_loadSettings {} {
     }
     # Initialize default values
     'eAssist_initVariables
+	
+	
+	# Set options in the Options DB
+	option add *tearOff 0
+	
 }
 
 

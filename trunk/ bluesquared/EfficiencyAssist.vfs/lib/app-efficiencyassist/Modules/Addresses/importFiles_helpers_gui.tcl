@@ -128,3 +128,45 @@ proc eAssistHelper::addDistTypes_GUI {} {
 	
     ${log}::debug --END -- [info level 1]
 } ;# eAssistHelper::addDistTypes_GUI
+
+
+proc eAssistHelper::tblPopup {} {
+    #****f* tblPopup/eAssistHelper
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	Popup menu for the main Table for editing addresses
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	importFiles::eAssistGUI
+    #
+    # PARENTS
+    #	eAssist::parentGUI
+    #
+    # NOTES
+	# 	This is initiated in the above parent.
+    #
+    # SEE ALSO
+    #
+    #***
+    global log files
+    ${log}::debug --START-- [info level 1]
+	
+	menu .tblMenu
+	
+	# Add cascade menu
+	# [example] $m add cascade -menu $m.file -label File
+	
+	# Add commands
+	.tblMenu add command -label [mc "Insert Row"] -command "${log}::debug Adding Row"
+	.tblMenu add command -label [mc "Display contents"] -command {${log}::debug [$files(tab3f2).tbl get [$files(tab3f2).tbl curselection]]}
+	
+    ${log}::debug --END-- [info level 1]
+} ;# eAssistHelper::tblPopup

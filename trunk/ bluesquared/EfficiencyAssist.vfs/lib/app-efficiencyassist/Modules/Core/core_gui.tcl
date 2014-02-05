@@ -97,6 +97,8 @@ proc eAssist::parentGUI {} {
 
     $mb.help add command -label [mc "About..."] -command { BlueSquared_About::aboutWindow }
 
+    # Enable popup menus
+    eAssistHelper::tblPopup
 
     ## Create Separator Frame
     #set frame0 [ttk::frame .frame0]
@@ -189,34 +191,33 @@ proc eAssist::buttonBarGUI {module} {
   
     switch -- $module {
         BoxLabels   {
-            # .. save the settings as soon as we enter this mode
-            eAssistSetup::SaveGlobalSettings
             # .. setup the buttons on the button bar
             eAssist::remButtons $btn(Bar)
             eAssist::addButtons [mc "Print Labels"] {} btn1 0 8p
             eAssist::addButtons [mc "Exit"] exit btn2 1 0p
             # .. launch the mode
             Shipping_Gui::shippingGUI
+            # .. save the settings
+            eAssistSetup::SaveGlobalSettings
         }
         Addresses   {
-            # .. save the settings as soon as we enter this mode
-            eAssistSetup::SaveGlobalSettings
             # .. setup the buttons on the button bar
             importFiles::initMenu
             eAssist::remButtons $btn(Bar)
             #eAssist::addButtons [mc "Export Files"] exit btn1 0 2p
             # .. launch the mode
             importFiles::eAssistGUI
+
             }
         Setup       {
-            # .. save the settings as soon as we enter this mode
-            eAssistSetup::SaveGlobalSettings
             # .. setup the buttons on the button bar
             eAssist::remButtons $btn(Bar)
             eAssist::addButtons [mc "Save"] eAssistSetup::SaveGlobalSettings btn1 0 8p
             eAssist::addButtons [mc "Exit"] exit btn2 1 0p
             # .. launch the mode
             eAssistSetup::eAssistSetup
+            # .. save the settings
+            eAssistSetup::SaveGlobalSettings
         }
         default     {}
     }
