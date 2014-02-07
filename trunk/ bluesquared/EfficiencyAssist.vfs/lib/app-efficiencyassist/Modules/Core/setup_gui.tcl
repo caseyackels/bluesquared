@@ -63,10 +63,10 @@ proc eAssistSetup::eAssistSetup {} {
     #
     #
     #***
-    global G_setupFrame program currentModule tree log GS
+    global G_setupFrame program tree log GS
     
-    set program(currentModule) Setup
-    set currentModule Setup
+    #set program(currentModule) Setup
+    #set currentModule Setup
     
     # Reset frames before continuing
     eAssist_Global::resetFrames parent
@@ -477,7 +477,7 @@ proc eAssistSetup::company_GUI {} {
     #
     #
     #***
-    global G_setupFrame GS_program company internal currentModule setup
+    global G_setupFrame GS_program company internal setup
     
     #set currentModule company
     eAssist_Global::resetSetupFrames ;# Reset all frames so we start clean

@@ -55,10 +55,10 @@ proc shippingGUI {} {
     #	TODO: List the other *GUI procs.
     #
     #***
-    global GI_textVar GS_textVar frame1 frame2b genResults GS_windows program currentModule
+    global GI_textVar GS_textVar frame1 frame2b genResults GS_windows program
     
-    set program(currentModule) BoxLabels
-    set currentModule BoxLabels
+    #set program(currentModule) BoxLabels
+    #set currentModule BoxLabels
 
     # Clear the frames before continuing
     eAssist_Global::resetFrames parent

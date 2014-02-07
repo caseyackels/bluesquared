@@ -128,9 +128,30 @@ proc eAssistSetup::delCarrierSetup {varType listBox} {
     ${log}::debug --START-- [info level 1]
     
     if {[$listBox curselection] == ""} {return}
+    
     # Delete the entry, then set the var to all values remaining values.
     $listBox delete [$listBox curselection]
-    set carrierSetup($varType) [$listBox get 0 end]
+    
+    switch -- $varType {
+            PAYMENT     {
+                        set newVarType PaymentType
+            }
+            SHIPMENT    {
+                        set newVarType ShipmentType
+            }
+            CARRIERS    {
+                        set newVarType CarrierList
+            }
+            RATES       {
+                        set newVarType RateType
+            }
+            default     {
+                        ${log}::debug Nothing set for this SWITCH command
+            }
+    }
+    
+    set carrierSetup($newVarType) [$listBox get 0 end]
+    
 	
     ${log}::debug --END-- [info level 1]
 } ;# eAssistSetup::delCarrierSetup

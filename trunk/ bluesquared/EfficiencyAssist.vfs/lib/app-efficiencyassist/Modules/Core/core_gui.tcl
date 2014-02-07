@@ -88,7 +88,7 @@ proc eAssist::parentGUI {} {
     $mb add cascade -label [mc "Module"] -menu $mb.module
 
     $mb.module add command -label [mc "Box Labels"] -command {eAssist::buttonBarGUI BoxLabels}
-    $mb.module add command -label [mc "Batch Maker"] -command {eAssist::buttonBarGUI Addresses}
+    $mb.module add command -label [mc "Batch Maker"] -command {eAssist::buttonBarGUI BatchMaker}
     $mb.module add command -label [mc "Setup"] -command {eAssist::buttonBarGUI Setup}
 
     ## Help
@@ -187,7 +187,7 @@ proc eAssist::buttonBarGUI {module} {
     #	N/A
     #
     #***
-    global btn
+    global btn program
   
     switch -- $module {
         BoxLabels   {
@@ -195,25 +195,32 @@ proc eAssist::buttonBarGUI {module} {
             eAssist::remButtons $btn(Bar)
             eAssist::addButtons [mc "Print Labels"] {} btn1 0 8p
             eAssist::addButtons [mc "Exit"] exit btn2 1 0p
+            # .. remember what module we are in ..
+            set program(currentModule) BoxLabels
             # .. launch the mode
             Shipping_Gui::shippingGUI
             # .. save the settings
             eAssistSetup::SaveGlobalSettings
         }
-        Addresses   {
+        BatchMaker   {
             # .. setup the buttons on the button bar
             importFiles::initMenu
             eAssist::remButtons $btn(Bar)
+            # .. remember what module we are in ..
+            set program(currentModule) BatchMaker
             #eAssist::addButtons [mc "Export Files"] exit btn1 0 2p
             # .. launch the mode
             importFiles::eAssistGUI
-
+            # .. save the settings
+            eAssistSetup::SaveGlobalSettings
             }
         Setup       {
             # .. setup the buttons on the button bar
             eAssist::remButtons $btn(Bar)
             eAssist::addButtons [mc "Save"] eAssistSetup::SaveGlobalSettings btn1 0 8p
             eAssist::addButtons [mc "Exit"] exit btn2 1 0p
+            # .. remember what module we are in ..
+            set program(currentModule) Setup
             # .. launch the mode
             eAssistSetup::eAssistSetup
             # .. save the settings

@@ -61,8 +61,8 @@ proc importFiles::eAssistGUI {} {
     #***
     global log program currentModule w headerParent files mySettings process dist filter w options csmpls CSR job
     
-    set program(currentModule) Addresses
-    set currentModule Addresses
+    #set program(currentModule) Addresses
+    #set currentModule Addresses
       
     # Clear the frames before continuing
     eAssist_Global::resetFrames parent

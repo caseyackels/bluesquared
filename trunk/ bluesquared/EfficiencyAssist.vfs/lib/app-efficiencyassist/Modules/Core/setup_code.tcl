@@ -192,7 +192,7 @@ proc eAssistSetup::SaveGlobalSettings {} {
     #
     #***
     global log GS_filePaths GS_filePathSetup program company logSettings boxLabelInfo intlSetup headerParams headerParent headerAddress headerBoxes setup GS
-    global currentModule dist w carrierSetup CSR
+    global dist w carrierSetup CSR
 
     
     ${log}::debug Folder: [eAssist_Global::folderAccessibility $program(Home)]
