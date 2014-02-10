@@ -108,6 +108,14 @@ proc vUpdate::whatVersion {} {
     
 } ;#whatVersion
 
+##
+## Add proc to launch a dialog
+## [New Update: Version <4.3.1>]
+## [Old Version: 4.2.1]
+## [A new update has been installed]
+## [Would you like to view the changes?]
+## Buttons Yes/No (Yes opens up the Change Log), (No closes the update dialog)
+
 
 proc vUpdate::newVersion {} {
     #****f* newVersion/vUpdate
