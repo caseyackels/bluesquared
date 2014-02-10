@@ -89,16 +89,19 @@ proc vUpdate::whatVersion {} {
     
     # Check the versioning from the bottom up
     if {$cVersion(Beta) ne $program(beta)} {
-        ${log}::debug Beta levels do not match!!
+        ${log}::debug Beta levels do not match!
+        ${log}::debug Minor Update, launching 'New Update' dialog ...
     }
     
     if {$cVersion(PatchLevel) ne $program(PatchLevel)} {
-        ${log}::debug Patch Levels do not match!!
+        ${log}::debug Patch Levels do not match!
+        ${log}::debug Minor Update, launching 'New Update' dialog ...
     
     }
     
     if {$cVersion(Version) ne $program(Version)} {
-        ${log}::debug Major Versions do not match!!
+        ${log}::debug Major Versions do not match!
+        ${log}::debug Major Update, launching 'New Update' dialog ...
     }
     
     
