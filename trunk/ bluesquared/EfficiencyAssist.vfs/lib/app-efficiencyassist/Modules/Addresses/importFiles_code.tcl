@@ -140,6 +140,14 @@ proc importFiles::processFile {tab} {
     
     # Whitelist for required columns, so that they won't be hidden.
     set headerParent(whiteList) [list DistributionType CarrierMethod]
+    
+    # Get the length of the Distribution Types
+    if {[info exists newList]} {unset newList}
+    foreach val $dist(distributionTypes) {
+        lappend newList [string length $val]
+    }
+    # Grab the highest number ...
+    set distWidth [expr {[lrange [lsort -integer $newList] end end] + 4}]
 
     # insert the remaining available columns into a listbox.
     foreach listItem [$files(tab1f2).listbox get 0 end] {
@@ -174,6 +182,9 @@ proc importFiles::processFile {tab} {
                                         -labelalign center \
                                         -editable yes \
                                         -editwindow $myWidget
+        
+        # Ensure that we don't have to manually expand this column ...
+        if {$hdr eq "DistributionType"} {$files(tab3f2).tbl columnconfigure $x -width $distWidth}
         
     }
 

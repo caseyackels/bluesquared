@@ -118,7 +118,7 @@ proc importFiles::eAssistGUI {} {
     
     # This option should be saved, and read from the config file.
         set options(AutoAssignHeader) 1
-    ttk::checkbutton $frame1a.chkbtn1 -text [mc "Auto-Assign header names"] -variable options(AutoAssignHeader)
+    ttk::checkbutton $frame1a.chkbtn1 -text [mc "Auto-Assign Header Names"] -variable options(AutoAssignHeader)
     grid $frame1a.chkbtn1 -column 0 -columnspan 2 -row 1 -sticky w
 
     
@@ -396,9 +396,11 @@ proc importFiles::eAssistGUI {} {
                                     -exportselection yes \
                                     -showseparators yes \
                                     -fullseparators yes \
-                                    -movablecolumns yes \
-                                    -movablerows yes \
+                                    -movablecolumns no \
+                                    -movablerows no \
                                     -editselectedonly 1 \
+                                    -selectmode extended \
+                                    -selecttype cell \
                                     -editstartcommand {importFiles::startCmd} \
                                     -editendcommand {importFiles::endCmd} \
                                     -yscrollcommand [list $scrolly set] \
@@ -417,6 +419,24 @@ proc importFiles::eAssistGUI {} {
     set bodyTag [$files(tab3f2).tbl bodytag]
     bind $bodyTag <<Button3>> +[list tk_popup .tblMenu %X %Y]
     
+    # Toggle between selecting a row, or a single cell
+    bind $bodyTag <Control-e> {
+        if {[$files(tab3f2).tbl cget -selectmode] eq "extended"} {
+            $files(tab3f2).tbl configure -selectmode browse
+            $files(tab3f2).tbl configure -selecttype row
+            eAssistHelper::tblPopup browse
+            ${log}::debug Switching to Browse Mode
+        
+        } else {
+            $files(tab3f2).tbl configure -selectmode extended
+            $files(tab3f2).tbl configure -selecttype cell
+            eAssistHelper::tblPopup extended
+            ${log}::debug Switching to Extended Mode
+        }
+    }
+    
+    # Initialize popup menus
+    eAssistHelper::tblPopup extended
 
     #----- GRID
     grid $files(tab3f2).tbl -column 0 -row 0 -sticky news -padx 5p -pady 5p

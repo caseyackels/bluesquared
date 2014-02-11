@@ -130,7 +130,7 @@ proc eAssistHelper::addDistTypes_GUI {} {
 } ;# eAssistHelper::addDistTypes_GUI
 
 
-proc eAssistHelper::tblPopup {} {
+proc eAssistHelper::tblPopup {mode} {
     #****f* tblPopup/eAssistHelper
     # AUTHOR
     #	Casey Ackels
@@ -159,14 +159,25 @@ proc eAssistHelper::tblPopup {} {
     global log files
     ${log}::debug --START-- [info level 1]
 	
-	menu .tblMenu
+	if {[winfo exists .tblMenu]} {
+		destroy .tblMenu
+		menu .tblMenu
+	} else {
+		menu .tblMenu
+	}
 	
 	# Add cascade menu
 	# [example] $m add cascade -menu $m.file -label File
-	
+
 	# Add commands
-	.tblMenu add command -label [mc "Insert Row"] -command "${log}::debug Adding Row"
-	.tblMenu add command -label [mc "Display contents"] -command {${log}::debug [$files(tab3f2).tbl get [$files(tab3f2).tbl curselection]]}
+	# Disable menu items if we don't want them active during "Extended" Mode
+	if {$mode eq "extended"} {
+	} else {
+		.tblMenu add command -label [mc "Insert Row"] -command {catch [$files(tab3f2).tbl insert [$files(tab3f2).tbl curselection] ""] err}
+		.tblMenu add command -label [mc "Delete Row"] -command {catch [$files(tab3f2).tbl delete [$files(tab3f2).tbl curselection]] err}
+	}
 	
+	# Items that should always be displayed
+	.tblMenu add command -label [mc "Display contents"] -command {${log}::debug [$files(tab3f2).tbl get [$files(tab3f2).tbl curselection]]}
     ${log}::debug --END-- [info level 1]
 } ;# eAssistHelper::tblPopup

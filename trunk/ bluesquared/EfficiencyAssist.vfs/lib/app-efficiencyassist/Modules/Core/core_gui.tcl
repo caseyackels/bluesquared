@@ -97,8 +97,6 @@ proc eAssist::parentGUI {} {
 
     $mb.help add command -label [mc "About..."] -command { BlueSquared_About::aboutWindow }
 
-    # Enable popup menus
-    eAssistHelper::tblPopup
 
     ## Create Separator Frame
     #set frame0 [ttk::frame .frame0]
