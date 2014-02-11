@@ -171,13 +171,17 @@ proc eAssistHelper::tblPopup {mode} {
 
 	# Add commands
 	# Disable menu items if we don't want them active during "Extended" Mode
+	
 	if {$mode eq "extended"} {
+		.tblMenu add command -label [mc "Display contents"] -command {${log}::debug [$files(tab3f2).tbl getcells [$files(tab3f2).tbl curcellselection]]}
 	} else {
+		# Browse mode
 		.tblMenu add command -label [mc "Insert Row"] -command {catch [$files(tab3f2).tbl insert [$files(tab3f2).tbl curselection] ""] err}
 		.tblMenu add command -label [mc "Delete Row"] -command {catch [$files(tab3f2).tbl delete [$files(tab3f2).tbl curselection]] err}
+		.tblMenu add command -label [mc "Display contents"] -command {${log}::debug [$files(tab3f2).tbl get [$files(tab3f2).tbl curselection]]}
 	}
 	
 	# Items that should always be displayed
-	.tblMenu add command -label [mc "Display contents"] -command {${log}::debug [$files(tab3f2).tbl get [$files(tab3f2).tbl curselection]]}
+	
     ${log}::debug --END-- [info level 1]
 } ;# eAssistHelper::tblPopup

@@ -418,6 +418,7 @@ proc importFiles::eAssistGUI {} {
 
     set bodyTag [$files(tab3f2).tbl bodytag]
     bind $bodyTag <<Button3>> +[list tk_popup .tblMenu %X %Y]
+    bind [$files(tab3f2).tbl editwintag] <Return> "[bind TablelistEdit <Down>]; break"
     
     # Toggle between selecting a row, or a single cell
     bind $bodyTag <Control-e> {
