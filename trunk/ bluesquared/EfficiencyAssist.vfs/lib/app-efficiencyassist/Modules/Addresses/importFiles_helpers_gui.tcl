@@ -130,6 +130,141 @@ proc eAssistHelper::addDistTypes_GUI {} {
 } ;# eAssistHelper::addDistTypes_GUI
 
 
+proc eAssistHelper::insertItems {cells} {
+    #****f* insertItems/eAssistHelper
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	Opens a dialog and allows the user to input data that should be the same for each cell that they selected
+	#	Will only work in [Extended] Mode for BatchMaker
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	eAssistHelper::insValuesToTable
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log files headerParams dist origCells carrierSetup
+    ${log}::debug --START-- [info level 1]
+    
+	set w(di) .di
+	if {[winfo exists $w(di)]} {destroy .di}
+		
+	toplevel $w(di)
+    wm transient $w(di) .
+    wm title $w(di) [mc "Quick Insert"]
+
+    # Put the window in the center of the parent window
+    set locX [expr {[winfo width . ] / 3 + [winfo x .]}]
+    set locY [expr {[winfo height . ] / 3 + [winfo y .]}]
+    wm geometry $w(di) +${locX}+${locY}
+
+    focus $w(di)
+	
+	set f1 [ttk::frame $w(di).f1]
+	pack $f1 -expand yes -fill both -pady 5p -padx 5p
+	
+	ttk::label $f1.txt0 -text [mc "This will fill all selected cells with the same value"]
+	grid $f1.txt0 -column 0 -row 0 -rowspan 2 -sticky news -pady 5p -padx 5p
+	
+	set f2 [ttk::frame $w(di).f2]
+	pack $f2 -expand yes -fill both -pady 5p -padx 5p
+	
+	# Button Bar
+	set btnBar [ttk::frame $w(di).btnBar]
+	pack $btnBar -side right -pady 5p -padx 5p
+	
+	# Create the buttons here, but we'll [grid] it at the bottom of this proc.
+	ttk::button $btnBar.ok		-text [mc "OK"] -command {eAssistHelper::insValuesToTable $newType $origCells; destroy .di}
+	ttk::button $btnBar.cancel	-text [mc "Cancel"] -command {destroy .di}
+
+	
+	if {[info exists curCol]} {unset curCol}
+	set newType ""
+	set origCells $cells
+	
+	foreach val $cells {
+		# Initialize that variable
+		if {![info exists curCol]} {set curCol [$files(tab3f2).tbl columncget [lrange [split $val ,] end end] -name]}
+		
+		# This should get over written during our cycles
+		set curCol1 [$files(tab3f2).tbl columncget [lrange [split $val ,] end end] -name]
+		
+		# if we arent the same lets save the column name
+		if {[string match $curCol1 $curCol] ne 1} {lappend curCol [$files(tab3f2).tbl columncget [lrange [split $val ,] end end] -name]}
+
+	}
+
+	# Guard against multiple cells being selected ...	
+	if {[llength $curCol] == 1} {
+		foreach header $curCol {
+			incr x
+			incr i
+			${log}::debug $header / Widgets: [lrange $headerParams($header) 2 2]
+			# Check to make sure that the column hasn't been hidden, if it is, lets stop the current loop.
+			if {[$files(tab3f2).tbl columncget $header -hide] == 1} {continue}
+			
+			set wid [string tolower [lrange $headerParams($header) 2 2]]
+	
+			if {$wid eq "ttk::combobox"} {
+				if {[string equal [string tolower $header] distributiontype] eq 1} {
+					
+					ttk::label $f2.txt$i -text [mc "$header"]
+					$wid $f2.$x$header -values $dist(distributionTypes) -textvariable newType
+					$f2.$x$header delete 0 end
+					$f2.$x$header configure -state readonly
+					
+					grid $f2.txt$i -column 0 -row $x -sticky news -pady 5p -padx 5p
+					grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
+				
+				} elseif {[string equal [string tolower $header] carriermethod] eq 1} {
+					ttk::label $f2.txt$i -text [mc "$header"]
+					$wid $f2.$x$header -values $carrierSetup(CarrierList) -textvariable newType
+					$f2.$x$header delete 0 end
+					$f2.$x$header configure -state readonly
+					
+					grid $f2.txt$i -column 0 -row $x -sticky news -pady 5p -padx 5p
+					grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
+				}
+			} else {
+				ttk::label $f2.txt$i -text [mc "$header"]
+				# Create the widget specified in Setup for the column; typically will be ttk::entry
+				$wid $f2.$x$header
+				
+				grid $f2.txt$i -column 0 -row $x -sticky news -pady 5p -padx 5p
+				grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
+			}
+		}
+	} else {
+		ttk::label $f2.txt1 -text [mc "Please select cells in one column only"]
+		grid $f2.txt1 -column 0 -row 0 -sticky news -pady 5p -padx 5p
+		
+		grid forget $f1
+		$btnBar.ok configure -command {destroy .di}
+	}
+
+	
+	# Look above for the initiation of the btnBar
+	grid $btnBar.ok -column 0 -row 0 -sticky news -pady 5p -padx 5p
+	grid $btnBar.cancel -column 1 -row 0 -sticky news -pady 5p -pady 5p
+
+	
+	
+    ${log}::debug --END-- [info level 1]
+} ;# eAssistHelper::insertItems
+
 proc eAssistHelper::tblPopup {mode} {
     #****f* tblPopup/eAssistHelper
     # AUTHOR
@@ -156,7 +291,7 @@ proc eAssistHelper::tblPopup {mode} {
     # SEE ALSO
     #
     #***
-    global log files
+    global log files 
     ${log}::debug --START-- [info level 1]
 	
 	if {[winfo exists .tblMenu]} {
@@ -170,9 +305,15 @@ proc eAssistHelper::tblPopup {mode} {
 	# [example] $m add cascade -menu $m.file -label File
 
 	# Add commands
-	# Disable menu items if we don't want them active during "Extended" Mode
+	# Control what shows up, depending on if we are in [extended] or [browse] mode
 	
 	if {$mode eq "extended"} {
+		#if {[eAssistHelper::multiCells] eq 1} {set state disabled} else {set state normal}
+		if {[eAssistHelper::multiCells] eq 1} {${log}::debug One Column}
+		.tblMenu add command -label [mc "Copy"] -command {${log}::debug [$files(tab3f2).tbl getcells [$files(tab3f2).tbl curcellselection]]}
+		.tblMenu add command -label [mc "Paste"] -command {${log}::debug [$files(tab3f2).tbl getcells [$files(tab3f2).tbl curcellselection]]}
+		.tblMenu add command -label [mc "Clear Contents"] -command {${log}::debug [$files(tab3f2).tbl getcells [$files(tab3f2).tbl curcellselection]]}
+		.tblMenu add command -label [mc "Insert..."] -command {${log}::debug [$files(tab3f2).tbl curcellselection]; eAssistHelper::insertItems [$files(tab3f2).tbl curcellselection]}
 		.tblMenu add command -label [mc "Display contents"] -command {${log}::debug [$files(tab3f2).tbl getcells [$files(tab3f2).tbl curcellselection]]}
 	} else {
 		# Browse mode

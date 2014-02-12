@@ -281,3 +281,96 @@ proc eAssistHelper::resetImportInterface {} {
 	
     ${log}::debug --END -- [info level 1]
 } ;# eAssistHelper::resetImportInterface
+
+
+proc eAssistHelper::insValuesToTable {args} {
+    #****f* insValuesToTable/eAssistHelper
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	Insert values set through the GUI into selected cells
+    #
+    # SYNOPSIS
+    #	$args = textvar with new data, and cell locations
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	eAssistHelper::insertItems
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log files
+    ${log}::debug --START-- [info level 1]
+    
+	set newType [join [lrange $args 0 0]]
+	set cellLocations [join [lrange $args 1 end]]
+	
+	${log}::debug Inserting ...
+	
+	foreach val $cellLocations {
+		${log}::debug Inserting $newType into $val
+		$files(tab3f2).tbl cellconfigure $val -text $newType
+	}
+
+	
+    ${log}::debug --END-- [info level 1]
+} ;# eAssistHelper::insValuesToTable
+
+proc eAssistHelper::multiCells {} {
+    #****f* multiCells/eAssistHelper
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	Check to see if we are selected on multiple columns; returns 1 if we are, 0 if aren't
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log files
+    ${log}::debug --START-- [info level 1]
+	set curCol 1
+	
+    set cells [$files(tab3f2).tbl curcellselection]
+	
+	#if {[info exists curCol]} {unset curCol}
+	foreach val $cells {
+		# Initialize that variable
+		if {![info exists curCol]} {set curCol [$files(tab3f2).tbl columncget [lrange [split $val ,] end end] -name]}
+		
+		# This should get over written during our cycles
+		set curCol1 [$files(tab3f2).tbl columncget [lrange [split $val ,] end end] -name]
+		
+		# if we arent the same lets save the column name
+		if {[string match $curCol1 $curCol] ne 1} {lappend curCol [$files(tab3f2).tbl columncget [lrange [split $val ,] end end] -name]}
+
+	}
+	
+	if {[llength $curCol] eq 2} {return 1} else {return 0}
+	#${log}::debug We are selected on [llength $curCol] columns
+	
+    ${log}::debug --END-- [info level 1]
+} ;# eAssistHelper::multiCells

@@ -309,8 +309,8 @@ proc importFiles::startCmd {tbl row col text} {
 
         switch -glob [string tolower [$tbl columncget $col -name]] {
             "distributiontype" {
-                        ${log}::debug Enter the Distribution Types
-                        ${log}::debug Dists: $dist(distributionTypes)
+                        #${log}::debug Enter the Distribution Types
+                        #${log}::debug Dists: $dist(distributionTypes)
                         #$w configure -editable yes -editwindow ttk::entry
                         $w configure -values $dist(distributionTypes) -state readonly
                         }
