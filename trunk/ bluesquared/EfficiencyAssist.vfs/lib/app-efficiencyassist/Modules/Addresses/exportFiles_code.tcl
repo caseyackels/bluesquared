@@ -59,10 +59,13 @@ proc export::DataToExport {} {
 	
 	${log}::debug File Name: $fileName
     
-    #set myFile(data) [open [file join [eAssist_Global::SaveFile $fileName]] w]
-    set myFile(data) [catch {[open [eAssist_Global::SaveFile $fileName] w]} err]
+    set myFile(data) [open [file join [eAssist_Global::SaveFile $fileName]] w]
+    #set myFile(data) [catch {[open [eAssist_Global::SaveFile $fileName] w]} err]
     #${log}::debug Writing to file [file join $mySettings(outFilePath) Test_file.csv]
-    if {[info exists err]} {return}
+    if {[info exists err]} {
+        ${log}::debug ERROR: $err
+        return
+    }
     
     # HEADER: Write output
     chan puts $myFile(data) [::csv::join $headerParent(outPutHeader)]

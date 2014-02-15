@@ -354,30 +354,30 @@ proc importFiles::eAssistGUI {} {
     
     
     # --- Internal Samples Frame
-    set files(internalSamples) [ttk::labelframe $files(f3a).f3 -text [mc "Internal Samples"]]
-    grid $files(internalSamples) -column 0 -row 1 -sticky news -padx 2p ;#-pady 5p
-
-    ttk::label $files(internalSamples).txt1     -text [mc "Ticket"]
-    ttk::label $files(internalSamples).txt1a    -textvariable csmpls(TicketTotal)
-    ttk::label $files(internalSamples).txt2     -text [mc "CSR"]
-    ttk::label $files(internalSamples).txt2a    -textvariable csmpls(CSRTotal)
-    ttk::label $files(internalSamples).txt3     -text [mc "Sample Room"]
-    ttk::label $files(internalSamples).txt3a    -textvariable csmpls(SmplRoomTotal)
-    ttk::label $files(internalSamples).txt4     -text [mc "Sales"]
-    ttk::label $files(internalSamples).txt4a    -textvariable csmpls(SalesTotal)
-    ttk::button $files(internalSamples).btn1    -text [mc "Edit"] -command {eAssistHelper::addCompanySamples}
-    
-    
-    #------------- Grid Frame 1b
-    grid $files(internalSamples).txt1   -column 0 -row 0 -sticky new -padx 2p
-    grid $files(internalSamples).txt1a  -column 1 -row 0 -sticky new -padx 2p
-    grid $files(internalSamples).txt2   -column 0 -row 1 -sticky new -padx 2p
-    grid $files(internalSamples).txt2a  -column 1 -row 1 -sticky new -padx 2p
-    grid $files(internalSamples).txt3   -column 0 -row 2 -sticky new -padx 2p
-    grid $files(internalSamples).txt3a  -column 1 -row 2 -sticky new -padx 2p
-    grid $files(internalSamples).txt4   -column 0 -row 3 -sticky new -padx 2p
-    grid $files(internalSamples).txt4a  -column 1 -row 3 -sticky new -padx 2p
-    grid $files(internalSamples).btn1   -column 1 -row 4 -sticky new ;#-padx 3p
+    #set files(internalSamples) [ttk::labelframe $files(f3a).f3 -text [mc "Internal Samples"]]
+    #grid $files(internalSamples) -column 0 -row 1 -sticky news -padx 2p ;#-pady 5p
+    #
+    #ttk::label $files(internalSamples).txt1     -text [mc "Ticket"]
+    #ttk::label $files(internalSamples).txt1a    -textvariable csmpls(TicketTotal)
+    #ttk::label $files(internalSamples).txt2     -text [mc "CSR"]
+    #ttk::label $files(internalSamples).txt2a    -textvariable csmpls(CSRTotal)
+    #ttk::label $files(internalSamples).txt3     -text [mc "Sample Room"]
+    #ttk::label $files(internalSamples).txt3a    -textvariable csmpls(SmplRoomTotal)
+    #ttk::label $files(internalSamples).txt4     -text [mc "Sales"]
+    #ttk::label $files(internalSamples).txt4a    -textvariable csmpls(SalesTotal)
+    #ttk::button $files(internalSamples).btn1    -text [mc "Edit"] -command {eAssistHelper::addCompanySamples}
+    #
+    #
+    ##------------- Grid Frame 1b
+    #grid $files(internalSamples).txt1   -column 0 -row 0 -sticky new -padx 2p
+    #grid $files(internalSamples).txt1a  -column 1 -row 0 -sticky new -padx 2p
+    #grid $files(internalSamples).txt2   -column 0 -row 1 -sticky new -padx 2p
+    #grid $files(internalSamples).txt2a  -column 1 -row 1 -sticky new -padx 2p
+    #grid $files(internalSamples).txt3   -column 0 -row 2 -sticky new -padx 2p
+    #grid $files(internalSamples).txt3a  -column 1 -row 2 -sticky new -padx 2p
+    #grid $files(internalSamples).txt4   -column 0 -row 3 -sticky new -padx 2p
+    #grid $files(internalSamples).txt4a  -column 1 -row 3 -sticky new -padx 2p
+    #grid $files(internalSamples).btn1   -column 1 -row 4 -sticky new ;#-padx 3p
     
     ##
     #------------- Frame 2, Tablelist Notebook
@@ -486,7 +486,7 @@ proc importFiles::initMenu {} {
     
     #$mb.dist add command -label [mc "Filters"] -command {eAssistHelper::filters}
     $mb.dist add command -label [mc "Filter Editor"] -command {eAssist_tools::FilterEditor}
-    $mb.dist add command -label [mc "Internal Samples"] -command {eAssistHelper::addCompanySamples}
+    $mb.dist add command -label [mc "Internal Samples"] -command {eAssistHelper::addCompanySamples} -state disabled
     $mb.dist add command -label [mc "Split"] -command {eAssistHelper::splitVersions}
     $mb.dist add separator
     $mb.dist add command -label [mc "Options"] -command {eAssistPref::launchPreferences}

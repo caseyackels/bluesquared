@@ -49,11 +49,11 @@ proc eAssistPref::launchPreferences {} {
     # SEE ALSO
     #
     #***
-    global log program currentModule pref
+    global log program pref
     
     toplevel .preferences
     wm transient .preferences .
-    wm title .preferences [mc "$currentModule Preferences"]
+    wm title .preferences [mc "$program(currentModule) Preferences"]
 
     # Put the window in the center of the parent window
     set locX [expr {[winfo width . ] / 3 + [winfo x .]}]
@@ -61,7 +61,7 @@ proc eAssistPref::launchPreferences {} {
     wm geometry .preferences +${locX}+${locY}
 
     focus .preferences
-    ${log}::debug which Preferences : $currentModule
+    ${log}::debug which Preferences : $program(currentModule)
     
     
     ##
@@ -79,21 +79,21 @@ proc eAssistPref::launchPreferences {} {
     # Tab setup is in the corresponding proc
     ttk::notebook::enableTraversal $pref(nb)
     
-    switch -- $currentModule {
-        Addresses   {${log}::debug Launching $currentModule; eAssistPref::launchAddresses ;#eAssist_Global::resetFrames pref}
-        BoxLabels   {${log}::debug Launching $currentModule ;#eAssist_Global::resetFrames pref}
-        Setup       {${log}::debug Launching $currentModule; return ;#eAssist_Global::resetFrames pref}
+    switch -- $program(currentModule) {
+        Addresses   {${log}::debug Launching $program(currentModule); eAssistPref::launchAddresses ;#eAssist_Global::resetFrames pref}
+        BoxLabels   {${log}::debug Launching $program(currentModule) ;#eAssist_Global::resetFrames pref}
+        Setup       {${log}::debug Launching $program(currentModule); return ;#eAssist_Global::resetFrames pref}
     }
 
     
     set btnBar [ttk::frame .preferences.btnBar]
     pack $btnBar -side bottom -anchor e -pady 8p -padx 5p
     
-    ttk::button $btnBar.cancel -text [mc "Cancel"] -command {destroy .preferences}
     ttk::button $btnBar.ok -text [mc "Ok"] -command {eAssistPref::saveConfig ; destroy .preferences}
+    ttk::button $btnBar.cancel -text [mc "Cancel"] -command {destroy .preferences}
     
-    grid $btnBar.cancel -column 0 -row 3 -sticky nse -padx 8p
-    grid $btnBar.ok -column 1 -row 3 -sticky nse
+	grid $btnBar.ok -column 0 -row 3 -sticky nse -padx 8p
+    grid $btnBar.cancel -column 1 -row 3 -sticky nse 
 
 } ;#eAssistPref::launchPreferences
 

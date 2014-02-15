@@ -310,11 +310,14 @@ proc eAssistHelper::tblPopup {mode} {
 	if {$mode eq "extended"} {
 		#if {[eAssistHelper::multiCells] eq 1} {set state disabled} else {set state normal}
 		if {[eAssistHelper::multiCells] eq 1} {${log}::debug One Column}
+		.tblMenu add command -label [mc "Insert..."] -command {${log}::debug [$files(tab3f2).tbl curcellselection]; eAssistHelper::insertItems [$files(tab3f2).tbl curcellselection]}
 		.tblMenu add command -label [mc "Copy"] -command {${log}::debug [$files(tab3f2).tbl getcells [$files(tab3f2).tbl curcellselection]]}
 		.tblMenu add command -label [mc "Paste"] -command {${log}::debug [$files(tab3f2).tbl getcells [$files(tab3f2).tbl curcellselection]]}
 		.tblMenu add command -label [mc "Clear Contents"] -command {${log}::debug [$files(tab3f2).tbl getcells [$files(tab3f2).tbl curcellselection]]}
-		.tblMenu add command -label [mc "Insert..."] -command {${log}::debug [$files(tab3f2).tbl curcellselection]; eAssistHelper::insertItems [$files(tab3f2).tbl curcellselection]}
-		.tblMenu add command -label [mc "Display contents"] -command {${log}::debug [$files(tab3f2).tbl getcells [$files(tab3f2).tbl curcellselection]]}
+		.tblMenu add command -label [mc "Display Contents"] -command {${log}::debug [$files(tab3f2).tbl getcells [$files(tab3f2).tbl curcellselection]]}
+		.tblMenu add separator
+		.tblMenu add command -label [mc "Insert Row"] -command {catch [$files(tab3f2).tbl insert [$files(tab3f2).tbl curselection] ""] err}
+		.tblMenu add command -label [mc "Delete Row"] -command {catch [$files(tab3f2).tbl delete [$files(tab3f2).tbl curselection]] err}
 	} else {
 		# Browse mode
 		.tblMenu add command -label [mc "Insert Row"] -command {catch [$files(tab3f2).tbl insert [$files(tab3f2).tbl curselection] ""] err}
