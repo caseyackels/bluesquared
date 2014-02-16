@@ -344,7 +344,7 @@ proc eAssistHelper::runFilters {} {
                         lappend cellNumber $y
                     }
                 }
-                lappend newRow [string toupper $cellData]
+                lappend newRow $cellData
             }
             # We must first delete the existing row, then insert the new row.
             $files(tab3f2).tbl delete $x
