@@ -202,8 +202,10 @@ proc eAssist::buttonBarGUI {module} {
         }
         BatchMaker   {
             # .. setup the buttons on the button bar
+            eAssist::remButtons $btn(Bar) ;# Remove buttons
+            eAssist::statusBar ;# Add the status bar
+            # .. Initialize menu options
             importFiles::initMenu
-            eAssist::remButtons $btn(Bar)
             # .. remember what module we are in ..
             set program(currentModule) BatchMaker
             #eAssist::addButtons [mc "Export Files"] exit btn1 0 2p
@@ -253,6 +255,7 @@ proc eAssist::addButtons {text command btn1 column padX} {
     # NOTES
     #
     # SEE ALSO
+    #   eAssist::remButtons
     #
     #***
     global log btn
@@ -301,3 +304,50 @@ proc eAssist::remButtons {path} {
 	
     ${log}::debug --END-- [info level 1]
 } ;# eAssist::remButtons
+
+
+proc eAssist::statusBar {args} {
+    #****f* statusBar/eAssist
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	General Status bar
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log btn job
+    ${log}::debug --START-- [info level 1]
+
+    # reconfigure btn(bar)
+    pack configure $btn(Bar) -anchor w -fill x -pady 5p
+    
+    if {[winfo exists $btn(Bar).f1]} {destroy $btn(Bar).f1}
+    set f1 [ttk::frame $btn(Bar).f1 -padding 2 -relief groove -borderwidth 2]
+    grid $f1 -column 0 -row 0 -sticky nse
+    
+    ttk::label $f1.txt1 -text [mc "Total Copies:"]
+    ttk::entry $f1.txt2 -textvariable job(TotalCopies) -width 5 -state disabled -justify center
+    
+    grid $f1.txt1 -column 0 -row 0 -sticky nse
+    grid $f1.txt2 -column 1 -row 0 -sticky nsw -padx 5p
+    
+
+    
+    ${log}::debug --END-- [info level 1]
+} ;# eAssist::statusBar

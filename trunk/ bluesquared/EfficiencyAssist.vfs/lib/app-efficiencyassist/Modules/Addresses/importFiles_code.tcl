@@ -63,13 +63,13 @@ proc importFiles::readFile {fileName} {
     set process(fd) [open "$fileName" RDONLY]
 
     # Make the data useful, and put it into lists
-    # While we are at it, make everything UPPER CASE
+    # We don't change the case here, in case the user wants it left alone.
     #while {-1 != [gets $fp line]}
     while { [gets $process(fd) line] >= 0 } {
         # Guard against lines of comma's, this will not be viewable in excel. Only in a text editor.
         if {[string is punc [join [split [string trim $line] " "] ""]] eq 1} {continue}
 
-        lappend process(dataList) [string toupper $line]
+        lappend process(dataList) $line
     }
     
     ${log}::debug *RECORDS*: [expr [llength $process(dataList)]-1]
@@ -129,6 +129,7 @@ proc importFiles::processFile {tab} {
     # NOTES
     #
     # SEE ALSO
+    #   IFMenus::tblPopup
     #
     #***
     global log files headerAddress position process headerParams headerParent dist w
@@ -139,6 +140,7 @@ proc importFiles::processFile {tab} {
     $w(nbk) select $w(nbk).f3
     
     # Whitelist for required columns, so that they won't be hidden.
+    # this should be user configurable
     set headerParent(whiteList) [list DistributionType CarrierMethod]
     
     # Get the length of the Distribution Types
@@ -146,6 +148,7 @@ proc importFiles::processFile {tab} {
     foreach val $dist(distributionTypes) {
         lappend newList [string length $val]
     }
+    
     # Grab the highest number ...
     set distWidth [expr {[lrange [lsort -integer $newList] end end] + 4}]
 
@@ -155,13 +158,14 @@ proc importFiles::processFile {tab} {
         
         set itemColor [$files(tab1f2).listbox itemcget $itemPosition -foreground]
         
-        if {[string compare $itemColor "lightgrey"] != 0} {
-            ${log}::debug Inserting $listItem
-            if {[lsearch -nocase $headerParent(whiteList) $listItem] == -1} {
-                $files(tab3f1a).lbox1 insert end $listItem
-                ${log}::debug Remaining Available Headers : $listItem
-            }
-        }
+        #if {[string compare $itemColor "lightgrey"] != 0} {
+        #    ${log}::debug Inserting $listItem
+        #    if {[lsearch -nocase $headerParent(whiteList) $listItem] == -1} {
+        #        $files(tab3f1a).lbox1 insert end $listItem
+        #
+        #        ${log}::debug Remaining Available Headers : $listItem
+        #    }
+        #}
     }
     
     # Create the columns in the Table, using parameters assigned to each 'column type', from Setup. Located in the headerParams array.
@@ -274,6 +278,9 @@ proc importFiles::processFile {tab} {
     # save the original version list as origVersionList, so we can keep the process(versionList) variable updated with user changed versions
     set process(origVersionList) $process(versionList)
     
+    # Initialize popup menus
+    IFMenus::tblPopup extended
+    
     ${log}::debug --END-- [info level 1]
 } ;# importFiles::processFile
 
@@ -303,7 +310,7 @@ proc importFiles::startCmd {tbl row col text} {
     # SEE ALSO
     #
     #***
-    global log dist process headerParent headerParams carrierSetup
+    global log dist carrierSetup job process
     ${log}::debug --START-- [info level 1]
     set w [$tbl editwinpath]
 
@@ -315,13 +322,18 @@ proc importFiles::startCmd {tbl row col text} {
                         $w configure -values $dist(distributionTypes) -state readonly
                         }
             *vers* {
-                        $w configure -values [$tbl getcolumn Version] ;# Create a Versions list, as we read in the file, so we can populate this combobox.
-                        }
+                    # process(versionList) is created in [importFiles::processFile]
+                    # Add $text to list of versions if that version doesn't exist (i.e. user created a new version)
+                    if {[lsearch $process(versionList) $text] == -1} {lappend process(versionList) $text}
+                    $w configure -values $process(versionList)
+                    }
             "carriermethod" {$w configure -values $carrierSetup(CarrierList) -state readonly}
+            "quantity"  {set job(TotalCopies) [eAssistHelper::calcSamples $col $tbl]}
             default {
                 #${log}::debug Column Name: [string tolower [$tbl columncget $col -name]]
             }
         }
+        
         
         return $text
     

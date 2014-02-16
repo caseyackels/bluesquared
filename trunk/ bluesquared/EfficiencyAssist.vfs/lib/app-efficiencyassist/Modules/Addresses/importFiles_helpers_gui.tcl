@@ -37,7 +37,7 @@ proc eAssistHelper::addDistTypes_GUI {} {
     #	(c) 2011-2013 Casey Ackels
     #
     # FUNCTION
-    #	Helper GUI, for when we come across particular Distribution Types
+    #	Add an address that wasn't in the source file
     #
     # SYNOPSIS
     #
@@ -187,7 +187,7 @@ proc eAssistHelper::insertItems {cells} {
 	pack $btnBar -side right -pady 5p -padx 5p
 	
 	# Create the buttons here, but we'll [grid] it at the bottom of this proc.
-	ttk::button $btnBar.ok		-text [mc "OK"] -command {eAssistHelper::insValuesToTable $newType $origCells; destroy .di}
+	ttk::button $btnBar.ok		-text [mc "OK"] -command {eAssistHelper::insValuesToTableCells $newType $origCells; destroy .di}
 	ttk::button $btnBar.cancel	-text [mc "Cancel"] -command {destroy .di}
 
 	
@@ -241,7 +241,7 @@ proc eAssistHelper::insertItems {cells} {
 			} else {
 				ttk::label $f2.txt$i -text [mc "$header"]
 				# Create the widget specified in Setup for the column; typically will be ttk::entry
-				$wid $f2.$x$header
+				$wid $f2.$x$header -textvariable newType
 				
 				grid $f2.txt$i -column 0 -row $x -sticky news -pady 5p -padx 5p
 				grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
@@ -265,67 +265,4 @@ proc eAssistHelper::insertItems {cells} {
     ${log}::debug --END-- [info level 1]
 } ;# eAssistHelper::insertItems
 
-proc eAssistHelper::tblPopup {mode} {
-    #****f* tblPopup/eAssistHelper
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2011-2014 Casey Ackels
-    #
-    # FUNCTION
-    #	Popup menu for the main Table for editing addresses
-    #
-    # SYNOPSIS
-    #
-    #
-    # CHILDREN
-    #	importFiles::eAssistGUI
-    #
-    # PARENTS
-    #	eAssist::parentGUI
-    #
-    # NOTES
-	# 	This is initiated in the above parent.
-    #
-    # SEE ALSO
-    #
-    #***
-    global log files 
-    ${log}::debug --START-- [info level 1]
-	
-	if {[winfo exists .tblMenu]} {
-		destroy .tblMenu
-		menu .tblMenu
-	} else {
-		menu .tblMenu
-	}
-	
-	# Add cascade menu
-	# [example] $m add cascade -menu $m.file -label File
 
-	# Add commands
-	# Control what shows up, depending on if we are in [extended] or [browse] mode
-	
-	if {$mode eq "extended"} {
-		#if {[eAssistHelper::multiCells] eq 1} {set state disabled} else {set state normal}
-		if {[eAssistHelper::multiCells] eq 1} {${log}::debug One Column}
-		.tblMenu add command -label [mc "Insert..."] -command {${log}::debug [$files(tab3f2).tbl curcellselection]; eAssistHelper::insertItems [$files(tab3f2).tbl curcellselection]}
-		.tblMenu add command -label [mc "Copy"] -command {${log}::debug [$files(tab3f2).tbl getcells [$files(tab3f2).tbl curcellselection]]}
-		.tblMenu add command -label [mc "Paste"] -command {${log}::debug [$files(tab3f2).tbl getcells [$files(tab3f2).tbl curcellselection]]}
-		.tblMenu add command -label [mc "Clear Contents"] -command {${log}::debug [$files(tab3f2).tbl getcells [$files(tab3f2).tbl curcellselection]]}
-		.tblMenu add command -label [mc "Display Contents"] -command {${log}::debug [$files(tab3f2).tbl getcells [$files(tab3f2).tbl curcellselection]]}
-		.tblMenu add separator
-		.tblMenu add command -label [mc "Insert Row"] -command {catch [$files(tab3f2).tbl insert [$files(tab3f2).tbl curselection] ""] err}
-		.tblMenu add command -label [mc "Delete Row"] -command {catch [$files(tab3f2).tbl delete [$files(tab3f2).tbl curselection]] err}
-	} else {
-		# Browse mode
-		.tblMenu add command -label [mc "Insert Row"] -command {catch [$files(tab3f2).tbl insert [$files(tab3f2).tbl curselection] ""] err}
-		.tblMenu add command -label [mc "Delete Row"] -command {catch [$files(tab3f2).tbl delete [$files(tab3f2).tbl curselection]] err}
-		.tblMenu add command -label [mc "Display contents"] -command {${log}::debug [$files(tab3f2).tbl get [$files(tab3f2).tbl curselection]]}
-	}
-	
-	# Items that should always be displayed
-	
-    ${log}::debug --END-- [info level 1]
-} ;# eAssistHelper::tblPopup

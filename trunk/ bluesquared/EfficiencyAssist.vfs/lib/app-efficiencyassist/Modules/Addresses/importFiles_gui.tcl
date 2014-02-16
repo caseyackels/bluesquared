@@ -31,6 +31,7 @@ package provide eAssist_importFiles 1.0
 
 namespace eval eAssist_GUI {}
 namespace eval importFiles {}
+namespace eval IFMenus {} ;# IF = importFiles
 
 proc importFiles::eAssistGUI {} {
     #****f* eAssistGUI/importFiles
@@ -61,9 +62,6 @@ proc importFiles::eAssistGUI {} {
     #***
     global log program currentModule w headerParent files mySettings process dist filter w options csmpls CSR job
     
-    #set program(currentModule) Addresses
-    #set currentModule Addresses
-      
     # Clear the frames before continuing
     eAssist_Global::resetFrames parent
     
@@ -262,34 +260,34 @@ proc importFiles::eAssistGUI {} {
     ##
     ##------------- Frame 1a, Top Left Frame
     ##
-    set files(tab3f1a) [ttk::labelframe $nb.f1.f1.a -text [mc "Available Columns"]]
-    pack $files(tab3f1a) -side left -fill both -padx 5p -pady 5p
-    
-    #ttk::label $files(tab3f1).txt1 -text [mc "Available Columns"]
-        set scrolly_lbox1 $files(tab3f1a).scrolly
-        set scrollx_lbox1 $files(tab3f1a).scrollx
-    
-    listbox $files(tab3f1a).lbox1 -width 20 \
-                                -yscrollcommand [list $scrolly_lbox1 set] \
-                                -xscrollcommand [list $scrollx_lbox1 set]
-
-    ttk::scrollbar $scrolly_lbox1 -orient v -command [list $files(tab3f1a).lbox1 yview]
-    ttk::scrollbar $scrollx_lbox1 -orient h -command [list $files(tab3f1a).lbox1 xview]
-        
-    # Enable the 'autoscrollbar'
-    ::autoscroll::autoscroll $scrolly_lbox1
-    ::autoscroll::autoscroll $scrollx_lbox1
-    
-    ttk::button $files(tab3f1a).btn1 -text [mc "Add"] -command {eAssistHelper::unHideColumns}
-    
-    
-    #------------- Grid Frame 1a  
-    #grid $files(tab3f1).txt1 -column 0 -row 0 -sticky new
-    grid $files(tab3f1a).lbox1 -column 1 -row 0 -sticky news
-    grid $scrollx_lbox1 -column 1 -row 1 -sticky ew
-    grid $scrolly_lbox1 -column 2 -row 0 -sticky ns
-    
-    grid $files(tab3f1a).btn1 -column 3 -row 0 -sticky new
+    #set files(tab3f1a) [ttk::labelframe $nb.f1.f1.a -text [mc "Available Columns"]]
+    #pack $files(tab3f1a) -side left -fill both -padx 5p -pady 5p
+    #
+    ##ttk::label $files(tab3f1).txt1 -text [mc "Available Columns"]
+    #    set scrolly_lbox1 $files(tab3f1a).scrolly
+    #    set scrollx_lbox1 $files(tab3f1a).scrollx
+    #
+    #listbox $files(tab3f1a).lbox1 -width 20 \
+    #                            -yscrollcommand [list $scrolly_lbox1 set] \
+    #                            -xscrollcommand [list $scrollx_lbox1 set]
+    #
+    #ttk::scrollbar $scrolly_lbox1 -orient v -command [list $files(tab3f1a).lbox1 yview]
+    #ttk::scrollbar $scrollx_lbox1 -orient h -command [list $files(tab3f1a).lbox1 xview]
+    #    
+    ## Enable the 'autoscrollbar'
+    #::autoscroll::autoscroll $scrolly_lbox1
+    #::autoscroll::autoscroll $scrollx_lbox1
+    #
+    #ttk::button $files(tab3f1a).btn1 -text [mc "Add"] -command {eAssistHelper::unHideColumns}
+    #
+    #
+    ##------------- Grid Frame 1a  
+    ##grid $files(tab3f1).txt1 -column 0 -row 0 -sticky new
+    #grid $files(tab3f1a).lbox1 -column 1 -row 0 -sticky news
+    #grid $scrollx_lbox1 -column 1 -row 1 -sticky ew
+    #grid $scrolly_lbox1 -column 2 -row 0 -sticky ns
+    #
+    #grid $files(tab3f1a).btn1 -column 3 -row 0 -sticky new
 
     
     ##
@@ -418,6 +416,7 @@ proc importFiles::eAssistGUI {} {
 
     set bodyTag [$files(tab3f2).tbl bodytag]
     bind $bodyTag <<Button3>> +[list tk_popup .tblMenu %X %Y]
+    
     bind [$files(tab3f2).tbl editwintag] <Return> "[bind TablelistEdit <Down>]; break"
     
     # Toggle between selecting a row, or a single cell
@@ -425,19 +424,16 @@ proc importFiles::eAssistGUI {} {
         if {[$files(tab3f2).tbl cget -selectmode] eq "extended"} {
             $files(tab3f2).tbl configure -selectmode browse
             $files(tab3f2).tbl configure -selecttype row
-            eAssistHelper::tblPopup browse
+            IFMenus::tblPopup browse
             ${log}::debug Switching to Browse Mode
         
         } else {
             $files(tab3f2).tbl configure -selectmode extended
             $files(tab3f2).tbl configure -selecttype cell
-            eAssistHelper::tblPopup extended
+            IFMenus::tblPopup extended
             ${log}::debug Switching to Extended Mode
         }
     }
-    
-    # Initialize popup menus
-    eAssistHelper::tblPopup extended
 
     #----- GRID
     grid $files(tab3f2).tbl -column 0 -row 0 -sticky news -padx 5p -pady 5p
@@ -478,18 +474,19 @@ proc importFiles::initMenu {} {
     global log mb
     ${log}::debug --START -- [info level 1]
     
-    catch {menu $mb.dist -tearoff 0 -relief raised -bd 2} err
+    #catch {menu $mb.modMenu -tearoff 0 -relief raised -bd 2} err
     #if {$err != ""} {$mb delete 2}
-    if {$err != ""} {$mb delete 1}
+    #if {$err != ""} {${log}::debug initMenu Err: $err ; $mb delete 2}
+    $mb.modMenu delete 0 end
     
-    $mb insert 2 cascade -label [mc "Distribution"] -menu $mb.dist
+    #$mb insert 2 cascade -label [mc "Distribution"] -menu $mb.dist
     
     #$mb.dist add command -label [mc "Filters"] -command {eAssistHelper::filters}
-    $mb.dist add command -label [mc "Filter Editor"] -command {eAssist_tools::FilterEditor}
-    $mb.dist add command -label [mc "Internal Samples"] -command {eAssistHelper::addCompanySamples} -state disabled
-    $mb.dist add command -label [mc "Split"] -command {eAssistHelper::splitVersions}
-    $mb.dist add separator
-    $mb.dist add command -label [mc "Options"] -command {eAssistPref::launchPreferences}
+    $mb.modMenu add command -label [mc "Filter Editor"] -command {eAssist_tools::FilterEditor}
+    $mb.modMenu add command -label [mc "Internal Samples"] -command {eAssistHelper::addCompanySamples} -state disabled
+    $mb.modMenu add command -label [mc "Split"] -command {eAssistHelper::splitVersions}
+    $mb.modMenu add separator
+    $mb.modMenu add command -label [mc "Options"] -command {eAssistPref::launchPreferences}
 	
     ${log}::debug --END -- [info level 1]
 } ;# importFiles::initMenu

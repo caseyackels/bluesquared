@@ -186,8 +186,8 @@ proc eAssistHelper::unMapHeader {} {
 } ;# ::unMapHeader
 
 
-proc eAssistHelper::unHideColumns {} {
-    #****f* addColumns/eAssistHelper
+proc eAssistHelper::unHideColumns {args} {
+    #****f* unHideColumns/eAssistHelper
     # AUTHOR
     #	Casey Ackels
     #
@@ -214,7 +214,12 @@ proc eAssistHelper::unHideColumns {} {
     global log files process dist headerParent
     ${log}::debug --START -- [info level 1]
 	
-	set col [lsearch $headerParent(headerList) [$files(tab3f1a).lbox1 get [$files(tab3f1a).lbox1 curselection]]]
+	# detect if we are using the context menu or the listbox (args will be blank if we're using the listbox)
+	if {$args == ""} {
+		set col [lsearch $headerParent(headerList) [$files(tab3f1a).lbox1 get [$files(tab3f1a).lbox1 curselection]]]
+	} else {
+		set col $args
+	}
 	
 	if {$col != ""} {
 		$files(tab3f2).tbl columnconfigure $col -hide no
@@ -223,10 +228,15 @@ proc eAssistHelper::unHideColumns {} {
 	}
 	
 	# Delete the entry
-	$files(tab3f1a).lbox1 delete [$files(tab3f1a).lbox1 curselection]
+	if {$args == ""} {
+		$files(tab3f1a).lbox1 delete [$files(tab3f1a).lbox1 curselection]
+	} else {
+		$files(tab3f1a).lbox1 delete $args
+	}
+	
 	
     ${log}::debug --END -- [info level 1]
-} ;# eAssistHelper::addColumns
+} ;# eAssistHelper::unHideColumns
 
 
 proc eAssistHelper::resetImportInterface {} {
@@ -283,8 +293,8 @@ proc eAssistHelper::resetImportInterface {} {
 } ;# eAssistHelper::resetImportInterface
 
 
-proc eAssistHelper::insValuesToTable {args} {
-    #****f* insValuesToTable/eAssistHelper
+proc eAssistHelper::insValuesToTableCells {args} {
+    #****f* insValuesToTableCells/eAssistHelper
     # AUTHOR
     #	Casey Ackels
     #
@@ -323,7 +333,8 @@ proc eAssistHelper::insValuesToTable {args} {
 
 	
     ${log}::debug --END-- [info level 1]
-} ;# eAssistHelper::insValuesToTable
+} ;# eAssistHelper::insValuesToTableCells
+
 
 proc eAssistHelper::multiCells {} {
     #****f* multiCells/eAssistHelper
