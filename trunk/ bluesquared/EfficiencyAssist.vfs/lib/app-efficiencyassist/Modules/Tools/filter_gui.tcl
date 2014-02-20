@@ -70,12 +70,17 @@ proc eAssist_tools::FilterEditor {} {
     focus .filterEditor
     
     # reset the progressbar and Filter Message
-    set filter(progbarProgess) 0
+    if {[info exists filter(progbarProgress)]} {unset filter(progbarProgress)}
+
+    set filter(stopRunning) 0
     set filter(progbarFilterName) [mc "Ready ..."]
     
     # .. create the frames
     set frame1 [ttk::frame .filterEditor.frame1]
     pack $frame1
+    
+    ttk::separator .filterEditor.sepbar -orient horizontal
+    pack .filterEditor.sepbar -fill x
     
     set filter(f2) [ttk::frame .filterEditor.frame2]
     pack $filter(f2)
@@ -86,37 +91,88 @@ proc eAssist_tools::FilterEditor {} {
     
     # Setup the array for the filters
     # .. Frame 1 - create the children widgets
-    ttk::checkbutton $frame1.chkbtn1 -text [mc "Remove Hi-Bit Characters"] -variable filter(run,stripASCII_CC) ;#-command {${log}::debug Removing Hi-Bit Characters}
-    ttk::checkbutton $frame1.chkbtn2 -text [mc "Remove Control Characters"] -variable filter(run,stripCC) ;#-command {${log}::debug Removing Control Characters}
-    ttk::checkbutton $frame1.chkbtn3 -text [mc "Remove Punctuation"] -variable filter(run,stripUDL)
-    # Add in "Remove Leading/Trailing White Space"
-    # Add in "Remove Quotes"
-    ttk::checkbutton $frame1.chkbtn4 -text [mc "Abbreviate words in address"] -variable filter(run,abbrvAddrState) ;#-commnd {${log}::debug Abbreviate words ...}
-        tooltip::tooltip $frame1.chkbtn4 [mc "Affects only the columns: Address1, Address2 and State"]
+    ttk::checkbutton $frame1.chkbtn1 -text [mc "Remove Hi-Bit Characters"] -command {eAssist_tools::closeFilterEditor reset} -variable filter(run,stripASCII_CC)
+    ttk::button      $frame1.btn     -text [mc "Edit..."] -command {} -state disabled
+    ttk::checkbutton $frame1.chkbtn2 -text [mc "Remove Control Characters"] -command {eAssist_tools::closeFilterEditor reset} -variable filter(run,stripCC)
+    ttk::checkbutton $frame1.chkbtn3 -text [mc "Abbreviate words in address"] -command {eAssist_tools::closeFilterEditor reset} -variable filter(run,abbrvAddrState) ;#-commnd {${log}::debug Abbreviate words ...}
+        tooltip::tooltip $frame1.chkbtn3 [mc "Affects only the columns: Address1, Address2 and State"]
     
+    ttk::checkbutton $frame1.chkbtn4 -text [mc "Remove Punctuation"] -command {eAssist_tools::closeFilterEditor reset} -variable filter(run,stripUDL)
+    
+    
+
     grid $frame1.chkbtn1 -column 0 -row 0 -pady 2p -padx 5p -sticky w
+    grid $frame1.btn     -column 1 -row 0 -pady 2p -padx 5p -sticky news
     grid $frame1.chkbtn2 -column 0 -row 1 -pady 2p -padx 5p -sticky w
     grid $frame1.chkbtn3 -column 0 -row 2 -pady 2p -padx 5p -sticky w
     grid $frame1.chkbtn4 -column 0 -row 3 -pady 2p -padx 5p -sticky w
     
+
+    
     # Progress bar
     # .. Frame 2
-    ttk::label $filter(f2).txt -textvariable filter(progbarFilterName)
+    ttk::label $filter(f2).txt -textvariable filter(progbarFilterName) 
     # Maximum is set in [runFilters] after we figure out how many filters we are running...
     ttk::progressbar $filter(f2).progbar -length 200 -mode determinate -variable filter(progbarProgress)
     
-    grid $filter(f2).txt -column 0 -row 0 -pady 5p -padx 5p -sticky w
-    grid $filter(f2).progbar -column 0 -row 1 -pady 5p -padx 5p -sticky ew
+    grid $filter(f2).txt -column 0 -row 0 -pady 2p -padx 5p -sticky w
+    grid $filter(f2).progbar -column 0 -columnspan 2 -row 1 -pady 2p -padx 5p -sticky ew
     
     
     
     # .. Button Bar - create the children widgets
-    ttk::button $btnBar.cancel -text [mc "Cancel"] -command {destroy .filterEditor}
-    ttk::button $btnBar.ok -text [mc "OK"] -command {eAssistHelper::runFilters}
-    
-    grid $btnBar.cancel -column 0 -row 0 -pady 5p -padx 5p -sticky se
-    grid $btnBar.ok -column 1 -row 0 -pady 5p -padx 5p -sticky se
+    ttk::button $btnBar.ok -text [mc "OK"] -command {${log}::debug [time {eAssistHelper::runFilters}]}
+    ttk::button $btnBar.cancel -text [mc "Close"] -command {eAssist_tools::closeFilterEditor kill .filterEditor}
+
+    grid $btnBar.ok -column 0 -row 0 -pady 5p -padx 5p -sticky se 
+    grid $btnBar.cancel -column 1 -row 0 -pady 5p -padx 5p -sticky se
+
     
 	
     ${log}::debug --END-- [info level 1]
 } ;# eAssist_tools::FilterEditor
+
+
+proc eAssist_tools::closeFilterEditor {function args} {
+    #****f* closeFilterEditor/eAssist_tools
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	Close the filter editor and clear out the progress bar variable
+    #
+    # SYNOPSIS
+    #   closeFilterEditor <kill|reset> <winPathToKill>
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log filter
+    ${log}::debug --START-- [info level 1]
+
+    
+    switch -- $function {
+        kill    {
+                set filter(stopRunning) 1
+                destroy $args
+                set filter(progbarProgress) 0
+        }
+        reset   {
+                set filter(progbarProgress) 0
+                set filter(progbarFilterName) [mc "Ready..."]
+        }
+    }
+	
+    ${log}::debug --END-- [info level 1]
+} ;# eAssist_tools::closeFilterEditor

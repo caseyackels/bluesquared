@@ -22,7 +22,7 @@
 # - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
-proc eAssistSetup::addCarrierSetup {varType entryField listBox} {
+proc eAssistSetup::addPackagingSetup {varType entryField listBox} {
     #****f* addCarrierSetup/eAssistSetup
     # AUTHOR
     #	Casey Ackels
@@ -51,7 +51,7 @@ proc eAssistSetup::addCarrierSetup {varType entryField listBox} {
     # SEE ALSO
     #
     #***
-    global log carrierSetup
+    global log packagingSetup
     ${log}::debug --START-- [info level 1]
     
     ${log}::debug Adding $varType, $entryField, $listBox
@@ -59,30 +59,15 @@ proc eAssistSetup::addCarrierSetup {varType entryField listBox} {
     if {[$entryField get] == ""} {return}
 
     switch -- $varType {
-            PAYMENT     {
-                        set entryValue $carrierSetup(enterPaymentType)
-                        set newVarType PaymentType
-                        ${log}::debug PAYMENT - $entryField
+            PACKAGE     {
+                        set entryValue $packagingSetup(enterPackageType)
+                        set newVarType PackageType
+                        ${log}::debug PACKAGE - $entryField
             }
-            SHIPMENT    {
-                        set entryValue $carrierSetup(enterShipmentType)
-                        set newVarType ShipmentType
-                        ${log}::debug SHIPMENT - $entryField
-            }
-            CARRIERS    {
-                        set entryValue $carrierSetup(enterCarrier)
-                        set newVarType CarrierList
-                        ${log}::debug CARRIERS - $entryField
-            }
-            RATES       {
-                        set entryValue $carrierSetup(enterRateType)
-                        set newVarType RateType
-                        ${log}::debug RATES - $entryField
-            }
-            SHIPPINGCLASS {
-                        set entryValue $carrierSetup(enterShippingClass)
-                        set newVarType ShippingClass
-                        ${log}::debug SHIPPINGCLASS - $entryField
+            CONTAINER    {
+                        set entryValue $packagingSetup(enterContainerType)
+                        set newVarType ContainerType
+                        ${log}::debug CONTAINER - $entryField
             }
             default     {
                         ${log}::debug Nothing set for this SWITCH command
@@ -96,7 +81,7 @@ proc eAssistSetup::addCarrierSetup {varType entryField listBox} {
     
     
     
-    set carrierSetup($newVarType) [$listBox get 0 end]
+    set packagingSetup($newVarType) [$listBox get 0 end]
     ${log}::debug $newVarType _ADD: [$listBox get 0 end]
     
 	
@@ -104,7 +89,7 @@ proc eAssistSetup::addCarrierSetup {varType entryField listBox} {
 } ;# eAssistSetup::addCarrierSetup
 
 
-proc eAssistSetup::delCarrierSetup {varType listBox} {
+proc eAssistSetup::delPackagingSetup {varType listBox} {
     #****f* delCarrierSetup/eAssistSetup
     # AUTHOR
     #	Casey Ackels
@@ -129,7 +114,7 @@ proc eAssistSetup::delCarrierSetup {varType listBox} {
     # SEE ALSO
     #
     #***
-    global log carrierSetup
+    global log packagingSetup
     ${log}::debug --START-- [info level 1]
     
     if {[$listBox curselection] == ""} {return}
@@ -138,29 +123,18 @@ proc eAssistSetup::delCarrierSetup {varType listBox} {
     $listBox delete [$listBox curselection]
     
     switch -- $varType {
-            PAYMENT     {
-                        set newVarType PaymentType
+            PACKAGE     {
+                        set newVarType PackageType
             }
-            SHIPMENT    {
-                        set newVarType ShipmentType
-            }
-            CARRIERS    {
-                        set newVarType CarrierList
-            }
-            RATES       {
-                        set newVarType RateType
-            }
-            SHIPPINGCLASS {
-                        set entryValue $carrierSetup(enterShippingClass)
-                        set newVarType ShippingClass
-                        ${log}::debug SHIPPINGCLASS - $entryField
+            CONTAINER    {
+                        set newVarType ContainerType
             }
             default     {
                         ${log}::debug Nothing set for this SWITCH command
             }
     }
     
-    set carrierSetup($newVarType) [$listBox get 0 end]
+    set packagingSetup($newVarType) [$listBox get 0 end]
     
 	
     ${log}::debug --END-- [info level 1]

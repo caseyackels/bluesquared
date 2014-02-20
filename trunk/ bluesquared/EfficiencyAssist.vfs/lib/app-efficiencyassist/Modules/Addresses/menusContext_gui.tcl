@@ -76,17 +76,14 @@ proc IFMenus::tblPopup {mode} {
     
     .tblMenu add separator
     
-    
 
-	# Add commands
 	# Control what shows up, depending on if we are in [extended] or [browse] mode
 	# Paste [clipboard get]
 	if {$mode eq "extended"} {
-		#if {[eAssistHelper::multiCells] eq 1} {set state disabled} else {set state normal}
-		if {[eAssistHelper::multiCells] eq 1} {${log}::debug One Column}
 		.tblMenu add command -label [mc "Quick Fill..."] -command {eAssistHelper::insertItems [$files(tab3f2).tbl curcellselection]}
 		.tblMenu add command -label [mc "Copy"] -command {clipboard clear; clipboard append [$files(tab3f2).tbl getcells [$files(tab3f2).tbl curcellselection]]}
 		.tblMenu add command -label [mc "Paste"] -command {eAssistHelper::insValuesToTableCells [clipboard get] [$files(tab3f2).tbl curcellselection]}
+        .tblMenu add command -label [mc "Clear"] -command {IFMenus::clearItems [$files(tab3f2).tbl curcellselection]}
         .tblMenu add separator
 		.tblMenu add command -label [mc "Copy Row"] -command {clipboard clear; clipboard append [$files(tab3f2).tbl get [$files(tab3f2).tbl curselection]]}
 		.tblMenu add command -label [mc "Paste Row"] -command {
@@ -118,6 +115,7 @@ proc IFMenus::tblPopup {mode} {
     ${log}::debug --END-- [info level 1]
 } ;# IFMenus::tblPopup
 
+
 proc IFMenus::columnMenus {showPath hidePath} {
     #****f* columnMenus/IFMenus
     # AUTHOR
@@ -136,7 +134,7 @@ proc IFMenus::columnMenus {showPath hidePath} {
     #	N/A
     #
     # PARENTS
-    #	
+    #	IFMenus::tblPopup
     #
     # NOTES
     #
@@ -182,7 +180,7 @@ proc IFMenus::toggleMenus {YesNo hidePath showPath colName} {
     #	N/A
     #
     # PARENTS
-    #	
+    #	IFMenus::tblPopup
     #
     # NOTES
     #
@@ -208,3 +206,39 @@ proc IFMenus::toggleMenus {YesNo hidePath showPath colName} {
 	
     ${log}::debug --END-- [info level 1]
 } ;# IFMenus::toggleMenus
+
+
+proc IFMenus::clearItems {cells} {
+    #****f* clearItems/IFMenus
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	Clears the selected cells
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	IFMenus::tblPopup
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log files
+    ${log}::debug --START-- [info level 1]
+    
+    foreach cell $cells {
+        $files(tab3f2).tbl cellconfigure $cell -text ""
+    }
+	
+    ${log}::debug --END-- [info level 1]
+} ;# IFMenus::clearItems

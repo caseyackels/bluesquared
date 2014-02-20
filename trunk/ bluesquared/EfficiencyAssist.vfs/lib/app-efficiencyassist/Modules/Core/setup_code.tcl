@@ -110,6 +110,7 @@ proc eAssistSetup::selectionChanged {tbl} {
         International   {eAssistSetup::international_GUI ; set GS(gui,lastFrame) international_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
         AddressHeaders  {eAssistSetup::addressHeaders_GUI ; set GS(gui,lastFrame) addressHeaders_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
         Carrier         {eAssistSetup::carrierMethod_GUI; set GS(gui,lastFrame) carrierMethod_GUI; ${log}::debug Current Frame: $G_currentSetupFrame}
+        Packaging       {eAssistSetup::packagingTypes_GUI; set GS(gui,lastFrame) packagingTypes_GUI; ${log}::debug Current Frame: $G_currentSetupFrame}
         DistTypes       {eAssistSetup::distributionTypes_GUI ; set GS(gui,lastFrame) distributionTypes_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
         CSR             {eAssistSetup::customerService_GUI ; set GS(gui,lastFrame) customerService_GUI ; ${log}::debug current Frame: $G_currentSetupFrame}
         Company         {eAssistSetup::company_GUI ; set GS(gui,lastFrame) company_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
@@ -192,7 +193,7 @@ proc eAssistSetup::SaveGlobalSettings {} {
     #
     #***
     global log GS_filePaths GS_filePathSetup program company logSettings boxLabelInfo intlSetup headerParams headerParent headerAddress headerBoxes setup GS
-    global dist w carrierSetup CSR
+    global dist w carrierSetup CSR packagingSetup
 
     
     ${log}::debug Folder: [eAssist_Global::folderAccessibility $program(Home)]
@@ -286,10 +287,17 @@ proc eAssistSetup::SaveGlobalSettings {} {
     }
     
     foreach value [array names carrierSetup] {
+        #if {![info exists carrierSetup($value)]} {continue}
         chan puts $fd "carrierSetup($value) $carrierSetup($value)"
     }
     
+    foreach value [array names packagingSetup] {
+        #if {![info exists packagingSetup($value)]} {continue}
+        chan puts $fd "packagingSetup($value) $packagingSetup($value)"
+    }
+    
     foreach value [array names CSR] {
+        #if {![info exists CSR($value)]} {continue}
         chan puts $fd "CSR($value) $CSR($value)"
     }
     

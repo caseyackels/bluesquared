@@ -79,10 +79,11 @@ proc eAssistPref::launchPreferences {} {
     # Tab setup is in the corresponding proc
     ttk::notebook::enableTraversal $pref(nb)
     
-    switch -- $program(currentModule) {
-        Addresses   {${log}::debug Launching $program(currentModule); eAssistPref::launchAddresses ;#eAssist_Global::resetFrames pref}
-        BoxLabels   {${log}::debug Launching $program(currentModule) ;#eAssist_Global::resetFrames pref}
-        Setup       {${log}::debug Launching $program(currentModule); return ;#eAssist_Global::resetFrames pref}
+    switch -- [string tolower $program(currentModule)] {
+        batchmaker   {${log}::debug Launching $program(currentModule); eAssistPref::launchBatchMakerPref} ;#eAssist_Global::resetFrames pref
+        boxlabels   {${log}::debug Launching $program(currentModule)} ;#eAssist_Global::resetFrames pref
+        setup       {${log}::debug Launching $program(currentModule)} ;#eAssist_Global::resetFrames pref
+		default		{${log}::debug $program(currentModule) isn't setup yet}
     }
 
     
@@ -98,8 +99,8 @@ proc eAssistPref::launchPreferences {} {
 } ;#eAssistPref::launchPreferences
 
 
-proc eAssistPref::launchAddresses {} {
-    #****f* launchAddresses/eAssistPref
+proc eAssistPref::launchBatchMakerPref {} {
+    #****f* launchBatchMakerPref/eAssistPref
     # AUTHOR
     #	Casey Ackels
     #
@@ -167,9 +168,9 @@ proc eAssistPref::launchAddresses {} {
 	
 	grid $tab1.txt -column 0 -row 2 -sticky e -padx 5p -pady 5p
 	grid $tab1.entry -column 1 -row 2 -sticky ew -padx 5p -pady 5p
-	grid $tab1.txt2 -column 2 -row 2 -sticky ew -padx 5p -pady 5p
+	grid $tab1.txt2 -column 0 -columnspan 3 -row 3 -sticky ew -padx 5p -pady 5p
 
-    grid columnconfigure $tab1 1 -weight 1
+    grid columnconfigure $tab1 1 -weight 2
     
     ##
     ## - Tab2
@@ -334,4 +335,4 @@ bind [$pref(nb).f2.tab2b.listbox bodytag] <Double-1> {
 
 
 
-} ;# eAssistPref::launchAddresses
+} ;# eAssistPref::launchBatchMakerPref

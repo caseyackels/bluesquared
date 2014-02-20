@@ -80,7 +80,7 @@ proc eAssist::parentGUI {} {
 
     ## Module Menu - This is a dynamic menu for the active module.
     menu $mb.modMenu -tearoff 0 -relief raised -bd 2
-    $mb add cascade -label [mc "Menu"] -menu $mb.modMenu
+    $mb add cascade -label [mc "Edit"] -menu $mb.modMenu
 
 
     ## Modules
@@ -261,6 +261,9 @@ proc eAssist::addButtons {text command btn1 column padX} {
     global log btn
     ${log}::debug --START-- [info level 1]
     
+    # reconfigure btn(bar)
+    pack configure $btn(Bar) -side right -fill x -pady 5p
+    
     {*}$btn(Bar).$btn1 configure -text $text -command $command
     grid $btn(Bar).$btn1 -column $column -row 3 -sticky nse -padx $padX
 	
@@ -335,7 +338,7 @@ proc eAssist::statusBar {args} {
     ${log}::debug --START-- [info level 1]
 
     # reconfigure btn(bar)
-    pack configure $btn(Bar) -anchor w -fill x -pady 5p
+    pack configure $btn(Bar) -side left -fill x -pady 5p
     
     if {[winfo exists $btn(Bar).f1]} {destroy $btn(Bar).f1}
     set f1 [ttk::frame $btn(Bar).f1 -padding 2 -relief groove -borderwidth 2]

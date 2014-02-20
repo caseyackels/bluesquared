@@ -65,6 +65,8 @@ proc importFiles::eAssistGUI {} {
     # Clear the frames before continuing
     eAssist_Global::resetFrames parent
     
+    wm geometry . 700x610 ;# Width x Height
+    
     # Setup the Filter array
     eAssist_Global::launchFilters
     
@@ -255,7 +257,7 @@ proc importFiles::eAssistGUI {} {
     ##------------- Frame 1 Top Frame - Container
     ##
     set files(tab3f1a) [ttk::frame $nb.f1.f1]
-    pack $files(tab3f1a) -side top -fill both -padx 5p -pady 5p
+    pack $files(tab3f1a) -side top -fill both ;# -padx 5p -pady 5p
     
     ##
     ##------------- Frame 1a, Top Left Frame
@@ -294,15 +296,14 @@ proc importFiles::eAssistGUI {} {
     ##------------- Frame 3a
     ## Container frame
     set files(f3a) [ttk::frame $nb.f1.f1.b]
-    pack $files(f3a) -side left -fill both -expand yes -padx 2p -pady 5p
+    pack $files(f3a) -side left -fill both -expand yes ;#-padx 5p -pady 5p
     
     # --- Job Info Frame
     set files(jobInfo) [ttk::labelframe $files(f3a).f1 -text [mc "Job Information"]]
-    grid $files(jobInfo) -column 0 -row 0 -sticky news -padx 2p ;#-pady 5p
+    grid $files(jobInfo) -column 0 -row 0 -sticky news -padx 5p -pady 5p -ipady 5p
     
     ttk::label $files(jobInfo).txt1 -text [mc "CSR"]
     ttk::combobox $files(jobInfo).cbox1 -values $CSR(Names) -textvariable job(CSRName)
-    #tooltip::tooltip $files(jobInfo).cbox1 [mc "This is hardcoded, need to fix!"]
     
     ttk::label $files(jobInfo).txt1a -text [mc "Title"]
     ttk::entry $files(jobInfo).entry1a -textvariable job(Title)
@@ -316,27 +317,27 @@ proc importFiles::eAssistGUI {} {
     ttk::entry $files(jobInfo).entry3 -textvariable job(Number)
     tooltip::tooltip $files(jobInfo).entry3 [mc "Job Number"]
     
-    grid $files(jobInfo).txt1      -column 0 -row 0 -sticky nes -padx 3p -pady 2p
-    grid $files(jobInfo).cbox1     -column 1 -row 0 -sticky news -padx 3p -pady 2p
-    grid $files(jobInfo).txt1a     -column 0 -row 1 -sticky nes -padx 3p -pady 2p
-    grid $files(jobInfo).entry1a   -column 1 -row 1 -sticky news -padx 3p -pady 2p
-    grid $files(jobInfo).txt2      -column 0 -row 2 -sticky nes -padx 3p -pady 2p
-    grid $files(jobInfo).entry2    -column 1 -row 2 -sticky news -padx 3p -pady 2p
-    grid $files(jobInfo).txt3      -column 0 -row 3 -sticky nes -padx 3p -pady 2p
-    grid $files(jobInfo).entry3    -column 1 -row 3 -sticky news -padx 3p -pady 2p
+    grid $files(jobInfo).txt1      -column 0 -row 0 -sticky nes -padx 3p -pady 3p
+    grid $files(jobInfo).cbox1     -column 1 -row 0 -sticky news -padx 3p -pady 3p
+    grid $files(jobInfo).txt1a     -column 0 -row 1 -sticky nes -padx 3p -pady 3p
+    grid $files(jobInfo).entry1a   -column 1 -row 1 -sticky news -padx 3p -pady 3p
+    grid $files(jobInfo).txt2      -column 0 -row 2 -sticky nes -padx 3p -pady 3p
+    grid $files(jobInfo).entry2    -column 1 -row 2 -sticky news -padx 3p -pady 3p
+    grid $files(jobInfo).txt3      -column 0 -row 3 -sticky nes -padx 3p -pady 3p
+    grid $files(jobInfo).entry3    -column 1 -row 3 -sticky news -padx 3p -pady 3p
     
     # --- Piece Info Frame
     set files(pieceInfo) [ttk::labelframe $files(f3a).f2 -text [mc "Piece Information"]]
-    grid $files(pieceInfo) -column 1 -row 0 -sticky news -padx 2p ;#-pady 5p
+    grid $files(pieceInfo) -column 1 -row 0 -sticky news -padx 5p -pady 5p
     
     # -- Widgets
-    ttk::label $files(pieceInfo).txt2 -text [mc "Weight"]
-    ttk::entry $files(pieceInfo).entry2 ;#-textvariable
+    ttk::label $files(pieceInfo).txt2 -text [mc "Weight"] -state disabled
+    ttk::entry $files(pieceInfo).entry2 -state disabled
     tooltip::tooltip $files(pieceInfo).entry2 [mc "Piece Weight"]
 
     
-    ttk::label $files(pieceInfo).txt3 -text [mc "Thickness"]
-    ttk::entry $files(pieceInfo).entry3 ;#-textvariable
+    ttk::label $files(pieceInfo).txt3 -text [mc "Thickness"] -state disabled
+    ttk::entry $files(pieceInfo).entry3 -state disabled
     tooltip::tooltip $files(pieceInfo).entry3 [mc "Piece Thickness"]
     
     ttk::button $files(pieceInfo).btn -text [mc "Auto Assign Carrier"] -state disabled
@@ -473,16 +474,13 @@ proc importFiles::initMenu {} {
     #***
     global log mb
     ${log}::debug --START -- [info level 1]
-    
-    #catch {menu $mb.modMenu -tearoff 0 -relief raised -bd 2} err
-    #if {$err != ""} {$mb delete 2}
-    #if {$err != ""} {${log}::debug initMenu Err: $err ; $mb delete 2}
+
     $mb.modMenu delete 0 end
     
-    #$mb insert 2 cascade -label [mc "Distribution"] -menu $mb.dist
-    
-    #$mb.dist add command -label [mc "Filters"] -command {eAssistHelper::filters}
-    $mb.modMenu add command -label [mc "Filter Editor"] -command {eAssist_tools::FilterEditor}
+    # Change menu name
+    #$mb entryconfigure Edit -label Distribution
+
+    $mb.modMenu add command -label [mc "Filters..."] -command {eAssist_tools::FilterEditor}
     $mb.modMenu add command -label [mc "Internal Samples"] -command {eAssistHelper::addCompanySamples} -state disabled
     $mb.modMenu add command -label [mc "Split"] -command {eAssistHelper::splitVersions}
     $mb.modMenu add separator

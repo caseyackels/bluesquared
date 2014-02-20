@@ -147,7 +147,7 @@ proc eAssistSetup::addressHeaders_GUI {} {
         
     bind [$w(hdr_frame1a).listbox bodytag] <Double-1> {
         # Delete the entry
-        $w(hdr_frame1a).listbox delete [$w(hdr_frame1a).listbox curselection]
+        #$w(hdr_frame1a).listbox delete [$w(hdr_frame1a).listbox curselection]
     }
     
     # Create the row counter and the first line

@@ -156,7 +156,7 @@ proc eAssistHelper::insertItems {cells} {
     # SEE ALSO
     #
     #***
-    global log files headerParams dist origCells carrierSetup
+    global log files headerParams dist origCells carrierSetup packagingSetup
     ${log}::debug --START-- [info level 1]
     
 	set w(di) .di
@@ -217,34 +217,56 @@ proc eAssistHelper::insertItems {cells} {
 			if {[$files(tab3f2).tbl columncget $header -hide] == 1} {continue}
 			
 			set wid [string tolower [lrange $headerParams($header) 2 2]]
-	
+			
 			if {$wid eq "ttk::combobox"} {
-				if {[string equal [string tolower $header] distributiontype] eq 1} {
-					
-					ttk::label $f2.txt$i -text [mc "$header"]
-					$wid $f2.$x$header -values $dist(distributionTypes) -textvariable newType
-					$f2.$x$header delete 0 end
-					$f2.$x$header configure -state readonly
-					
-					grid $f2.txt$i -column 0 -row $x -sticky news -pady 5p -padx 5p
-					grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
-				
-				} elseif {[string equal [string tolower $header] carriermethod] eq 1} {
-					ttk::label $f2.txt$i -text [mc "$header"]
-					$wid $f2.$x$header -values $carrierSetup(CarrierList) -textvariable newType
-					$f2.$x$header delete 0 end
-					$f2.$x$header configure -state readonly
-					
-					grid $f2.txt$i -column 0 -row $x -sticky news -pady 5p -padx 5p
-					grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
+				switch -glob -- [string tolower $header] {
+					distributiontype	{
+						ttk::label $f2.txt$i -text [mc "$header"]
+						$wid $f2.$x$header -values $dist(distributionTypes) -textvariable newType
+						
+						$f2.$x$header delete 0 end
+						$f2.$x$header configure -state readonly
+						
+						grid $f2.txt$i -column 0 -row $x -sticky news -pady 5p -padx 5p
+						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
+					}
+					carriermethod		{
+						ttk::label $f2.txt$i -text [mc "$header"]
+						$wid $f2.$x$header -values $carrierSetup(CarrierList) -textvariable newType
+						$f2.$x$header delete 0 end
+						$f2.$x$header configure -state readonly
+						
+						grid $f2.txt$i -column 0 -row $x -sticky news -pady 5p -padx 5p
+						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
+					}
+					packagetype			{
+						ttk::label $f2.txt$i -text [mc "$header"]
+						$wid $f2.$x$header -values $packagingSetup(PackageType) -textvariable newType
+						$f2.$x$header delete 0 end
+						$f2.$x$header configure -state readonly
+						
+						grid $f2.txt$i -column 0 -row $x -sticky news -pady 5p -padx 5p
+						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
+					}
+					containertype		{
+						ttk::label $f2.txt$i -text [mc "$header"]
+						$wid $f2.$x$header -values $packagingSetup(ContainerType) -textvariable newType
+						$f2.$x$header delete 0 end
+						$f2.$x$header configure -state readonly
+						
+						grid $f2.txt$i -column 0 -row $x -sticky news -pady 5p -padx 5p
+						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
+					}
+					default			{ ${log}::debug Item not setup to use the ComboBox!}
 				}
 			} else {
-				ttk::label $f2.txt$i -text [mc "$header"]
-				# Create the widget specified in Setup for the column; typically will be ttk::entry
-				$wid $f2.$x$header -textvariable newType
+						ttk::label $f2.txt$i -text [mc "$header"]
+						# Create the widget specified in Setup for the column; typically will be ttk::entry
+						$wid $f2.$x$header -textvariable newType
 				
-				grid $f2.txt$i -column 0 -row $x -sticky news -pady 5p -padx 5p
-				grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
+						grid $f2.txt$i -column 0 -row $x -sticky news -pady 5p -padx 5p
+						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
+						${log}::debug I shouldn't be here
 			}
 		}
 	} else {

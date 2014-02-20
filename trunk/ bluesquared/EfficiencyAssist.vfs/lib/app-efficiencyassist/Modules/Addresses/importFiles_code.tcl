@@ -310,25 +310,33 @@ proc importFiles::startCmd {tbl row col text} {
     # SEE ALSO
     #
     #***
-    global log dist carrierSetup job process
+    global log dist carrierSetup job process packagingSetup
     ${log}::debug --START-- [info level 1]
     set w [$tbl editwinpath]
 
         switch -glob [string tolower [$tbl columncget $col -name]] {
-            "distributiontype" {
-                        #${log}::debug Enter the Distribution Types
-                        #${log}::debug Dists: $dist(distributionTypes)
-                        #$w configure -editable yes -editwindow ttk::entry
-                        $w configure -values $dist(distributionTypes) -state readonly
-                        }
-            *vers* {
-                    # process(versionList) is created in [importFiles::processFile]
-                    # Add $text to list of versions if that version doesn't exist (i.e. user created a new version)
-                    if {[lsearch $process(versionList) $text] == -1} {lappend process(versionList) $text}
-                    $w configure -values $process(versionList)
-                    }
-            "carriermethod" {$w configure -values $carrierSetup(CarrierList) -state readonly}
-            "quantity"  {set job(TotalCopies) [eAssistHelper::calcSamples $col $tbl]}
+            "distributiontype"  {
+                                #${log}::debug Enter the Distribution Types
+                                #${log}::debug Dists: $dist(distributionTypes)
+                                #$w configure -editable yes -editwindow ttk::entry
+                                $w configure -values $dist(distributionTypes) -state readonly
+            }
+            *vers*              {
+                                # process(versionList) is created in [importFiles::processFile]
+                                $w configure -values $process(versionList)
+            }
+            "carriermethod"     {
+                                $w configure -values $carrierSetup(CarrierList) -state readonly
+            }
+            "quantity"          {
+                                set job(TotalCopies) [eAssistHelper::calcSamples $col $tbl]
+            }
+            "containertype"     {
+                                $w configure -values $packagingSetup(ContainerType) -state readonly
+            }
+            "packagetype"       {
+                                $w configure -values $packagingSetup(PackageType) -state readonly
+            }
             default {
                 #${log}::debug Column Name: [string tolower [$tbl columncget $col -name]]
             }
@@ -366,7 +374,7 @@ proc importFiles::endCmd {tbl row col text} {
     # SEE ALSO
     #
     #***
-    global log headerParams headerParent files
+    global log headerParams headerParent files process
     ${log}::debug --START-- [info level 1]
     
     set ColName [$tbl columncget $col -name]
@@ -386,6 +394,15 @@ proc importFiles::endCmd {tbl row col text} {
             }
             $files(tab3f2).tbl cellconfigure $row,$col -background $backGround
         }
+    }
+    
+    switch -glob [string tolower [$tbl columncget $col -name]] {
+        *vers*  {# Add $text to list of versions if that version doesn't exist (i.e. user created a new version)
+                    if {[lsearch $process(versionList) $text] == -1} {
+                        lappend process(versionList) $text
+                    }
+                    ${log}::debug TEXT: $text
+                }
     }
     
     

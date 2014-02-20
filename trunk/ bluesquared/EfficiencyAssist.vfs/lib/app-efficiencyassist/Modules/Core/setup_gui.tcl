@@ -71,6 +71,8 @@ proc eAssistSetup::eAssistSetup {} {
     # Reset frames before continuing
     eAssist_Global::resetFrames parent
     
+    wm geometry . 700x610 ;# Width x Height
+    
     # Create tree for Setup
     set tbl [ttk::frame .container.tree]
     pack $tbl -fill both -side left -anchor nw -padx 5p -pady 5p -ipady 2p
@@ -81,8 +83,8 @@ proc eAssistSetup::eAssistSetup {} {
     
     # Create groups and children
     # 
-    # *** Add your new options to: eAssistSetup::selectionChanged
-    set tree(groups) {BoxLabels BatchMaker DistTypes CSR Company Logging}
+    # *** Add your new options to: eAssistSetup::selectionChanged in setup_code.tcl
+    set tree(groups) {BoxLabels BatchMaker Packaging DistTypes CSR Company Logging}
     
     set tree(BoxLabelsChildren) [list Paths Labels Delimiters BoxHeaders ShipMethod Misc.] ;# when changing these, also change them in eAssistSetup::selectionChanged
         set BoxLabelsChildren_length [llength $tree(BoxLabelsChildren)] ;# so we can add new tree items without having to adjust manually. Used in following childLists.

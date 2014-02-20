@@ -49,6 +49,7 @@ proc eAssistSetup::carrierMethod_GUI {} {
     #
     #***
     global G_setupFrame log carrierSetup
+    global f1 f2 f3 f4 f5 ;# Used for bindings only
     
     eAssist_Global::resetSetupFrames ;# Reset all frames so we start clean
     
@@ -80,20 +81,58 @@ proc eAssistSetup::carrierMethod_GUI {} {
     ## Tab 1 (Build Carrier Tables)
     ##
     
+    #
     # --- Frame 1 Payment Types
-    set f1 [ttk::labelframe $w(carrier).ctbl.f1 -text [mc "Payment Types"]]
-    grid $f1 -column 0 -row 0 -pady 5p -padx 5p
+    #
+    set f1 [ttk::labelframe $w(carrier).ctbl.f1 -text [mc "Payment Types"] -padding 10]
+    grid $f1 -column 0 -row 0 -pady 5p -padx 5p -sticky new
+    
+    #grid columnconfigure $w(carrier).ctbl $f1 -weight 1
+    #grid rowconfigure $w(carrier).ctbl $f1 -weight 1
     
     ttk::entry $f1.entry -textvariable carrierSetup(enterPaymentType)
-    ttk::button $f1.add -text [mc "Add"] -command "eAssistSetup::addCarrierSetup PAYMENT $f1.entry $f1.lbox"
+        tooltip::tooltip $f1.entry [mc "Use the Enter Key to add items"]
     
-    listbox $f1.lbox
-    ttk::button $f1.del -text [mc "Delete"] -command "eAssistSetup::delCarrierSetup PAYMENT $f1.lbox"
+    listbox $f1.lbox \
+                    -yscrollcommand [list $f1.yPayment set] \
+                    -xscrollcommand [list $f1.xPayment set]
+        tooltip::tooltip $f1.lbox [mc "Use the Backspace Key to remove items"]
     
-    grid $f1.entry -column 0 -row 0
-    grid $f1.add -column 1 -row 0 -sticky new
-    grid $f1.lbox -column 0 -row 1 -sticky news
-    grid $f1.del -column 1 -row 1 -sticky new
+    
+    # setup the Autoscrollbars
+    ttk::scrollbar $f1.xPayment -orient horizontal -command [list $f1.lbox xview]
+    ttk::scrollbar $f1.yPayment -orient vertical -command [list $f1.lbox yview]
+     
+    ::autoscroll::autoscroll $f1.xPayment ;# Enable the 'autoscrollbar'
+    ::autoscroll::autoscroll $f1.yPayment
+    
+    
+    grid $f1.entry      -column 0 -row 0 -sticky news
+    grid $f1.lbox       -column 0 -row 1 -sticky news
+    grid $f1.yPayment   -column 1 -row 1 -sticky ens
+    grid $f1.xPayment   -column 0 -row 1 -sticky esw
+    
+    
+    grid columnconfigure $f1 $f1.lbox -weight 1
+    grid rowconfigure $f1 $f1.lbox -weight 1
+
+    bind $f1.entry <Return> {
+        eAssistSetup::addCarrierSetup PAYMENT $f1.entry $f1.lbox
+    }
+    
+    bind $f1.entry <KP_Enter> {
+        eAssistSetup::addCarrierSetup PAYMENT $f1.entry $f1.lbox
+    } ;# So both enter key's work the same way
+    
+    bind $f1.lbox <Delete> {
+        eAssistSetup::delCarrierSetup PAYMENT $f1.lbox
+    }
+    
+    bind $f1.lbox <BackSpace> {
+        eAssistSetup::delCarrierSetup PAYMENT $f1.lbox
+    }
+
+
     
     # Populate the listbox if we have existing data
     if {[info exists carrierSetup(PaymentType)] == 1} {
@@ -102,20 +141,52 @@ proc eAssistSetup::carrierMethod_GUI {} {
         }
     }
     
+    #
     # --- Frame 2, Shipment Type
-    set f2 [ttk::labelframe $w(carrier).ctbl.f2 -text [mc "Shipment Type"]]
-    grid $f2 -column 1 -row 0 -pady 5p -padx 5p
+    #
+    set f2 [ttk::labelframe $w(carrier).ctbl.f2 -text [mc "Shipment Type"] -padding 10]
+    grid $f2 -column 1 -row 0 -pady 5p -padx 5p -sticky new
     
-    ttk::entry $f2.entry -textvariable carrierSetup(enterShipmentType)
-    ttk::button $f2.add -text [mc "Add"] -command "eAssistSetup::addCarrierSetup SHIPMENT $f2.entry $f2.lbox"
+    #grid columnconfigure $w(carrier).ctbl $f2 -weight 1
+    #grid rowconfigure $w(carrier).ctbl $f2 -weight 1
     
-    listbox $f2.lbox
-    ttk::button $f2.del -text [mc "Delete"] -command "eAssistSetup::delCarrierSetup SHIPMENT $f2.lbox"
+    ttk::entry $f2.entry -textvariable carrierSetup(enterShipmentType)    
+    listbox $f2.lbox \
+                    -xscrollcommand [list $f2.xShipment set] \
+                    -yscrollcommand [list $f2.xShipment set]
     
-    grid $f2.entry -column 0 -row 0
-    grid $f2.add -column 1 -row 0 -sticky new
-    grid $f2.lbox -column 0 -row 1 -sticky news
-    grid $f2.del -column 1 -row 1 -sticky new
+    # setup the Autoscrollbars
+    ttk::scrollbar $f2.xShipment -orient h -command [list $f2.lbox xview]
+    ttk::scrollbar $f2.yShipment -orient v -command [list $f2.lbox yview]
+    
+    grid $f2.entry      -column 0 -row 0 -sticky swe
+    grid $f2.lbox       -column 0 -row 1 -sticky news
+    grid $f2.xShipment  -column 0 -row 1 -sticky ews
+    grid $f2.yShipment  -column 2 -row 0 -sticky ens
+    
+    ::autoscroll::autoscroll $f2.xShipment ;# Enable the 'autoscrollbar'
+    ::autoscroll::autoscroll $f2.yShipment
+    
+    grid columnconfigure $f2 $f2.lbox -weight 1
+    grid rowconfigure $f2 $f2.lbox -weight 1
+    
+    # Bindings
+    bind $f2.entry <Return> {
+        eAssistSetup::addCarrierSetup SHIPMENT $f2.entry $f2.lbox
+    }
+    
+    bind $f2.entry <KP_Enter> {
+        # Keypad Enter key
+        eAssistSetup::addCarrierSetup SHIPMENT $f2.entry $f2.lbox
+    }
+    
+    bind $f2.lbox <Delete> {
+        eAssistSetup::delCarrierSetup SHIPMENT $f2.lbox
+    }
+    
+    bind $f2.lbox <BackSpace> {
+        eAssistSetup::delCarrierSetup SHIPMENT $f2.lbox
+    }
     
     # Populate the listbox if we have existing data
     if {[info exists carrierSetup(ShipmentType)] == 1} {
@@ -124,22 +195,51 @@ proc eAssistSetup::carrierMethod_GUI {} {
         }
     }
     
+    #
     # --- Frame 3, Carriers
-    set f3 [ttk::labelframe $w(carrier).ctbl.f3 -text [mc "Carriers"]]
-    grid $f3 -column 0 -row 1 -pady 5p -padx 5p
+    #
+    set f3 [ttk::labelframe $w(carrier).ctbl.f3 -text [mc "Carriers"] -padding 10]
+    grid $f3 -column 2 -row 0 -pady 5p -padx 5p -sticky news
     
-    ttk::entry $f3.entry -textvariable carrierSetup(enterCarrier)
-    ttk::button $f3.add -text [mc "Add"] -command "eAssistSetup::addCarrierSetup CARRIERS $f3.entry $f3.lbox"
+    #grid columnconfigure $w(carrier).ctbl $f3 -weight 1
+    #grid rowconfigure $w(carrier).ctbl $f3 -weight 1
     
-    listbox $f3.lbox
-    ttk::button $f3.del -text [mc "Delete"] -command "eAssistSetup::delCarrierSetup CARRIERS $f3.lbox"
+    ttk::entry $f3.entry -textvariable carrierSetup(enterCarrier)   
+    listbox $f3.lbox \
+                    -xscrollcommand [list $f3.xCarriers set] \
+                    -yscrollcommand [list $f3.yCarriers set]
     
-    grid $f3.entry -column 0 -row 0
-    grid $f3.add -column 1 -row 0 -sticky new
-    grid $f3.lbox -column 0 -row 1 -sticky news
-    grid $f3.del -column 1 -row 1 -sticky new
+    # setup the Autoscrollbars
+    ttk::scrollbar $f3.xCarriers -orient h -command [list $f3.lbox xview]
+    ttk::scrollbar $f3.yCarriers -orient v -command [list $f3.lbox yview]
     
+    ::autoscroll::autoscroll $f3.xCarriers ;# Enable the 'autoscrollbar'
+    ::autoscroll::autoscroll $f3.yCarriers
+    
+    grid $f3.entry      -column 0 -row 0 -sticky swe
+    grid $f3.lbox       -column 0 -row 1 -sticky news
+    grid $f3.xCarriers  -column 0 -row 1 -sticky ews
+    grid $f3.yCarriers  -column 2 -row 0 -sticky ens
 
+    
+    # Bindings
+    bind $f3.entry <Return> {
+        eAssistSetup::addCarrierSetup CARRIERS $f3.entry $f3.lbox
+    }
+    
+    bind $f3.entry <KP_Enter> {
+        eAssistSetup::addCarrierSetup CARRIERS $f3.entry $f3.lbox
+    } ;# So both enter key's work the same way
+    
+    bind $f3.lbox <Delete> {
+        eAssistSetup::delCarrierSetup CARRIERS $f3.lbox
+    }
+    
+    bind $f3.lbox <BackSpace> {
+        eAssistSetup::delCarrierSetup CARRIERS $f3.lbox
+    }
+    
+    
     # Populate the listbox if we have existing data
     if {[info exists carrierSetup(CarrierList)] == 1} {
         foreach item $carrierSetup(CarrierList) {
@@ -147,21 +247,49 @@ proc eAssistSetup::carrierMethod_GUI {} {
         }
     }
     
+    #
     # --- Frame 4, Rate Types
-    set f4 [ttk::labelframe $w(carrier).ctbl.f4 -text [mc "Rate Types"]]
-    grid $f4 -column 1 -row 1 -pady 5p -padx 5p
+    #
+    set f4 [ttk::labelframe $w(carrier).ctbl.f4 -text [mc "Rate Types"] -padding 10]
+    grid $f4 -column 0 -row 1 -pady 5p -padx 5p -sticky news
     
-    ttk::entry $f4.entry -textvariable carrierSetup(enterRateType)
-    ttk::button $f4.add -text [mc "Add"] -command "eAssistSetup::addCarrierSetup RATES $f4.entry $f4.lbox"
+    #grid columnconfigure $w(carrier).ctbl $f3 -weight 1
+    #grid rowconfigure $w(carrier).ctbl $f3 -weight 1
     
-    listbox $f4.lbox
-    ttk::button $f4.del -text [mc "Delete"] -command "eAssistSetup::delCarrierSetup RATES $f4.lbox"
-    
-    grid $f4.entry -column 0 -row 0
-    grid $f4.add -column 1 -row 0 -sticky new
-    grid $f4.lbox -column 0 -row 1 -sticky news
-    grid $f4.del -column 1 -row 1 -sticky new
+    ttk::entry $f4.entry -textvariable carrierSetup(enterRateType)    
+    listbox $f4.lbox \
+                    -xscrollcommand [list $f4.xRateType set] \
+                    -yscrollcommand [list $f4.yRateType set]
 
+    # setup the Autoscrollbars
+    ttk::scrollbar $f4.xRateType  -orient h -command [list $f4.lbox xview]
+    ttk::scrollbar $f4.yRateType  -orient v -command [list $f4.lbox yview]
+    
+    ::autoscroll::autoscroll $f4.xRateType  ;# Enable the 'autoscrollbar'
+    ::autoscroll::autoscroll $f4.yRateType 
+    
+    grid $f4.entry      -column 0 -row 0 -sticky swe
+    grid $f4.lbox       -column 0 -row 1 -sticky news
+    grid $f4.xRateType  -column 0 -row 1 -sticky ews
+    grid $f4.yRateType  -column 2 -row 0 -sticky ens
+
+    # Bindings
+    bind $f4.entry <Return> {
+        eAssistSetup::addCarrierSetup RATES $f4.entry $f4.lbox
+    }
+    
+    bind $f4.entry <KP_Enter> {
+        eAssistSetup::addCarrierSetup RATES $f4.entry $f4.lbox
+    } ;# So both enter key's work the same way
+    
+    bind $f4.lbox <Delete> {
+        eAssistSetup::delCarrierSetup RATES $f4.lbox
+    }
+    
+    bind $f4.lbox <BackSpace> {
+        eAssistSetup::delCarrierSetup RATES $f4.lbox
+    }
+    
     # Populate the listbox if we have existing data
     if {[info exists carrierSetup(RateType)] == 1} {
         foreach item $carrierSetup(RateType) {
@@ -169,4 +297,54 @@ proc eAssistSetup::carrierMethod_GUI {} {
         }
     }
     
+    
+    #
+    # --- Frame 5, Shipping Class
+    #
+    set f5 [ttk::labelframe $w(carrier).ctbl.f5 -text [mc "Shipping Class"] -padding 10]
+    grid $f5 -column 1 -row 1 -pady 5p -padx 5p -sticky news
+    
+    ttk::entry $f5.entry -textvariable carrierSetup(enterShippingClass)    
+    listbox $f5.lbox \
+                    -xscrollcommand [list $f5.xShippingClass set] \
+                    -yscrollcommand [list $f5.yShippingClass set]
+
+    # setup the Autoscrollbars
+    ttk::scrollbar $f5.xShippingClass  -orient h -command [list $f5.lbox xview]
+    ttk::scrollbar $f5.yShippingClass  -orient v -command [list $f5.lbox yview]
+    
+    ::autoscroll::autoscroll $f5.xShippingClass  ;# Enable the 'autoscrollbar'
+    ::autoscroll::autoscroll $f5.yShippingClass
+    
+    grid $f5.entry           -column 0 -row 0 -sticky swe
+    grid $f5.lbox            -column 0 -row 1 -sticky news
+    grid $f5.xShippingClass  -column 0 -row 1 -sticky ews
+    grid $f5.yShippingClass  -column 2 -row 0 -sticky ens
+
+    # Bindings
+    bind $f5.entry <Return> {
+        eAssistSetup::addCarrierSetup SHIPPINGCLASS $f5.entry $f5.lbox
+    }
+    
+    bind $f5.entry <KP_Enter> {
+        eAssistSetup::addCarrierSetup SHIPPINGCLASS $f5.entry $f5.lbox
+    } ;# So both enter key's work the same way
+    
+    bind $f5.lbox <Delete> {
+        eAssistSetup::delCarrierSetup SHIPPINGCLASS $f5.lbox
+    }
+    
+    bind $f5.lbox <BackSpace> {
+        eAssistSetup::delCarrierSetup SHIPPINGCLASS $f5.lbox
+    }
+    
+    # Populate the listbox if we have existing data
+    if {[info exists carrierSetup(ShippingClass)] == 1} {
+        foreach item $carrierSetup(ShippingClass) {
+            $f5.lbox insert end $item
+        }
+    }
 } ;# eAssistSetup::carrierMethod_GUI
+
+
+#Remove buttons, and create bindings to the <Enter> key; <Delete> key, and a <Double-1> to delete
