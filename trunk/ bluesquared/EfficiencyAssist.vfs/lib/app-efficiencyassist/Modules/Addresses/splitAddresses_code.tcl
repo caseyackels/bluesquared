@@ -138,6 +138,7 @@ proc eAssistHelper::splitInsertData {splitTable mainTable} {
         lappend process(controlDupes) $currentEntry
         incr z
     }
+	
 
     ${log}::debug --END-- [info level 1]
 } ;# eAssistHelper::splitInsertData
@@ -168,12 +169,31 @@ proc eAssistHelper::editStartSplit {tbl row col text} {
     # SEE ALSO
     #
     #***
-    global log splitVers dist w
+    global log splitVers splitData dist w
     ${log}::debug --START-- [info level 1]
         
 		set win [$tbl editwinpath]
+		;#eAssistHelper::calcColumn $tbl $col; ${log}::debug calculating ...
         switch -glob [string tolower [$tbl columncget $col -name]] {
-            "quantity"		{eAssistHelper::calcColumn $tbl $col; ${log}::debug calculating ...}
+            "quantity"		{
+						# Reject input if it isn't a number
+						if {![string is integer $text]} {
+							bell
+							tk_messageBox -title "Error" -icon error -message \
+							 [mc "Only numbers are allowed"]
+							$tbl rejectinput
+							return
+						}
+						
+						# .. Grab allocated counts
+						${log}::debug Quantity Column: $text - adding text to column qty
+						$tbl cellconfigure $row,$col -text $text
+						
+						set splitVers(allocated) [eAssistHelper::showCurrentVersTotals $w(sVersf2).tbl Quantity]
+	
+						# .. Calculate how much we have left to allocate
+						set splitVers(unallocated) [eAssistHelper::subtAllocatedFromTotal $splitVers(totalVersionQty) $splitVers(allocated)]
+						} 
             "distributiontype"  {$win configure -values $dist(distributionTypes) -state readonly}
 			default	{}
         }
@@ -181,11 +201,12 @@ proc eAssistHelper::editStartSplit {tbl row col text} {
 		#${log}::debug SaveData-vers $splitVers(activeVersion)
 		#${log}::debug SaveData-data [$w(sVersf2).tbl get 0 end]
 		# set array to save the data per version
-		set splitVers(data,$splitVers(activeVersion)) [$w(sVersf2).tbl get 0 end]
+		set splitData($splitVers(activeVersion)) [$w(sVersf2).tbl get 0 end]
 
-    return $text
+    
 
     ${log}::debug --END-- [info level 1]
+	return $text
 } ;# eAssistHelper::editStartSplit
 
 
@@ -214,113 +235,131 @@ proc eAssistHelper::editEndSplit {tbl row col text} {
     # SEE ALSO
     #
     #***
-    global log splitQty splitVers
+    global log splitQty splitVers w
     ${log}::debug --START-- [info level 1]
-        
-	#set w [$tbl editwinpath]
 
-    #${log}::debug Column Name: [$tbl columncget $col -name]
-    switch -glob [string tolower [$tbl columncget $col -name]] {
-            "quantity"	{eAssistHelper::calcColumn $tbl $col; ${log}::debug calculating ...}
+	switch -glob [string tolower [$tbl columncget $col -name]] {
+            "quantity"	{
+						# Reject input if it isn't a number
+						if {![string is integer $text]} {
+							bell
+							tk_messageBox -title "Error" -icon error -message \
+							 [mc "Only numbers are allowed"]
+							$tbl rejectinput
+							return
+						}
+						
+						# .. Grab allocated counts
+						${log}::debug Quantity Column: $text - adding text to column qty
+						$tbl cellconfigure $row,$col -text $text
+						
+						set splitVers(allocated) [eAssistHelper::showCurrentVersTotals $w(sVersf2).tbl Quantity]
+	
+						# .. Calculate how much we have left to allocate
+						set splitVers(unallocated) [eAssistHelper::subtAllocatedFromTotal $splitVers(totalVersionQty) $splitVers(allocated)]
+						} 
 			default		{}
     }
     
-	return $text
+	${log}::debug New Alloc: $text - $splitVers(allocated)
+	${log}::debug Remaining: $text - $splitVers(unallocated)
 
     ${log}::debug --END-- [info level 1]
+	
+	return $text
 } ;# eAssistHelper::editEndSplit
 
 
-proc eAssistHelper::calcColumn {tbl args} {
-    #****f* calcColumn/eAssistHelper
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2011-2013 Casey Ackels
-    #
-    # FUNCTION
-    #	eAssistHelper::calcColumn <args>
-    #
-    # SYNOPSIS
-	#	Calculates a column of data. If it contains data other than numerics this proc will choke on it.
-	#	Args must be either: $col -or- "quantity"
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #	
-    #
-    # NOTES
-	#	To be used in conjunction with a start or end edit command for a tablelist
-	#	This has a dependency on the global variable: splitVers
-	#	**This will only work with the Split Quantity Table!**
-    #
-    # SEE ALSO
-    #
-    #***
-    global log splitVers
-    ${log}::debug --START-- [info level 1]
-	
-	if {[info exists numTotal]} {unset numTotal}
-    
-	# Check to see if the vars contain data, if they don't, then we'll cycle through to find which column contains the Quantity column.
-	if {$args ne "quantity"} {
-		#${log}::debug wasn't called by a binding
-	
-		set colCount [$tbl getcolumns $args]
-		#${log}::debug column count: $colCount
-		
-	} else {
-		for {set x 0} {[$tbl columncount] > $x} {incr x} {
-			if {[string tolower [$tbl columncget $x -name]] eq $args} {
-				set splitVers(idx,Quantity) $x
-				#${log}::debug "Found: [$tbl columncget $x -name]"
-				set colCount [$tbl getcolumns $x]
-			}
-		}
-	}
-	
-	set x 0
-	foreach num $colCount {
-		if {$num ne {}} {
-			${log}::debug String should be integer: $num
-			lappend numTotal $num
-			incr x
-		}
-		#${log}::debug numTotal: $numTotal
-	}
-	
-	#if $x = 0, we know that there is nothing in $colCount as far as integers go
-	if {$x == 0} {set numTotal 0}
-	
-	if {[info exists numTotal]} {
-		${log}::debug total count: $numTotal
-		#${log}::debug [join $numTotal +]
-		${log}::debug [expr [join $numTotal +]]
-		set splitVers(allocated) [expr [join $numTotal +]]
-		set splitVers(unallocated) [expr $splitVers(totalVersionQty) - $splitVers(allocated)]
-	} else {
-		#${log}::debug No data found, set Unallocated to TotalVersionQty
-		set splitVers(unallocated) $splitVers(totalVersionQty)
-	}
-	
-	# Check to see if the splitVers(unallocated) version contains a negative number, if it does turn the text to red.
-	if {$splitVers(unallocated) < 0} {
-		${log}::debug Unallocated is less than zero, change to red!
-		.splitVersions.f2.f2b.txt8 configure -foreground red
-	} else {
-		.splitVersions.f2.f2b.txt8 configure -foreground black
-	}
-	
-	eAssistHelper::saveSplitData
-	
-    ${log}::debug --END-- [info level 1]
-} ;# eAssistHelper::calcColumn
+#proc eAssistHelper::calcColumn {tbl args} {
+#    #****f* calcColumn/eAssistHelper
+#    # AUTHOR
+#    #	Casey Ackels
+#    #
+#    # COPYRIGHT
+#    #	(c) 2011-2013 Casey Ackels
+#    #
+#    # FUNCTION
+#    #	eAssistHelper::calcColumn <args>
+#    #
+#    # SYNOPSIS
+#	#	Calculates a column of data. If it contains data other than numerics this proc will choke on it.
+#	#	Args must be either: $col -or- "quantity"
+#    #
+#    # CHILDREN
+#    #	N/A
+#    #
+#    # PARENTS
+#    #	
+#    #
+#    # NOTES
+#	#	To be used in conjunction with a start or end edit command for a tablelist
+#	#	This has a dependency on the global variable: splitVers
+#	#	**This will only work with the Split Quantity Table!**
+#    #
+#    # SEE ALSO
+#    #
+#    #***
+#    global log splitVers
+#    ${log}::debug --START-- [info level 1]
+#	
+#	if {[info exists numTotal]} {unset numTotal}
+#    
+#	# Check to see if the vars contain data, if they don't, then we'll cycle through to find which column contains the Quantity column.
+#	if {$args ne "quantity"} {
+#		#${log}::debug wasn't called by a binding
+#	
+#		set colCount [$tbl getcolumns $args]
+#		#${log}::debug column count: $colCount
+#		
+#	} else {
+#		for {set x 0} {[$tbl columncount] > $x} {incr x} {
+#			if {[string tolower [$tbl columncget $x -name]] eq $args} {
+#				set splitVers(idx,Quantity) $x
+#				#${log}::debug "Found: [$tbl columncget $x -name]"
+#				set colCount [$tbl getcolumns $x]
+#			}
+#		}
+#	}
+#	
+#	set x 0
+#	foreach num $colCount {
+#		if {$num ne {}} {
+#			${log}::debug String should be integer: $num
+#			lappend numTotal $num
+#			incr x
+#		}
+#		#${log}::debug numTotal: $numTotal
+#	}
+#	
+#	#if $x = 0, we know that there is nothing in $colCount as far as integers go
+#	if {$x == 0} {set numTotal 0}
+#	
+#	if {[info exists numTotal]} {
+#		${log}::debug total count: $numTotal
+#		#${log}::debug [join $numTotal +]
+#		${log}::debug [expr [join $numTotal +]]
+#		set splitVers(allocated) [expr [join $numTotal +]]
+#		set splitVers(unallocated) [expr $splitVers(totalVersionQty) - $splitVers(allocated)]
+#	} else {
+#		#${log}::debug No data found, set Unallocated to TotalVersionQty
+#		set splitVers(unallocated) $splitVers(totalVersionQty)
+#	}
+#	
+#	# Check to see if the splitVers(unallocated) version contains a negative number, if it does turn the text to red.
+#	if {$splitVers(unallocated) < 0} {
+#		${log}::debug Unallocated is less than zero, change to red!
+#		.splitVersions.f2.f2b.txt8 configure -foreground red
+#	} else {
+#		.splitVersions.f2.f2b.txt8 configure -foreground black
+#	}
+#	
+#	eAssistHelper::saveSplitData
+#	
+#    ${log}::debug --END-- [info level 1]
+#} ;# eAssistHelper::calcColumn
 
 
-proc eAssistHelper::saveSplitData {} {
+proc eAssistHelper::saveSplitData {tblTo} {
     #****f* saveSplitData/eAssistHelper
     # AUTHOR
     #	Casey Ackels
@@ -329,7 +368,7 @@ proc eAssistHelper::saveSplitData {} {
     #	(c) 2011-2013 Casey Ackels
     #
     # FUNCTION
-    #	eAssistHelper::saveSplitData
+    #	eAssistHelper::saveSplitData <tableToInsertInto>
     #
     # SYNOPSIS
     #
@@ -345,12 +384,31 @@ proc eAssistHelper::saveSplitData {} {
     # SEE ALSO
     #
     #***
-    global log w splitVers
+    global log w splitData headerParams
     ${log}::debug --START-- [info level 1]
-    
-	${log}::debug $splitVers(activeVersion) - [$w(sVersf2).tbl get 0 end]
-	set splitVers(qty,$splitVers(activeVersion)) [$w(sVersf2).tbl get 0 end]
+
+	# Clear out any data that currently exists in the tblTo widget
+	$tblTo delete 0 end
 	
+	foreach vers [array names splitData] {
+		# Looping by the Version
+		${log}::debug INSERTING: $vers
+		
+		foreach row $splitData($vers) {
+			# Looping per row within Version
+			set row [lrange $row 1 end]
+			#${log}::debug ROW (Before): $row
+			
+			set vIdx [$tblTo columnindex Version]
+			set vPos [lindex $row $vIdx]
+			set row [lreplace $row $vIdx $vIdx $vers]
+			
+			#${log}::debug ROW (After): $row
+			$tblTo insert end $row
+		}
+	}
+	
+		
     ${log}::debug --END-- [info level 1]
 } ;# eAssistHelper::saveSplitData
 
@@ -380,20 +438,37 @@ proc eAssistHelper::resetQuantityColumn {actVers} {
     # SEE ALSO
     #
     #***
-    global log w splitVers
+    global log w splitVers splitData
     ${log}::debug --START-- [info level 1]
 
-	# Remove all data
-	#$w(sVersf2).tbl delete 0,$splitVers(idx,Quantity) end,$splitVers(idx,Quantity)
-	
-	foreach rowIdx rows {
-		
-	}
-
 	# if we've edited this version, lets insert what we've already put in.
-	if {[info exists $splitVers(qty,$actVers)]} {
-		$w(sVersf2).tbl insert $splitVers(qty,$actVers)
+	if {[info exists splitData($actVers)]} {
+
+		# Get the column indices
+		set colQty [$w(sVersf2).tbl columnindex Quantity]
+		set colDist [$w(sVersf2).tbl columnindex DistributionType]
+		
+		set row 0
+		foreach val $splitData($actVers) {
+			#${log}::debug Inserting Quantity: $row,Quantity [lindex $val $colQty]
+			#${log}::debug Inserting DistributionType: $row,DistributionType [lindex $val $colDist]
+			$w(sVersf2).tbl cellconfigure $row,Quantity -text [lindex $val $colQty] ;# assuming that the Quantity column is the 12th index
+			$w(sVersf2).tbl cellconfigure $row,DistributionType -text [lindex $val $colDist] ;# assuming that the Quantity column is the 12th index
+			incr row
+		}
+	} else {
+		# Remove Data if nothing exists ... (this will happen when we are going through the versions for the first time)
+		set clearColumns [list Quantity]
+		foreach col $clearColumns {
+			$w(sVersf2).tbl fillcolumn $col ""
+		}
 	}
+	
+	#.. Grab allocated counts
+	set splitVers(allocated) [eAssistHelper::showCurrentVersTotals $w(sVersf2).tbl Quantity]
+   
+	#.. Calculate how much we have left to allocate
+	set splitVers(unallocated) [eAssistHelper::subtAllocatedFromTotal $splitVers(totalVersionQty) $splitVers(allocated)]
 	
 	
     ${log}::debug --END-- [info level 1]

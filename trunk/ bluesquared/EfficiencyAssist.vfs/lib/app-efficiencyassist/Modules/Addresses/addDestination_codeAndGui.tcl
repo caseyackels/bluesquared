@@ -105,7 +105,7 @@ proc eAssistHelper::addDestination {tblPath} {
 	ttk::entry $w(dest).getCity -textvariable newAddr(City)
     
     ttk::label $w(dest).reqState -text [mc "State"] -foreground red
-	ttk::entry $w(dest).getState -textvariable newAddr(State) -width 3
+	ttk::entry $w(dest).getState -textvariable newAddr(State) -width 4
     
     ttk::label $w(dest).reqZip -text [mc "Zip"] -foreground red
 	ttk::entry $w(dest).getZip -textvariable newAddr(Zip) -width 10

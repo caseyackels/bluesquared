@@ -64,7 +64,7 @@ proc eAssistHelper::splitVersions {} {
     wm geometry .splitVersions 625x375+${locX}+${locY}
 
     focus .splitVersions
-	  
+	grab current
     #Menu
     set mb1 [menu .mb1]
     .splitVersions configure -menu $mb1
@@ -73,14 +73,14 @@ proc eAssistHelper::splitVersions {} {
     menu $mb1.file -tearoff 0 -relief raised -bd 2
     
     $mb1 add cascade -label [mc "File"] -menu $mb1.file
-    $mb1.file add command -label [mc "Add Destination"] -command {eAssistHelper::addDestination $w(sVersf2).tbl}
+    $mb1.file add command -label [mc "Add Destination"] -command {eAssistHelper::addDestination $w(sVersf2).tbl} -state disabled
     $mb1.file add command -label [mc "Close"] -command {destroy .splitVersions}
     
 	set f1 [ttk::frame .splitVersions.f1]
 	pack $f1 -fill both -pady 5p -padx 5p
 
 	# // Get the most updated list of the versions
-	set process(versionList) [$files(tab3f2).tbl getcolumn Version]
+	#set process(versionList) [$files(tab3f2).tbl getcolumn Version]
 	
     ttk::label $f1.txt1 -text [mc "Version"]
     ttk::combobox $f1.cbox1 -values $process(versionList) \
@@ -94,9 +94,17 @@ proc eAssistHelper::splitVersions {} {
     
     set splitVers(activeVersion) [lindex $process(versionList) 0]
     
-    bind $f1.cbox1 <<ComboboxSelected>> {      
+    bind $f1.cbox1 <<ComboboxSelected>> {
+		${log}::debug Processing $splitVers(activeVersion)
 		eAssistHelper::displayVerQty $splitVers(activeVersion)
-		eAssistHelper::calcColumn $w(sVersf2).tbl quantity
+		
+		# .. Grab allocated counts
+		set splitVers(allocated) [eAssistHelper::showCurrentVersTotals $w(sVersf2).tbl Quantity]
+		
+		# .. Calculate how much we have left to allocate
+		set splitVers(unallocated) [eAssistHelper::subtAllocatedFromTotal $splitVers(totalVersionQty) $splitVers(allocated)]
+		#eAssistHelper::calcColumn $w(sVersf2).tbl quantity
+		#set splitVers(allocated) [eAssistHelper::calcSamples $col $w(sVersf2).tbl ]
 		eAssistHelper::resetQuantityColumn $splitVers(activeVersion)
     }
     
@@ -149,13 +157,19 @@ proc eAssistHelper::splitVersions {} {
 								-exportselection yes \
 								-showseparators yes \
 								-fullseparators yes \
-								-movablecolumns yes \
-								-movablerows yes \
+								-movablecolumns no \
+								-movablerows no \
+                                -editselectedonly 1 \
+                                -selectmode extended \
+                                -selecttype cell \
 								-editstartcommand {eAssistHelper::editStartSplit} \
 								-editendcommand {eAssistHelper::editEndSplit} \
 								-yscrollcommand [list $scrolly set] \
 								-xscrollcommand [list $scrollx set]
+	
+	bind [$w(sVersf2).tbl editwintag] <Return> "[bind TablelistEdit <Down>]; break"
 
+	
 	ttk::scrollbar $scrolly -orient v -command [list $w(sVersf2).tbl yview]
 	ttk::scrollbar $scrollx -orient h -command [list $w(sVersf2).tbl xview]
 		
@@ -175,14 +189,89 @@ proc eAssistHelper::splitVersions {} {
 	set w(sVersBtn) [ttk::frame .splitVersions.btn]
 	pack $w(sVersBtn) -side bottom -anchor se -pady 8p -padx 5p
     
-    ttk::button $w(sVersBtn).btn1 -text [mc "Cancel"] -command {destroy .splitVersions}
-    ttk::button $w(sVersBtn).btn2 -text [mc "OK"]
+    ttk::button $w(sVersBtn).btn1 -text [mc "OK"] -command {eAssistHelper::saveSplitData $files(tab3f2).tbl}
+    ttk::button $w(sVersBtn).btn2 -text [mc "Cancel"] -command {destroy .splitVersions}
     
     grid $w(sVersBtn).btn1 -column 0 -row 0 -padx 2p -pady 2p
 	grid $w(sVersBtn).btn2 -column 1 -row 0 -padx 2p -pady 2p
-    
+	
+	# Create the popup menus
+	IFMenus::tblPopup $w(sVersf2).tbl extended .splitTblMenu
+	
     ${log}::debug --END -- [info level 1]
 } ;# eAssistHelper::splitVersions
 
 
+proc eAssistHelper::showCurrentVersTotals {tblPath col} {
+    #****f* showCurrentVersTotals/eAssistHelper
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	eAssistHelper::showCurrentVersTotals <tblPath> <colIndex>
+    #
+    # SYNOPSIS
+    #	Show the totals for the current version
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log
+    ${log}::debug --START-- [info level 1]
+    
+	set myList [string map [list \{\} 0] [$tblPath getcolumn $col]]
+	set returnCount [expr [join $myList +]]
+	
+	${log}::debug Current Count: $returnCount
+	
+	
+	return $returnCount
+    ${log}::debug --END-- [info level 1]
+} ;# eAssistHelper::showCurrentVersTotals
 
+
+proc eAssistHelper::subtAllocatedFromTotal {curCount totCount} {
+    #****f* subtAllocatedFromTotal/eAssistHelper
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	Subtract allocated quantity from total quantity
+    #
+    # SYNOPSIS
+    #	eAssistHelper::subtAllocatedFromTotal <curCount> <totCount>
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log
+    ${log}::debug --START-- [info level 1]
+
+	${log}::debug Remaining amount to allocate: [expr $curCount - $totCount]
+	
+	return [expr $curCount - $totCount]
+
+    ${log}::debug --END-- [info level 1]
+} ;# eAssistHelper::subtAllocatedFromTotal

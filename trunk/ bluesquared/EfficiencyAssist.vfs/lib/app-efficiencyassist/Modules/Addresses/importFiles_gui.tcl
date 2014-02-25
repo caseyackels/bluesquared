@@ -299,7 +299,7 @@ proc importFiles::eAssistGUI {} {
     pack $files(f3a) -side left -fill both -expand yes ;#-padx 5p -pady 5p
     
     # --- Job Info Frame
-    set files(jobInfo) [ttk::labelframe $files(f3a).f1 -text [mc "Job Information"]]
+    set files(jobInfo) [ttk::labelframe $files(f3a).f1 -text [mc "Job Information"] -padding 10]
     grid $files(jobInfo) -column 0 -row 0 -sticky news -padx 5p -pady 5p -ipady 5p
     
     ttk::label $files(jobInfo).txt1 -text [mc "CSR"]
@@ -327,7 +327,7 @@ proc importFiles::eAssistGUI {} {
     grid $files(jobInfo).entry3    -column 1 -row 3 -sticky news -padx 3p -pady 3p
     
     # --- Piece Info Frame
-    set files(pieceInfo) [ttk::labelframe $files(f3a).f2 -text [mc "Piece Information"]]
+    set files(pieceInfo) [ttk::labelframe $files(f3a).f2 -text [mc "Piece Information"] -padding 10]
     grid $files(pieceInfo) -column 1 -row 0 -sticky news -padx 5p -pady 5p
     
     # -- Widgets
@@ -353,29 +353,29 @@ proc importFiles::eAssistGUI {} {
     
     
     # --- Internal Samples Frame
-    #set files(internalSamples) [ttk::labelframe $files(f3a).f3 -text [mc "Internal Samples"]]
-    #grid $files(internalSamples) -column 0 -row 1 -sticky news -padx 2p ;#-pady 5p
-    #
-    #ttk::label $files(internalSamples).txt1     -text [mc "Ticket"]
-    #ttk::label $files(internalSamples).txt1a    -textvariable csmpls(TicketTotal)
-    #ttk::label $files(internalSamples).txt2     -text [mc "CSR"]
-    #ttk::label $files(internalSamples).txt2a    -textvariable csmpls(CSRTotal)
-    #ttk::label $files(internalSamples).txt3     -text [mc "Sample Room"]
-    #ttk::label $files(internalSamples).txt3a    -textvariable csmpls(SmplRoomTotal)
-    #ttk::label $files(internalSamples).txt4     -text [mc "Sales"]
-    #ttk::label $files(internalSamples).txt4a    -textvariable csmpls(SalesTotal)
+    set files(internalSamples) [ttk::labelframe $files(f3a).f3 -text [mc "Internal Samples"] -padding 10]
+    grid $files(internalSamples) -column 2 -row 0 -sticky news -sticky news -padx 5p -pady 5p
+    
+    ttk::label $files(internalSamples).txt1     -text [mc "Ticket"]
+    ttk::label $files(internalSamples).txt1a    -textvariable csmpls(TicketTotal)
+    ttk::label $files(internalSamples).txt2     -text [mc "CSR"]
+    ttk::label $files(internalSamples).txt2a    -textvariable csmpls(CSRTotal)
+    ttk::label $files(internalSamples).txt3     -text [mc "Sample Room"]
+    ttk::label $files(internalSamples).txt3a    -textvariable csmpls(SmplRoomTotal)
+    ttk::label $files(internalSamples).txt4     -text [mc "Sales"]
+    ttk::label $files(internalSamples).txt4a    -textvariable csmpls(SalesTotal)
     #ttk::button $files(internalSamples).btn1    -text [mc "Edit"] -command {eAssistHelper::addCompanySamples}
-    #
-    #
-    ##------------- Grid Frame 1b
-    #grid $files(internalSamples).txt1   -column 0 -row 0 -sticky new -padx 2p
-    #grid $files(internalSamples).txt1a  -column 1 -row 0 -sticky new -padx 2p
-    #grid $files(internalSamples).txt2   -column 0 -row 1 -sticky new -padx 2p
-    #grid $files(internalSamples).txt2a  -column 1 -row 1 -sticky new -padx 2p
-    #grid $files(internalSamples).txt3   -column 0 -row 2 -sticky new -padx 2p
-    #grid $files(internalSamples).txt3a  -column 1 -row 2 -sticky new -padx 2p
-    #grid $files(internalSamples).txt4   -column 0 -row 3 -sticky new -padx 2p
-    #grid $files(internalSamples).txt4a  -column 1 -row 3 -sticky new -padx 2p
+    
+    
+    #------------- Grid Frame 1b
+    grid $files(internalSamples).txt1   -column 0 -row 0 -sticky new -padx 2p
+    grid $files(internalSamples).txt1a  -column 1 -row 0 -sticky new -padx 2p
+    grid $files(internalSamples).txt2   -column 0 -row 1 -sticky new -padx 2p
+    grid $files(internalSamples).txt2a  -column 1 -row 1 -sticky new -padx 2p
+    grid $files(internalSamples).txt3   -column 0 -row 2 -sticky new -padx 2p
+    grid $files(internalSamples).txt3a  -column 1 -row 2 -sticky new -padx 2p
+    grid $files(internalSamples).txt4   -column 0 -row 3 -sticky new -padx 2p
+    grid $files(internalSamples).txt4a  -column 1 -row 3 -sticky new -padx 2p
     #grid $files(internalSamples).btn1   -column 1 -row 4 -sticky new ;#-padx 3p
     
     ##
@@ -415,10 +415,13 @@ proc importFiles::eAssistGUI {} {
     ::autoscroll::autoscroll $scrolly ;# Enable the 'autoscrollbar'
     ::autoscroll::autoscroll $scrollx ;# Enable the 'autoscrollbar'
 
+    # Setup the bindings
     set bodyTag [$files(tab3f2).tbl bodytag]
-    bind $bodyTag <<Button3>> +[list tk_popup .tblMenu %X %Y]
+    set labelTag [$files(tab3f2).tbl labeltag]
+    set editWinTag [$files(tab3f2).tbl editwintag]
     
-    bind [$files(tab3f2).tbl editwintag] <Return> "[bind TablelistEdit <Down>]; break"
+    # Begin bodyTag
+    #bind $bodyTag <<Button3>> +[list tk_popup .tblMenu %X %Y]
     
     # Toggle between selecting a row, or a single cell
     bind $bodyTag <Control-e> {
@@ -435,6 +438,11 @@ proc importFiles::eAssistGUI {} {
             ${log}::debug Switching to Extended Mode
         }
     }
+    # Begin labelTag
+    bind $labelTag <Button-3> +[list tk_popup .tblToggleColumns %X %Y]
+    
+    # Begin editWinTag
+    bind $editWinTag <Return> "[bind TablelistEdit <Down>]; break"
 
     #----- GRID
     grid $files(tab3f2).tbl -column 0 -row 0 -sticky news -padx 5p -pady 5p
@@ -474,17 +482,31 @@ proc importFiles::initMenu {} {
     #***
     global log mb
     ${log}::debug --START -- [info level 1]
+    
+    if {[winfo exists $mb.modMenu.quick]} {
+        destroy $mb.modMenu.quick
+    }
 
     $mb.modMenu delete 0 end
     
     # Change menu name
     #$mb entryconfigure Edit -label Distribution
-
-    $mb.modMenu add command -label [mc "Filters..."] -command {eAssist_tools::FilterEditor}
-    $mb.modMenu add command -label [mc "Internal Samples"] -command {eAssistHelper::addCompanySamples} -state disabled
-    $mb.modMenu add command -label [mc "Split"] -command {eAssistHelper::splitVersions}
+    # Add cascade
+    menu $mb.modMenu.quick
+    $mb.modMenu add cascade -label [mc "Quick Add"] -menu $mb.modMenu.quick
+    $mb.modMenu.quick add command -label [mc "JG Mail"]
+    $mb.modMenu.quick add command -label [mc "JG Inventory"]
+    
     $mb.modMenu add separator
-    $mb.modMenu add command -label [mc "Options"] -command {eAssistPref::launchPreferences}
+    
+    $mb.modMenu add command -label [mc "Add Destination"] -command {eAssistHelper::addDestination $files(tab3f2).tbl}
+    $mb.modMenu add command -label [mc "Filters..."] -command {eAssist_tools::FilterEditor}
+    $mb.modMenu add command -label [mc "Internal Samples"] -command {eAssistHelper::addCompanySamples}
+    $mb.modMenu add command -label [mc "Split"] -command {eAssistHelper::splitVersions}
+    
+    $mb.modMenu add separator
+    
+    $mb.modMenu add command -label [mc "Preferences"] -command {eAssistPref::launchPreferences}
 	
     ${log}::debug --END -- [info level 1]
 } ;# importFiles::initMenu

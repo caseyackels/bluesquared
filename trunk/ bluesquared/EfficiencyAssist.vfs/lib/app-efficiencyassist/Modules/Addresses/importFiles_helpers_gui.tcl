@@ -86,7 +86,7 @@ proc eAssistHelper::addDistTypes_GUI {} {
 	
 	ttk::label $w(dType).txt5 -text [mc "City/State/Zip"]
 	ttk::entry $w(dType).entry6
-	ttk::entry $w(dType).entry7 -width 3
+	ttk::entry $w(dType).entry7 -width 5
 	ttk::entry $w(dType).entry8 -width 10
 	
 	ttk::label $w(dType).txt6 -text [mc "Country/Phone"]
@@ -130,7 +130,7 @@ proc eAssistHelper::addDistTypes_GUI {} {
 } ;# eAssistHelper::addDistTypes_GUI
 
 
-proc eAssistHelper::insertItems {cells} {
+proc eAssistHelper::insertItems {tbl} {
     #****f* insertItems/eAssistHelper
     # AUTHOR
     #	Casey Ackels
@@ -143,24 +143,25 @@ proc eAssistHelper::insertItems {cells} {
 	#	Will only work in [Extended] Mode for BatchMaker
     #
     # SYNOPSIS
-    #
+    #	eAssistHelper::insertItems <tbl>
     #
     # CHILDREN
     #	eAssistHelper::insValuesToTable
     #
     # PARENTS
-    #	
+    #	IFMenus::tblPopup
     #
     # NOTES
     #
     # SEE ALSO
     #
     #***
-    global log files headerParams dist origCells carrierSetup packagingSetup
+    global log files headerParams dist carrierSetup packagingSetup txtVariable
     ${log}::debug --START-- [info level 1]
     
 	set w(di) .di
 	if {[winfo exists $w(di)]} {destroy .di}
+	if {[info exists txtVariable]} {unset txtVariable}
 		
 	toplevel $w(di)
     wm transient $w(di) .
@@ -182,30 +183,29 @@ proc eAssistHelper::insertItems {cells} {
 	set f2 [ttk::frame $w(di).f2]
 	pack $f2 -expand yes -fill both -pady 5p -padx 5p
 	
+
+	if {[info exists curCol]} {unset curCol}
+	#set newType ""
+	set origCells [$tbl curcellselection]
+	set cells [$tbl curcellselection]
+	
+	foreach val $cells {
+		# Initialize that variable
+		if {![info exists curCol]} {set curCol [$tbl columncget [lrange [split $val ,] end end] -name]}
+		
+		# This should get over written during our cycles
+		set curCol1 [$tbl columncget [lrange [split $val ,] end end] -name]
+		
+		# if we arent the same lets save the column name
+		if {[string match $curCol1 $curCol] ne 1} {lappend curCol [$tbl columncget [lrange [split $val ,] end end] -name]}
+
+	}
+	
 	# Button Bar
 	set btnBar [ttk::frame $w(di).btnBar]
 	pack $btnBar -side right -pady 5p -padx 5p
 	
-	# Create the buttons here, but we'll [grid] it at the bottom of this proc.
-	ttk::button $btnBar.ok		-text [mc "OK"] -command {eAssistHelper::insValuesToTableCells $newType $origCells; destroy .di}
-	ttk::button $btnBar.cancel	-text [mc "Cancel"] -command {destroy .di}
 
-	
-	if {[info exists curCol]} {unset curCol}
-	set newType ""
-	set origCells $cells
-	
-	foreach val $cells {
-		# Initialize that variable
-		if {![info exists curCol]} {set curCol [$files(tab3f2).tbl columncget [lrange [split $val ,] end end] -name]}
-		
-		# This should get over written during our cycles
-		set curCol1 [$files(tab3f2).tbl columncget [lrange [split $val ,] end end] -name]
-		
-		# if we arent the same lets save the column name
-		if {[string match $curCol1 $curCol] ne 1} {lappend curCol [$files(tab3f2).tbl columncget [lrange [split $val ,] end end] -name]}
-
-	}
 
 	# Guard against multiple cells being selected ...	
 	if {[llength $curCol] == 1} {
@@ -214,7 +214,7 @@ proc eAssistHelper::insertItems {cells} {
 			incr i
 			${log}::debug $header / Widgets: [lrange $headerParams($header) 2 2]
 			# Check to make sure that the column hasn't been hidden, if it is, lets stop the current loop.
-			if {[$files(tab3f2).tbl columncget $header -hide] == 1} {continue}
+			if {[$tbl columncget $header -hide] == 1} {continue}
 			
 			set wid [string tolower [lrange $headerParams($header) 2 2]]
 			
@@ -222,17 +222,20 @@ proc eAssistHelper::insertItems {cells} {
 				switch -glob -- [string tolower $header] {
 					distributiontype	{
 						ttk::label $f2.txt$i -text [mc "$header"]
-						$wid $f2.$x$header -values $dist(distributionTypes) -textvariable newType
+						$wid $f2.$x$header -values $dist(distributionTypes) -textvariable txtVariable
 						
 						$f2.$x$header delete 0 end
 						$f2.$x$header configure -state readonly
 						
 						grid $f2.txt$i -column 0 -row $x -sticky news -pady 5p -padx 5p
 						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
+						
+						#$btnBar.ok configure -command "eAssistHelper::insValuesToTableCells [list $tbl] $txtVariable $origCells; destroy .di"
+						
 					}
 					carriermethod		{
 						ttk::label $f2.txt$i -text [mc "$header"]
-						$wid $f2.$x$header -values $carrierSetup(CarrierList) -textvariable newType
+						$wid $f2.$x$header -values $carrierSetup(CarrierList) -textvariable txtVariable
 						$f2.$x$header delete 0 end
 						$f2.$x$header configure -state readonly
 						
@@ -241,7 +244,7 @@ proc eAssistHelper::insertItems {cells} {
 					}
 					packagetype			{
 						ttk::label $f2.txt$i -text [mc "$header"]
-						$wid $f2.$x$header -values $packagingSetup(PackageType) -textvariable newType
+						$wid $f2.$x$header -values $packagingSetup(PackageType) -textvariable txtVariable
 						$f2.$x$header delete 0 end
 						$f2.$x$header configure -state readonly
 						
@@ -250,7 +253,7 @@ proc eAssistHelper::insertItems {cells} {
 					}
 					containertype		{
 						ttk::label $f2.txt$i -text [mc "$header"]
-						$wid $f2.$x$header -values $packagingSetup(ContainerType) -textvariable newType
+						$wid $f2.$x$header -values $packagingSetup(ContainerType) -textvariable txtVariable
 						$f2.$x$header delete 0 end
 						$f2.$x$header configure -state readonly
 						
@@ -262,13 +265,13 @@ proc eAssistHelper::insertItems {cells} {
 			} else {
 						ttk::label $f2.txt$i -text [mc "$header"]
 						# Create the widget specified in Setup for the column; typically will be ttk::entry
-						$wid $f2.$x$header -textvariable newType
+						$wid $f2.$x$header -textvariable txtVariable
 				
 						grid $f2.txt$i -column 0 -row $x -sticky news -pady 5p -padx 5p
 						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
-						${log}::debug I shouldn't be here
 			}
 		}
+	
 	} else {
 		ttk::label $f2.txt1 -text [mc "Please select cells in one column only"]
 		grid $f2.txt1 -column 0 -row 0 -sticky news -pady 5p -padx 5p
@@ -276,11 +279,22 @@ proc eAssistHelper::insertItems {cells} {
 		grid forget $f1
 		$btnBar.ok configure -command {destroy .di}
 	}
-
 	
+	# Create the buttons here, but we'll [grid] it at the bottom of this proc.
+	#${log}::debug newType: $newType
+	ttk::button $btnBar.ok		-text [mc "OK"] -command "[list eAssistHelper::insValuesToTableCells $tbl "" $origCells]; destroy .di" ;#"eAssistHelper::insValuesToTableCells [list $tbl] $txtVariable $origCells; destroy .di"
+	#ttk::button $btnBar.ok		-text [mc "OK"] -command {${log}::debug [uplevel 1]}
+	#ttk::button $btnBar.ok		-text [mc "OK"] -command [list puts "tbl: $tbl, newType: [$f2.$x$header get], origCells: $origCells"]
+	ttk::button $btnBar.cancel	-text [mc "Cancel"] -command {destroy .di}
+
 	# Look above for the initiation of the btnBar
 	grid $btnBar.ok -column 0 -row 0 -sticky news -pady 5p -padx 5p
 	grid $btnBar.cancel -column 1 -row 0 -sticky news -pady 5p -pady 5p
+
+	#bind $f2.$x$header <<ComboboxSelected>> {
+	#	set newType txtVariable
+	#	eval $btnBar.ok configure -command "eAssistHelper::insValuesToTableCells [list $tbl] $txtVariable $origCells; destroy .di"
+	#}
 
 	
 	

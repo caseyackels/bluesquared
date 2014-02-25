@@ -132,7 +132,7 @@ proc importFiles::processFile {tab} {
     #   IFMenus::tblPopup
     #
     #***
-    global log files headerAddress position process headerParams headerParent dist w
+    global log files headerAddress position process headerParams headerParent dist w job
     ${log}::debug --START-- [info level 1]
     
     # Enable the tab before processing the file
@@ -158,14 +158,6 @@ proc importFiles::processFile {tab} {
         
         set itemColor [$files(tab1f2).listbox itemcget $itemPosition -foreground]
         
-        #if {[string compare $itemColor "lightgrey"] != 0} {
-        #    ${log}::debug Inserting $listItem
-        #    if {[lsearch -nocase $headerParent(whiteList) $listItem] == -1} {
-        #        $files(tab3f1a).lbox1 insert end $listItem
-        #
-        #        ${log}::debug Remaining Available Headers : $listItem
-        #    }
-        #}
     }
     
     # Create the columns in the Table, using parameters assigned to each 'column type', from Setup. Located in the headerParams array.
@@ -279,7 +271,11 @@ proc importFiles::processFile {tab} {
     set process(origVersionList) $process(versionList)
     
     # Initialize popup menus
-    IFMenus::tblPopup extended
+    IFMenus::tblPopup $files(tab3f2).tbl extended .tblMenu
+    IFMenus::createToggleMenu $files(tab3f2).tbl
+    
+    # Get total copies
+    set job(TotalCopies) [eAssistHelper::calcSamples $files(tab3f2).tbl [$files(tab3f2).tbl columncget Quantity -name]]
     
     ${log}::debug --END-- [info level 1]
 } ;# importFiles::processFile
@@ -313,23 +309,49 @@ proc importFiles::startCmd {tbl row col text} {
     global log dist carrierSetup job process packagingSetup
     ${log}::debug --START-- [info level 1]
     set w [$tbl editwinpath]
-
-        switch -glob [string tolower [$tbl columncget $col -name]] {
+    
+    # Ensure that the cell we are in, conforms to the character limitations
+    #foreach header headerParent(headerList) {
+    #    if {[string match $header $col] == 0} {
+    #        if {[string length $text] > [lindex $headerParams($ColName) 0]} {
+    #            ${log}::debug length [string length $text]
+    #            
+    #            set bgColor [lindex $headerParams($ColName) 3]
+    #            if {$bgColor != ""} {
+    #                set backGround $bgColor
+    #            } else {
+    #                set backGround yellow
+    #            }
+    #        } else {
+    #            set backGround SystemWindow
+    #        }
+    #        
+    #        $files(tab3f2).tbl cellconfigure $row,$col -background $backGround
+    #    }
+    #}
+    set colName [$tbl columncget $col -name]
+    
+    switch -nocase $colName {
             "distributiontype"  {
-                                #${log}::debug Enter the Distribution Types
-                                #${log}::debug Dists: $dist(distributionTypes)
-                                #$w configure -editable yes -editwindow ttk::entry
                                 $w configure -values $dist(distributionTypes) -state readonly
             }
-            *vers*              {
-                                # process(versionList) is created in [importFiles::processFile]
+            version              {
                                 $w configure -values $process(versionList)
+                                set process(startTblText) $text
+                                ${log}::debug StartCmd: $process(startTblText)
             }
             "carriermethod"     {
                                 $w configure -values $carrierSetup(CarrierList) -state readonly
             }
             "quantity"          {
-                                set job(TotalCopies) [eAssistHelper::calcSamples $col $tbl]
+                                    if {![string is integer $text]} {
+                                            bell
+                                            tk_messageBox -title "Error" -icon error -message \
+                                                [mc "Only numbers are allowed"]
+                                        $tbl rejectinput
+                                        return
+                                    }
+                                set job(TotalCopies) [eAssistHelper::calcSamples $tbl $col]
             }
             "containertype"     {
                                 $w configure -values $packagingSetup(ContainerType) -state readonly
@@ -342,8 +364,29 @@ proc importFiles::startCmd {tbl row col text} {
             }
         }
         
+        $tbl cellconfigure $row,$col -text $text
+
+    set idx [lsearch -nocase [array names headerParams] $colName]
+
+    if {$idx != -1} {
+        if {[string length $text] > [lindex $headerParams($colName) 0]} {
+            ${log}::debug length [string length $text]
+                
+            set bgColor [lindex $headerParams($colName) 3]
+            if {$bgColor != ""} {
+                set backGround $bgColor
+            } else {
+                set backGround yellow
+            }
+        } else {
+            set backGround SystemWindow
+        }
+    # Update the internal list with the current text so that we can run calculations on it.
+    $tbl cellconfigure $row,$col -background $backGround
+    }
+
         
-        return $text
+    return $text
     
     ${log}::debug --END-- [info level 1]
 } ;#importFiles::startCmd
@@ -377,34 +420,46 @@ proc importFiles::endCmd {tbl row col text} {
     global log headerParams headerParent files process
     ${log}::debug --START-- [info level 1]
     
-    set ColName [$tbl columncget $col -name]
+    set colName [$tbl columncget $col -name]
     
-    foreach header headerParent(headerList) {
-        if {[string match $header $col] == 0} {
-            if {[string length $text] > [lindex $headerParams($ColName) 0]} {
-                ${log}::debug length [string length $text]
-                set bgColor [lindex $headerParams($ColName) 3]
-                if {$bgColor != ""} {
-                    set backGround $bgColor
-                } else {
-                    set backGround yellow
-                }
-            } else {
-                set backGround SystemWindow
-            }
-            $files(tab3f2).tbl cellconfigure $row,$col -background $backGround
-        }
-    }
-    
-    switch -glob [string tolower [$tbl columncget $col -name]] {
-        *vers*  {# Add $text to list of versions if that version doesn't exist (i.e. user created a new version)
-                    if {[lsearch $process(versionList) $text] == -1} {
-                        lappend process(versionList) $text
+    switch -nocase $colName {
+        version  {# Add $text to list of versions if that version doesn't exist (i.e. user created a new version)
+                    if {$text == ""} {
+                        set newItem [lsearch $process(versionList) $process(startTblText)]
+                        set process(versionList) [lreplace $process(versionList) $newItem $newItem]
+                        ${log}::debug Text is: $text
+                        ${log}::debug $process(startTblText) should be removed from the list: $process(versionList)
                     }
-                    ${log}::debug TEXT: $text
+                    
+                    if {[lsearch $process(versionList) $text] == -1} {
+                        #${log}::debug Old Version List: $process(versionList)
+                        set newItem [lsearch $process(versionList) $process(startTblText)]
+                        set process(versionList) [lreplace $process(versionList) $newItem $newItem $text]
+                        #${log}::debug New Version List: $process(versionList)
+                    }
                 }
     }
     
+    $tbl cellconfigure $row,$col -text $text
+    set idx [lsearch -nocase [array names headerParams] $colName]
+    
+    if {$idx != -1} {
+        if {[string length $text] > [lindex $headerParams($colName) 0]} {
+            ${log}::debug length [string length $text]
+                
+            set bgColor [lindex $headerParams($colName) 3]
+            if {$bgColor != ""} {
+                set backGround $bgColor
+            } else {
+                set backGround yellow
+            }
+        } else {
+            set backGround SystemWindow
+        }
+    # Update the internal list with the current text so that we can run calculations on it.
+    $tbl cellconfigure $row,$col -background $backGround
+    }
+
     
 	return $text
     ${log}::debug --END-- [info level 1]

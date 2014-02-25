@@ -293,7 +293,7 @@ proc eAssistHelper::resetImportInterface {} {
 } ;# eAssistHelper::resetImportInterface
 
 
-proc eAssistHelper::insValuesToTableCells {args} {
+proc eAssistHelper::insValuesToTableCells {tbl txtVar cells} {
     #****f* insValuesToTableCells/eAssistHelper
     # AUTHOR
     #	Casey Ackels
@@ -305,34 +305,31 @@ proc eAssistHelper::insValuesToTableCells {args} {
     #	Insert values set through the GUI into selected cells
     #
     # SYNOPSIS
-    #	$args = textvar with new data, and cell locations
+    #	eAssistHelper::insValuesToTableCells <tbl> <txtVar> <cell>
     #
     # CHILDREN
     #	N/A
     #
     # PARENTS
-    #	eAssistHelper::insertItems
+    #	eAssistHelper::insertItems, IFMenus::tblPopup
     #
     # NOTES
     #
     # SEE ALSO
     #
     #***
-    global log files
-    ${log}::debug --START-- [info level 1]
-    
-	set newType [join [lrange $args 0 0]]
-	set cellLocations [join [lrange $args 1 end]]
+    global log files txtVariable w
 	
-	${log}::debug Inserting ...
+	if {$txtVar == ""} {
+			set txtVar $txtVariable
+	}
 	
-	foreach val $cellLocations {
-		${log}::debug Inserting $newType into $val
-		$files(tab3f2).tbl cellconfigure $val -text $newType
+	foreach val $cells {
+		${log}::debug Inserting $txtVar into $tbl - $val
+		$tbl cellconfigure $val -text $txtVar
 	}
 
 	
-    ${log}::debug --END-- [info level 1]
 } ;# eAssistHelper::insValuesToTableCells
 
 

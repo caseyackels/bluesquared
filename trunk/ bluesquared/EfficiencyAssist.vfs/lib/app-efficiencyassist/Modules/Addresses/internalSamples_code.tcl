@@ -48,11 +48,21 @@ proc eAssistHelper::editStartSmpl {tbl row col text} {
     # SEE ALSO
     #
     #***
-    global log
+    global log csmpls
     ${log}::debug --START-- [info level 1]
 
-	eAssistHelper::detectColumn $tbl $col
-
+	# This table only contains columns which require integers only. So, we can make this a global requirement.
+	
+	if {![string is integer $text]} {
+		bell
+		tk_messageBox -title "Error" -icon error -message \
+									[mc "Only numbers are allowed"]
+		$tbl rejectinput
+		return
+	}
+	
+	eAssistHelper::detectColumn $tbl $row $col $text
+   
     return $text
 
     ${log}::debug --END-- [info level 1]
@@ -84,10 +94,20 @@ proc eAssistHelper::editEndSmpl {tbl row col text} {
     # SEE ALSO
     #
     #***
-    global log
+    global log csmpls
     ${log}::debug --START-- [info level 1]
-
-	eAssistHelper::detectColumn $tbl $col 
+	# This table only contains columns which require integers only. So, we can make this a global requirement.
+	
+	if {![string is integer $text]} {
+		bell
+		tk_messageBox -title "Error" -icon error -message \
+									[mc "Only numbers are allowed"]
+		$tbl rejectinput
+		return
+	}
+	
+	
+	eAssistHelper::detectColumn $tbl $row $col $text
     
     return $text
 
@@ -95,7 +115,7 @@ proc eAssistHelper::editEndSmpl {tbl row col text} {
 } ;# eAssistHelper::editEndSmpl
 
 
-proc eAssistHelper::detectColumn {tbl col} {
+proc eAssistHelper::detectColumn {tbl row {col 0} {text 0}} {
     #****f* detectColumn/eAssistHelper
     # AUTHOR
     #	Casey Ackels
@@ -107,6 +127,7 @@ proc eAssistHelper::detectColumn {tbl col} {
     #	Figure out which column are are in, and [switch] accordingly
     #
     # SYNOPSIS
+	# 	eAssistHelper::detectColumn <tbl> <row> ?column? ?text?
     #
     #
     # CHILDREN
@@ -122,12 +143,17 @@ proc eAssistHelper::detectColumn {tbl col} {
     #***
     global log csmpls
     ${log}::debug --START-- [info level 1]
-    
+	
+	# Update the internal list with the current text so that we can run calculations on it.
+	if {$row != ""} {
+		$tbl cellconfigure $row,$col -text $text
+	}
+
 	switch -glob [string tolower [$tbl columncget $col -name]] {
-            "ticket"		{ set csmpls(TicketTotal)	[eAssistHelper::calcSamples [$tbl columnindex Ticket] $tbl] }
-            "csr"			{ set csmpls(CSRTotal)		[eAssistHelper::calcSamples [$tbl columnindex CSR] $tbl] }
-            "sampleroom"	{ set csmpls(SmplRoomTotal) [eAssistHelper::calcSamples [$tbl columnindex SampleRoom] $tbl] }
-			"sales"			{ set csmpls(SalesTotal)	[eAssistHelper::calcSamples [$tbl columnindex Sales] $tbl]}
+            "ticket"		{ set csmpls(TicketTotal)	[eAssistHelper::calcSamples $tbl $col] }
+            "csr"			{ set csmpls(CSRTotal)		[eAssistHelper::calcSamples $tbl $col] }
+            "sampleroom"	{ set csmpls(SmplRoomTotal) [eAssistHelper::calcSamples $tbl $col] }
+			"sales"			{ set csmpls(SalesTotal)	[eAssistHelper::calcSamples $tbl $col] }
 			default			{ ${log}::notice -[info level 1]- Column -[$tbl columncget $col -name]- not found! }
     }
 	
@@ -135,7 +161,7 @@ proc eAssistHelper::detectColumn {tbl col} {
 } ;# eAssistHelper::detectColumn
 
 
-proc eAssistHelper::calcSamples {columnIndex winpath} {
+proc eAssistHelper::calcSamples {tbl col} {
     #****f* calcSamples/eAssistHelper
     # AUTHOR
     #	Casey Ackels
@@ -147,7 +173,7 @@ proc eAssistHelper::calcSamples {columnIndex winpath} {
     #	Calculate the sample totals
     #
     # SYNOPSIS
-    #
+    #	eAssistHelper::calcSamples <tbl> <col>
     #
     # CHILDREN
     #	N/A
@@ -163,7 +189,7 @@ proc eAssistHelper::calcSamples {columnIndex winpath} {
     global log
     ${log}::debug --START -- [info level 1]
 
-	set myList [string map [list \{\} 0] [$winpath getcolumn $columnIndex]]
+	set myList [string map [list \{\} 0] [$tbl getcolumn $col]]
 	set returnCount [expr [join $myList +]]
 	
 
@@ -198,7 +224,7 @@ proc eAssistHelper::quickAddSmpls {win entryTxt} {
     # SEE ALSO
     #
     #***
-    global log csmpls
+    global log csmpls w
     ${log}::debug --START-- [info level 1]
     
 	for {set x 0} {[$win columncount] > $x} {incr x} {
@@ -209,20 +235,23 @@ proc eAssistHelper::quickAddSmpls {win entryTxt} {
 			if {[string match $value $currentColumn] == 1} {
 				if {$csmpls($value) == 1} {
 					$win fillcolumn $x $entryTxt
-					eAssistHelper::detectColumn $win $x
-					#set csmpls($value) [eAssistHelper::calcSamples $x $win]
+					eAssistHelper::detectColumn $win "" $x
+					# Reset the checkbutton
+					set csmpls($value) 0
+
 				}
 			}
 		}
-		
-		
 	}
+	
+	# Clear the entry widget
+	$w(csmpls.f2).addEntry delete 0 end
 
     ${log}::debug --END-- [info level 1]
 } ;# eAssistHelper::quickAddSmpls
 
 
-proc eAssistHelper::saveCSMPLS {} {
+proc eAssistHelper::saveCSMPLS {tblFrom tblTo} {
     #****f* saveCSMPLS/eAssistHelper
     # AUTHOR
     #	Casey Ackels
@@ -234,7 +263,7 @@ proc eAssistHelper::saveCSMPLS {} {
     #	Process the allocated samples.
     #
     # SYNOPSIS
-    #
+    #	eAssistHelper::saveCSMPLS <tbl>
     #
     # CHILDREN
     #	N/A
@@ -249,89 +278,48 @@ proc eAssistHelper::saveCSMPLS {} {
     #***
     global log csmpls w process files company
     ${log}::debug --START-- [info level 1]
-    
-    set ColumnCount [$w(csmpls.f1).tbl columncount]
-    set RowCount [llength [$w(csmpls.f1).tbl getcells 0,0 end,0]]
+	
+	set columnCount [$tblTo columncount]
+	set rowCount [$tblFrom size]
+	
+	for {set x 0} {$rowCount > $x} {incr x} {
+		set vers [lindex $process(versionList) $x]
+		# add up all listed quantities
+		set tmpList [string map [list \{\} 0] [lrange [$tblFrom get $x] 2 end]]
+		set returnCount [expr [join $tmpList +]]
+		
+		# Reset for each row
+		if {[info exists insertCompany]} {unset insertCompany}
+		
+		for {set i 0} {$columnCount > $i} {incr i} {
+			set col [string tolower [$files(tab3f2).tbl columncget $i -name]]
+			${log}::debug Column: $col
+			#puts [lsearch [array names company] $col]
 
-    # Rows
-	for {set x 0} {$RowCount > $x} {incr x} {
-        set vers [lindex $process(versionList) $x]
-		# Columns
-		for {set y 0} {$ColumnCount > $y} {incr y} {
-			set ColumnName [$w(csmpls.f1).tbl columncget $y -name]
-            
-            switch -nocase $ColumnName {
-                ticket          { eAssistHelper::insertSmpls $vers [$w(csmpls.f1).tbl getcells $x,$y] }
-                sales           { eAssistHelper::insertSmpls $vers [$w(csmpls.f1).tbl getcells $x,$y] }
-                sampleroom      { eAssistHelper::insertSmpls $vers [$w(csmpls.f1).tbl getcells $x,$y] }
-                csr             { eAssistHelper::insertSmpls $vers [$w(csmpls.f1).tbl getcells $x,$y] }
-                default         {}
-            }
-        }
-    }
-    
+			set companyIndex [lsearch [array names company] $col]
+			if {$companyIndex ne -1} {
+				lappend insertCompany $company([lindex [array names company] $companyIndex])
+			
+			} else {
+				switch -nocase $col {
+					version				{lappend insertCompany $vers}
+					quantity			{lappend insertCompany $returnCount}
+					distributiontype	{lappend insertCompany $csmpls(distributionType)}
+					packagetype			{lappend insertCompany $csmpls(packageType)}
+					default				{lappend insertCompany ""}
+				}
+			}
+		}
+		
+
+		# .. finally, we'll insert the compiled data
+		if {$returnCount != 0} {
+			# If we received any counts, other than 0, lets insert a row for it.
+			${log}::debug INSERT: $tblTo $insertCompany
+			$tblTo insert end $insertCompany
+			#puts "tblTo $insertCompany"
+		}
+	}  
 	
     ${log}::debug --END-- [info level 1]
 } ;# eAssistHelper::saveCSMPLS
-
-
-proc eAssistHelper::insertSmpls {vers args} {
-    #****f* insertSmpls/eAssistHelper
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2011-2013 Casey Ackels
-    #
-    # FUNCTION
-    #	Insert samples into the main table.
-    #   args = qty of samples (ticket, sales, sampleroom, csr)
-    #
-    # SYNOPSIS
-    #
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #	
-    #
-    # NOTES
-    #
-    # SEE ALSO
-    #
-    #***
-    global log company files process
-    ${log}::debug --START-- [info level 1]
-	
-	#${log}::debug Vers: $vers, Args: $args
-	#return
-    
-    set args [join $args]
-    if {$args == ""} {return}
-    
-    set companyAddr [array names company]
-    set ColumnCount [$files(tab3f2).tbl columncount]
-    set RowCount [llength [$files(tab3f2).tbl getcells 0,0 end,0]]
-
-	# Columns
-	for {set y 0} {$ColumnCount > $y} {incr y} {
-		set ColumnName [$files(tab3f2).tbl columncget $y -name]
-		set columnExists [lsearch -nocase $companyAddr $ColumnName]
-		if {$columnExists != -1} {
-			#${log}::debug Inserting into existing destination column: $ColumnName
-			lappend insertCompany [string toupper $company([lindex $companyAddr $columnExists])]
-		} else {
-			switch -nocase $ColumnName {
-				version     {${log}::debug Inserting into column: $ColumnName - Vers: $vers; lappend insertCompany $vers}
-				quantity    {${log}::debug Inserting into column: $ColumnName - Vers: $args; lappend insertCompany $args}
-				default     {lappend insertCompany ""}
-			}
-		}
-	}
-    ${log}::debug INSERTING COMPANY $insertCompany
-    #$files(tab3f2).tbl insert end $insertCompany
-
-
-    ${log}::debug --END-- [info level 1]
-} ;# eAssistHelper::insertSmpls
