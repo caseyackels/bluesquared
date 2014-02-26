@@ -428,6 +428,7 @@ proc importFiles::eAssistGUI {} {
     }
     # Begin labelTag
     bind $labelTag <Button-3> +[list tk_popup .tblToggleColumns %X %Y]
+    #bind $labelTag <Enter> {tooltip::tooltip $labelTag testing}
 
 
     #----- GRID

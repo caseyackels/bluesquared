@@ -191,12 +191,26 @@ proc importFiles::processFile {tab} {
     set ColumnCount [$files(tab3f2).tbl columncount]
     # Index (i.e. 01, from 01_HeaderName)
     set FileHeaders [lsort [array names position]]
-        
+    
     foreach record $process(dataList) {
         # .. Skip over any 'blank' lines in Excel
         if {[string is punc $record] == 1} {continue}
-
-        set l_line [csv::split $record]
+            
+        ## Ensure we have good data; if we don't, lets try to fix it
+        if {[csv::iscomplete $record] == 0} {
+                lappend badString $record
+                ${log}::notice Bad Record - Found on line [lsearch $process(dataList) $record] - $record
+                # Stop looping and go to the next record
+                continue
+        } else {
+            if {[info exists badString]} {
+                set l_line [csv::split [join $badString]]
+                unset badString
+            } else {
+                set l_line [csv::split $record]
+            }
+        }
+        
         set l_line [join [split $l_line ,] ""] ;# remove all comma's
         #l_line = entire row of records
         # [lindex $l_line $index] = Individual record
@@ -219,7 +233,6 @@ proc importFiles::processFile {tab} {
                 if {$index == ""} {
                     # If we dont have an index for it, then lets hide the column aswell.
                     # This will not hide columns that have no data in it, just columns that were not in the original file.
-                    #if {[lsearch $headerList(masterHeader)}
                     $files(tab3f2).tbl columnconfigure $x -hide yes
                     
                     lappend newRow ""
