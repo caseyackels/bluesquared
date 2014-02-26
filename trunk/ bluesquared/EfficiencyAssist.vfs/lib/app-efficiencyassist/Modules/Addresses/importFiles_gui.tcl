@@ -424,25 +424,11 @@ proc importFiles::eAssistGUI {} {
     #bind $bodyTag <<Button3>> +[list tk_popup .tblMenu %X %Y]
     
     # Toggle between selecting a row, or a single cell
-    bind $bodyTag <Control-e> {
-        if {[$files(tab3f2).tbl cget -selectmode] eq "extended"} {
-            $files(tab3f2).tbl configure -selectmode browse
-            $files(tab3f2).tbl configure -selecttype row
-            IFMenus::tblPopup browse
-            ${log}::debug Switching to Browse Mode
-        
-        } else {
-            $files(tab3f2).tbl configure -selectmode extended
-            $files(tab3f2).tbl configure -selecttype cell
-            IFMenus::tblPopup extended
-            ${log}::debug Switching to Extended Mode
-        }
+    bind $bodyTag <Double-1> {
     }
     # Begin labelTag
     bind $labelTag <Button-3> +[list tk_popup .tblToggleColumns %X %Y]
-    
-    # Begin editWinTag
-    bind $editWinTag <Return> "[bind TablelistEdit <Down>]; break"
+
 
     #----- GRID
     grid $files(tab3f2).tbl -column 0 -row 0 -sticky news -padx 5p -pady 5p

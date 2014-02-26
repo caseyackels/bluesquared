@@ -141,7 +141,7 @@ proc importFiles::processFile {tab} {
     
     # Whitelist for required columns, so that they won't be hidden.
     # this should be user configurable
-    set headerParent(whiteList) [list DistributionType CarrierMethod]
+    set headerParent(whiteList) [list count DistributionType CarrierMethod]
     
     # Get the length of the Distribution Types
     if {[info exists newList]} {unset newList}
@@ -160,8 +160,9 @@ proc importFiles::processFile {tab} {
         
     }
     
+    
     # Create the columns in the Table, using parameters assigned to each 'column type', from Setup. Located in the headerParams array.
-    set x -1
+    set x -1; #was -1
     foreach hdr $headerParent(headerList) {
         incr x
         $files(tab3f2).tbl insertcolumns end 0 $hdr
@@ -192,6 +193,7 @@ proc importFiles::processFile {tab} {
     set FileHeaders [lsort [array names position]]
         
     foreach record $process(dataList) {
+        # .. Skip over any 'blank' lines in Excel
         if {[string is punc $record] == 1} {continue}
 
         set l_line [csv::split $record]
@@ -271,11 +273,15 @@ proc importFiles::processFile {tab} {
     set process(origVersionList) $process(versionList)
     
     # Initialize popup menus
-    IFMenus::tblPopup $files(tab3f2).tbl extended .tblMenu
+    IFMenus::tblPopup $files(tab3f2).tbl browse .tblMenu
     IFMenus::createToggleMenu $files(tab3f2).tbl
     
     # Get total copies
     set job(TotalCopies) [eAssistHelper::calcSamples $files(tab3f2).tbl [$files(tab3f2).tbl columncget Quantity -name]]
+    
+    # Insert columns that we should always see
+    $files(tab3f2).tbl insertcolumns 0 0 "..."
+    $files(tab3f2).tbl columnconfigure 0 -name "count" -showlinenumbers 1 -labelalign center
     
     ${log}::debug --END-- [info level 1]
 } ;# importFiles::processFile

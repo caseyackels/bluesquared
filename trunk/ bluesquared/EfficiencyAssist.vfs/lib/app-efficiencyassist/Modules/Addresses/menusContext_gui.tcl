@@ -84,7 +84,7 @@ proc IFMenus::tblPopup {tbl mode mName} {
 	# Paste [clipboard get]
     if {$mName eq ".splitTblMenu"} {
         # w(sVersf2).tbl / Split Table
-        if {$mode eq "extended"} {
+        if {$mode eq "browse"} {
             $mName add command -label [mc "Quick Fill..."] -command {eAssistHelper::insertItems $w(sVersf2).tbl}
             $mName add command -label [mc "Copy"] -command {IFMenus::copyCell $w(sVersf2).tbl}
             $mName add command -label [mc "Paste"] -command {eAssistHelper::insValuesToTableCells $w(sVersf2).tbl [clipboard get] [$w(sVersf2).tbl curcellselection]}
@@ -104,7 +104,7 @@ proc IFMenus::tblPopup {tbl mode mName} {
         }
     } else {
         # files(tab3f2).tbl / Main Table
-        if {$mode eq "extended"} {
+        if {$mode eq "browse"} {
             $mName add command -label [mc "Quick Fill..."] -command {eAssistHelper::insertItems $files(tab3f2).tbl}
             $mName add command -label [mc "Copy"] -command {IFMenus::copyCell $files(tab3f2).tbl}
             $mName add command -label [mc "Paste"] -command {eAssistHelper::insValuesToTableCells $files(tab3f2).tbl [clipboard get] [$files(tab3f2).tbl curcellselection]}
