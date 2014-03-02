@@ -1,11 +1,9 @@
-#**** Program Specific ****#
-program(currentModule) Setup
 program(Version) 4
 program(PatchLevel) 0.0
 program(beta) Alpha
 GS_filePathSetup(checkToggle) 0
-GS_filePathSetup(labelDirectory) 
 GS_filePathSetup(lookInDirectory) C:/Users/Casey.Ackels/Downloads
+GS_filePathSetup(labelDirectory) 
 GS_filePathSetup(enable,Bartender) 1
 GS_filePathSetup(saveInDirectory) C:/Users/Casey.Ackels/Desktop
 GS(gui,lastFrame) customerService_GUI
@@ -26,67 +24,81 @@ logSettings(currentLogLevel) Debug
 logSettings(displayConsole) 1
 logSettings(loglevel) debug
 logSettings(levels) Debug Info Notice Warn Error Critical Alert Emergency
-boxLabelInfo(labelNames) 4Line
 boxLabelInfo(currentBoxLabel) 4Line
+boxLabelInfo(labelNames) 4Line
 boxLabelInfo(4Line,labelSetup) 5 C:/Users/Casey.Ackels/Downloads
-intlSetup(enterTerms) 
-intlSetup(enterLicense) 
-intlSetup(UOMList) Each Box
 intlSetup(PAYERList) SENDER THIRDPARTY
-intlSetup(enterPayer) 
-intlSetup(enterUOM) 
-intlSetup(TERMSList) DDP
+intlSetup(UOMList) Each Box
+intlSetup(enterLicense) 
+intlSetup(enterTerms) 
 intlSetup(LICENSEList) NLR
-headerParent(whiteList) DistributionType CarrierMethod
-headerParent(headerList) Company Attention Address1 Address2 Address3 City State Zip Country Phone Version Quantity Notes ShipDate DistributionType CarrierMethod 3rdPartyBilling ArriveDate
-headerParent(outPutHeader) ShipToCompany ShipToAttention ShipToAddressLine1 ShipToAddressLine2 ShipToAddressLine3 ShipToCity ShipToState ShipToPostalCode ShipToCountry ShipToPhone Version ShipQuantity UserNotes ShipToDate DistributionType CarrierMethod 3rdPartyBilling ArriveDate {} {}
+intlSetup(TERMSList) DDP
+intlSetup(enterUOM) 
+intlSetup(enterPayer) 
+headerParent(headerList) Company Attention Address1 Address2 Address3 City State Zip Country Phone Version Quantity Notes ShipDate DistributionType CarrierMethod 3rdPartyBilling ArriveDate ContainerType PackageType PackageQty ShippingClass
+headerParent(whiteList) count DistributionType CarrierMethod
+headerParent(outPutHeader) ShipToCompany ShipToAttention ShipToAddressLine1 ShipToAddressLine2 ShipToAddressLine3 ShipToCity ShipToState ShipToPostalCode ShipToCountry ShipToPhone Version ShipQuantity UserNotes ShipToDate DistributionType CarrierMethod 3rdPartyBilling ArriveDate ContainerType PackageType PackageQty ShippingClass
+headerAddress(ShippingClass) shippingclass
 headerAddress(Address2) addr2 add2 addressline2 {address line 2}
 headerAddress(State) state st st. province state/province
 headerAddress(Address3) add3 addr3 addressline3 {address line 3}
 headerAddress(City) city
+headerAddress(PackageQty) packageqty
 headerAddress(DistributionType) distributiontype {dist type}
 headerAddress(ShipDate) {ship date} ship shipdate
+headerAddress(PackageType) packagetype
 headerAddress(Attention) Atten attn attention contact {contact name} name
 headerAddress(ShipTo) {Ship To}
 headerAddress(CarrierMethod) carrier carriermethod
 headerAddress(Notes) {user notes} notes
-headerAddress(3rdPartyBilling) 3rdpartybilling
 headerAddress(Phone) phone ph
+headerAddress(3rdPartyBilling) 3rdpartybilling
 headerAddress(Zip) zip {postal code}
 headerAddress(Country) country
+headerAddress(ContainerType) containertype
 headerAddress(Version) version vers
-headerAddress(Address1) add1 addr {Address Line 1} addressline1 Address addr1
-headerAddress(Company) destination company {company name}
-headerAddress(Quantity) qty copies quantity
 headerAddress(ArriveDate) arrivedate
+headerAddress(Quantity) qty copies quantity
+headerAddress(Company) destination company {company name}
+headerAddress(Address1) add1 addr {Address Line 1} addressline1 Address addr1
+headerParams(ShippingClass) 20 ShippingClass ttk::combobox {}
 headerParams(Address2) 32 ShipToAddressLine2 ttk::entry {}
 headerParams(Address3) 32 ShipToAddressLine3 ttk::entry {}
 headerParams(City) 24 ShipToCity ttk::entry {}
 headerParams(State) 2 ShipToState ttk::entry {}
+headerParams(PackageQty) 10 PackageQty ttk::entry {}
 headerParams(DistributionType) 32 DistributionType ttk::combobox {}
 headerParams(ShipDate) 10 ShipToDate ttk::entry {}
+headerParams(PackageType) 32 PackageType ttk::combobox {}
 headerParams(Attention) 24 ShipToAttention ttk::entry {}
 headerParams(CarrierMethod) 32 CarrierMethod ttk::combobox {}
 headerParams(Notes) 200 UserNotes ttk::entry {}
-headerParams(3rdPartyBilling) 20 3rdPartyBilling ttk::entry {}
 headerParams(Phone) 20 ShipToPhone ttk::entry {}
+headerParams(3rdPartyBilling) 20 3rdPartyBilling ttk::entry {}
 headerParams(Zip) 10 ShipToPostalCode ttk::entry {}
 headerParams(Country) 24 ShipToCountry ttk::entry {}
+headerParams(ContainerType) 32 ContainerType ttk::combobox {}
 headerParams(Version) 30 Version ttk::combobox {}
-headerParams(ArriveDate) 10 ArriveDate ttk::entry {}
-headerParams(Address1) 32 ShipToAddressLine1 ttk::entry {}
-headerParams(Quantity) 22 ShipQuantity ttk::entry {}
 headerParams(Company) 32 ShipToCompany ttk::entry red
+headerParams(Quantity) 22 ShipQuantity ttk::entry {}
+headerParams(Address1) 32 ShipToAddressLine1 ttk::entry {}
+headerParams(ArriveDate) 10 ArriveDate ttk::entry {}
 dist(distributionTypes) {01. Customer Samples} {02. Internal Samples} {03. Customer Copies} {04. Freight} {05. Small Package} {06. JG Mail} {07. UPS Import} {08. JG Inventory} {09. USPS Import} {10. Overs} {11. Buy-Out Bindery} {12. Buy-Out Press} {13. FedEx Import}
 setup(smallPackageCarrierName) UPS FedEX UPS-NRI
 setup(smallPackageCarriers) {UPS 947919 {}} {FedEX 5555555 {}} {UPS-NRI 5656566 {}}
-carrierSetup(enterShipmentType) 
-carrierSetup(enterRateType) 
-carrierSetup(PaymentType) Prepaid {Third Party}
+carrierSetup(ShippingClass) {Final Product}
 carrierSetup(CarrierList) Peninsula UPS {Oak Harbor}
-carrierSetup(enterPaymentType) 
-carrierSetup(enterCarrier) 
-carrierSetup(PAYMENT) 
-carrierSetup(ShipmentType) {Small Package} {Truck Load}
+carrierSetup(PaymentType) Prepaid {Third Party}
+carrierSetup(enterRateType) 
+carrierSetup(enterShipmentType) 
+carrierSetup(enterShippingClass) 
 carrierSetup(RateType) Pallet Volume
-CSR(Names) Meredith Lyn Mary Cyndi {Dan H} {Pam F} Tom Darlene Linda
+carrierSetup(ShipmentType) {Small Package} {Truck Load}
+carrierSetup(PAYMENT) Prepaid {Third Party}
+carrierSetup(enterCarrier) 
+carrierSetup(enterPaymentType) 
+packagingSetup(enterPackageType) 
+packagingSetup(ContainerType) Skid {Mail Skid}
+packagingSetup(PackageType) {Carton, 9inch} {Carton, 6inch}
+packagingSetup(enterContainerType) 
+CSR(Names) Meredith Mary Cyndi {Dan H} Lyn Darlene Linda {Pam F} Tom
