@@ -133,6 +133,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	source [file join [file dirname [info script]] Libraries global_helpers.tcl]
     source [file join [file dirname [info script]] Libraries StreetSuffixState.tcl]
 	source [file join [file dirname [info script]] Libraries fileProperties.tcl]
+	source [file join [file dirname [info script]] Libraries saveSettings.tcl]
     
     loadSuffix ;# Initialize variables from StreetSuffixState.tcl
     
@@ -144,7 +145,8 @@ proc 'eAssist_sourceReqdFiles {} {
         eAssistSetup::toggleConsole $logSettings(displayConsole)
     }	
 
-}
+} ;# 'eAssist_sourceReqdFiles
+
 
 proc 'eAssist_bootStrap {} {
 	# enable packages that are required before the rest of the packages need to be loaded
@@ -163,10 +165,11 @@ proc 'eAssist_bootStrap {} {
 	package require logger::appender
 	package require logger::utils
 	
-}
+} ;#'eAssist_bootStrap
+
 
 proc 'eAssist_initVariables {} {
-    #****f* eAssist/Disthelper_Helper
+    #****f* 'eAssist_initVariables/global
     # AUTHOR
     #	Casey Ackels
     #
@@ -190,18 +193,15 @@ proc 'eAssist_initVariables {} {
     # SEE ALSO
     #
     #***
-    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter
+    global settings header mySettings settings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter logSettings
 
-	#-------- CORE SETTINGS   
-    # Create personal settings file %appdata%
-    if {[file isdirectory [file join $env(APPDATA) eAssistSettings]] == 0} {
-        file mkdir [file join $env(APPDATA) eAssistSettings]
-    }
-    
-    # Find out where we are in the system
-    set program(Home) [pwd]
-	set mySettings(Home) [file join $env(APPDATA) eAssistSettings]
+	#-------- CORE SETTINGS
+	if {$logSettings(displayConsole) == 1} {console show}
 	
+	## Defaults
+	#
+	
+	# Just in case we can't figure out where we last stopped
     if {![info exists program(lastFrame)]} {
         # Set default last frame for Setup
         set program(lastFrame) company_GUI
@@ -240,19 +240,19 @@ proc 'eAssist_initVariables {} {
 					  run,stripUDL 1 \
 					  run,abbrvAddrState 1]
 	
-    if {![info exists mySettings(outFilePath)]} {
+    if {![info exists settings(outFilePath)]} {
         # Location for saving the file
-        set mySettings(outFilePath) [file dirname $mySettings(Home)]
+        set mySettings(outFilePath) [file dirname $mySettings(Folder)]
     }
 
-    if {![info exists mySettings(outFilePathCopy)]} {
+    if {![info exists settings(outFilePathCopy)]} {
         # Location for saving a copy of the file (this should just be up one directory)
-        set mySettings(outFilePathCopy) [file dirname $mySettings(Home)]
+        set mySettings(outFilePathCopy) [file dirname $mySettings(Folder)]
     }
    
-    if {![info exists mySettings(sourceFiles)]} {
+    if {![info exists settings(sourceFiles)]} {
         # Default for finding the source import files
-        set mySettings(sourceFiles) [file dirname $mySettings(Home)]
+        set mySettings(sourceFiles) [file dirname $mySettings(Folder)]
     }
 
     if {![info exists settings(importOrder)]} {
@@ -394,7 +394,106 @@ proc 'eAssist_initVariables {} {
         set header(residential) [list ResidentialDelivery]
     }
     
-}
+} ;# 'eAssist_initVariables
+
+
+proc 'eAssist_checkPrefFile {} {
+    #****f* 'eAssist_checkPrefFile/global
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	Find out what permissions we have for the Preferences
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log mySettings program env
+    ${log}::debug --START-- [info level 1]
+    
+	set folderAccess ""
+
+	# Set file names
+	set mySettings(File) mySettings.txt
+	set mySettings(ConfigFile) config.txt
+    set program(Home) [pwd]
+	set mySettings(Folder) eAssistSettings
+	
+	## FOLDER
+	# Create or check personal settings folder %appdata%, to ensure that we can read/write to it
+	if {![file isdirectory [file join $env(APPDATA) $mySettings(Folder)]]} {
+			set folderAppDataAccess [eAssist_Global::folderAccessibility $env(APPDATA)]
+			${log}::notice -WARNING- [file join $env(APPDATA) $mySettings(Folder)] does not exist, checking to see if we can create
+			
+			if {$folderAppDataAccess == 3} {
+				file mkdir [file join $env(APPDATA) $mySettings(Folder)]
+				set mySettings(Home) [file join $env(APPDATA) $mySettings(Folder)]
+				${log}::notice -PASS- Creating $mySettings(Home) ...
+			
+			} else {
+				${log}::critical -FAIL- Folder Access Code: $folderAppDataAccess
+				${log}::critical -FAIL- Cannot create folder in $env(APPDATA), named $mySettings(Folder)
+				set state d0
+				return $state
+			}
+	
+	} else {
+		set folderAccess [eAssist_Global::folderAccessibility [file join $env(APPDATA) $mySettings(Folder)]]
+		
+		if {$folderAccess != 3} {
+			${log}::critical -FAIL- Folder Access Code: $folderAccess
+			${log}::critical -FAIL- Can't read/write to [file join $env(APPDATA) $mySettings(Folder)], this must be resolved to run $program(Name)
+			set state d0
+			return $state
+		}
+		
+		if {$folderAccess == 3} {
+			set mySettings(Home) [file join $env(APPDATA) $mySettings(Folder)]
+			${log}::notice -PASS- $mySettings(Home) exists and has correct permissions ...
+		}
+	}
+	
+
+	
+	## FILE
+	# Create personal settings file mySettings.txt
+	if {![file exists [file join $mySettings(Home) $mySettings(File)]]} {
+		# File doesn't exist, check to see if we can read/write to it
+		if {$folderAccess == 3} {
+			${log}::notice -WARNING- $mySettings(File) doesn't exist, defaults will be loaded.
+			set state f1
+		}
+
+	} else {
+		# file exists, but we can't read/write to it.
+		if {[eAssist_Global::fileAccessibility $mySettings(Home) $mySettings(File)] != 3} {
+			${log}::critical -FAIL- We can't read/write to $mySettings(File), this must be resolved to run $program(Name)
+			set state f0
+			return $state
+		}
+		
+		# File seems to be ok
+		${log}::notice -PASS- $mySettings(File) exists and has correct permissions ...
+		set state f1
+		return $state
+	}
+
+    ${log}::debug --END-- [info level 1]
+} ;# 'eAssist_checkPrefFile
 
 
 proc 'eAssist_loadSettings {} {
@@ -439,9 +538,8 @@ proc 'eAssist_loadSettings {} {
 	logger::utils::applyAppender -appender colorConsole
 	${log}::notice "Initialized eAssist_svc logging"
     
-	${log}::notice "Platform: $tcl_platform(osVersion)"
-    ${log}::notice [parray tcl_platform]
-
+	#${log}::notice "Platform: $tcl_platform(osVersion)"
+    #${log}::notice [parray tcl_platform]
     
     set program(Version) 4
     set program(PatchLevel) 0.0 ;# Leading decimal is not needed
@@ -461,36 +559,35 @@ proc 'eAssist_loadSettings {} {
 
     # Import msgcat namespace so we only have to use [mc]
     namespace import msgcat::mc
-
-    #config file - these variables are "system wide"; and are not to be personalized.
-	# Initialize variables
-	foreach myFile [list profile_imports.txt config.txt] {
-    #if {[catch {open config.txt r} fd]} {}
-		if {[catch {open $myFile r} fd]} {
-	     ${log}::notice "unable to load defaults: $myFile"
-	     ${log}::notice "execute initVariables: $myFile"
-    
-		} else {
 	
+	# Ensure we have proper permissions for the preferences file before continuing
+	'eAssist_checkPrefFile
+
+	# Initialize setup variables
+	foreach myFile [list $mySettings(ConfigFile)] {
+		set fd [open [file join $program(Home) $myFile] r]
+		
 		set configFile [split [read $fd] \n]
 		catch {chan close $fd}
-
-        foreach line $configFile {
-            if {$line == ""} {continue}
-            set l_line [split $line " "]
-            set [lindex $l_line 0] [join [lrange $l_line 1 end] " "]
+	
+		foreach line $configFile {
+			if {$line == ""} {continue}
+			set l_line [split $line " "]
+			set [lindex $l_line 0] [join [lrange $l_line 1 end] " "]
 			${log}::notice "Loaded variables ($myFile): $l_line"
-        }
-        ${log}::notice "Loaded variables ($myFile): Complete!"
 		}
+		
+		${log}::notice "Loaded variables ($myFile): Complete!"
 	}
     
     set fd "" ;# Make sure we are cleared out before reusing.
     # Load Personalized settings
-    if {[catch {open [file join $env(APPDATA) eAssistSettings mySettings.txt] r} fd]} {
-        ${log}::notice "Cannot find mySettings.txt; loading defaults"
+	set settingsFile [file join $mySettings(Home) mySettings(File)]
+    if {[catch {open $settingsFile r} fd]} {
+        ${log}::notice "File doesn't exist $mySettings(File); loading defaults"
 
-        'eAssist_initVariables ;# load defaults
+        # This shouldn't be needed since we are executing it later ...
+		#'eAssist_initVariables ;# load defaults
         
     } else {
         set settingsFile [split [read $fd] \n]
@@ -500,9 +597,11 @@ proc 'eAssist_loadSettings {} {
                 if {$line == ""} {continue}
                 set l_line [split $line " "]
                 set [lindex $l_line 0] [join [lrange $l_line 1 end] " "]
-                ${log}::notice "line: $line"
+                #${log}::notice "line: $line"
         }
     }
+	
+	
     # Initialize default values
     'eAssist_initVariables
 	
@@ -512,12 +611,14 @@ proc 'eAssist_loadSettings {} {
 	
 }
 
+# Load required files / packages
+'eAssist_sourceReqdFiles
+
 
 # Load the config file
 'eAssist_loadSettings
 
-# Load required files / packages
-'eAssist_sourceReqdFiles
+
 
 # Load the Option Database options
 #'distHelper_loadOptions

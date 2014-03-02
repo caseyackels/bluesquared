@@ -55,18 +55,23 @@ proc eAssistHelper::autoMap {masterHeader fileHeader} {
     # SEE ALSO
     #
     #***
-    global log files process position headerParent
+    global log files process position headerParent w
     ${log}::debug --START -- [info level 1]
 	
-    # Insert mapped headers into the Mapped headers listbox
-	$files(tab1f3).listbox insert end "$fileHeader > $masterHeader"
+	# setup the variables
+	set lboxOrig $w(wi).lbox1.listbox
+	set lboxAvail $w(wi).lbox2.listbox
+	set lboxMapped $w(wi).lbox3.listbox
+    
+	# Insert mapped headers into the Mapped headers listbox
+	$lboxMapped insert end "$fileHeader > $masterHeader"
 	
 	# Color the mapped headers
-	$files(tab1f1).listbox itemconfigure end -foreground lightgrey -selectforeground grey
+	$lboxOrig itemconfigure end -foreground lightgrey -selectforeground grey
 	
 	foreach item $headerParent(headerList) {
 		if {[string compare -nocase $item $masterHeader] != -1} {
-			$files(tab1f2).listbox itemconfigure [lsearch $headerParent(headerList) $masterHeader] -foreground lightgrey -selectforeground grey
+			$lboxAvail itemconfigure [lsearch $headerParent(headerList) $masterHeader] -foreground lightgrey -selectforeground grey
 		}
 	}
 	
@@ -111,32 +116,36 @@ proc eAssistHelper::mapHeader {} {
     #***
     global log files position
 	${log}::debug --START-- [info level 1]
+	
+	# setup the variables
+	set lboxOrig $w(wi).lbox1.listbox
+	set lboxAvail $w(wi).lbox2.listbox
+	set lboxMapped $w(wi).lbox3.listbox
     
 	#${log}::debug textvar: [$files(tab1f1).listbox get [$files(tab1f1).listbox curselection]] > [$files(tab1f2).listbox get [$files(tab1f2).listbox curselection]]
 	
 	# Insert the two mapped headers into the "Mapped" listbox.
-    $files(tab1f3).listbox insert end "[$files(tab1f1).listbox get [$files(tab1f1).listbox curselection]] > [$files(tab1f2).listbox get [$files(tab1f2).listbox curselection]]"
+    $lboxMapped insert end "[$lboxOrig get [$lboxOrig curselection]] > [$lboxAvail get [$lboxAvail curselection]]"
 
-	# 
-	if {[string length [$files(tab1f1).listbox curselection]] <= 1 } {
-			set cSelection 0[$files(tab1f1).listbox curselection]
+	if {[string length [$lboxOrig curselection]] <= 1 } {
+			set cSelection 0[$lboxOrig curselection]
 			${log}::debug selection $cSelection
 	} else {
-		set cSelection [$files(tab1f1).listbox curselection]
+		set cSelection [$lboxOrig curselection]
 		${log}::debug selection $cSelection
 	}
 	
 	# cSelection = index; header Name = 01_Address
-	set header [join [join [split [list [$files(tab1f2).listbox get [$files(tab1f2).listbox curselection] ] ] ] ""]]
+	set header [join [join [split [list [$lboxAvail get [$lboxAvail curselection] ] ] ] ""]]
 	${log}::debug header: $header
 	
 	set position([join [list $cSelection $header] _]) ""
 	
 	# Delete "un-assigned column" entry
-	$files(tab1f1).listbox itemconfigure [$files(tab1f1).listbox curselection] -foreground lightgrey -selectforeground grey
+	$lboxOrig itemconfigure [$lboxOrig curselection] -foreground lightgrey -selectforeground grey
 	
 	# Delete "available column" entry
-	$files(tab1f2).listbox itemconfigure [$files(tab1f2).listbox curselection] -foreground lightgrey -selectforeground grey
+	$lboxAvail itemconfigure [$lboxAvail curselection] -foreground lightgrey -selectforeground grey
 	
 	${log}::debug --END-- [info level 1]
 } ;# eAssistHelper::mapHeader
@@ -170,7 +179,12 @@ proc eAssistHelper::unMapHeader {} {
     global log files position
 	${log}::debug --START-- [info level 1]
 	
-	set hdr [$files(tab1f3).listbox get [$files(tab1f3).listbox curselection]]
+	# setup the variables
+	set lboxOrig $w(wi).lbox1.listbox
+	set lboxAvail $w(wi).lbox2.listbox
+	set lboxMapped $w(wi).lbox3.listbox
+	
+	set hdr [$lboxMapped get [$lboxMapped curselection]]
 	set hdr [join [join [lrange [split $hdr >] 1 end]]]
 	
 	set hdr1 [lsearch -glob [array names position] *$hdr]
@@ -178,7 +192,7 @@ proc eAssistHelper::unMapHeader {} {
 
 	# Remove the header from the array, so we can re-assign if neccessary.
 	unset position($hdr1) 
-	$files(tab1f3).listbox delete [$files(tab1f3).listbox curselection]
+	$lboxMapped delete [$lboxMapped curselection]
 	
 	#parray position
 	
@@ -269,7 +283,7 @@ proc eAssistHelper::resetImportInterface {} {
     
 	#Enable the widgets
 	#$w(nbk) tab 1 -state normal
-	$w(nbk) tab 2 -state disable
+	#$w(nbk) tab 2 -state disable
 	
 	$w(nbk).f1.top.btn2 configure -state normal
 	$w(nbk).f1.btns.btn1 configure -state normal

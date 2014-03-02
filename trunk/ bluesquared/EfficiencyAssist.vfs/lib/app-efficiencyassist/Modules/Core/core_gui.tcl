@@ -31,6 +31,7 @@
 package provide eAssist_core 1.0
 
 namespace eval eAssist {}
+namespace eval lib {}
 
 proc eAssist::parentGUI {} {
     #****f* parentGUI/eAssist
@@ -59,9 +60,13 @@ proc eAssist::parentGUI {} {
     #	N/A
     #
     #***
-    global settings program mySettings currentModule btn log mb wait
+    global program settings btn log mb
 
-    wm geometry . 640x610 ;# Width x Height
+    set locX [expr {[winfo screenwidth . ] / 4 + [winfo x .]}]
+    set locY [expr {[winfo screenheight . ] / 5 + [winfo y .]}]
+    #wm geometry .wi 625x375+${locX}+${locY}
+    wm geometry . 640x610+${locX}+${locY}
+
     
     wm title . $program(FullName)
     focus -force .
@@ -74,8 +79,9 @@ proc eAssist::parentGUI {} {
     menu $mb.file -tearoff 0 -relief raised -bd 2
 
     $mb add cascade -label [mc "File"] -menu $mb.file
+    $mb.file add command -label [mc "Import File"] -command {importFiles::fileImportGUI}
     #$mb.file add command -label [mc "Preferences..."] -command {eAssistPref::launchPreferences}
-    $mb.file add command -label [mc "Export File"] -command {export::DataToExport}
+    $mb.file add command -label [mc "Export File"] -command {export::DataToExport} -state disabled
     $mb.file add command -label [mc "Exit"] -command {exit}
 
     ## Module Menu - This is a dynamic menu for the active module.
@@ -109,13 +115,6 @@ proc eAssist::parentGUI {} {
     ttk::frame .container
     pack .container -expand yes -fill both
 
-    # Start the gui
-    # All frames that make up the GUI are children to .container
-       
-    if {![info exists program(currentModule)]} {
-        #${log}::debug current module : $program(currentModule)
-        set program(currentModule) Setup
-    }
  
     ##
     ## Control Buttons
@@ -125,10 +124,15 @@ proc eAssist::parentGUI {} {
     
     ttk::button $btn(Bar).btn1
     ttk::button $btn(Bar).btn2
-    #grid $btn(Bar).print -column 0 -row 3 -sticky nse -padx 8p
-    #grid $btn(Bar).close -column 1 -row 3 -sticky nse
+
+    # Start the gui
+    # All frames that make up the GUI are children to .container  
+    if {![info exists settings(currentModule)]} {
+        #${log}::debug current module : $program(currentModule)
+        set settings(currentModule) Setup
+    }
     
-    eAssist::buttonBarGUI $program(currentModule)
+    eAssist::buttonBarGUI $settings(currentModule)
 
     
     eAssist_GUI::editPopup
@@ -154,6 +158,7 @@ proc eAssist::parentGUI {} {
     #        }
     #    }
     #}
+    
 
 } ;# End of parentGUI
 
@@ -167,7 +172,7 @@ proc eAssist::buttonBarGUI {module} {
     #	(c) 2011-2014 Casey Ackels
     #
     # FUNCTION
-    #	re-configure the button bar as needed, depending on what 'mode' we are in, or going to.
+    #	Controls what module we start in, and re-configure the button bar as needed, depending on what 'mode' we are in, or going to.
     #
     # SYNOPSIS
     #	N/A
@@ -185,46 +190,58 @@ proc eAssist::buttonBarGUI {module} {
     #	N/A
     #
     #***
-    global btn program
+    global btn program settings
   
     switch -- $module {
         BoxLabels   {
+            # .. remember what module we are in ..
+            set settings(currentModule) BoxLabels
+            
             # .. setup the buttons on the button bar
             eAssist::remButtons $btn(Bar)
             eAssist::addButtons [mc "Print Labels"] {} btn1 0 8p
             eAssist::addButtons [mc "Exit"] exit btn2 1 0p
-            # .. remember what module we are in ..
-            set program(currentModule) BoxLabels
+
             # .. launch the mode
             Shipping_Gui::shippingGUI
+            
             # .. save the settings
-            eAssistSetup::SaveGlobalSettings
+            #eAssistSetup::SaveGlobalSettings
+            lib::savePreferences
         }
         BatchMaker   {
-            # .. setup the buttons on the button bar
-            eAssist::remButtons $btn(Bar) ;# Remove buttons
-            eAssist::statusBar ;# Add the status bar
+            # .. remember what module we are in ..
+            set settings(currentModule) BatchMaker
+            
+            # .. setup the buttons and status bar
+            eAssist::remButtons $btn(Bar)
+            eAssist::statusBar
+            
             # .. Initialize menu options
             importFiles::initMenu
-            # .. remember what module we are in ..
-            set program(currentModule) BatchMaker
-            #eAssist::addButtons [mc "Export Files"] exit btn1 0 2p
+            
             # .. launch the mode
             importFiles::eAssistGUI
+            
             # .. save the settings
-            eAssistSetup::SaveGlobalSettings
+            #eAssistSetup::SaveGlobalSettings
+            lib::savePreferences
             }
         Setup       {
+            # .. remember what module we are in ..
+            set settings(currentModule) Setup
+            
             # .. setup the buttons on the button bar
             eAssist::remButtons $btn(Bar)
             eAssist::addButtons [mc "Save"] eAssistSetup::SaveGlobalSettings btn1 0 8p
             eAssist::addButtons [mc "Exit"] exit btn2 1 0p
-            # .. remember what module we are in ..
-            set program(currentModule) Setup
+
             # .. launch the mode
             eAssistSetup::eAssistSetup
+            
             # .. save the settings
-            eAssistSetup::SaveGlobalSettings
+            #eAssistSetup::SaveGlobalSettings
+            lib::savePreferences 
         }
         default     {}
     }
@@ -232,7 +249,7 @@ proc eAssist::buttonBarGUI {module} {
 } ;# buttonBarGUI
 
 
-proc eAssist::addButtons {text command btn1 column padX} {
+proc eAssist::addButtons {text command btn1 column padX args} {
     #****f* addButtons/eAssist
     # AUTHOR
     #	Casey Ackels
@@ -258,13 +275,22 @@ proc eAssist::addButtons {text command btn1 column padX} {
     #   eAssist::remButtons
     #
     #***
-    global log btn
+    global log btn settings
     ${log}::debug --START-- [info level 1]
+    
+    if {$settings(currentModule) eq "Setup"} {
+        
+        if {$text eq [mc "Save"]} {
+            set state [eAssist::stateButtons]
+        } else {
+        set state normal
+        }
+    }
     
     # reconfigure btn(bar)
     pack configure $btn(Bar) -side right -fill x -pady 5p
     
-    {*}$btn(Bar).$btn1 configure -text $text -command $command
+    {*}$btn(Bar).$btn1 configure -text $text -command $command -state $state
     grid $btn(Bar).$btn1 -column $column -row 3 -sticky nse -padx $padX
 	
     ${log}::debug --END-- [info level 1]
@@ -307,6 +333,43 @@ proc eAssist::remButtons {path} {
 	
     ${log}::debug --END-- [info level 1]
 } ;# eAssist::remButtons
+
+proc eAssist::stateButtons {} {
+    #****f* stateButtons/eAssist
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	Configures the state of the Save button, depending on if we can read/write to the config file in Setup mode
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log mySettings program
+    ${log}::debug --START-- [info level 1]
+ 
+    if {[eAssist_Global::fileAccessibility $program(Home) $mySettings(ConfigFile)] != 3} {
+        return disabled
+    } else {
+        return enabled
+    }
+	
+    ${log}::debug --END-- [info level 1]
+} ;# eAssist::stateButtons
 
 
 proc eAssist::statusBar {args} {

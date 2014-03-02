@@ -31,7 +31,12 @@ proc eAssist_Global::folderAccessibility {path} {
     #	(c) 2011-2014 Casey Ackels
     #
     # FUNCTION
-    #	Find out if we can read or write to the specified folder. Returns 0 if we can't do anything; 1 if we can read, 2 if we can write, 3 if we can do both.
+    #	Find out if we can read or write to the specified folder.
+    #	Returns
+    #	    0 - can't read/write
+    #	    1 - read
+    #	    2 - write
+    #	    3 - read/write
     #
     # SYNOPSIS
     #   eAssist_Global::folderAccessibility <PathToFolder>
@@ -40,9 +45,10 @@ proc eAssist_Global::folderAccessibility {path} {
     #	N/A
     #
     # PARENTS
-    #	
+    #	'eAssist_initVariables
     #
     # NOTES
+    #   Files: startup.tcl
     #
     # SEE ALSO
     #
@@ -112,7 +118,7 @@ proc eAssist_Global::fileAccessibility {folder file} {
     
     # READ FILE
     if {[file readable [file join $folder $file]]} {
-        ${log}::notice -PASS- $file file is readable ...
+        #${log}::notice -PASS- $file file is readable ...
         set fileRead 1
     
     } else {
@@ -122,12 +128,12 @@ proc eAssist_Global::fileAccessibility {folder file} {
     
     # WRITE FILE
     if {[file writable [file join $folder $file]]} {
-        ${log}::notice -PASS- $file file is writable ...
+        #${log}::notice -PASS- $file file is writable ...
         set fileWrite 2
 
     } else {
-        console show
-        ${log}::critical -FAIL- Cannot write to $file file for saving. Check the file permissions and try again.
+        #console show
+        #${log}::critical -FAIL- Cannot write to $file file for saving. Check the file permissions and try again.
     }
 	
     

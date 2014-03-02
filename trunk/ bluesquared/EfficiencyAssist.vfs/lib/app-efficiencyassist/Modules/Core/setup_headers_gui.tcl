@@ -133,6 +133,7 @@ proc eAssistSetup::addressHeaders_GUI {} {
         #'debug Populate listbox - data exists
             foreach hdrInfo $headerParent(headerList) {
                 #
+				if {$hdrInfo eq ""} {continue}
                 $w(hdr_frame1a).listbox insert end "{} $hdrInfo $headerParams($hdrInfo)"
                
                 #${log}::debug HEADER: [list $hdrInfo [lindex $headerParams($hdrInfo) 0] [lindex $headerParams($hdrInfo) 1]]

@@ -342,9 +342,9 @@ proc eAssistHelper::saveNewDest {win tblPath} {
     # Set up Column info
     set ColumnCount [$tblPath columncount]
     set ColumnName ""
-    for {set x 0} {$ColumnCount > $x} {incr x} {
-            lappend ColumnName [$tblPath columncget $x -name]
-    }
+		for {set x 0} {$ColumnCount > $x} {incr x} {
+				lappend ColumnName [$tblPath columncget $x -name]
+		}
 
 
     set insertRow ""
@@ -367,3 +367,4 @@ proc eAssistHelper::saveNewDest {win tblPath} {
 	
     ${log}::debug --END -- [info level 1]
 } ;# eAssistHelper::saveNewDest
+

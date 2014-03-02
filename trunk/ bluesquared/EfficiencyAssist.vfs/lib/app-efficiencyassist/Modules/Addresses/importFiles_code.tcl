@@ -22,7 +22,7 @@
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
 
-proc importFiles::readFile {fileName} {
+proc importFiles::readFile {fileName lbox} {
     #****f* readFile/importFiles
     # AUTHOR
     #	Casey Ackels
@@ -47,13 +47,13 @@ proc importFiles::readFile {fileName} {
     # SEE ALSO
     #
     #***
-    global log process files headerParent headerAddress options
+    global log process files headerParent headerAddress options w
     ${log}::debug --START-- [info level 1]
     ${log}::debug file name: $fileName
     ${log}::debug file tail: [file tail $fileName]
     
     ${log}::debug RESET INTERFACE
-    eAssistHelper::resetImportInterface
+    #eAssistHelper::resetImportInterface
     
     if {$fileName eq ""} {return}
     
@@ -87,7 +87,7 @@ proc importFiles::readFile {fileName} {
     # process(Header) contains headers listed in the file
     foreach header $process(Header) {
         # Insert all headers, regardless if they match or not.
-        $files(tab1f1).listbox insert end $header
+        $lbox insert end $header
         
         foreach headerName $headerParent(headerList) {
             if {$process(Header) != ""} {
@@ -101,12 +101,14 @@ proc importFiles::readFile {fileName} {
             }
         }
     }
+    
+    importFiles::enableButtons $w(wi).top.btn2 $w(wi).btns.btn1 $w(wi).btns.btn2
     ${log}::debug --END-- [info level 1]
 } ;# importFiles::readFile
 
 
 
-proc importFiles::processFile {tab} {
+proc importFiles::processFile {win} {
     #****f* processFile/importFiles
     # AUTHOR
     #	Casey Ackels
@@ -135,57 +137,13 @@ proc importFiles::processFile {tab} {
     global log files headerAddress position process headerParams headerParent dist w job
     ${log}::debug --START-- [info level 1]
     
-    # Enable the tab before processing the file
-    $w(nbk) tab $tab -state normal
-    $w(nbk) select $w(nbk).f3
+    # Close the file importer window
+    destroy $win
     
     # Whitelist for required columns, so that they won't be hidden.
     # this should be user configurable
     set headerParent(whiteList) [list count DistributionType CarrierMethod]
-    
-    # Get the length of the Distribution Types
-    if {[info exists newList]} {unset newList}
-    foreach val $dist(distributionTypes) {
-        lappend newList [string length $val]
-    }
-    
-    # Grab the highest number ...
-    set distWidth [expr {[lrange [lsort -integer $newList] end end] + 4}]
-
-    # insert the remaining available columns into a listbox.
-    foreach listItem [$files(tab1f2).listbox get 0 end] {
-        set itemPosition [lsearch [$files(tab1f2).listbox get 0 end] $listItem]
-        
-        set itemColor [$files(tab1f2).listbox itemcget $itemPosition -foreground]
-        
-    }
-    
-    
-    # Create the columns in the Table, using parameters assigned to each 'column type', from Setup. Located in the headerParams array.
-    set x -1; #was -1
-    foreach hdr $headerParent(headerList) {
-        incr x
-        $files(tab3f2).tbl insertcolumns end 0 $hdr
-        
-        set myWidget [lindex $headerParams($hdr) 2]
-        
-        if {$myWidget == ""} {
-            # Just in case an entry wasn't filled out, lets make a default.
-            set myWidget ttk::entry
-        }
-
-        $files(tab3f2).tbl columnconfigure $x \
-                                        -name $hdr \
-                                        -labelalign center \
-                                        -editable yes \
-                                        -editwindow $myWidget
-        
-        # Ensure that we don't have to manually expand this column ...
-        if {$hdr eq "DistributionType"} {$files(tab3f2).tbl columnconfigure $x -width $distWidth}
-        
-    }
-
-  
+      
     set process(versionList) ""
     
     set ColumnCount [$files(tab3f2).tbl columncount]
@@ -329,25 +287,6 @@ proc importFiles::startCmd {tbl row col text} {
     ${log}::debug --START-- [info level 1]
     set w [$tbl editwinpath]
     
-    # Ensure that the cell we are in, conforms to the character limitations
-    #foreach header headerParent(headerList) {
-    #    if {[string match $header $col] == 0} {
-    #        if {[string length $text] > [lindex $headerParams($ColName) 0]} {
-    #            ${log}::debug length [string length $text]
-    #            
-    #            set bgColor [lindex $headerParams($ColName) 3]
-    #            if {$bgColor != ""} {
-    #                set backGround $bgColor
-    #            } else {
-    #                set backGround yellow
-    #            }
-    #        } else {
-    #            set backGround SystemWindow
-    #        }
-    #        
-    #        $files(tab3f2).tbl cellconfigure $row,$col -background $backGround
-    #    }
-    #}
     set colName [$tbl columncget $col -name]
     
     switch -nocase $colName {
@@ -483,3 +422,68 @@ proc importFiles::endCmd {tbl row col text} {
 	return $text
     ${log}::debug --END-- [info level 1]
 } ;# importFiles::endCmd
+
+
+proc importFiles::insertColumns {tbl} {
+    #****f* insertColumns/importFiles
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	Insert columns before populating them with data
+    #
+    # SYNOPSIS
+    #   importFiles::insertColumns <tbl>
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log headerParent headerParams dist
+    ${log}::debug --START-- [info level 1]
+    
+    # Get the length of the Distribution Types
+    if {[info exists newList]} {unset newList}
+    
+    foreach val $dist(distributionTypes) {
+            lappend newList [string length $val]
+    }
+    
+    set distWidth [expr {[lrange [lsort -integer $newList] end end] + 4}]
+
+    # Create the columns in the Table, using parameters assigned to each 'column type', from Setup. Located in the headerParams array.
+    set x -1; #was -1
+    foreach hdr $headerParent(headerList) {
+        incr x
+        $tbl insertcolumns end 0 $hdr
+        
+        set myWidget [lindex $headerParams($hdr) 2]
+        
+        if {$myWidget == ""} {
+            # Just in case an entry wasn't filled out, lets make a default.
+            set myWidget ttk::entry
+        }
+
+        $tbl columnconfigure $x \
+                            -name $hdr \
+                            -labelalign center \
+                            -editable yes \
+                            -editwindow $myWidget
+        
+        # Ensure that we don't have to manually expand this column ...
+        if {$hdr eq "DistributionType"} {$tbl columnconfigure $x -width $distWidth}
+        
+    }
+	
+    ${log}::debug --END-- [info level 1]
+} ;# ::insertColumns

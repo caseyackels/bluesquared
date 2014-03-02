@@ -90,7 +90,7 @@ proc eAssistPref::launchPreferences {} {
     set btnBar [ttk::frame .preferences.btnBar]
     pack $btnBar -side bottom -anchor e -pady 8p -padx 5p
     
-    ttk::button $btnBar.ok -text [mc "Ok"] -command {eAssistPref::saveConfig ; destroy .preferences}
+    ttk::button $btnBar.ok -text [mc "Ok"] -command {lib::savePreferences; destroy .preferences}
     ttk::button $btnBar.cancel -text [mc "Cancel"] -command {destroy .preferences}
     
 	grid $btnBar.ok -column 0 -row 3 -sticky nse -padx 8p

@@ -450,8 +450,6 @@ proc eAssistHelper::resetQuantityColumn {actVers} {
 		
 		set row 0
 		foreach val $splitData($actVers) {
-			#${log}::debug Inserting Quantity: $row,Quantity [lindex $val $colQty]
-			#${log}::debug Inserting DistributionType: $row,DistributionType [lindex $val $colDist]
 			$w(sVersf2).tbl cellconfigure $row,Quantity -text [lindex $val $colQty] ;# assuming that the Quantity column is the 12th index
 			$w(sVersf2).tbl cellconfigure $row,DistributionType -text [lindex $val $colDist] ;# assuming that the Quantity column is the 12th index
 			incr row

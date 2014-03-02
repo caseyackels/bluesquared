@@ -70,6 +70,7 @@ proc importFiles::eAssistGUI {} {
     # Setup the Filter array
     eAssist_Global::launchFilters
     
+    
     ##
     ## Parent Frame
     ##
@@ -88,149 +89,149 @@ proc importFiles::eAssistGUI {} {
     #
     # Create the notebook
     #
-    $w(nbk) add [ttk::frame $w(nbk).f1] -text [mc "Import Files"]
-    $w(nbk) add [ttk::frame $w(nbk).f2] -text [mc "Process Batch Files"] -state disabled
-    $w(nbk) add [ttk::frame $w(nbk).f3] -text [mc "Process Planner Files"] -state disabled
+    #$w(nbk) add [ttk::frame $w(nbk).f1] -text [mc "Import Files"] -state hidden
+    #$w(nbk) add [ttk::frame $w(nbk).f2] -text [mc "Process Batch Files"] -state hidden
+    $w(nbk) add [ttk::frame $w(nbk).f3] -text [mc "Process Planner Files"]
 
-    $w(nbk) select $w(nbk).f1
+    $w(nbk) select $w(nbk).f3
     
     ##
     ## - TAB 1
     ##
     
     #------------- Frame 1a - Top frame
-    set frame1a [ttk::labelframe $w(nbk).f1.top -text [mc "Open file"]]
-    pack $frame1a -side top -fill both -padx 5p -pady 5p
-    
-    ttk::label $frame1a.txt1 -text [mc "File Name:"]
-    ttk::entry $frame1a.entry1 -textvariable process(fileName) -width 50
-    
-    grid $frame1a.txt1 -column 0 -row 0 -pady 5p -sticky e ;#-padx 2p
-    grid $frame1a.entry1 -column 1 -row 0 -pady 5p -sticky ew ;#-padx 2p
-    
-    ttk::button $frame1a.btn1 -text [mc "Open File"] -command {importFiles::readFile [eAssist_Global::OpenFile "Open File" $mySettings(sourceFiles) file csv]}
-    ttk::button $frame1a.btn2 -text [mc "Import"] -command {importFiles::processFile 2} -state disabled ;# The "2" designates the tab id.
-    #ttk::button $frame1a.btn3 -text [mc "Reset"] -command {{$log}::debug Reset Interface} -state disabled
-    
-    grid $frame1a.btn1 -column 2 -row 0 -padx 5p
-    grid $frame1a.btn2 -column 3 -row 0 -padx 3p
-    #grid $frame1a.btn3 -column 4 -row 0 -padx 3p
-    
-    # This option should be saved, and read from the config file.
-        set options(AutoAssignHeader) 1
-    ttk::checkbutton $frame1a.chkbtn1 -text [mc "Auto-Assign Header Names"] -variable options(AutoAssignHeader)
-    grid $frame1a.chkbtn1 -column 0 -columnspan 2 -row 1 -sticky w
-
-    
-    #ttk::label $frame1a.txt2 -text [mc "Number of Records:"]
-    #ttk::label $frame1a.entry2 -textvariable process(numOfRecords) -relief flat
+    #set frame1a [ttk::labelframe $w(nbk).f1.top -text [mc "Open file"]]
+    #pack $frame1a -side top -fill both -padx 5p -pady 5p
     #
-    #grid $frame1a.txt2 -column 0 -row 2 -sticky e
-    #grid $frame1a.entry2 -column 1 -row 2 -sticky ew
+    #ttk::label $frame1a.txt1 -text [mc "File Name:"]
+    #ttk::entry $frame1a.entry1 -textvariable process(fileName) -width 50
+    #
+    #grid $frame1a.txt1 -column 0 -row 0 -pady 5p -sticky e ;#-padx 2p
+    #grid $frame1a.entry1 -column 1 -row 0 -pady 5p -sticky ew ;#-padx 2p
+    #
+    #ttk::button $frame1a.btn1 -text [mc "Open File"] -command {importFiles::readFile [eAssist_Global::OpenFile "Open File" $mySettings(sourceFiles) file csv]}
+    #ttk::button $frame1a.btn2 -text [mc "Import"] -command {importFiles::processFile 2} -state disabled ;# The "2" designates the tab id.
+    ##ttk::button $frame1a.btn3 -text [mc "Reset"] -command {{$log}::debug Reset Interface} -state disabled
+    #
+    #grid $frame1a.btn1 -column 2 -row 0 -padx 5p
+    #grid $frame1a.btn2 -column 3 -row 0 -padx 3p
+    ##grid $frame1a.btn3 -column 4 -row 0 -padx 3p
+    #
+    ## This option should be saved, and read from the config file.
+    #    set options(AutoAssignHeader) 1
+    #ttk::checkbutton $frame1a.chkbtn1 -text [mc "Auto-Assign Header Names"] -variable options(AutoAssignHeader)
+    #grid $frame1a.chkbtn1 -column 0 -columnspan 2 -row 1 -sticky w
+    #
+    #
+    ##ttk::label $frame1a.txt2 -text [mc "Number of Records:"]
+    ##ttk::label $frame1a.entry2 -textvariable process(numOfRecords) -relief flat
+    ##
+    ##grid $frame1a.txt2 -column 0 -row 2 -sticky e
+    ##grid $frame1a.entry2 -column 1 -row 2 -sticky ew
+    #
+    ##------------- Frame 1 - Listbox for unassigned file headers
+    #set files(tab1f1) [ttk::labelframe $w(nbk).f1.lbox1 -text [mc "Unassigned Columns"]]
+    #pack $files(tab1f1) -side left -fill both -padx 5p -pady 5p ;#-ipady 2p -anchor nw -side left
+    #
+    #listbox $files(tab1f1).listbox \
+    #            -width 22 \
+    #            -selectbackground yellow \
+    #            -selectforeground black \
+    #            -exportselection no \
+    #            -selectmode single \
+    #            -yscrollcommand [list $files(tab1f1).scrolly set] \
+    #            -xscrollcommand [list $files(tab1f1).scrollx set]
+    #
+    #
+    #ttk::scrollbar $files(tab1f1).scrolly -orient v -command [list $files(tab1f1).listbox yview]
+    #ttk::scrollbar $files(tab1f1).scrollx -orient h -command [list $files(tab1f1).listbox xview]
+    #
+    #
+    #grid $files(tab1f1).listbox -column 0 -row 0 -sticky news
+    #grid columnconfigure $files(tab1f1) $files(tab1f1).listbox -weight 1
+    #grid rowconfigure $files(tab1f1) $files(tab1f1).listbox -weight 1
+    #
+    #grid $files(tab1f1).scrolly -column 1 -row 0 -sticky nse
+    #grid $files(tab1f1).scrollx -column 0 -row 1 -sticky ews
+    #
+    #
+    ## Enable the 'autoscrollbar'
+    #::autoscroll::autoscroll $files(tab1f1).scrolly
+    #::autoscroll::autoscroll $files(tab1f1).scrollx
+    #
+    ##-------------- Frame 2 - Listbox, available headers to map to.
+    #set files(tab1f2) [ttk::labelframe $w(nbk).f1.lbox2 -text [mc "Available Columns"]]
+    #pack $files(tab1f2) -side left -fill both -padx 5p -pady 5p
+    #
+    #listbox $files(tab1f2).listbox \
+    #            -width 25 \
+    #            -selectbackground yellow \
+    #            -selectforeground black \
+    #            -exportselection no \
+    #            -selectmode single \
+    #            -yscrollcommand [list $files(tab1f2).scrolly set] \
+    #            -xscrollcommand [list $files(tab1f2).scrollx set]
+    #
+    #if {[info exists headerParent(headerList)] != 0 } {
+    #    foreach item $headerParent(headerList) {
+    #        $files(tab1f2).listbox insert end $item
+    #    }
+    #    ${log}::debug Inserting masterHeader into files(tab1f2).listbox: $headerParent(headerList)
+    #}
+    #
+    #ttk::scrollbar $files(tab1f2).scrolly -orient v -command [list $files(tab1f2).listbox yview]
+    #ttk::scrollbar $files(tab1f2).scrollx -orient h -command [list $files(tab1f2).listbox xview]
+    #
+    #
+    #grid $files(tab1f2).listbox -column 0 -row 0 -sticky news
+    #grid columnconfigure $files(tab1f2) $files(tab1f2).listbox -weight 1
+    #grid rowconfigure $files(tab1f2) $files(tab1f2).listbox -weight 1
+    #
+    #grid $files(tab1f2).scrolly -column 1 -row 0 -sticky nse
+    #grid $files(tab1f2).scrollx -column 0 -row 1 -sticky ews
+    #
+    #
+    ## Enable the 'autoscrollbar'
+    #::autoscroll::autoscroll $files(tab1f2).scrolly
+    #::autoscroll::autoscroll $files(tab1f2).scrollx
     
-    #------------- Frame 1 - Listbox for unassigned file headers
-    set files(tab1f1) [ttk::labelframe $w(nbk).f1.lbox1 -text [mc "Unassigned Columns"]]
-    pack $files(tab1f1) -side left -fill both -padx 5p -pady 5p ;#-ipady 2p -anchor nw -side left
 
-    listbox $files(tab1f1).listbox \
-                -width 22 \
-                -selectbackground yellow \
-                -selectforeground black \
-                -exportselection no \
-                -selectmode single \
-                -yscrollcommand [list $files(tab1f1).scrolly set] \
-                -xscrollcommand [list $files(tab1f1).scrollx set]
-
-
-    ttk::scrollbar $files(tab1f1).scrolly -orient v -command [list $files(tab1f1).listbox yview]
-    ttk::scrollbar $files(tab1f1).scrollx -orient h -command [list $files(tab1f1).listbox xview]
-    
-
-    grid $files(tab1f1).listbox -column 0 -row 0 -sticky news
-    grid columnconfigure $files(tab1f1) $files(tab1f1).listbox -weight 1
-    grid rowconfigure $files(tab1f1) $files(tab1f1).listbox -weight 1
-
-    grid $files(tab1f1).scrolly -column 1 -row 0 -sticky nse
-    grid $files(tab1f1).scrollx -column 0 -row 1 -sticky ews
-    
-
-    # Enable the 'autoscrollbar'
-    ::autoscroll::autoscroll $files(tab1f1).scrolly
-    ::autoscroll::autoscroll $files(tab1f1).scrollx
-    
-    #-------------- Frame 2 - Listbox, available headers to map to.
-    set files(tab1f2) [ttk::labelframe $w(nbk).f1.lbox2 -text [mc "Available Columns"]]
-    pack $files(tab1f2) -side left -fill both -padx 5p -pady 5p
-    
-    listbox $files(tab1f2).listbox \
-                -width 25 \
-                -selectbackground yellow \
-                -selectforeground black \
-                -exportselection no \
-                -selectmode single \
-                -yscrollcommand [list $files(tab1f2).scrolly set] \
-                -xscrollcommand [list $files(tab1f2).scrollx set]
-    
-    if {[info exists headerParent(headerList)] != 0 } {
-        foreach item $headerParent(headerList) {
-            $files(tab1f2).listbox insert end $item
-        }
-        ${log}::debug Inserting masterHeader into files(tab1f2).listbox: $headerParent(headerList)
-    }
-
-    ttk::scrollbar $files(tab1f2).scrolly -orient v -command [list $files(tab1f2).listbox yview]
-    ttk::scrollbar $files(tab1f2).scrollx -orient h -command [list $files(tab1f2).listbox xview]
-    
-
-    grid $files(tab1f2).listbox -column 0 -row 0 -sticky news
-    grid columnconfigure $files(tab1f2) $files(tab1f2).listbox -weight 1
-    grid rowconfigure $files(tab1f2) $files(tab1f2).listbox -weight 1
-
-    grid $files(tab1f2).scrolly -column 1 -row 0 -sticky nse
-    grid $files(tab1f2).scrollx -column 0 -row 1 -sticky ews
-    
-
-    # Enable the 'autoscrollbar'
-    ::autoscroll::autoscroll $files(tab1f2).scrolly
-    ::autoscroll::autoscroll $files(tab1f2).scrollx
-    
-
-    #--------------- Frame 2a - Buttons
-    set files(tab1f2a) [ttk::frame $w(nbk).f1.btns]
-    pack $files(tab1f2a) -side left -fill both -padx 5p -pady 5p
-    
-    ttk::button $files(tab1f2a).btn1 -text [mc "Add >"] -command {eAssistHelper::mapHeader} -state disabled
-    ttk::button $files(tab1f2a).btn2 -text [mc "< Remove"] -command {eAssistHelper::unMapHeader} -state disabled
-    
-    grid $files(tab1f2a).btn1 -column 0 -row 0 -sticky n -pady 5p
-    grid $files(tab1f2a).btn2 -column 0 -row 1 -sticky n -pady 5p
-
-    #--------------- Frame 3 - Listbox, mapped headers
-    set files(tab1f3) [ttk::labelframe $w(nbk).f1.lbox3 -text [mc "Mapped Columns"]]
-    pack $files(tab1f3) -side left -fill both -padx 5p -pady 5p
-    
-    listbox $files(tab1f3).listbox \
-                -width 28 \
-                -selectbackground yellow \
-                -selectforeground black \
-                -exportselection no \
-                -selectmode single \
-                -yscrollcommand [list $files(tab1f3).scrolly set] \
-                -xscrollcommand [list $files(tab1f3).scrollx set]
-
-    ttk::scrollbar $files(tab1f3).scrolly -orient v -command [list $files(tab1f3).listbox yview]
-    ttk::scrollbar $files(tab1f3).scrollx -orient h -command [list $files(tab1f3).listbox xview]
-
-    grid $files(tab1f3).listbox -column 0 -row 0 -sticky news
-    grid columnconfigure $files(tab1f3) $files(tab1f3).listbox -weight 2
-    grid rowconfigure $files(tab1f3) $files(tab1f3).listbox -weight 2
-
-    grid $files(tab1f3).scrolly -column 1 -row 0 -sticky nse
-    grid $files(tab1f3).scrollx -column 0 -row 1 -sticky ews
-
-    # Enable the 'autoscrollbar'
-    ::autoscroll::autoscroll $files(tab1f3).scrolly
-    ::autoscroll::autoscroll $files(tab1f3).scrollx
+    ##--------------- Frame 2a - Buttons
+    #set files(tab1f2a) [ttk::frame $w(nbk).f1.btns]
+    #pack $files(tab1f2a) -side left -fill both -padx 5p -pady 5p
+    #
+    #ttk::button $files(tab1f2a).btn1 -text [mc "Add >"] -command {eAssistHelper::mapHeader} -state disabled
+    #ttk::button $files(tab1f2a).btn2 -text [mc "< Remove"] -command {eAssistHelper::unMapHeader} -state disabled
+    #
+    #grid $files(tab1f2a).btn1 -column 0 -row 0 -sticky n -pady 5p
+    #grid $files(tab1f2a).btn2 -column 0 -row 1 -sticky n -pady 5p
+    #
+    ##--------------- Frame 3 - Listbox, mapped headers
+    #set files(tab1f3) [ttk::labelframe $w(nbk).f1.lbox3 -text [mc "Mapped Columns"]]
+    #pack $files(tab1f3) -side left -fill both -padx 5p -pady 5p
+    #
+    #listbox $files(tab1f3).listbox \
+    #            -width 28 \
+    #            -selectbackground yellow \
+    #            -selectforeground black \
+    #            -exportselection no \
+    #            -selectmode single \
+    #            -yscrollcommand [list $files(tab1f3).scrolly set] \
+    #            -xscrollcommand [list $files(tab1f3).scrollx set]
+    #
+    #ttk::scrollbar $files(tab1f3).scrolly -orient v -command [list $files(tab1f3).listbox yview]
+    #ttk::scrollbar $files(tab1f3).scrollx -orient h -command [list $files(tab1f3).listbox xview]
+    #
+    #grid $files(tab1f3).listbox -column 0 -row 0 -sticky news
+    #grid columnconfigure $files(tab1f3) $files(tab1f3).listbox -weight 2
+    #grid rowconfigure $files(tab1f3) $files(tab1f3).listbox -weight 2
+    #
+    #grid $files(tab1f3).scrolly -column 1 -row 0 -sticky nse
+    #grid $files(tab1f3).scrollx -column 0 -row 1 -sticky ews
+    #
+    ## Enable the 'autoscrollbar'
+    #::autoscroll::autoscroll $files(tab1f3).scrolly
+    #::autoscroll::autoscroll $files(tab1f3).scrollx
     
     ##
     ## - TAB 3
@@ -405,7 +406,9 @@ proc importFiles::eAssistGUI {} {
                                     -yscrollcommand [list $scrolly set] \
                                     -xscrollcommand [list $scrollx set]
 
-
+    # Create the columns
+    importFiles::insertColumns $files(tab3f2).tbl
+    
     ttk::scrollbar $scrolly -orient v -command [list $files(tab3f2).tbl yview]
     ttk::scrollbar $scrollx -orient h -command [list $files(tab3f2).tbl xview]
         
@@ -437,6 +440,7 @@ proc importFiles::eAssistGUI {} {
     grid rowconfigure $files(tab3f2) $files(tab3f2).tbl -weight 2
     
 #ttk::style map TEntry -fieldbackground [list focus yellow]
+   
 
 
 } ;# importFiles::eAssistGUI
