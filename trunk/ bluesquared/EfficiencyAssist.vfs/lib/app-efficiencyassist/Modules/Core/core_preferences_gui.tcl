@@ -49,11 +49,11 @@ proc eAssistPref::launchPreferences {} {
     # SEE ALSO
     #
     #***
-    global log program pref
+    global log program pref settings
     
     toplevel .preferences
     wm transient .preferences .
-    wm title .preferences [mc "$program(currentModule) Preferences"]
+    wm title .preferences [mc "$settings(currentModule) Preferences"]
 
     # Put the window in the center of the parent window
     set locX [expr {[winfo width . ] / 3 + [winfo x .]}]
@@ -61,7 +61,7 @@ proc eAssistPref::launchPreferences {} {
     wm geometry .preferences +${locX}+${locY}
 
     focus .preferences
-    ${log}::debug which Preferences : $program(currentModule)
+    ${log}::debug which Preferences : $settings(currentModule)
     
     
     ##
@@ -79,11 +79,11 @@ proc eAssistPref::launchPreferences {} {
     # Tab setup is in the corresponding proc
     ttk::notebook::enableTraversal $pref(nb)
     
-    switch -- [string tolower $program(currentModule)] {
-        batchmaker   {${log}::debug Launching $program(currentModule); eAssistPref::launchBatchMakerPref} ;#eAssist_Global::resetFrames pref
-        boxlabels   {${log}::debug Launching $program(currentModule)} ;#eAssist_Global::resetFrames pref
-        setup       {${log}::debug Launching $program(currentModule)} ;#eAssist_Global::resetFrames pref
-		default		{${log}::debug $program(currentModule) isn't setup yet}
+    switch -- [string tolower $settings(currentModule)] {
+        batchmaker   {${log}::debug Launching $settings(currentModule); eAssistPref::launchBatchMakerPref} ;#eAssist_Global::resetFrames pref
+        boxlabels   {${log}::debug Launching $settings(currentModule)} ;#eAssist_Global::resetFrames pref
+        setup       {${log}::debug Launching $settings(currentModule)} ;#eAssist_Global::resetFrames pref
+		default		{${log}::debug $settings(currentModule) isn't setup yet}
     }
 
     

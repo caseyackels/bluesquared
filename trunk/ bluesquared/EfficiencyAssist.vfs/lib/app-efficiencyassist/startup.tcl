@@ -193,7 +193,7 @@ proc 'eAssist_initVariables {} {
     # SEE ALSO
     #
     #***
-    global settings header mySettings settings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter logSettings
+    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter logSettings
 
 	#-------- CORE SETTINGS
 	if {$logSettings(displayConsole) == 1} {console show}
@@ -242,17 +242,17 @@ proc 'eAssist_initVariables {} {
 	
     if {![info exists settings(outFilePath)]} {
         # Location for saving the file
-        set mySettings(outFilePath) [file dirname $mySettings(Folder)]
+        set mySettings(outFilePath) [file dirname $mySettings(Home)]
     }
 
     if {![info exists settings(outFilePathCopy)]} {
         # Location for saving a copy of the file (this should just be up one directory)
-        set mySettings(outFilePathCopy) [file dirname $mySettings(Folder)]
+        set mySettings(outFilePathCopy) [file dirname $mySettings(Home)]
     }
    
     if {![info exists settings(sourceFiles)]} {
         # Default for finding the source import files
-        set mySettings(sourceFiles) [file dirname $mySettings(Folder)]
+        set mySettings(sourceFiles) [file dirname $mySettings(Home)]
     }
 
     if {![info exists settings(importOrder)]} {
@@ -437,7 +437,7 @@ proc 'eAssist_checkPrefFile {} {
 	# Create or check personal settings folder %appdata%, to ensure that we can read/write to it
 	if {![file isdirectory [file join $env(APPDATA) $mySettings(Folder)]]} {
 			set folderAppDataAccess [eAssist_Global::folderAccessibility $env(APPDATA)]
-			${log}::notice -WARNING- [file join $env(APPDATA) $mySettings(Folder)] does not exist, checking to see if we can create
+			${log}::notice -WARNING- [file join $env(APPDATA) $mySettings(Folder)] does not exist, checking to see if we can create it...
 			
 			if {$folderAppDataAccess == 3} {
 				file mkdir [file join $env(APPDATA) $mySettings(Folder)]
@@ -582,7 +582,7 @@ proc 'eAssist_loadSettings {} {
     
     set fd "" ;# Make sure we are cleared out before reusing.
     # Load Personalized settings
-	set settingsFile [file join $mySettings(Home) mySettings(File)]
+	set settingsFile [file join $mySettings(Home) $mySettings(File)]
     if {[catch {open $settingsFile r} fd]} {
         ${log}::notice "File doesn't exist $mySettings(File); loading defaults"
 

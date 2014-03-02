@@ -86,11 +86,7 @@ proc eAssistSetup::SaveGlobalSettings {} {
             chan puts $fd "GS_filePathSetup($value) $GS_filePathSetup($value)"
     }
     
-    foreach value [array names GS] {
-            chan puts $fd "GS($value) $GS($value)"
-    }
     
-    chan puts $fd "#**** Setup Specific ****#"
     foreach value [array names company] {
             chan puts $fd "company($value) $company($value)"
     }
@@ -189,7 +185,7 @@ proc lib::savePreferences {} {
     # SEE ALSO
     #
     #***
-    global log pref settings program mySettings
+    global log pref settings program mySettings GS
     ${log}::debug --START-- saveConfig
     #global settings header internal customer3P mySettings env international company shipVia3P
     
@@ -200,14 +196,7 @@ proc lib::savePreferences {} {
         return
     }
     
-    #if {[eAssist_Global::fileAccessibility $mySettings(Home) $mySettings(File)] != 3} {
-    #    ${log}::critical -WARNING- Can't write to [file join $mySettings(Home) $mySettings(File)]. Settings will not be saved if changes occur.
-    #    return
-    #}
-    
-    
 
-    
     # Do processing (if applicable) before writing out to the file
     if {[info exists pref(nb)]} {
         set customer3P(table) [$pref(nb).f2.tab2b.listbox get 0 end]
@@ -221,6 +210,10 @@ proc lib::savePreferences {} {
         
         chan puts $fd "customer3P(table) $customer3P(table)"
         chan puts $fd "customer3P(name) $customer3P(name)"
+        
+        #foreach value [array names customer3P] {
+        #    chan puts $fd "company($value) $company($value)"
+        #}
 
         # ---- #
         set shipVia3P(table) [$pref(nb).f2.tab2.listbox get 0 end]
@@ -235,16 +228,17 @@ proc lib::savePreferences {} {
         chan puts $fd "shipVia3P(table) $shipVia3P(table)"
     }
     
+    # Write out entire arrays
 
-    foreach value [array names customer3P] {
-            chan puts $fd "company($value) $company($value)"
-    }
 
     foreach value [array names settings] {
         chan puts $fd "settings($value) $settings($value)"
         #puts $mySettings($value)
-        ${log}::debug Writing Settings : settings($value) $settings($value)
+        #${log}::debug Writing Settings : settings($value) $settings($value)
     }
+    
+    # Individual variables
+    chan puts $fd "GS(gui,lastFrame) $GS(gui,lastFrame)"
     
     
     chan close $fd

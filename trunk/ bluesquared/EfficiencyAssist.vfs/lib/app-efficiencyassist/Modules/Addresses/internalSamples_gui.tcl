@@ -50,6 +50,9 @@ proc eAssistHelper::addCompanySamples {} {
     #***
     global log process w csmpls files dist packagingSetup
     ${log}::debug --START-- [info level 1]
+	
+	# Ensure we have data in the table before creating this window
+	if {[$files(tab3f2).tbl size] <= 2} {return}
     
 	toplevel .csmpls
     wm transient .csmpls .

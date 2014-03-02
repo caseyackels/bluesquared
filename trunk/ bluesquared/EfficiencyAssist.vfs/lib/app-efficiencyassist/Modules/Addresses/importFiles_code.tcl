@@ -254,6 +254,9 @@ proc importFiles::processFile {win} {
     $files(tab3f2).tbl insertcolumns 0 0 "..."
     $files(tab3f2).tbl columnconfigure 0 -name "count" -showlinenumbers 1 -labelalign center
     
+    # Enable menu items
+    importFiles::enableMenuItems
+    
     ${log}::debug --END-- [info level 1]
 } ;# importFiles::processFile
 
@@ -487,3 +490,42 @@ proc importFiles::insertColumns {tbl} {
 	
     ${log}::debug --END-- [info level 1]
 } ;# ::insertColumns
+
+
+proc importFiles::enableMenuItems {} {
+    #****f* enableMenuItems/importFiles
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	Enable menu items, now that we have imported a list.
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log mb
+    ${log}::debug --START-- [info level 1]
+    
+    set menuCount [$mb.modMenu index end]
+    
+     # Enable/Disable the menu items depending on which one is active.
+    for {set x 0} {$menuCount >= $x} {incr x} {
+        catch {$mb.modMenu entryconfigure $x -state normal}
+    }
+	
+    ${log}::debug --END-- [info level 1]
+} ;# importFiles::enableMenuItems

@@ -61,6 +61,7 @@ proc eAssist::parentGUI {} {
     #
     #***
     global program settings btn log mb
+    ${log}::debug Entering parentGUI
 
     set locX [expr {[winfo screenwidth . ] / 4 + [winfo x .]}]
     set locY [expr {[winfo screenheight . ] / 5 + [winfo y .]}]
@@ -93,9 +94,9 @@ proc eAssist::parentGUI {} {
     menu $mb.module -tearoff 0 -relief raised -bd 2
     $mb add cascade -label [mc "Module"] -menu $mb.module
 
-    $mb.module add command -label [mc "Box Labels"] -command {eAssist::buttonBarGUI BoxLabels}
-    $mb.module add command -label [mc "Batch Maker"] -command {eAssist::buttonBarGUI BatchMaker}
-    $mb.module add command -label [mc "Setup"] -command {eAssist::buttonBarGUI Setup}
+    $mb.module add command -label [mc "Box Labels"] -command {eAssist::buttonBarGUI BoxLabels 0}
+    $mb.module add command -label [mc "Batch Maker"] -command {eAssist::buttonBarGUI BatchMaker 1}
+    $mb.module add command -label [mc "Setup"] -command {eAssist::buttonBarGUI Setup 2}
 
     ## Help
     menu $mb.help -tearoff 0 -relief raised -bd 2
@@ -128,10 +129,10 @@ proc eAssist::parentGUI {} {
     # Start the gui
     # All frames that make up the GUI are children to .container  
     if {![info exists settings(currentModule)]} {
-        #${log}::debug current module : $program(currentModule)
-        set settings(currentModule) Setup
+        set settings(currentModule) [list Setup 2]
     }
     
+    #${log}::debug CurrentModule: $settings(currentModule)
     eAssist::buttonBarGUI $settings(currentModule)
 
     
@@ -163,7 +164,7 @@ proc eAssist::parentGUI {} {
 } ;# End of parentGUI
 
 
-proc eAssist::buttonBarGUI {module} {
+proc eAssist::buttonBarGUI {args} {
     #****f* buttonBarGUI/eAssist
     # AUTHOR
     #	Casey Ackels
@@ -190,12 +191,31 @@ proc eAssist::buttonBarGUI {module} {
     #	N/A
     #
     #***
-    global btn program settings
-  
+    global log btn program settings mb
+    ${log}::debug Entering buttonBarGUI
+    
+    set module [lrange [join $args] 0 0]
+    set idx [lrange [join $args] 1 1]
+    
+    set menuCount [$mb.module index end]
+    
+    # Enable/Disable the menu items depending on which one is active.
+    for {set x 0} {$menuCount >= $x} {incr x} {
+        if {$idx == $x} {
+            $mb.module entryconfigure $x -state disable
+        } else {
+            $mb.module entryconfigure $x -state normal
+        }
+    }
+    
+    #${log}::debug INDEX: [lrange $args 1 1]
+        
+    ${log}::debug Entering - $module
     switch -- $module {
         BoxLabels   {
+            ${log}::debug Entering $module mode
             # .. remember what module we are in ..
-            set settings(currentModule) BoxLabels
+            set settings(currentModule) [list BoxLabels 0]
             
             # .. setup the buttons on the button bar
             eAssist::remButtons $btn(Bar)
@@ -210,9 +230,10 @@ proc eAssist::buttonBarGUI {module} {
             lib::savePreferences
         }
         BatchMaker   {
+            ${log}::debug Entering $module mode
             # .. remember what module we are in ..
-            set settings(currentModule) BatchMaker
-            
+            set settings(currentModule) [list BatchMaker 1]
+
             # .. setup the buttons and status bar
             eAssist::remButtons $btn(Bar)
             eAssist::statusBar
@@ -228,9 +249,10 @@ proc eAssist::buttonBarGUI {module} {
             lib::savePreferences
             }
         Setup       {
+            ${log}::debug Entering $module mode
             # .. remember what module we are in ..
-            set settings(currentModule) Setup
-            
+            set settings(currentModule) [list Setup 2]
+
             # .. setup the buttons on the button bar
             eAssist::remButtons $btn(Bar)
             eAssist::addButtons [mc "Save"] eAssistSetup::SaveGlobalSettings btn1 0 8p
@@ -245,6 +267,7 @@ proc eAssist::buttonBarGUI {module} {
         }
         default     {}
     }
+    
     
 } ;# buttonBarGUI
 
@@ -278,13 +301,15 @@ proc eAssist::addButtons {text command btn1 column padX args} {
     global log btn settings
     ${log}::debug --START-- [info level 1]
     
-    if {$settings(currentModule) eq "Setup"} {
+    if {[lrange $settings(currentModule) 0 0] eq "Setup"} {
         
         if {$text eq [mc "Save"]} {
             set state [eAssist::stateButtons]
         } else {
-        set state normal
+            set state normal
         }
+    } else {
+        set state normal
     }
     
     # reconfigure btn(bar)
@@ -363,9 +388,9 @@ proc eAssist::stateButtons {} {
     ${log}::debug --START-- [info level 1]
  
     if {[eAssist_Global::fileAccessibility $program(Home) $mySettings(ConfigFile)] != 3} {
-        return disabled
+        return disable
     } else {
-        return enabled
+        return normal
     }
 	
     ${log}::debug --END-- [info level 1]
