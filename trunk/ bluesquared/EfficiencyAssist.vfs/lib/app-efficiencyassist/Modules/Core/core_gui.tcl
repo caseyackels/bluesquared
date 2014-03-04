@@ -268,6 +268,8 @@ proc eAssist::buttonBarGUI {args} {
         default     {}
     }
     
+    # Check the versions
+    vUpdate::whatVersion
     
 } ;# buttonBarGUI
 

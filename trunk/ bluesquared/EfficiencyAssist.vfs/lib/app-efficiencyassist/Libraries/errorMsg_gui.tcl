@@ -14,6 +14,7 @@
 # I = Integer (Do not use this unless you are certain it is an Integer and not a plain string)
 
 namespace eval Error_Message {}
+namespace eval msg {}
 
 
 proc Error_Message::detectError {windowPath} {
@@ -87,77 +88,39 @@ proc Error_Message::errorMsg {code args} {
 } ;# end of errorMsg
 
 
-proc Error_Message::newVersion {txt command args} {
-    #****f* newVersion/Error_Message
+proc msg::initMessages {} {
+    #****f* initMessages/msg
     # AUTHOR
     #	Casey Ackels
     #
     # COPYRIGHT
-    #	(c) 2012 - Casey Ackels
+    #	(c) 2011-2014 Casey Ackels
     #
     # FUNCTION
-    #	Error_Message::newVersion {Button Text} {Button Code} {args (Text)}
+    #	Initialize messages
     #
     # SYNOPSIS
-    #	Calling this command detects if the user is launching this version for the first time, if so we tell them where to look for new features, bug fixes, etc.
+    #
     #
     # CHILDREN
     #	N/A
     #
     # PARENTS
-    #
+    #	
     #
     # NOTES
     #
     # SEE ALSO
     #
     #***
+    global log msgs
+    ${log}::debug --START-- [info level 1]
     
-    toplevel .newVersion
-    wm transient .newVersion .
-    wm title .newVersion [mc "New Version Detected"]
-
-    # Put the window in the center of the parent window
-    set locX [expr {[winfo width . ] / 2 + [winfo x .]}]
-    set locY [expr {[winfo height . ] / 2 + [winfo y .]}]
-    puts "newVersion_x: $locX"
-    puts "newVersion_y: $locY"
+    # Initialize
+    set msgs [dict create]
     
-    wm geometry .newVersion +${locX}+${locY}
-    #wm geometry . 640x575 ;# width x Height
-
-    focus .newVersion
+    dict set $msgs 
     
-    ##
-    ## Parent Frame
-    ##
-    set frame0 [ttk::frame .newVersion.frame0]
-    pack $frame0 -expand yes -fill both -pady 5p -padx 5p
-    
-    ttk::label $frame0.txt -text [mc "A new version has been detected!"]
-    ttk::label $frame0.notes1 -text [mc "Special Notes:"]
-    ttk::label $frame0.notes2 -text [join $args]
-    ttk::label $frame0.notes3 -text [mc "To prevent seeing this message again, open Preferences, and click 'Save & Close'"]
-    
-    grid $frame0.txt -column 0 -row 0 -columnspan 2 -sticky ns
-    grid $frame0.notes1 -column 0 -row 1 -sticky ew
-    grid $frame0.notes2 -column 1 -row 2 -sticky ew
-    grid $frame0.notes3 -column 1 -row 3 -sticky ew
-    
-    
-    ##
-    ## Button Bar
-    ##
-
-    set buttonbar [ttk::frame .newVersion.buttonbar]
-    if {$txt ne "" && $command ne ""} {
-        ttk::button $buttonbar.misc -text $txt -command $command
-        grid $buttonbar.misc -column 0 -row 3 -sticky news
-    }
-    ttk::button $buttonbar.ok -text [mc "View Change Log"] -command { BlueSquared_About::aboutWindow 2 }
-    ttk::button $buttonbar.close -text [mc "Close"] -command { destroy .newVersion }
-
-    grid $buttonbar.ok -column 1 -row 3 -sticky nwe -padx 8p -ipadx 4p
-    grid $buttonbar.close -column 2 -row 3 -sticky nse -ipadx 4p
-    pack $buttonbar -side bottom -anchor e -pady 8p -padx 5p
-}
+	
+    ${log}::debug --END-- [info level 1]
+} ;# msg::initMessages

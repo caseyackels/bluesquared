@@ -70,7 +70,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]]]
 	lappend ::auto_path [file join [file dirname [info script]] Binaries]
 	#lappend ::auto_path [file join [file dirname [info script]] Binaries sqlite3.3.8]
-	lappend ::auto_path [file join [file dirname [info script]] Binaries tkdnd2.2]
+	#lappend ::auto_path [file join [file dirname [info script]] Binaries tkdnd2.2]
 
     ##
     ## 3rd party tcl scripts
@@ -94,6 +94,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Modules BoxLabels]
 	lappend ::auto_path [file join [file dirname [info script]] Modules Addresses]
 	lappend ::auto_path [file join [file dirname [info script]] Modules Tools]
+	lappend ::auto_path [file join [file dirname [info script]] Modules vUpdate]
 
 	#
 	## Start the Package Require
@@ -103,7 +104,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	package require msgcat
 
 	## 3rd Party modules
-	package require tkdnd
+	#package require tkdnd
 	package require Tablelist_tile 5.10
 	package require tcom
 	#package require twapi
@@ -123,6 +124,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	package require aboutwindow
 	package require boxlabels
 	package require eAssist_tools
+	package require vUpdate
 	
     
 
@@ -541,13 +543,13 @@ proc 'eAssist_loadSettings {} {
 	#${log}::notice "Platform: $tcl_platform(osVersion)"
     #${log}::notice [parray tcl_platform]
     
-    set program(Version) 4
-    set program(PatchLevel) 0.0 ;# Leading decimal is not needed
-    set program(beta) "Alpha"
-    set program(Name) "Efficiency Assist"
-    set program(FullName) "$program(Name) - $program(Version).$program(PatchLevel) $program(beta)"
+    #set program(Version) 4
+    #set program(PatchLevel) 1.0 ;# Leading decimal is not needed
+    #set program(beta) "Alpha"
+    #set program(Name) "Efficiency Assist"
+    #set program(FullName) "$program(Name) - $program(Version).$program(PatchLevel) $program(beta)"
     
-    #vUpdate::saveCurrentVersion $program(Version) $program(PatchLevel) $program(beta)
+    
     
     # Set required configuration changes here, i.e.
     # set cVersion(Setup,message) <informational message>
@@ -555,7 +557,6 @@ proc 'eAssist_loadSettings {} {
     # set cVersion(Options,message) <informational message>
     # set cVersion(Options,newconfig) <options page>, <options page>, ...
     
-    tk appname $program(Name)
 
     # Import msgcat namespace so we only have to use [mc]
     namespace import msgcat::mc
@@ -622,9 +623,7 @@ proc 'eAssist_loadSettings {} {
 
 # Load the Option Database options
 #'distHelper_loadOptions
-
-# Check the versions
-#vUpdate::whatVersion
+vUpdate::saveCurrentVersion
 
 # Start the GUI
 eAssist::parentGUI

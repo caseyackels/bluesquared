@@ -32,7 +32,7 @@ proc eAssistSetup::SaveGlobalSettings {} {
     #
     # FUNCTION
     #	Save the Gloal Settings to a file. These settings are what affect everyone's usage of Efficiency Assist.
-    #	If "yes" is passed as an argument, we will also save the User Preferences
+    #	
     #
     # SYNOPSIS
     #	N/A
@@ -73,10 +73,6 @@ proc eAssistSetup::SaveGlobalSettings {} {
     
     ${log}::notice Starting to write out Setup settings ...
     # ******************************
-
-    chan puts $fd "program(Version) $program(Version)"
-    chan puts $fd "program(PatchLevel) $program(PatchLevel)"
-    chan puts $fd "program(beta) $program(beta)"
     
     foreach value [array names GS_filePaths] {
             chan puts $fd "GS_filePaths($value) $GS_filePaths($value)"
@@ -228,9 +224,13 @@ proc lib::savePreferences {} {
         chan puts $fd "shipVia3P(table) $shipVia3P(table)"
     }
     
+    # Write out individual variables
+    chan puts $fd "program(Version) $program(Version)"
+    chan puts $fd "program(PatchLevel) $program(PatchLevel)"
+    chan puts $fd "program(beta) $program(beta)"
+    
+    
     # Write out entire arrays
-
-
     foreach value [array names settings] {
         chan puts $fd "settings($value) $settings($value)"
         #puts $mySettings($value)
