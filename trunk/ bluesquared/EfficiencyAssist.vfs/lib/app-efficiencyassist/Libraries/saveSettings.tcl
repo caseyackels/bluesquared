@@ -228,18 +228,16 @@ proc lib::savePreferences {} {
     chan puts $fd "program(Version) $program(Version)"
     chan puts $fd "program(PatchLevel) $program(PatchLevel)"
     chan puts $fd "program(beta) $program(beta)"
-    
+    chan puts $fd "GS(gui,lastFrame) $GS(gui,lastFrame)"   
     
     # Write out entire arrays
     foreach value [array names settings] {
         chan puts $fd "settings($value) $settings($value)"
-        #puts $mySettings($value)
-        #${log}::debug Writing Settings : settings($value) $settings($value)
     }
-    
-    # Individual variables
-    chan puts $fd "GS(gui,lastFrame) $GS(gui,lastFrame)"
-    
+
+    foreach value [array names mySettings] {
+        chan puts $fd "mySettings($value) $mySettings($value)"
+    }
     
     chan close $fd
 

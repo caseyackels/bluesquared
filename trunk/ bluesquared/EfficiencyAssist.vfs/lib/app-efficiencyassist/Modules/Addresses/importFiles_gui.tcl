@@ -65,7 +65,7 @@ proc importFiles::eAssistGUI {} {
     # Clear the frames before continuing
     eAssist_Global::resetFrames parent
     
-    wm geometry . 700x610 ;# Width x Height
+    wm geometry . 900x610 ;# Width x Height
     
     # Setup the Filter array
     eAssist_Global::launchFilters

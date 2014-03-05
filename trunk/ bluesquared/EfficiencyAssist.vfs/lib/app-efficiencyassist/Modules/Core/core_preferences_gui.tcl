@@ -51,9 +51,11 @@ proc eAssistPref::launchPreferences {} {
     #***
     global log program pref settings
     
+	set currentModule [lrange $settings(currentModule) 0 0]
+	
     toplevel .preferences
     wm transient .preferences .
-    wm title .preferences [mc "$settings(currentModule) Preferences"]
+    wm title .preferences [mc "$currentModule Preferences"]
 
     # Put the window in the center of the parent window
     set locX [expr {[winfo width . ] / 3 + [winfo x .]}]
@@ -61,7 +63,7 @@ proc eAssistPref::launchPreferences {} {
     wm geometry .preferences +${locX}+${locY}
 
     focus .preferences
-    ${log}::debug which Preferences : $settings(currentModule)
+    ${log}::debug which Preferences : $currentModule
     
     
     ##
@@ -79,18 +81,18 @@ proc eAssistPref::launchPreferences {} {
     # Tab setup is in the corresponding proc
     ttk::notebook::enableTraversal $pref(nb)
     
-    switch -- [string tolower $settings(currentModule)] {
-        batchmaker   {${log}::debug Launching $settings(currentModule); eAssistPref::launchBatchMakerPref} ;#eAssist_Global::resetFrames pref
-        boxlabels   {${log}::debug Launching $settings(currentModule)} ;#eAssist_Global::resetFrames pref
-        setup       {${log}::debug Launching $settings(currentModule)} ;#eAssist_Global::resetFrames pref
-		default		{${log}::debug $settings(currentModule) isn't setup yet}
+    switch -- [string tolower $currentModule] {
+        batchmaker   {${log}::debug Launching $currentModule; eAssistPref::launchBatchMakerPref} ;#eAssist_Global::resetFrames pref
+        boxlabels   {${log}::debug Launching $currentModule} ;#eAssist_Global::resetFrames pref
+        setup       {${log}::debug Launching $currentModule} ;#eAssist_Global::resetFrames pref
+		default		{${log}::debug $currentModule isn't setup yet}
     }
 
     
     set btnBar [ttk::frame .preferences.btnBar]
     pack $btnBar -side bottom -anchor e -pady 8p -padx 5p
     
-    ttk::button $btnBar.ok -text [mc "Ok"] -command {lib::savePreferences; destroy .preferences}
+    ttk::button $btnBar.ok -text [mc "OK"] -command {lib::savePreferences; destroy .preferences}
     ttk::button $btnBar.cancel -text [mc "Cancel"] -command {destroy .preferences}
     
 	grid $btnBar.ok -column 0 -row 3 -sticky nse -padx 8p

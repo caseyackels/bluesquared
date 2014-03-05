@@ -242,17 +242,17 @@ proc 'eAssist_initVariables {} {
 					  run,stripUDL 1 \
 					  run,abbrvAddrState 1]
 	
-    if {![info exists settings(outFilePath)]} {
+    if {![info exists mySettings(outFilePath)]} {
         # Location for saving the file
         set mySettings(outFilePath) [file dirname $mySettings(Home)]
     }
 
-    if {![info exists settings(outFilePathCopy)]} {
+    if {![info exists mySettings(outFilePathCopy)]} {
         # Location for saving a copy of the file (this should just be up one directory)
         set mySettings(outFilePathCopy) [file dirname $mySettings(Home)]
     }
    
-    if {![info exists settings(sourceFiles)]} {
+    if {![info exists mySettings(sourceFiles)]} {
         # Default for finding the source import files
         set mySettings(sourceFiles) [file dirname $mySettings(Home)]
     }
@@ -601,7 +601,6 @@ proc 'eAssist_loadSettings {} {
                 #${log}::notice "line: $line"
         }
     }
-	
 	
     # Initialize default values
     'eAssist_initVariables
