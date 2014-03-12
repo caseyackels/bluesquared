@@ -99,13 +99,13 @@ proc controlFile {args} {
     #	N/A
     #
     #***
-    global files
+    global files mySettings
 
 
     switch -- [lindex $args 0] {
 	destination {
             if {[lindex $args 1] eq "fileopen"} {
-                set files(destination) [open listdisplay.csv w]
+                set files(destination) [open [file join $mySettings(path,labelDBfile) $mySettings(name,labelDBfile).csv] w]
                 # Insert Header row
                 chan puts $files(destination) [::csv::join "Labels Quantity Line1 Line2 Line3 Line4 Line5"]
                 #return $files(destination)
@@ -117,19 +117,19 @@ proc controlFile {args} {
         }
 
         history {
-            if {[file exists history.csv] ne 1} {
-                set files(history) [open history.csv w]
+            if {[file exists [file join $mySettings(Home) history.csv]] ne 1} {
+                set files(history) [open [file join $mySettings(Home) history.csv] w]
             }
 
             if {[lindex $args 1] eq "filewrite"} {
                 #set files(history_tmp) [open history_tmp.csv w+]
-                set files(history) [open history.csv w]
+                set files(history) [open [file join $mySettings(Home) history.csv] w]
 
             } elseif {[lindex $args 1] eq "fileappend"} {
-                set files(history) [open history.csv a+]
+                set files(history) [open [file join $mySettings(Home) history.csv] a+]
 
             } elseif { [lindex $args 1] eq "fileread"} {
-                set files(history) [open history.csv r+]
+                set files(history) [open [file join $mySettings(Home) history.csv] r+]
 
             } elseif {[lindex $args 1] eq "fileclose"} {
                 flush $files(history)
@@ -178,7 +178,7 @@ proc insertInListbox {args} {
         }
 
     } else {
-	Error_Message::errorMsg insertInListBox1; return
+	Error_Message::errorMsg insertInListBox1 ""; return
     }
     # This way we can see incoming values
     $frame2b.listbox see end
@@ -243,11 +243,14 @@ proc addListboxNums {{reset 0}} {
             set GS_textVar(labelsPartialLike) ""
             set GS_textVar(labelsPartialUnique) ""
 
-            if {[winfo exists .breakdown] == 1} {puts "addlistbox::Refreshing Break Down"; Shipping_Gui::breakDown}
+            if {[winfo exists .breakdown]} {
+				# Find out if the window exists before finding out if we can see it or not.
+				if {[winfo ismapped .breakdown] == 1} {puts "addlistbox::Refreshing Break Down"; Shipping_Gui::breakDown}
+			}
         }
     }
 } ;# addListboxNums
-
+ 
 
 proc createList {} {
     global frame2b GS_textVar
@@ -454,18 +457,28 @@ proc displayListHelper {fullboxes partialboxes {reset 0}} {
 
 
 proc printLabels {} {
-    global GS_textVar programPath lineNumber
+    global log GS_textVar programPath lineNumber mySettings
 
 	if {[info exists GS_textVar(maxBoxQty)] == 0} {
 	    Error_Message::errorMsg printLabels1
 	    return
 	}
+	
+	if {$mySettings(path,bartender) == ""} {
+		${log}::debug path,bartender is empty: $mySettings(path,bartender)
+		return
+	}
+	
+	if {$mySettings(path,labelDir) == ""} {
+		${log}::debug path,labelDir is empty: $mySettings(path,labelDir)
+		return
+	}
 
-        set lineNumber "" ;# Make sure we're cleared
+    #set lineNumber "" ;# Make sure we're cleared
 
 	Shipping_Code::createList
 	Shipping_Code::writeHistory $GS_textVar(maxBoxQty)
-        Shipping_Code::openHistory
+    Shipping_Code::openHistory
 	#Shipping_Code::setTips
 
             #Figure out how many Lines are being used and load the appropriate label
@@ -477,51 +490,59 @@ proc printLabels {} {
             #    #$Bartend /F=$LabelPath/6LINEDB.btw /P /S /CLOSE
             #} else
 
+	# Fix the file paths so that bartender doesn't choke
+	set labelDir [join [split $mySettings(path,labelDir) /] \\]
+	
 	if {$GS_textVar(line5) != ""} {
 	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
-                    set lineNumber 6
+                    #set lineNumber 5
                     # Redirect for special print options
-                    Shipping_Gui::chooseLabel
-                    puts "6 Line Label"
+                    Shipping_Gui::chooseLabel 5
+                    puts "5 Line Label"
 
 		} else {
-		    exec $programPath(Bartend) /AF=$programPath(LabelPath)\\6LINEDB.btw /P /CLOSE
+		    exec $mySettings(path,bartender) /AF=$labelDir\\6LINEDB.btw /P /CLOSE
+			${log}::debug $mySettings(path,bartender) /AF=$labelDir\\6LINEDB.btw /P /CLOSE
 	    }
 
 	} elseif {$GS_textVar(line4) != ""} {
 	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
-                    set lineNumber 5
+                    #set lineNumber 4
                     # Redirect for special print options
-                    Shipping_Gui::chooseLabel
-                    puts "5 Line Label"
+                    Shipping_Gui::chooseLabel 4
+                    puts "4 Line Label"
 
                 } else {
-		    exec $programPath(Bartend) /AF=$programPath(LabelPath)\\5LINEDB.btw /P /CLOSE
+		    exec $mySettings(path,bartender) /AF=$labelDir\\5LINEDB.btw /P /CLOSE
+			${log}::debug $mySettings(path,bartender) /AF=$labelDir\\5LINEDB.btw /P /CLOSE
 	    }
 
 	} elseif {$GS_textVar(line3) != ""} {
 	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
-                    set lineNumber 4
+                    #set lineNumber 3
                     # Redirect for special print options
-                    Shipping_Gui::chooseLabel
-                    puts "4 Line Label"
+                    Shipping_Gui::chooseLabel 3
+                    puts "3 Line Label"
 
                 } else {
-		    exec $programPath(Bartend) /AF=$programPath(LabelPath)\\4LINEDB.btw /P /CLOSE
+		    exec $mySettings(path,bartender) /AF=$labelDir\\4LINEDB.btw /P /CLOSE
+			${log}::debug $mySettings(path,bartender) /AF=$labelDir\\4LINEDB.btw /P /CLOSE
 	    }
 
 	} elseif {$GS_textVar(line2) != ""} {
 	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
                         Error_Message::errorMsg seattleMet2; return
 	    } else {
-		exec $programPath(Bartend) /AF=$programPath(LabelPath)\\3LINEDB.btw /P /CLOSE
+		exec $mySettings(path,bartender) /AF=$labelDir\\3LINEDB.btw /P /CLOSE
+		${log}::debug $mySettings(path,bartender) /AF=$labelDir\\3LINEDB.btw /P /CLOSE
 	    }
 
 	} elseif {$GS_textVar(line1) != ""} {
 	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
                         Error_Message::errorMsg seattleMet2; return
 	    } else {
-		exec $programPath(Bartend) /AF=$programPath(LabelPath)\\2LINEDB.btw /P /CLOSE
+		exec $mySettings(path,bartender) /AF=$labelDir\\2LINEDB.btw /P /CLOSE
+		${log}::debug $mySettings(path,bartender) /AF=$labelDir\\2LINEDB.btw /P /CLOSE
 	    }
 	}
 
@@ -554,9 +575,12 @@ proc printCustomLabels {args} {
     #	N/A
     #
     #***
-    global programPath
-
-    exec $programPath(Bartend) /AF=$programPath(LabelPath)\\$args /P /CLOSE
+    global mySettings log
+	
+	${log}::debug Printing custom labels: $args
+	
+	set labelDir [join [split $mySettings(path,labelDir) /] \\]
+    exec $mySettings(path,bartender) /AF=$labelDir\\$args /P /CLOSE
     #puts "programPath(Bartend) /AF=programPath(LabelPath)\\$args /P /CLOSE"
 }
 
@@ -895,6 +919,3 @@ proc clearList {} {
 
 
 } ;# End of Shipping_Code namespace
-
-Shipping_Code::openHistory ;# Populate the variable so we don't get errors upon startup.
-#eAssist_GUI::editPopup ;# Initiate the popup's

@@ -72,18 +72,10 @@ proc eAssistPref::launchPreferences {} {
     set pref(frame0) [ttk::frame .preferences.frame0]
     pack $pref(frame0) -expand yes -fill both -pady 5p -padx 5p
 
-    ##
-    ## Notebook
-    ##
-    set pref(nb) [ttk::notebook $pref(frame0).nb]
-    pack $pref(nb) -expand yes -fill both
-
-    # Tab setup is in the corresponding proc
-    ttk::notebook::enableTraversal $pref(nb)
     
     switch -- [string tolower $currentModule] {
         batchmaker   {${log}::debug Launching $currentModule; eAssistPref::launchBatchMakerPref} ;#eAssist_Global::resetFrames pref
-        boxlabels   {${log}::debug Launching $currentModule} ;#eAssist_Global::resetFrames pref
+        boxlabels   {${log}::debug Launching $currentModule ; eAssistPref::launchBoxMakerPref} ;#eAssist_Global::resetFrames pref
         setup       {${log}::debug Launching $currentModule} ;#eAssist_Global::resetFrames pref
 		default		{${log}::debug $currentModule isn't setup yet}
     }
@@ -129,7 +121,16 @@ proc eAssistPref::launchBatchMakerPref {} {
     #***
     global log pref internal mySettings setup
     # Reset Frames
-    
+
+    ##
+    ## Notebook
+    ##
+    set pref(nb) [ttk::notebook $pref(frame0).nb]
+    pack $pref(nb) -expand yes -fill both
+
+    # Tab setup is in the corresponding proc
+    ttk::notebook::enableTraversal $pref(nb)
+	
     # Setup the tabs
     $pref(nb) add [ttk::frame $pref(nb).f1] -text [mc "File Paths"]
     $pref(nb) add [ttk::frame $pref(nb).f2] -text [mc "3P - Ship Via"]
@@ -338,3 +339,90 @@ bind [$pref(nb).f2.tab2b.listbox bodytag] <Double-1> {
 
 
 } ;# eAssistPref::launchBatchMakerPref
+
+proc eAssistPref::launchBoxMakerPref {} {
+    #****f* launchBoxMakerPref/eAssistPref
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	Preferences for creating box labels
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log pref mySettings
+    ${log}::debug --START-- [info level 1]
+	
+	wm geometry .preferences 450x275
+	
+	ttk::label $pref(frame0).txt1 -text [mc "Bartender Path"]
+	ttk::entry $pref(frame0).entry1 -width 15 -textvariable mySettings(path,bartender)
+	ttk::button $pref(frame0).btn1 -text "..." -command {set mySettings(path,bartender) [eAssist_Global::OpenFile [mc "Bartender Path"] [pwd] file .exe]}
+	
+	grid $pref(frame0).txt1 -column 0 -row 0 -pady 5p -padx 5p -sticky e
+	grid $pref(frame0).entry1 -column 1 -row 0 -sticky ew
+	grid $pref(frame0).btn1 -column 2 -row 0
+	
+	ttk::label $pref(frame0).txt2 -text [mc "Label Directory"] 
+	ttk::entry $pref(frame0).entry2 -width 15 -textvariable mySettings(path,labelDir)
+	ttk::button $pref(frame0).btn2 -text "..." -command {set mySettings(path,labelDir) [eAssist_Global::OpenFile [mc "Choose Directory"] [pwd] dir]}
+	
+	grid $pref(frame0).txt2 -column 0 -row 1 -sticky e
+	grid $pref(frame0).entry2 -column 1 -row 1 -sticky ew
+	grid $pref(frame0).btn2 -column 2 -row 1
+	
+	ttk::label $pref(frame0).txt3 -text [mc "Wordpad"]
+	ttk::entry $pref(frame0).entry3 -width 15 -textvariable mySettings(path,wordpad)
+	ttk::button $pref(frame0).btn3 -text "..." -command {set mySettings(path,wordpad) [eAssist_Global::OpenFile [mc "Wordpad Path"] [pwd] file .exe]}
+	
+	grid $pref(frame0).txt3 -column 0 -row 2 -sticky e
+	grid $pref(frame0).entry3 -column 1 -row 2 -sticky ew
+	grid $pref(frame0).btn3 -column 2 -row 2
+	
+	ttk::label $pref(frame0).txt4 -text [mc "Printer Path"]
+	ttk::entry $pref(frame0).entry4 -width 15 -textvariable mySettings(path,printer)
+	#ttk::button $pref(frame0).btn4 -text "..." -command {set mySettings(path,printer) [eAssist_Global::OpenFile [mc "Choose Directory"] [pwd] dir]}
+		tooltip::tooltip $pref(frame0).entry4 [mc "i.e. \\\vm-fileprint\\shipping-time"]
+	
+	grid $pref(frame0).txt4 -column 0 -row 3 -sticky e
+	grid $pref(frame0).entry4 -column 1 -row 3 -sticky ew
+	#grid $pref(frame0).btn4 -column 2 -row 3
+	
+	ttk::label $pref(frame0).txt5 -text [mc "Output file Path"]
+	ttk::entry $pref(frame0).entry5 -width 15 -textvariable mySettings(path,labelDBfile)
+		tooltip::tooltip $pref(frame0).entry5 [mc "The path to the DB that the Bartender Label is pointed to"]
+	ttk::button $pref(frame0).btn5 -text "..." -command {set mySettings(path,labelDBfile) [eAssist_Global::OpenFile [mc "Label DB Path"] [pwd] dir]}
+	
+	grid $pref(frame0).txt5 -column 0 -row 4 -sticky e
+	grid $pref(frame0).entry5 -column 1 -row 4 -sticky ew
+	grid $pref(frame0).btn5 -column 2 -row 4
+	
+	ttk::label $pref(frame0).txt6 -text [mc "Output file Name"]
+	ttk::entry $pref(frame0).entry6 -width 15 -textvariable mySettings(name,labelDBfile)
+		tooltip::tooltip $pref(frame0).entry6 [mc "The DB file name that the Bartender Label needs. Don't include an extension. We add '.csv' to the name."]
+	
+	grid $pref(frame0).txt6 -column 0 -row 5 -sticky e
+	grid $pref(frame0).entry6 -column 1 -row 5 -sticky ew
+
+	
+	
+	
+	grid columnconfigure $pref(frame0) 1 -weight 1
+	
+    ${log}::debug --END-- [info level 1]
+} ;# eAssistPref::launchBoxMakerPref

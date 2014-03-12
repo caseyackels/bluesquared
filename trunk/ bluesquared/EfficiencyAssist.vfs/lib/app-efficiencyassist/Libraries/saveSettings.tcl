@@ -92,7 +92,7 @@ proc eAssistSetup::SaveGlobalSettings {} {
     }
     
     foreach value [array names boxLabelInfo] {
-        ${log}::debug boxLabelInfo: $value
+        #${log}::debug boxLabelInfo: $value
             chan puts $fd "boxLabelInfo($value) $boxLabelInfo($value)"
     }
     
@@ -228,7 +228,7 @@ proc lib::savePreferences {} {
     chan puts $fd "program(Version) $program(Version)"
     chan puts $fd "program(PatchLevel) $program(PatchLevel)"
     chan puts $fd "program(beta) $program(beta)"
-    chan puts $fd "GS(gui,lastFrame) $GS(gui,lastFrame)"   
+    chan puts $fd "GS(gui,lastFrame) $GS(gui,lastFrame)"
     
     # Write out entire arrays
     foreach value [array names settings] {

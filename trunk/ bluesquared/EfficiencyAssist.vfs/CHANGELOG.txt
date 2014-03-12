@@ -1,3 +1,31 @@
+= Version 4.0.0 Beta 3
+== Box Labels
+== About Window
+== Batch Maker
+
+--
+
+= Version 4.0.0 Beta 2
+== Box Labels
+* [UPDATE] Shortcut keys have been added:
+# Ctrl+M - Current Month
+# Ctrl+N - Next Month
+# Ctrl+Y - Current Year
+# Ctrl+D - Delete all in the current entry field
+# Up/Down - Traverses through the fields
+# Enter - Same as Tabbing
+
+--
+
+= Version 4.0.0 Beta 1
+== Notes
+* [Overview] The Box Label program has been incorporated into two other pieces of software, and is now a 'module'. Efficiency Assist is now the name of this program.
+== Box Labels
+* [BUG] Seattle Met labels should behave as expected. The current work around of adding text (or a space) into the 5th line should not be needed now.
+* [UPDATE] The ability to classify what a shipment is (Freight/UPS Import) has been added, but currently doesn't do anything. In the future this will be printed on the breakdown report.
+
+--
+
 = Version 3.0.4 (April 2013)
 == Notes
 * [BUG] Fixed issue where PackingType for USPS was incomplete. (MediumFlatRate instead of MediumFlatRateBox)

@@ -73,8 +73,17 @@ proc Error_Message::errorMsg {code args} {
                             set message2 [mc "Error Location: %s" $code]
                             set title $defaultTitle
                             set icon warning}
+        seattleMet1     {set message [mc "Detected an address over 35 characters, you must fix this before shipping!\n$args"]
+                            set message2 [mc "Error Location: %s" $code]
+                            set title $defaultTitle
+                            set icon warning}
+        seattleMet2     {set message [mc "You must have more than 2 lines of information"]
+                            set message2 [mc "Error Location: %s" $code]
+                            set title $defaultTitle
+                            set icon warning}
         default         {set message [mc "Unknown Error Message"]
                             set message2 ""
+                            set title $defaultTitle
                             set icon error}
     }
     

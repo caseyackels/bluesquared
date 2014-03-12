@@ -379,7 +379,7 @@ proc 'eAssist_initVariables {} {
     }
 	
 
-    #
+
     # - These are used internally
     # 8/28/2013 - Move this so we see them within Efficiency
 	
@@ -428,12 +428,16 @@ proc 'eAssist_checkPrefFile {} {
     ${log}::debug --START-- [info level 1]
     
 	set folderAccess ""
-
+	
 	# Set file names
 	set mySettings(File) mySettings.txt
 	set mySettings(ConfigFile) config.txt
     set program(Home) [pwd]
 	set mySettings(Folder) eAssistSettings
+	
+	if {![info exists program(Name)]} {set program(Name) "EfficiencyAssist"}
+	#if {![info exists mySettings(Home)]} {set mySettings(Home) [file join $env(APPDATA) $mySettings(Folder)]}
+
 	
 	## FOLDER
 	# Create or check personal settings folder %appdata%, to ensure that we can read/write to it
@@ -478,6 +482,7 @@ proc 'eAssist_checkPrefFile {} {
 		if {$folderAccess == 3} {
 			${log}::notice -WARNING- $mySettings(File) doesn't exist, defaults will be loaded.
 			set state f1
+			return $state
 		}
 
 	} else {

@@ -104,6 +104,103 @@ proc eAssist_Global::resetSetupFrames {} {
 } ;# eAssist_Global::resetSetupFrames
 
 
+proc eAssist_Global::checkVars {win {var ""}} {
+    #****f* checkVars/eAssist_Global
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	eAssist_Global::checkVars <prefWindow> ?variable? ?msg?
+    #
+    # SYNOPSIS
+	# 	Checks to ensure that the variable exists, if it doesn't, let display a window asking the user if they'd like to launch the Preferences window (or Setup).
+	# 	It is possible to check if the var exists prior to this command, in that case, omit the var name in the command.
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log program
+    ${log}::debug --START-- [info level 1]
+    
+	
+	if {($var == "") || (![info exists $var])} {
+		${log}::debug Variable doesn't exist ... launching window.
+	} else {
+		return $var
+	}
+	
+	switch -- $win {
+		pref	{set launchWin "eAssistPref::launchPreferences"}
+		setup	{set launchWin "eAssist::buttonBarGUI Setup 2"}
+		default	{${log}::notice No window was set, aborting.
+				return}
+	}
+	
+	set answer [tk_messageBox -title [mc "Additonal configuration needed"] \
+					-type yesno \
+					-icon error \
+					-parent . \
+					-detail [mc "Additional options need to be configured, would you like to go there now?\n\n$program(Name) will not be able to function properly until these options are set."]]
+	
+	switch $answer {
+		yes		{$launchWin}
+		no		{${log}::debug We Selected NO}
+		default	{}
+	}
+					
+	
+    ${log}::debug --END-- [info level 1]
+} ;# eAssist_Global::checkVars
+
+
+proc eAssist_Global::isAuthenticated {args} {
+    #****f* isAuthenticated/eAssist_Global
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	Find out if we are authenticated to see, or access Setup.
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log auth
+    ${log}::debug --START-- [info level 1]
+    
+	if {![info exists auth]} {return}
+	
+	if {![string match $args $auth(pword)]} {return}
+	
+    ${log}::debug --END-- [info level 1]
+} ;# eAssist_Global::isAuthenticated
+
+
 proc eAssist_Global::OpenFile {title initDir type args} {
     #****f* getOpenFile/eAssist_Global
     # AUTHOR
@@ -131,6 +228,7 @@ proc eAssist_Global::OpenFile {title initDir type args} {
     #
     #
     #***
+	global log
 
     if {$type eq "file"} {
         set filename [tk_getOpenFile \
@@ -148,6 +246,7 @@ proc eAssist_Global::OpenFile {title initDir type args} {
     # If we do not select a file name, and cancel out of the dialog, do not produce an error.
     if {$filename eq ""} {return}
 
+	${log}::debug filename: $filename
     return $filename
 
 } ;# eAssist_Global::OpenFile

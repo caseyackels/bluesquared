@@ -57,11 +57,15 @@ proc shippingGUI {} {
     #***
     global GI_textVar GS_textVar frame1 frame2b genResults GS_windows program
     
+    Shipping_Code::openHistory ;# Populate the variable so we don't get errors upon startup.
+    
+    wm geometry . 450x475
     #set program(currentModule) BoxLabels
     #set currentModule BoxLabels
 
     # Clear the frames before continuing
     eAssist_Global::resetFrames parent
+
 
 # Frame 1
     set frame1 [ttk::labelframe .container.frame1 -text "Label Information"]
@@ -159,6 +163,7 @@ proc shippingGUI {} {
                         -validate key \
                         -validatecommand {Shipping_Code::filterKeys -numeric %S %W %P}
 
+    set GS_textVar(shipvia) Freight
     ttk::combobox $frame2a.cbox -textvar GS_textVar(shipvia) \
                                 -width 7 \
                                 -values [list "Freight" "Import"]
@@ -247,7 +252,7 @@ foreach window "$frame2a.add $frame2a.entry1 $frame2a.entry2" {
 
     bind $window <Return> {
         ;# Guard against the user inadvertantly hitting <Enter> or "Add" button without anything in the entry fields
-        if {[info exists GS_textVar(destQty)] eq 0} {return}
+        if {([info exists GS_textVar(destQty)] eq 0) || ($GS_textVar(destQty) eq "")} {return}
         Shipping_Code::addMaster $GS_textVar(destQty) $GS_textVar(batch) $GS_textVar(shipvia)
     }
 }
@@ -260,7 +265,7 @@ bind $frame1.entry1 <KeyRelease> {
     }
 }
 
-bind $frame1.entry1 <Control-KeyPress-m-> {%W insert end [clock format [clock seconds] -format %%B]}
+#bind $frame1.entry1 <Control-KeyPress-M> {%W insert end "[string toupper [clock format [clock seconds] -format %%B]] "}
 
 bind $frame1.entry2 <KeyRelease> {
     if {[string length $GS_textVar(line2)] != 0} {
@@ -295,18 +300,18 @@ bind $frame1.entry5 <KeyRelease> {
 foreach window [list 1 2 3 4 5] {
     # We must use %% because the %b identifier is used by [bind] and [clock format]
     ;# Insert the current month
-    bind $frame1.entry$window <Control-KeyPress-m-> {
-        %W insert end [clock format [clock seconds] -format %%B]
+    bind $frame1.entry$window <Control-KeyPress-M> {
+        %W insert end "[string toupper [clock format [clock seconds] -format %%B]] "
     }
 
     ;# Insert the next month (i.e. this month is October, next month is November)
-    bind $frame1.entry$window <Control-KeyPress-n> {
-        %W insert end [clock format [clock scan month] -format %%B]
+    bind $frame1.entry$window <Control-KeyPress-N> {
+        %W insert end "[string toupper [clock format [clock scan month] -format %%B]] "
     }
 
     ;# Insert the current year
-    bind $frame1.entry$window <Control-KeyPress-y> {
-        %W insert end [clock format [clock seconds] -format %%Y]
+    bind $frame1.entry$window <Control-KeyPress-Y> {
+        %W insert end "[string toupper [clock format [clock seconds] -format %%Y]] "
     }
 
     ;# Bind the Enter key to traverse through the entry fields like <Tab>
@@ -317,7 +322,7 @@ foreach window [list 1 2 3 4 5] {
     bind $frame1.entry$window <Shift-Return> {tk::TabToWindow [tk_focusPrev %W]}
     bind $frame1.entry$window <KeyPress-Up> {tk::TabToWindow [tk_focusNext %W]}
 
-    bind $frame1.entry$window <Control-KeyPress-k> {%W delete 0 end}
+    bind $frame1.entry$window <Control-KeyPress-D> {%W delete 0 end}
 
     bind $frame1.entry$window <ButtonPress-3> {tk_popup .editPopup %X %Y}
 }
@@ -365,7 +370,10 @@ bind all <F1> {console show}
 bind all <F2> {console hide}
 
 
+Shipping_Gui::initMenu
+Shipping_Gui::initVariables
 
+   
 } ;# End of shippingGUI
 
 proc printbreakDown {} {
@@ -395,7 +403,11 @@ proc printbreakDown {} {
     #	TODO: List the other *GUI procs.
     #
     #***
-    global GS_textVar
+    global GS_textVar mySettings log
+    
+    if {![winfo exists mySettings(path,printer)]} {return}
+    if {![winfo exists mySettings(path,wordpad)]} {return}
+    
 
     set myBreakDownText [.breakdown.txt get 0.0 end]
     set file [open breakdown.txt w]
@@ -417,7 +429,9 @@ proc printbreakDown {} {
     #catch {exec [file join C:\\ "Program Files" "Windows NT" Accessories wordpad.exe] /pt breakdown.txt {\\vm-printserver\Mailing 9050}}
 
     # Shipping Printer
-    catch {exec [file join C:\\ "Program Files" "Windows NT" Accessories wordpad.exe] /pt breakdown.txt {\\vm-printserver\Shipping-Time}}
+    #catch {exec [file join C:\\ "Program Files" "Windows NT" Accessories wordpad.exe] /pt breakdown.txt {\\vm-printserver\Shipping-Time}}
+    exec [file join $mySettings(path,wordpad)] /pt breakdown.txt "$mySettings(path,printer)"
+    #${log}::debug PRINTING: [file join $mySettings(path,wordpad)] "$mySettings(path,printer)"
 } ;# End of printbreakDown
 
 
@@ -448,7 +462,9 @@ proc breakDown {} {
     #	TODO: List the other *GUI procs.
     #
     #***
-    global GS_textVar GS_widget GS_winGeom
+    global GS_textVar GS_widget GS_winGeom log
+    
+    ${log}::debug Creating Breakdown window ...
 
     if {![winfo exists .breakdown]} {
         toplevel .breakdown
@@ -456,37 +472,54 @@ proc breakDown {} {
 
         puts "winfo geom: [winfo geometry .]"
         wm geometry .breakdown +854+214
-        wm withdraw .breakdown
+        #wm withdraw .breakdown
+        ${log}::debug Breadown window Created...
 
         # Now we don't destroy the window if someone closes it by the "X" button at the top of the screen.
         wm protocol .breakdown WM_DELETE_WINDOW {wm withdraw .breakdown}
-        puts "breakdown window created"
 
         set frame1 [ttk::frame .breakdown.frame1]
         pack $frame1 -fill both -expand yes -pady 5p
 
         set GS_widget(breakdown) $frame1.txt
-        text $frame1.txt -width 30
+        text $frame1.txt -width 30 \
+                -xscrollcommand [list $frame1.scrollx set] \
+                -yscrollcommand [list $frame1.scrolly set]
+        
+        # setup the autoscroll bars
+        ttk::scrollbar $frame1.scrollx -orient h -command [list $frame1.txt xview]
+        ttk::scrollbar $frame1.scrolly -orient v -command [list $frame1.txt yview]
+       
+        grid $frame1.txt -column 0 -row 0 -sticky news -padx 5p
+       #grid columnconfigure $frame1 $frame1.txt -weight 1
 
-        grid $frame1.txt -column 1 -row 0 -sticky news -padx 5p
+        grid $frame1.scrolly -column 1 -row 0 -sticky nse
+        grid $frame1.scrollx -column 0 -row 1 -sticky ews
+
+        ::autoscroll::autoscroll $frame1.scrollx ;# Enable the 'autoscrollbar'
+        ::autoscroll::autoscroll $frame1.scrolly ;# Enable the 'autoscrollbar'
+
+
 
         set frame2 [ttk::frame .breakdown.frame2]
         pack $frame2 -pady 10p -anchor se
 
-        ttk::button $frame2.print -text "Print" -command {Shipping_Gui::printbreakDown}
-        ttk::button $frame2.close -text "Close" -command {wm withdraw .breakdown}
+        ttk::button $frame2.print -text [mc "Print"] -command {Shipping_Gui::printbreakDown}
+        ttk::button $frame2.close -text [mc "Close"] -command {wm withdraw .breakdown}
 
         grid $frame2.print -column 0 -row 0 -padx 3p
         grid $frame2.close -column 1 -row 0 -padx 5p
 
 
-        #focus $GS_widget(breakdown)
-
         bind $GS_widget(breakdown) <KeyPress> {break} ;# Prevent people from entering/removing anything
 
-        puts "winfo x [winfo x .breakdown]"
 
     } else {
+        if {![winfo ismapped .breakdown]} {
+            # Display the window
+            wm deiconify .breakdown
+        }
+        
         # Refreshing
         .breakdown.frame1.txt delete 0.0 end
     }
@@ -533,7 +566,7 @@ proc breakDown {} {
 } ;# End of breakDown
 
 
-proc chooseLabel {} {
+proc chooseLabel {lines} {
     #****f* chooseLabel/Shipping_Gui
     # AUTHOR
     #	Casey Ackels
@@ -560,7 +593,7 @@ proc chooseLabel {} {
     #
     #
     #***
-    global GS_textVar GS_widget lineNumber
+    global log GS_textVar GS_widget
 
     toplevel .chooseLabel
     wm title .chooseLabel "Choose your Label"
@@ -576,7 +609,7 @@ proc chooseLabel {} {
 
     focus .chooseLabel
 
-    set frame0 [ttk::labelframe .chooseLabel.frame0 -text "Choose your Label"]
+    set frame0 [ttk::frame .chooseLabel.frame0]
     grid $frame0 -padx 5p -pady 5p
 
 
@@ -590,7 +623,7 @@ proc chooseLabel {} {
     set frame1 [ttk::frame .chooseLabel.frame1]
     grid $frame1 -padx 5p -pady 5p
 
-    ttk::button $frame1.print -text "Print" -command {puts "line $lineNumber$labels"};#Shipping_Code::printCustomLabels $lineNumber$labels; destroy .chooseLabel
+    ttk::button $frame1.print -text "Print" -command {Shipping_Code::printCustomLabels $lines$labels; destroy .chooseLabel}
     ttk::button $frame1.close -text "Close" -command {destroy .chooseLabel}
 
     grid $frame1.print -column 0 -row 0 -sticky ne
@@ -601,3 +634,63 @@ proc chooseLabel {} {
 
 
 } ;# End of Shipping_Gui namespace
+
+proc Shipping_Gui::initMenu {} {
+    #****f* initMenu/importFiles
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2013 Casey Ackels
+    #
+    # FUNCTION
+    #	Initialize menus for the Addresses module
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log mb
+    ${log}::debug --START -- [info level 1]
+    
+    if {[winfo exists $mb.modMenu.quick]} {
+        destroy $mb.modMenu.quick
+    }
+    
+    # Disable menu items
+    $mb.file entryconfigure 0 -state disable
+
+    $mb.modMenu delete 0 end
+    
+    ## Change menu name
+    ##$mb entryconfigure Edit -label Distribution
+    ## Add cascade
+    #menu $mb.modMenu.quick
+    #$mb.modMenu add cascade -label [mc "Quick Add"] -menu $mb.modMenu.quick 
+    ##$mb.modMenu.quick add command -label [mc "JG Mail"]
+    ##$mb.modMenu.quick add command -label [mc "JG Inventory"]
+    #
+    #$mb.modMenu add separator
+    
+    $mb.modMenu add command -label [mc "Clear List"] -command {Shipping_Code::clearList}
+    $mb.modMenu add command -label [mc "Show Breakdown"] -command {Shipping_Gui::breakDown}
+    #$mb.modMenu add command -label [mc "Filters..."] -command {eAssist_tools::FilterEditor} -state disable
+    #$mb.modMenu add command -label [mc "Internal Samples"] -command {eAssistHelper::addCompanySamples} -state disable
+    ##$mb.modMenu add command -label [mc "Split"] -command {eAssistHelper::splitVersions}
+    #
+    #$mb.modMenu add separator
+    
+    $mb.modMenu add command -label [mc "Preferences"] -command {eAssistPref::launchPreferences}
+	
+    ${log}::debug --END -- [info level 1]
+} ;# Shipping_Gui::initMenu

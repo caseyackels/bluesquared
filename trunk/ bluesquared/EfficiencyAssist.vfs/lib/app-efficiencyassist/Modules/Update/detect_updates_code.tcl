@@ -48,33 +48,41 @@ proc vUpdate::saveCurrentVersion {} {
     #***
     global log cVersion program
     
-    # We've loaded all the saved variables, so we know what the 'old' version is.
-    set cVersion(oldFullVersion) [list $program(Version).$program(PatchLevel) $program(beta)]
+    set firstRun 0
+    ${log}::debug Entering SaveCurrentVersion
     
-    set cVersion(oldVersion) $program(Version)
-    set cVersion(oldPatchLevel) $program(PatchLevel)
-    set cVersion(oldbeta) $program(beta)
+    # Check to see if we've ran this before ...
+    if {[info exists program(Version)] == 0} {
+        set firstRun 1
+        ${log}::debug firstRun: $firstRun
+    }
     
+    if {$firstRun == 0} {
+        # We've loaded all the saved variables, so we know what the 'old' version is.
+        set cVersion(oldFullVersion) "$program(Version).$program(PatchLevel) $program(beta)"
+        
+        set cVersion(oldVersion) $program(Version)
+        set cVersion(oldPatchLevel) $program(PatchLevel)
+        set cVersion(oldbeta) $program(beta)
+    }
     
     set program(Version) 4
     set program(PatchLevel) 0.0 ;# Leading decimal is not needed
-    set program(beta) "Beta"
-    set program(fullVersion) [list $program(Version).$program(PatchLevel) $program(beta)]
+    set program(beta) "Beta 2"
+    set program(fullVersion) "$program(Version).$program(PatchLevel) $program(beta)"
     
     set program(Name) "Efficiency Assist"
-    set program(FullName) "$program(Name) - $program(Version).$program(PatchLevel) $program(beta)"
+    set program(FullName) "$program(Name) - $program(fullVersion)"
     
     tk appname $program(Name)
 
-    #set cVersion(Version) $version
-    #set cVersion(PatchLevel) $patchlevel
-    #set cVersion(Beta) $beta
-    
-    #set cVersion(newFullVersion) [list $cVersion(Version).$cVersion(PatchLevel) $cVersion(Beta)]
 
-
-    
-    vUpdate::whatVersion
+    if {$firstRun == 0} {
+        vUpdate::whatVersion
+        ${log}::debug Launching window firstrun: $firstRun = 0
+    } else {
+        return
+    }
 } ;#saveCurrentVersion
 
 
@@ -107,6 +115,7 @@ proc vUpdate::whatVersion {} {
     #***
     global log cVersion program
     
+    if {![info exists cVersion(oldbeta)]} {return}
     # cVersion is read from the code
     # program array is read from the config file
     
@@ -233,7 +242,7 @@ proc vUpdate::newVersion {txt expln} {
     set wvers(btn) [ttk::frame $win.btns]
     pack $wvers(btn) -pady 5p -padx 5p -anchor se
     
-    ttk::button $wvers(btn).chnglog -text [mc "View Changelog"] -command {BlueSquared_About::aboutWindow 2; destroy .newVers}
+    ttk::button $wvers(btn).chnglog -text [mc "View Release Notes"] -command {BlueSquared_About::aboutWindow 2; destroy .newVers}
     ttk::button $wvers(btn).ok -text [mc "OK"] -command {lib::savePreferences; destroy .newVers}
     
     grid $wvers(btn).chnglog -column 0 -row 0 -sticky e -pady 5p -padx 5p -ipadx 3p

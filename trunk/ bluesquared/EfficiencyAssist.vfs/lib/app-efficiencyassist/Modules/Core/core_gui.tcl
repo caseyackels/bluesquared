@@ -102,7 +102,8 @@ proc eAssist::parentGUI {} {
     menu $mb.help -tearoff 0 -relief raised -bd 2
     $mb add cascade -label [mc "Help"] -menu $mb.help
 
-    $mb.help add command -label [mc "About..."] -command { BlueSquared_About::aboutWindow }
+    $mb.help add command -label [mc "About..."] -command { BlueSquared_About::aboutWindow 1}
+    $mb.help add command -label [mc "Release Notes..."] -command { BlueSquared_About::aboutWindow 2}
 
 
     ## Create Separator Frame
@@ -219,8 +220,8 @@ proc eAssist::buttonBarGUI {args} {
             
             # .. setup the buttons on the button bar
             eAssist::remButtons $btn(Bar)
-            eAssist::addButtons [mc "Print Labels"] {} btn1 0 8p
-            eAssist::addButtons [mc "Exit"] exit btn2 1 0p
+            eAssist::addButtons [mc "Print Labels"] Shipping_Code::printLabels btn1 0 8p
+            eAssist::addButtons [mc "Print Breakdown"] Shipping_Gui::printbreakDown btn2 1 0p
 
             # .. launch the mode
             Shipping_Gui::shippingGUI
