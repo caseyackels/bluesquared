@@ -58,7 +58,7 @@ proc BlueSquared_About::aboutWindow {args} {
     # SEE ALSO
     #
     #***
-    global about program
+    global about program log
 
     toplevel .about
     wm title .about $program(Name)
@@ -90,7 +90,7 @@ proc BlueSquared_About::aboutWindow {args} {
     $nb add [ttk::frame $nb.f1] -text [mc "About"]
     $nb add [ttk::frame $nb.f2] -text [mc "Release Notes"]
     #$nb add [ttk::frame $nb.f3] -text [mc "Licenses"]
-    $nb select $nb.f1
+    #$nb select $nb.f1
     $nb select $nb.f$args
 
     ttk::notebook::enableTraversal $nb
@@ -98,21 +98,28 @@ proc BlueSquared_About::aboutWindow {args} {
     ##
     ## Tab 1 (About)
     ##
-    text $nb.f1.text -wrap word \
-                    -yscrollcommand [list $nb.f1.scrolly set] \
-                    -xscrollcommand [list $nb.f1.scrollx set]
+    set tab1 [ttk::frame $nb.f1.f1]
+    pack $tab1 -expand yes -fill both -padx 5p -pady 5p
+    
+    
+    
+    text $tab1.text -wrap word \
+                    -yscrollcommand [list $tab1.scrolly set] \
+                    -xscrollcommand [list $tab1.scrollx set]
 
-    ttk::scrollbar $nb.f1.scrolly -orient v -command [list $nb.f1.listbox yview]
-    ttk::scrollbar $nb.f1.scrollx -orient h -command [list $nb.f1.listbox xview]
+    ttk::scrollbar $tab1.scrolly -orient v -command [list $tab1.listbox yview]
+    ttk::scrollbar $tab1.scrollx -orient h -command [list $tab1.listbox xview]
 
-    pack $nb.f1.text -padx 5p -pady 5p
+    #pack $nb.f1.text -padx 5p -pady 5p
+    grid $tab1.text -column 0 -row 0
 
-    pack $nb.f1.scrolly
-    pack $nb.f1.scrollx
-
+    #pack $nb.f1.scrolly
+    #pack $nb.f1.scrollx
+    grid $tab1.scrolly -column 1 -row 0 -sticky nse
+    grid $tab1.scrollx -column 0 -row 1 -sticky ews
     # Enable the 'autoscrollbar'
-    ::autoscroll::autoscroll $nb.f1.scrolly
-    ::autoscroll::autoscroll $nb.f1.scrollx
+    ::autoscroll::autoscroll $tab1.scrolly
+    ::autoscroll::autoscroll $tab1.scrollx
 
 
 
@@ -156,7 +163,7 @@ proc BlueSquared_About::aboutWindow {args} {
     ## Button Bar
     ##
 
-    set buttonbar [ttk::frame $frame0.buttonbar]
+    set buttonbar [ttk::frame $frame0.buttonbar -padding 10]
     ttk::button $buttonbar.close -text [mc "Close"] -command { destroy .about }
 
     grid $buttonbar.close -column 0 -row 0 -sticky nse -ipadx 4p
@@ -165,7 +172,7 @@ proc BlueSquared_About::aboutWindow {args} {
     #bind $tab2.text <Configure> "$tab2.text.hr configure -width %w"
     #frame $tab2.text.hr -relief raised -height 2 -background gray
 
-    BlueSquared_About::aboutOpenFiles $nb.f1.text $tab2.text
+    BlueSquared_About::aboutOpenFiles $tab1.text $tab2.text
 
 
 
