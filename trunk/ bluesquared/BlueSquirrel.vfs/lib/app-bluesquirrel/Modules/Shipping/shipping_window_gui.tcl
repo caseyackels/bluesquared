@@ -169,7 +169,8 @@ proc shippingGUI {} {
 
     ttk::combobox $frame2a.cbox -textvar GS_textVar(shipvia) \
                                 -width 7 \
-                                -values [list "Freight" "Import"]
+                                -values [list "Freight" "Import"] \
+                                -state disabled
                                 #-validate key \
                                 #-validatecommand {Shipping_Code::filterKeys -textLength %S %W %P}
 
@@ -177,7 +178,6 @@ proc shippingGUI {} {
     ttk::button $frame2a.add -text "Add to List" -command {
             ;# Guard against the user inadvertantly hitting <Enter> or "Add" button without anything in the entry fields
             if {([info exists GS_textVar(destQty)] eq 0) || ($GS_textVar(destQty) eq "")} {return}
-
             Shipping_Code::addMaster $GS_textVar(destQty) $GS_textVar(batch) $GS_textVar(shipvia)
     }
 
@@ -265,7 +265,9 @@ foreach window "$frame2a.add $frame2a.entry1 $frame2a.entry2" {
     bind $window <Return> {
         ;# Guard against the user inadvertantly hitting <Enter> or "Add" button without anything in the entry fields
         if {[info exists GS_textVar(destQty)] eq 0} {return}
+        if {[info exists GS_textVar(shipvia)] eq 0} {set GS_textVar(shipvia) "N/A"}
         Shipping_Code::addMaster $GS_textVar(destQty) $GS_textVar(batch) $GS_textVar(shipvia)
+        #Shipping_Code::addMaster $GS_textVar(destQty) $GS_textVar(batch)
     }
 }
 

@@ -841,7 +841,8 @@ proc addMaster {destQty batch shipvia} {
     global GS_textVar
 
     # This shouldn't be needed, we have existing code in the [bind]ing, and in the button command
-    #if {$GS_textVar(destQty) eq ""} {return}
+    if {$GS_textVar(destQty) eq ""} {return}
+	if {[info exists GS_textVar(shipvia)] eq 0} {set GS_textVar(shipvia) "N/A"}
 
     Shipping_Code::insertInListbox $destQty $batch $shipvia
 

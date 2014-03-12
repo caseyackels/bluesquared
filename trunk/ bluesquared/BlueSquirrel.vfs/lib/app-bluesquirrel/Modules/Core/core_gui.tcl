@@ -72,7 +72,7 @@ proc blueSquirrel::parentGUI {} {
     puts "actual y: $GS_winGeom(main,y)"
 
     #wm geometry . 390x420
-    wm geometry . 390x425-$GS_winGeom(main,x)-$GS_winGeom(main,y)
+    wm geometry . 390x450-$GS_winGeom(main,x)-$GS_winGeom(main,y)
     update
 
     # Create the Menu's
