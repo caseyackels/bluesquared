@@ -501,8 +501,8 @@ proc printLabels {} {
                     puts "5 Line Label"
 
 		} else {
-		    exec $mySettings(path,bartender) /AF=$labelDir\\6LINEDB.btw /P /CLOSE
-			${log}::debug $mySettings(path,bartender) /AF=$labelDir\\6LINEDB.btw /P /CLOSE
+		    exec $mySettings(path,bartender) /AF=$labelDir\\6LINEDB.btw /P /CLOSE /X
+			${log}::debug $mySettings(path,bartender) /AF=$labelDir\\6LINEDB.btw /P /CLOSE /X
 	    }
 
 	} elseif {$GS_textVar(line4) != ""} {
@@ -513,8 +513,8 @@ proc printLabels {} {
                     puts "4 Line Label"
 
                 } else {
-		    exec $mySettings(path,bartender) /AF=$labelDir\\5LINEDB.btw /P /CLOSE
-			${log}::debug $mySettings(path,bartender) /AF=$labelDir\\5LINEDB.btw /P /CLOSE
+		    exec $mySettings(path,bartender) /AF=$labelDir\\5LINEDB.btw /P /CLOSE /X
+			${log}::debug $mySettings(path,bartender) /AF=$labelDir\\5LINEDB.btw /P /CLOSE /X
 	    }
 
 	} elseif {$GS_textVar(line3) != ""} {
@@ -525,24 +525,24 @@ proc printLabels {} {
                     puts "3 Line Label"
 
                 } else {
-		    exec $mySettings(path,bartender) /AF=$labelDir\\4LINEDB.btw /P /CLOSE
-			${log}::debug $mySettings(path,bartender) /AF=$labelDir\\4LINEDB.btw /P /CLOSE
+		    exec $mySettings(path,bartender) /AF=$labelDir\\4LINEDB.btw /P /CLOSE /X
+			${log}::debug $mySettings(path,bartender) /AF=$labelDir\\4LINEDB.btw /P /CLOSE /X
 	    }
 
 	} elseif {$GS_textVar(line2) != ""} {
 	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
                         Error_Message::errorMsg seattleMet2; return
 	    } else {
-		exec $mySettings(path,bartender) /AF=$labelDir\\3LINEDB.btw /P /CLOSE
-		${log}::debug $mySettings(path,bartender) /AF=$labelDir\\3LINEDB.btw /P /CLOSE
+		exec $mySettings(path,bartender) /AF=$labelDir\\3LINEDB.btw /P /CLOSE /X
+		${log}::debug $mySettings(path,bartender) /AF=$labelDir\\3LINEDB.btw /P /CLOSE /X
 	    }
 
 	} elseif {$GS_textVar(line1) != ""} {
 	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
                         Error_Message::errorMsg seattleMet2; return
 	    } else {
-		exec $mySettings(path,bartender) /AF=$labelDir\\2LINEDB.btw /P /CLOSE
-		${log}::debug $mySettings(path,bartender) /AF=$labelDir\\2LINEDB.btw /P /CLOSE
+		exec $mySettings(path,bartender) /AF=$labelDir\\2LINEDB.btw /P /CLOSE /X
+		${log}::debug $mySettings(path,bartender) /AF=$labelDir\\2LINEDB.btw /P /CLOSE /X
 	    }
 	}
 
@@ -580,7 +580,7 @@ proc printCustomLabels {args} {
 	${log}::debug Printing custom labels: $args
 	
 	set labelDir [join [split $mySettings(path,labelDir) /] \\]
-    exec $mySettings(path,bartender) /AF=$labelDir\\$args /P /CLOSE
+    exec $mySettings(path,bartender) /AF=$labelDir\\$args /P /CLOSE /X
     #puts "programPath(Bartend) /AF=programPath(LabelPath)\\$args /P /CLOSE"
 }
 
