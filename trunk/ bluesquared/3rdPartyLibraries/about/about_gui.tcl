@@ -67,7 +67,7 @@ proc BlueSquared_About::aboutWindow {args} {
     set locX [expr {([winfo screenwidth .] - [winfo width .]) / 2}]
     set locY [expr {([winfo screenheight .] - [winfo height .]) / 2}]
 
-    wm geometry .about 450x500+${locX}+${locY}
+    wm geometry .about 450x520+${locX}+${locY}
     #wm geometry .about +${locX}+${locY}
     
     if {$args eq ""} {set args 1}
@@ -77,13 +77,13 @@ proc BlueSquared_About::aboutWindow {args} {
     ##
     ## Parent Frame
     ##
-    set frame0 [ttk::frame .about.frame0]
+    set frame0 [ttk::frame .about.frame0 -padding 2]
     pack $frame0 ;#-expand yes -fill both ;#-pady 5p -padx 5p
 
     ##
     ## Notebook
     ##
-    set nb [ttk::notebook $frame0.nb]
+    set nb [ttk::notebook $frame0.nb -padding 10]
     pack $nb ;#-expand yes -fill both
 
 
@@ -100,21 +100,20 @@ proc BlueSquared_About::aboutWindow {args} {
     ##
     set tab1 [ttk::frame $nb.f1.f1]
     pack $tab1 -expand yes -fill both -padx 5p -pady 5p
-    
-    
-    
+
     text $tab1.text -wrap word \
+                    -tabs 4 \
+                    -tabstyle wordprocessor \
                     -yscrollcommand [list $tab1.scrolly set] \
                     -xscrollcommand [list $tab1.scrollx set]
 
     ttk::scrollbar $tab1.scrolly -orient v -command [list $tab1.listbox yview]
     ttk::scrollbar $tab1.scrollx -orient h -command [list $tab1.listbox xview]
 
-    #pack $nb.f1.text -padx 5p -pady 5p
-    grid $tab1.text -column 0 -row 0
 
-    #pack $nb.f1.scrolly
-    #pack $nb.f1.scrollx
+    grid $tab1.text -column 0 -row 0
+    grid columnconfigure $tab1 $tab1.text -weight 1
+
     grid $tab1.scrolly -column 1 -row 0 -sticky nse
     grid $tab1.scrollx -column 0 -row 1 -sticky ews
     # Enable the 'autoscrollbar'
@@ -126,11 +125,8 @@ proc BlueSquared_About::aboutWindow {args} {
     ##
     ## Tab 2 (Release Notes)
     ##
-
     set tab2 [ttk::frame $nb.f2.frame1]
     pack $tab2 -expand yes -fill both -padx 5p -pady 5p
-    #pack $tab2 -padx 5p -pady 5p
-
 
     text $tab2.text -wrap word \
                     -tabs 4 \
@@ -141,7 +137,7 @@ proc BlueSquared_About::aboutWindow {args} {
     ttk::scrollbar $tab2.scrolly -orient v -command [list $tab2.text yview]
     ttk::scrollbar $tab2.scrollx -orient h -command [list $tab2.text xview]
 
-    grid $tab2.text -column 0 -row 0 ;#-sticky news;# -padx 5p -pady 5p
+    grid $tab2.text -column 0 -row 0
     grid columnconfigure $tab2 $tab2.text -weight 1
 
     grid $tab2.scrolly -column 1 -row 0 -sticky nse
@@ -163,7 +159,7 @@ proc BlueSquared_About::aboutWindow {args} {
     ## Button Bar
     ##
 
-    set buttonbar [ttk::frame $frame0.buttonbar -padding 10]
+    set buttonbar [ttk::frame $frame0.buttonbar]
     ttk::button $buttonbar.close -text [mc "Close"] -command { destroy .about }
 
     grid $buttonbar.close -column 0 -row 0 -sticky nse -ipadx 4p
