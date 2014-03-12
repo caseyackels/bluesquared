@@ -1,13 +1,8 @@
-program(Version) 4
-program(PatchLevel) 0.0
-program(beta) Alpha
-GS_filePathSetup(checkToggle) 0
+GS_filePathSetup(checkToggle) 1
 GS_filePathSetup(lookInDirectory) C:/Users/Casey.Ackels/Downloads
-GS_filePathSetup(labelDirectory) 
+GS_filePathSetup(labelDirectory) C:/Users/Casey.Ackels/Downloads
 GS_filePathSetup(enable,Bartender) 1
 GS_filePathSetup(saveInDirectory) C:/Users/Casey.Ackels/Desktop
-GS(gui,lastFrame) customerService_GUI
-#**** Setup Specific ****#
 company(address2) 
 company(state) OR
 company(city) Portland
@@ -24,9 +19,11 @@ logSettings(currentLogLevel) Debug
 logSettings(displayConsole) 1
 logSettings(loglevel) debug
 logSettings(levels) Debug Info Notice Warn Error Critical Alert Emergency
-boxLabelInfo(currentBoxLabel) 4Line
-boxLabelInfo(labelNames) 4Line
+boxLabelInfo(3Line,labelSetup) 3 C:/Users/Casey.Ackels/Downloads
+boxLabelInfo(currentBoxLabel) 5Line
+boxLabelInfo(labelNames) 4Line 3Line 5Line
 boxLabelInfo(4Line,labelSetup) 5 C:/Users/Casey.Ackels/Downloads
+boxLabelInfo(5Line,labelSetup) 5 C:/Users/Casey.Ackels/Downloads
 intlSetup(PAYERList) SENDER THIRDPARTY
 intlSetup(UOMList) Each Box
 intlSetup(enterLicense) 
