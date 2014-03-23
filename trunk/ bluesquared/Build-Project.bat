@@ -119,6 +119,9 @@ ping -n 1 127.0.0.1>nul
 :: Move the exe file to the main dir.
 move /Y Builds\%programName%-%version%.exe .
 
+::tclkitsh858.exe sdx.kit lsk BlueSquirrel-1.6.7-October2011.exe
+::tclkitsh858.exe sdx.kit unwrap BlueSquirrel-1.6.7-October2011.kit
+
 
 ECHO %time%: Your project has been built: %programName%-%version%.exe
 :: Time Delay

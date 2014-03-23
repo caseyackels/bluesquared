@@ -1,6 +1,10 @@
 = Version 4.0.0 Beta 3
 == Box Labels
+* [UPDATE] BarTender now is closed after every label processing. This is by design; BarTender is loaded into memory so it won't take as long to print as if it were completely shut down.
+
 == About Window
+* [UPDATE] Now both the Change Log and About tabs display formatted text.
+
 == Batch Maker
 
 --
