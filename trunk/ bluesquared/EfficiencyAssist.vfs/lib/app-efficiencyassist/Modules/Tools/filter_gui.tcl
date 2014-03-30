@@ -100,7 +100,6 @@ proc eAssist_tools::FilterEditor {} {
     ttk::checkbutton $frame1.chkbtn4 -text [mc "Remove Punctuation"] -command {eAssist_tools::closeFilterEditor reset} -variable filter(run,stripUDL)
         tooltip::tooltip $frame1.chkbtn4 [mc "Affects all Columns! Re-assign your Distribution Types if you run this."]
     
-    ttk::separator $frame1.sepBar -orient h
     
 
     grid $frame1.chkbtn1 -column 0 -row 0 -pady 2p -padx 5p -sticky w
@@ -108,7 +107,6 @@ proc eAssist_tools::FilterEditor {} {
     grid $frame1.chkbtn2 -column 0 -row 1 -pady 2p -padx 5p -sticky w
     grid $frame1.chkbtn3 -column 0 -row 2 -pady 2p -padx 5p -sticky w
     grid $frame1.chkbtn4 -column 0 -row 3 -pady 2p -padx 5p -sticky w
-    grid $frame1.sepBar  -column 0 -row 4 -columnspan 2 -row 0 -sticky ew
     
 
     
