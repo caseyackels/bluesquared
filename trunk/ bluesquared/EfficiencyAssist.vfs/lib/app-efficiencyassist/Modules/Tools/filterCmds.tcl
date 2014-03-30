@@ -275,7 +275,9 @@ proc eAssistHelper::runFilters {} {
     #${log}::debug --START-- [info level 1]
     
     set filter(progbarProgess) 0 ;# reset the progressbar before continuing
-	set ColumnCount [$files(tab3f2).tbl columncount]
+	# Grab the list of columns that we want to execute on, then get a count of how many. This will allow us to only execute on desired columns, and bypass certain columns.
+    set ColumnCount [$files(tab3f2).tbl columncount]
+    
 	set RowCount [llength [$files(tab3f2).tbl getcells 0,0 end,0]]
     
     # build the runlist to determine which filters to run
