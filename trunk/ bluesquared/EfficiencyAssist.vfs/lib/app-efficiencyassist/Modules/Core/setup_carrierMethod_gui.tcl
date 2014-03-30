@@ -110,7 +110,7 @@ proc eAssistSetup::carrierMethod_GUI {} {
     grid $f1.entry      -column 0 -row 0 -sticky news
     grid $f1.lbox       -column 0 -row 1 -sticky news
     grid $f1.yPayment   -column 1 -row 1 -sticky ens
-    grid $f1.xPayment   -column 0 -row 1 -sticky esw
+    grid $f1.xPayment   -column 0 -row 2 -sticky esw
     
     
     grid columnconfigure $f1 $f1.lbox -weight 1
@@ -118,10 +118,14 @@ proc eAssistSetup::carrierMethod_GUI {} {
 
     bind $f1.entry <Return> {
         eAssistSetup::addCarrierSetup PAYMENT $f1.entry $f1.lbox
+        # Always display the last entry
+        $f3.lbox see end
     }
     
     bind $f1.entry <KP_Enter> {
         eAssistSetup::addCarrierSetup PAYMENT $f1.entry $f1.lbox
+        # Always display the last entry
+        $f3.lbox see end
     } ;# So both enter key's work the same way
     
     bind $f1.lbox <Delete> {
@@ -161,8 +165,8 @@ proc eAssistSetup::carrierMethod_GUI {} {
     
     grid $f2.entry      -column 0 -row 0 -sticky swe
     grid $f2.lbox       -column 0 -row 1 -sticky news
-    grid $f2.xShipment  -column 0 -row 1 -sticky ews
-    grid $f2.yShipment  -column 2 -row 0 -sticky ens
+    grid $f2.xShipment  -column 0 -row 2 -sticky ews
+    grid $f2.yShipment  -column 1 -row 1 -sticky ens
     
     ::autoscroll::autoscroll $f2.xShipment ;# Enable the 'autoscrollbar'
     ::autoscroll::autoscroll $f2.yShipment
@@ -208,27 +212,32 @@ proc eAssistSetup::carrierMethod_GUI {} {
     listbox $f3.lbox \
                     -xscrollcommand [list $f3.xCarriers set] \
                     -yscrollcommand [list $f3.yCarriers set]
+
     
     # setup the Autoscrollbars
     ttk::scrollbar $f3.xCarriers -orient h -command [list $f3.lbox xview]
     ttk::scrollbar $f3.yCarriers -orient v -command [list $f3.lbox yview]
     
-    ::autoscroll::autoscroll $f3.xCarriers ;# Enable the 'autoscrollbar'
-    ::autoscroll::autoscroll $f3.yCarriers
-    
     grid $f3.entry      -column 0 -row 0 -sticky swe
     grid $f3.lbox       -column 0 -row 1 -sticky news
-    grid $f3.xCarriers  -column 0 -row 1 -sticky ews
-    grid $f3.yCarriers  -column 2 -row 0 -sticky ens
+    grid $f3.xCarriers  -column 0 -row 2 -sticky ews
+    grid $f3.yCarriers  -column 1 -row 1 -sticky ens
+    
+    ::autoscroll::autoscroll $f3.xCarriers ;# Enable the 'autoscrollbar'
+    ::autoscroll::autoscroll $f3.yCarriers
 
     
     # Bindings
     bind $f3.entry <Return> {
         eAssistSetup::addCarrierSetup CARRIERS $f3.entry $f3.lbox
+        # Always display the last entry
+        $f3.lbox see end
     }
     
     bind $f3.entry <KP_Enter> {
         eAssistSetup::addCarrierSetup CARRIERS $f3.entry $f3.lbox
+        # Always display the last entry
+        $f3.lbox see end
     } ;# So both enter key's work the same way
     
     bind $f3.lbox <Delete> {
@@ -270,16 +279,20 @@ proc eAssistSetup::carrierMethod_GUI {} {
     
     grid $f4.entry      -column 0 -row 0 -sticky swe
     grid $f4.lbox       -column 0 -row 1 -sticky news
-    grid $f4.xRateType  -column 0 -row 1 -sticky ews
-    grid $f4.yRateType  -column 2 -row 0 -sticky ens
+    grid $f4.xRateType  -column 0 -row 2 -sticky ews
+    grid $f4.yRateType  -column 1 -row 1 -sticky ens
 
     # Bindings
     bind $f4.entry <Return> {
         eAssistSetup::addCarrierSetup RATES $f4.entry $f4.lbox
+        # Always display the last entry
+        $f3.lbox see end
     }
     
     bind $f4.entry <KP_Enter> {
         eAssistSetup::addCarrierSetup RATES $f4.entry $f4.lbox
+        # Always display the last entry
+        $f3.lbox see end
     } ;# So both enter key's work the same way
     
     bind $f4.lbox <Delete> {
@@ -318,16 +331,20 @@ proc eAssistSetup::carrierMethod_GUI {} {
     
     grid $f5.entry           -column 0 -row 0 -sticky swe
     grid $f5.lbox            -column 0 -row 1 -sticky news
-    grid $f5.xShippingClass  -column 0 -row 1 -sticky ews
-    grid $f5.yShippingClass  -column 2 -row 0 -sticky ens
+    grid $f5.xShippingClass  -column 0 -row 2 -sticky ews
+    grid $f5.yShippingClass  -column 1 -row 1 -sticky ens
 
     # Bindings
     bind $f5.entry <Return> {
         eAssistSetup::addCarrierSetup SHIPPINGCLASS $f5.entry $f5.lbox
+        # Always display the last entry
+        $f3.lbox see end
     }
     
     bind $f5.entry <KP_Enter> {
         eAssistSetup::addCarrierSetup SHIPPINGCLASS $f5.entry $f5.lbox
+        # Always display the last entry
+        $f3.lbox see end
     } ;# So both enter key's work the same way
     
     bind $f5.lbox <Delete> {

@@ -79,6 +79,7 @@ proc eAssistSetup::addressHeaders_GUI {} {
                                                     0  "Output Header"
                                                     0  "Widget"
                                                     0  "Highlight"
+													0  "Always Display"
                                                     } \
                                         -showlabels yes \
                                         -height 10 \
@@ -125,6 +126,10 @@ proc eAssistSetup::addressHeaders_GUI {} {
                                             -editwindow ttk::entry \
                                             -labelalign center
        
+	    $w(hdr_frame1a).listbox columnconfigure 6 -name "AlwaysDisplay" \
+                                            -editable yes \
+                                            -editwindow ttk::combobox \
+                                            -labelalign center
 
         
         

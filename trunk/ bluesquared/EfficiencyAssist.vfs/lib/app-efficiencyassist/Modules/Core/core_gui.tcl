@@ -130,7 +130,7 @@ proc eAssist::parentGUI {} {
     # Start the gui
     # All frames that make up the GUI are children to .container  
     if {![info exists settings(currentModule)]} {
-        set settings(currentModule) [list Setup 2]
+        set settings(currentModule) [list BatchMaker 1]
     }
     
     #${log}::debug CurrentModule: $settings(currentModule)

@@ -49,7 +49,7 @@ proc importFiles::fileImportGUI {} {
     # SEE ALSO
     #
     #***
-    global log w options mySettings headerParent
+    global log w options mySettings headerParent process
     #${log}::debug Height: [winfo height .] - [winfo x .]
     #${log}::debug Width: [winfo width .] - [winfo y .]
     
@@ -79,8 +79,9 @@ proc importFiles::fileImportGUI {} {
     set f0 [ttk::labelframe $w(wi).top -text [mc "Open file"]]
     pack $f0 -side top -fill both -padx 5p -pady 5p
     
-    ttk::label $f0.txt1 -text [mc "File Name:"]
+    ttk::label $f0.txt1 -text [mc "File Name"]
     ttk::entry $f0.entry1 -textvariable process(fileName) -width 50
+        $f0.entry1 delete 0 end
     
     grid $f0.txt1 -column 0 -row 0 -pady 5p -sticky e ;#-padx 2p
     grid $f0.entry1 -column 1 -row 0 -pady 5p -sticky ew ;#-padx 2p
@@ -208,6 +209,7 @@ proc importFiles::fileImportGUI {} {
     # Enable the 'autoscrollbar'
     ::autoscroll::autoscroll $f3.scrolly
     ::autoscroll::autoscroll $f3.scrollx
+    
 
 } ;# importFiles::fileImportGUI
 

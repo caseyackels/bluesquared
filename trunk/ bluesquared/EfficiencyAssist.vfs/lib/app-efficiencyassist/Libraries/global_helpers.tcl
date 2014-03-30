@@ -357,6 +357,45 @@ proc eAssist_Global::detectWin {args} {
     ${log}::debug --END-- [info level 1]
 } ;# eAssist_Global::detectWin
 
+proc eAssist_Global::at {time args} {
+    #****f* at/eAssist_Global
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Richard Suchenwith
+    #
+    # FUNCTION
+    #	eAssist_Global::at <time> <command>
+    #
+    # SYNOPSIS
+    #	have a command execute at a certain time
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+	# 	Taken from http://wiki.tcl.tk/808
+	# 	Original author: RS
+    #
+    # SEE ALSO
+    #
+    #***
+    global log
+    ${log}::debug --START-- [info level 1]
+    
+	if {[llength $args] == 1} {set args [lindex $args 0]}
+    
+	set dt [expr {([clock scan $time]-[clock seconds])*1000}]
+    
+	after $dt $args
+	
+    ${log}::debug --END-- [info level 1]
+} ;# eAssist_Global::at
+
 
 proc eAssist_Global::launchFilters {} {
     #****f* launchFilters/eAssist_Global

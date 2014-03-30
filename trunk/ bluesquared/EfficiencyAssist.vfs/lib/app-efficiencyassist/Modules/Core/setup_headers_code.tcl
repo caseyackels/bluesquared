@@ -255,6 +255,9 @@ proc eAssistSetup::startCmdHdr {tbl row col text} {
             Widget  {
                 $win configure -values [list ttk::entry ttk::combobox] -state readonly
                 }
+            AlwaysDisplay   {
+                $win configure -values [list Yes No] -state readonly
+            }
             default {
             }
     }

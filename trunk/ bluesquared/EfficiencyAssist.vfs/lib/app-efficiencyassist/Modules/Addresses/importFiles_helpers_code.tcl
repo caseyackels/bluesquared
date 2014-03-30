@@ -114,7 +114,7 @@ proc eAssistHelper::mapHeader {} {
     # SEE ALSO
     #
     #***
-    global log files position
+    global log files position w
 	${log}::debug --START-- [info level 1]
 	
 	# setup the variables
@@ -280,19 +280,6 @@ proc eAssistHelper::resetImportInterface {} {
     #***
     global log w process position
     ${log}::debug --START -- [info level 1]
-    
-	#Enable the widgets
-	#$w(nbk) tab 1 -state normal
-	#$w(nbk) tab 2 -state disable
-	
-	$w(nbk).f1.top.btn2 configure -state normal
-	$w(nbk).f1.btns.btn1 configure -state normal
-	$w(nbk).f1.btns.btn2 configure -state normal
-	
-	# Clear out the listboxes and tables
-	$w(nbk).f1.lbox1.listbox delete 0 end
-	$w(nbk).f1.lbox3.listbox delete 0 end
-	$w(nbk).f3.nb.f1.f2.tbl delete 0 end
 	
 	# Clear out the variables
 	if {[array exists process] == 1} {

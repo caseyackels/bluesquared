@@ -208,13 +208,27 @@ proc 'eAssist_initVariables {} {
         # Set default last frame for Setup
         set program(lastFrame) company_GUI
     }
+	
+	if {![info exists program(checkUpdateTime)]} {
+		set program(checkUpdateTime) 15:02
+	}
 
 	if {![info exists boxLabelInfo(labelNames)]} {
         # Setup variable for holding list of box label names
         set boxLabelInfo(labelNames) ""
     }
-	
 
+	if {![info exists program(updateFilePath)]} {
+		# Path to the MANIFEST file (located on a shared drive)
+		set program(updateFilePath) ""
+	}
+	
+	if {![info exists program(updateFileName)]} {
+		# Update file name - defualts to MANIFEST
+		set program(updateFileName) MANIFEST
+	}
+
+	
 
 	#-------- Initialize variables
 	
@@ -396,6 +410,9 @@ proc 'eAssist_initVariables {} {
         set header(residential) [list ResidentialDelivery]
     }
     
+	
+	# Schedule a time to check for updates
+	eAssist_Global::at $program(checkUpdateTime) vUpdate::checkForUpdates
 } ;# 'eAssist_initVariables
 
 
@@ -436,7 +453,6 @@ proc 'eAssist_checkPrefFile {} {
 	set mySettings(Folder) eAssistSettings
 	
 	if {![info exists program(Name)]} {set program(Name) "EfficiencyAssist"}
-	#if {![info exists mySettings(Home)]} {set mySettings(Home) [file join $env(APPDATA) $mySettings(Folder)]}
 
 	
 	## FOLDER
@@ -544,18 +560,7 @@ proc 'eAssist_loadSettings {} {
 	set log [logger::init eAssist_svc]
 	logger::utils::applyAppender -appender colorConsole
 	${log}::notice "Initialized eAssist_svc logging"
-    
-	#${log}::notice "Platform: $tcl_platform(osVersion)"
-    #${log}::notice [parray tcl_platform]
-    
-    #set program(Version) 4
-    #set program(PatchLevel) 1.0 ;# Leading decimal is not needed
-    #set program(beta) "Alpha"
-    #set program(Name) "Efficiency Assist"
-    #set program(FullName) "$program(Name) - $program(Version).$program(PatchLevel) $program(beta)"
-    
-    
-    
+
     # Set required configuration changes here, i.e.
     # set cVersion(Setup,message) <informational message>
     # set cVersion(Setup,newconfig) <setup page>, <setup page, ...
@@ -591,9 +596,6 @@ proc 'eAssist_loadSettings {} {
 	set settingsFile [file join $mySettings(Home) $mySettings(File)]
     if {[catch {open $settingsFile r} fd]} {
         ${log}::notice "File doesn't exist $mySettings(File); loading defaults"
-
-        # This shouldn't be needed since we are executing it later ...
-		#'eAssist_initVariables ;# load defaults
         
     } else {
         set settingsFile [split [read $fd] \n]
@@ -603,7 +605,6 @@ proc 'eAssist_loadSettings {} {
                 if {$line == ""} {continue}
                 set l_line [split $line " "]
                 set [lindex $l_line 0] [join [lrange $l_line 1 end] " "]
-                #${log}::notice "line: $line"
         }
     }
 	
@@ -613,6 +614,24 @@ proc 'eAssist_loadSettings {} {
 	
 	# Set options in the Options DB
 	option add *tearOff 0
+	
+#	# check for updates
+#    set fd "" ;# Make sure we are cleared out before reusing.
+#	set updateFile [file join $program(updateFilePath) $program(updateFileName)]
+#    if {[catch {open $updateFile r} fd]} {
+#        ${log}::notice "File doesn't exist $program(updateFileName); loading defaults"
+#
+#    } else {
+#        set updateFile [split [read $fd] \n]
+#        catch {chan close $fd}
+#        
+#        foreach line $updateFile {
+#                if {$line == ""} {continue}
+#                set l_line [split $line " "]
+#                set [lindex $l_line 0] [join [lrange $l_line 1 end] " "]
+#                #${log}::notice "line: $line"
+#        }
+#    }
 	
 }
 

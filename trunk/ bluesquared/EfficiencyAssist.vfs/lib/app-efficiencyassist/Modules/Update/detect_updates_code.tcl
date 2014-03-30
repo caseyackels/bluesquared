@@ -77,7 +77,7 @@ proc vUpdate::saveCurrentVersion {} {
     tk appname $program(Name)
 
 
-    if {$firstRun == 0} {
+    if {$firstRun == 1} {
         vUpdate::whatVersion
         ${log}::debug Launching window firstrun: $firstRun = 0
     } else {
@@ -250,3 +250,51 @@ proc vUpdate::newVersion {txt expln} {
     
     
 } ;#newVersion
+
+#proc vUpdate::checkForUpdates {} {
+#    #****f* checkForUpdates/vUpdate
+#    # AUTHOR
+#    #	Casey Ackels
+#    #
+#    # COPYRIGHT
+#    #	(c) 2011-2014 Casey Ackels
+#    #
+#    # FUNCTION
+#    #	Periodically check to see if we can install a new update
+#    #
+#    # SYNOPSIS
+#    #
+#    #
+#    # CHILDREN
+#    #	N/A
+#    #
+#    # PARENTS
+#    #	
+#    #
+#    # NOTES
+#    #   This is executed in 'eAssist_initVariables (startup.tcl)
+#    #
+#    # SEE ALSO
+#    #
+#    #***
+#    global log
+#    ${log}::debug --START-- [info level 1]
+#    
+#    ${log}::notice FOUND AN UPDATE!
+#    
+#    # file mtime <installerFile> ;# get time the installer was last accessed
+#    # clock seconds ;# Get current time
+#    # compare with our saved last access time $program(LastAccessedInstaller)
+#    # If file is new, display a window telling user to relaunch program
+#    
+#    set directory [file join Z: EfficiencyAssist]
+#    
+#    set dirContents [glob eaInst* $directory]
+#    
+#    foreach item $dirContents {
+#        set itemM [string trim eaInst.ex]
+#    }
+#
+#	
+#    ${log}::debug --END-- [info level 1]
+#} ;# vUpdate::checkForUpdates

@@ -52,8 +52,8 @@ proc importFiles::readFile {fileName lbox} {
     ${log}::debug file name: $fileName
     ${log}::debug file tail: [file tail $fileName]
     
-    ${log}::debug RESET INTERFACE
-    #eAssistHelper::resetImportInterface
+    #${log}::debug RESET INTERFACE
+    eAssistHelper::resetImportInterface
     
     if {$fileName eq ""} {return}
     
@@ -135,14 +135,25 @@ proc importFiles::processFile {win} {
     #
     #***
     global log files headerAddress position process headerParams headerParent dist w job
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
     # Close the file importer window
     destroy $win
     
     # Whitelist for required columns, so that they won't be hidden.
     # this should be user configurable
-    set headerParent(whiteList) [list count DistributionType CarrierMethod]
+    #set headerParent(whiteList) [list count DistributionType CarrierMethod]
+    
+    ## This block of code should probably be put into the setup_headers_code.tcl file; and instead of hardcoding the column, we should query the table its located in
+    ## to retrieve the column location.
+    if {[info exists headerParent(whiteList)]} {unset headerParent(whiteList)}
+    foreach item $headerParent(headerList) {
+        if {[lindex $headerParams($item) 4] eq "Yes"} {
+            lappend headerParent(whiteList) $item
+        }
+    }
+    # Ensure the 'count' column is whitelisted
+    if {[lsearch $headerParent(whiteList) count] == -1} {lappend headerParent(whiteList) count}
       
     set process(versionList) ""
     
@@ -172,6 +183,7 @@ proc importFiles::processFile {win} {
         set l_line [join [split $l_line ,] ""] ;# remove all comma's
         #l_line = entire row of records
         # [lindex $l_line $index] = Individual record
+        #${log}::debug Raw Record: $l_line
 
         for {set x 0} {$ColumnCount > $x} {incr x} {
             set ColumnName [$files(tab3f2).tbl columncget $x -name]
@@ -208,10 +220,11 @@ proc importFiles::processFile {win} {
                         if {$bgColor != ""} {
                             set backGround $bgColor
                         } else {
-                            set backGround yellow
+                            set backGround yellow ;# default
                         }
                     }
                     
+                    # Dynamically build the list of versions
                     switch -glob [string tolower $ColumnName] {
                         *version    { if {[lsearch $process(versionList) $listData] == -1} {
                                         lappend process(versionList) $listData}
@@ -228,6 +241,7 @@ proc importFiles::processFile {win} {
 
         }
         $files(tab3f2).tbl insert end $newRow
+        #${log}::debug Final Record: $newRow
         
         if {[info exists maxCharColumn] == 1} {
             foreach column $maxCharColumn {
@@ -257,7 +271,7 @@ proc importFiles::processFile {win} {
     # Enable menu items
     importFiles::enableMenuItems
     
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# importFiles::processFile
 
 
