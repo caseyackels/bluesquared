@@ -190,7 +190,19 @@ proc eAssistHelper::calcSamples {tbl col} {
     ${log}::debug --START -- [info level 1]
 
 	set myList [string map [list \{\} 0] [$tbl getcolumn $col]]
-	set returnCount [expr [join $myList +]]
+	set returnCount [catch {expr [join $myList +]} err]
+	
+	if {$returnCount == 1} {
+		Error_Message::errorMsg BM001
+		#${log}::debug Cannot sum quantity, Alpha-Numerics!
+		#${log}::debug Error: $err
+		#${log}::debug myList: $myList
+		#${log}::debug Return: $returnCount
+		return
+	} else {
+		# err, will contain the total count.
+		set returnCount $err
+	}
 	
 
 	return $returnCount

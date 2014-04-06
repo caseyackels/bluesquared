@@ -52,8 +52,8 @@ proc importFiles::readFile {fileName lbox} {
     ${log}::debug file name: $fileName
     ${log}::debug file tail: [file tail $fileName]
     
-    #${log}::debug RESET INTERFACE
-    eAssistHelper::resetImportInterface
+    # Reset variables because we might be importing a 2nd file
+    eAssistHelper::resetImportInterface 1
     
     if {$fileName eq ""} {return}
     
@@ -139,6 +139,9 @@ proc importFiles::processFile {win} {
     
     # Close the file importer window
     destroy $win
+    
+    # Reset the entire interface
+    eAssistHelper::resetImportInterface 2
     
     # Whitelist for required columns, so that they won't be hidden.
     # this should be user configurable
@@ -264,9 +267,11 @@ proc importFiles::processFile {win} {
     # Get total copies
     set job(TotalCopies) [eAssistHelper::calcSamples $files(tab3f2).tbl [$files(tab3f2).tbl columncget Quantity -name]]
     
-    # Insert columns that we should always see
-    $files(tab3f2).tbl insertcolumns 0 0 "..."
-    $files(tab3f2).tbl columnconfigure 0 -name "count" -showlinenumbers 1 -labelalign center
+    # Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
+    if {[$files(tab3f2).tbl findcolumnname count] == -1} {
+        $files(tab3f2).tbl insertcolumns 0 0 "..."
+        $files(tab3f2).tbl columnconfigure 0 -name "count" -showlinenumbers 1 -labelalign center
+    }
     
     # Enable menu items
     importFiles::enableMenuItems

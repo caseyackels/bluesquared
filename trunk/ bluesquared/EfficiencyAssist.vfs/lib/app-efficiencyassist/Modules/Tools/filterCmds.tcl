@@ -331,7 +331,13 @@ proc eAssistHelper::runFilters {} {
 
     set filter(progbarFilterName) [mc "Starting the filters"]
     
-	#foreach value $filter(runList) {}      
+    # This allows us to only filter on certain columns. The only column that we may want, is Notes, but we will want a special Punctuation filter for it.
+    set colBlackList [list Company Attention Address1 Address2 Address3 City State Zip Phone Quantity]
+    foreach col $colBlackList {
+        lappend idxCols [$files(tab3f2).tbl columnindex $col]
+    }
+	
+    #foreach value $filter(runList) {}      
         # Master loop to cycle through each cell.
         # Rows
         for {set x 0} {$RowCount > $x} {incr x} {
@@ -340,7 +346,8 @@ proc eAssistHelper::runFilters {} {
             update
             
             # Columns
-            for {set y 0} {$ColumnCount > $y} {incr y} {
+            #for {set y 0} {$ColumnCount > $y} {incr y} {}
+            foreach y $idxCols {
 
                 set ColumnName [$files(tab3f2).tbl columncget $y -name]
                 #${log}::debug Column Name: $ColumnName

@@ -81,6 +81,10 @@ proc Error_Message::errorMsg {code args} {
                             set message2 [mc "Error Location: %s" $code]
                             set title $defaultTitle
                             set icon warning}
+        BM001           {set message [mc "Alpha Characters were detected, quantity will not be totaled. Remove the non-numeric characters"]
+                            set message2 [mc "Error Location: %s" $code]
+                            set title [mc Warning]
+                            set icon warning}
         default         {set message [mc "Unknown Error Message"]
                             set message2 ""
                             set title $defaultTitle

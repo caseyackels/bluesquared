@@ -78,7 +78,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries autoscroll]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries csv]
-	lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.10]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.11]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tcom3.9]
 	#lappend ::auto_path [file join [file dirname [info script]] Libraries twapi]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
@@ -105,7 +105,7 @@ proc 'eAssist_sourceReqdFiles {} {
 
 	## 3rd Party modules
 	#package require tkdnd
-	package require Tablelist_tile 5.10
+	package require Tablelist_tile 5.11
 	package require tcom
 	#package require twapi
 	package require tooltip

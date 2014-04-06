@@ -229,6 +229,7 @@ proc eAssist::buttonBarGUI {args} {
             # .. save the settings
             #eAssistSetup::SaveGlobalSettings
             lib::savePreferences
+            $mb.file entryconfigure 1 -state disable
         }
         BatchMaker   {
             ${log}::debug Entering $module mode
@@ -248,6 +249,7 @@ proc eAssist::buttonBarGUI {args} {
             # .. save the settings
             #eAssistSetup::SaveGlobalSettings
             lib::savePreferences
+            $mb.file entryconfigure 1 -state normal
             }
         Setup       {
             ${log}::debug Entering $module mode
@@ -264,7 +266,8 @@ proc eAssist::buttonBarGUI {args} {
             
             # .. save the settings
             #eAssistSetup::SaveGlobalSettings
-            lib::savePreferences 
+            lib::savePreferences
+            $mb.file entryconfigure 1 -state disable
         }
         default     {}
     }

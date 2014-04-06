@@ -253,7 +253,7 @@ proc eAssistHelper::unHideColumns {args} {
 } ;# eAssistHelper::unHideColumns
 
 
-proc eAssistHelper::resetImportInterface {} {
+proc eAssistHelper::resetImportInterface {args} {
     #****f* resetImportInterface/eAssistHelper
     # AUTHOR
     #	Casey Ackels
@@ -262,10 +262,12 @@ proc eAssistHelper::resetImportInterface {} {
     #	(c) 2011-2013 Casey Ackels
     #
     # FUNCTION
-    #	Resets the import file interface
+    #	eAssistHelper::resetImportInterface <1|2>
     #
     # SYNOPSIS
-    #
+    #	Resets the import file interface.
+	#	1 = Reset variables
+	#	2 = Reset GUI
     #
     # CHILDREN
     #	N/A
@@ -281,13 +283,19 @@ proc eAssistHelper::resetImportInterface {} {
     global log w process position
     ${log}::debug --START -- [info level 1]
 	
-	# Clear out the variables
-	if {[array exists process] == 1} {
-		unset process
-	}
 	
-	if {[array exists position] == 1} {
-		unset position
+	if {$args == 1} {
+	# Clear out the variables
+		if {[array exists process] == 1} {
+			unset process
+		}
+		
+		if {[array exists position] == 1} {
+			unset position
+		}
+	} else {
+		# Completely reset GUI
+		importFiles::eAssistGUI
 	}
 	
     ${log}::debug --END -- [info level 1]

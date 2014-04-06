@@ -96,8 +96,11 @@ proc importFiles::fileImportGUI {} {
     
     # This option should be saved, and read from the config file.
         set options(AutoAssignHeader) 1
+        set options(ClearExistingData) 1
     ttk::checkbutton $f0.chkbtn1 -text [mc "Auto-Assign Header Names"] -variable options(AutoAssignHeader)
+    ttk::checkbutton $f0.chkbtn2 -text [mc "Clear existing data before importing"] -variable options(ClearExistingData) -state disable
     grid $f0.chkbtn1 -column 0 -columnspan 2 -row 1 -sticky w
+    grid $f0.chkbtn2 -column 0 -columnspan 2 -row 2 -sticky w
 
     
     #ttk::label $frame1a.txt2 -text [mc "Number of Records:"]
