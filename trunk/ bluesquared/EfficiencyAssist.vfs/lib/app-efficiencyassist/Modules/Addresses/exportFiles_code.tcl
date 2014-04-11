@@ -69,15 +69,17 @@ proc export::DataToExport {} {
     
         
     # HEADER: Write output
-    chan puts $myFile(data) [::csv::join "OrderNumber $headerParent(outPutHeader)"]
-    ${log}::debug [::csv::join "OrderNumber $headerParent(outPutHeader)"]
+    # OrderType is a hardcoded value, this should be moved to a user option.
+    chan puts $myFile(data) [::csv::join "OrderNumber $headerParent(outPutHeader) OrderType"]
+    ${log}::debug [::csv::join "OrderNumber $headerParent(outPutHeader) OrderType"]
 
     set rowCount [$files(tab3f2).tbl size]
     for {set x 0} {$rowCount > $x} {incr x} {
         # RECORDS: Write output one row at a time.
-        chan puts $myFile(data) [::csv::join [$files(tab3f2).tbl get $x]]
+        # Version is a hardcoded value, this should be moved to a user option.
+        chan puts $myFile(data) [::csv::join "[$files(tab3f2).tbl get $x] Version"]
         #chan puts $myFile(data) [::csv::join [join [$files(tab3f2).tbl get $x $x]]]
-        ${log}::debug ROWS: [::csv::join [$files(tab3f2).tbl get $x]]
+        ${log}::debug ROWS: [::csv::join "[$files(tab3f2).tbl get $x] Version"]
     }
     
 	chan close $myFile(data)
