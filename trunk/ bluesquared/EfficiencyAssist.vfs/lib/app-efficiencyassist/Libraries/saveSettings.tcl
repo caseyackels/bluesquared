@@ -38,7 +38,7 @@ proc eAssistSetup::SaveGlobalSettings {} {
     #	N/A
     #
     # CHILDREN
-    #	N/A
+    #	eAssistSetup::saveHeaderParams
     #
     # PARENTS
     #	eAssistSetup::saveBoxLabels
@@ -70,6 +70,10 @@ proc eAssistSetup::SaveGlobalSettings {} {
         ${log}::critical -FAIL- Can't read/write to $mySettings(Home)! Any changes to Setup was not saved.
         return
     }
+    
+    # Update Header parameters
+    eAssistSetup::saveHeaderParams
+    
     
     ${log}::notice Starting to write out Setup settings ...
     # ******************************

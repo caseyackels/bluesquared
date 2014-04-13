@@ -262,6 +262,11 @@ proc eAssistSetup::startCmdHdr {tbl row col text} {
             }
     }
     
+    # Update the internal list with the current text so that we can run calculations on it.
+    ${log}::debug Before cellconfigure: $text
+    #$tbl cellconfigure $row,$col
+    #${log}::debug executing saveHeaderParams...
+    #eAssistSetup::saveHeaderParams
     return $text
 
     ${log}::debug --END-- [info level 1]
@@ -315,8 +320,11 @@ proc eAssistSetup::endCmdHdr {tbl row col text} {
             default {}
     }
     
-
-    
+    # Update the internal list with the current text so that we can run calculations on it.
+    #$tbl cellconfigure $row,$col
+    #eAssistSetup::saveHeaderParams
+    ${log}::debug executing saveHeaderParams...
+    eAssistSetup::saveHeaderParams
     return $text
 
     ${log}::debug --END-- [info level 1]
@@ -351,18 +359,50 @@ proc eAssistSetup::populateComboBox {} {
     global log w headerParams headerParent
     ${log}::debug --START -- [info level 1]
     
-	#${log}::debug getcells 0,1 - end,1: [$w(hdr_frame1a).listbox getcells 0,1 end,1]
     set headerParent(headerList) [$w(hdr_frame1a).listbox getcells 0,1 end,1]
-    #${log}::debug End of the List: [lrange $headerList end end]
     
     if {[lrange $headerParent(headerList) end end] == "{}"} {
         #Remove the last list item, since it is empty.
         set headerParent(headerList) [lrange $headerParent(headerList) 0 end-1]
     }
     
-    $w(hdr_frame1b).cbox1 configure -values $headerParent(headerList) 
+    $w(hdr_frame1b).cbox1 configure -values $headerParent(headerList)
     
-    set rCount [expr {[llength [$w(hdr_frame1a).listbox getcells 0,0 end,0]]} -1]
+    eAssistSetup::saveHeaderParams
+    
+    ${log}::debug --END -- [info level 1]
+} ;# eAssistSetup::populateComboBox
+
+
+proc eAssistSetup::saveHeaderParams {} {
+    #****f* saveHeaderParams/eAssistSetup
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	Save the header, and header parameters
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	eAssistSetup::populateComboBox, eAssistSetup::SaveGlobalSettings
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log w headerParams 
+    ${log}::debug --START-- [info level 1]
+    
+	set rCount [expr {[llength [$w(hdr_frame1a).listbox getcells 0,0 end,0]]} -1]
     for {set row 0} {$row <= $rCount} {incr row} {
         ${log}::debug Header Name, then the rest of the params
         ${log}::debug HEADER/PARAMS: [$w(hdr_frame1a).listbox getcells $row,1 $row,1] [$w(hdr_frame1a).listbox getcells $row,2 $row,end]
@@ -374,7 +414,6 @@ proc eAssistSetup::populateComboBox {} {
                 ${log}::debug Last line is blank, skipping...
             }
     }
-
     
-    ${log}::debug --END -- [info level 1]
-} ;# eAssistSetup::populateComboBox
+    ${log}::debug --END-- [info level 1]
+} ;# eAssistSetup::saveHeaderParams
