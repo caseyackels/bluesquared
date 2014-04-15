@@ -577,11 +577,12 @@ proc printCustomLabels {args} {
     #***
     global mySettings log
 	
-	${log}::debug Printing custom labels: $args
+	#${log}::debug Printing custom labels: [join $args ""]
+	set args [join $args ""]
 	
 	set labelDir [join [split $mySettings(path,labelDir) /] \\]
     exec $mySettings(path,bartender) /AF=$labelDir\\$args /P /CLOSE /X
-    #puts "programPath(Bartend) /AF=programPath(LabelPath)\\$args /P /CLOSE"
+    #${log}::debug programPath(Bartend) /AF=programPath(LabelPath)\\$args /P /CLOSE
 }
 
 proc truncateHistory {} {

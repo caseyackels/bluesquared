@@ -598,6 +598,7 @@ proc chooseLabel {lines} {
     toplevel .chooseLabel
     wm title .chooseLabel "Choose your Label"
     wm transient .chooseLabel .
+    ${log}::debug Using lines: $lines
 
     # x = horizontal
     # y = vertical
@@ -612,9 +613,10 @@ proc chooseLabel {lines} {
     set frame0 [ttk::frame .chooseLabel.frame0]
     grid $frame0 -padx 5p -pady 5p
 
+    set labels ""
 
-    ttk::radiobutton $frame0.white -text "White Label - Standard" -variable labels -value LINEDB.btw
-    ttk::radiobutton $frame0.green -text "Green Label - Special" -variable labels -value LINEDB_Seattle.btw
+    ttk::radiobutton $frame0.white -text "White Label - Standard" -variable labels -value LINEDB.btw -command "set lines $lines"
+    ttk::radiobutton $frame0.green -text "Green Label - Special" -variable labels -value LINEDB_Seattle.btw -command "set lines $lines"
     #$frame0.white invoke ;# set the default
 
     grid $frame0.white -column 0 -row 0 -padx 5p -pady 5p -sticky w
@@ -622,8 +624,8 @@ proc chooseLabel {lines} {
 
     set frame1 [ttk::frame .chooseLabel.frame1]
     grid $frame1 -padx 5p -pady 5p
-
-    ttk::button $frame1.print -text "Print" -command {Shipping_Code::printCustomLabels $lines$labels; destroy .chooseLabel}
+   
+    ttk::button $frame1.print -text "Print" -command {Shipping_Code::printCustomLabels $lines $labels; destroy .chooseLabel}
     ttk::button $frame1.close -text "Close" -command {destroy .chooseLabel}
 
     grid $frame1.print -column 0 -row 0 -sticky ne
