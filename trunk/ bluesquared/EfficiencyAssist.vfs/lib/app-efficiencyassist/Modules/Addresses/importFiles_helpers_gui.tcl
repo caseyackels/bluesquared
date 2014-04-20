@@ -260,7 +260,17 @@ proc eAssistHelper::insertItems {tbl} {
 						grid $f2.txt$i -column 0 -row $x -sticky news -pady 5p -padx 5p
 						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
 					}
-					default			{ ${log}::debug Item not setup to use the ComboBox!}
+					shippingclass		{
+						ttk::label $f2.txt$i -text [mc "$header"]
+						$wid $f2.$x$header -values $carrierSetup(ShippingClass) -textvariable txtVariable
+						$f2.$x$header delete 0 end
+						$f2.$x$header configure -state readonly
+						
+						grid $f2.txt$i -column 0 -row $x -sticky news -pady 5p -padx 5p
+						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
+					}
+					default			{
+						${log}::notice Item not setup to use the ComboBox!}
 				}
 			} else {
 						ttk::label $f2.txt$i -text [mc "$header"]
