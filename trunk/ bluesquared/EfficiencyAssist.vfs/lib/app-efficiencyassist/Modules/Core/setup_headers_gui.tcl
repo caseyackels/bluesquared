@@ -80,6 +80,7 @@ proc eAssistSetup::addressHeaders_GUI {} {
                                                     0  "Widget"
                                                     0  "Highlight"
 													0  "Always Display"
+													0  "Required"
                                                     } \
                                         -showlabels yes \
                                         -height 10 \
@@ -130,6 +131,11 @@ proc eAssistSetup::addressHeaders_GUI {} {
                                             -editable yes \
                                             -editwindow ttk::combobox \
                                             -labelalign center
+		
+		$w(hdr_frame1a).listbox columnconfigure 7 -name "Required" \
+											-editable yes \
+											-editwindow ttk::combobox \
+											-labelalign center
 
         
         
@@ -142,12 +148,12 @@ proc eAssistSetup::addressHeaders_GUI {} {
                 $w(hdr_frame1a).listbox insert end "{} $hdrInfo $headerParams($hdrInfo)"
                
                 #${log}::debug HEADER: [list $hdrInfo [lindex $headerParams($hdrInfo) 0] [lindex $headerParams($hdrInfo) 1]]
-                ${log}::debug _array name: $hdrInfo
-                ${log}::debug field 2: [lindex $headerParams($hdrInfo) 0]
-                ${log}::debug field 3: [lindex $headerParams($hdrInfo) 1]
-                ${log}::debug field 4: [lindex $headerParams($hdrInfo) 2]
-                ${log}::debug field 5: [lindex $headerParams($hdrInfo) 3]
-                ${log}::debug field 6: [lindex $headerParams($hdrInfo) 4]
+                #${log}::debug _array name: $hdrInfo
+                #${log}::debug field 2: [lindex $headerParams($hdrInfo) 0]
+                #${log}::debug field 3: [lindex $headerParams($hdrInfo) 1]
+                #${log}::debug field 4: [lindex $headerParams($hdrInfo) 2]
+                #${log}::debug field 5: [lindex $headerParams($hdrInfo) 3]
+                #${log}::debug field 6: [lindex $headerParams($hdrInfo) 4]
             }
     }
         

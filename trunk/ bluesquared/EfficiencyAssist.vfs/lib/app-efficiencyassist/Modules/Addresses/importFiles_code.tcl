@@ -147,8 +147,7 @@ proc importFiles::processFile {win} {
     # this should be user configurable
     #set headerParent(whiteList) [list count DistributionType CarrierMethod]
     
-    ## This block of code should probably be put into the setup_headers_code.tcl file; and instead of hardcoding the column, we should query the table its located in
-    ## to retrieve the column location.
+    ## Dynamically query the header setup params, to know which columns should be whitelisted.
     if {[info exists headerParent(whiteList)]} {unset headerParent(whiteList)}
     foreach item $headerParent(headerList) {
         if {[lindex $headerParams($item) 4] eq "Yes"} {
@@ -490,17 +489,23 @@ proc importFiles::insertColumns {tbl} {
         $tbl insertcolumns end 0 $hdr
         
         set myWidget [lindex $headerParams($hdr) 2]
-        
         if {$myWidget == ""} {
             # Just in case an entry wasn't filled out, lets make a default.
             set myWidget ttk::entry
+        }
+        
+        if {[lindex $headerParams($hdr) 5] eq "Yes"} {
+            set hdrFG red
+            } else {
+                set hdrFG black
         }
 
         $tbl columnconfigure $x \
                             -name $hdr \
                             -labelalign center \
                             -editable yes \
-                            -editwindow $myWidget
+                            -editwindow $myWidget \
+                            -labelforeground $hdrFG
         
         # Ensure that we don't have to manually expand this column ...
         if {$hdr eq "DistributionType"} {$tbl columnconfigure $x -width $distWidth}

@@ -258,6 +258,9 @@ proc eAssistSetup::startCmdHdr {tbl row col text} {
             AlwaysDisplay   {
                 $win configure -values [list Yes No] -state readonly
             }
+            Required    {
+                $win configure -values [list Yes No] -state readonly
+            }
             default {
             }
     }
