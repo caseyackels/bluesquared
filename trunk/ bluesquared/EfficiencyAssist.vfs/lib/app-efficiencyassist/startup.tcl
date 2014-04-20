@@ -412,7 +412,7 @@ proc 'eAssist_initVariables {} {
     
 	
 	# Schedule a time to check for updates
-	eAssist_Global::at $program(checkUpdateTime) vUpdate::checkForUpdates
+	#eAssist_Global::at $program(checkUpdateTime) vUpdate::checkForUpdates
 } ;# 'eAssist_initVariables
 
 

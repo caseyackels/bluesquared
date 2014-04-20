@@ -65,7 +65,7 @@ proc eAssistSetup::packagingTypes_GUI {} {
 
     ttk::label $f1.lbl -text [mc "Name"]
     ttk::entry $f1.entry -textvariable packagingSetup(enterContainerType)
-    listbox $f1.lbox
+    listbox $f1.lbox -width 30
     
     ## Grid
     grid $f1.lbl -column 0 -row 0 -sticky e
@@ -99,7 +99,7 @@ proc eAssistSetup::packagingTypes_GUI {} {
     
     ttk::label $f2.lbl -text [mc "Name"]
     ttk::entry $f2.entry -textvariable packagingSetup(enterPackageType)
-    listbox $f2.lbox
+    listbox $f2.lbox -width 30
     
     grid $f2.lbl -column 0 -row 0 -sticky e
     grid $f2.entry -column 1 -row 0 -sticky news

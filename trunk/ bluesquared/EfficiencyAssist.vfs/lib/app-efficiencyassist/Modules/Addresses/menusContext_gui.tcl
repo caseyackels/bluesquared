@@ -168,6 +168,8 @@ proc IFMenus::clearRowContents {tbl} {
 	
     ${log}::debug --END-- [info level 1]
 } ;# IFMenus::clearRowContents
+
+
 proc IFMenus::pasteRow {tbl} {
     #****f* pasteRow/IFMenus
     # AUTHOR
@@ -242,6 +244,8 @@ proc IFMenus::copyRow {tbl} {
 	
     ${log}::debug --END-- [info level 1]
 } ;# IFMenus::copyRow
+
+
 proc IFMenus::copyCell {tbl} {
     #****f* copyCell/IFMenus
     # AUTHOR

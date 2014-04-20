@@ -210,6 +210,7 @@ proc eAssistSetup::carrierMethod_GUI {} {
     
     ttk::entry $f3.entry -textvariable carrierSetup(enterCarrier)   
     listbox $f3.lbox \
+                    -width 25 \
                     -xscrollcommand [list $f3.xCarriers set] \
                     -yscrollcommand [list $f3.yCarriers set]
 

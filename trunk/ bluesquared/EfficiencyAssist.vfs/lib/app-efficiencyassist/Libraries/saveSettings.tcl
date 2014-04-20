@@ -71,8 +71,8 @@ proc eAssistSetup::SaveGlobalSettings {} {
         return
     }
     
-    # Update Header parameters
-    eAssistSetup::saveHeaderParams
+    # Update Header parameters; we'll get an error if we haven't gone to the Header page
+    catch {eAssistSetup::saveHeaderParams} err
     
     
     ${log}::notice Starting to write out Setup settings ...
