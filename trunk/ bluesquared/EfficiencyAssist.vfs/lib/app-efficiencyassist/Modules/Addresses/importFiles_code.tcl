@@ -143,10 +143,7 @@ proc importFiles::processFile {win} {
     # Reset the entire interface
     eAssistHelper::resetImportInterface 2
     
-    # Whitelist for required columns, so that they won't be hidden.
-    # this should be user configurable
-    #set headerParent(whiteList) [list count DistributionType CarrierMethod]
-    
+    # Whitelist for required columns, so that they won't be hidden.   
     ## Dynamically query the header setup params, to know which columns should be whitelisted.
     if {[info exists headerParent(whiteList)]} {unset headerParent(whiteList)}
     foreach item $headerParent(headerList) {
@@ -257,7 +254,9 @@ proc importFiles::processFile {win} {
     }
     
     # save the original version list as origVersionList, so we can keep the process(versionList) variable updated with user changed versions
-    set process(origVersionList) $process(versionList)
+    if {[info exists process(versionList)]} {
+        set process(origVersionList) $process(versionList)
+    }
     
     # Initialize popup menus
     IFMenus::tblPopup $files(tab3f2).tbl browse .tblMenu

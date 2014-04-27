@@ -70,13 +70,15 @@ proc eAssistSetup::carrierMethod_GUI {} {
     # Setup the notebook
     #
     $w(carrier) add [ttk::frame $w(carrier).ctbl] -text [mc "Build Carrier Tables"]
-    $w(carrier) add [ttk::frame $w(carrier).bcarrier] -text [mc "Build Carrier"] -state disabled
+    $w(carrier) add [ttk::frame $w(carrier).bcarrier] -text [mc "Build Carrier"]
     $w(carrier) add [ttk::frame $w(carrier).bshipvia] -text [mc "Build Ship Via"] -state disabled
     $w(carrier) add [ttk::frame $w(carrier).frtrates] -text [mc "Freight Rates"] -state disabled
     $w(carrier) add [ttk::frame $w(carrier).upsrates] -text [mc "UPS Rates"] -state disabled
     $w(carrier) add [ttk::frame $w(carrier).fedexrates] -text [mc "FedEx Rates"] -state disabled
     
     $w(carrier) select $w(carrier).ctbl
+
+    
     ##
     ## Tab 1 (Build Carrier Tables)
     ##
@@ -362,6 +364,34 @@ proc eAssistSetup::carrierMethod_GUI {} {
             $f5.lbox insert end $item
         }
     }
+    
+    ##
+    ## Tab 2 (Build Carrier)
+    ##
+    
+    #
+    # --- Frame 1 Carrier
+    #
+    set f1_bcarrier [ttk::labelframe $w(carrier).bcarrier.f1 -text [mc "Carrier"] -padding 10]
+    grid $f1_bcarrier -column 0 -row 0 -pady 5p -padx 5p -sticky new
+    
+    ttk::label $f1_bcarrier.txt -text [mc "Carrier"]
+    ttk::combobox $f1_bcarrier.cbox -values [$f3.lbox get 0 end] \
+                                    -state readonly
+    ttk::label $f1_bcarrier.txt1 -text [mc "Weight Range"]
+    ttk::entry $f1_bcarrier.entry1
+    
+    ttk::label $f1_bcarrier.txt2 -text [mc "to"]
+    ttk::entry $f1_bcarrier.entry2
+    
+    ## Grid
+    grid $f1_bcarrier.txt -column 0 -row 0 -sticky news
+    grid $f1_bcarrier.cbox -column 1 -row 0 -sticky news
+    
+    grid $f1_bcarrier.txt1 -column 0 -row 1 -sticky news
+    grid $f1_bcarrier.entry1 -column 1 -row 1
+    grid $f1_bcarrier.txt2 -column 2 -row 1
+    grid $f1_bcarrier.entry2 -column 3 -row 1
 } ;# eAssistSetup::carrierMethod_GUI
 
 
