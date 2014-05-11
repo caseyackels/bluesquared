@@ -7,6 +7,7 @@
 * [UPDATE] Now both the Change Log and About tabs display formatted text.
 
 == Batch Maker
+* [UPDATE] If a version doesn't exist in the file, we will insert the default of 'Version 1'; which Planner uses as their default.
 
 --
 

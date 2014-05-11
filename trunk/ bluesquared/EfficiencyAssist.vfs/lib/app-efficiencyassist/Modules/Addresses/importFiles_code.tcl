@@ -196,6 +196,15 @@ proc importFiles::processFile {win} {
             } else {
                 set index [string trimleft $index 0]
             }
+            
+            # Set the default if no data for versions exist.
+            if {$tmpHeader eq "10_Version"} {
+                #${log}::debug tmpHeader: $tmpHeader, Data: [string trim [lindex $l_line $index]], index: $index
+                if {[string trim [lindex $l_line $index]] == {}} {
+                    #${log}::debug No version found, inserting default
+                    set l_line [lreplace $l_line $index $index "Version 1"]
+                }
+            }
 
             # Ensure that we only use columns for processing when needed. Required columns should not go through the processing below.
             if {[lsearch -nocase $headerParent(whiteList) $ColumnName] == -1} {
@@ -225,8 +234,17 @@ proc importFiles::processFile {win} {
                     
                     # Dynamically build the list of versions
                     switch -glob [string tolower $ColumnName] {
-                        *version    { if {[lsearch $process(versionList) $listData] == -1} {
-                                        lappend process(versionList) $listData}
+                        *version    {
+                                        if {[lsearch $process(versionList) $listData] == -1} {
+                                                lappend process(versionList) $listData
+                                        }
+                                        #if {$listData == {}} {
+                                        #    ${log}::debug No data found: $listData
+                                        #    if {[lsearch $process(versionList) "Version 1"] == -1} {
+                                        #        ${log}::debug Version is unique: $listData
+                                        #            lappend process(versionList) "Version 1"
+                                        #    }
+                                        #}
                                     }
                         default     {}
                     }
