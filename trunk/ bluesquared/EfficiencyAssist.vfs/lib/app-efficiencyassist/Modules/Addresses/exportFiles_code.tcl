@@ -43,7 +43,19 @@ proc export::DataToExport {} {
     ${log}::debug --START-- [info level 1]
     
     
-    ${log}::debug File Name: $mySettings(job,fileName)
+    if {[info exists mySettings(job,fileName)] != 1} {
+        ${log}::debug Job number is not filled in!
+        return
+    }
+    
+    foreach val [list Number Name Title] {
+        if {![info exists job($val)]} {
+            ${log}::debug Aborting... job($val) doesn't exist. Please fill in the $val field.
+            return
+            }
+    }
+    
+    ${log}::notice Default file name: $mySettings(job,fileName)
 	
 	if {[info exists fileName]} {unset fileName}
 	
@@ -57,12 +69,13 @@ proc export::DataToExport {} {
 	}
 	set fileName [join $fileName]
 	
-	${log}::debug File Name: $fileName
+	${log}::debug Actual file name: $fileName
     
-    set myFile(data) [open [file join [eAssist_Global::SaveFile $fileName]] w]
-    #set myFile(data) [catch {[open [eAssist_Global::SaveFile $fileName] w]} err]
+    #set myFile(data) [open [file join [eAssist_Global::SaveFile $fileName]] w]
+    set myFile(data) [catch {[open [eAssist_Global::SaveFile $fileName] w]} err]
     #${log}::debug Writing to file [file join $mySettings(outFilePath) Test_file.csv]
     if {[info exists err]} {
+        ${log}::notice Aborting... The Save As window was closed without a file name.
         ${log}::debug ERROR: $err
         return
     }

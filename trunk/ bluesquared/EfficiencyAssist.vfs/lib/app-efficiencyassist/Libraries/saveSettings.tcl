@@ -237,7 +237,10 @@ proc lib::savePreferences {} {
     chan puts $fd "program(beta) $program(beta)"
     chan puts $fd "program(updateFilePath) $program(updateFilePath)"
     chan puts $fd "program(updateFileName) $program(updateFileName)"
-    chan puts $fd "GS(gui,lastFrame) $GS(gui,lastFrame)"
+    
+    if {[info exists GS(gui,lastFrame)]} {
+        chan puts $fd "GS(gui,lastFrame) $GS(gui,lastFrame)"
+    }
     
     # Write out entire arrays
     foreach value [array names settings] {
