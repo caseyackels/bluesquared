@@ -159,6 +159,7 @@ proc importFiles::processFile {win} {
     set ColumnCount [$files(tab3f2).tbl columncount]
     # Index (i.e. 01, from 01_HeaderName)
     set FileHeaders [lsort [array names position]]
+    #${log}::debug FileHeaders: $FileHeaders
     
     foreach record $process(dataList) {
         # .. Skip over any 'blank' lines in Excel
@@ -188,7 +189,12 @@ proc importFiles::processFile {win} {
             set ColumnName [$files(tab3f2).tbl columncget $x -name]
 
             set tmpHeader [lindex $FileHeaders [lsearch -nocase $FileHeaders *$ColumnName]]
+
             set index [lrange [split $tmpHeader _] 0 0]
+            #set indexHdr [lrange [split $tmpHeader _] 1 1]
+         
+            ${log}::debug Current Column: $ColumnName
+            ${log}::debug tmpHeader: $tmpHeader
 
             if {[string compare $index 00] == 0} {
                 # This is the first record so we only want to strip the leading 0, not both.
@@ -197,63 +203,62 @@ proc importFiles::processFile {win} {
                 set index [string trimleft $index 0]
             }
             
-            # Set the default if no data for versions exist.
-            if {$tmpHeader eq "10_Version"} {
-                #${log}::debug tmpHeader: $tmpHeader, Data: [string trim [lindex $l_line $index]], index: $index
+            ## Set the default if no data for versions exist.
+            if {[string match -nocase *version $tmpHeader]} {
                 if {[string trim [lindex $l_line $index]] == {}} {
-                    #${log}::debug No version found, inserting default
+                    ${log}::notice No version was found, inserting default...
                     set l_line [lreplace $l_line $index $index "Version 1"]
                 }
             }
 
-            # Ensure that we only use columns for processing when needed. Required columns should not go through the processing below.
-            if {[lsearch -nocase $headerParent(whiteList) $ColumnName] == -1} {
-                if {$index == ""} {
+            if {$index == ""} {                    
+                ${log}::debug Index: $index
+                
+                lappend newRow ""
+                
+                if {[lsearch -nocase $headerParent(whiteList) $ColumnName] == -1} {
                     # If we dont have an index for it, then lets hide the column aswell.
                     # This will not hide columns that have no data in it, just columns that were not in the original file.
+                
+                    ${log}::notice $ColumnName is not on the white list
+                    ${log}::notice $ColumnName doesn't contain any data
+                    ${log}::notice Hiding $ColumnName ...
                     $files(tab3f2).tbl columnconfigure $x -hide yes
-                    
-                    lappend newRow ""
-                } else {
-                    set listData [string trim [lindex $l_line $index]]
-    
-                    
-                    # Figure out if the listData contains more chars than allowed; at the same time set the highlight configuration if it does exceed the limits
-                    if {[string length $listData] > [lindex $headerParams($ColumnName) 0]} {
-                        ${log}::debug List: $listData - Length: [string length $listData]
-                        lappend maxCharColumn $x
-                        
-                        set bgColor [lindex $headerParams($ColumnName) 3]
-                        
-                        if {$bgColor != ""} {
-                            set backGround $bgColor
-                        } else {
-                            set backGround yellow ;# default
-                        }
-                    }
-                    
-                    # Dynamically build the list of versions
-                    switch -glob [string tolower $ColumnName] {
-                        *version    {
-                                        if {[lsearch $process(versionList) $listData] == -1} {
-                                                lappend process(versionList) $listData
-                                        }
-                                        #if {$listData == {}} {
-                                        #    ${log}::debug No data found: $listData
-                                        #    if {[lsearch $process(versionList) "Version 1"] == -1} {
-                                        #        ${log}::debug Version is unique: $listData
-                                        #            lappend process(versionList) "Version 1"
-                                        #    }
-                                        #}
-                                    }
-                        default     {}
-                    }
-                    
-                    
-                    # Create the list of values
-                    lappend newRow $listData
                 }
-            }
+
+            } else {
+                set listData [string trim [lindex $l_line $index]]
+
+                # Figure out if the listData contains more chars than allowed; at the same time set the highlight configuration if it does exceed the limits
+                if {[string length $listData] > [lindex $headerParams($ColumnName) 0]} {
+                    #${log}::debug List: $listData - Length: [string length $listData]
+                    lappend maxCharColumn $x
+                    
+                    set bgColor [lindex $headerParams($ColumnName) 3]
+                    
+                    if {$bgColor != ""} {
+                        set backGround $bgColor
+                    } else {
+                        set backGround yellow ;# default
+                    }
+                }
+                
+                # Dynamically build the list of versions
+                switch -glob [string tolower $ColumnName] {
+                    *version    {
+                                    if {[lsearch $process(versionList) $listData] == -1} {
+                                            lappend process(versionList) $listData
+                                    }
+                                }
+                    default     {}
+                }
+                
+                
+                # Create the list of values
+                lappend newRow $listData
+                ${log}::debug Position: [llength $newRow]
+                    
+                }
             #${log}::debug NewRow: $newRow
 
         }
@@ -284,10 +289,10 @@ proc importFiles::processFile {win} {
     set job(TotalCopies) [eAssistHelper::calcSamples $files(tab3f2).tbl [$files(tab3f2).tbl columncget Quantity -name]]
     
     # Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
-    if {[$files(tab3f2).tbl findcolumnname count] == -1} {
-        $files(tab3f2).tbl insertcolumns 0 0 "..."
-        $files(tab3f2).tbl columnconfigure 0 -name "count" -showlinenumbers 1 -labelalign center
-    }
+    #if {[$files(tab3f2).tbl findcolumnname count] == -1} {
+    #    $files(tab3f2).tbl insertcolumns 0 0 "..."
+    #    $files(tab3f2).tbl columnconfigure 0 -name "count" -showlinenumbers 1 -labelalign center
+    #}
     
     # Enable menu items
     importFiles::enableMenuItems

@@ -72,12 +72,19 @@ proc export::DataToExport {} {
 	${log}::debug Actual file name: $fileName
     
     #set myFile(data) [open [file join [eAssist_Global::SaveFile $fileName]] w]
-    set myFile(data) [catch {[open [eAssist_Global::SaveFile $fileName] w]} err]
+    # don't open the file yet, because we may have canceled the Save As dialog...
+    set myFile(data) [file join [eAssist_Global::SaveFile $fileName]]
+    
+    #${log}::debug myFile(data) - $myFile(data)
+    #set myFile(data) {[open [eAssist_Global::SaveFile $fileName] w]} err]
     #${log}::debug Writing to file [file join $mySettings(outFilePath) Test_file.csv]
-    if {[info exists err]} {
+    if {$myFile(data) == {}} {
         ${log}::notice Aborting... The Save As window was closed without a file name.
-        ${log}::debug ERROR: $err
+        #${log}::debug ERROR: $err
         return
+    } else {
+        # open the file
+        set myFile(data) [open $myFile(data) w]
     }
     
         
