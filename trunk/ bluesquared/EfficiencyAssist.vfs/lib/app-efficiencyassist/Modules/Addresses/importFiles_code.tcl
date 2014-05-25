@@ -134,7 +134,7 @@ proc importFiles::processFile {win} {
     #   IFMenus::tblPopup
     #
     #***
-    global log files headerAddress position process headerParams headerParent dist w job
+    global log files headerAddress position process headerParams headerParent dist w job L_states
     #${log}::debug --START-- [info level 1]
     
     # Close the file importer window
@@ -193,8 +193,8 @@ proc importFiles::processFile {win} {
             set index [lrange [split $tmpHeader _] 0 0]
             #set indexHdr [lrange [split $tmpHeader _] 1 1]
          
-            ${log}::debug Current Column: $ColumnName
-            ${log}::debug tmpHeader: $tmpHeader
+            #${log}::debug Current Column: $ColumnName
+            #${log}::debug tmpHeader: $tmpHeader
 
             if {[string compare $index 00] == 0} {
                 # This is the first record so we only want to strip the leading 0, not both.
@@ -212,7 +212,7 @@ proc importFiles::processFile {win} {
             }
 
             if {$index == ""} {                    
-                ${log}::debug Index: $index
+                #${log}::debug Index: $index
                 
                 lappend newRow ""
                 
@@ -246,17 +246,26 @@ proc importFiles::processFile {win} {
                 # Dynamically build the list of versions
                 switch -glob [string tolower $ColumnName] {
                     *version    {
-                                    if {[lsearch $process(versionList) $listData] == -1} {
-                                            lappend process(versionList) $listData
+                                if {[lsearch $process(versionList) $listData] == -1} {
+                                        lappend process(versionList) $listData
                                     }
-                                }
+                    }
+                    state       {
+                        set getZip [lindex $FileHeaders [lsearch -nocase $FileHeaders *zip]]
+                        set idxZip [string trimleft [lrange [split $getZip _] 0 0] 0]
+                        
+                        importFiles::detectCountry $l_line $listData $getZip $idxZip                        
+                    }
+                    *zip        {
+                        ${log}::debug Zip code: $listData
+                    }
                     default     {}
                 }
                 
                 
                 # Create the list of values
                 lappend newRow $listData
-                ${log}::debug Position: [llength $newRow]
+                #${log}::debug Position: [llength $newRow]
                     
                 }
             #${log}::debug NewRow: $newRow
@@ -575,3 +584,68 @@ proc importFiles::enableMenuItems {} {
 	
     ${log}::debug --END-- [info level 1]
 } ;# importFiles::enableMenuItems
+
+
+proc importFiles::detectCountry {l_line state zip idxZip} {
+    #****f* detectCountry/importFiles
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	Detect if the state exists in the US, if it doesn't look at the zip code. Ultimately, either inserting the country ISO code or highlighting the Country field
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #   $l_line = the entire row of data being read in.
+    #
+    # SEE ALSO
+    #
+    #***
+    global log L_states L_countryCodes
+    ${log}::debug --START-- [info level 1]
+    
+    set domestic yes
+    
+    set zip [string trim [lindex $l_line $idxZip]
+    
+    ${log}::debug State-Zip: $state - $zip]
+    ${log}::debug US State? [lsearch -nocase $L_states $state]
+    
+    if {[lsearch -nocase $L_states $state] == -1} {
+        ${log}::debug State not found - $state
+        set domestic no
+    }
+    
+    if {$domestic eq "no"} {
+        # Check for common abbreviations for canada, mexico and japan
+        if {[lsearch -nocase $L_countryCodes $state] == -1} {
+            ${log}::debug State/Country not found - $state
+        } else {
+            ${log}::debug State/Country: [lindex $L_countryCodes [lsearch -nocase $L_countryCodes $state]]
+        }
+        
+        # Check the zip code
+        for {set x 0} {$x < 9} {incr x} {
+            if {[string first $x $zip 0] == 0} {
+                ${log}::debug Zip code exists in the USA: $zip
+                break
+            } else {
+                ${log}::debug Cannot find Zip code: $zip
+            }
+        }
+    }
+    
+	
+    ${log}::debug --END-- [info level 1]
+} ;# importFiles::detectCountry
