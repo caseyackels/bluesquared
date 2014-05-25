@@ -1,0 +1,20 @@
+order id,Company,Attention,Address,City,ST,Zip,Country,Qty,Notes,Distribution Type
+1,JG Mail,,2840 NW 35th Ave,Portland,OR,97210,US,4527,,06. JG Mail
+2,Media Centre Baselworld,,2840 NW 35th Ave,Portland,OR,97210,US,1500,Sample Quality,08. JG Inventory
+3,SJTA Show MGMT,,2840 NW 35th Ave,Portland,OR,97210,US,300,Sample Quality,08. JG Inventory
+4,MJSA Expo NY,,2840 NW 35th Ave,Portland,OR,97210,US,1000,Sample Quality,08. JG Inventory
+5,GIA Education Services,Attn:  Ted Sellars,5345 Armada Drive,Carlsbad,CA,92008,US,20,Sample Quality,07. UPS Import
+6,GIA NY Ed Ctr.,Attn:  Tony Petrillo,270 Madison Ave. 2nd Floor,New York,NY,10016,US,12,Sample Quality,07. UPS Import
+7,Metalwerx,Attn:  Karen Christians,50 Guinan Street,Waltham,MA,2451,US,10,Sample Quality,07. UPS Import
+8,Jewelry Training Center,Attn: Arthur Skuratowicz,3730 Sinton Road Ste 105,Colorado Springs,CO,80907,US,30,Sample Quality,07. UPS Import
+9,Swets Sub Svc.,,E 160 9th Ave.,Runnemede,NJ,8078,US,3,Sample Quality,07. UPS Import
+10,Revere Academy of Jewelry Arts,Attn: Christine Dhein,785 Market St. Ste 900,San Francisco,CA,94103,US,30,Sample Quality,07. UPS Import
+11,Wolf Designs,Attn:  Kate Wolf,70 Merrill Street,Portland,ME,4101,US,12,Sample Quality,07. UPS Import
+12,Jewelers Mutual Insurance Co.,Sheri Ihde,24 Jewelers Park Drive,Neenah,WI,54956,US,100,Sample Quality,09. USPS Import
+13,Fashion Inst. Of Tech,Michael Coan,227 W 27th St,New York,NY,10001,US,100,Sample Quality,09. USPS Import
+14,Texas Inst of Jewelry Tech,Ulla Raus,2400 Clarksville St,Paris,TX,75460,US,100,Sample Quality,09. USPS Import
+15,North Bennet Street School,Rosemary Trainer,39 N. Bennett St.,Boston,MA,2113,US,20,Sample Quality,09. USPS Import
+16,Alberta College of Art & Design,Charles Lewton-Brain,1407 14th Ave. NW,Calgary,AB,T2N 4R3,CA,25,Sample Quality,09. USPS Import
+17,MJSA,Attn:  Rich Youmans,57 John L Dietsch Sq.,Attleboro Falls,MA,2763,US,115,Inspect,03. Customer Copies
+18,Skies America,Attn:  Allen Nelson,9655 SW Sunshine Ct. Ste 500,Beaverton,OR,97005,US,75,Inspect,03. Customer Copies
+19,Skies America,Attn:  Kathy Pike,9655 SW Sunshine Ct. Ste 500,Beaverton,OR,97005,US,25,Inspect Tearsheets,03. Customer Copies
