@@ -331,20 +331,36 @@ proc eAssistHelper::insValuesToTableCells {tbl txtVar cells} {
     #	eAssistHelper::insertItems, IFMenus::tblPopup
     #
     # NOTES
-    #
+    #$$
     # SEE ALSO
     #
     #***
     global log files txtVariable w
+	# 'Inserting {{Brent Olsen} {Janet Esfeld} {Noni Wiggin}} into .container.frame0.nbk.f3.nb.f1.f2.tbl - 0,0'
+	
 	
 	if {$txtVar == ""} {
 			set txtVar $txtVariable
 	}
 	
-	foreach val $cells {
-		${log}::debug Inserting $txtVar into $tbl - $val
-		$tbl cellconfigure $val -text $txtVar
-	}
+	#foreach val $cells {}
+	#	${log}::debug Inserting $txtVar into $tbl - $val - $cells
+	#	${log}::debug Selected Cells: [$tbl curcellselection]
+		
+		if {[llength $txtVar] != 1} {
+			# Pasting multiple cells
+			#foreach item $txtVar cell [$tbl curcellselection] {} ;# pasting into highlighted cells only
+			foreach item $txtVar cell $cells {
+				${log}::debug Inserting $item - $cell - $cells
+				$tbl cellconfigure $cell -text $item
+			}
+		} else {
+			# Pasting a single cell
+			${log}::debug Inserting $txtVar - $cells
+			#$tbl cellconfigure $val -text $txtVar
+			$tbl cellconfigure $cells -text $txtVar
+		}
+	#{}
 
 	
 } ;# eAssistHelper::insValuesToTableCells

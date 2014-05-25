@@ -254,7 +254,7 @@ proc importFiles::processFile {win} {
                         set getZip [lindex $FileHeaders [lsearch -nocase $FileHeaders *zip]]
                         set idxZip [string trimleft [lrange [split $getZip _] 0 0] 0]
                         
-                        importFiles::detectCountry $l_line $listData $getZip $idxZip                        
+                        importFiles::detectCountry $l_line $listData $idxZip                        
                     }
                     *zip        {
                         ${log}::debug Zip code: $listData
@@ -298,10 +298,10 @@ proc importFiles::processFile {win} {
     set job(TotalCopies) [eAssistHelper::calcSamples $files(tab3f2).tbl [$files(tab3f2).tbl columncget Quantity -name]]
     
     # Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
-    #if {[$files(tab3f2).tbl findcolumnname count] == -1} {
-    #    $files(tab3f2).tbl insertcolumns 0 0 "..."
-    #    $files(tab3f2).tbl columnconfigure 0 -name "count" -showlinenumbers 1 -labelalign center
-    #}
+    if {[$files(tab3f2).tbl findcolumnname count] == -1} {
+        $files(tab3f2).tbl insertcolumns 0 0 "..."
+        $files(tab3f2).tbl columnconfigure 0 -name "count" -showlinenumbers 1 -labelalign center
+    }
     
     # Enable menu items
     importFiles::enableMenuItems
@@ -586,7 +586,7 @@ proc importFiles::enableMenuItems {} {
 } ;# importFiles::enableMenuItems
 
 
-proc importFiles::detectCountry {l_line state zip idxZip} {
+proc importFiles::detectCountry {l_line state idxZip} {
     #****f* detectCountry/importFiles
     # AUTHOR
     #	Casey Ackels
@@ -616,13 +616,12 @@ proc importFiles::detectCountry {l_line state zip idxZip} {
     ${log}::debug --START-- [info level 1]
     
     set domestic yes
+    set zip [string trim [lindex $l_line $idxZip]]
     
-    set zip [string trim [lindex $l_line $idxZip]
+    ${log}::debug State-Zip: $state - $zip
+    ${log}::debug US State? [lsearch -nocase $L_states(US) $state]
     
-    ${log}::debug State-Zip: $state - $zip]
-    ${log}::debug US State? [lsearch -nocase $L_states $state]
-    
-    if {[lsearch -nocase $L_states $state] == -1} {
+    if {[lsearch -nocase $L_states(US) $state] == -1} {
         ${log}::debug State not found - $state
         set domestic no
     }
@@ -630,20 +629,30 @@ proc importFiles::detectCountry {l_line state zip idxZip} {
     if {$domestic eq "no"} {
         # Check for common abbreviations for canada, mexico and japan
         if {[lsearch -nocase $L_countryCodes $state] == -1} {
-            ${log}::debug State/Country not found - $state
+            ${log}::debug State/Country not found - $state - lets look at zip codes.
         } else {
-            ${log}::debug State/Country: [lindex $L_countryCodes [lsearch -nocase $L_countryCodes $state]]
+            ${log}::debug State was found: $state
+            set domestic yes
         }
         
         # Check the zip code
-        for {set x 0} {$x < 9} {incr x} {
+        # USA Zip Codes [zip+4], each state starts with a 0-9.
+        for {set x 0} {$x < 10} {incr x} {
             if {[string first $x $zip 0] == 0} {
                 ${log}::debug Zip code exists in the USA: $zip
+                set domestic yes
                 break
-            } else {
-                ${log}::debug Cannot find Zip code: $zip
             }
         }
+    }
+    
+    # If it still isn't domestic, lets try to find the country
+    if {$domestic eq "no"} {
+        # Canadian format A1A 1A1
+        # Look at length - must be 6 chars
+        ${log}::debug length [llength $zip]
+        ${log}::debug alphanum? [string is alnum [string range $zip 0 2]]
+        ${log}::debug Non-US Zip code: $zip
     }
     
 	

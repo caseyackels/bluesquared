@@ -274,9 +274,42 @@ proc IFMenus::copyCell {tbl} {
     global log
     #${log}::debug --START-- [info level 1]
     
+    set Copy [$tbl getcells [$tbl curcellselection]]
+    set Cells [$tbl curcellselection]
+    
     clipboard clear
-    clipboard append [$tbl getcells [$tbl curcellselection]]
-	
+    clipboard append $Copy
+    
+    if {[info exist tmp]} {unset tmp}
+    
+    foreach item $Cells {
+        lappend tmp [lindex [split $item ,] 0]
+    }
+    
+    set colIdx [lrange [split $Cells ,] 0 0]
+    
+    foreach cell $tmp {
+        if {[string match $cell $colIdx] != 1} {
+            #${log}::debug $cell - $colIdx - VERTICAL COPY
+            ${log}::debug Cell Values - $Copy
+            set tmp_direction Vertical
+        } else {
+            #${log}::debug $cell - $colIdx - HORIZONTAL COPY
+            ${log}::debug Cell Values - $Copy
+            set tmp_direction Horizontal
+        }
+    }
+    
+    ${log}::debug $tmp_direction copy
+    
+    #set tmpAdded [expr [join $tmp +]]
+    #set tmpDivided [expr $tmpAdded / 2 ]
+    #
+    #if {$tmpDivided == [lrange $tmp 0 0]} {
+    #    ${log}::debug HORIZONTAL COPY
+    #} else {
+    #    ${log}::debug VERTICAL COPY
+    #}
     #${log}::debug --END-- [info level 1]
 } ;# IFMenus::copyCell
 

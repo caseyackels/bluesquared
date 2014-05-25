@@ -10,7 +10,8 @@ proc loadSuffix {} {
     # Below we reset the variables to [string tolower]
 
 # STATES
-set L_states [list ALABAMA \
+# Entries are: Name, 2 digit code
+set L_states(US) [list ALABAMA \
 AL \
 ALASKA \
 AK \
@@ -692,6 +693,7 @@ set L_streetSuffix [list ALLEY \
 
     
 #Secondary Unit
+# Entries are: Name
 set L_secondaryUnit [list APARTMENT \
 APT \
 BASEMENT \
@@ -733,7 +735,7 @@ UPPR \
 #]
 
 # Countries
-#Secondary Unit
+# Entries are: Name, 2 digit code
 set L_countryCodes [list Afghanistan \
 AF \
 Albania \
@@ -911,7 +913,7 @@ Guyana \
 GY \
 Haiti \
 HT \
-H{oly See (Vatican City)} \
+{Holy See (Vatican City)} \
 VA \
 Honduras \
 HN \
@@ -1205,10 +1207,213 @@ ZM \
 Zimbabwe \
 ZW]
 
+set L_states(CA) [list Alberta \
+AB \
+{British Columbia} \
+BC \
+Manitoba \
+MB \
+{New Brunswick} \
+NB \
+Newfoundland \
+NL \
+Labrador \
+NL \
+{Nova Scotia} \
+NS \
+{Northwest Territories} \
+NT \
+Nunavut \
+NT \
+Ontario \
+ON \
+{Prince Edward Island} \
+PE \
+Quebec \
+QC \
+Saskatchewan \
+SK \
+Yukon \
+YT]
+
+# Entries are: Name, Conventional abbreviation, 2 digit code
+set L_states(MX) [list Aguascalientes \
+AGS \
+AG \
+{Baja California} \
+BC \
+BC \
+{Baja California Sur} \
+BCS \
+BS \
+Campeche \
+Camp \
+CM \
+Chiapas \
+Chis \
+CS \
+Chihuahua \
+Chih \
+CH \
+Coahuila \
+Coah \
+CO \
+Colima \
+Col \
+CL \
+{Federal District} \
+DF \
+DF \
+Durango \
+DGO \
+DG \
+Guanajuato \
+GTO \
+GT \
+Guerrero \
+GRO \
+GR \
+Hidalgo \
+HGO \
+HG \
+Jalisco \
+JAL \
+JA \
+{Mexico State} \
+Edomex \
+ME \
+Michaoacan \
+Mich \
+MI \
+Morelos \
+Mor \
+MO \
+Nayarit \
+NL \
+NL \
+Oaxaca \
+Oax \
+OA \
+Puebla \
+Pue \
+PU \
+Queretaro \
+Qro \
+QE \
+{Quintana Roo} \
+{Q Roo} \
+QR \
+{San Luis Potosi} \
+SLP \
+SL \
+Sinaloa \
+Sin \
+SI \
+Sonora \
+Son \
+SO \
+Tabasco \
+Tab \
+TB \
+Tamaulipas \
+Tamps \
+TM \
+Tlaxcala \
+tlax \
+TL \
+Veracruz \
+Ver \
+VE \
+Yucatan \
+YUC \
+YU \
+Zacatecas \
+Zac \
+ZA]
+
+set L_ZipCodes(USA,0) [list Connecticut \
+CT \
+Massachussetts \
+MA \
+Maine \
+ME \
+{New Hampshire} \
+NH \
+{New Jersey} \
+NJ \
+{Puerto Rico} \
+PR \
+{Rhode Island} \
+RI \
+Vermont \
+VT \
+{Virigin Islands} \
+VI \
+{Army Post Europe} \
+AE \
+{Fleet Post Office Europe} \
+AE]
+
+set L_zipCodes(USA,1) [list Delaware \
+DE \
+{New York} \
+NY \
+Pennsylvania \
+PA]
+
+set L_zipCodes(USA,2) [list {District of Columbia} \
+DC \
+Maryland \
+MD \
+{North Carolina} \
+NC \
+{South Carolina} \
+SC \
+Virgina \
+VA \
+{West Virgina} \
+WV]
+
+set L_zipCodes(USA,3) [list Alabama \
+AL \
+Florida \
+FL \
+Georgia \
+GA \
+Mississippi \
+MS \
+Tennessee \
+TN \
+{Army Post Office Americas} \
+AA \
+{Fleet Post Office Americas} \
+AA]
+
+set L_zipCodes(USA,4) [list Indiana \
+IN \
+Kentucky \
+KY \
+Michigan \
+MI \
+Ohio \
+OH]
+
+set L_zipCodes(USA,5) [list Iowa \
+IA \
+Minnesota \
+MN \
+Montana \
+MT \
+{North Dakota} \
+ND \
+{South Dakota} \
+SD \
+Wisconsin \
+WI]
 
 
 set StreetSuffix(Road) [list Road Rd]
-set L_states [string toupper $L_states]
+#set L_states [string toupper $L_states]
 set L_streetSuffix [string toupper $L_streetSuffix]
 set L_secondaryUnit [string toupper $L_secondaryUnit]
 }
