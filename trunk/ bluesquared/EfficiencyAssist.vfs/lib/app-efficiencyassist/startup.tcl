@@ -84,6 +84,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries about]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries debug] ;# Deprecated
+	lappend ::auto_path [file join [file dirname [info script]] Libraries sqlite3_3801]
 
 
 	##
@@ -112,6 +113,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	package require autoscroll
 	package require csv
 	package require debug
+	package require sqlite3
 	
 	
 	# Logger; MD5 are [package require]'d below.
@@ -130,22 +132,23 @@ proc 'eAssist_sourceReqdFiles {} {
 
 
 	# Source files that are not in a package
-    source [file join [file dirname [info script]] Libraries popups.tcl]
-    source [file join [file dirname [info script]] Libraries errorMsg_gui.tcl]
+	source [file join [file dirname [info script]] Libraries popups.tcl]
+	source [file join [file dirname [info script]] Libraries errorMsg_gui.tcl]
 	source [file join [file dirname [info script]] Libraries global_helpers.tcl]
-    source [file join [file dirname [info script]] Libraries StreetSuffixState.tcl]
+	source [file join [file dirname [info script]] Libraries StreetSuffixState.tcl]
 	source [file join [file dirname [info script]] Libraries fileProperties.tcl]
 	source [file join [file dirname [info script]] Libraries saveSettings.tcl]
     
-    loadSuffix ;# Initialize variables from StreetSuffixState.tcl
+	loadSuffix ;# Initialize variables from StreetSuffixState.tcl
     
-    load [file join [file dirname [info script]] Libraries twapi twapi-x86-3.1.17.dll]
-    #source [file join [file dirname [info script]] Libraries debug.tcl]
+	load [file join [file dirname [info script]] Libraries twapi twapi-x86-3.1.17.dll]
+	#load [file join [file dirname [info script]] Libraries sqlite3_3801 sqlite3801.dll] Sqlite3
+	#source [file join [file dirname [info script]] Libraries debug.tcl]
 	
 	if {[info exists logSettings(displayConsole)]} {
-        # Setup variable for holding list of box label names
-        eAssistSetup::toggleConsole $logSettings(displayConsole)
-    }	
+		# Setup variable for holding list of box label names
+		eAssistSetup::toggleConsole $logSettings(displayConsole)
+	}	
 
 } ;# 'eAssist_sourceReqdFiles
 
