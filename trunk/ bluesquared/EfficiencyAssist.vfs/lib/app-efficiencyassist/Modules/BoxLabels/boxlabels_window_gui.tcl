@@ -472,11 +472,9 @@ proc breakDown {} {
 
         puts "winfo geom: [winfo geometry .]"
         wm geometry .breakdown +854+214
-        #wm withdraw .breakdown
+
         ${log}::debug Breadown window Created...
 
-        # Now we don't destroy the window if someone closes it by the "X" button at the top of the screen.
-        wm protocol .breakdown WM_DELETE_WINDOW {wm withdraw .breakdown}
 
         set frame1 [ttk::frame .breakdown.frame1]
         pack $frame1 -fill both -expand yes -pady 5p
@@ -505,19 +503,21 @@ proc breakDown {} {
         pack $frame2 -pady 10p -anchor se
 
         ttk::button $frame2.print -text [mc "Print"] -command {Shipping_Gui::printbreakDown}
-        ttk::button $frame2.close -text [mc "Close"] -command {wm withdraw .breakdown}
+        ttk::button $frame2.close -text [mc "Close"] -command {destroy .breakdown}
 
         grid $frame2.print -column 0 -row 0 -padx 3p
         grid $frame2.close -column 1 -row 0 -padx 5p
 
 
         bind $GS_widget(breakdown) <KeyPress> {break} ;# Prevent people from entering/removing anything
-
+        ${log}::debug Breakdown window - 1st time ...
 
     } else {
         if {![winfo ismapped .breakdown]} {
             # Display the window
             wm deiconify .breakdown
+            
+            ${log}::debug Breakdown window - all ready mapped ...
         }
         
         # Refreshing
@@ -561,7 +561,6 @@ proc breakDown {} {
             $GS_widget(breakdown) insert end "1 Box @ $value\n"
         }
     }
-
 
 } ;# End of breakDown
 

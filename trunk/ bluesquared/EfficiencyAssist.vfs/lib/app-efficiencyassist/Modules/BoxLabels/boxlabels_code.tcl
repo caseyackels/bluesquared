@@ -113,7 +113,7 @@ proc controlFile {args} {
             } elseif {[lindex $args 1] eq "fileclose"} {
                 #flush $files(history)
                 chan close $files(destination)
-	    }
+			}
         }
 
         history {
@@ -142,7 +142,7 @@ proc controlFile {args} {
 
 
 proc writeText {labels quantity} {
-    global files GS_textVar
+    global files GS_textVar log
 
     ## ATTENTION: The Open/Close commands are in proc [controlFile]
 
@@ -150,6 +150,8 @@ proc writeText {labels quantity} {
     lappend textValues $labels $quantity "$GS_textVar(line1)" "$GS_textVar(line2)" "$GS_textVar(line3)" "$GS_textVar(line4)" "$GS_textVar(line5)"
     # Insert the values
     chan puts $files(destination) [::csv::join $textValues]
+	
+	${log}::debug writeText: textValues: $textValues
 
 } ;# End of writeText
 
