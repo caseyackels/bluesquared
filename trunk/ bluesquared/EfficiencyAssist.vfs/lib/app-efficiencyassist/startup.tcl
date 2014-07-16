@@ -96,6 +96,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Modules Addresses]
 	lappend ::auto_path [file join [file dirname [info script]] Modules Tools]
 	lappend ::auto_path [file join [file dirname [info script]] Modules vUpdate]
+	lappend ::auto_path [file join [file dirname [info script]] Modules Database]
 
 	#
 	## Start the Package Require
@@ -127,6 +128,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	package require boxlabels
 	package require eAssist_tools
 	package require vUpdate
+	package require eAssist_db
 	
     
 
@@ -653,3 +655,6 @@ vUpdate::saveCurrentVersion
 
 # Start the GUI
 eAssist::parentGUI
+
+# Test the DB
+#eAssist_db::loadDB

@@ -466,9 +466,11 @@ proc printLabels {} {
 	    return
 	}
 	
-	if {$mySettings(path,bartender) == ""} {
-		${log}::debug path,bartender is empty: $mySettings(path,bartender)
-		return
+	if {([info exists mySettings(path,bartender)] != 0)} {
+		if { $mySettings(path,bartender) == ""} {
+			${log}::debug path,bartender is empty: $mySettings(path,bartender)
+			return
+		}
 	}
 	
 	if {$mySettings(path,labelDir) == ""} {
@@ -499,7 +501,7 @@ proc printLabels {} {
 	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
                     #set lineNumber 5
                     # Redirect for special print options
-                    Shipping_Gui::chooseLabel 5
+                    Shipping_Gui::chooseLabel 6
                     puts "5 Line Label"
 
 		} else {
@@ -511,8 +513,8 @@ proc printLabels {} {
 	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
                     #set lineNumber 4
                     # Redirect for special print options
-                    Shipping_Gui::chooseLabel 4
-                    puts "4 Line Label"
+                    Shipping_Gui::chooseLabel 5
+                    puts "5 Line Label"
 
                 } else {
 		    exec $mySettings(path,bartender) /AF=$labelDir\\5LINEDB.btw /P /CLOSE /X
@@ -523,8 +525,8 @@ proc printLabels {} {
 	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
                     #set lineNumber 3
                     # Redirect for special print options
-                    Shipping_Gui::chooseLabel 3
-                    puts "3 Line Label"
+                    Shipping_Gui::chooseLabel 4
+                    puts "4 Line Label"
 
                 } else {
 		    exec $mySettings(path,bartender) /AF=$labelDir\\4LINEDB.btw /P /CLOSE /X
@@ -579,7 +581,7 @@ proc printCustomLabels {args} {
     #***
     global mySettings log
 	
-	#${log}::debug Printing custom labels: [join $args ""]
+	${log}::debug Printing custom labels: [join $args ""]
 	set args [join $args ""]
 	
 	set labelDir [join [split $mySettings(path,labelDir) /] \\]

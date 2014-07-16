@@ -623,6 +623,8 @@ proc chooseLabel {lines} {
 
     set frame1 [ttk::frame .chooseLabel.frame1]
     grid $frame1 -padx 5p -pady 5p
+    
+    ${log}::debug Number of lines to be printed: $lines
    
     ttk::button $frame1.print -text "Print" -command {Shipping_Code::printCustomLabels $lines $labels; destroy .chooseLabel}
     ttk::button $frame1.close -text "Close" -command {destroy .chooseLabel}
