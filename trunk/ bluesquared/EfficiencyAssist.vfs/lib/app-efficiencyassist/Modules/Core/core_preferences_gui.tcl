@@ -397,7 +397,7 @@ proc eAssistPref::launchBoxMakerPref {} {
 	ttk::label $pref(frame0).txt4 -text [mc "Printer Path"]
 	ttk::entry $pref(frame0).entry4 -width 15 -textvariable mySettings(path,printer)
 	#ttk::button $pref(frame0).btn4 -text "..." -command {set mySettings(path,printer) [eAssist_Global::OpenFile [mc "Choose Directory"] [pwd] dir]}
-		tooltip::tooltip $pref(frame0).entry4 [mc "i.e. \\\vm-fileprint\\shipping-time"]
+		tooltip::tooltip $pref(frame0).entry4 [mc "i.e. \\vm-fileprint\\shipping-time"]
 	
 	grid $pref(frame0).txt4 -column 0 -row 3 -sticky e
 	grid $pref(frame0).entry4 -column 1 -row 3 -sticky ew
@@ -418,6 +418,13 @@ proc eAssistPref::launchBoxMakerPref {} {
 	
 	grid $pref(frame0).txt6 -column 0 -row 5 -sticky e
 	grid $pref(frame0).entry6 -column 1 -row 5 -sticky ew
+	
+	ttk::label $pref(frame0).txt7 -text [mc "Break down File"]
+	ttk::entry $pref(frame0).entry7 -width 15 -textvariable mySettings(path,bdfile)
+		tooltip::tooltip $pref(frame0).entry7 [mc "Choose the name of your breakdown file. This file is used to send to the printer using WordPad."]
+		
+	grid $pref(frame0).txt7 -column 0 -row 6 -sticky e
+	grid $pref(frame0).entry7 -column 1 -row 6 -sticky ew
 
 	
 	

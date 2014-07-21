@@ -56,9 +56,14 @@ proc eAssist_db::loadDB {} {
     
     set myDB [file join $program(Home) EA_setup.edb]
     
+    set myList "$Header_ID $HeaderName $HeaderParams"
+    
     sqlite3 db $myDB
     
-    ${log}::debug [db eval {SELECT * from Headers}]
+    db eval {SELECT * from Headers} {
+        ${log}::debug $myList
+    }
+    
 	
     ${log}::debug --END-- [info level 1]
 } ;# eAssist_db::loadDB

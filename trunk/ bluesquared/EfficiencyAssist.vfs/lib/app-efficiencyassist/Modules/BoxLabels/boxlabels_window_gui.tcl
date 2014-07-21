@@ -405,12 +405,22 @@ proc printbreakDown {} {
     #***
     global GS_textVar mySettings log
     
-    if {![winfo exists mySettings(path,printer)]} {return}
-    if {![winfo exists mySettings(path,wordpad)]} {return}
+    if {![info exists mySettings(path,printer)]} {
+        ${log}::debug Path to printer does not exist. Exiting...
+        return
+    }
+    if {![info exists mySettings(path,wordpad)]} {
+        ${log}::debug Path to WordPad does not exist. Exiting...
+        return
+    }
+    if {![info exists mySettings(path,bdfile)]} {
+        ${log}::debug Path to the BreakDown file does not exist. Exiting...
+        return
+    }
     
 
-    set myBreakDownText [.breakdown.txt get 0.0 end]
-    set file [open breakdown.txt w]
+    set myBreakDownText [.breakdown.frame1.txt get 0.0 end]
+    set file [open [file join $mySettings(Home) $mySettings(path,bdfile)] w]
 
     puts $file [clock format [clock scan now] -format "%A %B %d %r"]\n
     puts $file $GS_textVar(line1)
@@ -430,7 +440,8 @@ proc printbreakDown {} {
 
     # Shipping Printer
     #catch {exec [file join C:\\ "Program Files" "Windows NT" Accessories wordpad.exe] /pt breakdown.txt {\\vm-printserver\Shipping-Time}}
-    exec [file join $mySettings(path,wordpad)] /pt breakdown.txt "$mySettings(path,printer)"
+    ${log}::debug [file join $mySettings(path,wordpad)] /pt [file join $mySettings(Home) $mySettings(path,bdfile)] "$mySettings(path,printer)"
+    exec [file join $mySettings(path,wordpad)] /pt [file join $mySettings(Home) $mySettings(path,bdfile)] "$mySettings(path,printer)"
     #${log}::debug PRINTING: [file join $mySettings(path,wordpad)] "$mySettings(path,printer)"
 } ;# End of printbreakDown
 
