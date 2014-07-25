@@ -418,7 +418,13 @@ proc printbreakDown {} {
         return
     }
     
-
+    # Guard against the possiblity that the breakdown window has never been launched.
+    # If it doesn't exist, lets launch it, then immediately hide it.
+    if {![winfo exists .breakdown]} {
+        breakDown
+        wm withdraw .breakdown
+    }
+        
     set myBreakDownText [.breakdown.frame1.txt get 0.0 end]
     set file [open [file join $mySettings(Home) $mySettings(path,bdfile)] w]
 
@@ -441,8 +447,7 @@ proc printbreakDown {} {
     # Shipping Printer
     #catch {exec [file join C:\\ "Program Files" "Windows NT" Accessories wordpad.exe] /pt breakdown.txt {\\vm-printserver\Shipping-Time}}
     ${log}::debug [file join $mySettings(path,wordpad)] /pt [file join $mySettings(Home) $mySettings(path,bdfile)] "$mySettings(path,printer)"
-    exec [file join $mySettings(path,wordpad)] /pt [file join $mySettings(Home) $mySettings(path,bdfile)] "$mySettings(path,printer)"
-    #${log}::debug PRINTING: [file join $mySettings(path,wordpad)] "$mySettings(path,printer)"
+    catch {exec [file join $mySettings(path,wordpad)] /pt [file join $mySettings(Home) $mySettings(path,bdfile)] "$mySettings(path,printer)"}
 } ;# End of printbreakDown
 
 

@@ -84,11 +84,13 @@ proc eAssistPref::launchPreferences {} {
     set btnBar [ttk::frame .preferences.btnBar]
     pack $btnBar -side bottom -anchor e -pady 8p -padx 5p
     
+	ttk::button $btnBar.change -text [mc "Change"] -command {lib::showPwordWindow .preferences.frame0}
     ttk::button $btnBar.ok -text [mc "OK"] -command {lib::savePreferences; destroy .preferences}
     ttk::button $btnBar.cancel -text [mc "Cancel"] -command {destroy .preferences}
     
-	grid $btnBar.ok -column 0 -row 3 -sticky nse -padx 8p
-    grid $btnBar.cancel -column 1 -row 3 -sticky nse 
+	grid $btnBar.change -column 0 -row 3 -sticky nse -padx 20p
+	grid $btnBar.ok -column 1 -row 3 -sticky nse -padx 8p
+    grid $btnBar.cancel -column 2 -row 3 -sticky nse 
 
 } ;#eAssistPref::launchPreferences
 
@@ -430,6 +432,8 @@ proc eAssistPref::launchBoxMakerPref {} {
 	
 	
 	grid columnconfigure $pref(frame0) 1 -weight 1
+	
+	eAssist_Global::widgetState disabled $pref(frame0)
 	
     ${log}::debug --END-- [info level 1]
 } ;# eAssistPref::launchBoxMakerPref

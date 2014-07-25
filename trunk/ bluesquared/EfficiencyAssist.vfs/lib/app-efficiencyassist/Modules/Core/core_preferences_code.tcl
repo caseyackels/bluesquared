@@ -150,4 +150,4 @@ proc eAssistPref::endCmd {tbl row col text} {
             }
     }
     return $text
-} ;#eAssistPref::endCmd 
+} ;#eAssistPref::endCmd

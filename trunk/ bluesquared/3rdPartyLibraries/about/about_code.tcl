@@ -119,6 +119,12 @@ proc BlueSquared_About::aboutOpenFiles {about_Text changeLog_Text} {
             $wid tag configure BUG \
                             -font {verdana 10 bold}
             
+            $wid tag configure UPDATE \
+                            -font {verdana 10 bold}
+            
+            $wid tag configure NOTE \
+                            -font {verdana 10 bold}
+            
         if {$item eq "about"} {
             $wid tag configure Normal \
                             -font {verdana 10} \
@@ -186,6 +192,8 @@ proc BlueSquared_About::aboutOpenFiles {about_Text changeLog_Text} {
                 
                 switch -nocase $grpName {
                     [BUG] {set newTag BUG}
+                    [UPDATE] {set newTag UPDATE}
+                    [NOTE] {set newTag NOTE}
                     default {${log}::debug no tag for: $grpName}
                 }
                 

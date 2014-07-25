@@ -165,8 +165,8 @@ proc eAssist_Global::checkVars {win {var ""}} {
 } ;# eAssist_Global::checkVars
 
 
-proc eAssist_Global::isAuthenticated {args} {
-    #****f* isAuthenticated/eAssist_Global
+proc eAssist_Global::widgetState {state win} {
+    #****f* widgetState/eAssist_Global
     # AUTHOR
     #	Casey Ackels
     #
@@ -174,7 +174,7 @@ proc eAssist_Global::isAuthenticated {args} {
     #	(c) 2011-2014 Casey Ackels
     #
     # FUNCTION
-    #	Find out if we are authenticated to see, or access Setup.
+    #	Control the state of the widgets of the window by passing disabled/normal, and the widget path
     #
     # SYNOPSIS
     #
@@ -190,16 +190,29 @@ proc eAssist_Global::isAuthenticated {args} {
     # SEE ALSO
     #
     #***
-    global log auth
+    global log
     ${log}::debug --START-- [info level 1]
     
-	if {![info exists auth]} {return}
+    foreach w [winfo children $win] {
+		if {$state eq "disabled"} {
+			set newState disabled
+			set newCommand [list $w state]
+		
+		} elseif {$state eq "normal"} {
+			set newState normal
+			set newCommand [list $w configure -state]
+		
+		} else {
+			${log}::critical [info level 1] available arguments are: Disabled, or Normal
+			return
+		}
 	
-	if {![string match $args $auth(pword)]} {return}
+		${log}::debug STATE: $newState $w
+        {*}$newCommand $newState
+    }
 	
     ${log}::debug --END-- [info level 1]
-} ;# eAssist_Global::isAuthenticated
-
+} ;# eAssist_Global::widgetState
 
 proc eAssist_Global::OpenFile {title initDir type args} {
     #****f* getOpenFile/eAssist_Global

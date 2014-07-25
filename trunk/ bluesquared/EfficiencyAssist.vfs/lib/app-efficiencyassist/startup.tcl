@@ -140,6 +140,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	source [file join [file dirname [info script]] Libraries StreetSuffixState.tcl]
 	source [file join [file dirname [info script]] Libraries fileProperties.tcl]
 	source [file join [file dirname [info script]] Libraries saveSettings.tcl]
+	source [file join [file dirname [info script]] Libraries password_util.tcl]
     
 	loadSuffix ;# Initialize variables from StreetSuffixState.tcl
     
@@ -165,8 +166,10 @@ proc 'eAssist_bootStrap {} {
 	# Third Party packages
 	lappend ::auto_path [file join [file dirname [info script]] Libraries log]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries md5]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries md5crypt]
 	
 	package require md5
+	package require md5crypt
 	package require log
 	package require logger
 	package require logger::appender
@@ -200,10 +203,15 @@ proc 'eAssist_initVariables {} {
     # SEE ALSO
     #
     #***
-    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter logSettings
+    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter logSettings auth
 
 	#-------- CORE SETTINGS
 	if {$logSettings(displayConsole) == 1} {console show}
+	
+	# admin7954
+	set auth(adminPword) {$1$6JV2D0G7$RHuHLMxJuuQ3HWWG3wOML1}
+	set auth(adminSalt) {6JV2D0G7iPZ.xfGbLxnx}
+	
 	
 	## Defaults
 	#
