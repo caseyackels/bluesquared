@@ -1,3 +1,9 @@
+= Version 4.0.0 Beta 4
+== Box Labels
+* [UPDATE] The Break Down file should now print correctly
+
+--
+
 = Version 4.0.0 Beta 3
 == Box Labels
 * [UPDATE] BarTender now is closed after every label processing. This is by design; BarTender is loaded into memory so it won't take as long to print as if it were completely shut down.

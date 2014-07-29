@@ -549,6 +549,8 @@ proc printLabels {} {
 		${log}::debug $mySettings(path,bartender) /AF=$labelDir\\2LINEDB.btw /P /CLOSE /X
 	    }
 	}
+	
+	Shipping_Gui::printbreakDown email
 
 } ;# printLabels
 
@@ -583,6 +585,8 @@ proc printCustomLabels {args} {
 	
 	${log}::debug Printing custom labels: [join $args ""]
 	set args [join $args ""]
+	
+	Shipping_Gui::printbreakDown email
 	
 	set labelDir [join [split $mySettings(path,labelDir) /] \\]
     exec $mySettings(path,bartender) /AF=$labelDir\\$args /P /CLOSE /X

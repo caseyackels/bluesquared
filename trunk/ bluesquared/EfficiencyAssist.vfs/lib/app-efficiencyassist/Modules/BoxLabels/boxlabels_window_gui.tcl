@@ -376,7 +376,7 @@ Shipping_Gui::initVariables
    
 } ;# End of shippingGUI
 
-proc printbreakDown {} {
+proc printbreakDown {args} {
     #****f* printbreakDown/Shipping_Gui
     # AUTHOR
     #	Casey Ackels
@@ -438,16 +438,31 @@ proc printbreakDown {} {
 
     chan close $file
 
-    ##
-    ## This needs to be a user set option!!
-    ##
-    # Test Printer
-    #catch {exec [file join C:\\ "Program Files" "Windows NT" Accessories wordpad.exe] /pt breakdown.txt {\\vm-printserver\Mailing 9050}}
 
-    # Shipping Printer
-    #catch {exec [file join C:\\ "Program Files" "Windows NT" Accessories wordpad.exe] /pt breakdown.txt {\\vm-printserver\Shipping-Time}}
-    ${log}::debug [file join $mySettings(path,wordpad)] /pt [file join $mySettings(Home) $mySettings(path,bdfile)] "$mySettings(path,printer)"
-    catch {exec [file join $mySettings(path,wordpad)] /pt [file join $mySettings(Home) $mySettings(path,bdfile)] "$mySettings(path,printer)"}
+    
+    if {$args eq "email"} {
+        ##
+        ## Email
+        ##
+        mail::mail "$GS_textVar(line1)" "$GS_textVar(line1)\n$GS_textVar(line2)\n$GS_textVar(line3)\n$GS_textVar(line4)\n$GS_textVar(line5)\n\n$myBreakDownText"
+        ${log}::debug [list $GS_textVar(line1) $GS_textVar(line2) $myBreakDownText]
+    } else {
+        ##
+        ## Email
+        ##
+        mail::mail "$GS_textVar(line1)" "$GS_textVar(line1)\n$GS_textVar(line2)\n$GS_textVar(line3)\n$GS_textVar(line4)\n$GS_textVar(line5)\n\n$myBreakDownText"
+        ${log}::debug [list $GS_textVar(line1) $GS_textVar(line2) $myBreakDownText]
+        
+        ##
+        ## Shipping Printer
+        ## 
+        #catch {exec [file join C:\\ "Program Files" "Windows NT" Accessories wordpad.exe] /pt breakdown.txt {\\vm-printserver\Shipping-Time}}
+        ${log}::debug [file join $mySettings(path,wordpad)] /pt [file join $mySettings(Home) $mySettings(path,bdfile)] "$mySettings(path,printer)"
+        catch {exec [file join $mySettings(path,wordpad)] /pt [file join $mySettings(Home) $mySettings(path,bdfile)] "$mySettings(path,printer)"} 
+    }
+    
+
+    
 } ;# End of printbreakDown
 
 

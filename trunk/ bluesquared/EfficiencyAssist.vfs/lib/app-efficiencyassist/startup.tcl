@@ -85,6 +85,10 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries about]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries debug] ;# Deprecated
 	lappend ::auto_path [file join [file dirname [info script]] Libraries sqlite3_3801]
+	# MIMIE requires Base64
+	lappend ::auto_path [file join [file dirname [info script]] Libraries mime]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries base64]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries smtp]
 
 
 	##
@@ -97,6 +101,8 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Modules Tools]
 	lappend ::auto_path [file join [file dirname [info script]] Modules vUpdate]
 	lappend ::auto_path [file join [file dirname [info script]] Modules Database]
+	lappend ::auto_path [file join [file dirname [info script]] Modules Email]
+	
 
 	#
 	## Start the Package Require
@@ -115,6 +121,9 @@ proc 'eAssist_sourceReqdFiles {} {
 	package require csv
 	package require debug
 	package require sqlite3
+	package require smtp
+	package require mime
+	package require base64
 	
 	
 	# Logger; MD5 are [package require]'d below.
@@ -129,6 +138,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	package require eAssist_tools
 	package require vUpdate
 	package require eAssist_db
+	package require eAssist_email
 	
     
 
