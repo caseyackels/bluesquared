@@ -483,16 +483,9 @@ proc printLabels {} {
 	Shipping_Code::createList
 	Shipping_Code::writeHistory $GS_textVar(maxBoxQty)
     Shipping_Code::openHistory
-	#Shipping_Code::setTips
 
-            #Figure out how many Lines are being used and load the appropriate label
-            #set programPath(Bartend) [file join C:// "Program Files" Seagull "BarTender 7.10" Enterprise Bartend.exe]
-            #set programPath(LabelPath) {C:\\"Documents and Settings"\\Shipping\\Desktop\\Labels\\"SPECIAL LABELS"}
-	#puts $programPath(Bartend)
-            #if {$GS_textVar(line6) != ""} {
-            #    puts "$Bartend /F=$LabelPath/6LINEDB.btw /P /S /CLOSE"
-            #    #$Bartend /F=$LabelPath/6LINEDB.btw /P /S /CLOSE
-            #} else
+	Shipping_Gui::printbreakDown email ; # Send an email of the breakdown
+
 
 	# Fix the file paths so that bartender doesn't choke
 	set labelDir [join [split $mySettings(path,labelDir) /] \\]
@@ -550,7 +543,7 @@ proc printLabels {} {
 	    }
 	}
 	
-	Shipping_Gui::printbreakDown email
+	
 
 } ;# printLabels
 
@@ -586,7 +579,6 @@ proc printCustomLabels {args} {
 	${log}::debug Printing custom labels: [join $args ""]
 	set args [join $args ""]
 	
-	Shipping_Gui::printbreakDown email
 	
 	set labelDir [join [split $mySettings(path,labelDir) /] \\]
     exec $mySettings(path,bartender) /AF=$labelDir\\$args /P /CLOSE /X

@@ -454,7 +454,7 @@ proc printbreakDown {args} {
         ${log}::debug [list $GS_textVar(line1) $GS_textVar(line2) $myBreakDownText]
         
         ##
-        ## Shipping Printer
+        ## Print the breakdown
         ## 
         #catch {exec [file join C:\\ "Program Files" "Windows NT" Accessories wordpad.exe] /pt breakdown.txt {\\vm-printserver\Shipping-Time}}
         ${log}::debug [file join $mySettings(path,wordpad)] /pt [file join $mySettings(Home) $mySettings(path,bdfile)] "$mySettings(path,printer)"

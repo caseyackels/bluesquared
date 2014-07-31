@@ -115,6 +115,7 @@ proc eAssistSetup::selectionChanged {tbl} {
         CSR             {eAssistSetup::customerService_GUI ; set GS(gui,lastFrame) customerService_GUI ; ${log}::debug current Frame: $G_currentSetupFrame}
         Company         {eAssistSetup::company_GUI ; set GS(gui,lastFrame) company_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
         Logging         {eAssistSetup::logging_GUI ; set GS(gui,lastFrame) logging_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
+        Email           {eAssistSetup::emailSetup_GUI ; set GS(gui,lastFrame) emailSetup ; ${log}::debug Current Frame: $G_currentSetupFrame}
         default         {${log}::notice $G_currentSetupFrame does not match any configured frames.}
      }
     
