@@ -243,6 +243,12 @@ proc eAssistSetup::startCmdHdr {tbl row col text} {
     #$w(hdr_frame1a).listbox
     
     switch -- [$tbl columncget $col -name] {
+        
+            HeaderName  {
+                # We don't want spaces in our header names because we create variables from them; and if there are spaces it EA will break.
+                ${log}::debug bind [$tbl editwinpath] <space> {break}
+                bind [$tbl editwinpath] <space> {break}
+            }
             MaxStringLength {
                 set myRow [expr {[$tbl index end] - 1}]
                 if {$row == 0} {$tbl insert end ""}

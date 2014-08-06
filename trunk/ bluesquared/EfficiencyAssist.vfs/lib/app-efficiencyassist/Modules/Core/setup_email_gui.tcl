@@ -104,7 +104,7 @@ proc eAssistSetup::emailSetup_GUI {} {
     
     
     ##
-    ## Frame 2
+    ## Frame 3
     ##
     set f3 [ttk::labelframe $frame0.f3 -text [mc "Composing"] -padding 10]
     grid $f3 -column 0 -row 2 -sticky news -padx 5p

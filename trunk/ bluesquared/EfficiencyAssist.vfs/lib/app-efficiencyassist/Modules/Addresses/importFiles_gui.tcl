@@ -432,6 +432,16 @@ proc importFiles::eAssistGUI {} {
     # Begin labelTag
     bind $labelTag <Button-3> +[list tk_popup .tblToggleColumns %X %Y]
     #bind $labelTag <Enter> {tooltip::tooltip $labelTag testing}
+    
+    bind $bodyTag <Control-v> {
+        eAssistHelper::insValuesToTableCells -hotkey $files(tab3f2).tbl [clipboard get] [$files(tab3f2).tbl curcellselection]
+        ${log}::debug Pressed <Control-V>
+    }
+    
+    bind $bodyTag <Control-c> {
+        IFMenus::copyCell $files(tab3f2).tbl
+        ${log}::debug Pressed <Control-C>
+    }
 
 
     #----- GRID

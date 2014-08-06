@@ -87,7 +87,7 @@ proc IFMenus::tblPopup {tbl mode mName} {
         if {$mode eq "browse"} {
             $mName add command -label [mc "Quick Fill..."] -command {eAssistHelper::insertItems $w(sVersf2).tbl}
             $mName add command -label [mc "Copy"] -command {IFMenus::copyCell $w(sVersf2).tbl}
-            $mName add command -label [mc "Paste"] -command {eAssistHelper::insValuesToTableCells $w(sVersf2).tbl [clipboard get] [$w(sVersf2).tbl curcellselection]}
+            $mName add command -label [mc "Paste"] -command {eAssistHelper::insValuesToTableCells -window $w(sVersf2).tbl [clipboard get] [$w(sVersf2).tbl curcellselection]}
             $mName add command -label [mc "Clear"] -command {IFMenus::clearItems $w(sVersf2).tbl}
             #$mName add separator
             #$mName add command -label [mc "Copy Row"] -command {IFMenus::copyRow $w(sVersf2).tbl}
@@ -107,7 +107,7 @@ proc IFMenus::tblPopup {tbl mode mName} {
         if {$mode eq "browse"} {
             $mName add command -label [mc "Quick Fill..."] -command {eAssistHelper::insertItems $files(tab3f2).tbl}
             $mName add command -label [mc "Copy"] -command {IFMenus::copyCell $files(tab3f2).tbl}
-            $mName add command -label [mc "Paste"] -command {eAssistHelper::insValuesToTableCells $files(tab3f2).tbl [clipboard get] [$files(tab3f2).tbl curcellselection]}
+            $mName add command -label [mc "Paste"] -command {eAssistHelper::insValuesToTableCells -menu $files(tab3f2).tbl [clipboard get] [$files(tab3f2).tbl curcellselection]}
             $mName add command -label [mc "Clear"] -command {IFMenus::clearItems $files(tab3f2).tbl}
             $mName add separator
             $mName add command -label [mc "Copy Row"] -command {IFMenus::copyRow $files(tab3f2).tbl}
@@ -271,10 +271,10 @@ proc IFMenus::copyCell {tbl} {
     # SEE ALSO
     #
     #***
-    global log
+    global log copy
     #${log}::debug --START-- [info level 1]
     
-    set Copy [$tbl getcells [$tbl curcellselection]]
+    set Copy [$tbl getcells [$tbl curcellselection]]    
     set Cells [$tbl curcellselection]
     
     clipboard clear
@@ -290,26 +290,17 @@ proc IFMenus::copyCell {tbl} {
     
     foreach cell $tmp {
         if {[string match $cell $colIdx] != 1} {
-            #${log}::debug $cell - $colIdx - VERTICAL COPY
-            ${log}::debug Cell Values - $Copy
             set tmp_direction Vertical
         } else {
-            #${log}::debug $cell - $colIdx - HORIZONTAL COPY
-            ${log}::debug Cell Values - $Copy
             set tmp_direction Horizontal
         }
     }
     
-    ${log}::debug $tmp_direction copy
+    set copy(orient) $tmp_direction
+    set copy(cellsCopied) [llength $tmp]
     
-    #set tmpAdded [expr [join $tmp +]]
-    #set tmpDivided [expr $tmpAdded / 2 ]
-    #
-    #if {$tmpDivided == [lrange $tmp 0 0]} {
-    #    ${log}::debug HORIZONTAL COPY
-    #} else {
-    #    ${log}::debug VERTICAL COPY
-    #}
+    ${log}::debug $copy(orient) - No. Cells Copied: $copy(cellsCopied)
+    
     #${log}::debug --END-- [info level 1]
 } ;# IFMenus::copyCell
 

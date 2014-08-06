@@ -292,7 +292,7 @@ proc eAssistHelper::insertItems {tbl} {
 	
 	# Create the buttons here, but we'll [grid] it at the bottom of this proc.
 	#${log}::debug newType: $newType
-	ttk::button $btnBar.ok		-text [mc "OK"] -command "[list eAssistHelper::insValuesToTableCells $tbl "" $origCells]; destroy .di" ;#"eAssistHelper::insValuesToTableCells [list $tbl] $txtVariable $origCells; destroy .di"
+	ttk::button $btnBar.ok		-text [mc "OK"] -command "[list eAssistHelper::insValuesToTableCells -window $tbl "" $origCells]; destroy .di" ;#"eAssistHelper::insValuesToTableCells [list $tbl] $txtVariable $origCells; destroy .di"
 	#ttk::button $btnBar.ok		-text [mc "OK"] -command {${log}::debug [uplevel 1]}
 	#ttk::button $btnBar.ok		-text [mc "OK"] -command [list puts "tbl: $tbl, newType: [$f2.$x$header get], origCells: $origCells"]
 	ttk::button $btnBar.cancel	-text [mc "Cancel"] -command {destroy .di}

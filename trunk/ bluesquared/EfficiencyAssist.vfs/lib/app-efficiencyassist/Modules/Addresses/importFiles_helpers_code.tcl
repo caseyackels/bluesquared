@@ -310,7 +310,7 @@ proc eAssistHelper::resetImportInterface {args} {
 } ;# eAssistHelper::resetImportInterface
 
 
-proc eAssistHelper::insValuesToTableCells {tbl txtVar cells} {
+proc eAssistHelper::insValuesToTableCells {type tbl txtVar cells} {
     #****f* insValuesToTableCells/eAssistHelper
     # AUTHOR
     #	Casey Ackels
@@ -319,10 +319,12 @@ proc eAssistHelper::insValuesToTableCells {tbl txtVar cells} {
     #	(c) 2011-2014 Casey Ackels
     #
     # FUNCTION
-    #	Insert values set through the GUI into selected cells
+    #	Insert values set through the GUI into selected cells.
+	#	Type can be; -menu or -window.
+	#	Orient - V (Vertical) or H (Horizontal)
     #
     # SYNOPSIS
-    #	eAssistHelper::insValuesToTableCells <tbl> <txtVar> <cell>
+    #	eAssistHelper::insValuesToTableCells <type> <orient><tbl> <txtVar> <cell>
     #
     # CHILDREN
     #	N/A
@@ -335,32 +337,100 @@ proc eAssistHelper::insValuesToTableCells {tbl txtVar cells} {
     # SEE ALSO
     #
     #***
-    global log files txtVariable w
+    global log files txtVariable w copy
 	# 'Inserting {{Brent Olsen} {Janet Esfeld} {Noni Wiggin}} into .container.frame0.nbk.f3.nb.f1.f2.tbl - 0,0'
 	
 	
 	if {$txtVar == ""} {
+		${log}::debug txtVar doesn't exist, using $txtVariable
 			set txtVar $txtVariable
 	}
 	
-	#foreach val $cells {}
-	#	${log}::debug Inserting $txtVar into $tbl - $val - $cells
-	#	${log}::debug Selected Cells: [$tbl curcellselection]
-		
-		if {[llength $txtVar] != 1} {
+	if {$type eq "-window"} {
+		foreach val $cells {
+			${log}::debug Inserting $txtVar into $tbl - $val - $cells
+			#${log}::debug Selected Cells: [$tbl curcellselection]
+			
+			if {[llength $txtVar] != 1} {
+				# Pasting multiple cells
+				#foreach item $txtVar cell [$tbl curcellselection] {} ;# pasting into highlighted cells only
+				foreach cell $cells {
+					${log}::debug Inserting $txtVar - $cell
+					$tbl cellconfigure $cell -text $txtVar
+				}
+			} else {
+				# Pasting a single cell
+				${log}::debug Inserting $txtVar - $cells
+				#$tbl cellconfigure $val -text $txtVar
+				$tbl cellconfigure $cells -text $txtVar
+			}
+		}
+	} elseif {$type eq "-menu"} {
+		if {$copy(cellsCopied) >= 2} {
 			# Pasting multiple cells
+			${log}::debug Values: $txtVar - cells: $cells
 			#foreach item $txtVar cell [$tbl curcellselection] {} ;# pasting into highlighted cells only
+			set incrCells [lindex [split $cells ,] 0]
+			set incrCol [lindex [split $cells ,] 1]
+			
 			foreach item $txtVar cell $cells {
-				${log}::debug Inserting $item - $cell - $cells
-				$tbl cellconfigure $cell -text $item
+				#${log}::debug Inserting $item - $incrCells,$incrCol
+				$tbl cellconfigure $incrCells,$incrCol -text $item
+				
+				if {$copy(orient) eq "Vertical"} {
+					set incrCells [incr incrCells]
+				} else {
+					set incrCol [incr incrCol]
+				}
+				
+				if {[info exists err]} {
+					${log}::debug Error, ran out of cells: $cells
+					unset err
+				}			
 			}
 		} else {
 			# Pasting a single cell
 			${log}::debug Inserting $txtVar - $cells
-			#$tbl cellconfigure $val -text $txtVar
 			$tbl cellconfigure $cells -text $txtVar
 		}
-	#{}
+	} elseif {$type eq "-hotkey"} {
+			if {$copy(orient) eq "Vertical"} {
+				set txtVar [split $txtVar \n]
+			} else {
+				set txtVar [split $txtVar \t]
+		}
+		
+		if {$copy(cellsCopied) >= 2} {
+			# Pasting multiple cells
+			#${log}::debug Values: $txtVar - cells: $cells
+			#foreach item $txtVar cell [$tbl curcellselection] {} ;# pasting into highlighted cells only
+			set incrCells [lindex [split $cells ,] 0]
+			set incrCol [lindex [split $cells ,] 1]
+			
+			foreach item $txtVar cell $cells {
+				#${log}::debug Inserting $item - $incrCells,$incrCol
+				$tbl cellconfigure $incrCells,$incrCol -text $item
+				
+				if {$copy(orient) eq "Vertical"} {
+					set incrCells [incr incrCells]
+				} else {
+					set incrCol [incr incrCol]
+				}
+				
+				if {[info exists err]} {
+					${log}::debug Error, ran out of cells: $cells
+					unset err
+				}			
+			}
+		} else {
+			# Pasting a single cell
+			#${log}::debug Inserting $txtVar - $cells
+			$tbl cellconfigure $cells -text $txtVar
+		}
+		
+	}
+	
+
 
 	
 } ;# eAssistHelper::insValuesToTableCells
