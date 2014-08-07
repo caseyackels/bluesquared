@@ -1,3 +1,9 @@
+= Version 4.0.0 Beta 5
+== Batch Maker
+* [UPDATE] Copy/Paste now works, both vertically and horizontally. Through the r-click menu, and hotkeys. (ctrl-c, ctrl-v)
+
+--
+
 = Version 4.0.0 Beta 4
 == Box Labels
 * [UPDATE] The Break Down file should now print correctly

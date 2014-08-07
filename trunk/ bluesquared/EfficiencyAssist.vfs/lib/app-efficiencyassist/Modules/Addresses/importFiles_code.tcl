@@ -134,14 +134,17 @@ proc importFiles::processFile {win} {
     #   IFMenus::tblPopup
     #
     #***
-    global log files headerAddress position process headerParams headerParent dist w job L_states
+    global log files headerAddress position process headerParams headerParent dist w job L_states options
     #${log}::debug --START-- [info level 1]
     
     # Close the file importer window
     destroy $win
     
-    # Reset the entire interface
-    eAssistHelper::resetImportInterface 2
+    if {$options(ClearExistingData) == 1} {
+        # Reset the entire interface
+        eAssistHelper::resetImportInterface 2
+    }
+
     
     # Whitelist for required columns, so that they won't be hidden.   
     ## Dynamically query the header setup params, to know which columns should be whitelisted.
