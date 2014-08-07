@@ -213,7 +213,7 @@ proc 'eAssist_initVariables {} {
     # SEE ALSO
     #
     #***
-    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter logSettings auth
+    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter logSettings auth options
 
 	#-------- CORE SETTINGS
 	if {$logSettings(displayConsole) == 1} {console show}
@@ -250,6 +250,22 @@ proc 'eAssist_initVariables {} {
 		# Update file name - defualts to MANIFEST
 		set program(updateFileName) MANIFEST
 	}
+	
+	##
+	## Quick preferences - these are options that aren't in the Preference window, but sprinkled throughout the main program
+	##
+	
+    if {![info exists options(AutoAssignHeader)]} {
+		# Auto-Assign headers in BatchMaker
+		set options(AutoAssignHeader) 1
+	}
+	
+	if {![info exists options(ClearExistingData)]} {
+		# Clears data from BatchMaker if it exists; this is useful if you want to overwrite what is already there.
+		set options(ClearExistingData) 1
+	}
+    
+	
 
 	
 
@@ -570,7 +586,7 @@ proc 'eAssist_loadSettings {} {
     #
     #***
     global settings debug program header customer3P env mySettings international company shipVia3P tcl_platform setup logSettings log boxSettings boxLabelInfo intlSetup
-	global headerParent headerAddress headerParams headerBoxes GS_filePathSetup GS currentModule pref dist carrierSetup CSR packagingSetup
+	global headerParent headerAddress headerParams headerBoxes GS_filePathSetup GS currentModule pref dist carrierSetup CSR packagingSetup options
 	
 	set debug(onOff) on ;# Old - Still exists so we don't receive errors, on the instances where it still exists
 	set logSettings(loglevel) notice ;# Default to notice, over ridden if the user selects a different option

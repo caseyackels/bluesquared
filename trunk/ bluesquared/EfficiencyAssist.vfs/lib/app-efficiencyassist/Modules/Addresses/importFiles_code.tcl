@@ -140,6 +140,7 @@ proc importFiles::processFile {win} {
     # Close the file importer window
     destroy $win
     
+    # This will allow us to append, or reset the interface depending on the user's selection in the File Importer window
     if {$options(ClearExistingData) == 1} {
         # Reset the entire interface
         eAssistHelper::resetImportInterface 2

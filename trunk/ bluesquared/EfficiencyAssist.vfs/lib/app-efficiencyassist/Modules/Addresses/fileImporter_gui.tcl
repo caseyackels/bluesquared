@@ -87,7 +87,7 @@ proc importFiles::fileImportGUI {} {
     grid $f0.entry1 -column 1 -row 0 -pady 5p -sticky ew ;#-padx 2p
     
     ttk::button $f0.btn1 -text [mc "Open File"] -command {importFiles::readFile [eAssist_Global::OpenFile "Open File" $mySettings(sourceFiles) file csv] $w(wi).lbox1.listbox}
-    ttk::button $f0.btn2 -text [mc "Import"] -command {importFiles::processFile $w(wi)} -state disabled
+    ttk::button $f0.btn2 -text [mc "Import"] -command {lib::savePreferences; importFiles::processFile $w(wi)} -state disabled
     #ttk::button $frame1a.btn3 -text [mc "Reset"] -command {{$log}::debug Reset Interface} -state disabled
     
     grid $f0.btn1 -column 2 -row 0 -padx 5p
@@ -95,8 +95,8 @@ proc importFiles::fileImportGUI {} {
     #grid $frame1a.btn3 -column 4 -row 0 -padx 3p
     
     # This option should be saved, and read from the config file.
-        set options(AutoAssignHeader) 1
-        set options(ClearExistingData) 1
+        #set options(AutoAssignHeader) 1
+        #set options(ClearExistingData) 1
     ttk::checkbutton $f0.chkbtn1 -text [mc "Auto-Assign Header Names"] -variable options(AutoAssignHeader)
     ttk::checkbutton $f0.chkbtn2 -text [mc "Clear existing data before importing"] -variable options(ClearExistingData)
     grid $f0.chkbtn1 -column 0 -columnspan 2 -row 1 -sticky w

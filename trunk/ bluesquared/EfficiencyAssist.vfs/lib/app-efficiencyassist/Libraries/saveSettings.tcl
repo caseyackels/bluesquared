@@ -185,7 +185,7 @@ proc lib::savePreferences {} {
     # SEE ALSO
     #
     #***
-    global log pref settings program mySettings GS
+    global log pref settings program mySettings GS options
     ${log}::debug --START-- saveConfig
     #global settings header internal customer3P mySettings env international company shipVia3P
     
@@ -249,6 +249,10 @@ proc lib::savePreferences {} {
 
     foreach value [array names mySettings] {
         chan puts $fd "mySettings($value) $mySettings($value)"
+    }
+    
+    foreach value [array names options] {
+        chan puts $fd "options($value) $options($value)"
     }
     
     chan close $fd
