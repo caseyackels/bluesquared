@@ -51,11 +51,12 @@ proc eAssistSetup::SaveGlobalSettings {} {
     #
     #***
     global log GS_filePaths GS_filePathSetup program company logSettings boxLabelInfo intlSetup headerParams headerParent headerAddress headerBoxes setup GS
-    global dist w carrierSetup CSR packagingSetup mySettings
+    global dist w carrierSetup CSR packagingSetup mySettings emailSetup
 
     
     #${log}::debug Folder: [eAssist_Global::folderAccessibility $program(Home)]
     #${log}::debug File: [eAssist_Global::fileAccessibility $program(Home) $mySettings(ConfigFile)]
+    lib::savePreferences
     
     # If we can't read or write, lets return.
     if {[eAssist_Global::folderAccessibility $program(Home)] != 3} {
@@ -152,6 +153,11 @@ proc eAssistSetup::SaveGlobalSettings {} {
     foreach value [array names CSR] {
         #if {![info exists CSR($value)]} {continue}
         chan puts $fd "CSR($value) $CSR($value)"
+    }
+    
+    foreach value [array names emailSetup] {
+        #if {![info exists CSR($value)]} {continue}
+        chan puts $fd "emailSetup($value) $emailSetup($value)"
     }
     
     chan close $fd

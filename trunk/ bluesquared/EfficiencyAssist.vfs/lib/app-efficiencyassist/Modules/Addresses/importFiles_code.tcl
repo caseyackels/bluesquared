@@ -65,11 +65,30 @@ proc importFiles::readFile {fileName lbox} {
     # Make the data useful, and put it into lists
     # We don't change the case here, in case the user wants it left alone.
     #while {-1 != [gets $fp line]}
+    set gateway 0
     while { [gets $process(fd) line] >= 0 } {
         # Guard against lines of comma's, this will not be viewable in excel. Only in a text editor.
-        if {[string is punc [join [split [string trim $line] " "] ""]] eq 1} {continue}
+        if {[string is punc [join [split [string trim $line] " "] ""]] eq 1} {
+            ${log}::notice Found some punc data, skipping ...
+            continue
+        }
+        #lappend process(dataList) $line
+        
+        if {$gateway == 0} {
+            # ** This should be a user settable option! **
+            # While 'city' should be universal, a requirement no less, it is still possible to not have a column named 'city'.
+            if {[string match *city* $line] || [string match *address* $line] || [string match *state* $line] || [string match *zip* $line]} {
+                        ${log}::notice Found the Header row - $line
+                        lappend process(dataList) $line
+                        set gateway 1
+                } else {
+                    ${log}::notice Searching for the header row ...
+                    continue
+            }
+        } else {
+            lappend process(dataList) $line
+        }
 
-        lappend process(dataList) $line
     }
     
     ${log}::debug *RECORDS*: [expr [llength $process(dataList)]-1]
@@ -185,6 +204,7 @@ proc importFiles::processFile {win} {
         }
         
         set l_line [join [split $l_line ,] ""] ;# remove all comma's
+        
         #l_line = entire row of records
         # [lindex $l_line $index] = Individual record
         #${log}::debug Raw Record: $l_line

@@ -51,7 +51,7 @@ proc mail::mail {SUB TEXT} {
     # SEE ALSO
     #
     #***
-    global log
+    global log setup
     
     set tok [mime::initialize -canonical text/plain -string $TEXT]
     
@@ -64,7 +64,7 @@ proc mail::mail {SUB TEXT} {
     set SERVER mail.journalgraphics.com
     set PORT 25
     set FROM jg.shipping
-    set TO casey.ackels@journalgraphics.com
+    set TO "casey.ackels@journalgraphics.com; casey.ackels@gmail.com"
     set SUBJECT "Package Info: $SUB"
     
     smtp::sendmessage $tok \
