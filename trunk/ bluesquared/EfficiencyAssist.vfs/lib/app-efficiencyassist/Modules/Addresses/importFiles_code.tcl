@@ -77,7 +77,7 @@ proc importFiles::readFile {fileName lbox} {
         if {$gateway == 0} {
             # ** This should be a user settable option! **
             # While 'city' should be universal, a requirement no less, it is still possible to not have a column named 'city'.
-            if {[string match *city* $line] || [string match *address* $line] || [string match *state* $line] || [string match *zip* $line]} {
+            if {[string match -nocase *city* $line] || [string match -nocase *address* $line] || [string match -nocase *state* $line] || [string match -nocase *zip* $line]} {
                         ${log}::notice Found the Header row - $line
                         lappend process(dataList) $line
                         set gateway 1

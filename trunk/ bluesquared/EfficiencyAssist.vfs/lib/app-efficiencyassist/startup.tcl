@@ -213,7 +213,7 @@ proc 'eAssist_initVariables {} {
     # SEE ALSO
     #
     #***
-    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter logSettings auth options
+    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter logSettings auth options emailSetup
 
 	#-------- CORE SETTINGS
 	if {$logSettings(displayConsole) == 1} {console show}
@@ -249,6 +249,10 @@ proc 'eAssist_initVariables {} {
 	if {![info exists program(updateFileName)]} {
 		# Update file name - defualts to MANIFEST
 		set program(updateFileName) MANIFEST
+	}
+	
+	if {![info exists emailSetup(boxlabels,Notification)]} {
+		set emailSetup(boxlabels,Notification) 0
 	}
 	
 	##

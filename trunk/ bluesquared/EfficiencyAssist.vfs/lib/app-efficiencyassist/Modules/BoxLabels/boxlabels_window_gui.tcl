@@ -405,14 +405,6 @@ proc printbreakDown {args} {
     #***
     global GS_textVar mySettings log
     
-    if {![info exists mySettings(path,printer)]} {
-        ${log}::debug Path to printer does not exist. Exiting...
-        return
-    }
-    if {![info exists mySettings(path,wordpad)]} {
-        ${log}::debug Path to WordPad does not exist. Exiting...
-        return
-    }
     if {![info exists mySettings(path,bdfile)]} {
         ${log}::debug Path to the BreakDown file does not exist. Exiting...
         return
@@ -444,14 +436,24 @@ proc printbreakDown {args} {
         ##
         ## Email
         ##
-        mail::mail "$GS_textVar(line1)" "$GS_textVar(line1)\n$GS_textVar(line2)\n$GS_textVar(line3)\n$GS_textVar(line4)\n$GS_textVar(line5)\n\n$myBreakDownText"
+        mail::mail boxlabels "$GS_textVar(line1)" "$GS_textVar(line1)\n$GS_textVar(line2)\n$GS_textVar(line3)\n$GS_textVar(line4)\n$GS_textVar(line5)\n\n$myBreakDownText"
         ${log}::debug [list $GS_textVar(line1) $GS_textVar(line2) $myBreakDownText]
     } else {
         ##
         ## Email
         ##
-        mail::mail "$GS_textVar(line1)" "$GS_textVar(line1)\n$GS_textVar(line2)\n$GS_textVar(line3)\n$GS_textVar(line4)\n$GS_textVar(line5)\n\n$myBreakDownText"
+        mail::mail boxlabels "$GS_textVar(line1)" "$GS_textVar(line1)\n$GS_textVar(line2)\n$GS_textVar(line3)\n$GS_textVar(line4)\n$GS_textVar(line5)\n\n$myBreakDownText"
         ${log}::debug [list $GS_textVar(line1) $GS_textVar(line2) $myBreakDownText]
+        
+        # Check for required settings, exit if we don't have them
+        if {![info exists mySettings(path,printer)]} {
+            ${log}::debug Path to printer does not exist. Exiting...
+            return
+        }
+        if {![info exists mySettings(path,wordpad)]} {
+            ${log}::debug Path to WordPad does not exist. Exiting...
+            return
+        }
         
         ##
         ## Print the breakdown

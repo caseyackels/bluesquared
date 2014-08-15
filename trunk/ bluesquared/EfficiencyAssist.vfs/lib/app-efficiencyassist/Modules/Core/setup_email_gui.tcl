@@ -106,22 +106,24 @@ proc eAssistSetup::emailSetup_GUI {} {
     set nbkF1 [ttk::labelframe $f2(nbk).f1.top -text [mc "Configure Email"]]
     pack $nbkF1 -side top -fill both -padx 5p -pady 5p
     
-    ttk::checkbutton $nbkF1.ckbtn1
-    ttk::label $nbkF1.txt1 -text [mc "Enable Email Notifications?"]
+    ttk::checkbutton $nbkF1.ckbtn1 -variable emailSetup(boxlabels,Notification)
+    ttk::label $nbkF1.txt1 -text [mc "Enable Notifications?"]
     
     ttk::label $nbkF1.txt2 -text [mc "From"]
-    ttk::entry $nbkF1.entry2 -width 40
+    ttk::entry $nbkF1.entry2 -width 40 -textvariable emailSetup(boxlabels,From)
+        tooltip::tooltip $nbkF1.entry2 [mc "One valid email address only"]
     
     ttk::label $nbkF1.txt3 -text [mc "To"]
-    ttk::entry $nbkF1.entry3
+    ttk::entry $nbkF1.entry3 -textvariable emailSetup(boxlabels,To)
+        tooltip::tooltip $nbkF1.entry3 [mc "One valid email address only"]
     
     ttk::label $nbkF1.txt4 -text [mc "Subject"]
-    ttk::entry $nbkF1.entry4
+    ttk::entry $nbkF1.entry4 -textvariable emailSetup(boxlabels,Subject)
         tooltip::tooltip $nbkF1.entry4 [mc "This will prefix what was typed into the first line of the label"]
     
     
-    grid $nbkF1.ckbtn1 -column 0 -row 0 -pady 2p -padx 2p -sticky nse
-    grid $nbkF1.txt1 -column 1 -row 0 -pady 2p -padx 1p -sticky nsw
+    grid $nbkF1.ckbtn1 -column 0 -row 0 -pady 2p -sticky nse
+    grid $nbkF1.txt1 -column 1 -row 0 -pady 2p -sticky nsw
     
     grid $nbkF1.txt2 -column 0 -row 1 -pady 2p -padx 2p -sticky nse
     grid $nbkF1.entry2 -column 1 -row 1 -pady 2p -padx 2p -sticky news
