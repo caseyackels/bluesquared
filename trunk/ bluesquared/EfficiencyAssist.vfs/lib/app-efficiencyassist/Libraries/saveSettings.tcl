@@ -51,11 +51,14 @@ proc eAssistSetup::SaveGlobalSettings {} {
     #
     #***
     global log GS_filePaths GS_filePathSetup program company logSettings boxLabelInfo intlSetup headerParams headerParent headerAddress headerBoxes setup GS
-    global dist w carrierSetup CSR packagingSetup mySettings emailSetup
+    global dist w carrierSetup CSR packagingSetup mySettings emailSetup settings
 
     
     #${log}::debug Folder: [eAssist_Global::folderAccessibility $program(Home)]
     #${log}::debug File: [eAssist_Global::fileAccessibility $program(Home) $mySettings(ConfigFile)]
+    # Make sure we set the current modules' geometry before saving
+    set options(geom,[lindex $settings(currentModule) 0]) [wm geometry .]
+    
     lib::savePreferences
     
     # If we can't read or write, lets return.
@@ -201,6 +204,7 @@ proc lib::savePreferences {} {
         ${log}::critical -WARNING- Can't write to [file join $mySettings(Home) $mySettings(File)]. Settings will not be saved if changes occur.
         return
     }
+
     
 
     # Do processing (if applicable) before writing out to the file

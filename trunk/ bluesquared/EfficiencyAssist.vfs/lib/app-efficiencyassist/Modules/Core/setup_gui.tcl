@@ -63,7 +63,7 @@ proc eAssistSetup::eAssistSetup {} {
     #
     #
     #***
-    global G_setupFrame program tree log GS
+    global G_setupFrame program tree log GS options settings
     
     #set program(currentModule) Setup
     #set currentModule Setup
@@ -71,7 +71,14 @@ proc eAssistSetup::eAssistSetup {} {
     # Reset frames before continuing
     eAssist_Global::resetFrames parent
     
-    wm geometry . 700x610 ;# Width x Height
+    #eAssist_Global::getGeom [lindex $settings(currentModule) 0]
+    #
+    #if {[info exists options(geom,[lindex $settings(currentModule) 0])]} {
+    #    wm geometry . $options(geom,[lindex $settings(currentModule) 0])
+    #} else {
+    #    wm geometry . 700x610 ;# Width x Height
+    #}
+    
     
     # Create tree for Setup
     set tbl [ttk::frame .container.tree]

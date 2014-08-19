@@ -55,8 +55,7 @@ proc eAssist_db::loadDB {} {
     ${log}::debug --START-- [info level 1]
     
     set myDB [file join $program(Home) EA_setup.edb]
-    
-    set myList "$Header_ID $HeaderName $HeaderParams"
+    #set myList "$Header_ID $HeaderName $HeaderParams"
     
     sqlite3 db $myDB
     
@@ -67,3 +66,47 @@ proc eAssist_db::loadDB {} {
 	
     ${log}::debug --END-- [info level 1]
 } ;# eAssist_db::loadDB
+
+
+proc eAssist_db::tblHeader {} {
+    #****f* tblHeader/eAssist_db
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	List of columns in Header Table
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log
+    ${log}::debug --START-- [info level 1]
+    
+    array set db.tblHeader {
+        Header_ID ""
+        HeaderName ""
+        HeaderMaxLength ""
+        OutputHeaderName ""
+        Widget ""
+        Highlight ""
+        AlwaysDisplay ""
+        Required ""
+        DefaultWidth ""
+    }
+    
+    ${log}::debug --END-- [info level 1]
+} ;# eAssist_db::tblHeader

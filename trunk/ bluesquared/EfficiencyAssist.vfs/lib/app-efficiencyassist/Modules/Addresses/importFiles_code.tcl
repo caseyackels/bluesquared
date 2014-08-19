@@ -72,14 +72,12 @@ proc importFiles::readFile {fileName lbox} {
             ${log}::notice Found some punc data, skipping ...
             continue
         }
-        #lappend process(dataList) $line
         
         # Cycle through the rows until we find something that resembles a header row. Once we find it, start appending the data to a variable.
         # The imported files may have several rows of information before getting to the header row.
         if {$gateway == 0} {
             
             set Tmphdr [split $line ,]
-            #set line [join $Tmphdr ,]
             set hdr_lines 0
             foreach temp $Tmphdr {
                 #${log}::debug Header $temp
@@ -487,10 +485,11 @@ proc importFiles::endCmd {tbl row col text} {
     # SEE ALSO
     #
     #***
-    global log headerParams headerParent files process
+    global log headerParams headerParent files process job
     ${log}::debug --START-- [info level 1]
     
     set colName [$tbl columncget $col -name]
+    set updateCount 0
     
     switch -nocase $colName {
         version  {# Add $text to list of versions if that version doesn't exist (i.e. user created a new version)
@@ -507,7 +506,18 @@ proc importFiles::endCmd {tbl row col text} {
                         set process(versionList) [lreplace $process(versionList) $newItem $newItem $text]
                         #${log}::debug New Version List: $process(versionList)
                     }
-                }
+        }
+        quantity    {
+                    # We update the count's at the end of this proc
+                    if {![string is integer $text]} {
+                        bell
+                        tk_messageBox -title "Error" -icon error -message \
+                                        [mc "Only numbers are allowed"]
+                        $tbl rejectinput
+                        return
+                    }
+                    set updateCount 1                    
+        }
     }
     
     $tbl cellconfigure $row,$col -text $text
@@ -530,6 +540,9 @@ proc importFiles::endCmd {tbl row col text} {
     $tbl cellconfigure $row,$col -background $backGround
     }
 
+    if {$updateCount == 1} {
+        set job(TotalCopies) [eAssistHelper::calcSamples $tbl $col]
+    }
     
 	return $text
     ${log}::debug --END-- [info level 1]

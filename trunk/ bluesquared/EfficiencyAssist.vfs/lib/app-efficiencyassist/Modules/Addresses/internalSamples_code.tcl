@@ -191,6 +191,7 @@ proc eAssistHelper::calcSamples {tbl col} {
 
 	set myList [string map [list \{\} 0] [$tbl getcolumn $col]]
 	set returnCount [catch {expr [join $myList +]} err]
+	#${log}::debug Column Count: $returnCount
 	
 	if {$returnCount == 1} {
 		Error_Message::errorMsg BM001
@@ -202,6 +203,7 @@ proc eAssistHelper::calcSamples {tbl col} {
 	} else {
 		# err, will contain the total count.
 		set returnCount $err
+		#${log}::debug ColumnCount(returnCount): $returnCount
 	}
 	
 

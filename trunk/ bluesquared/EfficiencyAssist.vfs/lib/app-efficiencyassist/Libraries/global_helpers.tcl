@@ -410,6 +410,46 @@ proc eAssist_Global::at {time args} {
 } ;# eAssist_Global::at
 
 
+proc eAssist_Global::getGeom {module args} {
+    #****f* getGeom/eAssist_Global
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	Executes, or uses the default for the current module
+    #
+    # SYNOPSIS
+    #	getGeom <module> ?args?
+	#	Args = qualified geometry eg 450x500+200+200
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log options
+    ${log}::debug --START-- [info level 1]
+    
+	if {[info exists options(geom,$module)]} {
+		wm geometry . $options(geom,$module)
+		${log}::notice Geometry exists for $module - Using $options(geom,$module)
+	} else {
+		wm geometry . $args
+		${log}::notice Geometry does NOT exist for $module - Using $args
+	}
+	
+	
+    ${log}::debug --END-- [info level 1]
+} ;# eAssist_Global::getGeom
 proc eAssist_Global::launchFilters {} {
     #****f* launchFilters/eAssist_Global
     # AUTHOR

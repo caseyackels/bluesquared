@@ -60,13 +60,16 @@ proc eAssist::parentGUI {} {
     #	N/A
     #
     #***
-    global program settings btn log mb
+    global program settings btn log mb options
     ${log}::debug Entering parentGUI
 
     set locX [expr {[winfo screenwidth . ] / 4 + [winfo x .]}]
     set locY [expr {[winfo screenheight . ] / 5 + [winfo y .]}]
     #wm geometry .wi 625x375+${locX}+${locY}
     wm geometry . 640x610+${locX}+${locY}
+    
+    wm protocol . WM_DELETE_WINDOW {eAssistSetup::SaveGlobalSettings; destroy .}
+    wm protocol . WM_SAVE_YOURSELF eAssistSetup::SaveGlobalSettings
 
     
     wm title . $program(FullName)
@@ -94,9 +97,9 @@ proc eAssist::parentGUI {} {
     menu $mb.module -tearoff 0 -relief raised -bd 2
     $mb add cascade -label [mc "Module"] -menu $mb.module
 
-    $mb.module add command -label [mc "Box Labels"] -command {eAssist::buttonBarGUI BoxLabels 0}
-    $mb.module add command -label [mc "Batch Maker"] -command {eAssist::buttonBarGUI BatchMaker 1}
-    $mb.module add command -label [mc "Setup"] -command {eAssist::buttonBarGUI Setup 2}
+    $mb.module add command -label [mc "Box Labels"] -command {set options(geom,[lindex $settings(currentModule) 0]) [wm geometry .]; eAssist::buttonBarGUI BoxLabels 0}
+    $mb.module add command -label [mc "Batch Maker"] -command {set options(geom,[lindex $settings(currentModule) 0]) [wm geometry .]; eAssist::buttonBarGUI BatchMaker 1}
+    $mb.module add command -label [mc "Setup"] -command {set options(geom,[lindex $settings(currentModule) 0]) [wm geometry .]; eAssist::buttonBarGUI Setup 2}
 
     ## Help
     menu $mb.help -tearoff 0 -relief raised -bd 2
@@ -192,9 +195,13 @@ proc eAssist::buttonBarGUI {args} {
     #	N/A
     #
     #***
-    global log btn program settings mb
+    global log btn program settings mb options
     ${log}::debug Entering buttonBarGUI
     
+    # save the geometry of the module that we are leaving
+    #set options(geom,[lindex $settings(currentModule) 0]) [wm geometry .]
+    #${log}::debug Geometry: $options(geom,[lindex $settings(currentModule) 0])
+
     set module [lrange [join $args] 0 0]
     set idx [lrange [join $args] 1 1]
     
@@ -230,6 +237,7 @@ proc eAssist::buttonBarGUI {args} {
             #eAssistSetup::SaveGlobalSettings
             lib::savePreferences
             $mb.file entryconfigure 1 -state disable
+            eAssist_Global::getGeom $module 450x475
         }
         BatchMaker   {
             ${log}::debug Entering $module mode
@@ -250,6 +258,7 @@ proc eAssist::buttonBarGUI {args} {
             #eAssistSetup::SaveGlobalSettings
             lib::savePreferences
             $mb.file entryconfigure 1 -state normal
+            eAssist_Global::getGeom $module 900x610+240+124
             }
         Setup       {
             ${log}::debug Entering $module mode
@@ -268,6 +277,7 @@ proc eAssist::buttonBarGUI {args} {
             #eAssistSetup::SaveGlobalSettings
             lib::savePreferences
             $mb.file entryconfigure 1 -state disable
+            eAssist_Global::getGeom $module 845x573+247+156
         }
         default     {}
     }
