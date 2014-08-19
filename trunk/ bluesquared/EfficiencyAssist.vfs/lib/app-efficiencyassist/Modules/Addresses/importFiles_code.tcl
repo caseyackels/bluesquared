@@ -74,24 +74,60 @@ proc importFiles::readFile {fileName lbox} {
         }
         #lappend process(dataList) $line
         
+        # Cycle through the rows until we find something that resembles a header row. Once we find it, start appending the data to a variable.
+        # The imported files may have several rows of information before getting to the header row.
         if {$gateway == 0} {
+            
+            set Tmphdr [split $line ,]
+            #set line [join $Tmphdr ,]
+            set hdr_lines 0
+            foreach temp $Tmphdr {
+                #${log}::debug Header $temp
+                if {$gateway == 1} {
+                    #${log}::debug Setting gateway to 1
+                    break
+                    }
+                
+                foreach hdr $headerParent(headerList) {
+                    if {[lsearch -nocase $headerAddress($hdr) $temp] != -1} {
+                        #${log}::debug Found a Header Match: [lsearch -nocase $headerAddress($hdr) $temp]
+                        #${log}::debug Number of matched headers: $hdr_lines
+                        incr hdr_lines
+                
+                        # Once we reach 4 matches lets stop looping
+                        if {$hdr_lines >= 4} {
+                            ${log}::notice Found the Header row - $line
+                            ${log}::notice Stopping the loop ...
+                            lappend process(dataList) $line
+                            set gateway 1
+                            break
+                        } else {
+                            ${log}::notice Searching for the header row ...
+                            ${log}::notice Headers found: $hdr_lines - $temp
+                            continue
+                        }
+                    }
+                }
+            }
+            
+            
             # ** This should be a user settable option! **
             # While 'city' should be universal, a requirement no less, it is still possible to not have a column named 'city'.
-            if {[string match -nocase *city* $line] || [string match -nocase *address* $line] || [string match -nocase *state* $line] || [string match -nocase *zip* $line]} {
-                        ${log}::notice Found the Header row - $line
-                        lappend process(dataList) $line
-                        set gateway 1
-                } else {
-                    ${log}::notice Searching for the header row ...
-                    continue
-            }
+            #if {[string match -nocase *city* $line] || [string match -nocase *address* $line] || [string match -nocase *state* $line] || [string match -nocase *zip* $line]} {}
+            #            ${log}::notice Found the Header row - $line
+            #            lappend process(dataList) $line
+            #            set gateway 1
+            #    {} else {}
+            #        ${log}::notice Searching for the header row ...
+            #        continue
+            #{}
         } else {
             lappend process(dataList) $line
         }
 
     }
     
-    ${log}::debug *RECORDS*: [expr [llength $process(dataList)]-1]
+    ${log}::debug *Header RECORDS*: [expr [llength $process(dataList)]-1]
     set process(numOfRecords) [expr [llength $process(dataList)]-1]
 
     chan close $process(fd)
