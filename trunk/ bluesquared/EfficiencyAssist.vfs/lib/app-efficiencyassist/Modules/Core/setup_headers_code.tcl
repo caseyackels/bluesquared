@@ -256,6 +256,10 @@ proc eAssistSetup::startCmdHdr {tbl row col text} {
                 if {($row != 0) && ($row == $myRow)} {$tbl insert end ""}
                 
                 set headerParent(outPutHeader) [$w(hdr_frame1a).listbox getcells 0,3 end,3]
+                if {[lrange $headerParent(outPutHeader) end end] == "{}"} {
+                            #Remove the last list item, since it is empty.
+                            set headerParent(outPutHeader) [lrange $headerParent(outPutHeader) 0 end-1]
+                }
                 ${log}::debug Saving : [$w(hdr_frame1a).listbox getcells 0,3 end,3]
                 }
             Widget  {

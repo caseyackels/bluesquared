@@ -74,21 +74,26 @@ proc eAssistSetup::packagingTypes_GUI {} {
     
     ## Bindings
     # Enter
-    bind $f1.entry <Return> "eAssistSetup::addPackagingSetup CONTAINER $f1.entry $f1.lbox"
+    bind $f1.entry <Return> "eAssistSetup::addPackagingSetup CONTAINERS $f1.entry $f1.lbox"
     # .. So both enter key's work the same way
-    bind $f1.entry <KP_Enter> "eAssistSetup::addPackagingSetup CONTAINER $f1.entry $f1.lbox"
+    bind $f1.entry <KP_Enter> "eAssistSetup::addPackagingSetup CONTAINERS $f1.entry $f1.lbox"
     
     # Delete
-    bind $f1.lbox <Delete> "eAssistSetup::delPackagingSetup CONTAINER $f1.lbox"
-    bind $f1.lbox <BackSpace> "eAssistSetup::delPackagingSetup CONTAINER $f1.lbox"
+    bind $f1.lbox <Delete> "eAssistSetup::delPackagingSetup CONTAINERS $f1.lbox"
+    bind $f1.lbox <BackSpace> "eAssistSetup::delPackagingSetup CONTAINERS $f1.lbox"
 
 
     
     # Populate the listbox if we have existing data
-    if {[info exists packagingSetup(ContainerType)] == 1} {
-        foreach item $packagingSetup(ContainerType) {
-            $f1.lbox insert end $item
-        }
+    #if {[info exists packagingSetup(ContainerType)] == 1} {
+    #    foreach item $packagingSetup(ContainerType) {
+    #        $f1.lbox insert end $item
+    #    }
+    #}
+    if {[info exists packagingSetup(Containers)] == 1} {
+            foreach item $packagingSetup(Containers) {
+                $f1.lbox insert end $item
+            }
     }
     
     ##
@@ -107,20 +112,25 @@ proc eAssistSetup::packagingTypes_GUI {} {
     
     ## Bindings
     # Enter
-    bind $f2.entry <Return> "eAssistSetup::addPackagingSetup PACKAGE $f2.entry $f2.lbox"
+    bind $f2.entry <Return> "eAssistSetup::addPackagingSetup PACKAGES $f2.entry $f2.lbox"
     # .. So both enter key's work the same way
-    bind $f2.entry <KP_Enter> "eAssistSetup::addPackagingSetup PACKAGE $f2.entry $f2.lbox"
+    bind $f2.entry <KP_Enter> "eAssistSetup::addPackagingSetup PACKAGES $f2.entry $f2.lbox"
     
     # Delete
-    bind $f2.lbox <Delete> "eAssistSetup::delPackagingSetup PACKAGE $f2.lbox"
-    bind $f2.lbox <BackSpace> "eAssistSetup::delPackagingSetup PACKAGE $f2.lbox"
+    bind $f2.lbox <Delete> "eAssistSetup::delPackagingSetup PACKAGES $f2.lbox"
+    bind $f2.lbox <BackSpace> "eAssistSetup::delPackagingSetup PACKAGES $f2.lbox"
     
     
     # Populate the listbox if we have existing data
-    if {[info exists packagingSetup(PackageType)] == 1} {
-        foreach item $packagingSetup(PackageType) {
-            $f2.lbox insert end $item
-        }
+    #if {[info exists packagingSetup(PackageType)] == 1} {
+    #    foreach item $packagingSetup(PackageType) {
+    #        $f2.lbox insert end $item
+    #    }
+    #}
+    if {[info exists packagingSetup(Packages)] == 1} {
+            foreach item $packagingSetup(Packages) {
+                $f2.lbox insert end $item
+            }
     }
 
 } ;#packagingTypes_GUI

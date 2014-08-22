@@ -427,6 +427,9 @@ proc importFiles::startCmd {tbl row col text} {
             "packagetype"       {
                                 $w configure -values $packagingSetup(PackageType) -state readonly
             }
+            shippingclass       {
+                                $w configure -values $carrierSetup(ShippingClass) -state readonly
+            }
             default {
                 #${log}::debug Column Name: [string tolower [$tbl columncget $col -name]]
             }

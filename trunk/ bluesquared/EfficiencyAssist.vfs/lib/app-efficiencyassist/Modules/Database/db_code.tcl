@@ -59,17 +59,19 @@ proc eAssist_db::loadDB {} {
     
     sqlite3 db $myDB
     
-    db eval {SELECT * from Headers} {
-        ${log}::debug $myList
-    }
+    #db eval {SELECT * from Headers} {
+    #    ${log}::debug $myList
+    #}
+    
+    eAssist_db::initContainers
     
 	
     ${log}::debug --END-- [info level 1]
 } ;# eAssist_db::loadDB
 
 
-proc eAssist_db::tblHeader {} {
-    #****f* tblHeader/eAssist_db
+proc eAssist_db::initContainers {} {
+    #****f* initContainers/eAssist_db
     # AUTHOR
     #	Casey Ackels
     #
@@ -77,7 +79,54 @@ proc eAssist_db::tblHeader {} {
     #	(c) 2011-2014 Casey Ackels
     #
     # FUNCTION
-    #	List of columns in Header Table
+    #	Initialize variables for the Containers table
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log packagingSetup
+    ${log}::debug --START-- [info level 1]
+    
+    # Needed since we are migrating from a flat file
+    #if {[info exists packagingSetup(Containers)]} {unset packagingSetup(Containers)}
+    # Setup the variables holding the Containers and Packages
+    db eval {SELECT Container from Containers} {
+        #${log}::debug Container: $Container
+        lappend packagingSetup(Containers) $Container
+    }
+
+    # Needed since we are migrating from a flat file
+    #if {[info exists packagingSetup(Packages)]} {unset packagingSetup(Packages)}
+    db eval {SELECT Package from Packages} {
+        #${log}::debug Container: $Package
+        lappend packagingSetup(Packages) $Package
+    }
+    
+    ${log}::debug --END-- [info level 1]
+} ;# eAssist_db::initContainers
+
+
+proc eAssist_db::delete {table col args} {
+    #****f* delete/eAssist_db
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	eAssist_db::delete <table> <col> <args>
     #
     # SYNOPSIS
     #
@@ -96,17 +145,10 @@ proc eAssist_db::tblHeader {} {
     global log
     ${log}::debug --START-- [info level 1]
     
-    array set db.tblHeader {
-        Header_ID ""
-        HeaderName ""
-        HeaderMaxLength ""
-        OutputHeaderName ""
-        Widget ""
-        Highlight ""
-        AlwaysDisplay ""
-        Required ""
-        DefaultWidth ""
-    }
-    
+    #set args [join $args]
+    #db eval {DELETE from Containers WHERE Container='test pallet'}
+    # Need to use quotes so we the variables have proper substitution
+    db eval "DELETE from $table WHERE $col='$args'"
+    ${log}::debug Deleting: DELETE from $table WHERE $col='$args'
     ${log}::debug --END-- [info level 1]
-} ;# eAssist_db::tblHeader
+} ;# eAssist_db::delete

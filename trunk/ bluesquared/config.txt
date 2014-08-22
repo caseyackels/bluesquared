@@ -1,6 +1,6 @@
 GS_filePathSetup(checkToggle) 0
-GS_filePathSetup(labelDirectory) C:/Users/Casey.Ackels/Downloads
 GS_filePathSetup(lookInDirectory) C:/Users/Casey.Ackels/Downloads
+GS_filePathSetup(labelDirectory) C:/Users/Casey.Ackels/Downloads
 GS_filePathSetup(enable,Bartender) 1
 GS_filePathSetup(saveInDirectory) C:/Users/Casey.Ackels/Desktop
 company(address2) 
@@ -19,22 +19,22 @@ logSettings(currentLogLevel) Debug
 logSettings(displayConsole) 1
 logSettings(loglevel) debug
 logSettings(levels) Debug Info Notice Warn Error Critical Alert Emergency
-boxLabelInfo(labelNames) 4Line 3Line 5Line
-boxLabelInfo(currentBoxLabel) 5Line
 boxLabelInfo(3Line,labelSetup) 3 C:/Users/Casey.Ackels/Downloads
+boxLabelInfo(currentBoxLabel) 5Line
+boxLabelInfo(labelNames) 4Line 3Line 5Line
 boxLabelInfo(4Line,labelSetup) 5 C:/Users/Casey.Ackels/Downloads
 boxLabelInfo(5Line,labelSetup) 5 C:/Users/Casey.Ackels/Downloads
-intlSetup(enterTerms) 
-intlSetup(enterLicense) 
-intlSetup(UOMList) Each Box
 intlSetup(PAYERList) SENDER THIRDPARTY
-intlSetup(enterPayer) 
-intlSetup(enterUOM) 
-intlSetup(TERMSList) DDP
+intlSetup(UOMList) Each Box
+intlSetup(enterLicense) 
+intlSetup(enterTerms) 
 intlSetup(LICENSEList) NLR
-headerParent(whiteList) Company Notes DistributionType ContainerType PackageType ShippingClass Email InternalNotes count
-headerParent(headerList) Company Attention Address1 Address2 Address3 City State Zip Country Phone Version Quantity Notes ShipDate DistributionType CarrierMethod 3rdPartyBilling ArriveDate ContainerType PackageType PackageQty ShippingClass Email InternalNotes
-headerParent(outPutHeader) ShipToCompany ShipToAttention ShipToAddressLine1 ShipToAddressLine2 ShipToAddressLine3 ShipToCity ShipToState ShipToPostalCode ShipToCountry ShipToPhone Version ShipQuantity UserNotes ShipToDate DistributionType CarrierMethod 3rdPartyBilling ArriveDate ContainerType PackageType PackageQty ShippingClass Email InternalNotes {} {}
+intlSetup(TERMSList) DDP
+intlSetup(enterUOM) 
+intlSetup(enterPayer) 
+headerParent(whiteList) Company Notes DistributionType ContainerType PackageType ShippingClass InternalNotes DestinationIdentifier count
+headerParent(headerList) Company Attention Address1 Address2 Address3 City State Zip Country Phone Version Quantity Notes ShipDate DistributionType CarrierMethod 3rdPartyBilling ArriveDate ContainerType PackageType PackageQty ShippingClass Email InternalNotes DestinationIdentifier
+headerParent(outPutHeader) ShipToCompany ShipToAttention ShipToAddressLine1 ShipToAddressLine2 ShipToAddressLine3 ShipToCity ShipToState ShipToPostalCode ShipToCountry ShipToPhone Version ShipQuantity UserNotes ShipToDate DistributionType CarrierMethod 3rdPartyBilling ArriveDate ContainerType PackageType PackageQty ShippingClass Email InternalNotes {}
 headerAddress(ShippingClass) shippingclass
 headerAddress(Address2) addr2 add2 addressline2 {address line 2} shiptoaddressline2
 headerAddress(State) state st st. province state/province shiptostate
@@ -47,19 +47,20 @@ headerAddress(PackageType) packagetype
 headerAddress(Attention) Atten attn attention contact {contact name} name Shiptoattention
 headerAddress(ShipTo) {Ship To}
 headerAddress(Email) UserEmail
-headerAddress(Notes) {user notes} notes usernotes
 headerAddress(CarrierMethod) carrier carriermethod
-headerAddress(3rdPartyBilling) 3rdpartybilling
+headerAddress(Notes) {user notes} notes usernotes
 headerAddress(Phone) phone ph shiptophone {Contact Phone}
+headerAddress(3rdPartyBilling) 3rdpartybilling
 headerAddress(Zip) zip {postal code} shiptopostalcode
 headerAddress(Country) country shiptocountry
+headerAddress(DestinationIdentifier) destinationidentifier
 headerAddress(ContainerType) containertype
-headerAddress(InternalNotes) {Internal Notes} internalnotes
 headerAddress(Version) version vers
-headerAddress(Address1) add1 addr {Address Line 1} addressline1 Address addr1 shiptoaddressline1
-headerAddress(Company) destination company {company name} business shiptocompany {destination name}
-headerAddress(Quantity) qty copies quantity shipquantity
+headerAddress(InternalNotes) {Internal Notes} internalnotes
 headerAddress(ArriveDate) arrivedate
+headerAddress(Quantity) qty copies quantity shipquantity
+headerAddress(Company) destination company {company name} business shiptocompany {destination name}
+headerAddress(Address1) add1 addr {Address Line 1} addressline1 Address addr1 shiptoaddressline1
 headerParams(ShippingClass) 20 ShippingClass ttk::combobox {} Yes Yes
 headerParams(Address2) 32 ShipToAddressLine2 ttk::entry {} {} {}
 headerParams(Address3) 32 ShipToAddressLine3 ttk::entry {} {} {}
@@ -71,43 +72,40 @@ headerParams(ShipDate) 10 ShipToDate ttk::entry {} {} {}
 headerParams(PackageType) 32 PackageType ttk::combobox {} Yes {}
 headerParams(Attention) 24 ShipToAttention ttk::entry {} No Yes
 headerParams(Email) 45 Email ttk::entry {} No No
-headerParams(CarrierMethod) 32 CarrierMethod ttk::combobox {} No {}
 headerParams(Notes) 200 UserNotes ttk::entry {} Yes {}
-headerParams(3rdPartyBilling) 20 3rdPartyBilling ttk::entry {} {} {}
+headerParams(CarrierMethod) 32 CarrierMethod ttk::combobox {} No {}
 headerParams(Phone) 20 ShipToPhone ttk::entry {} {} {}
+headerParams(3rdPartyBilling) 20 3rdPartyBilling ttk::entry {} {} {}
 headerParams(Zip) 10 ShipToPostalCode ttk::entry {} No Yes
 headerParams(Country) 24 ShipToCountry ttk::entry {} No Yes
+headerParams(DestinationIdentifier) 12 DestinationIdentifier ttk::entry {} Yes Yes
 headerParams(ContainerType) 32 ContainerType ttk::combobox {} Yes {}
-headerParams(InternalNotes) 200 InternalNotes ttk::entry {} Yes {}
 headerParams(Version) 30 Version ttk::combobox {} No No
-headerParams(ArriveDate) 10 ArriveDate ttk::entry {} {} {}
-headerParams(Address1) 32 ShipToAddressLine1 ttk::entry {} No Yes
-headerParams(Quantity) 22 ShipQuantity ttk::entry {} No No
+headerParams(InternalNotes) 200 InternalNotes ttk::entry {} Yes {}
 headerParams(Company) 32 ShipToCompany ttk::entry {} Yes Yes
+headerParams(Quantity) 22 ShipQuantity ttk::entry {} No No
+headerParams(Address1) 32 ShipToAddressLine1 ttk::entry {} No Yes
+headerParams(ArriveDate) 10 ArriveDate ttk::entry {} {} {}
 dist(distributionTypes) {01. Customer Samples} {02. Internal Samples} {03. Customer Copies} {04. Freight} {05. Small Package} {06. JG Mail} {07. UPS Import} {08. JG Inventory} {09. USPS Import} {10. Overs} {11. Buy-Out Bindery} {12. Buy-Out Press} {13. FedEx Import} {00. Customer Tearsheets}
 setup(smallPackageCarrierName) UPS FedEX UPS-NRI
 setup(smallPackageCarriers) {UPS 947919 {}} {FedEX 5555555 {}} {UPS-NRI 5656566 {}}
-carrierSetup(enterShipmentType) 
-carrierSetup(enterRateType) 
-carrierSetup(PaymentType) Prepaid {Third Party}
-carrierSetup(CarrierList) {UPS Next Day Air} {UPS 2 Day Air} {UPS 3 Day Select} {UPS Std Service - Canada} {UPS Ground} {UPS WW Next Day} {UPS WW/2-5 Day} {USPS Priority} {USPS 1st Class} {UPS ManQ}
 carrierSetup(ShippingClass) {Finished Product} Buyout {Job Component} {Mail Drop} {Promotional Samples} {Proof 1} {Proof 2} {Return materials to Customer}
-carrierSetup(enterPaymentType) 
-carrierSetup(enterCarrier) 
-carrierSetup(PAYMENT) Prepaid {Third Party}
-carrierSetup(ShipmentType) {Small Package} {Truck Load}
-carrierSetup(RateType) Pallet Volume
+carrierSetup(CarrierList) {UPS Next Day Air} {UPS 2 Day Air} {UPS 3 Day Select} {UPS Std Service - Canada} {UPS Ground} {UPS WW Next Day} {UPS WW/2-5 Day} {USPS Priority} {USPS 1st Class} {UPS ManQ}
+carrierSetup(PaymentType) Prepaid {Third Party}
+carrierSetup(enterRateType) 
+carrierSetup(enterShipmentType) 
 carrierSetup(enterShippingClass) 
-packagingSetup(enterPackageType) 
-packagingSetup(ContainerType) {Pallets, Mail} {*Pallets, 48x40} {*Pallets, 48x40 New} {*Pallets, 48x40 HT} {*Pallets, 28x40}
-packagingSetup(PackageType) {Bundles, Loose} {Bundles, Strapped} {Ctn, 11 x 8.5 x 9 - 2456} {Ctn, 11 x 8.5 x 6 - 2228} {Ctn, 11 x 8.5 x 3 - 3755} {Ctn, 11 x 8.5 x 9 UPS 44# - 2647} {Ctn, 11 x 9.125 x 4 - 2598} {Ctn, 11 x 9.125 x 9.5 - 1952} {Ctn, 10.625 x 8.125 x 9 - 3905} {Ctn, 12.125 x 10.125 x 9 - 2650} {Ctn, 12.125 x 9.625 x 3 - 3160} {Ctn, 12.125 x 9.625 x 6 - 3161} {Ctn, 12.25 x 11 x 6.5 - 3410} {Ctn, 12.25 x 9.25 x 9 - 1364} {Ctn, 17 x 11 x 6 - 3541} {Ctn, Custom} {Ctn, Customer Supplied} {Ctn, USPS 11 x 8.5 x 5.5} {Ctn, USPS 12 x 12 x 5.5} {Ctn, USPS 13.625 x 7.875 x 3.375}
-packagingSetup(enterContainerType) 
+carrierSetup(RateType) Pallet Volume
+carrierSetup(ShipmentType) {Small Package} {Truck Load}
+carrierSetup(PAYMENT) Prepaid {Third Party}
+carrierSetup(enterCarrier) 
+carrierSetup(enterPaymentType) 
 CSR(Names) Meredith Mary Cyndi {Dan H} Lyn Darlene Linda {Pam F} Tom
-emailSetup(email,serverName) mail.journalgraphics.com
-emailSetup(email,userName) jga.shipping
-emailSetup(boxlabels,From) jgshipping
 emailSetup(boxlabels,Subject) Package Info:
+emailSetup(boxlabels,From) jgshipping
+emailSetup(email,userName) jga.shipping
+emailSetup(email,serverName) mail.journalgraphics.com
 emailSetup(email,port) 25
-emailSetup(email,password) shipping
-emailSetup(boxlabels,Notification) 1
 emailSetup(boxlabels,To) casey.ackels@journalgraphics.com
+emailSetup(boxlabels,Notification) 1
+emailSetup(email,password) shipping

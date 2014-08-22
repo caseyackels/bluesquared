@@ -205,14 +205,28 @@ proc eAssistHelper::insertItems {tbl} {
 	set btnBar [ttk::frame $w(di).btnBar]
 	pack $btnBar -side right -pady 5p -padx 5p
 	
+	# Create the buttons here, but we'll [grid] it at the bottom of this proc.
+	#${log}::debug newType: $newType
+	ttk::button $btnBar.ok		-text [mc "OK"] -command "[list eAssistHelper::insValuesToTableCells -window $tbl "" $origCells]; destroy .di" ;#"eAssistHelper::insValuesToTableCells [list $tbl] $txtVariable $origCells; destroy .di"
+	#ttk::button $btnBar.ok		-text [mc "OK"] -command {${log}::debug [uplevel 1]}
+	#ttk::button $btnBar.ok		-text [mc "OK"] -command [list puts "tbl: $tbl, newType: [$f2.$x$header get], origCells: $origCells"]
+	ttk::button $btnBar.cancel	-text [mc "Cancel"] -command {destroy .di}
 
+	# Look above for the initiation of the btnBar
+	grid $btnBar.ok -column 0 -row 0 -sticky news -pady 5p -padx 5p
+	grid $btnBar.cancel -column 1 -row 0 -sticky news -pady 5p -pady 5p
 
-	# Guard against multiple cells being selected ...	
+	# END GUI
+	
+	# Guard against multiple cells being selected ...
+	
+	# Var to use to get versions: $process(versionList)
+	
 	if {[llength $curCol] == 1} {
 		foreach header $curCol {
 			incr x
 			incr i
-			${log}::debug $header / Widgets: [lrange $headerParams($header) 2 2]
+			${log}::debug Header: $header / Widgets: [lrange $headerParams($header) 2 2]
 			# Check to make sure that the column hasn't been hidden, if it is, lets stop the current loop.
 			if {[$tbl columncget $header -hide] == 1} {continue}
 			
@@ -221,6 +235,7 @@ proc eAssistHelper::insertItems {tbl} {
 			if {$wid eq "ttk::combobox"} {
 				switch -glob -- [string tolower $header] {
 					distributiontype	{
+						${log}::debug DistributionType
 						ttk::label $f2.txt$i -text [mc "$header"]
 						$wid $f2.$x$header -values $dist(distributionTypes) -textvariable txtVariable
 						
@@ -234,6 +249,7 @@ proc eAssistHelper::insertItems {tbl} {
 						
 					}
 					carriermethod		{
+						${log}::debug CarrierMethod
 						ttk::label $f2.txt$i -text [mc "$header"]
 						$wid $f2.$x$header -values $carrierSetup(CarrierList) -textvariable txtVariable
 						$f2.$x$header delete 0 end
@@ -243,6 +259,7 @@ proc eAssistHelper::insertItems {tbl} {
 						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
 					}
 					packagetype			{
+						${log}::debug PackageType
 						ttk::label $f2.txt$i -text [mc "$header"]
 						$wid $f2.$x$header -values $packagingSetup(PackageType) -textvariable txtVariable
 						$f2.$x$header delete 0 end
@@ -252,6 +269,7 @@ proc eAssistHelper::insertItems {tbl} {
 						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
 					}
 					containertype		{
+						${log}::debug ContainerType
 						ttk::label $f2.txt$i -text [mc "$header"]
 						$wid $f2.$x$header -values $packagingSetup(ContainerType) -textvariable txtVariable
 						$f2.$x$header delete 0 end
@@ -261,6 +279,7 @@ proc eAssistHelper::insertItems {tbl} {
 						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
 					}
 					shippingclass		{
+						${log}::debug ShippingClass
 						ttk::label $f2.txt$i -text [mc "$header"]
 						$wid $f2.$x$header -values $carrierSetup(ShippingClass) -textvariable txtVariable
 						$f2.$x$header delete 0 end
@@ -270,9 +289,14 @@ proc eAssistHelper::insertItems {tbl} {
 						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
 					}
 					default			{
-						${log}::notice Item not setup to use the ComboBox!}
+						${log}::notice Item not setup to use the ComboBox, displaying a generic text widget
+						ttk::entry $f2.$x$header -textvariable txtVariable
+						
+						grid $f2.$x$header -column 0 -row $x -sticky news -pady 5p -padx 5p
+						}
 				}
 			} else {
+						${log}::debug General
 						ttk::label $f2.txt$i -text [mc "$header"]
 						# Create the widget specified in Setup for the column; typically will be ttk::entry
 						$wid $f2.$x$header -textvariable txtVariable
@@ -286,20 +310,13 @@ proc eAssistHelper::insertItems {tbl} {
 		ttk::label $f2.txt1 -text [mc "Please select cells in one column only"]
 		grid $f2.txt1 -column 0 -row 0 -sticky news -pady 5p -padx 5p
 		
+		# Remove the regular text, and cancel button. Redirect the command of the OK button to just closing the window.
 		grid forget $f1
+		grid forget $btnBar.cancel
 		$btnBar.ok configure -command {destroy .di}
 	}
 	
-	# Create the buttons here, but we'll [grid] it at the bottom of this proc.
-	#${log}::debug newType: $newType
-	ttk::button $btnBar.ok		-text [mc "OK"] -command "[list eAssistHelper::insValuesToTableCells -window $tbl "" $origCells]; destroy .di" ;#"eAssistHelper::insValuesToTableCells [list $tbl] $txtVariable $origCells; destroy .di"
-	#ttk::button $btnBar.ok		-text [mc "OK"] -command {${log}::debug [uplevel 1]}
-	#ttk::button $btnBar.ok		-text [mc "OK"] -command [list puts "tbl: $tbl, newType: [$f2.$x$header get], origCells: $origCells"]
-	ttk::button $btnBar.cancel	-text [mc "Cancel"] -command {destroy .di}
 
-	# Look above for the initiation of the btnBar
-	grid $btnBar.ok -column 0 -row 0 -sticky news -pady 5p -padx 5p
-	grid $btnBar.cancel -column 1 -row 0 -sticky news -pady 5p -pady 5p
 
 	#bind $f2.$x$header <<ComboboxSelected>> {
 	#	set newType txtVariable

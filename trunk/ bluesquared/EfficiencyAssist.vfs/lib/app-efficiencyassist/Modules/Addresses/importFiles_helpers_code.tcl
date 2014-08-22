@@ -351,7 +351,8 @@ proc eAssistHelper::insValuesToTableCells {type tbl txtVar cells} {
 			${log}::debug Inserting $txtVar into $tbl - $val - $cells
 			#${log}::debug Selected Cells: [$tbl curcellselection]
 			
-			if {[llength $txtVar] != 1} {
+			#if {[llength $txtVar] != 1} {}
+			if {[llength $cells] != 1} {
 				# Pasting multiple cells
 				#foreach item $txtVar cell [$tbl curcellselection] {} ;# pasting into highlighted cells only
 				foreach cell $cells {

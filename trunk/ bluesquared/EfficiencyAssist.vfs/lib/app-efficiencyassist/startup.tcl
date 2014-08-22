@@ -456,6 +456,9 @@ proc 'eAssist_initVariables {} {
 	
 	# Schedule a time to check for updates
 	#eAssist_Global::at $program(checkUpdateTime) vUpdate::checkForUpdates
+	
+	# Load the DB
+	eAssist_db::loadDB
 } ;# 'eAssist_initVariables
 
 

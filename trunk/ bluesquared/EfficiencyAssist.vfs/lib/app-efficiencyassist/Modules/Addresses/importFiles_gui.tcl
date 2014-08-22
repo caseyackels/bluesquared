@@ -401,6 +401,8 @@ proc importFiles::eAssistGUI {} {
                                     -editselectedonly 1 \
                                     -selectmode extended \
                                     -selecttype cell \
+                                    -labelcommand tablelist::sortByColumn \
+                                    -labelcommand2 tablelist::addToSortColumns \
                                     -editstartcommand {importFiles::startCmd} \
                                     -editendcommand {importFiles::endCmd} \
                                     -yscrollcommand [list $scrolly set] \
@@ -427,11 +429,25 @@ proc importFiles::eAssistGUI {} {
     #bind $bodyTag <<Button3>> +[list tk_popup .tblMenu %X %Y]
     
     # Toggle between selecting a row, or a single cell
-    bind $bodyTag <Double-1> {
+    bind $bodyTag <Button-1> {
+        #${log}::debug Clicked on column %W %x %y
+        #${log}::debug Column Name: [$files(tab3f2).tbl containingcolumn %x]
+        set colName [$files(tab3f2).tbl columncget [$files(tab3f2).tbl containingcolumn %x] -name]
+        #${log}::debug Column Name: $colName
+        
+        if {$colName eq "count"} {
+            $files(tab3f2).tbl configure -selecttype row
+        } else {
+            $files(tab3f2).tbl configure -selecttype cell
+        }
     }
-    # Begin labelTag
-    bind $labelTag <Button-3> +[list tk_popup .tblToggleColumns %X %Y]
-    #bind $labelTag <Enter> {tooltip::tooltip $labelTag testing}
+    
+# bind [.tbl bodytag] <Button-1> {printClickedCell %W %x %y}
+#
+#proc printClickedCell {w x y} {
+#    foreach {tbl x y} [tablelist::convEventFields $w $x $y] {}
+#    puts "clicked on cell [$tbl containingcell $x $y]"
+#}   
     
     bind $bodyTag <Control-v> {
         eAssistHelper::insValuesToTableCells -hotkey $files(tab3f2).tbl [clipboard get] [$files(tab3f2).tbl curcellselection]
@@ -442,7 +458,10 @@ proc importFiles::eAssistGUI {} {
         IFMenus::copyCell $files(tab3f2).tbl
         ${log}::debug Pressed <Control-C>
     }
-
+    
+    # Begin labelTag
+    bind $labelTag <Button-3> +[list tk_popup .tblToggleColumns %X %Y]
+    #bind $labelTag <Enter> {tooltip::tooltip $labelTag testing}
 
     #----- GRID
     grid $files(tab3f2).tbl -column 0 -row 0 -sticky news -padx 5p -pady 5p

@@ -148,10 +148,10 @@ proc eAssistSetup::SaveGlobalSettings {} {
         chan puts $fd "carrierSetup($value) $carrierSetup($value)"
     }
     
-    foreach value [array names packagingSetup] {
-        #if {![info exists packagingSetup($value)]} {continue}
-        chan puts $fd "packagingSetup($value) $packagingSetup($value)"
-    }
+    #foreach value [array names packagingSetup] {
+    #    #if {![info exists packagingSetup($value)]} {continue}
+    #    chan puts $fd "packagingSetup($value) $packagingSetup($value)"
+    #}
     
     foreach value [array names CSR] {
         #if {![info exists CSR($value)]} {continue}

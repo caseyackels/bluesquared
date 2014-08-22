@@ -22,7 +22,7 @@
 # - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
-proc eAssistSetup::addPackagingSetup {varType entryField listBox} {
+proc eAssistSetup::addPackagingSetup {dbTable entryField listBox} {
     #****f* addCarrierSetup/eAssistSetup
     # AUTHOR
     #	Casey Ackels
@@ -34,7 +34,7 @@ proc eAssistSetup::addPackagingSetup {varType entryField listBox} {
     #	Add values to listbox
     #	entryField = Path to widget
     #   listBox = Path to widget
-    #   Type = what it is, for the switch to work correctly
+    #   dbTable = what it is, for the switch to work correctly
     #
     # SYNOPSIS
     #
@@ -54,20 +54,22 @@ proc eAssistSetup::addPackagingSetup {varType entryField listBox} {
     global log packagingSetup
     ${log}::debug --START-- [info level 1]
     
-    ${log}::debug Adding $varType, $entryField, $listBox
+    ${log}::debug Adding $dbTable, $entryField, $listBox
     
     if {[$entryField get] == ""} {return}
 
-    switch -- $varType {
-            PACKAGE     {
+    switch -- $dbTable {
+            PACKAGES     {
                         set entryValue $packagingSetup(enterPackageType)
-                        set newVarType PackageType
-                        ${log}::debug PACKAGE - $entryField
+                        set newVarType Packages
+                        set dbCol Package
+                        ${log}::debug PACKAGES - $entryField
             }
-            CONTAINER    {
+            CONTAINERS    {
                         set entryValue $packagingSetup(enterContainerType)
-                        set newVarType ContainerType
-                        ${log}::debug CONTAINER - $entryField
+                        set newVarType Containers
+                        set dbCol Container
+                        ${log}::debug CONTAINERS - $entryField
             }
             default     {
                         ${log}::debug Nothing set for this SWITCH command
@@ -77,6 +79,10 @@ proc eAssistSetup::addPackagingSetup {varType entryField listBox} {
     ${log}::debug Adding _ $entryField _ to $newVarType Listbox
     
     $listBox insert end $entryValue
+    
+    # Insert into DB; must use quotes instead of curly braces to allow variable substituition
+    db eval "insert into ${dbTable}($dbCol) values('$entryValue')"
+    
     $entryField delete 0 end
     
     
@@ -89,7 +95,7 @@ proc eAssistSetup::addPackagingSetup {varType entryField listBox} {
 } ;# eAssistSetup::addCarrierSetup
 
 
-proc eAssistSetup::delPackagingSetup {varType listBox} {
+proc eAssistSetup::delPackagingSetup {dbTable listBox} {
     #****f* delCarrierSetup/eAssistSetup
     # AUTHOR
     #	Casey Ackels
@@ -119,22 +125,29 @@ proc eAssistSetup::delPackagingSetup {varType listBox} {
     
     if {[$listBox curselection] == ""} {return}
     
-    # Delete the entry, then set the var to all values remaining values.
-    $listBox delete [$listBox curselection]
-    
-    switch -- $varType {
-            PACKAGE     {
-                        set newVarType PackageType
+    switch -- $dbTable {
+            PACKAGES     {
+                        #set newVarType PackageType
+                        set newVarType Package
+                        set dbCol Package
             }
-            CONTAINER    {
-                        set newVarType ContainerType
+            CONTAINERS    {
+                        #set newVarType ContainerType
+                        set newVarType Container
+                        set dbCol Package
             }
             default     {
                         ${log}::debug Nothing set for this SWITCH command
             }
     }
     
-    set packagingSetup($newVarType) [$listBox get 0 end]
+    # Delete the entry, then set the var to all values remaining values.
+    eAssist_db::delete $dbTable $newVarType [$listBox get [$listBox curselection]]
+    
+    $listBox delete [$listBox curselection]
+    eAssist_db::initContainers
+    
+    #set packagingSetup($newVarType) [$listBox get 0 end]
     
 	
     ${log}::debug --END-- [info level 1]

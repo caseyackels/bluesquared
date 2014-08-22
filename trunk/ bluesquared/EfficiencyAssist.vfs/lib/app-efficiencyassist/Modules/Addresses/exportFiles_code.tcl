@@ -90,6 +90,7 @@ proc export::DataToExport {} {
         
     # HEADER: Write output
     # OrderType is a hardcoded value, this should be moved to a user option.
+    #   OrderType is the Column name, Version is the value.
     chan puts $myFile(data) [::csv::join "OrderNumber $headerParent(outPutHeader) OrderType"]
     ${log}::debug [::csv::join "OrderNumber $headerParent(outPutHeader) OrderType"]
 

@@ -1,6 +1,21 @@
-= Version 4.0.0 Beta 5
+= Version 4.0.0 Beta 7
+== Batch Maker
+* [UPDATE] Selecting a cell in the 'count' column will now select the entire row; selecting any cell not in the 'count' column will select single cells.
+
+== Core
+* [UPDATE] DB integration has started, Packages/Containers are the first widgets to insert/pull data from the db.
+
+--
+
+= Version 4.0.0 Beta 6
 == Batch Maker
 * [UPDATE] Copy/Paste now works, both vertically and horizontally. Through the r-click menu, and hotkeys. (ctrl-c, ctrl-v)
+
+== Core
+* [UPDATE] Email settings have been moved to the Setup module
+
+== General
+* [UPDATE] If you resize the window, it will now remember where it was, and how large the window was before it was closed.
 
 --
 
