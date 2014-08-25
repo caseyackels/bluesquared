@@ -17,6 +17,7 @@ REM Find out what project the user wants to build
 ::CHOICE /C:123 /M "1=BoxLabels 2=Efficiency Assist 3=NextGen-RM" %1
 set /p project= 1=BoxLabels 2=Efficiency Assist 3=ReceiptMaker NG ^>
 set /p wrap= Do you want to build an executable? 1/0 ^>
+set /p installer= Would you like to create an installer? 1/0 ^>
 
 :: Create a blank line
 ECHO.
@@ -127,6 +128,8 @@ ECHO %time%: Your project has been built: %programName%-%version%.exe
 :: Time Delay
 ping -n 1 127.0.0.1>nul
 
+if %installer% == 1 GOTO INSTALLER
+
 GOTO END
 
 
@@ -136,5 +139,23 @@ ECHO %time%: Your finished project (%programName%) has been exported to Builds\%
 ping -n 10 127.0.0.1>nul
 
 GOTO END
+
+:INSTALLER
+rem - Insert a delay
+ping -n 2 127.0.0.1>nul
+
+ECHO Creating Installer for: %programName%-%version%.exe - Starting...
+ECHO Copying project files
+
+rem - Insert a delay
+ping -n 1 127.0.0.1>nul
+move /Y %programName%-%version%.exe Installer\
+copy /Y EA_setup.edb Installer\
+
+cd Installer
+"C:\Program Files (x86)\NSIS\makensis.exe" eaInstaller.nsi
+
+ping -n 1 127.0.0.1>nul
+GOTO :END
 
 :END

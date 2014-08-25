@@ -61,10 +61,11 @@ Section
     SetOutPath $INSTDIR
 
     #File /oname=$DOCUMENTS EfficiencyAssist.exe
-    File /a EfficiencyAssist.exe
-    File /a config.txt
+    File /a *.exe
+    File /a *.edb
+    #File /a config.txt
     
     ; set the config to readonly
-    setFileAttributes config.txt readonly
+    #setFileAttributes config.txt readonly
 
 SectionEnd
