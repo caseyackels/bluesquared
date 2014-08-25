@@ -7,7 +7,8 @@
 Name "Efficiency Assist Installer"
 
 ; The installer
-OutFile "install_EfficiencyAssist.exe"
+; OutFile myprog${VERSION}.exe
+OutFile "eaSetup-${VERSION}.exe"
 
 ; The default installation directory
 InstallDir "$DOCUMENTS\EfficiencyAssist"

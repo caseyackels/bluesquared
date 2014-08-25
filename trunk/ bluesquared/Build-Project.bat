@@ -149,13 +149,29 @@ ECHO Copying project files
 
 rem - Insert a delay
 ping -n 1 127.0.0.1>nul
-move /Y %programName%-%version%.exe Installer\
+
+rem - Look below for the 'clean up' section, files must be specified there as well.
 copy /Y EA_setup.edb Installer\
 
-cd Installer
-"C:\Program Files (x86)\NSIS\makensis.exe" eaInstaller.nsi
+move /Y %programName%-%version%.exe Installer\
 
+cd Installer
+
+rename %programName%-%version%.exe %programName%.exe
+ECHO Renaming program to: %programName%.exe
+
+"C:\Program Files (x86)\NSIS\makensis.exe" /DVERSION=%version% eaInstaller.nsi
+
+ping -n 10 127.0.0.1>nul
+
+ECHO Clean up files ...
+
+del %programName%.exe
+del EA_setup.edb
+
+ECHO Finished ...
 ping -n 1 127.0.0.1>nul
+
 GOTO :END
 
 :END
