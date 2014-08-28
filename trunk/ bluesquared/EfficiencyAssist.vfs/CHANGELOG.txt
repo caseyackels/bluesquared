@@ -1,6 +1,7 @@
-= Version 4.0.0 Beta 7
+= Version 4.0.0 Beta 7 (September 2014)
 == Batch Maker
 * [UPDATE] Selecting a cell in the 'count' column will now select the entire row; selecting any cell not in the 'count' column will select single cells.
+* [NEW] Clicking on the headers will now sort the column.
 
 == Core
 * [UPDATE] DB integration has started, Packages/Containers are the first widgets to insert/pull data from the db.

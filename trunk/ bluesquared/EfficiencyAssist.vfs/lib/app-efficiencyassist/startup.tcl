@@ -79,8 +79,8 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries autoscroll]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries csv]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.11]
-	lappend ::auto_path [file join [file dirname [info script]] Libraries tcom3.9]
-	#lappend ::auto_path [file join [file dirname [info script]] Libraries twapi]
+	#lappend ::auto_path [file join [file dirname [info script]] Libraries tcom3.9]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries twapi_1]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries about]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries debug] ;# Deprecated
@@ -89,6 +89,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries mime]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries base64]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries smtp]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries Cawt_1.0.7]
 
 
 	##
@@ -114,8 +115,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	## 3rd Party modules
 	#package require tkdnd
 	package require Tablelist_tile 5.11
-	package require tcom
-	#package require twapi
+	#package require tcom
 	package require tooltip
 	package require autoscroll
 	package require csv
@@ -124,6 +124,8 @@ proc 'eAssist_sourceReqdFiles {} {
 	package require smtp
 	package require mime
 	package require base64
+	package require twapi
+	package require cawt
 	
 	
 	# Logger; MD5 are [package require]'d below.
@@ -154,12 +156,11 @@ proc 'eAssist_sourceReqdFiles {} {
     
 	loadSuffix ;# Initialize variables from StreetSuffixState.tcl
     
-	load [file join [file dirname [info script]] Libraries twapi twapi-x86-3.1.17.dll]
+	#load [file join [file dirname [info script]] Libraries twapi twapi_base.dll]
 	#load [file join [file dirname [info script]] Libraries sqlite3_3801 sqlite3801.dll] Sqlite3
 	#source [file join [file dirname [info script]] Libraries debug.tcl]
 	
 	if {[info exists logSettings(displayConsole)]} {
-		# Setup variable for holding list of box label names
 		eAssistSetup::toggleConsole $logSettings(displayConsole)
 	}	
 
@@ -314,10 +315,10 @@ proc 'eAssist_initVariables {} {
         set mySettings(sourceFiles) [file dirname $mySettings(Home)]
     }
 
-    if {![info exists settings(importOrder)]} {
-        # Set default for headers; wording is used internally
-        set settings(importOrder) [list shipVia Company Consignee delAddr delAddr2 delAddr3 City State Zip Phone Quantity Version Date Contact Email 3rdParty]
-    }
+    #if {![info exists settings(importOrder)]} {
+    #    # Set default for headers; wording is used internally
+    #    set settings(importOrder) [list shipVia Company Consignee delAddr delAddr2 delAddr3 City State Zip Phone Quantity Version Date Contact Email 3rdParty]
+    #}
 
     if {![info exists settings(shipvia3P)]} {
         # Set possible 3rd party shipvia codes
@@ -338,120 +339,120 @@ proc 'eAssist_initVariables {} {
     # Header
     #
     
-    if {![info exists header(shipvia)]} {
-        set header(shipvia) [list ShipViaCode "ship via" shipvia]
-    }
-
-    if {![info exists header(company)]} {
-        set header(company) [list ShipToName company destination "company name"]
-    }
-
-    if {![info exists header(attention)]} {
-        # Variations on spelling of consignee
-        set header(attention) [list ShipToContact contact attention attn attn:]
-    }
-
-    if {![info exists header(address1)]} {
-        set header(address1) [list ShipToAddressline1 address address1 "address 1" add add1 "add 1" addr addr1 "addr 1"]
-    }
-
-    if {![info exists header(address2)]} {
-        set header(address2) [list ShipToAddressline2 address2 "address 2" add2 "add 2" addr2 "addr 2"]
-    }
-
-    if {![info exists header(address3)]} {
-        set header(address3) [list ShipToAddressline3 address3 "address 3" add3 "add 3" addr3 "addr 3"]
-    }
-
-    if {![info exists header(CityStateZip)]} {
-        set header(CityStateZip) [list city-state-zip city-st-zip "city state zip" "city st zip" csv state/region]
-    }
-
-    if {![info exists header(city)]} {
-        set header(city) [list City ShipToCity]
-    }
-    
-    if {![info exists header(state)]} {
-        set header(state) [list ShipToState st st. state]
-    }
-    
-    if {![info exists header(country)]} {
-        set header(country) [list country ShipToCountry]
-    }
-
-     if {![info exists header(zip)]} {
-        set header(zip) [list ShipToZipCode zip zipcode "zip code" postalcode "postal code" postal]
-    }
-    
-    if {![info exists header(phone)]} {
-        set header(phone) [list phone ShipToPhone]
-    }
-    
-    if {![info exists header(email)]} {
-        set header(email) [list email ShipToEmail]
-    }
-    
-    if {![info exists header(shipdate)]} {
-        set header(shipdate) [list "Ship Date" shipdate]
-    }
-
-     if {![info exists header(BatchNumberReference)]} {
-        # This will hold the job number and a alpha at the end
-        # E.G 60155_A (or 60155A)
-        set header(BatchNumberReference) [list BatchNumberReference]
-    }
-
-    if {![info exists header(Reference1)]} {
-        # After we output the file, Reference1 will hold the job number
-        set header(Reference1) [list Reference1]
-    }
-    
-    if {![info exists header(version)]} {
-        # This is used in the original file, and reassigned to the Reference2 column
-        set header(version) [list version vers]
-    }
-    
-    if {![info exists header(Reference2)]} {
-        # After we output the file, Reference2 will hold the Version/Qty
-        set header(Reference2) [list Reference2]
-    }
-
-    if {![info exists header(quantity)]} {
-        # This is used in the original file, and reassigned to the Reference2 column
-        set header(quantity) [list quantity qty]
-    }
-    
-    if {![info exists header(PackageQuantity)]} {
-        set header(PackageQuantity) [list PackageQuantity]
-    }
-
-    if {![info exists header(3rdPartyNumber)]} {
-        # 3P Account Number
-        set header(3rdPartyNumber) [list ThirdPartyAccountNumber "3rd Party" 3rdParty 3p]
-    }
-    
-    if {![info exists header(3rdPartyCode)]} {
-        # Customer Code within Process Shipper
-        set header(3rdPartyCode) [list ThirdPartyID]
-    }
-	
-
-
-    # - These are used internally
-    # 8/28/2013 - Move this so we see them within Efficiency
-	
-    if {![info exists header(pieceweight)]} {
-        set header(pieceweight) [list pieceweight "pc weight" "piece weight" "pc wgt"]
-    }
-
-    if {![info exists header(fullbox)]} {
-        set header(fullbox) [list fullbox "full box"]
-    }
-    
-    if {![info exists header(residential)]} {
-        # This column is used when we use address cleansing.
-        set header(residential) [list ResidentialDelivery]
-    }
+    #if {![info exists header(shipvia)]} {
+    #    set header(shipvia) [list ShipViaCode "ship via" shipvia]
+    #}
+    #
+    #if {![info exists header(company)]} {
+    #    set header(company) [list ShipToName company destination "company name"]
+    #}
+    #
+    #if {![info exists header(attention)]} {
+    #    # Variations on spelling of consignee
+    #    set header(attention) [list ShipToContact contact attention attn attn:]
+    #}
+    #
+    #if {![info exists header(address1)]} {
+    #    set header(address1) [list ShipToAddressline1 address address1 "address 1" add add1 "add 1" addr addr1 "addr 1"]
+    #}
+    #
+    #if {![info exists header(address2)]} {
+    #    set header(address2) [list ShipToAddressline2 address2 "address 2" add2 "add 2" addr2 "addr 2"]
+    #}
+    #
+    #if {![info exists header(address3)]} {
+    #    set header(address3) [list ShipToAddressline3 address3 "address 3" add3 "add 3" addr3 "addr 3"]
+    #}
+    #
+    #if {![info exists header(CityStateZip)]} {
+    #    set header(CityStateZip) [list city-state-zip city-st-zip "city state zip" "city st zip" csv state/region]
+    #}
+    #
+    #if {![info exists header(city)]} {
+    #    set header(city) [list City ShipToCity]
+    #}
+    #
+    #if {![info exists header(state)]} {
+    #    set header(state) [list ShipToState st st. state]
+    #}
+    #
+    #if {![info exists header(country)]} {
+    #    set header(country) [list country ShipToCountry]
+    #}
+    #
+    # if {![info exists header(zip)]} {
+    #    set header(zip) [list ShipToZipCode zip zipcode "zip code" postalcode "postal code" postal]
+    #}
+    #
+    #if {![info exists header(phone)]} {
+    #    set header(phone) [list phone ShipToPhone]
+    #}
+    #
+    #if {![info exists header(email)]} {
+    #    set header(email) [list email ShipToEmail]
+    #}
+    #
+    #if {![info exists header(shipdate)]} {
+    #    set header(shipdate) [list "Ship Date" shipdate]
+    #}
+    #
+    # if {![info exists header(BatchNumberReference)]} {
+    #    # This will hold the job number and a alpha at the end
+    #    # E.G 60155_A (or 60155A)
+    #    set header(BatchNumberReference) [list BatchNumberReference]
+    #}
+    #
+    #if {![info exists header(Reference1)]} {
+    #    # After we output the file, Reference1 will hold the job number
+    #    set header(Reference1) [list Reference1]
+    #}
+    #
+    #if {![info exists header(version)]} {
+    #    # This is used in the original file, and reassigned to the Reference2 column
+    #    set header(version) [list version vers]
+    #}
+    #
+    #if {![info exists header(Reference2)]} {
+    #    # After we output the file, Reference2 will hold the Version/Qty
+    #    set header(Reference2) [list Reference2]
+    #}
+    #
+    #if {![info exists header(quantity)]} {
+    #    # This is used in the original file, and reassigned to the Reference2 column
+    #    set header(quantity) [list quantity qty]
+    #}
+    #
+    #if {![info exists header(PackageQuantity)]} {
+    #    set header(PackageQuantity) [list PackageQuantity]
+    #}
+    #
+    #if {![info exists header(3rdPartyNumber)]} {
+    #    # 3P Account Number
+    #    set header(3rdPartyNumber) [list ThirdPartyAccountNumber "3rd Party" 3rdParty 3p]
+    #}
+    #
+    #if {![info exists header(3rdPartyCode)]} {
+    #    # Customer Code within Process Shipper
+    #    set header(3rdPartyCode) [list ThirdPartyID]
+    #}
+    #
+    #
+    #
+    ## - These are used internally
+    ## 8/28/2013 - Move this so we see them within Efficiency
+    #
+    #if {![info exists header(pieceweight)]} {
+    #    set header(pieceweight) [list pieceweight "pc weight" "piece weight" "pc wgt"]
+    #}
+    #
+    #if {![info exists header(fullbox)]} {
+    #    set header(fullbox) [list fullbox "full box"]
+    #}
+    #
+    #if {![info exists header(residential)]} {
+    #    # This column is used when we use address cleansing.
+    #    set header(residential) [list ResidentialDelivery]
+    #}
     
 	
 	# Schedule a time to check for updates
@@ -603,9 +604,9 @@ proc 'eAssist_loadSettings {} {
 	'eAssist_bootStrap
 
 	# initialize logging service
-	set log [logger::init eAssist_svc]
+	set log [logger::init log_svc]
 	logger::utils::applyAppender -appender colorConsole
-	${log}::notice "Initialized eAssist_svc logging"
+	${log}::notice "Initialized log_svc logging"
 
     # Set required configuration changes here, i.e.
     # set cVersion(Setup,message) <informational message>
@@ -679,6 +680,10 @@ proc 'eAssist_loadSettings {} {
 #        }
 #    }
 	
+	
+	# Get excel version
+	# Office 2003 = 11
+	# Office 2007 = 12
 }
 
 # Load required files / packages
