@@ -80,7 +80,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries csv]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.11]
 	#lappend ::auto_path [file join [file dirname [info script]] Libraries tcom3.9]
-	lappend ::auto_path [file join [file dirname [info script]] Libraries twapi_1]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries twapi]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries about]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries debug] ;# Deprecated
