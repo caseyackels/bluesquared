@@ -27,7 +27,8 @@
 # - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
-package provide eAssist_importFiles 1.0
+#package provide eAssist_importFiles 1.0
+package provide eAssist_ModImportFiles 1.0
 
 namespace eval eAssist_GUI {}
 namespace eval importFiles {}

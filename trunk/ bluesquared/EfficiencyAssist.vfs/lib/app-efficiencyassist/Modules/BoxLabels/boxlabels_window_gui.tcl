@@ -23,10 +23,11 @@
 # L = List
 # I = Integer (Do not use this unless you are certain it is an Integer and not a plain string)
 
-package provide boxlabels 1.0
-
+#package provide boxlabels 1.0
+package provide eAssist_ModBoxLabels 1.0
 
 namespace eval Shipping_Gui {
+# Update email triggers in ModBoxLabels pkgIndex.tcl file
 
 proc shippingGUI {} {
     #****f* shippingGUI/Shipping_Gui

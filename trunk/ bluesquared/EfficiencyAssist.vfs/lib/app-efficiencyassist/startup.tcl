@@ -111,6 +111,8 @@ proc 'eAssist_sourceReqdFiles {} {
 
 	## System Packages
 	package require msgcat
+	# Import msgcat namespace so we only have to use [mc]
+	namespace import msgcat::mc
 
 	## 3rd Party modules
 	#package require tkdnd
@@ -134,13 +136,16 @@ proc 'eAssist_sourceReqdFiles {} {
 	## Efficiency Assist modules
 	#package require eAssist_Preferences
 	package require eAssist_core ;# Includes Preferences, and Setup mode
-	package require eAssist_importFiles
+	package require eAssist_ModImportFiles
+	package require eAssist_ModBoxLabels
 	package require aboutwindow
-	package require boxlabels
+	
+	# non-gui elements
 	package require eAssist_tools
 	package require vUpdate
 	package require eAssist_db
 	package require eAssist_email
+	
 	
     
 
@@ -214,7 +219,7 @@ proc 'eAssist_initVariables {} {
     # SEE ALSO
     #
     #***
-    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter logSettings auth options emailSetup
+    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter logSettings auth options emailSetup emailEvent
 
 	#-------- CORE SETTINGS
 	if {$logSettings(displayConsole) == 1} {console show}
@@ -223,24 +228,23 @@ proc 'eAssist_initVariables {} {
 	set auth(adminPword) {$1$6JV2D0G7$RHuHLMxJuuQ3HWWG3wOML1}
 	set auth(adminSalt) {6JV2D0G7iPZ.xfGbLxnx}
 	
-	
 	## Defaults
 	#
 	
 	# Just in case we can't figure out where we last stopped
-    if {![info exists program(lastFrame)]} {
-        # Set default last frame for Setup
-        set program(lastFrame) company_GUI
-    }
+	if {![info exists program(lastFrame)]} {
+		# Set default last frame for Setup
+		set program(lastFrame) company_GUI
+	}
 	
 	if {![info exists program(checkUpdateTime)]} {
 		set program(checkUpdateTime) 15:02
 	}
 
 	if {![info exists boxLabelInfo(labelNames)]} {
-        # Setup variable for holding list of box label names
-        set boxLabelInfo(labelNames) ""
-    }
+		# Setup variable for holding list of box label names
+		set boxLabelInfo(labelNames) ""
+	}
 
 	if {![info exists program(updateFilePath)]} {
 		# Path to the MANIFEST file (located on a shared drive)
@@ -255,6 +259,7 @@ proc 'eAssist_initVariables {} {
 	if {![info exists emailSetup(boxlabels,Notification)]} {
 		set emailSetup(boxlabels,Notification) 0
 	}
+
 	
 	##
 	## Quick preferences - these are options that aren't in the Preference window, but sprinkled throughout the main program
@@ -615,8 +620,7 @@ proc 'eAssist_loadSettings {} {
     # set cVersion(Options,newconfig) <options page>, <options page>, ...
     
 
-    # Import msgcat namespace so we only have to use [mc]
-    namespace import msgcat::mc
+
 	
 	# Ensure we have proper permissions for the preferences file before continuing
 	'eAssist_checkPrefFile
@@ -693,7 +697,8 @@ proc 'eAssist_loadSettings {} {
 # Load the config file
 'eAssist_loadSettings
 
-
+# Get the currently loaded modules (box labels, batch maker, etc)
+eAssist_Global::getModules
 
 # Load the Option Database options
 #'distHelper_loadOptions

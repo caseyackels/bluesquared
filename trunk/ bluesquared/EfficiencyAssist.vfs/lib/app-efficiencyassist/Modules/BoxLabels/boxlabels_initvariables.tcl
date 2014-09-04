@@ -22,6 +22,42 @@
 # - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
+proc Shipping_Gui::initModVariables {} {
+    #****f* initModVariables/Shipping_Gui
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #	Initialize, and set variables for Module information
+    #
+    # SYNOPSIS
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #
+    # SEE ALSO
+    #
+    #***
+    global log emailEvent desc
+    
+    # The array 'ModBoxLabels', must be part of the description as seen below. If not, this will break the auto-population in the email setup.
+    set desc(ModBoxLabels) [mc "Box Labels"]
+    set emailEvent(ModBoxLabels) [list Print "Print BreakDown"] 
+    
+} ;# Shipping_Gui::initModVariables
+
+Shipping_Gui::initModVariables
+
+
 proc Shipping_Gui::initVariables {} {
     #****f* initVariables/Shipping_Gui
     # AUTHOR
@@ -47,9 +83,12 @@ proc Shipping_Gui::initVariables {} {
     # SEE ALSO
     #
     #***
-    global log mySettings
+    global log mySettings emailEvent desc
     ${log}::debug --START-- [info level 1]
     set throwError 0
+    
+    set desc(ModBoxLabels) [mc "Box Labels"]
+    set emailEvent(ModBoxLabels) [list Print "Print BreakDown"] 
     
     set myVars [list bartender labelDir wordpad printer labelDBfile]
 	foreach item $myVars {

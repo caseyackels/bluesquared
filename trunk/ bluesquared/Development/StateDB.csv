@@ -1,19 +1,19 @@
-Name,Abbreviation,Notes,Country,Zip Code 2 digit (Starting),Zip Code 2 digit (ending)
-Puerto Rico,PR,,,006,007
-Puerto Rico,PR,,,009,009
+Name,Abbreviation,Notes,Country,Zip Code 3 digit (Starting),Zip Code 3 digit (ending)
+Puerto Rico,PR,,,6,7
+Puerto Rico,PR,,,9,9
 Arizona,AZ,,,850,865
-Massachussetts,MA,,US,010,027
-Rhode Island,RI,,,028,029
-New Hampshire,NH,,,030,038
-Maine,ME,,,039,049
-Vermont,VT,,,050,054
-Massachussetts,MA,Andover,US,055,055
-Vermont,VT,,,056,059
-Connecticut,CT,Conflicting,US,060,063
-New York,NY,Fishers Island,,063,063
-Connecticut,CT,Conflicting,US,064,069
-Connecticut,CT,,US,068,069
-New Jersey,NJ,,,070,089
+Massachussetts,MA,,US,10,27
+Rhode Island,RI,,,28,29
+New Hampshire,NH,,,30,38
+Maine,ME,,,39,49
+Vermont,VT,,,50,54
+Massachussetts,MA,Andover,US,55,55
+Vermont,VT,,,56,59
+Connecticut,CT,Conflicting,US,60,63
+New York,NY,Fishers Island,,63,63
+Connecticut,CT,Conflicting,US,64,69
+Connecticut,CT,,US,68,69
+New Jersey,NJ,,,70,89
 New York,NY,,,100,149
 Pennsylvania,PA,,,150,196
 Delaware,DE,,,197,199

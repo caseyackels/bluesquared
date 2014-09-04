@@ -107,7 +107,8 @@ IF %wrap% == n GOTO NOWRAP
 ECHO Generating executable file...
 ECHO Please wait...
 cd Builds
-..\tclkitsh858.exe ..\sdx.kit wrap %programName%.exe -runtime ..\tclkit-858.exe -writable
+..\base-tcl8.6-thread-win32-ix86.exe ..\sdx.kit wrap %programName%.exe -runtime ..\base-tk8.6-thread-win32-ix86.exe -writable
+::..\tclkitsh858.exe ..\sdx.kit wrap %programName%.exe -runtime ..\tclkit-858.exe -writable
 ::..\tclkit-tcl-win64-86.exe ..\sdx.kit wrap %programName%.exe -runtime ..\tclkit-tk-win64-86.exe
 
 rename %programName%.exe %programName%-%version%.exe
