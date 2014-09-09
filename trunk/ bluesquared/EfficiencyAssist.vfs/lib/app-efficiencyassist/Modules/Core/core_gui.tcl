@@ -258,7 +258,7 @@ proc eAssist::buttonBarGUI {args} {
             #eAssistSetup::SaveGlobalSettings
             lib::savePreferences
             #$mb.file entryconfigure 1 -state normal
-            $mb.file add command -label [mc "New Project"] -command {eAssistHelper::projSetup}
+            $mb.file add command -label [mc "New/Edit Project"] -command {eAssistHelper::projSetup}
             $mb.file add command -label [mc "Import File"] -command {importFiles::fileImportGUI}
             $mb.file add command -label [mc "Export File"] -command {export::DataToExport} -state disabled
             eAssist_Global::getGeom $module 900x610+240+124
