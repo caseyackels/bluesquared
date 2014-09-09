@@ -134,8 +134,7 @@ proc eAssistSetup::emailSetup_GUI {} {
     ttk::label $eF1.txt3 -text [mc "Module Notifications"]
     
     ttk::checkbutton $eF1.ckbtn2
-    ttk::label $eF1.txt4 -text [mc "Event Notifications"]
-    
+    ttk::label $eF1.txt4 -text [mc "Event Notifications"]  
     
     grid $eF1.txt1 -column 0 -row 0 -pady 2p -sticky nse 
     grid $eF1.cbx1 -column 1 -row 0 -pady 2p -padx 5p -sticky news 

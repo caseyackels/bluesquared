@@ -329,3 +329,77 @@ proc eAssistHelper::insertItems {tbl} {
 } ;# eAssistHelper::insertItems
 
 
+proc eAssistHelper::projSetup {} {
+    #****f* projSetup/eAssisthelper
+    # CREATION DATE
+    #   09/08/2014 (Monday Sep 08)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssisthelper::projSetup  
+    #
+    # FUNCTION
+    #	Launch the Project Setup gui, so we can assign the Job Number, Jot Title, Name and CSR
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log CSR job
+
+    set w(ps) .ps
+    if {[winfo exists $w(ps)]} {destroy .ps}
+
+    toplevel $w(ps)
+    wm transient $w(ps) .
+    wm title $w(ps) [mc "Project Setup"]
+    
+    set locX [expr {[winfo screenwidth . ] / 4 + [winfo x .]}]
+    set locY [expr {[winfo screenheight . ] / 5 + [winfo y .]}]
+    wm geometry $w(ps) +${locX}+${locY}
+
+    set f1 [ttk::frame $w(ps).f1]
+    pack $f1 -fill both -expand yes ;#-padx 5p -pady 5p
+    focus $w(ps)
+    
+    ttk::label $f1.txt1 -text [mc "CSR"]
+    ttk::combobox $f1.cbox1 -values $CSR(Names) -textvariable job(CSRName)
+    
+    ttk::label $f1.txt1a -text [mc "Title"]
+    ttk::entry $f1.entry1a -textvariable job(Title)
+    tooltip::tooltip $f1.entry1a [mc "Publication Title"]
+    
+    ttk::label $f1.txt2 -text [mc "Name"]
+    ttk::entry $f1.entry2 -textvariable job(Name)
+    tooltip::tooltip $f1.entry2 [mc "Job Name"]
+    
+    ttk::label $f1.txt3 -text [mc "Number"]
+    ttk::entry $f1.entry3 -textvariable job(Number)
+    tooltip::tooltip $f1.entry3 [mc "Job Number"]
+    
+    grid $f1.txt1      -column 0 -row 0 -sticky nes -padx 3p -pady 3p
+    grid $f1.cbox1     -column 1 -row 0 -sticky news -padx 3p -pady 3p
+    grid $f1.txt1a     -column 0 -row 1 -sticky nes -padx 3p -pady 3p
+    grid $f1.entry1a   -column 1 -row 1 -sticky news -padx 3p -pady 3p
+    grid $f1.txt2      -column 0 -row 2 -sticky nes -padx 3p -pady 3p
+    grid $f1.entry2    -column 1 -row 2 -sticky news -padx 3p -pady 3p
+    grid $f1.txt3      -column 0 -row 3 -sticky nes -padx 3p -pady 3p
+    grid $f1.entry3    -column 1 -row 3 -sticky news -padx 3p -pady 3p
+    
+} ;# eAssistHelper::projSetup

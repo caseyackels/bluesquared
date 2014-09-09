@@ -83,10 +83,10 @@ proc eAssist::parentGUI {} {
     menu $mb.file -tearoff 0 -relief raised -bd 2
 
     $mb add cascade -label [mc "File"] -menu $mb.file
-    $mb.file add command -label [mc "Import File"] -command {importFiles::fileImportGUI}
+    #$mb.file add command -label [mc "Import File"] -command {importFiles::fileImportGUI}
     #$mb.file add command -label [mc "Preferences..."] -command {eAssistPref::launchPreferences}
-    $mb.file add command -label [mc "Export File"] -command {export::DataToExport} -state disabled
-    $mb.file add command -label [mc "Exit"] -command {exit}
+    #$mb.file add command -label [mc "Export File"] -command {export::DataToExport} -state disabled
+    #$mb.file add command -label [mc "Exit"] -command {exit}
 
     ## Module Menu - This is a dynamic menu for the active module.
     menu $mb.modMenu -tearoff 0 -relief raised -bd 2
@@ -257,7 +257,10 @@ proc eAssist::buttonBarGUI {args} {
             # .. save the settings
             #eAssistSetup::SaveGlobalSettings
             lib::savePreferences
-            $mb.file entryconfigure 1 -state normal
+            #$mb.file entryconfigure 1 -state normal
+            $mb.file add command -label [mc "New Project"] -command {eAssistHelper::projSetup}
+            $mb.file add command -label [mc "Import File"] -command {importFiles::fileImportGUI}
+            $mb.file add command -label [mc "Export File"] -command {export::DataToExport} -state disabled
             eAssist_Global::getGeom $module 900x610+240+124
             }
         Setup       {
@@ -281,6 +284,8 @@ proc eAssist::buttonBarGUI {args} {
         }
         default     {}
     }
+    
+    $mb.file add command -label [mc "Exit"] -command {exit}
     
     # Check the versions
     vUpdate::whatVersion
