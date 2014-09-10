@@ -1,34 +1,36 @@
 
 -- Table: Countries
 CREATE TABLE Countries ( 
-    Country_ID  INTEGER     PRIMARY KEY AUTOINCREMENT
-                            NOT NULL,
-    CountryCode CHAR( 2 )   NOT NULL
-                            UNIQUE,
-    CountryName CHAR( 50 )  NOT NULL 
-);
-
-
--- Table: PostalCodes
-CREATE TABLE PostalCodes ( 
-    PostalCode_ID     INTEGER       PRIMARY KEY AUTOINCREMENT,
-    PostalCodeLowEnd  INTEGER( 3 ),
-    PostalCodeHighEnd INTEGER( 3 ),
-    ProvID            INTEGER       NOT NULL
-                                    REFERENCES Provinces ( Prov_ID ),
-    CountryID         INTEGER       NOT NULL
-                                    REFERENCES Countries ( Country_ID ) 
+    Country_ID  INTEGER    PRIMARY KEY AUTOINCREMENT
+                           NOT NULL,
+    CountryCode CHAR( 2 )  NOT NULL
+                           UNIQUE,
+    CountryName TEXT       NOT NULL 
 );
 
 
 -- Table: Provinces
 CREATE TABLE Provinces ( 
-    Prov_ID   INTEGER    PRIMARY KEY AUTOINCREMENT
-                         NOT NULL,
-    Prov_Abbr CHAR( 3 )  NOT NULL
-                         UNIQUE,
-    Prov_Name TEXT       NOT NULL
-                         UNIQUE 
+    Prov_ID           INTEGER    PRIMARY KEY AUTOINCREMENT
+                                 NOT NULL,
+    ProvAbbr          CHAR( 3 )  NOT NULL
+                                 UNIQUE,
+    ProvName          TEXT       NOT NULL
+                                 UNIQUE,
+    PostalCodeLowEnd  VARCHAR,
+    PostalCodeHighEnd VARCHAR,
+    CountryID         INTEGER    REFERENCES Countries ( Country_ID ) ON UPDATE CASCADE 
+);
+
+
+-- Table: PostalCodes
+CREATE TABLE PostalCodes ( 
+    PostalCode_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+    ProvID        INTEGER NOT NULL
+                          REFERENCES Provinces ( Prov_ID ),
+    CountryID     INTEGER NOT NULL
+                          REFERENCES Countries ( Country_ID ),
+    PostalCode    VARCHAR 
 );
 
 
@@ -99,15 +101,6 @@ CREATE TABLE SubHeaders (
     SubHeaderName VARCHAR UNIQUE ON CONFLICT FAIL,
     HeaderID      INTEGER NOT NULL
                           REFERENCES Headers ( Header_ID ) 
-);
-
-
--- Table: CSRs
-CREATE TABLE CSRs ( 
-    CSR_ID    INTEGER PRIMARY KEY AUTOINCREMENT
-                      NOT NULL,
-    FirstName VARCHAR NOT NULL,
-    LastName  VARCHAR 
 );
 
 
@@ -182,4 +175,53 @@ CREATE TABLE Schema (
     Year                  INTEGER NOT NULL ON CONFLICT ROLLBACK,
     CompatibleProgramVers VARCHAR NOT NULL ON CONFLICT ROLLBACK 
 );
+
+
+-- Table: CSRs
+CREATE TABLE CSRs ( 
+    CSR_ID    INTEGER PRIMARY KEY AUTOINCREMENT
+                      NOT NULL,
+    FirstName VARCHAR NOT NULL,
+    LastName  VARCHAR,
+    Email     VARCHAR 
+);
+
+
+-- Table: EmailSetup
+CREATE TABLE EmailSetup ( 
+    Email_ID           INTEGER PRIMARY KEY AUTOINCREMENT
+                               NOT NULL,
+    EmailServer        VARCHAR NOT NULL,
+    EmailPassword      VARCHAR,
+    EmailPort          INTEGER,
+    EmailLogin         VARCHAR,
+    EmailNotifications BOOLEAN NOT NULL 
+);
+
+
+-- Table: EmailNotifications
+CREATE TABLE EmailNotifications ( 
+    EN_ID              INTEGER PRIMARY KEY AUTOINCREMENT
+                               NOT NULL,
+    Modules            VARCHAR NOT NULL
+                               UNIQUE,
+    ModNotifications   VARCHAR,
+    Events             VARCHAR NOT NULL,
+    EventNotifications VARCHAR,
+    EmailFrom          VARCHAR NOT NULL ON CONFLICT ABORT,
+    EmailTo            VARCHAR NOT NULL ON CONFLICT ABORT,
+    EmailSubject       VARCHAR NOT NULL ON CONFLICT ABORT,
+    EmailBody          VARCHAR NOT NULL ON CONFLICT ABORT,
+    EmailID                    REFERENCES EmailSetup ( Email_ID ) 
+);
+
+
+-- View: Ex. Show SubHeaders
+CREATE VIEW [Ex. Show SubHeaders] AS
+       SELECT SubHeaderName
+         FROM SubHeaders
+              LEFT OUTER JOIN Headers
+                           ON SubHeaders.HeaderID = Headers.Header_ID
+        WHERE HeaderName = 'Company';
+;
 
