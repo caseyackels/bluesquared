@@ -451,43 +451,43 @@ proc eAssist_Global::getGeom {module args} {
     ${log}::debug --END-- [info level 1]
 } ;# eAssist_Global::getGeom
 
-proc eAssist_Global::getModules {} {
-    #****f* getModules/eAssist_Global
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2011-2013 Casey Ackels
-    #
-    # FUNCTION
-    #	Retrieves all loaded modules (namespaces that have *mod* in the name)
-    #
-    # SYNOPSIS
-    #	N/A
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #
-    #
-    # NOTES
-    #
-    # SEE ALSO
-    #
-    #***
-    global log system desc
-    
-    set EAMOD eAssist_Mod
-    
-    foreach name [package names] {
-	if {[string match eAssist_Mod* $name]} {
-	    lappend system(LoadedModules) $desc([string trimleft $name eAssist_])
-	}
-    }
-    
-
-} ;# eAssist_Global::getModules
+#proc eAssist_Global::getModules {} {
+#    #****f* getModules/eAssist_Global
+#    # AUTHOR
+#    #	Casey Ackels
+#    #
+#    # COPYRIGHT
+#    #	(c) 2011-2013 Casey Ackels
+#    #
+#    # FUNCTION
+#    #	Retrieves all loaded modules (namespaces that have *mod* in the name)
+#    #
+#    # SYNOPSIS
+#    #	N/A
+#    #
+#    # CHILDREN
+#    #	N/A
+#    #
+#    # PARENTS
+#    #
+#    #
+#    # NOTES
+#    #
+#    # SEE ALSO
+#    #
+#    #***
+#    global log system desc
+#    
+#    set EAMOD eAssist_Mod
+#    
+#    foreach name [package names] {
+#	if {[string match eAssist_Mod* $name]} {
+#	    lappend system(LoadedModules) $desc([string trimleft $name eAssist_])
+#	}
+#    }
+#    
+#
+#} ;# eAssist_Global::getModules
 
 
 proc eAssist_Global::launchFilters {} {

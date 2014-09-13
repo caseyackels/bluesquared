@@ -44,7 +44,7 @@ proc eAssist_db::loadDB {} {
     #	N/A
     #
     # PARENTS
-    #	
+    #	'eAssist_bootStrap
     #
     # NOTES
     #
@@ -55,13 +55,8 @@ proc eAssist_db::loadDB {} {
     ${log}::debug --START-- [info level 1]
     
     set myDB [file join $program(Home) EA_setup.edb]
-    #set myList "$Header_ID $HeaderName $HeaderParams"
     
     sqlite3 db $myDB
-    
-    #db eval {SELECT * from Headers} {
-    #    ${log}::debug $myList
-    #}
     
     eAssist_db::initContainers
     
@@ -113,6 +108,7 @@ proc eAssist_db::initContainers {} {
         lappend packagingSetup(Packages) $Package
     }
     
+    
     ${log}::debug --END-- [info level 1]
 } ;# eAssist_db::initContainers
 
@@ -152,3 +148,214 @@ proc eAssist_db::delete {table col args} {
     ${log}::debug Deleting: DELETE from $table WHERE $col='$args'
     ${log}::debug --END-- [info level 1]
 } ;# eAssist_db::delete
+
+
+proc eAssist_db::checkModuleName {moduleName} {
+    #****f* checkModuleName/eAssist_db
+    # CREATION DATE
+    #   09/10/2014 (Wednesday Sep 10)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssist_db::checkModuleName moduleName 
+    #
+    # FUNCTION
+    #	Check to see if the module name is inserted into the DB, if it doesn't insert it.
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    ${log}::debug Looking for $moduleName in the database ...
+    if {[info exists ModNames]} {unset ModNames}
+        
+    db eval {SELECT ModuleName from Modules} {
+        # Note this var ModuleName <-- upper case 'M'; and is a table in the DB
+        lappend ModNames $ModuleName
+    }
+
+    if {[lsearch -nocase $ModNames $moduleName] == -1} {
+            ${log}::debug Couldn't find $moduleName, inserting ...
+                db eval {INSERT or ABORT INTO Modules (ModuleName)
+                    VALUES ($moduleName)
+                }
+    } else {
+            ${log}::debug Found $moduleName!
+    }
+    ${log}::debug $moduleName Event Notifications: [db eval {SELECT ModuleName FROM Modules WHERE ModuleName = $moduleName}]
+    #unset ModNames
+} ;# eAssist_db::checkModuleName
+
+
+proc eAssist_db::checkEvents {moduleName args} {
+    #****f* checkEvents/eAssist_db
+    # CREATION DATE
+    #   09/10/2014 (Wednesday Sep 10)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssist_db::initValues moduleName args
+    #
+    # FUNCTION
+    #   moduleName = The module name that we want to associate our events with
+    #   args = Events that can be used to send email notices
+    #
+    #	Initializes DB values for the specific package (Box Labels)
+    #	The DB should already be loaded before this is performed.
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log desc emailEvent
+  
+    ## Check to see if the Event Notifications exists in the DB, if it doesn't lets insert.
+    #
+    set modID [db eval {SELECT Mod_ID FROM Modules WHERE ModuleName = $moduleName}]
+    ${log}::debug Looking for Module: $moduleName / ID: $modID
+    
+    set tmpEvents [db eval { SELECT EventName
+                                FROM EventNotifications
+                                    LEFT OUTER JOIN Modules
+                                            ON EventNotifications.ModID = Modules.Mod_ID
+                                WHERE ModuleName = $moduleName
+                    }]
+    ${log}::debug Found events for $moduleName: $tmpEvents
+    
+    foreach tmpEmailEvent $args {
+        ${log}::debug Looking for $tmpEmailEvent in the database ...
+        
+        if {[lsearch -nocase $tmpEvents $tmpEmailEvent] == -1} {
+            ${log}::debug Couldn't find $tmpEmailEvent, inserting ...
+            db eval {INSERT or ABORT INTO EventNotifications (ModID, EventName)
+                VALUES ($modID, $tmpEmailEvent)
+            }
+        
+        } else {
+            ${log}::debug Found $tmpEmailEvent!
+        }
+    }
+    ${log}::debug Events passed to: [info level 1]
+    ${log}::debug All Event Notifications: [db eval {SELECT EventName FROM EventNotifications}]
+    
+} ;# eAssist_db::checkEvents
+
+
+proc eAssist_db::getDBModules {} {
+    #****f* getDBModules/eAssist_db
+    # CREATION DATE
+    #   09/11/2014 (Thursday Sep 11)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssist_db::getDBModules  
+    #
+    # FUNCTION
+    #	Retrieves the modules that are loaded in the DB
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   eAssistSetup::getModules
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    db eval {SELECT ModuleName FROM Modules}
+    
+} ;# eAssist_db::getDBModules
+
+
+proc eAssist_db::getJoinedEvents {moduleName} {
+    #****f* getJoinedEvents/eAssist_db
+    # CREATION DATE
+    #   09/11/2014 (Thursday Sep 11)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssist_db::getJoinedEvents args 
+    #
+    # FUNCTION
+    #	Retrieve the Email Events, associated with moduleName
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    set eventValues [db eval { SELECT EventName
+                        FROM EventNotifications
+                            LEFT OUTER JOIN Modules
+                                    ON EventNotifications.ModID = Modules.Mod_ID
+                        WHERE ModuleName = $moduleName }]
+    
+    ${log}::debug Event Values: $eventValues
+    
+    return $eventValues
+
+} ;# eAssist_db::getJoinedEvents

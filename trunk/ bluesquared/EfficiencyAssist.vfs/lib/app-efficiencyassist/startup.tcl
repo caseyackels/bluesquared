@@ -84,8 +84,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries about]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries debug] ;# Deprecated
-	lappend ::auto_path [file join [file dirname [info script]] Libraries sqlite3_3801]
-	# MIMIE requires Base64
+	# MIME requires Base64
 	lappend ::auto_path [file join [file dirname [info script]] Libraries mime]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries base64]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries smtp]
@@ -101,7 +100,6 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Modules Addresses]
 	lappend ::auto_path [file join [file dirname [info script]] Modules Tools]
 	lappend ::auto_path [file join [file dirname [info script]] Modules vUpdate]
-	lappend ::auto_path [file join [file dirname [info script]] Modules Database]
 	lappend ::auto_path [file join [file dirname [info script]] Modules Email]
 	
 
@@ -122,7 +120,6 @@ proc 'eAssist_sourceReqdFiles {} {
 	package require autoscroll
 	package require csv
 	package require debug
-	package require sqlite3
 	package require smtp
 	package require mime
 	package require base64
@@ -143,7 +140,6 @@ proc 'eAssist_sourceReqdFiles {} {
 	# non-gui elements
 	package require eAssist_tools
 	package require vUpdate
-	package require eAssist_db
 	package require eAssist_email
 	
 	
@@ -173,16 +169,16 @@ proc 'eAssist_sourceReqdFiles {} {
 
 
 proc 'eAssist_bootStrap {} {
+	global program log
+	
+	set program(Home) [pwd]
+	
 	# enable packages that are required before the rest of the packages need to be loaded
-	# Project built packages
-	lappend ::auto_path [file join [file dirname [info script]] Modules Update]
-	
-	#package require vUpdate
-	
 	# Third Party packages
 	lappend ::auto_path [file join [file dirname [info script]] Libraries log]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries md5]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries md5crypt]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries sqlite3_3801]
 	
 	package require md5
 	package require md5crypt
@@ -190,7 +186,26 @@ proc 'eAssist_bootStrap {} {
 	package require logger
 	package require logger::appender
 	package require logger::utils
+	package require sqlite3
 	
+	# Project built packages
+	lappend ::auto_path [file join [file dirname [info script]] Modules Update]
+	lappend ::auto_path [file join [file dirname [info script]] Modules Database]
+	
+	package require eAssist_db
+	
+	set debug(onOff) on ;# Old - Still exists so we don't receive errors, on the instances where it still exists
+	set logSettings(loglevel) notice ;# Default to notice, over ridden if the user selects a different option
+	set logSettings(displayConsole) 0 ;# disable by default, same as above
+
+	# initialize logging service
+	set log [logger::init log_svc]
+	logger::utils::applyAppender -appender colorConsole
+	${log}::notice "Initialized log_svc logging"
+	
+	# load the DB
+	eAssist_db::loadDB
+
 } ;#'eAssist_bootStrap
 
 
@@ -463,8 +478,7 @@ proc 'eAssist_initVariables {} {
 	# Schedule a time to check for updates
 	#eAssist_Global::at $program(checkUpdateTime) vUpdate::checkForUpdates
 	
-	# Load the DB
-	eAssist_db::loadDB
+
 } ;# 'eAssist_initVariables
 
 
@@ -501,7 +515,6 @@ proc 'eAssist_checkPrefFile {} {
 	# Set file names
 	set mySettings(File) mySettings.txt
 	set mySettings(ConfigFile) config.txt
-    set program(Home) [pwd]
 	set mySettings(Folder) eAssistSettings
 	
 	if {![info exists program(Name)]} {set program(Name) "EfficiencyAssist"}
@@ -601,17 +614,7 @@ proc 'eAssist_loadSettings {} {
     global settings debug program header customer3P env mySettings international company shipVia3P tcl_platform setup logSettings log boxSettings boxLabelInfo intlSetup
 	global headerParent headerAddress headerParams headerBoxes GS_filePathSetup GS currentModule pref dist carrierSetup CSR packagingSetup options emailSetup
 	
-	set debug(onOff) on ;# Old - Still exists so we don't receive errors, on the instances where it still exists
-	set logSettings(loglevel) notice ;# Default to notice, over ridden if the user selects a different option
-	set logSettings(displayConsole) 0 ;# disable by default, same as above
-	
-	# Load required packages
-	'eAssist_bootStrap
 
-	# initialize logging service
-	set log [logger::init log_svc]
-	logger::utils::applyAppender -appender colorConsole
-	${log}::notice "Initialized log_svc logging"
 
     # Set required configuration changes here, i.e.
     # set cVersion(Setup,message) <informational message>
@@ -689,16 +692,19 @@ proc 'eAssist_loadSettings {} {
 	# Office 2003 = 11
 	# Office 2007 = 12
 }
+# Load required packages
+'eAssist_bootStrap
 
 # Load required files / packages
 'eAssist_sourceReqdFiles
 
-
 # Load the config file
 'eAssist_loadSettings
 
+
+
 # Get the currently loaded modules (box labels, batch maker, etc)
-eAssist_Global::getModules
+#eAssist_Global::getModules
 
 # Load the Option Database options
 #'distHelper_loadOptions
@@ -707,5 +713,3 @@ vUpdate::saveCurrentVersion
 # Start the GUI
 eAssist::parentGUI
 
-# Test the DB
-#eAssist_db::loadDB

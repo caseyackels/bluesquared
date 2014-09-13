@@ -121,13 +121,13 @@ proc eAssistSetup::emailSetup_GUI {} {
     ttk::label $eF1.txt1 -text [mc "Module"]
 	# The system modules should be listed in their respective *ModInitVariables proc within their '*initVars*' file.
     ttk::combobox $eF1.cbx1 -state readonly \
-			    -values $system(LoadedModules) \
-			    -textvariable currentModule
+			    -postcommand [list eAssistSetup::getModules $eF1.cbx1]
     
     #Event
     ttk::label $eF1.txt2 -text [mc "Event"]
     ttk::combobox $eF1.cbx2 -state readonly \
-			    -postcommand [list eAssistSetup::getEmailEvents $eF1]
+                -postcommand [list eAssistSetup::getEmailEvents $eF1]
+			    #-postcommand [list eAssistSetup::getEmailEvents $eF1]
     
     # Turn on/off the notificiations
     ttk::checkbutton $eF1.ckbtn1 -variable emailSetup(boxlabels,Notification)
@@ -149,25 +149,25 @@ proc eAssistSetup::emailSetup_GUI {} {
     grid $eF1.txt4 -column 3 -row 1 -pady 2p -sticky nsw
     
 
+    ##
+    ## Frame 2 - From/To, Subject and Body of the email
+    ##
     
-    
-    
-    # Frame 2 - From/To, Subject and Body of the email
     set eF2 [ttk::labelframe $nbk.events.f2 -text [mc "Email"] -padding 10]
     pack $eF2 -fill both -padx 5p -pady 5p
     
     ttk::label $eF2.txt2 -text [mc "From"]
-    ttk::entry $eF2.entry2 -width 40 -textvariable emailSetup(boxlabels,From)
+    ttk::entry $eF2.entry2 -width 40 -textvariable emailSetup(From)
         tooltip::tooltip $eF2.entry2 [mc "One valid email address only"]
     
     ttk::label $eF2.txt3 -text [mc "To"]
-    ttk::entry $eF2.entry3 -textvariable emailSetup(boxlabels,To)
+    ttk::entry $eF2.entry3 -textvariable emailSetup(To)
         tooltip::tooltip $eF2.entry3 [mc "One valid email address only"]
     
     ttk::label $eF2.subs -text [mc "Substitutions\n %1-%5: Each line of the box labels\n %b: Breakdown information"]
     
     ttk::label $eF2.txt4 -text [mc "Subject Prefix"]
-    ttk::entry $eF2.entry4 -textvariable emailSetup(boxlabels,Subject)
+    ttk::entry $eF2.entry4 -textvariable emailSetup(Subject)
         tooltip::tooltip $eF2.entry4 [mc "This will prefix what was typed into the first line of the label"]
 	
     text $eF2.text -height 5 \
@@ -200,5 +200,15 @@ proc eAssistSetup::emailSetup_GUI {} {
     grid columnconfigure $eF2 $eF2.text -weight 1
     
     
+    ##
+    ## Bindings
+    ##
+    
+    # Reset the current entry in the Events combobox, since we are changing what Events are available in the -postcommand
+    bind $eF1.cbx1 <<ComboboxSelected>> "$eF1.cbx2 set {}"
+    # Populate the textVars if we have the data
+    bind $eF1.cbx2 <<ComboboxSelected>> "
+        ${log}::debug Event Dropdown was selected: {*}$eF1.cbx1
+        eAssistSetup::setEmailVars {*}$eF1.cbx1 {*}$eF1.cbx2"
     
 } ;# emailSetup_GUI

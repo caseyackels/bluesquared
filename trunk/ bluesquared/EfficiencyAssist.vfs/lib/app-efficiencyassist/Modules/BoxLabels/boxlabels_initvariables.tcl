@@ -22,8 +22,8 @@
 # - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
-proc Shipping_Gui::initModVariables {} {
-    #****f* initModVariables/Shipping_Gui
+proc Shipping_Gui::initDBTables {} {
+    #****f* initDBTables/Shipping_Gui
     # AUTHOR
     #	Casey Ackels
     #
@@ -45,17 +45,21 @@ proc Shipping_Gui::initModVariables {} {
     # NOTES
     #
     # SEE ALSO
-    #
+    #   eAssist_db::initValues
+    #   
     #***
-    global log emailEvent desc
+    global log
     
     # The array 'ModBoxLabels', must be part of the description as seen below. If not, this will break the auto-population in the email setup.
-    set desc(ModBoxLabels) [mc "Box Labels"]
-    set emailEvent(ModBoxLabels) [list Print "Print BreakDown"] 
-    
-} ;# Shipping_Gui::initModVariables
+    #set desc(ModBoxLabels) [mc "Box Labels"]
+    #set emailEvent(ModBoxLabels) [list Print "Print BreakDown"] 
+    eAssist_db::checkModuleName "Box Labels"
+    eAssist_db::checkEvents "Box Labels" onPrint onPrintBreakDown
 
-Shipping_Gui::initModVariables
+    
+} ;# Shipping_Gui::initDBTables
+
+Shipping_Gui::initDBTables
 
 
 proc Shipping_Gui::initVariables {} {
@@ -83,12 +87,12 @@ proc Shipping_Gui::initVariables {} {
     # SEE ALSO
     #
     #***
-    global log mySettings emailEvent desc
+    global log mySettings
     ${log}::debug --START-- [info level 1]
     set throwError 0
     
-    set desc(ModBoxLabels) [mc "Box Labels"]
-    set emailEvent(ModBoxLabels) [list Print "Print BreakDown"] 
+    #set desc(ModBoxLabels) [mc "Box Labels"]
+    #set emailEvent(ModBoxLabels) [list Print "Print BreakDown"] 
     
     set myVars [list bartender labelDir wordpad printer labelDBfile]
 	foreach item $myVars {
