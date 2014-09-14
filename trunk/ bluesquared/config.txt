@@ -101,15 +101,8 @@ carrierSetup(PAYMENT) Prepaid {Third Party}
 carrierSetup(enterCarrier) 
 carrierSetup(enterPaymentType) 
 CSR(Names) Meredith Mary Cyndi {Dan H} Lyn Darlene Linda {Pam F} Tom
-emailSetup(boxlabels,Subject) Package Info:
-emailSetup(Subject) {Just a test}
-emailSetup(boxlabels,To) casey.ackels@journalgraphics.com
-emailSetup(To) test@test.com
 emailSetup(email,serverName) mail.journalgraphics.com
 emailSetup(boxlabels,Notification) 0
 emailSetup(email,password) shipping
 emailSetup(email,port) 25
-emailSetup(boxlabels,From) jgshipping
 emailSetup(email,userName) jga.shipping
-emailSetup(From) casey@test.com
-emailSetup(Body) {Testing email entries}
