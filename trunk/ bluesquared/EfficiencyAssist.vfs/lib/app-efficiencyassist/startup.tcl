@@ -143,8 +143,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	package require eAssist_email
 	
 	
-    
-
+   
 
 	# Source files that are not in a package
 	source [file join [file dirname [info script]] Libraries popups.tcl]
