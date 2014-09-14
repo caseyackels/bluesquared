@@ -160,7 +160,7 @@ proc eAssistSetup::setEmailVars {moduleName eventName} {
 
 		set emailSetup(From) [eAssistSetup::queryDBemailVars EmailFrom $moduleName $eventName]
 		set emailSetup(To) [eAssistSetup::queryDBemailVars EmailTo $moduleName $eventName]
-		set emailSetup(Subject) [join [eAssistSetup::queryDBemailVars EmailSubject $moduleName $eventName]]
+		set emailSetup(Subject) [eAssistSetup::queryDBemailVars EmailSubject $moduleName $eventName]
 		set emailSetup(Body) [eAssistSetup::queryDBemailVars EmailBody $moduleName $eventName]
 	}
 

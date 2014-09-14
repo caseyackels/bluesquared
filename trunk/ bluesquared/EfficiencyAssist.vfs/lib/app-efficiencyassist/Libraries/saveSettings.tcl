@@ -158,11 +158,6 @@ proc eAssistSetup::SaveGlobalSettings {} {
         chan puts $fd "CSR($value) $CSR($value)"
     }
     
-    foreach value [array names emailSetup] {
-        #if {![info exists CSR($value)]} {continue}
-        chan puts $fd "emailSetup($value) $emailSetup($value)"
-    }
-    
     chan close $fd
     
     ${log}::notice Finished writing out the Setup settings
