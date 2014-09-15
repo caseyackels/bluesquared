@@ -8,7 +8,7 @@
 #
 # $Revision: 169 $
 # $LastChangedBy: casey.ackels $
-# $LastChangedDate: 2011-10-17 16:11:20 -0700 (Mon, 17 Oct 2011) $
+# $LastChangedDate$
 #
 ########################################################################################
 
@@ -146,10 +146,10 @@ proc eAssistSetup::setEmailVars {moduleName eventName} {
 	${log}::debug Mod: $moduleName Event: $eventName
 	
 	set emailEntry [db eval	{SELECT *
-								FROM EmailNotifications
-									WHERE ModuleName = moduleName
-								AND
-									EventName = eventName
+						FROM EmailNotifications
+							WHERE ModuleName = moduleName
+						AND
+							EventName = eventName
 	}]
 	
 	if {$emailEntry eq ""} {

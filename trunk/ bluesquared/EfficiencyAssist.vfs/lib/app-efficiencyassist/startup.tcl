@@ -7,8 +7,8 @@
 # Subversion
 #
 # $Revision$
-# $LastChangedBy$
-# $LastChangedDate$
+# $LastChangedBy: casey.ackels $
+# $LastChangedDate: 2014-09-14 15:39:41 -0700 (Sun, 14 Sep 2014) $
 #
 ########################################################################################
 

@@ -6,8 +6,8 @@
 #
 # Subversion
 #
-# $Revision$
-# $LastChangedBy$
+# $Revision: 523 $
+# $LastChangedBy: casey.ackels $
 # $LastChangedDate$
 #
 ########################################################################################
