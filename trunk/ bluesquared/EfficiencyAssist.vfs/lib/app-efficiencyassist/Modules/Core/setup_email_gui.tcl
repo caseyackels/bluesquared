@@ -90,8 +90,8 @@ proc eAssistSetup::emailSetup_GUI {} {
     ttk::label $svrF1.txt4 -text [mc "Password"]
     ttk::entry $svrF1.entry4 -show * -textvariable emailSetup(email,password)
     
-    ttk::checkbutton $svrF1.cbtn1 -text [mc "TLS"] -state disabled
-    ttk::checkbutton $svrF1.cbtn2 -text [mc "Global Notifications"] -state disabled
+    ttk::checkbutton $svrF1.cbtn1 -text [mc "TLS"] -variable emailSetup(TLS) -state disabled
+    ttk::checkbutton $svrF1.cbtn2 -text [mc "Global Notifications"] -variable emailSetup(globalNotifications) -state disabled
     
     
     grid $svrF1.txt1 -column 0 -row 0 -padx 2p -pady 2p -sticky nse
@@ -129,12 +129,12 @@ proc eAssistSetup::emailSetup_GUI {} {
                 -postcommand [list eAssistSetup::getEmailEvents $eF1]
 			    #-postcommand [list eAssistSetup::getEmailEvents $eF1]
     
-    # Turn on/off the notificiations
-    ttk::checkbutton $eF1.ckbtn1 -variable emailSetup(boxlabels,Notification)
+    # Turn on/off the notifications
+    ttk::checkbutton $eF1.ckbtn1 -variable emailSetup(mod,Notification)
     ttk::label $eF1.txt3 -text [mc "Module Notifications"]
     
-    ttk::checkbutton $eF1.ckbtn2
-    ttk::label $eF1.txt4 -text [mc "Event Notifications"]  
+    ttk::checkbutton $eF1.ckbtn2 -variable emailSetup(event,Notification)
+    ttk::label $eF1.txt4 -text [mc "Event Notifications"]
     
     grid $eF1.txt1 -column 0 -row 0 -pady 2p -sticky nse 
     grid $eF1.cbx1 -column 1 -row 0 -pady 2p -padx 5p -sticky news 
