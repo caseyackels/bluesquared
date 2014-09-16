@@ -165,6 +165,7 @@ proc eAssistSetup::emailSetup_GUI {} {
         tooltip::tooltip $eF2.entry3 [mc "One valid email address only"]
     
     ttk::label $eF2.subs -text [mc "Substitutions\n %1-%5: Each line of the box labels\n %b: Breakdown information"]
+    ttk::label $eF2.subTxt -textvariable emailSetup(SubTxt)
     
     ttk::label $eF2.txt4 -text [mc "Subject Prefix"]
     ttk::entry $eF2.entry4 -textvariable emailSetup(Subject)
@@ -209,6 +210,8 @@ proc eAssistSetup::emailSetup_GUI {} {
     # Populate the textVars if we have the data
     bind $eF1.cbx2 <<ComboboxSelected>> "
         ${log}::debug Event Dropdown was selected: {*}$eF1.cbx1
-        eAssistSetup::setEmailVars {*}$eF1.cbx1 {*}$eF1.cbx2"
+        eAssistSetup::setEmailVars {*}$eF1.cbx1 {*}$eF1.cbx2
+        eAssist_db::getSubText {*}$eF1.cbx2
+        "
     
 } ;# emailSetup_GUI

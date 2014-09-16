@@ -59,6 +59,7 @@ proc eAssist_db::loadDB {} {
     sqlite3 db $myDB
     
     eAssist_db::initContainers
+    eAssist_db::getEmailSetup
     
 	
     ${log}::debug --END-- [info level 1]
@@ -93,16 +94,11 @@ proc eAssist_db::initContainers {} {
     global log packagingSetup
     ${log}::debug --START-- [info level 1]
     
-    # Needed since we are migrating from a flat file
-    #if {[info exists packagingSetup(Containers)]} {unset packagingSetup(Containers)}
-    # Setup the variables holding the Containers and Packages
     db eval {SELECT Container from Containers} {
         #${log}::debug Container: $Container
         lappend packagingSetup(Containers) $Container
     }
 
-    # Needed since we are migrating from a flat file
-    #if {[info exists packagingSetup(Packages)]} {unset packagingSetup(Packages)}
     db eval {SELECT Package from Packages} {
         #${log}::debug Container: $Package
         lappend packagingSetup(Packages) $Package
@@ -149,6 +145,10 @@ proc eAssist_db::delete {table col args} {
     ${log}::debug --END-- [info level 1]
 } ;# eAssist_db::delete
 
+
+###----------
+## Insert data in tables if needed
+##
 
 proc eAssist_db::checkModuleName {moduleName} {
     #****f* checkModuleName/eAssist_db
@@ -218,15 +218,17 @@ proc eAssist_db::checkEvents {moduleName args} {
     #   
     #
     # SYNOPSIS
-    #   eAssist_db::initValues moduleName args
+    #   eAssist_db::initValues -module ?moduleName? -eventName ?event substitution? ?event substitution? ...
     #
     # FUNCTION
     #   moduleName = The module name that we want to associate our events with
-    #   args = Events that can be used to send email notices
+    #   args = Events and Substitutions key-value.
     #
-    #	Initializes DB values for the specific package (Box Labels)
     #	The DB should already be loaded before this is performed.
-    #   
+    #   Example Usage:
+    #     eAssist_db::checkEvents "Box Labels" \
+    #                        -eventName onPrint "Substitutions\n %1-%5: Each line of the box labels\n %b: Breakdown information" \
+    #                        onPrintBreakDown "None at this time"
     #   
     # CHILDREN
     #	N/A
@@ -242,7 +244,7 @@ proc eAssist_db::checkEvents {moduleName args} {
     #   
     #***
     global log desc emailEvent
-  
+
     ## Check to see if the Event Notifications exists in the DB, if it doesn't lets insert.
     #
     set modID [db eval {SELECT Mod_ID FROM Modules WHERE ModuleName = $moduleName}]
@@ -256,23 +258,89 @@ proc eAssist_db::checkEvents {moduleName args} {
                     }]
     ${log}::debug Found events for $moduleName: $tmpEvents
     
-    foreach tmpEmailEvent $args {
-        ${log}::debug Looking for $tmpEmailEvent in the database ...
-        
-        if {[lsearch -nocase $tmpEvents $tmpEmailEvent] == -1} {
-            ${log}::debug Couldn't find $tmpEmailEvent, inserting ...
-            db eval {INSERT or ABORT INTO EventNotifications (ModID, EventName)
-                VALUES ($modID, $tmpEmailEvent)
+    # Setup args to only contain the event and notification text, and remove '-eventName'
+    set eventArgs [lrange $args 1 end]
+    
+    switch -- [lrange $args 0 0] {
+        -eventName {
+            foreach {tmpEmailEvent tmpSubstitution} $eventArgs {
+                ${log}::debug Looking for $tmpEmailEvent in the database ...
+                
+                if {[lsearch -nocase $tmpEvents $tmpEmailEvent] == -1} {
+                    ${log}::debug Couldn't find $tmpEmailEvent, inserting ...
+                    db eval {INSERT or ABORT INTO EventNotifications (ModID, EventName, EventSubstitutions)
+                        VALUES ($modID, $tmpEmailEvent, $tmpSubstitution)
+                    }
+                
+                } else {
+                    ${log}::debug Found $tmpEmailEvent!
+                }
             }
-        
-        } else {
-            ${log}::debug Found $tmpEmailEvent!
+        }
+        default {
+                return -code 1 [mc "wrong # args: should be eAssist_db::checkEvents <moduleName> ?args?"]
         }
     }
+
     ${log}::debug Events passed to: [info level 1]
     ${log}::debug All Event Notifications: [db eval {SELECT EventName FROM EventNotifications}]
     
 } ;# eAssist_db::checkEvents
+
+
+
+
+
+###-----------------
+### QUERIES
+##
+##
+
+proc eAssist_db::getEmailSetup {} {
+    #****f* getEmailSetup/eAssist_db
+    # CREATION DATE
+    #   09/15/2014 (Monday Sep 15)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssist_db::getEmailSetup  
+    #
+    # FUNCTION
+    #	Retrieves the email setup data and initilizes the emailSetup array
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log emailSetup
+    
+    db eval {SELECT EmailServer, EmailPort, EmailLogin, EmailPassword, TLS, GlobalEmailNotification FROM EmailSetup} {
+        set emailSetup(email,serverName) $EmailServer
+        set emailSetup(email,port) $EmailPort
+        set emailSetup(email,userName) $EmailLogin
+        set emailSetup(email,password) $EmailPassword
+        
+        set emailSetup(TLS) $TLS
+        set emailSetup(globalNotifications) $GlobalEmailNotification
+    }
+    
+} ;# eAssist_db::getEmailSetup
 
 
 proc eAssist_db::getDBModules {} {
@@ -330,7 +398,7 @@ proc eAssist_db::getJoinedEvents {moduleName} {
     #   eAssist_db::getJoinedEvents args 
     #
     # FUNCTION
-    #	Retrieve the Email Events, associated with moduleName
+    #	Retrieve the Email Events associated with moduleName to populate the dropdown widget
     #   
     #   
     # CHILDREN
@@ -359,3 +427,6 @@ proc eAssist_db::getJoinedEvents {moduleName} {
     return $eventValues
 
 } ;# eAssist_db::getJoinedEvents
+
+
+

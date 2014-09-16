@@ -711,4 +711,3 @@ vUpdate::saveCurrentVersion
 
 # Start the GUI
 eAssist::parentGUI
-

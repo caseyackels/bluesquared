@@ -216,3 +216,44 @@ proc eAssistSetup::queryDBemailVars {column moduleName eventName} {
 
 
 } ;# eAssistSetup::queryDBemailVars
+
+
+proc eAssist_db::getSubText {w} {
+    #****f* getSubText/eAssist_db
+    # CREATION DATE
+    #   09/15/2014 (Monday Sep 15)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssist_db::getSubText w Event 
+    #
+    # FUNCTION
+    #	Queries the EventNotifications table, and retrieves the substitution text.
+	#	w = Widget path to retrieve event name
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log emailSetup
+
+    set emailSetup(SubTxt) [db eval {SELECT EventSubstitutions FROM EventNotifications WHERE EventName = w}]
+
+    
+} ;# eAssist_db::getSubText
