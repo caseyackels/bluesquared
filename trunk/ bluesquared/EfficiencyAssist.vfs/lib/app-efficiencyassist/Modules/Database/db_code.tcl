@@ -182,7 +182,7 @@ proc eAssist_db::checkModuleName {moduleName} {
     #   
     #   
     #***
-    global log
+    global log emailSetup
 
     ${log}::debug Looking for $moduleName in the database ...
     if {[info exists ModNames]} {unset ModNames}
@@ -194,8 +194,8 @@ proc eAssist_db::checkModuleName {moduleName} {
 
     if {[lsearch -nocase $ModNames $moduleName] == -1} {
             ${log}::debug Couldn't find $moduleName, inserting ...
-                db eval {INSERT or ABORT INTO Modules (ModuleName)
-                    VALUES ($moduleName)
+                db eval {INSERT or ABORT INTO Modules (ModuleName EnableModNotification)
+                    VALUES ($moduleName $emailSetup(mod,Notification))
                 }
     } else {
             ${log}::debug Found $moduleName!
@@ -243,7 +243,7 @@ proc eAssist_db::checkEvents {moduleName args} {
     #   
     #   
     #***
-    global log desc emailEvent
+    global log desc emailSetup
 
     ## Check to see if the Event Notifications exists in the DB, if it doesn't lets insert.
     #
@@ -258,6 +258,7 @@ proc eAssist_db::checkEvents {moduleName args} {
                     }]
     ${log}::debug Found events for $moduleName: $tmpEvents
     
+       
     # Setup args to only contain the event and notification text, and remove '-eventName'
     set eventArgs [lrange $args 1 end]
     
@@ -268,13 +269,50 @@ proc eAssist_db::checkEvents {moduleName args} {
                 
                 if {[lsearch -nocase $tmpEvents $tmpEmailEvent] == -1} {
                     ${log}::debug Couldn't find $tmpEmailEvent, inserting ...
-                    db eval {INSERT or ABORT INTO EventNotifications (ModID, EventName, EventSubstitutions)
-                        VALUES ($modID, $tmpEmailEvent, $tmpSubstitution)
+                    
+                    db eval {INSERT or ABORT INTO EventNotifications (ModID, EventName, EventSubstitutions EnableEventNotification)
+                        VALUES ($modID, $tmpEmailEvent, $tmpSubstitution, $emailSetup(Event,Notification))
                     }
                 
                 } else {
-                    ${log}::debug Found $tmpEmailEvent!
-                }
+                    # An event already exists, now we check for the substitutions.
+                    ${log}::debug Found $tmpEmailEvent, checking for the Substitutions!
+                    
+                    set dbMod [db eval {SELECT ModID
+                                                From EventNotifications
+                                                    LEFT OUTER JOIN Modules 
+                                                        ON EventNotifications.ModID = Modules.Mod_ID
+                                                    WHERE EventName = $tmpEmailEvent}]
+                    
+                    set dbSubstitution [join [db eval {SELECT EventSubstitutions
+                                                    FROM EventNotifications
+                                                        WHERE ModID = $dbMod
+                                                    AND
+                                                        EventName = $tmpEmailEvent}]]
+                    
+                        # Nothing found in the column, lets insert what we have.
+                        if {$dbSubstitution eq ""} {
+                            ${log}::debug Nothing found in the column, lets insert.
+                            ${log}::debug Mod: $moduleName $tmpSubstitution
+                            
+                            db eval {INSERT or ABORT INTO EventNotifications} (EventSubstitutions)
+                               VALUES ($tmpSubstitution)
+                        
+                        # We found an existing substitution, but it doesn't match. Lets update what we were passed.
+                        } elseif {![string match $tmpSubstitution $dbSubstitution]} {
+                            ${log}::notice Data exists in the DB, but it doesn't match what was passed to this proc, lets update to:
+                            ${log}::debug Mod: $moduleName, Event: $tmpEmailEvent
+                            ${log}::notice Old: $dbSubstitution
+                            ${log}::notice New: $tmpSubstitution
+                            
+                            db eval {UPDATE EventNotifications
+                                                    SET EventSubstitutions = $tmpSubstitution
+                                                        WHERE ModID = $dbMod
+                                                    AND
+                                                        EventName = $tmpEmailEvent}
+                            
+                        }
+                }                
             }
         }
         default {
@@ -282,8 +320,8 @@ proc eAssist_db::checkEvents {moduleName args} {
         }
     }
 
-    ${log}::debug Events passed to: [info level 1]
-    ${log}::debug All Event Notifications: [db eval {SELECT EventName FROM EventNotifications}]
+    #${log}::debug Events passed to: [info level 1]
+    #${log}::debug All Event Notifications: [db eval {SELECT EventName,  FROM EventNotifications}]
     
 } ;# eAssist_db::checkEvents
 

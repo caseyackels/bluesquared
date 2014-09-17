@@ -48,7 +48,7 @@ proc eAssistSetup::emailSetup_GUI {} {
     # SEE ALSO
     #
     #***
-    global log G_setupFrame emailSetup system
+    global log G_setupFrame email emailSetup system
     set currentModule ""
     
     eAssist_Global::resetSetupFrames ;# Reset all frames so we start clean
@@ -133,7 +133,7 @@ proc eAssistSetup::emailSetup_GUI {} {
     ttk::checkbutton $eF1.ckbtn1 -variable emailSetup(mod,Notification)
     ttk::label $eF1.txt3 -text [mc "Module Notifications"]
     
-    ttk::checkbutton $eF1.ckbtn2 -variable emailSetup(event,Notification)
+    ttk::checkbutton $eF1.ckbtn2 -variable emailSetup(Event,Notification)
     ttk::label $eF1.txt4 -text [mc "Event Notifications"]
     
     grid $eF1.txt1 -column 0 -row 0 -pady 2p -sticky nse 
@@ -154,21 +154,19 @@ proc eAssistSetup::emailSetup_GUI {} {
     ##
     
     set eF2 [ttk::labelframe $nbk.events.f2 -text [mc "Email"] -padding 10]
-    pack $eF2 -fill both -padx 5p -pady 5p
+    pack $eF2 -fill both -expand yes -padx 5p -pady 5p
     
     ttk::label $eF2.txt2 -text [mc "From"]
-    ttk::entry $eF2.entry2 -width 40 -textvariable emailSetup(From)
+    ttk::entry $eF2.entry2 -width 40 -textvariable email(From)
         tooltip::tooltip $eF2.entry2 [mc "One valid email address only"]
     
     ttk::label $eF2.txt3 -text [mc "To"]
-    ttk::entry $eF2.entry3 -textvariable emailSetup(To)
+    ttk::entry $eF2.entry3 -textvariable email(To)
         tooltip::tooltip $eF2.entry3 [mc "One valid email address only"]
     
-    ttk::label $eF2.subs -text [mc "Substitutions\n %1-%5: Each line of the box labels\n %b: Breakdown information"]
-    ttk::label $eF2.subTxt -textvariable emailSetup(SubTxt)
     
-    ttk::label $eF2.txt4 -text [mc "Subject Prefix"]
-    ttk::entry $eF2.entry4 -textvariable emailSetup(Subject)
+    ttk::label $eF2.txt4 -text [mc "Subject"]
+    ttk::entry $eF2.entry4 -textvariable email(Subject)
         tooltip::tooltip $eF2.entry4 [mc "This will prefix what was typed into the first line of the label"]
 	
     text $eF2.text -height 5 \
@@ -178,6 +176,9 @@ proc eAssistSetup::emailSetup_GUI {} {
     
     ttk::scrollbar $eF2.scrolly -orient v -command [list $eF2.text yview]
     ttk::scrollbar $eF2.scrollx -orient v -command [list $eF2.text xview]
+    
+    ttk::label $eF2.subs -text [mc "Available Macros:"]
+    ttk::label $eF2.subTxt -textvariable email(SubTxt)
 
     
     grid $eF2.txt2 -column 0 -row 1 -pady 2p -padx 2p -sticky nse
@@ -185,14 +186,15 @@ proc eAssistSetup::emailSetup_GUI {} {
     grid $eF2.txt3 -column 0 -row 2 -pady 2p -padx 2p -sticky nse
     grid $eF2.entry3 -column 1 -row 2 -pady 2p -padx 2p -sticky news
     
-    grid $eF2.subs -column 1 -row 3 -pady 2p -padx 2p -sticky w
+    grid $eF2.txt4 -column 0 -row 3 -pady 2p -padx 2p -sticky nse
+    grid $eF2.entry4 -column 1 -row 3 -pady 2p -padx 2p -sticky news
     
-    grid $eF2.txt4 -column 0 -row 4 -pady 2p -padx 2p -sticky nse
-    grid $eF2.entry4 -column 1 -row 4 -pady 2p -padx 2p -sticky news
+    grid $eF2.text -column 1 -row 4 -pady 2p -padx 2p ;#-sticky news
+    grid $eF2.scrolly -column 1 -row 4 -sticky nse
+    grid $eF2.scrollx -column 0 -row 4 -sticky sew
     
-    grid $eF2.text -column 1 -row 5 -pady 2p -padx 2p ;#-sticky news
-    grid $eF2.scrolly -column 1 -row 5 -sticky nse
-    grid $eF2.scrollx -column 0 -row 5 -sticky sew
+    grid $eF2.subs -column 0 -row 5 -pady 2p -padx 2p -sticky ne
+    grid $eF2.subTxt -column 1 -row 5 -pady 2p -padx 2p -sticky news 
 
     # Enable the 'autoscrollbar'
     ::autoscroll::autoscroll $eF2.scrolly
@@ -206,12 +208,17 @@ proc eAssistSetup::emailSetup_GUI {} {
     ##
     
     # Reset the current entry in the Events combobox, since we are changing what Events are available in the -postcommand
-    bind $eF1.cbx1 <<ComboboxSelected>> "$eF1.cbx2 set {}"
+    bind $eF1.cbx1 <<ComboboxSelected>> "
+        $eF1.cbx2 set {}
+        eAssistSetup::getModSetup $eF1.cbx1
+        "
     # Populate the textVars if we have the data
     bind $eF1.cbx2 <<ComboboxSelected>> "
-        ${log}::debug Event Dropdown was selected: {*}$eF1.cbx1
-        eAssistSetup::setEmailVars {*}$eF1.cbx1 {*}$eF1.cbx2
-        eAssist_db::getSubText {*}$eF1.cbx2
+        ${log}::debug Event Dropdown was selected: $eF1.cbx1
+        eAssist_db::getEventSetup $eF1.cbx2
+        eAssistSetup::setEmailVars $eF1.cbx1 $eF1.cbx2 $eF2.text
         "
+        
+    bind . <Control-s> "eAssist_db::saveEmailTpl {*}$eF1.cbx1 {*}$eF1.cbx2 $eF2.text"
     
 } ;# emailSetup_GUI

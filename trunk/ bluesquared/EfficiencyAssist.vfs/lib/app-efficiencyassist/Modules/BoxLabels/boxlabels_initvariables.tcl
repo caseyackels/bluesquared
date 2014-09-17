@@ -55,7 +55,7 @@ proc Shipping_Gui::initDBTables {} {
     #set emailEvent(ModBoxLabels) [list Print "Print BreakDown"] 
     eAssist_db::checkModuleName "Box Labels"
     eAssist_db::checkEvents "Box Labels" \
-                            -eventName onPrint "Substitutions\n %1-%5: Each line of the box labels\n %b: Breakdown information" \
+                            -eventName onPrint "Usage: %1-%5: represents each line of the box labels\n %b: Breakdown information" \
                             onPrintBreakDown "None at this time"
 
     
