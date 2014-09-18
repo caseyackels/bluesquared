@@ -84,7 +84,7 @@ proc eAssist_db::initContainers {} {
     #	N/A
     #
     # PARENTS
-    #	
+    #	eAssist_db::loadDB
     #
     # NOTES
     #
@@ -357,7 +357,7 @@ proc eAssist_db::getEmailSetup {} {
     #	N/A
     #   
     # PARENTS
-    #   
+    #   eAssist_db::loadDB
     #   
     # NOTES
     #   
@@ -397,7 +397,7 @@ proc eAssist_db::getDBModules {} {
     #   eAssist_db::getDBModules  
     #
     # FUNCTION
-    #	Retrieves the modules that are loaded in the DB
+    #	Retrieves all module names that are loaded in the DB
     #   
     #   
     # CHILDREN

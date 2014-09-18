@@ -27,7 +27,6 @@
 package provide eAssist_ModBoxLabels 1.0
 
 namespace eval Shipping_Gui {
-# Update email triggers in ModBoxLabels pkgIndex.tcl file
 
 proc shippingGUI {} {
     #****f* shippingGUI/Shipping_Gui
@@ -437,14 +436,26 @@ proc printbreakDown {args} {
         ##
         ## Email
         ##
-        mail::mail boxlabels "$GS_textVar(line1)" "$GS_textVar(line1)\n$GS_textVar(line2)\n$GS_textVar(line3)\n$GS_textVar(line4)\n$GS_textVar(line5)\n\n$myBreakDownText"
-        ${log}::debug [list $GS_textVar(line1) $GS_textVar(line2) $myBreakDownText]
+        #mail::mail boxlabels "$GS_textVar(line1)" "$GS_textVar(line1)\n$GS_textVar(line2)\n$GS_textVar(line3)\n$GS_textVar(line4)\n$GS_textVar(line5)\n\n$myBreakDownText"
+        Shipping_Code::onPrint_event -line1 $GS_textVar(line1) \
+                                        -line2 $GS_textVar(line2) \
+                                        -line3 $GS_textVar(line3) \
+                                        -line4 $GS_textVar(line4) \
+                                        -line5 $GS_textVar(line5) \
+                                        -breakdown $myBreakDownText
+        #${log}::debug [list $GS_textVar(line1) $GS_textVar(line2) $myBreakDownText]
     } else {
         ##
         ## Email
         ##
-        mail::mail boxlabels "$GS_textVar(line1)" "$GS_textVar(line1)\n$GS_textVar(line2)\n$GS_textVar(line3)\n$GS_textVar(line4)\n$GS_textVar(line5)\n\n$myBreakDownText"
-        ${log}::debug [list $GS_textVar(line1) $GS_textVar(line2) $myBreakDownText]
+        #mail::mail boxlabels "$GS_textVar(line1)" "$GS_textVar(line1)\n$GS_textVar(line2)\n$GS_textVar(line3)\n$GS_textVar(line4)\n$GS_textVar(line5)\n\n$myBreakDownText"
+        Shipping_Code::onPrint_event -line1 $GS_textVar(line1) \
+                                        -line2 $GS_textVar(line2) \
+                                        -line3 $GS_textVar(line3) \
+                                        -line4 $GS_textVar(line4) \
+                                        -line5 $GS_textVar(line5) \
+                                        -breakdown $myBreakDownText
+        #${log}::debug [list $GS_textVar(line1) $GS_textVar(line2) $myBreakDownText]
         
         # Check for required settings, exit if we don't have them
         if {![info exists mySettings(path,printer)]} {

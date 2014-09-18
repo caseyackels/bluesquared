@@ -26,7 +26,7 @@ package provide eAssist_email 1.0
 
 namespace eval mail {}
 
-proc mail::mail {mode SUB TEXT} {
+proc mail::mail {moduleName eventName args} {
     #****f* mail/mail
     # AUTHOR
     #	Casey Ackels
@@ -35,7 +35,7 @@ proc mail::mail {mode SUB TEXT} {
     #	(c) 2011-2013 Casey Ackels
     #
     # FUNCTION
-    #	mail::mail:: <Mode> <Subject> <Text>
+    #	mail::mail:: <moduleName> -from value -to value -subject value -body value
     #
     # SYNOPSIS
     #   Send a canned email to a recipient
@@ -48,51 +48,43 @@ proc mail::mail {mode SUB TEXT} {
     #	
     #
     # NOTES
-    #   Server, user and password are hardcoded.
+    #   
     # SEE ALSO
     #
     #***
     global log emailSetup
+    
+    # Check to see if we can even send email
+    if {![maildb::emailGateway $moduleName $eventName]} {return}
 
-    # Ensure <mode> is valid
-    if {$mode eq "boxlabels" || $mode eq "batchmaker"} {
-        ${log}::debug Email Mode: OK
-    } else {
-        ${log}::debug Email Mode: FAILED - Please use boxlabels or batchmaker
-        return
+    set emailFrom [join [maildb::emailNoticeFromTo $::boxLabelsVars::cModName $eventName -from]]
+	set emailTo [join [maildb::emailNoticeFromTo $::boxLabelsVars::cModName $eventName -to]]
+    
+    foreach {key value} $args {
+        switch -- $key {
+            -subject    {set emailSubject $value}
+            -body       {set emailBody $value}
+        }
     }
     
-    if {$emailSetup($mode,Notification) == 0} {
-        ${log}::notice Email Notification is DISABLED
-        return
-    } else {
-        ${log}::notice Email Notifications is ENABLED
-    }
+    ${log}::debug From: $emailFrom
+    ${log}::debug To: $emailTo
+    ${log}::debug Subject: $emailSubject
+    ${log}::debug EmailBody: $emailBody
+
     
-    # All of these options should be user configurable
-    #set USERNAME casey.ackels
-    #set PASSWORD 1520567954CaDel
-    #set USERNAME jg.shipping
-    #set PASSWORD shipping
-    #set SERVER mail.journalgraphics.com
-    #set PORT 25
-    #
-    #set FROM $emailSetup($mode,From)
-    #set TO $emailSetup($mode,To)
-    #set SUBJECT "$emailSetup($mode,Subject) $SUB"
-    
-    set tok [mime::initialize -canonical text/plain -string $TEXT]
+    set tok [mime::initialize -canonical text/plain -string $emailBody]
     ##
     ## To send to multiple people, we must add additional '-header' lines
     smtp::sendmessage $tok \
         -servers [list $emailSetup(email,serverName)] \
         -ports [list $emailSetup(email,port)] \
-        -usetls 1 \
+        -usetls 0 \
         -username $emailSetup(email,userName) \
         -password $emailSetup(email,password) \
-        -header [list From [list $emailSetup($mode,From)]] \
-        -header [list To "$emailSetup($mode,To)"] \
-        -header [list Subject "$emailSetup($mode,Subject) $SUB"] \
+        -header [list From [list $emailFrom]] \
+        -header [list To "$emailTo"] \
+        -header [list Subject "$emailSubject"] \
         -header [list Date "[clock format [clock seconds]]"]    
     
     

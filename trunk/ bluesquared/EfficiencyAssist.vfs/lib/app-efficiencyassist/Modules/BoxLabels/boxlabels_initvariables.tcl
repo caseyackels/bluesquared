@@ -22,7 +22,19 @@
 # - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
-proc Shipping_Gui::initDBTables {} {
+namespace eval boxLabelsVars {
+        set cModName "Box Labels"
+        
+        # List eligible macros
+        set eventOnPrintMacroLines "%1 %2 %3 %4 %5"
+        set eventOnPrintMacroBreakdown "%b"
+        
+        # Set the help text for the macros
+        set eventOnPrintTEXT "Usage: $eventOnPrintMacroLines\n Each number represents each line of the box labels\n $eventOnPrintMacroBreakdown: Breakdown information"
+}
+
+
+proc boxLabelsVars::initDBTables {} {
     #****f* initDBTables/Shipping_Gui
     # AUTHOR
     #	Casey Ackels
@@ -52,18 +64,21 @@ proc Shipping_Gui::initDBTables {} {
     
     # The array 'ModBoxLabels', must be part of the description as seen below. If not, this will break the auto-population in the email setup.
     #set desc(ModBoxLabels) [mc "Box Labels"]
-    #set emailEvent(ModBoxLabels) [list Print "Print BreakDown"] 
+    #set emailEvent(ModBoxLabels) [list Print "Print BreakDown"]
+    puts $::boxLabelsVars::cModName
+    
     eAssist_db::checkModuleName "Box Labels"
     eAssist_db::checkEvents "Box Labels" \
-                            -eventName onPrint "Usage: %1-%5: represents each line of the box labels\n %b: Breakdown information" \
+                            -eventName onPrint $::boxLabelsVars::eventOnPrintTEXT \
                             onPrintBreakDown "None at this time"
 
     
 } ;# Shipping_Gui::initDBTables
 
-Shipping_Gui::initDBTables
 
-
+boxLabelsVars::initDBTables
+    
+    
 proc Shipping_Gui::initVariables {} {
     #****f* initVariables/Shipping_Gui
     # AUTHOR
@@ -91,6 +106,9 @@ proc Shipping_Gui::initVariables {} {
     #***
     global log mySettings
     ${log}::debug --START-- [info level 1]
+    
+    
+    
     set throwError 0
     
     #set desc(ModBoxLabels) [mc "Box Labels"]

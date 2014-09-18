@@ -917,6 +917,103 @@ proc clearList {} {
     Shipping_Code::addListboxNums 1 ;# Reset Counter
     Shipping_Code::displayListHelper "" "" 1 ;# Reset Counter
 }
-
-
 } ;# End of Shipping_Code namespace
+
+
+proc Shipping_Code::onPrint_event {args} {
+    #****f* emailBoxLabels/Shipping_Code 
+    # CREATION DATE
+    #   09/17/2014 (Wednesday Sep 17)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   Shipping_Code::email::boxlabels -line1 <arg> -line2 <arg> -line3 <arg> -line4 <arg> -line5 <arg> -breakdown <arg> 
+    #
+    # FUNCTION
+    #	Preprocesses data before sending it on to email::email
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   email::email
+    #   
+    #***
+	global log
+	set wrongArgs [mc "wrong # args should be: Shipping_Code::onPrint_event -line1 <arg> -line2 <arg> -line3 <arg> -line4 <arg> -line5 <arg> -breakdown <arg>"]
+	
+	# Just in case no arguments are passed
+	if {(![info exists args]) || ($args eq "")} {
+		return -code 1 $wrongArgs
+	}
+
+	set eventName [lindex [split [lindex [split [lindex [info level 0] 0] ::] 2] _] 0]
+	
+	set Subj [join [maildb::getEmailText  $::boxLabelsVars::cModName $eventName -subject]]
+	set Body [join [maildb::getEmailText  $::boxLabelsVars::cModName $eventName -body]]
+	
+	# String Map
+	# set myText "Line 1 of the label"
+	# set emailBody "Body of the email: %b"
+	# string map "%b [list $myText]" $emailBody
+	set MacroList [linsert $::boxLabelsVars::eventOnPrintMacroLines end $::boxLabelsVars::eventOnPrintMacroBreakdown]
+	
+
+	foreach {key value} $args {
+		#${log}::debug Looking at $key $value
+		foreach macro $MacroList {
+			${log}::debug Searching for Macro: $macro
+			
+			# List all eligible sections for the macro's.
+			# We keep the same Subj variable, because we are continually re[set]ing it, an want to keep the original data.
+			# Once we hit the body, we go through an iterative process.
+			switch -- $key {
+				-line1		{${log}::debug Box Labels: Line1 $value
+							set Subj [string map "$macro [list $value]" $Subj]
+							set MappedBody [string map "$macro [list $value]" $Body]
+							${log}::debug New Subject: $Subj
+							}
+				-line2		{
+							set Subj [string map "$macro [list $value]" $Subj]
+							set MappedBody [string map "$macro [list $value]" $Body]
+							}
+				-line3		{
+							set Subj [string map "$macro [list $value]" $Subj]
+							set MappedBody [string map "$macro [list $value]" $Body]
+							}
+				-line4		{
+							set Subj [string map "$macro [list $value]" $Subj]
+							set MappedBody [string map "$macro [list $value]" $Body]
+							}
+				-line5		{
+							set Subj [string map "$macro [list $value]" $Subj]
+							set MappedBody [string map "$macro [list $value]" $Body]
+							}
+				-breakdown	{
+							${log}::debug Breakdown Value: $value
+							set Subj [string map "$macro [list $value]" $Subj]
+							set MappedBody [string map "$macro [list $value]" $Body]
+							}
+				default		{return -code 1 $wrongArgs}
+				
+			}
+		}
+	}
+
+    #${log}::debug New Subject: $Subj
+	#${log}::debug New Body: $MappedBody		
+	mail::mail $::boxLabelsVars::cModName $eventName -subject $Subj -body $MappedBody
+} ;# Shipping_Code::emailBoxLabels

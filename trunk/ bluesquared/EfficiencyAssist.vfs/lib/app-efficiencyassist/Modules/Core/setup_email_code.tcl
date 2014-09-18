@@ -375,6 +375,14 @@ proc eAssist_db::saveEmailTpl {mod event body} {
 	set eventName [$event get]
 	set email(Body) [$body get 1.0 end]
 	
+	# Update the Modules table if we don't match what we currently have in the db compared to the GUI
+	set enableModNotices [db eval {SELECT EnableModNotification FROM Modules WHERE ModuleName = $moduleName}]
+	
+	if {$emailSetup(mod,Notification) != $enableModNotices} {
+		db eval {UPDATE Modules SET EnableModNotification = $emailSetup(mod,Notification)}
+	}
+	
+	# Update the specific Email body, and Event information
 	set dbTplExists [db eval {SELECT EN_ID, ModuleName, EventName
 								FROM EmailNotifications
 									WHERE ModuleName = $moduleName 
@@ -385,7 +393,7 @@ proc eAssist_db::saveEmailTpl {mod event body} {
 		#Nothing exists in the db, so lets insert
 		${log}::debug dbTplExists = $dbTplExists - Inserting data ....
 		db eval {INSERT or ABORT into EmailNotifications (ModuleName, EventName, EventNotification, EmailFrom, EmailTo, EmailSubject, EmailBody)
-					VALUES ($moduleName $eventName $emailSetup(Event,Notification) $email(From) $email(To) $email(Subject) $email(Body)}
+					VALUES ($moduleName, $eventName, $emailSetup(Event,Notification), $email(From), $email(To), $email(Subject), $email(Body)}
 	} else {
 		${log}::debug dbTplExists = $dbTplExists - Updating data ....
 		set id [lrange $dbTplExists 0 0]
