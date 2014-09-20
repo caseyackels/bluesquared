@@ -61,14 +61,10 @@ proc boxLabelsVars::initDBTables {} {
     #   
     #***
     global log
-    
-    # The array 'ModBoxLabels', must be part of the description as seen below. If not, this will break the auto-population in the email setup.
-    #set desc(ModBoxLabels) [mc "Box Labels"]
-    #set emailEvent(ModBoxLabels) [list Print "Print BreakDown"]
-    puts $::boxLabelsVars::cModName
-    
-    eAssist_db::checkModuleName "Box Labels"
-    eAssist_db::checkEvents "Box Labels" \
+       
+    #eAssist_db::checkModuleName "Box Labels"
+    eAssist_db::checkModuleName $::boxLabelsVars::cModName
+    eAssist_db::checkEvents $::boxLabelsVars::cModName \
                             -eventName onPrint $::boxLabelsVars::eventOnPrintTEXT \
                             onPrintBreakDown "None at this time"
 

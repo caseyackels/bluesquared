@@ -61,6 +61,9 @@ proc eAssistSetup::SaveGlobalSettings {} {
     
     lib::savePreferences
     
+    # Save data to the DB
+    #eAssist_db::Save
+    
     # If we can't read or write, lets return.
     if {[eAssist_Global::folderAccessibility $program(Home)] != 3} {
         ${log}::critical -FAIL- Can't read/write to $program(Home)! Any changes to Setup was not saved.

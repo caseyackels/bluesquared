@@ -217,6 +217,8 @@ proc eAssist::buttonBarGUI {args} {
     }
     
     #${log}::debug INDEX: [lrange $args 1 1]
+    $mb.modMenu delete 0 end
+    $mb.file delete 0 end
         
     ${log}::debug Entering - $module
     switch -- $module {
@@ -236,7 +238,6 @@ proc eAssist::buttonBarGUI {args} {
             # .. save the settings
             #eAssistSetup::SaveGlobalSettings
             lib::savePreferences
-            $mb.file entryconfigure 1 -state disable
             eAssist_Global::getGeom $module 450x475
         }
         BatchMaker   {
@@ -258,9 +259,6 @@ proc eAssist::buttonBarGUI {args} {
             #eAssistSetup::SaveGlobalSettings
             lib::savePreferences
             #$mb.file entryconfigure 1 -state normal
-            $mb.file add command -label [mc "New/Edit Project"] -command {eAssistHelper::projSetup}
-            $mb.file add command -label [mc "Import File"] -command {importFiles::fileImportGUI}
-            $mb.file add command -label [mc "Export File"] -command {export::DataToExport} -state disabled
             eAssist_Global::getGeom $module 900x610+240+124
             }
         Setup       {
@@ -279,7 +277,7 @@ proc eAssist::buttonBarGUI {args} {
             # .. save the settings
             #eAssistSetup::SaveGlobalSettings
             lib::savePreferences
-            $mb.file entryconfigure 1 -state disable
+            #$mb.file entryconfigure 1 -state disable
             eAssist_Global::getGeom $module 845x573+247+156
         }
         default     {}

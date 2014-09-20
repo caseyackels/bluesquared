@@ -127,7 +127,6 @@ proc eAssistSetup::emailSetup_GUI {} {
     ttk::label $eF1.txt2 -text [mc "Event"]
     ttk::combobox $eF1.cbx2 -state readonly \
                 -postcommand [list eAssistSetup::getEmailEvents $eF1]
-			    #-postcommand [list eAssistSetup::getEmailEvents $eF1]
     
     # Turn on/off the notifications
     ttk::checkbutton $eF1.ckbtn1 -variable emailSetup(mod,Notification)
@@ -135,6 +134,8 @@ proc eAssistSetup::emailSetup_GUI {} {
     
     ttk::checkbutton $eF1.ckbtn2 -variable emailSetup(Event,Notification)
     ttk::label $eF1.txt4 -text [mc "Event Notifications"]
+    
+
     
     grid $eF1.txt1 -column 0 -row 0 -pady 2p -sticky nse 
     grid $eF1.cbx1 -column 1 -row 0 -pady 2p -padx 5p -sticky news 
@@ -147,6 +148,8 @@ proc eAssistSetup::emailSetup_GUI {} {
     
     grid $eF1.ckbtn2 -column 2 -row 1 -pady 2p -sticky nse
     grid $eF1.txt4 -column 3 -row 1 -pady 2p -sticky nsw
+    
+
     
 
     ##
@@ -194,7 +197,12 @@ proc eAssistSetup::emailSetup_GUI {} {
     grid $eF2.scrollx -column 0 -row 4 -sticky sew
     
     grid $eF2.subs -column 0 -row 5 -pady 2p -padx 2p -sticky ne
-    grid $eF2.subTxt -column 1 -row 5 -pady 2p -padx 2p -sticky news 
+    grid $eF2.subTxt -column 1 -row 5 -pady 2p -padx 2p -sticky news
+    
+    
+    ttk::button $eF1.btn -text [mc "Save"] -command "eAssist_db::saveEmailTpl $eF1.cbx1 $eF1.cbx2 $eF2.text"
+    grid $eF1.btn -column 1 -row 2 -pady 2p -sticky news 
+
 
     # Enable the 'autoscrollbar'
     ::autoscroll::autoscroll $eF2.scrolly
@@ -221,4 +229,4 @@ proc eAssistSetup::emailSetup_GUI {} {
         
     bind . <Control-s> "eAssist_db::saveEmailTpl {*}$eF1.cbx1 {*}$eF1.cbx2 $eF2.text"
     
-} ;# emailSetup_GUI
+} ;# emailSetup_GUI::emailSetup_GUI

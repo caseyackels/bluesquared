@@ -374,7 +374,7 @@ proc eAssistHelper::projSetup {} {
     set locY [expr {[winfo screenheight . ] / 5 + [winfo y .]}]
     wm geometry $w(ps) +${locX}+${locY}
 
-    set f1 [ttk::frame $w(ps).f1]
+    set f1 [ttk::labelframe $w(ps).f1 -text [mc "Job Information"] -padding 10]
     pack $f1 -fill both -expand yes ;#-padx 5p -pady 5p
     focus $w(ps)
     
@@ -383,15 +383,15 @@ proc eAssistHelper::projSetup {} {
     
     ttk::label $f1.txt1a -text [mc "Title"]
     ttk::entry $f1.entry1a -textvariable job(Title)
-    tooltip::tooltip $f1.entry1a [mc "Publication Title"]
+		tooltip::tooltip $f1.entry1a [mc "Publication Title"]
     
     ttk::label $f1.txt2 -text [mc "Name"]
     ttk::entry $f1.entry2 -textvariable job(Name)
-    tooltip::tooltip $f1.entry2 [mc "Job Name"]
+		tooltip::tooltip $f1.entry2 [mc "Job Name"]
     
     ttk::label $f1.txt3 -text [mc "Number"]
     ttk::entry $f1.entry3 -textvariable job(Number)
-    tooltip::tooltip $f1.entry3 [mc "Job Number"]
+		tooltip::tooltip $f1.entry3 [mc "Job Number"]
     
     grid $f1.txt1      -column 0 -row 0 -sticky nes -padx 3p -pady 3p
     grid $f1.cbox1     -column 1 -row 0 -sticky news -padx 3p -pady 3p
@@ -401,5 +401,29 @@ proc eAssistHelper::projSetup {} {
     grid $f1.entry2    -column 1 -row 2 -sticky news -padx 3p -pady 3p
     grid $f1.txt3      -column 0 -row 3 -sticky nes -padx 3p -pady 3p
     grid $f1.entry3    -column 1 -row 3 -sticky news -padx 3p -pady 3p
+	
+	set f2 [ttk::labelframe $w(ps).f2 -text [mc "Piece Information"] -padding 10]
+	pack $f1 -fill both -expand yes
+	
+	ttk::label $f2.txt1 -text [mc "Weight"]
+	ttk::entry $f2.entry1
+	
+	ttk::label $f2.txt2 -text [mc "Thickness"]
+	ttk::entry $f2.entry2
+	
+	grid $f2.txt1 -column 0 -row 0 -sticky nes
+	grid $f2.entry1 -column 1 -row 0 -sticky news
+	
+	grid $f2.txt2 -column 0 -row 1 -sticky nes
+	grid $f2.entry2 -column 1 -row 1 -sticky news
+	
+	set btnBar [ttk::frame $w(ps).btnBar]
+	pack $btnBar -anchor se
+	
+	ttk::button $btnBar.ok -text [mc "OK"]
+	
+	grid $btnBar.ok -column 0 -row 0 -sticky news
+	
+	
     
 } ;# eAssistHelper::projSetup

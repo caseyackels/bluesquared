@@ -509,6 +509,12 @@ proc importFiles::initMenu {} {
     }
 
     $mb.modMenu delete 0 end
+    $mb.file delete 0 end
+    
+    # Add Module specific Menus
+    $mb.file add command -label [mc "Project Information"] -command {eAssistHelper::projSetup}
+    $mb.file add command -label [mc "Import File"] -command {importFiles::fileImportGUI}
+    $mb.file add command -label [mc "Export File"] -command {export::DataToExport} -state disabled
     
     # Change menu name
     #$mb entryconfigure Edit -label Distribution
