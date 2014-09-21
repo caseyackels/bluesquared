@@ -402,27 +402,26 @@ proc eAssistHelper::projSetup {} {
     grid $f1.txt3      -column 0 -row 3 -sticky nes -padx 3p -pady 3p
     grid $f1.entry3    -column 1 -row 3 -sticky news -padx 3p -pady 3p
 	
-	set f2 [ttk::labelframe $w(ps).f2 -text [mc "Piece Information"] -padding 10]
-	pack $f1 -fill both -expand yes
-	
-	ttk::label $f2.txt1 -text [mc "Weight"]
-	ttk::entry $f2.entry1
-	
-	ttk::label $f2.txt2 -text [mc "Thickness"]
-	ttk::entry $f2.entry2
-	
-	grid $f2.txt1 -column 0 -row 0 -sticky nes
-	grid $f2.entry1 -column 1 -row 0 -sticky news
-	
-	grid $f2.txt2 -column 0 -row 1 -sticky nes
-	grid $f2.entry2 -column 1 -row 1 -sticky news
-	
-	set btnBar [ttk::frame $w(ps).btnBar]
-	pack $btnBar -anchor se
-	
-	ttk::button $btnBar.ok -text [mc "OK"]
-	
-	grid $btnBar.ok -column 0 -row 0 -sticky news
+    set f2 [ttk::labelframe $w(ps).f2 -text [mc "Piece Information"] -padding 10]
+    pack $f2 -fill both -expand yes
+    
+    ttk::label $f2.txt1 -text [mc "Weight"]
+    ttk::entry $f2.entry1
+    
+    ttk::label $f2.txt2 -text [mc "Thickness"]
+    ttk::entry $f2.entry2
+    
+    grid $f2.txt1 -column 0 -row 0 -sticky nes
+    grid $f2.entry1 -column 1 -row 0 -sticky news
+    grid $f2.txt2 -column 0 -row 1 -sticky nes
+    grid $f2.entry2 -column 1 -row 1 -sticky news
+    
+    set btnBar [ttk::frame $w(ps).btnBar]
+    pack $btnBar -anchor se
+    
+    ttk::button $btnBar.ok -text [mc "OK"]
+    
+    grid $btnBar.ok -column 0 -row 0 -sticky news
 	
 	
     

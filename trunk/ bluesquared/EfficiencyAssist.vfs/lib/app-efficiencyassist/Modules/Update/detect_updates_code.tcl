@@ -35,7 +35,7 @@ proc vUpdate::saveCurrentVersion {} {
     #	N/A
     #
     # CHILDREN
-    #	vUpdate::whatVersion
+    #	vUpdate::whatVersion vUpdate::getLatestRev
     #
     # PARENTS
     #	
@@ -52,7 +52,7 @@ proc vUpdate::saveCurrentVersion {} {
     ${log}::debug Entering SaveCurrentVersion
     
     # Check to see if we've ran this before ...
-    if {[info exists program(Version)] == 0} {
+    if {[info exists $program(Version)] == 0} {
         set firstRun 1
         ${log}::debug firstRun: $firstRun
     }
@@ -69,6 +69,7 @@ proc vUpdate::saveCurrentVersion {} {
     set program(Version) 4
     set program(PatchLevel) 0.0 ;# Leading decimal is not needed
     set program(beta) "Beta 6"
+    set program(Dev) 1
     set program(fullVersion) "$program(Version).$program(PatchLevel) $program(beta)"
     
     set program(Name) "Efficiency Assist"
@@ -76,7 +77,12 @@ proc vUpdate::saveCurrentVersion {} {
     
     tk appname $program(Name)
 
-
+    if {$program(Dev) == 1} {
+        # We're running a dev version, lets populate the latest code repo version
+        set program(FullName) "$program(FullName) Rev: [vUpdate::getLatestRev]"
+    }
+    
+    
     if {$firstRun == 1} {
         vUpdate::whatVersion
         ${log}::debug Launching window firstrun: $firstRun = 0
@@ -298,3 +304,57 @@ proc vUpdate::newVersion {txt expln} {
 #	
 #    ${log}::debug --END-- [info level 1]
 #} ;# vUpdate::checkForUpdates
+
+
+proc vUpdate::getLatestRev {} {
+    #****f* getLatestRev/vUpdate
+    # CREATION DATE
+    #   09/21/2014 (Sunday Sep 21)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   vUpdate::getLatestRev 
+    #
+    # FUNCTION
+    #	Retrieves the latest revision number, if svn.exe is installed and puts it into the program(FullName) variable
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   vUpdate::saveCurrentVersion
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    set RepoPath "https://bluesquared.googlecode.com/svn/trunk/%20bluesquared"
+
+    # Returns 0 if 'svn' was found on the system.
+    set values [catch {exec svn info $RepoPath} msg]
+
+    if {$values} {
+        ${log}::notice "svn.exe was not found on this system. Install TortoiseSVN and try again."
+        return {N/A}
+        #return -code 1 "svn.exe was not found on this system. Install TortoiseSVN and try again."
+    }
+    
+    set nmsg [split $msg \n]
+    set lastChangedRev [lindex $nmsg [lsearch $nmsg "Last Changed Rev*"]]
+    set lastChangedRevNumber [lrange [split $lastChangedRev] end end]
+    
+    return $lastChangedRevNumber
+
+} ;# vUpdate::getLatestRev
