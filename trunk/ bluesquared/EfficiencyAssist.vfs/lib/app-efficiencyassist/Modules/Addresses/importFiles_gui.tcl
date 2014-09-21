@@ -301,57 +301,57 @@ proc importFiles::eAssistGUI {} {
     pack $files(f3a) -side left -fill both -expand yes ;#-padx 5p -pady 5p
     
     # --- Job Info Frame
-    set files(jobInfo) [ttk::labelframe $files(f3a).f1 -text [mc "Job Information"] -padding 10]
-    grid $files(jobInfo) -column 0 -row 0 -sticky news -padx 5p -pady 5p -ipady 5p
-    
-    ttk::label $files(jobInfo).txt1 -text [mc "CSR"]
-    ttk::combobox $files(jobInfo).cbox1 -values $CSR(Names) -textvariable job(CSRName)
-    
-    ttk::label $files(jobInfo).txt1a -text [mc "Title"]
-    ttk::entry $files(jobInfo).entry1a -textvariable job(Title)
-    tooltip::tooltip $files(jobInfo).entry1a [mc "Publication Title"]
-    
-    ttk::label $files(jobInfo).txt2 -text [mc "Name"]
-    ttk::entry $files(jobInfo).entry2 -textvariable job(Name)
-    tooltip::tooltip $files(jobInfo).entry2 [mc "Job Name"]
-    
-    ttk::label $files(jobInfo).txt3 -text [mc "Number"]
-    ttk::entry $files(jobInfo).entry3 -textvariable job(Number)
-    tooltip::tooltip $files(jobInfo).entry3 [mc "Job Number"]
-    
-    grid $files(jobInfo).txt1      -column 0 -row 0 -sticky nes -padx 3p -pady 3p
-    grid $files(jobInfo).cbox1     -column 1 -row 0 -sticky news -padx 3p -pady 3p
-    grid $files(jobInfo).txt1a     -column 0 -row 1 -sticky nes -padx 3p -pady 3p
-    grid $files(jobInfo).entry1a   -column 1 -row 1 -sticky news -padx 3p -pady 3p
-    grid $files(jobInfo).txt2      -column 0 -row 2 -sticky nes -padx 3p -pady 3p
-    grid $files(jobInfo).entry2    -column 1 -row 2 -sticky news -padx 3p -pady 3p
-    grid $files(jobInfo).txt3      -column 0 -row 3 -sticky nes -padx 3p -pady 3p
-    grid $files(jobInfo).entry3    -column 1 -row 3 -sticky news -padx 3p -pady 3p
-    
-    # --- Piece Info Frame
-    set files(pieceInfo) [ttk::labelframe $files(f3a).f2 -text [mc "Piece Information"] -padding 10]
-    grid $files(pieceInfo) -column 1 -row 0 -sticky news -padx 5p -pady 5p
-    
-    # -- Widgets
-    ttk::label $files(pieceInfo).txt2 -text [mc "Weight"] -state disabled
-    ttk::entry $files(pieceInfo).entry2 -state disabled
-    tooltip::tooltip $files(pieceInfo).entry2 [mc "Piece Weight"]
-
-    
-    ttk::label $files(pieceInfo).txt3 -text [mc "Thickness"] -state disabled
-    ttk::entry $files(pieceInfo).entry3 -state disabled
-    tooltip::tooltip $files(pieceInfo).entry3 [mc "Piece Thickness"]
-    
-    ttk::button $files(pieceInfo).btn -text [mc "Auto Assign Carrier"] -state disabled
-    
-    # Grid frame f3
-    #grid $files(tab1).txt1 -column 0 -row 0 -sticky nes -padx 2p
-    #grid $files(tab1).entry1 -column 1 -row 0 -sticky news -padx 2p
-    grid $files(pieceInfo).txt2      -column 0 -row 1 -sticky nes -padx 3p -pady 2p
-    grid $files(pieceInfo).entry2    -column 1 -row 1 -sticky news -padx 3p -pady 2p
-    grid $files(pieceInfo).txt3      -column 0 -row 2 -sticky nes -padx 3p -pady 2p
-    grid $files(pieceInfo).entry3    -column 1 -row 2 -sticky news -padx 3p -pady 2p
-    grid $files(pieceInfo).btn       -column 0 -columnspan 2 -row 3 -sticky news -padx 3p -pady 2p
+    #set files(jobInfo) [ttk::labelframe $files(f3a).f1 -text [mc "Job Information"] -padding 10]
+    #grid $files(jobInfo) -column 0 -row 0 -sticky news -padx 5p -pady 5p -ipady 5p
+    #
+    #ttk::label $files(jobInfo).txt1 -text [mc "CSR"]
+    #ttk::combobox $files(jobInfo).cbox1 -values $CSR(Names) -textvariable job(CSRName)
+    #
+    #ttk::label $files(jobInfo).txt1a -text [mc "Title"]
+    #ttk::entry $files(jobInfo).entry1a -textvariable job(Title)
+    #tooltip::tooltip $files(jobInfo).entry1a [mc "Publication Title"]
+    #
+    #ttk::label $files(jobInfo).txt2 -text [mc "Name"]
+    #ttk::entry $files(jobInfo).entry2 -textvariable job(Name)
+    #tooltip::tooltip $files(jobInfo).entry2 [mc "Job Name"]
+    #
+    #ttk::label $files(jobInfo).txt3 -text [mc "Number"]
+    #ttk::entry $files(jobInfo).entry3 -textvariable job(Number)
+    #tooltip::tooltip $files(jobInfo).entry3 [mc "Job Number"]
+    #
+    #grid $files(jobInfo).txt1      -column 0 -row 0 -sticky nes -padx 3p -pady 3p
+    #grid $files(jobInfo).cbox1     -column 1 -row 0 -sticky news -padx 3p -pady 3p
+    #grid $files(jobInfo).txt1a     -column 0 -row 1 -sticky nes -padx 3p -pady 3p
+    #grid $files(jobInfo).entry1a   -column 1 -row 1 -sticky news -padx 3p -pady 3p
+    #grid $files(jobInfo).txt2      -column 0 -row 2 -sticky nes -padx 3p -pady 3p
+    #grid $files(jobInfo).entry2    -column 1 -row 2 -sticky news -padx 3p -pady 3p
+    #grid $files(jobInfo).txt3      -column 0 -row 3 -sticky nes -padx 3p -pady 3p
+    #grid $files(jobInfo).entry3    -column 1 -row 3 -sticky news -padx 3p -pady 3p
+    #
+    ## --- Piece Info Frame
+    #set files(pieceInfo) [ttk::labelframe $files(f3a).f2 -text [mc "Piece Information"] -padding 10]
+    #grid $files(pieceInfo) -column 1 -row 0 -sticky news -padx 5p -pady 5p
+    #
+    ## -- Widgets
+    #ttk::label $files(pieceInfo).txt2 -text [mc "Weight"] -state disabled
+    #ttk::entry $files(pieceInfo).entry2 -state disabled
+    #tooltip::tooltip $files(pieceInfo).entry2 [mc "Piece Weight"]
+    #
+    #
+    #ttk::label $files(pieceInfo).txt3 -text [mc "Thickness"] -state disabled
+    #ttk::entry $files(pieceInfo).entry3 -state disabled
+    #tooltip::tooltip $files(pieceInfo).entry3 [mc "Piece Thickness"]
+    #
+    #ttk::button $files(pieceInfo).btn -text [mc "Auto Assign Carrier"] -state disabled
+    #
+    ## Grid frame f3
+    ##grid $files(tab1).txt1 -column 0 -row 0 -sticky nes -padx 2p
+    ##grid $files(tab1).entry1 -column 1 -row 0 -sticky news -padx 2p
+    #grid $files(pieceInfo).txt2      -column 0 -row 1 -sticky nes -padx 3p -pady 2p
+    #grid $files(pieceInfo).entry2    -column 1 -row 1 -sticky news -padx 3p -pady 2p
+    #grid $files(pieceInfo).txt3      -column 0 -row 2 -sticky nes -padx 3p -pady 2p
+    #grid $files(pieceInfo).entry3    -column 1 -row 2 -sticky news -padx 3p -pady 2p
+    #grid $files(pieceInfo).btn       -column 0 -columnspan 2 -row 3 -sticky news -padx 3p -pady 2p
     
     
     # --- Internal Samples Frame

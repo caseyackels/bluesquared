@@ -140,7 +140,7 @@ proc eAssistHelper::insertItems {tbl} {
     #
     # FUNCTION
     #	Opens a dialog and allows the user to input data that should be the same for each cell that they selected
-	#	Will only work in [Extended] Mode for BatchMaker
+    #	Will only work in [Extended] Mode for BatchMaker
     #
     # SYNOPSIS
     #	eAssistHelper::insertItems <tbl>
@@ -159,11 +159,11 @@ proc eAssistHelper::insertItems {tbl} {
     global log files headerParams dist carrierSetup packagingSetup txtVariable
     ${log}::debug --START-- [info level 1]
     
-	set w(di) .di
-	if {[winfo exists $w(di)]} {destroy .di}
-	if {[info exists txtVariable]} {unset txtVariable}
-		
-	toplevel $w(di)
+    set w(di) .di
+    if {[winfo exists $w(di)]} {destroy .di}
+    if {[info exists txtVariable]} {unset txtVariable}
+	    
+    toplevel $w(di)
     wm transient $w(di) .
     wm title $w(di) [mc "Quick Insert"]
 
@@ -185,7 +185,6 @@ proc eAssistHelper::insertItems {tbl} {
 	
 
 	if {[info exists curCol]} {unset curCol}
-	#set newType ""
 	set origCells [$tbl curcellselection]
 	set cells [$tbl curcellselection]
 	
@@ -204,22 +203,16 @@ proc eAssistHelper::insertItems {tbl} {
 	# Button Bar
 	set btnBar [ttk::frame $w(di).btnBar]
 	pack $btnBar -side right -pady 5p -padx 5p
-	
-	# Create the buttons here, but we'll [grid] it at the bottom of this proc.
-	#${log}::debug newType: $newType
-	ttk::button $btnBar.ok		-text [mc "OK"] -command "[list eAssistHelper::insValuesToTableCells -window $tbl "" $origCells]; destroy .di" ;#"eAssistHelper::insValuesToTableCells [list $tbl] $txtVariable $origCells; destroy .di"
-	#ttk::button $btnBar.ok		-text [mc "OK"] -command {${log}::debug [uplevel 1]}
-	#ttk::button $btnBar.ok		-text [mc "OK"] -command [list puts "tbl: $tbl, newType: [$f2.$x$header get], origCells: $origCells"]
+
+	ttk::button $btnBar.ok		-text [mc "OK"] -command "[list eAssistHelper::insValuesToTableCells -window $tbl "" $origCells]; destroy .di"
 	ttk::button $btnBar.cancel	-text [mc "Cancel"] -command {destroy .di}
 
-	# Look above for the initiation of the btnBar
 	grid $btnBar.ok -column 0 -row 0 -sticky news -pady 5p -padx 5p
 	grid $btnBar.cancel -column 1 -row 0 -sticky news -pady 5p -pady 5p
 
 	# END GUI
 	
 	# Guard against multiple cells being selected ...
-	
 	# Var to use to get versions: $process(versionList)
 	
 	if {[llength $curCol] == 1} {
@@ -261,7 +254,7 @@ proc eAssistHelper::insertItems {tbl} {
 					packagetype			{
 						${log}::debug PackageType
 						ttk::label $f2.txt$i -text [mc "$header"]
-						$wid $f2.$x$header -values $packagingSetup(PackageType) -textvariable txtVariable
+						$wid $f2.$x$header -values $packagingSetup(Packages) -textvariable txtVariable
 						$f2.$x$header delete 0 end
 						$f2.$x$header configure -state readonly
 						
@@ -271,7 +264,7 @@ proc eAssistHelper::insertItems {tbl} {
 					containertype		{
 						${log}::debug ContainerType
 						ttk::label $f2.txt$i -text [mc "$header"]
-						$wid $f2.$x$header -values $packagingSetup(ContainerType) -textvariable txtVariable
+						$wid $f2.$x$header -values $packagingSetup(Containers) -textvariable txtVariable
 						$f2.$x$header delete 0 end
 						$f2.$x$header configure -state readonly
 						
@@ -315,16 +308,7 @@ proc eAssistHelper::insertItems {tbl} {
 		grid forget $btnBar.cancel
 		$btnBar.ok configure -command {destroy .di}
 	}
-	
 
-
-	#bind $f2.$x$header <<ComboboxSelected>> {
-	#	set newType txtVariable
-	#	eval $btnBar.ok configure -command "eAssistHelper::insValuesToTableCells [list $tbl] $txtVariable $origCells; destroy .di"
-	#}
-
-	
-	
     ${log}::debug --END-- [info level 1]
 } ;# eAssistHelper::insertItems
 
@@ -368,18 +352,19 @@ proc eAssistHelper::projSetup {} {
 
     toplevel $w(ps)
     wm transient $w(ps) .
-    wm title $w(ps) [mc "Project Setup"]
+    wm title $w(ps) [mc "Project Information"]
     
     set locX [expr {[winfo screenwidth . ] / 4 + [winfo x .]}]
     set locY [expr {[winfo screenheight . ] / 5 + [winfo y .]}]
     wm geometry $w(ps) +${locX}+${locY}
 
     set f1 [ttk::labelframe $w(ps).f1 -text [mc "Job Information"] -padding 10]
-    pack $f1 -fill both -expand yes ;#-padx 5p -pady 5p
-    focus $w(ps)
+    pack $f1 -fill both -expand yes -padx 5p -pady 5p
+    
     
     ttk::label $f1.txt1 -text [mc "CSR"]
     ttk::combobox $f1.cbox1 -values $CSR(Names) -textvariable job(CSRName)
+    focus $f1.txt1
     
     ttk::label $f1.txt1a -text [mc "Title"]
     ttk::entry $f1.entry1a -textvariable job(Title)
@@ -402,26 +387,28 @@ proc eAssistHelper::projSetup {} {
     grid $f1.txt3      -column 0 -row 3 -sticky nes -padx 3p -pady 3p
     grid $f1.entry3    -column 1 -row 3 -sticky news -padx 3p -pady 3p
 	
-    set f2 [ttk::labelframe $w(ps).f2 -text [mc "Piece Information"] -padding 10]
-    pack $f2 -fill both -expand yes
+    #set f2 [ttk::labelframe $w(ps).f2 -text [mc "Piece Information"] -padding 10]
+    #pack $f2 -fill both -expand yes
+    #
+    #ttk::label $f2.txt1 -text [mc "Weight"]
+    #ttk::entry $f2.entry1
+    #
+    #ttk::label $f2.txt2 -text [mc "Thickness"]
+    #ttk::entry $f2.entry2
+    #
+    #grid $f2.txt1 -column 0 -row 0 -sticky nes
+    #grid $f2.entry1 -column 1 -row 0 -sticky news
+    #grid $f2.txt2 -column 0 -row 1 -sticky nes
+    #grid $f2.entry2 -column 1 -row 1 -sticky news
     
-    ttk::label $f2.txt1 -text [mc "Weight"]
-    ttk::entry $f2.entry1
+    set btnBar [ttk::frame $w(ps).btnBar -padding 10]
+    pack $btnBar -anchor se ;#-padx 5p -pady 5p
     
-    ttk::label $f2.txt2 -text [mc "Thickness"]
-    ttk::entry $f2.entry2
-    
-    grid $f2.txt1 -column 0 -row 0 -sticky nes
-    grid $f2.entry1 -column 1 -row 0 -sticky news
-    grid $f2.txt2 -column 0 -row 1 -sticky nes
-    grid $f2.entry2 -column 1 -row 1 -sticky news
-    
-    set btnBar [ttk::frame $w(ps).btnBar]
-    pack $btnBar -anchor se
-    
-    ttk::button $btnBar.ok -text [mc "OK"]
+    ttk::button $btnBar.ok -text [mc "OK"] -command "destroy $w(ps)"
+    ttk::button $btnBar.import -text [mc "Import File"] -command "importFiles::fileImportGUI; destroy $w(ps)"
     
     grid $btnBar.ok -column 0 -row 0 -sticky news
+    grid $btnBar.import -column 1 -row 0 -sticky news
 	
 	
     
