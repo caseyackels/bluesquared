@@ -466,5 +466,75 @@ proc eAssist_db::getJoinedEvents {moduleName} {
 
 } ;# eAssist_db::getJoinedEvents
 
+proc eAssist_db::dbWhereQuery {args} {
+    #****f* dbWhereQuery/eAssist_db
+    # CREATION DATE
+    #   09/24/2014 (Wednesday Sep 24)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   dbCSR::dbWhereQuery -columnNames ?value(s)? -table <tableName> -where <where clause>
+    #   Example: dbCSR::dbWhereQuery -columnNames {FirstName LastName} -table CSRS -where Status=1
+    #   
+    #
+    # FUNCTION
+    #	Issues a query to specified table, with a WHERE clause
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+    
+    foreach {key value} $args {
+        switch -- $key {
+            -columnNames {set colNames $value; puts "ColumnNames: $colNames"}
+            -table {set tbl $value; if {[llength $value] != 1} {return -code 1 [mc "wrong # args: Should be -table value]}}
+            -where {set where $value; if {[llength $value] != 1} {return -code 1 [mc "wrong # args: Should be -where value]}}
+            default {return -code 1 [mc "Unknown $key $value"]}
+        }
+    }
+    
+    foreach val {colNames tbl where} {
+        puts "val1: $val"
+        puts "val2: [subst $$val]"
+        if {![info exists $val]} {
+            return -code 1 [mc "wrong # args: Should be -columnNames value ... valueN -table value -where value ... valueN\nCommand Issued: [info level 0] "]
+        }
+    }
+    
+    if {[info exists returnQuery]} {unset returnQuery}
+    if {[info exists myNewCommand]} {unset myNewCommand}
+            
+    if {[llength $colNames] == 1} {
+        set returnQuery [db eval "SELECT $colNames FROM $tbl WHERE $where"]
+    } else {
+        foreach val $colNames {
+            set pos [lsearch $colNames $val]; puts "Pos: $pos"
+            set myCommand {[subst $[lrange $colNames %b %b]]}
+            lappend myNewCommand [string map "%b $pos" $myCommand]
+        }
+            db eval "SELECT [join $colNames ,] FROM $tbl WHERE $where" {
+                lappend returnQuery "[join [subst $myNewCommand]]"
+            }
+    }
+    return $returnQuery
 
+} ;# eAssist_db::dbWhereQuery
 

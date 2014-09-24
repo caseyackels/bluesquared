@@ -141,9 +141,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	package require eAssist_tools
 	package require vUpdate
 	package require eAssist_email
-	
-	
-   
+
 
 	# Source files that are not in a package
 	source [file join [file dirname [info script]] Libraries popups.tcl]
@@ -153,6 +151,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	source [file join [file dirname [info script]] Libraries fileProperties.tcl]
 	source [file join [file dirname [info script]] Libraries saveSettings.tcl]
 	source [file join [file dirname [info script]] Libraries password_util.tcl]
+	source [file join [file dirname [info script]] Libraries AutoComplete.tcl]
     
 	loadSuffix ;# Initialize variables from StreetSuffixState.tcl
     

@@ -363,11 +363,11 @@ proc eAssistHelper::projSetup {} {
     
     
     ttk::label $f1.txt1 -text [mc "CSR"]
-    ttk::combobox $f1.cbox1 -values $CSR(Names) -textvariable job(CSRName)
+    ttk::combobox $f1.cbox1 -postcommand "dbCSR::getCSRID $f1.cbox1 {FirstName LastName}" -textvariable job(CSRName) -validate all -validatecommand {AutoComplete::AutoComplete %W %d %v %P [dbCSR::getCSRID "" {FirstName LastName}]}
     focus $f1.txt1
     
     ttk::label $f1.txt1a -text [mc "Title"]
-    ttk::entry $f1.entry1a -textvariable job(Title)
+    ttk::entry $f1.entry1a -textvariable job(Title) -validate all -validatecommand {AutoComplete::AutoComplete %W %d %v %P [list "Portland Monthly" "Seattle Met" Other]}
 		tooltip::tooltip $f1.entry1a [mc "Publication Title"]
     
     ttk::label $f1.txt2 -text [mc "Name"]

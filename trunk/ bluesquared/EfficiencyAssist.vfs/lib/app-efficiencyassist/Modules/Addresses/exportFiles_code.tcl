@@ -67,6 +67,7 @@ proc export::DataToExport {} {
 			default	{$log::notice Mapping for $value does not exist}
 		}
 	}
+
 	set fileName [join $fileName]
 	
 	${log}::debug Actual file name: $fileName
@@ -75,9 +76,7 @@ proc export::DataToExport {} {
     # don't open the file yet, because we may have canceled the Save As dialog...
     set myFile(data) [file join [eAssist_Global::SaveFile $fileName]]
     
-    #${log}::debug myFile(data) - $myFile(data)
-    #set myFile(data) {[open [eAssist_Global::SaveFile $fileName] w]} err]
-    #${log}::debug Writing to file [file join $mySettings(outFilePath) Test_file.csv]
+
     if {$myFile(data) == {}} {
         ${log}::notice Aborting... The Save As window was closed without a file name.
         #${log}::debug ERROR: $err
@@ -99,7 +98,6 @@ proc export::DataToExport {} {
         # RECORDS: Write output one row at a time.
         # Version is a hardcoded value, this should be moved to a user option.
         chan puts $myFile(data) [::csv::join "[$files(tab3f2).tbl get $x] Version"]
-        #chan puts $myFile(data) [::csv::join [join [$files(tab3f2).tbl get $x $x]]]
         ${log}::debug ROWS: [::csv::join "[$files(tab3f2).tbl get $x] Version"]
     }
     

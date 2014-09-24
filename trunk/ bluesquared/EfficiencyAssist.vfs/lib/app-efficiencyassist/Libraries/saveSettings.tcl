@@ -156,10 +156,10 @@ proc eAssistSetup::SaveGlobalSettings {} {
     #    chan puts $fd "packagingSetup($value) $packagingSetup($value)"
     #}
     
-    foreach value [array names CSR] {
-        #if {![info exists CSR($value)]} {continue}
-        chan puts $fd "CSR($value) $CSR($value)"
-    }
+    #foreach value [array names CSR] {
+    #    #if {![info exists CSR($value)]} {continue}
+    #    chan puts $fd "CSR($value) $CSR($value)"
+    #}
     
     chan close $fd
     
