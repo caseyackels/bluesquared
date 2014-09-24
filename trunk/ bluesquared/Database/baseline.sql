@@ -83,13 +83,13 @@ CREATE TABLE Headers (
     Header_ID        INTEGER PRIMARY KEY AUTOINCREMENT
                              NOT NULL,
     HeaderName       VARCHAR NOT NULL
-                             UNIQUE ON CONFLICT FAIL,
-    HeaderMaxLength  INTEGER,
-    OutputHeaderName VARCHAR,
-    Widget           VARCHAR,
+                             UNIQUE ON CONFLICT ABORT,
+    HeaderMaxLength  INTEGER NOT NULL ON CONFLICT ABORT,
+    OutputHeaderName VARCHAR NOT NULL ON CONFLICT ABORT,
+    Widget           VARCHAR NOT NULL ON CONFLICT ABORT,
     Highlight        VARCHAR,
-    AlwaysDisplay    VARCHAR,
-    Required         VARCHAR,
+    AlwaysDisplay    BOOLEAN DEFAULT ( 1 ),
+    Required         BOOLEAN DEFAULT ( 1 ),
     DefaultWidth     INTEGER 
 );
 
@@ -177,42 +177,64 @@ CREATE TABLE Schema (
 );
 
 
--- Table: CSRs
-CREATE TABLE CSRs ( 
-    CSR_ID    INTEGER PRIMARY KEY AUTOINCREMENT
-                      NOT NULL,
-    FirstName VARCHAR NOT NULL,
-    LastName  VARCHAR,
-    Email     VARCHAR 
+-- Table: EmailSetup
+CREATE TABLE EmailSetup ( 
+    Email_ID                INTEGER PRIMARY KEY AUTOINCREMENT
+                                    NOT NULL,
+    EmailServer             VARCHAR NOT NULL,
+    EmailPassword           VARCHAR,
+    EmailPort               INTEGER,
+    EmailLogin              VARCHAR,
+    GlobalEmailNotification BOOLEAN NOT NULL
+                                    DEFAULT ( 1 ),
+    TLS                     BOOLEAN DEFAULT ( 0 ) 
 );
 
 
--- Table: EmailSetup
-CREATE TABLE EmailSetup ( 
-    Email_ID           INTEGER PRIMARY KEY AUTOINCREMENT
-                               NOT NULL,
-    EmailServer        VARCHAR NOT NULL,
-    EmailPassword      VARCHAR,
-    EmailPort          INTEGER,
-    EmailLogin         VARCHAR,
-    EmailNotifications BOOLEAN NOT NULL 
+-- Table: Modules
+CREATE TABLE Modules ( 
+    Mod_ID                INTEGER PRIMARY KEY AUTOINCREMENT,
+    ModuleName            VARCHAR NOT NULL ON CONFLICT ABORT
+                                  UNIQUE ON CONFLICT ABORT,
+    EnableModNotification BOOLEAN DEFAULT ( 1 ) 
+);
+
+
+-- Table: EventNotifications
+CREATE TABLE EventNotifications ( 
+    Event_ID                INTEGER PRIMARY KEY AUTOINCREMENT,
+    ModID                   NONE    NOT NULL ON CONFLICT ABORT
+                                    REFERENCES Modules ( Mod_ID ),
+    EventName               VARCHAR NOT NULL ON CONFLICT ABORT,
+    EventSubstitutions      VARCHAR,
+    EnableEventNotification BOOLEAN DEFAULT ( 1 ) 
 );
 
 
 -- Table: EmailNotifications
 CREATE TABLE EmailNotifications ( 
-    EN_ID              INTEGER PRIMARY KEY AUTOINCREMENT
-                               NOT NULL,
-    Modules            VARCHAR NOT NULL
-                               UNIQUE,
-    ModNotifications   VARCHAR,
-    Events             VARCHAR NOT NULL,
-    EventNotifications VARCHAR,
-    EmailFrom          VARCHAR NOT NULL ON CONFLICT ABORT,
-    EmailTo            VARCHAR NOT NULL ON CONFLICT ABORT,
-    EmailSubject       VARCHAR NOT NULL ON CONFLICT ABORT,
-    EmailBody          VARCHAR NOT NULL ON CONFLICT ABORT,
-    EmailID                    REFERENCES EmailSetup ( Email_ID ) 
+    EN_ID             INTEGER PRIMARY KEY AUTOINCREMENT
+                              NOT NULL,
+    ModuleName        VARCHAR NOT NULL,
+    EventName         VARCHAR NOT NULL
+                              UNIQUE ON CONFLICT ABORT,
+    EventNotification BOOLEAN NOT NULL,
+    EmailFrom         VARCHAR NOT NULL ON CONFLICT ABORT,
+    EmailTo           VARCHAR NOT NULL ON CONFLICT ABORT,
+    EmailSubject      VARCHAR NOT NULL ON CONFLICT ABORT,
+    EmailBody         VARCHAR NOT NULL ON CONFLICT ABORT 
+);
+
+
+-- Table: CSRs
+CREATE TABLE CSRs ( 
+    CSR_ID    VARCHAR( 6 )  PRIMARY KEY ON CONFLICT ABORT
+                            NOT NULL
+                            UNIQUE ON CONFLICT ABORT,
+    FirstName VARCHAR       NOT NULL,
+    LastName  VARCHAR,
+    Email     VARCHAR,
+    Status    BOOLEAN       DEFAULT ( 1 ) 
 );
 
 
