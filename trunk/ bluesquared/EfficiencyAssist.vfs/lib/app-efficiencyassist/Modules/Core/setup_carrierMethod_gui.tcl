@@ -253,8 +253,9 @@ proc eAssistSetup::carrierMethod_GUI {} {
     
     
     # Populate the listbox if we have existing data
-    if {[info exists carrierSetup(CarrierList)] == 1} {
-        foreach item $carrierSetup(CarrierList) {
+    set carrierDB [eAssist_db::dbSelectQuery -columnNames Name -table Carriers]
+    if {$carrierDB ne ""} {
+        foreach item [eAssist_db::dbSelectQuery -columnNames Name -table Carriers] {
             $f3.lbox insert end $item
         }
     }

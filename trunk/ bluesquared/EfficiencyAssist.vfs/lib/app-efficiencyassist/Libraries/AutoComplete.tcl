@@ -63,16 +63,43 @@ proc AutoComplete::AutoComplete {win action validation value valuelist} {
     
 } ;# AutoComplete::AutoComplete
 
-#set fruitlist {apple banana cherry grape grapefruit lemon loganberry mango orange \
-#                 {passion fruit} pear plum pomegranate prune raspberry}
-# 
-#ttk::entry .test -validate all -validatecommand {autocomplete %W %d %v %P $fruitlist}
-#label .top -text "Self Defense Against Fresh Fruit"
-#label .ret -wraplength 300
-#button .done -text Go -command {.ret configure -text "It's quite simple to defend yourself against \
-#                         a man armed with a [.test get].  First of all you force him to drop the [.test get].  \
-#                         Second, you eat the [.test get], thus disarming him.  You have now rendered him harmless."}
-#grid .top -pady 5 -columnspan 2
-#grid .ret -columnspan 2
-#grid .test .done
-
+###
+### -- This is useful if we want to search on ShipViaCode, and return the name of the carrier.
+###
+#proc AutoComplete::AutoCompleteShipVia {win action validation value} {
+#if {[string is digit $value]} {
+#    puts "digits..."
+#    # Look at the ShipViaCode table, and return the carrier name
+#    # Valuelist = db query for shipviacodes; value = what we're typing
+#    set valuelist [db eval {SELECT ShipViaCode FROM ShipVia}]
+#    #puts "valuelist: $valuelist"
+#    set pop [lsearch -nocase -inline $valuelist $value*]
+#    #puts "pop: $pop"
+#        if {$pop ne ""} {
+#            set dbQuery [db eval {SELECT Name FROM ShipVia 
+#                        INNER JOIN Carriers
+#                            ON Carriers.Carrier_ID = ShipVia.CarrierID
+#                        WHERE ShipViaCode = $pop}]
+#        }
+#        #puts "dbQuery: $dbQuery"
+#    } else {
+#    # The user is typing letters ...
+#    # valuelist = dbquery for carrier names
+#    puts "letters..."
+#    set valuelist [db eval {SELECT Name FROM Carriers}]
+#        #puts "valuelist: valuelist"
+#        set dbQuery [lsearch -nocase -inline $valuelist $value*]
+#        #puts "dbQuery: $dbQuery"
+#    }
+#    
+#    if {$action == 1 & $value != {} & $dbQuery != {}} {
+#         $win delete 0 end;  $win insert end [join $dbQuery]
+#         $win selection range [string length $value] end
+#         $win icursor [string length $value]
+#    } else {
+#        $win selection clear
+#   }
+#   
+#   after idle [list $win configure -validate $validation]
+#   return 1
+#}

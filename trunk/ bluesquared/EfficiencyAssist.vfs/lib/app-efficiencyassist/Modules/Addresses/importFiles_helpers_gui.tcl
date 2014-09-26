@@ -372,7 +372,7 @@ proc eAssistHelper::projSetup {} {
     
     ttk::label $f1.txt2 -text [mc "Name"]
     ttk::entry $f1.entry2 -textvariable job(Name)
-		tooltip::tooltip $f1.entry2 [mc "Job Name"]
+		tooltip::tooltip $f1.entry2 [mc "Job Name"] 
     
     ttk::label $f1.txt3 -text [mc "Number"]
     ttk::entry $f1.entry3 -textvariable job(Number)

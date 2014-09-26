@@ -132,10 +132,7 @@ proc eAssistSetup::delCarrierSetup {varType listBox} {
     global log carrierSetup
     ${log}::debug --START-- [info level 1]
     
-    if {[$listBox curselection] == ""} {return}
-    
-    # Delete the entry, then set the var to all values remaining values.
-    $listBox delete [$listBox curselection]
+    if {[$listBox curselection] == ""} {return}   
     
     switch -- $varType {
             PAYMENT     {
@@ -145,7 +142,9 @@ proc eAssistSetup::delCarrierSetup {varType listBox} {
                         set newVarType ShipmentType
             }
             CARRIERS    {
-                        set newVarType CarrierList
+                        #set newVarType CarrierList
+                        set tbl Carriers
+                        set col Name
             }
             RATES       {
                         set newVarType RateType
@@ -160,7 +159,12 @@ proc eAssistSetup::delCarrierSetup {varType listBox} {
             }
     }
     
-    set carrierSetup($newVarType) [$listBox get 0 end]
+    # Remove the entry from the DB
+    eAssist_db::delete $tbl $col [$listBox curselection]
+    
+    # ... then remove it from the list box
+    $listBox delete [$listBox curselection]
+    #set carrierSetup($newVarType) [$listBox get 0 end]
     
 	
     ${log}::debug --END-- [info level 1]

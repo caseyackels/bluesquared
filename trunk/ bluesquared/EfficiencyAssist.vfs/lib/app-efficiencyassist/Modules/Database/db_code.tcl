@@ -109,6 +109,78 @@ proc eAssist_db::initContainers {} {
 } ;# eAssist_db::initContainers
 
 
+
+proc eAssist_db::dbInsert {args} {
+    #****f* dbInsert/eAssist_db
+    # CREATION DATE
+    #   09/26/2014 (Friday Sep 26)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssist_db::dbInsert -columnNames ?value1 ... valueN? -table value -data value
+    #
+    # FUNCTION
+    #	Inserts or Updates data in specified columns and table
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+proc eAssist_db::dbInsert {args} {
+    if {$args == ""} {return -code 1 [mc "wrong # args: Must be -columnNames ?value1 .. valueN? -table value -data value\nNOTE: Each data value must be enclosed with single quotes"]}
+    
+    foreach {key value} $args {
+        switch -- $key {
+            -columnNames {set colNames $value}
+            -table {set tbl $value; if {[llength $value] != 1} {return -code 1 [mc "wrong # args: Should be -table value"]}}
+            -data {set data $value}
+            default {return -code 1 [mc "Unknown $key $value"]}
+        }
+    }
+    
+    foreach val {colNames tbl data} {
+        if {![info exists $val]} {
+            return -code 1 [mc "wrong # args: Should be -columnNames value ... valueN -table value -where value ... valueN\nNOTE: Each data value must be enclosed with single quotes\nCommand Issued: [info level 0] "]
+        }
+    }
+    
+    # See if this is a new entry or if we should update an entry ...
+    set dbCheck [eAssist_db::dbWhereQuery -columnNames [lrange $colNames 0 0] -table $tbl -where [lrange $colNames 0 0]=[lrange $data 0 0]]
+    
+    if {[llength $colNames] == 1} {
+        # Only inserting into one column
+        db eval "INSERT or ABORT INTO $tbl $colNames VALUES ($data)"
+    } else {
+        set colNames [join $colNames ,]
+        set data [join $data ,]
+        db eval "INSERT or ABORT INTO $tbl ($colNames) VALUES ($data)"
+    }
+    
+    #db eval {INSERT or ABORT INTO EventNotifications (ModID, EventName, EventSubstitutions EnableEventNotification)
+    #    VALUES ($modID, $tmpEmailEvent, $tmpSubstitution, $emailSetup(Event,Notification))
+    #}
+
+    
+} ;# eAssist_db::dbInsert
+
+
 proc eAssist_db::delete {table col args} {
     #****f* delete/eAssist_db
     # AUTHOR
@@ -137,11 +209,8 @@ proc eAssist_db::delete {table col args} {
     global log
     ${log}::debug --START-- [info level 1]
     
-    #set args [join $args]
-    #db eval {DELETE from Containers WHERE Container='test pallet'}
-    # Need to use quotes so we the variables have proper substitution
     db eval "DELETE from $table WHERE $col='$args'"
-    ${log}::debug Deleting: DELETE from $table WHERE $col='$args'
+
     ${log}::debug --END-- [info level 1]
 } ;# eAssist_db::delete
 
@@ -466,6 +535,78 @@ proc eAssist_db::getJoinedEvents {moduleName} {
 
 } ;# eAssist_db::getJoinedEvents
 
+
+proc eAssist_db::dbSelectQuery {args} {
+    #****f* dbSelectQuery/eAssist_db
+    # CREATION DATE
+    #   09/26/2014 (Friday Sep 26)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssist_db::dbSelectQuery args 
+    #
+    # FUNCTION
+    #	Just a simple SELECT statement that accepts
+    #   -columnNames ?value ... valueN? -table value
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    foreach {key value} $args {
+        switch -- $key {
+            -columnNames {set colNames $value}
+            -table {set tbl $value; if {[llength $value] != 1} {return -code 1 [mc "wrong # args: Should be -table value]}}
+            default {return -code 1 [mc "Unknown $key $value"]}
+        }
+    } 
+
+    foreach val {colNames tbl} {
+        if {![info exists $val]} {
+            return -code 1 [mc "wrong # args: Should be -columnNames value ... valueN -table value\nCommand Issued: [info level 0] "]
+        }
+    }
+    
+    
+    if {[info exists returnQuery]} {unset returnQuery}
+    if {[info exists myNewCommand]} {unset myNewCommand}
+        
+        
+    if {[llength $colNames] == 1} {
+        set returnQuery [db eval "SELECT $colNames FROM $tbl"]
+    } else {
+        foreach val $colNames {
+            set pos [lsearch $colNames $val]; puts "Pos: $pos"
+            set myCommand {[subst $[lrange $colNames %b %b]]}
+            lappend myNewCommand [string map "%b $pos" $myCommand]
+        }
+            db eval "SELECT [join $colNames ,] FROM $tbl" {
+                lappend returnQuery "[join [subst $myNewCommand]]"
+            }
+    }
+    return $returnQuery
+    
+} ;# eAssist_db::dbSelectQuery
+
+
 proc eAssist_db::dbWhereQuery {args} {
     #****f* dbWhereQuery/eAssist_db
     # CREATION DATE
@@ -506,22 +647,22 @@ proc eAssist_db::dbWhereQuery {args} {
         switch -- $key {
             -columnNames {set colNames $value; puts "ColumnNames: $colNames"}
             -table {set tbl $value; if {[llength $value] != 1} {return -code 1 [mc "wrong # args: Should be -table value]}}
-            -where {set where $value; if {[llength $value] != 1} {return -code 1 [mc "wrong # args: Should be -where value]}}
+            -where {set where $value; if {[llength $value] != 1} {return -code 1 [mc "wrong # args: Should be -table value]}}
             default {return -code 1 [mc "Unknown $key $value"]}
         }
     }
     
     foreach val {colNames tbl where} {
-        puts "val1: $val"
-        puts "val2: [subst $$val]"
         if {![info exists $val]} {
             return -code 1 [mc "wrong # args: Should be -columnNames value ... valueN -table value -where value ... valueN\nCommand Issued: [info level 0] "]
         }
     }
     
+    
     if {[info exists returnQuery]} {unset returnQuery}
     if {[info exists myNewCommand]} {unset myNewCommand}
-            
+        
+        
     if {[llength $colNames] == 1} {
         set returnQuery [db eval "SELECT $colNames FROM $tbl WHERE $where"]
     } else {
