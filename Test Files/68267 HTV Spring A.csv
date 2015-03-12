@@ -1,0 +1,234 @@
+OrderNumber,ShipToCompany,ShipToAttention,ShipToAddressLine1,ShipToAddressLine2,ShipToAddressLine3,ShipToCity,ShipToState,ShipToPostalCode,ShipToCountry,ShipToPhone,Version,ShipQuantity,UserNotes,ShipToDate,DistributionType,CarrierMethod,3rdPartyBilling,ArriveDate,ContainerType,PackageType,PackageQty,ShippingClass,OrderType
+1,JG Mail,,2840 Nw 35th Ave,,,Portland,OR,97210,,,Laurel MT,4999,,,06. JG Mail,,,,"Pallets, Mail","Bundles, Loose",,Final Product,Version
+2,Hometown Values,Jim Lee,7919 77th St Ne,,,Marysville,WA,98270,,206261-0752,Laurel MT,2,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+3,Hometown Values,Karen Black UPS,7047 King Ave West,,,Billings,MT,59106,,406 591-5000,Laurel MT,500,,,05. Small Package,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+4,UPS Great Falls,Kim Holzer,Po Box 207,,,Great Falls,MT,59404,,406-799-7710,Laurel MT,5,,,05. Small Package,USPS Priority,,,,,,Final Product,Version
+5,JG Mail,,2840 Nw 35th Ave,,,Portland,OR,97210,,,Bonney Lake,15015,,,06. JG Mail,,,,"Pallets, Mail","Bundles, Loose",,Final Product,Version
+6,Hometown Values,Jim Lee,7919 77th St Ne,,,Marysville,WA,98270,,206261-0752,Bonney Lake,5,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+7,Hometown Values,Jerry J c/o Rick Baker,1008 David St Se,,,Olympia,WA,98503,,360-355-7074,Bonney Lake,10,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+8,Hometown Values,Nichole Frandanisa,2009 Sumner Tapps Hwy E,,,Lake Tapps,WA,98391,,253 579-2508,Bonney Lake,10,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+9,Hometown Values,Doug Vieselmeyer,14405 115th Ave Ct East,,,Puyallup,WA,98374,,,Bonney Lake,500,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+10,Hometown Values,Pete Colella,18558 60th Ave Ne,,,Kenmore,WA,98028,,425-481-9108,Bonney Lake,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+11,JG Mail,,2840 Nw 35th Ave,,,Portland,OR,97210,,,South Hill Graham Orting,15003,,,06. JG Mail,,,,"Pallets, Mail","Bundles, Loose",,Final Product,Version
+12,Hometown Values,Jim Lee,7919 77th St Ne,,,Marysville,WA,98270,,206261-0752,South Hill Graham Orting,5,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+13,Hometown Values,Jerry J c/o Rick Baker,1008 David St Se,,,Olympia,WA,98503,,360-355-7074,South Hill Graham Orting,10,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+14,Hometown Values,Nichole Frandanisa,2009 Sumner Tapps Hwy E,,,Lake Tapps,WA,98391,,253 579-2508,South Hill Graham Orting,1000,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+15,Hometown Values,Doug Vieselmeyer,14405 115th Ave Ct East,,,Puyallup,WA,98374,,,South Hill Graham Orting,10,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+16,JG Mail,,2840 Nw 35th Ave,,,Portland,OR,97210,,,W Kenn S Richland,15001,,,06. JG Mail,,,,"Pallets, Mail","Bundles, Loose",,Final Product,Version
+17,Hometown Values,Mark & Renae James,6810 54th Pl Ne,,,Marysville,WA,98270,,425971-0030,W Kenn S Richland,1,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+18,Hometown Values,Jim Lee,7919 77th St Ne,,,Marysville,WA,98270,,206261-0752,W Kenn S Richland,10,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+19,Hometown Values,Debbie Robinson,12433 68th Ave Se,,,Snohomish,WA,98296,,425 949-9030,W Kenn S Richland,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+20,Hometown Values,Jerry J c/o Rick Baker,1008 David St Se,,,Olympia,WA,98503,,360-355-7074,W Kenn S Richland,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+21,Hometown Values,Scott Mihelich,6205 Lincoln Dr,,,Ferndale,WA,98248,,360-303-2958,W Kenn S Richland,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+22,Hometown Values,Amy Mencer UPS,14324 W Cominsky Dr,,,Boise,ID,83713,,208-321-5558,W Kenn S Richland,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+23,Hometown Values,Nichole Frandanisa,2009 Sumner Tapps Hwy E,,,Lake Tapps,WA,98391,,253 579-2508,W Kenn S Richland,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+24,Hometown Values,Karen Sands,1829 Pine Grove Dr,,,Asheboro,NC,27205,,336-669-4559,W Kenn S Richland,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+25,Hometown Values,Karen Black UPS,7047 King Ave West,,,Billings,MT,59106,,406 591-5000,W Kenn S Richland,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+26,UPS Great Falls,Kim Holzer,Po Box 207,,,Great Falls,MT,59404,,406-799-7710,W Kenn S Richland,1,,,05. Small Package,USPS Priority,,,,,,Final Product,Version
+27,Hometown Values,Greg Lee,8524 West Gage Blvd Ste A-114,,,Kennewick,WA,99336,,509 948-1770,W Kenn S Richland,1000,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+28,Hometown Values,Sheri Herrick,908 E Main St,,,Weiser,ID,83672,,208 550-7203,W Kenn S Richland,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+29,Hometown Values,Ed and Christina Snow,11015 127th Ave Ne,,,Lake Stevens,WA,98258,,425 238-6177,W Kenn S Richland,1,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+30,Hometown Values,Doug Vieselmeyer,14405 115th Ave Ct East,,,Puyallup,WA,98374,,,W Kenn S Richland,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+31,Hometown Values,Susan Trenary,1777 S Burlington Blvd #197,,,Burlington,WA,98233,,360 708-5533,W Kenn S Richland,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+32,Hometown Values,Greg and Janet Rice,3803 Obriant Pl,,,Greensboro,NC,27410,,336-340-5583,W Kenn S Richland,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+33,JG Mail,,2840 Nw 35th Ave,,,Portland,OR,97210,,,Lakewood,15000,,,06. JG Mail,,,,"Pallets, Mail","Bundles, Loose",,Final Product,Version
+34,Hometown Values,Mark & Renae James,6810 54th Pl Ne,,,Marysville,WA,98270,,425971-0030,Lakewood,2,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+35,Hometown Values,Jim Lee,7919 77th St Ne,,,Marysville,WA,98270,,206261-0752,Lakewood,10,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+36,Hometown Values,Debbie Robinson,12433 68th Ave Se,,,Snohomish,WA,98296,,425 949-9030,Lakewood,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+37,Hometown Values,Jerry J c/o Rick Baker,1008 David St Se,,,Olympia,WA,98503,,360-355-7074,Lakewood,1000,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+38,Hometown Values,Scott Mihelich,6205 Lincoln Dr,,,Ferndale,WA,98248,,360-303-2958,Lakewood,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+39,Hometown Values,Amy Mencer UPS,14324 W Cominsky Dr,,,Boise,ID,83713,,208-321-5558,Lakewood,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+40,Hometown Values,Nichole Frandanisa,2009 Sumner Tapps Hwy E,,,Lake Tapps,WA,98391,,253 579-2508,Lakewood,10,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+41,Hometown Values,Karen Sands,1829 Pine Grove Dr,,,Asheboro,NC,27205,,336-669-4559,Lakewood,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+42,Hometown Values,Karen Black IMP,7047 King Ave West,,,Billings,MT,59106,,406 591-5000,Lakewood,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+43,UPS Great Falls,Kim Holzer,Po Box 207,,,Great Falls,MT,59404,,406-799-7710,Lakewood,1,,,05. Small Package,USPS Priority,,,,,,Final Product,Version
+44,Hometown Values,Greg Lee,8524 West Gage Blvd Ste A-114,,,Kennewick,WA,99336,,509 948-1770,Lakewood,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+45,Hometown Values,Sheri Herrick,908 E Main St,,,Weiser,ID,83672,,208 550-7203,Lakewood,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+46,Hometown Values,Ed and Christina Snow,11015 127th Ave Ne,,,Lake Stevens,WA,98258,,425 238-6177,Lakewood,1,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+47,Hometown Values,Doug Vieselmeyer,14405 115th Ave Ct East,,,Puyallup,WA,98374,,,Lakewood,5,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+48,Hometown Values,Susan Trenary,1777 S Burlington Blvd #197,,,Burlington,WA,98233,,360 708-5533,Lakewood,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+49,Hometown Values,Greg and Janet Rice,3803 Obriant Pl,,,Greensboro,NC,27410,,336-340-5583,Lakewood,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+50,JG Mail,,2840 Nw 35th Ave,,,Portland,OR,97210,,,Great Falls MT,35134,,,06. JG Mail,,,,"Pallets, Mail","Bundles, Loose",,Final Product,Version
+51,Hometown Values,Mark & Renae James,6810 54th Pl Ne,,,Marysville,WA,98270,,425971-0030,Great Falls MT,2,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+52,Hometown Values,Jim Lee,7919 77th St Ne,,,Marysville,WA,98270,,206261-0752,Great Falls MT,10,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+53,Hometown Values,Debbie Robinson,12433 68th Ave Se,,,Snohomish,WA,98296,,425 949-9030,Great Falls MT,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+54,Hometown Values,Jerry J c/o Rick Baker,1008 David St Se,,,Olympia,WA,98503,,360-355-7074,Great Falls MT,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+55,Hometown Values,Scott Mihelich,6205 Lincoln Dr,,,Ferndale,WA,98248,,360-303-2958,Great Falls MT,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+56,Hometown Values,Amy Mencer UPS,14324 W Cominsky Dr,,,Boise,ID,83713,,208-321-5558,Great Falls MT,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+57,Hometown Values,Nichole Frandanisa,2009 Sumner Tapps Hwy E,,,Lake Tapps,WA,98391,,253 579-2508,Great Falls MT,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+58,Hometown Values,Karen Sands,1829 Pine Grove Dr,,,Asheboro,NC,27205,,336-669-4559,Great Falls MT,5,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+59,Hometown Values,Karen Black UPS,7047 King Ave West,,,Billings,MT,59106,,406 591-5000,Great Falls MT,10,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+60,Hometown Values,Kim Holzer,5100 Tri Hill Frontage Rd,,,Great Falls,MT,59403,,,Great Falls MT,1000,,,05. Small Package,UPS Ground,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+61,Hometown Values,Greg Lee,8524 West Gage Blvd Ste A-114,,,Kennewick,WA,99336,,509 948-1770,Great Falls MT,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+62,Hometown Values,Sheri Herrick,908 E Main St,,,Weiser,ID,83672,,208 550-7203,Great Falls MT,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+63,Hometown Values,Ed and Christina Snow,11015 127th Ave Ne,,,Lake Stevens,WA,98258,,425 238-6177,Great Falls MT,1,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+64,Hometown Values,Doug Vieselmeyer,14405 115th Ave Ct East,,,Puyallup,WA,98374,,,Great Falls MT,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+65,Hometown Values,Susan Trenary,1777 S Burlington Blvd #197,,,Burlington,WA,98233,,360 708-5533,Great Falls MT,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+66,Hometown Values,Greg and Janet Rice,3803 Obriant Pl,,,Greensboro,NC,27410,,336-340-5583,Great Falls MT,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+67,JG Mail,,2840 Nw 35th Ave,,,Portland,OR,97210,,,Mill Creek Silver Lane,15000,,,06. JG Mail,,,,"Pallets, Mail","Bundles, Loose",,Final Product,Version
+68,Hometown Values,Mark & Renae James,6810 54th Pl Ne,,,Marysville,WA,98270,,425971-0030,Mill Creek Silver Lane,10,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+69,Hometown Values,Jim Lee,7919 77th St Ne,,,Marysville,WA,98270,,206261-0752,Mill Creek Silver Lane,20,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+70,Hometown Values,Debbie Robinson,12433 68th Ave Se,,,Snohomish,WA,98296,,425 949-9030,Mill Creek Silver Lane,1000,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+71,Hometown Values,Jerry J c/o Rick Baker,1008 David St Se,,,Olympia,WA,98503,,360-355-7074,Mill Creek Silver Lane,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+72,Hometown Values,Scott Mihelich,6205 Lincoln Dr,,,Ferndale,WA,98248,,360-303-2958,Mill Creek Silver Lane,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+73,Hometown Values,Amy Mencer UPS,14324 W Cominsky Dr,,,Boise,ID,83713,,208-321-5558,Mill Creek Silver Lane,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+74,Hometown Values,Amy Mencer IMP,14324 W Cominsky Dr,,,Boise,ID,83713,,208-321-5558,Mill Creek Silver Lane,0,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+75,Hometown Values,Pam Pare,4122 Hillcrest Ave Sw,,,Seattle,WA,98116,,206-953-1194,Mill Creek Silver Lane,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+76,Hometown Values,Nichole Frandanisa,2009 Sumner Tapps Hwy E,,,Lake Tapps,WA,98391,,253 579-2508,Mill Creek Silver Lane,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+77,Hometown Values,Karen Sands,1829 Pine Grove Dr,,,Asheboro,NC,27205,,336-669-4559,Mill Creek Silver Lane,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+78,Hometown Values,Karen Black UPS,7047 King Ave West,,,Billings,MT,59106,,406 591-5000,Mill Creek Silver Lane,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+79,UPS Great Falls,Kim Holzer,Po Box 207,,,Great Falls,MT,59404,,406-799-7710,Mill Creek Silver Lane,1,,,05. Small Package,USPS Priority,,,,,,Final Product,Version
+80,Hometown Values,Greg Lee,8524 West Gage Blvd Ste A-114,,,Kennewick,WA,99336,,509 948-1770,Mill Creek Silver Lane,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+81,Hometown Values,Sheri Herrick,908 E Main St,,,Weiser,ID,83672,,208 550-7203,Mill Creek Silver Lane,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+82,Hometown Values,Ed and Christina Snow,11015 127th Ave Ne,,,Lake Stevens,WA,98258,,425 238-6177,Mill Creek Silver Lane,20,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+83,Hometown Values,Doug Vieselmeyer,14405 115th Ave Ct East,,,Puyallup,WA,98374,,,Mill Creek Silver Lane,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+84,Hometown Values,Susan Trenary,1777 S Burlington Blvd #197,,,Burlington,WA,98233,,360 708-5533,Mill Creek Silver Lane,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+85,Hometown Values,Greg and Janet Rice,3803 Obriant Pl,,,Greensboro,NC,27410,,336-340-5583,Mill Creek Silver Lane,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+86,Hometown Values,Pete Colella,18558 60th Ave Ne,,,Kenmore,WA,98028,,425-481-9108,Mill Creek Silver Lane,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+87,JG Mail,,2840 Nw 35th Ave,,,Portland,OR,97210,,,Bellingham,30010,,,06. JG Mail,,,,"Pallets, Mail","Bundles, Loose",,Final Product,Version
+88,Hometown Values,Mark & Renae James,6810 54th Pl Ne,,,Marysville,WA,98270,,425971-0030,Bellingham,10,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+89,Hometown Values,Jim Lee,7919 77th St Ne,,,Marysville,WA,98270,,206261-0752,Bellingham,10,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+90,Hometown Values,Debbie Robinson,12433 68th Ave Se,,,Snohomish,WA,98296,,425 949-9030,Bellingham,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+91,Hometown Values,Jerry J c/o Rick Baker,1008 David St Se,,,Olympia,WA,98503,,360-355-7074,Bellingham,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+92,Hometown Values,Scott Mihelich,6205 Lincoln Dr,,,Ferndale,WA,98248,,360-303-2958,Bellingham,1000,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+93,Hometown Values,Amy Mencer UPS,14324 W Cominsky Dr,,,Boise,ID,83713,,208-321-5558,Bellingham,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+94,Hometown Values,Pam Pare,4122 Hillcrest Ave Sw,,,Seattle,WA,98116,,206-953-1194,Bellingham,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+95,Hometown Values,Nichole Frandanisa,2009 Sumner Tapps Hwy E,,,Lake Tapps,WA,98391,,253 579-2508,Bellingham,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+96,Hometown Values,Karen Sands,1829 Pine Grove Dr,,,Asheboro,NC,27205,,336-669-4559,Bellingham,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+97,Hometown Values,Karen Black UPS,7047 King Ave West,,,Billings,MT,59106,,406 591-5000,Bellingham,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+98,UPS Great Falls,Kim Holzer,Po Box 207,,,Great Falls,MT,59404,,406-799-7710,Bellingham,1,,,05. Small Package,USPS Priority,,,,,,Final Product,Version
+99,Hometown Values,Greg Lee,8524 West Gage Blvd Ste A-114,,,Kennewick,WA,99336,,509 948-1770,Bellingham,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+100,Hometown Values,Sheri Herrick,908 E Main St,,,Weiser,ID,83672,,208 550-7203,Bellingham,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+101,Hometown Values,Ed and Christina Snow,11015 127th Ave Ne,,,Lake Stevens,WA,98258,,425 238-6177,Bellingham,1,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+102,Hometown Values,Doug Vieselmeyer,14405 115th Ave Ct East,,,Puyallup,WA,98374,,,Bellingham,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+103,Hometown Values,Susan Trenary,1777 S Burlington Blvd #197,,,Burlington,WA,98233,,360 708-5533,Bellingham,15,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+104,Hometown Values,Greg and Janet Rice,3803 Obriant Pl,,,Greensboro,NC,27410,,336-340-5583,Bellingham,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+105,JG Mail,,2840 Nw 35th Ave,,,Portland,OR,97210,,,Billings Westend MT,22065,,,06. JG Mail,,,,"Pallets, Mail","Bundles, Loose",,Final Product,Version
+106,Hometown Values,Mark & Renae James,6810 54th Pl Ne,,,Marysville,WA,98270,,425971-0030,Billings Westend MT,2,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+107,Hometown Values,Jim Lee,7919 77th St Ne,,,Marysville,WA,98270,,206261-0752,Billings Westend MT,10,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+108,Hometown Values,Debbie Robinson,12433 68th Ave Se,,,Snohomish,WA,98296,,425 949-9030,Billings Westend MT,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+109,Hometown Values,Jerry J c/o Rick Baker,1008 David St Se,,,Olympia,WA,98503,,360-355-7074,Billings Westend MT,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+110,Hometown Values,Scott Mihelich,6205 Lincoln Dr,,,Ferndale,WA,98248,,360-303-2958,Billings Westend MT,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+111,Hometown Values,Amy Mencer UPS,14324 W Cominsky Dr,,,Boise,ID,83713,,208-321-5558,Billings Westend MT,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+112,Hometown Values,Nichole Frandanisa,2009 Sumner Tapps Hwy E,,,Lake Tapps,WA,98391,,253 579-2508,Billings Westend MT,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+113,Hometown Values,Karen Sands,1829 Pine Grove Dr,,,Asheboro,NC,27205,,336-669-4559,Billings Westend MT,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+114,Hometown Values,Karen Black UPS,7047 King Ave West,,,Billings,MT,59106,,406 591-5000,Billings Westend MT,1000,,,05. Small Package,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+115,UPS Great Falls,Kim Holzer,Po Box 207,,,Great Falls,MT,59404,,406-799-7710,Billings Westend MT,10,,,05. Small Package,USPS Priority,,,,,,Final Product,Version
+116,Hometown Values,Greg Lee,8524 West Gage Blvd Ste A-114,,,Kennewick,WA,99336,,509 948-1770,Billings Westend MT,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+117,Hometown Values,Sheri Herrick,908 E Main St,,,Weiser,ID,83672,,208 550-7203,Billings Westend MT,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+118,Hometown Values,Ed and Christina Snow,11015 127th Ave Ne,,,Lake Stevens,WA,98258,,425 238-6177,Billings Westend MT,1,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+119,Hometown Values,Doug Vieselmeyer,14405 115th Ave Ct East,,,Puyallup,WA,98374,,,Billings Westend MT,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+120,Hometown Values,Susan Trenary,1777 S Burlington Blvd #197,,,Burlington,WA,98233,,360 708-5533,Billings Westend MT,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+121,Hometown Values,Greg and Janet Rice,3803 Obriant Pl,,,Greensboro,NC,27410,,336-340-5583,Billings Westend MT,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+122,JG Mail,,2840 Nw 35th Ave,,,Portland,OR,97210,,,Lake Stevens,16000,,,06. JG Mail,,,,"Pallets, Mail","Bundles, Loose",,Final Product,Version
+123,Hometown Values,Mark & Renae James,6810 54th Pl Ne,,,Marysville,WA,98270,,425971-0030,Lake Stevens,20,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+124,Hometown Values,Jim Lee,7919 77th St Ne,,,Marysville,WA,98270,,206261-0752,Lake Stevens,1500,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+125,Hometown Values,Debbie Robinson,12433 68th Ave Se,,,Snohomish,WA,98296,,425 949-9030,Lake Stevens,5,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+126,Hometown Values,Jerry J c/o Rick Baker,1008 David St Se,,,Olympia,WA,98503,,360-355-7074,Lake Stevens,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+127,Hometown Values,Scott Mihelich,6205 Lincoln Dr,,,Ferndale,WA,98248,,360-303-2958,Lake Stevens,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+128,Hometown Values,Amy Mencer UPS,14324 W Cominsky Dr,,,Boise,ID,83713,,208-321-5558,Lake Stevens,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+129,Hometown Values,Pam Pare,4122 Hillcrest Ave Sw,,,Seattle,WA,98116,,206-953-1194,Lake Stevens,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+130,Hometown Values,Nichole Frandanisa,2009 Sumner Tapps Hwy E,,,Lake Tapps,WA,98391,,253 579-2508,Lake Stevens,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+131,Hometown Values,Karen Sands,1829 Pine Grove Dr,,,Asheboro,NC,27205,,336-669-4559,Lake Stevens,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+132,Hometown Values,Karen Black UPS,7047 King Ave West,,,Billings,MT,59106,,406 591-5000,Lake Stevens,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+133,UPS Great Falls,Kim Holzer,Po Box 207,,,Great Falls,MT,59404,,406-799-7710,Lake Stevens,1,,,05. Small Package,USPS Priority,,,,,,Final Product,Version
+134,Hometown Values,Greg Lee,8524 West Gage Blvd Ste A-114,,,Kennewick,WA,99336,,509 948-1770,Lake Stevens,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+135,Hometown Values,Sheri Herrick,908 E Main St,,,Weiser,ID,83672,,208 550-7203,Lake Stevens,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+136,Hometown Values,Ed and Christina Snow,11015 127th Ave Ne,,,Lake Stevens,WA,98258,,425 238-6177,Lake Stevens,15,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+137,Hometown Values,Doug Vieselmeyer,14405 115th Ave Ct East,,,Puyallup,WA,98374,,,Lake Stevens,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+138,Hometown Values,Susan Trenary,1777 S Burlington Blvd #197,,,Burlington,WA,98233,,360 708-5533,Lake Stevens,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+139,Hometown Values,Greg and Janet Rice,3803 Obriant Pl,,,Greensboro,NC,27410,,336-340-5583,Lake Stevens,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+140,Hometown Values,Pete Colella,18558 60th Ave Ne,,,Kenmore,WA,98028,,425-481-9108,Lake Stevens,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+141,JG Mail,,2840 Nw 35th Ave,,,Portland,OR,97210,,,Marysville,30000,,,06. JG Mail,,,,"Pallets, Mail","Bundles, Loose",,Final Product,Version
+142,Hometown Values,Mark & Renae James,6810 54th Pl Ne,,,Marysville,WA,98270,,425971-0030,Marysville,2000,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+143,Hometown Values,Jim Lee,7919 77th St Ne,,,Marysville,WA,98270,,206261-0752,Marysville,20,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+144,Hometown Values,Debbie Robinson,12433 68th Ave Se,,,Snohomish,WA,98296,,425 949-9030,Marysville,5,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+145,Hometown Values,Jerry J c/o Rick Baker,1008 David St Se,,,Olympia,WA,98503,,360-355-7074,Marysville,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+146,Hometown Values,Scott Mihelich,6205 Lincoln Dr,,,Ferndale,WA,98248,,360-303-2958,Marysville,5,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+147,Hometown Values,Amy Mencer UPS,14324 W Cominsky Dr,,,Boise,ID,83713,,208-321-5558,Marysville,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+148,Hometown Values,Pam Pare,4122 Hillcrest Ave Sw,,,Seattle,WA,98116,,206-953-1194,Marysville,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+149,Hometown Values,Nichole Frandanisa,2009 Sumner Tapps Hwy E,,,Lake Tapps,WA,98391,,253 579-2508,Marysville,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+150,Hometown Values,Karen Sands,1829 Pine Grove Dr,,,Asheboro,NC,27205,,336-669-4559,Marysville,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+151,Hometown Values,Karen Black UPS,7047 King Ave West,,,Billings,MT,59106,,406 591-5000,Marysville,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+152,UPS Great Falls,Kim Holzer,Po Box 207,,,Great Falls,MT,59404,,406-799-7710,Marysville,1,,,05. Small Package,USPS Priority,,,,,,Final Product,Version
+153,Hometown Values,Greg Lee,8524 West Gage Blvd Ste A-114,,,Kennewick,WA,99336,,509 948-1770,Marysville,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+154,Hometown Values,Sheri Herrick,908 E Main St,,,Weiser,ID,83672,,208 550-7203,Marysville,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+155,Hometown Values,Ed and Christina Snow,11015 127th Ave Ne,,,Lake Stevens,WA,98258,,425 238-6177,Marysville,10,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+156,Hometown Values,Doug Vieselmeyer,14405 115th Ave Ct East,,,Puyallup,WA,98374,,,Marysville,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+157,Hometown Values,Susan Trenary,1777 S Burlington Blvd #197,,,Burlington,WA,98233,,360 708-5533,Marysville,10,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+158,Hometown Values,Greg and Janet Rice,3803 Obriant Pl,,,Greensboro,NC,27410,,336-340-5583,Marysville,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+159,Hometown Values,Pete Colella,18558 60th Ave Ne,,,Kenmore,WA,98028,,425-481-9108,Marysville,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+160,JG Mail,,2840 Nw 35th Ave,,,Portland,OR,97210,,,Edmonds,15000,,,06. JG Mail,,,,"Pallets, Mail","Bundles, Loose",,Final Product,Version
+161,Hometown Values,Mark & Renae James,6810 54th Pl Ne,,,Marysville,WA,98270,,425971-0030,Edmonds,2,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+162,Hometown Values,Jim Lee,7919 77th St Ne,,,Marysville,WA,98270,,206261-0752,Edmonds,20,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+163,Hometown Values,Debbie Robinson,12433 68th Ave Se,,,Snohomish,WA,98296,,425 949-9030,Edmonds,5,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+164,Hometown Values,Jerry J c/o Rick Baker,1008 David St Se,,,Olympia,WA,98503,,360-355-7074,Edmonds,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+165,Hometown Values,Scott Mihelich,6205 Lincoln Dr,,,Ferndale,WA,98248,,360-303-2958,Edmonds,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+166,Hometown Values,Amy Mencer UPS,14324 W Cominsky Dr,,,Boise,ID,83713,,208-321-5558,Edmonds,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+167,Hometown Values,Pam Pare,4122 Hillcrest Ave Sw,,,Seattle,WA,98116,,206-953-1194,Edmonds,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+168,Hometown Values,Nichole Frandanisa,2009 Sumner Tapps Hwy E,,,Lake Tapps,WA,98391,,253 579-2508,Edmonds,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+169,Hometown Values,Karen Sands,1829 Pine Grove Dr,,,Asheboro,NC,27205,,336-669-4559,Edmonds,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+170,Hometown Values,Karen Black UPS,7047 King Ave West,,,Billings,MT,59106,,406 591-5000,Edmonds,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+171,UPS Great Falls,Kim Holzer,Po Box 207,,,Great Falls,MT,59404,,406-799-7710,Edmonds,1,,,05. Small Package,USPS Priority,,,,,,Final Product,Version
+172,Hometown Values,Greg Lee,8524 West Gage Blvd Ste A-114,,,Kennewick,WA,99336,,509 948-1770,Edmonds,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+173,Hometown Values,Sheri Herrick,908 E Main St,,,Weiser,ID,83672,,208 550-7203,Edmonds,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+174,Hometown Values,Ed and Christina Snow,11015 127th Ave Ne,,,Lake Stevens,WA,98258,,425 238-6177,Edmonds,2000,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+175,Hometown Values,Doug Vieselmeyer,14405 115th Ave Ct East,,,Puyallup,WA,98374,,,Edmonds,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+176,Hometown Values,Susan Trenary,1777 S Burlington Blvd #197,,,Burlington,WA,98233,,360 708-5533,Edmonds,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+177,Hometown Values,Greg and Janet Rice,3803 Obriant Pl,,,Greensboro,NC,27410,,336-340-5583,Edmonds,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+178,Hometown Values,Pete Colella,18558 60th Ave Ne,,,Kenmore,WA,98028,,425-481-9108,Edmonds,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+179,JG Mail,,2840 Nw 35th Ave,,,Portland,OR,97210,,,Boise ADA County,50282,,,06. JG Mail,,,,"Pallets, Mail","Bundles, Loose",,Final Product,Version
+180,Hometown Values,Mark & Renae James,6810 54th Pl Ne,,,Marysville,WA,98270,,425971-0030,Boise ADA County,2,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+181,Hometown Values,Jim Lee,7919 77th St Ne,,,Marysville,WA,98270,,206261-0752,Boise ADA County,15,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+182,Hometown Values,Debbie Robinson,12433 68th Ave Se,,,Snohomish,WA,98296,,425 949-9030,Boise ADA County,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+183,Hometown Values,Jerry J c/o Rick Baker,1008 David St Se,,,Olympia,WA,98503,,360-355-7074,Boise ADA County,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+184,Hometown Values,Scott Mihelich,6205 Lincoln Dr,,,Ferndale,WA,98248,,360-303-2958,Boise ADA County,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+185,Hometown Values,Amy Mencer IMP,14324 W Cominsky Dr,,,Boise,ID,83713,,208-321-5558,Boise ADA County,1000,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+186,Hometown Values,Pam Pare,4122 Hillcrest Ave Sw,,,Seattle,WA,98116,,206-953-1194,Boise ADA County,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+187,Hometown Values,Nichole Frandanisa,2009 Sumner Tapps Hwy E,,,Lake Tapps,WA,98391,,253 579-2508,Boise ADA County,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+188,Hometown Values,Karen Sands,1829 Pine Grove Dr,,,Asheboro,NC,27205,,336-669-4559,Boise ADA County,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+189,Hometown Values,Karen Black UPS,7047 King Ave West,,,Billings,MT,59106,,406 591-5000,Boise ADA County,1,,,05. Small Package,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+190,UPS Great Falls,Kim Holzer,Po Box 207,,,Great Falls,MT,59404,,406-799-7710,Boise ADA County,1,,,05. Small Package,USPS Priority,,,,,,Final Product,Version
+191,Hometown Values,Greg Lee,8524 West Gage Blvd Ste A-114,,,Kennewick,WA,99336,,509 948-1770,Boise ADA County,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+192,Hometown Values,Sheri Herrick,908 E Main St,,,Weiser,ID,83672,,208 550-7203,Boise ADA County,10,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+193,Hometown Values,Ed and Christina Snow,11015 127th Ave Ne,,,Lake Stevens,WA,98258,,425 238-6177,Boise ADA County,1,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+194,Hometown Values,Doug Vieselmeyer,14405 115th Ave Ct East,,,Puyallup,WA,98374,,,Boise ADA County,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+195,Hometown Values,Susan Trenary,1777 S Burlington Blvd #197,,,Burlington,WA,98233,,360 708-5533,Boise ADA County,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+196,Hometown Values,Greg and Janet Rice,3803 Obriant Pl,,,Greensboro,NC,27410,,336-340-5583,Boise ADA County,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+197,JG Mail,,2840 Nw 35th Ave,,,Portland,OR,97210,,,Skagit,40000,,,06. JG Mail,,,,"Pallets, Mail","Bundles, Loose",,Final Product,Version
+198,Hometown Values,Mark & Renae James,6810 54th Pl Ne,,,Marysville,WA,98270,,425971-0030,Skagit,25,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+199,Hometown Values,Jim Lee,7919 77th St Ne,,,Marysville,WA,98270,,206261-0752,Skagit,15,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+200,Hometown Values,Debbie Robinson,12433 68th Ave Se,,,Snohomish,WA,98296,,425 949-9030,Skagit,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+201,Hometown Values,Jerry J c/o Rick Baker,1008 David St Se,,,Olympia,WA,98503,,360-355-7074,Skagit,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+202,Hometown Values,Scott Mihelich,6205 Lincoln Dr,,,Ferndale,WA,98248,,360-303-2958,Skagit,15,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+203,Hometown Values,Amy Mencer UPS,14324 W Cominsky Dr,,,Boise,ID,83713,,208-321-5558,Skagit,1,,,05. Small Package,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+204,Hometown Values,Pam Pare,4122 Hillcrest Ave Sw,,,Seattle,WA,98116,,206-953-1194,Skagit,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+205,Hometown Values,Nichole Frandanisa,2009 Sumner Tapps Hwy E,,,Lake Tapps,WA,98391,,253 579-2508,Skagit,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+206,Hometown Values,Karen Sands,1829 Pine Grove Dr,,,Asheboro,NC,27205,,336-669-4559,Skagit,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+207,Hometown Values,Karen Black UPS,7047 King Ave West,,,Billings,MT,59106,,406 591-5000,Skagit,1,,,05. Small Package,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+208,UPS Great Falls,Kim Holzer,Po Box 207,,,Great Falls,MT,59404,,406-799-7710,Skagit,1,,,05. Small Package,USPS Priority,,,,,,Final Product,Version
+209,Hometown Values,Greg Lee,8524 West Gage Blvd Ste A-114,,,Kennewick,WA,99336,,509 948-1770,Skagit,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+210,Hometown Values,Sheri Herrick,908 E Main St,,,Weiser,ID,83672,,208 550-7203,Skagit,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+211,Hometown Values,Ed and Christina Snow,11015 127th Ave Ne,,,Lake Stevens,WA,98258,,425 238-6177,Skagit,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+212,Hometown Values,Doug Vieselmeyer,14405 115th Ave Ct East,,,Puyallup,WA,98374,,,Skagit,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+213,Hometown Values,Susan Trenary,1777 S Burlington Blvd #197,,,Burlington,WA,98233,,360 708-5533,Skagit,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+214,Hometown Values,Greg and Janet Rice,3803 Obriant Pl,,,Greensboro,NC,27410,,336-340-5583,Skagit,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+215,JG Mail,,2840 Nw 35th Ave,,,Portland,OR,97210,,,Snohomish,15004,,,06. JG Mail,,,,"Pallets, Mail","Bundles, Loose",,Final Product,Version
+216,Hometown Values,Mark & Renae James,6810 54th Pl Ne,,,Marysville,WA,98270,,425971-0030,Snohomish,10,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+217,Hometown Values,Jim Lee,7919 77th St Ne,,,Marysville,WA,98270,,206261-0752,Snohomish,1500,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+218,Hometown Values,Debbie Robinson,12433 68th Ave Se,,,Snohomish,WA,98296,,425 949-9030,Snohomish,10,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+219,Hometown Values,Jerry J c/o Rick Baker,1008 David St Se,,,Olympia,WA,98503,,360-355-7074,Snohomish,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+220,Hometown Values,Scott Mihelich,6205 Lincoln Dr,,,Ferndale,WA,98248,,360-303-2958,Snohomish,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+221,Hometown Values,Amy Mencer UPS,14324 W Cominsky Dr,,,Boise,ID,83713,,208-321-5558,Snohomish,1,,,05. Small Package,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+222,Hometown Values,Pam Pare,4122 Hillcrest Ave Sw,,,Seattle,WA,98116,,206-953-1194,Snohomish,3,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+223,Hometown Values,Nichole Frandanisa,2009 Sumner Tapps Hwy E,,,Lake Tapps,WA,98391,,253 579-2508,Snohomish,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+224,Hometown Values,Karen Sands,1829 Pine Grove Dr,,,Asheboro,NC,27205,,336-669-4559,Snohomish,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+225,Hometown Values,Karen Black UPS,7047 King Ave West,,,Billings,MT,59106,,406 591-5000,Snohomish,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+226,UPS Great Falls,Kim Holzer,Po Box 207,,,Great Falls,MT,59404,,406-799-7710,Snohomish,1,,,05. Small Package,USPS Priority,,,,,,Final Product,Version
+227,Hometown Values,Greg Lee,8524 West Gage Blvd Ste A-114,,,Kennewick,WA,99336,,509 948-1770,Snohomish,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+228,Hometown Values,Sheri Herrick,908 E Main St,,,Weiser,ID,83672,,208 550-7203,Snohomish,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+229,Hometown Values,Ed and Christina Snow,11015 127th Ave Ne,,,Lake Stevens,WA,98258,,425 238-6177,Snohomish,15,,,04. Freight,,,,"Pallets, 48x40","Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+230,Hometown Values,Doug Vieselmeyer,14405 115th Ave Ct East,,,Puyallup,WA,98374,,,Snohomish,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+231,Hometown Values,Susan Trenary,1777 S Burlington Blvd #197,,,Burlington,WA,98233,,360 708-5533,Snohomish,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+232,Hometown Values,Greg and Janet Rice,3803 Obriant Pl,,,Greensboro,NC,27410,,336-340-5583,Snohomish,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version
+233,Hometown Values,Pete Colella,18558 60th Ave Ne,,,Kenmore,WA,98028,,425-481-9108,Snohomish,1,,,07. UPS Import,,,,,"Ctn, 11 x 8.5 x 9 UPS 44#",,Final Product,Version

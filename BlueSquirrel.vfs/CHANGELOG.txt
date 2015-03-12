@@ -1,0 +1,33 @@
+= Version 1.7.0 (January 2012)
+== Major Features Implemented
+* Reports grouped by how they ship (Import/Freight). It is customizable so you can enter anything.
+* New About window
+* Preference window for configuration options
+
+== Minor Features/Adjustments
+* Now you cannot enter more data than what will print on the label, to the side of the entry fields you will see a character counter.
+
+--
+
+= Version 1.6.0 (June 2011)
+== Notes
+* Ability to print what is listed in the Breakdown window
+
+--
+
+= Version 1.5.1 (February 2011)
+* Breakdown will now automatically refresh if the window is open and you add or remove an entry.
+
+--
+
+= Version 1.5 (February 2011)
+* Fixed Breakdown to work correctly.
+* Changed versioning scheme to include version number, following with the month it was released.
+* Deactivated a module that wasn't in use, might increase speed.
+
+--
+
+= Version 1.2.11 (Frebruary 2011)
+* Overview reinstaed, go to Edit > Breakdown
+* When selecting the blank line in the History it will now clear out all entry fields
+* A few cosmetic updates

@@ -1,0 +1,79 @@
+Name,Abbreviation,Notes,Country,Zip Code 3 digit (Starting),Zip Code 3 digit (ending)
+Puerto Rico,PR,,,6,7
+Puerto Rico,PR,,,9,9
+Arizona,AZ,,,850,865
+Massachussetts,MA,,US,10,27
+Rhode Island,RI,,,28,29
+New Hampshire,NH,,,30,38
+Maine,ME,,,39,49
+Vermont,VT,,,50,54
+Massachussetts,MA,Andover,US,55,55
+Vermont,VT,,,56,59
+Connecticut,CT,Conflicting,US,60,63
+New York,NY,Fishers Island,,63,63
+Connecticut,CT,Conflicting,US,64,69
+Connecticut,CT,,US,68,69
+New Jersey,NJ,,,70,89
+New York,NY,,,100,149
+Pennsylvania,PA,,,150,196
+Delaware,DE,,,197,199
+District of Columbia,DC,,,200,207
+Virgina,VA,,,200,201
+Maryland,MD,,,203,219
+Virgina,VA,,,220,246
+West Virgina,WV,,,247,268
+North Carolina,NC,,,270,289
+South Carolina,SC,,,290,299
+Georgia,GA,,,300,319
+Florida,FL,,,320,349
+Alabama,AL,,,350,369
+Tennessee,TN,,,370,385
+Mississippi,MS,,,386,397
+Georgia,GA,Atlanta,,399,399
+Kentucky,KY,,,400,427
+Ohio,OH,,,430,459
+Indiana,IN,,,460,479
+Michigan,MI,,,480,497
+Iowa,IA,,,500,528
+Wisconsin,WI,,,530,549
+Minnesota,MN,,,550,567
+South Dakota,SD,,,570,577
+North Dakota,ND,,,580,588
+Montana,MT,,,590,599
+Illinois,IL,,,600,629
+Missouri,MO,,,630,658
+Kansas,KS,,,660,679
+Nebraska,NE,,,680,693
+Iowa,IA,Omaha,,681,681
+Lousiana,LA,,,700,714
+Mississippi,MS,Warren,,712,712
+Arkansas,AR,,,716,729
+Oklahoma,OK,,,730,731
+Oklahoma,OK,,,734,749
+Texas,TX,,,750,799
+Arkansas,AR,Texarkana,,755,755
+Colorado,CO,,,800,816
+Wyoming,WY,,,820,831
+Idaho,ID,,,832,838
+Utah,UT,,,840,847
+New Mexico,NM,,,870,884
+Texas,TX,El Paso,,885,885
+Nevada,NV,,,890,898
+California,CA,,,900,961
+Hawaii,HI,,,967,968
+Oregon,OR,,,970,979
+Washington,WA,,,980,994
+Alaska,AK,,,995,999
+American Samoa,AS,,,,
+Army Post Office Americas,AA,,,,
+Army Post Office Europe,AE,,,,
+Army Post Office Pacific,AP,,,,
+Federated States of Micronesia,FM,,,,
+Fleet Post Office Americas,AA,,,,
+Fleet Post Office Europe,AE,,,,
+Fleet Post Office Pacific,AP,,,,
+Guam,GU,,,,
+Marshall Islands,MH,,,,
+Northern Mariana Islands,MP,,,,
+Palau,PW,,,,
+Virgin Islands,VI,,,,

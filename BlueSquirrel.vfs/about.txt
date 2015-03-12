@@ -1,0 +1,8 @@
+Box Labels
+-----------------
+
+I wrote this program so that we would not have to repeatedly do mundane math for each job that required box labels.
+
+Casey Ackels created and currently maintains this program
+
+Copyright (C) 2007-2012 Casey Ackels. All rights reserved.
