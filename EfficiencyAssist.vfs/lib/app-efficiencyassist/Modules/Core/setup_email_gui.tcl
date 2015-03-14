@@ -8,7 +8,7 @@
 #
 # $Revision: 523 $
 # $LastChangedBy: casey.ackels $
-# $LastChangedDate$
+# $LastChangedDate: 2015-02-06 13:20:21 -0800 (Fri, 06 Feb 2015) $
 #
 ########################################################################################
 
@@ -178,7 +178,7 @@ proc eAssistSetup::emailSetup_GUI {} {
 		    -xscrollcommand [list $eF2.scrollx set]
     
     ttk::scrollbar $eF2.scrolly -orient v -command [list $eF2.text yview]
-    ttk::scrollbar $eF2.scrollx -orient v -command [list $eF2.text xview]
+    ttk::scrollbar $eF2.scrollx -orient h -command [list $eF2.text xview]
     
     ttk::label $eF2.subs -text [mc "Available Macros:"]
     ttk::label $eF2.subTxt -textvariable email(SubTxt)
@@ -192,7 +192,7 @@ proc eAssistSetup::emailSetup_GUI {} {
     grid $eF2.txt4 -column 0 -row 3 -pady 2p -padx 2p -sticky nse
     grid $eF2.entry4 -column 1 -row 3 -pady 2p -padx 2p -sticky news
     
-    grid $eF2.text -column 1 -row 4 -pady 2p -padx 2p ;#-sticky news
+    grid $eF2.text -column 1 -row 4 -pady 2p -padx 2p -sticky news
     grid $eF2.scrolly -column 1 -row 4 -sticky nse
     grid $eF2.scrollx -column 0 -row 4 -sticky sew
     

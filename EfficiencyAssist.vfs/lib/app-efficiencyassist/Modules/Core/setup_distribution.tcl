@@ -8,7 +8,7 @@
 #
 # $Revision: 338 $
 # $LastChangedBy: casey.ackels $
-# $LastChangedDate$
+# $LastChangedDate: 2014-10-25 16:11:53 -0700 (Sat, 25 Oct 2014) $
 #
 ########################################################################################
 
@@ -50,9 +50,7 @@ proc eAssistSetup::distributionTypes_GUI {} {
     #***
     global log G_setupFrame currentModule dist
     global GUI w
-    #variable GUI
-    
-    #set currentModule addressHeaders
+
     eAssist_Global::resetSetupFrames ;# Reset all frames so we start clean
     
     ##
@@ -64,13 +62,15 @@ proc eAssistSetup::distributionTypes_GUI {} {
     
 
     ttk::label $w(dist_frame1).label1 -text [mc "Distribution Type Name"]
-    ttk::entry $w(dist_frame1).entry1 -width 30 -textvariable insertDistributionType
+    ttk::entry $w(dist_frame1).entry1 -width 30
+	
+	ttk::button $w(dist_frame1).btn1 -text [mc "Add"] -command {eAssistSetup::modifyDistTypes add $w(dist_frame1).entry1 $w(dist_frame1).lbox1 DistTypeName DistributionTypes}
+    ttk::button $w(dist_frame1).btn2 -text [mc "Delete"] -command {eAssistSetup::modifyDistTypes delete $w(dist_frame1).entry1 $w(dist_frame1).lbox1 DistTypeName DistributionTypes}   
     
-    listbox $w(dist_frame1).lbox1 -height 20 \
+	listbox $w(dist_frame1).lbox1 -height 20 \
                 -width 30 \
                 -selectbackground yellow \
                 -selectforeground black \
-                -exportselection no \
                 -selectmode single \
                 -yscrollcommand [list $w(dist_frame1).scrolly set] \
                 -xscrollcommand [list $w(dist_frame1).scrollx set]
@@ -85,18 +85,6 @@ proc eAssistSetup::distributionTypes_GUI {} {
     ::autoscroll::autoscroll $w(dist_frame1).scrolly
     ::autoscroll::autoscroll $w(dist_frame1).scrollx
     
-    ttk::button $w(dist_frame1).btn1 -text [mc "Add"] -command {eAssistSetup::addToDistTypes $w(hdr_frame1).lbox1 $w(hdr_frame1).entry1 $insertDistributionType}
-    ttk::button $w(dist_frame1).btn2 -text [mc "Delete"] -command {eAssistSetup::removeDistTypes $w(hdr_frame1).lbox1}
-    
-    
-    #${log}::debug headerParent exists? [info exists headerParent(headerList)]
-    if {[info exists dist(distributionTypes)] != 0 } {
-        foreach item $dist(distributionTypes) {
-            $w(dist_frame1).lbox1 insert end $item
-        }
-        ${log}::debug Inserting Distribution Types into Listbox: $dist(distributionTypes)
-    }
-    
     #
     #-------- Grid Frame 1a
     #
@@ -106,12 +94,17 @@ proc eAssistSetup::distributionTypes_GUI {} {
     
     grid $w(dist_frame1).lbox1 -column 1 -row 1 -sticky news
     grid $w(dist_frame1).btn2 -column 2 -row 1 -sticky new
+	
+	## ------
+	## Commands
+	# Populate the listbox
+	ea::db::getDistTypes $w(dist_frame1).lbox1
     
     
 	
 } ;# eAssistSetup::distributionTypes_GUI
 
-proc eAssistSetup::addToDistTypes {lbox entryField distType} {
+proc eAssistSetup::modifyDistTypes {method widEntryField widListbox cols dbTable} {
     #****f* addToDistTypes/eAssistSetup
     # AUTHOR
     #	Casey Ackels
@@ -138,46 +131,72 @@ proc eAssistSetup::addToDistTypes {lbox entryField distType} {
     #***
     global log dist
     
-    $lbox insert end $distType
-    set dist(distributionTypes) [$lbox get 0 end]
-    
-    $entryField delete 0 end
+    #$lbox insert end $distType
+    #set dist(distributionTypes) [$lbox get 0 end]
+    #
+    #$entryField delete 0 end
+	
+	set values [list [$widEntryField get]]
+	${log}::debug VALUES: $values
+	
+	switch -- $method {
+		add		{
+			# Add to DB
+			eAssist_db::dbInsert -columnNames $cols -table $dbTable -data $values
+			# Remove value from the entry widget
+			$widEntryField delete 0 end
+		}
+		delete	{
+			set values [$widListbox get [$widListbox curselection]]
+			eAssist_db::delete $dbTable $cols $values
+		}
+		default {${log}::debug [info level 1] $method isn't a valid option}
+	}
+		
+		# Refresh list
+		ea::db::getDistTypes $widListbox
 	
 } ;# eAssistSetup::addToDistTypes
 
 
-proc eAssistSetup::removeDistType {wListbox } {
-    #****f* removeDistType/eAssistSetup
+proc ea::db::getDistTypes {widListbox} {
+    #****f* getDistTypes/ea::db
+    # CREATION DATE
+    #   10/24/2014 (Friday Oct 24)
+    #
     # AUTHOR
     #	Casey Ackels
     #
     # COPYRIGHT
-    #	(c) 2011-2013 Casey Ackels
-    #
-    # FUNCTION
-    #	
+    #	(c) 2014 Casey Ackels
+    #   
     #
     # SYNOPSIS
+    #   ea::db::getDistTypes  
     #
-    #
+    # FUNCTION
+    #	Retrieves the list of Distribution Types
+    #   
+    #   
     # CHILDREN
     #	N/A
-    #
+    #   
     # PARENTS
-    #	
-    #
+    #   
+    #   
     # NOTES
-    #
+    #   
+    #   
     # SEE ALSO
-    #
+    #   
+    #   
     #***
-    global log dist
-     ${log}::debug --START-- removeDistType
+    global log
 
-    if {[$wListbox curselection] == "" } {return}
-    $wListbox delete [$wListbox curselection]
-
-    set dist(distributionTypes) [$wListbox get 0 end]
+    $widListbox delete 0 end
+	
+	foreach item [eAssist_db::dbSelectQuery -columnNames DistTypeName -table DistributionTypes] {
+		$widListbox insert end $item
+	}
     
-    ${log}::debug --END-- removeDistType
-} ;# eAssistSetup::removeDistType
+} ;# ea::db::getDistTypes

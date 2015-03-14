@@ -8,7 +8,7 @@
 #
 # $Revision: 478 $
 # $LastChangedBy: casey.ackels@gmail.com $
-# $LastChangedDate$
+# $LastChangedDate: 2014-09-14 21:48:00 -0700 (Sun, 14 Sep 2014) $
 #
 ########################################################################################
 

@@ -8,7 +8,7 @@
 #
 # $Revision: 338 $
 # $LastChangedBy: casey.ackels $
-# $LastChangedDate$
+# $LastChangedDate: 2015-02-06 13:20:21 -0800 (Fri, 06 Feb 2015) $
 #
 ########################################################################################
 
@@ -51,7 +51,7 @@ proc eAssistSetup::changeLogLevel {args} {
     global log logSettings
         
         logger::setlevel [string tolower [lindex $logSettings(levels) $args]]
-        ${log}::notice [mc "Logging level has been set to: ${log}::currentloglevel"]
+        ${log}::notice [mc "Logging level has been set to: [${log}::currentloglevel]"]
     
 
 } ;#eAssistSetup::changeLogLevel

@@ -6,7 +6,7 @@
 #
 # Subversion
 #
-# $Revision$
+# $Revision: 612 $
 # $LastChangedBy: casey.ackels $
 # $LastChangedDate: 2011-10-17 16:11:20 -0700 (Mon, 17 Oct 2011) $
 #
@@ -22,7 +22,7 @@
 # - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
-proc lib::showPwordWindow {parent} {
+proc lib::showPwordWindow {} {
     #****f* showPwordWindow/lib
     # AUTHOR
     #	Casey Ackels
@@ -47,11 +47,10 @@ proc lib::showPwordWindow {parent} {
     # SEE ALSO
     #
     #***
-    global log
-    ${log}::debug --START-- [info level 1]
+    global log user
     
     toplevel .pwordLogin
-    wm transient .pwordLogin $parent
+    wm transient .pwordLogin .
     wm title .pwordLogin [mc "Login"]
 
     # Put the window in the center of the parent window
@@ -66,14 +65,25 @@ proc lib::showPwordWindow {parent} {
     set f1 [ttk::frame .pwordLogin.f1 -padding 10]
     pack $f1 -expand yes -fill both
     
+    ttk::label $f1.txta -text [mc "Current User:"]
+    ttk::label $f1.txtb -textvariable user(id)
+    
+    ttk::label $f1.txt0 -text [mc "User:"]
+    ttk::entry $f1.entry0 -width 20
     
     ttk::label $f1.txt1 -text [mc "Password:"]
     ttk::entry $f1.entry1 -width 20 -show *
     
-    focus $f1.entry1
+    focus $f1.entry0
     
-    grid $f1.txt1 -column 0 -row 0 -padx 5p -pady 5p
-    grid $f1.entry1 -column 1 -row 0 -padx 5p -pady 5p
+    grid $f1.txta -column 0 -row 0 -sticky nse
+    grid $f1.txtb -column 1 -row 0 -sticky nsw
+    
+    grid $f1.txt0 -column 0 -row 1 -padx 5p -pady 5p -sticky nse
+    grid $f1.entry0 -column 1 -row 1 -padx 5p -pady 5p -sticky news
+     
+    grid $f1.txt1 -column 0 -row 2 -padx 5p -pady 5p -sticky nse
+    grid $f1.entry1 -column 1 -row 2 -padx 5p -pady 5p -sticky news
     
     ##
     ## Frame 2
@@ -81,18 +91,24 @@ proc lib::showPwordWindow {parent} {
     set f2 [ttk::frame .pwordLogin.f2 -padding 10]
     pack $f2 -expand yes -fill both
     
-    ttk::button $f2.btn1 -text [mc "OK"] -command "lib::pwordCompare $parent .pwordLogin"
+    
+    ttk::button $f2.btn1 -text [mc "OK"] -command [list lib::pwordCompare .pwordLogin $f1.entry0 $f1.entry1]
     ttk::button $f2.btn2 -text [mc "Cancel"] -command {destroy .pwordLogin}
+    ttk::button $f2.btn0 -text [mc "Revert"] -command {ea::sec::changeUser [ea::sec::userExist]; ea::sec::modLauncher; destroy .pwordLogin}
     
-    grid $f2.btn1 -column 0 -row 0 -padx 5p
-    grid $f2.btn2 -column 1 -row 0 -padx 5p    
+    grid $f2.btn0 -column 0 -row 0 -padx 5p
+    grid $f2.btn1 -column 1 -row 0 -padx 5p
+    grid $f2.btn2 -column 2 -row 0 -padx 5p
     
-	
-    ${log}::debug --END-- [info level 1]
+    ##
+    ## Bindings
+    ea::tools::bindings $f1.entry1 {Return KP_Enter} [list lib::pwordCompare .pwordLogin $f1.entry0 $f1.entry1]
+    
+    
 } ;# lib::showPwordWindow
 
 
-proc lib::pwordCompare {parent win} {
+proc lib::pwordCompare {win usr_wid pass_wid} {
     #****f* pwordCompare/lib
     # AUTHOR
     #	Casey Ackels
@@ -117,54 +133,16 @@ proc lib::pwordCompare {parent win} {
     # SEE ALSO
     #
     #***
-    global log auth
-    ${log}::debug --START-- [info level 1]
+    global log user
     
-    set pword [::md5crypt::md5crypt [$win.f1.entry1 get] $auth(adminSalt)]
-    
-    if {![string match $auth(adminPword) $pword]} {
-        ${log}::debug Invalid Password
+    set authed [ea::sec::authUser [$usr_wid get] [$pass_wid get]]
+
+    if {!$authed} {
         return
     } else {
-        eAssist_Global::widgetState normal $parent
+        ${log}::debug Change User was a success!
         destroy $win
+        ea::sec::modLauncher
     }
-    
-	
-    ${log}::debug --END-- [info level 1]
-} ;# lib::pwordCompare
 
-#proc eAssist_Global::isAuthenticated {args} {
-#    #****f* isAuthenticated/eAssist_Global
-#    # AUTHOR
-#    #	Casey Ackels
-#    #
-#    # COPYRIGHT
-#    #	(c) 2011-2014 Casey Ackels
-#    #
-#    # FUNCTION
-#    #	Find out if we are authenticated to see, or access Setup.
-#    #
-#    # SYNOPSIS
-#    #
-#    #
-#    # CHILDREN
-#    #	N/A
-#    #
-#    # PARENTS
-#    #	
-#    #
-#    # NOTES
-#    #
-#    # SEE ALSO
-#    #
-#    #***
-#    global log auth
-#    ${log}::debug --START-- [info level 1]
-#    
-#	if {![info exists auth]} {return}
-#	
-#	if {![string match $args $auth(pword)]} {return}
-#	
-#    ${log}::debug --END-- [info level 1]
-##} ;# eAssist_Global::isAuthenticated
+} ;# lib::pwordCompare

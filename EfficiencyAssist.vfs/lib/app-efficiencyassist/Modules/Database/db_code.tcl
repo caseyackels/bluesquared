@@ -8,7 +8,7 @@
 #
 # $Revision: 169 $
 # $LastChangedBy: casey.ackels $
-# $LastChangedDate$
+# $LastChangedDate: 2015-03-06 13:29:36 -0800 (Fri, 06 Mar 2015) $
 #
 ########################################################################################
 
@@ -23,7 +23,9 @@
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 package provide eAssist_db 1.0
 
-namespace eval eAssist_db {}
+namespace eval eAssist_db {} ;# Old do not use
+namespace eval ea::db {}
+
 
 
 proc eAssist_db::loadDB {} {
@@ -58,7 +60,7 @@ proc eAssist_db::loadDB {} {
     
     sqlite3 db $myDB
     
-    eAssist_db::initContainers
+    #eAssist_db::initContainers
     eAssist_db::getEmailSetup
     
 	
@@ -66,7 +68,7 @@ proc eAssist_db::loadDB {} {
 } ;# eAssist_db::loadDB
 
 
-proc eAssist_db::initContainers {} {
+proc eAssist_db::initContainers {type wid} {
     #****f* initContainers/eAssist_db
     # AUTHOR
     #	Casey Ackels
@@ -78,7 +80,7 @@ proc eAssist_db::initContainers {} {
     #	Initialize variables for the Containers table
     #
     # SYNOPSIS
-    #
+    #   type = PACKAGES or CONTAINERS
     #
     # CHILDREN
     #	N/A
@@ -94,14 +96,19 @@ proc eAssist_db::initContainers {} {
     global log packagingSetup
     ${log}::debug --START-- [info level 1]
     
-    db eval {SELECT Container from Containers} {
-        #${log}::debug Container: $Container
-        lappend packagingSetup(Containers) $Container
+    switch -- $type {
+        packages    {set items [eAssist_db::dbSelectQuery -columnNames Package -table Packages]}
+        containers  {set items [eAssist_db::dbSelectQuery -columnNames Container -table Containers]}
     }
 
-    db eval {SELECT Package from Packages} {
-        #${log}::debug Container: $Package
-        lappend packagingSetup(Packages) $Package
+    
+    # get rid of all data before inserting new data ...
+    $wid delete 0 end
+    
+    if {$items ne ""} {
+        foreach item $items {
+            $wid insert end $item
+        }
     }
     
     
@@ -136,14 +143,14 @@ proc eAssist_db::dbInsert {args} {
     #   
     #   
     # NOTES
-    #   
+    #   Always make sure your index column is first. If we come up with a mismatch (4 values for 5 columns), we drop the first column, assuming it is the index and not wanted.
     #   
     # SEE ALSO
     #   
     #   
     #***
-    global log
-proc eAssist_db::dbInsert {args} {
+    global log tmp
+
     if {$args == ""} {return -code 1 [mc "wrong # args: Must be -columnNames ?value1 .. valueN? -table value -data value\nNOTE: Each data value must be enclosed with single quotes"]}
     
     foreach {key value} $args {
@@ -162,15 +169,67 @@ proc eAssist_db::dbInsert {args} {
     }
     
     # See if this is a new entry or if we should update an entry ...
-    set dbCheck [eAssist_db::dbWhereQuery -columnNames [lrange $colNames 0 0] -table $tbl -where [lrange $colNames 0 0]=[lrange $data 0 0]]
+    set dbCheck [eAssist_db::dbWhereQuery -columnNames [lrange $colNames 0 0] -table $tbl -where [lrange $colNames 0 0]='[lrange $data 0 0]']
+    #${log}::debug After dbCheck: $dbCheck
     
-    if {[llength $colNames] == 1} {
-        # Only inserting into one column
-        db eval "INSERT or ABORT INTO $tbl $colNames VALUES ($data)"
+    if {[info exists cleansedData]} {unset cleansedData}
+    foreach item $data {
+        lappend cleansedData '$item'
+    }
+    set data $cleansedData
+    
+    if {[llength $colNames] != [llength $cleansedData]} {
+        ${log}::notice [info level 1] Mismatched columns and data to insert into db. Dropping [lrange $colNames 0 0]
+        set colNames [lrange $colNames 1 end]
+    }
+       
+    # If rowID exists, issue an update statement.
+    if {[info exists tmp(db,rowID)] == 1} {
+        if {$tmp(db,rowID) != ""} {
+            #${log}::debug ROWID Exists: $tmp(db,rowID)
+            #${log}::debug Update_COLS: $colNames
+            #${log}::debug Update_DATA: $data
+            set y [llength $colNames]
+                for {set x 0} {$x < $y} {incr x} {
+                    # bypass values that could contain only curly braces (typically checkboxes)
+                    if {[join [lrange $data $x $x]] ne ""} {
+                        #${log}::debug Col/Val [join [lrange $colNames $x $x]]=[join [lrange $data $x $x]]
+                        lappend updateStatement [join [lrange $colNames $x $x]]=[join [lrange $data $x $x]]
+                    }
+                }
+            ${log}::debug updateStatement: [join $updateStatement ,]
+            set updateStatement [join $updateStatement ,]
+            #${log}::debug db eval "UPDATE $tbl SET $updateStatement WHERE rowid=$tmp(db,rowID)"
+            db eval "UPDATE $tbl SET $updateStatement WHERE rowid=$tmp(db,rowID)"
+                
+            set tmp(db,rowID) ""
+            return
+        }
+    }
+    
+    if {$dbCheck eq ""} {
+        # No preexisting data, lets insert...
+        if {[llength $colNames] == 1} {
+            # Only inserting into one column
+            set colNames [join $colNames]
+            set data [join $data] ;# Remove the braces (could be a list)
+            #${log}::debug Insert_COLS: $colNames
+            #${log}::debug Insert_TABLE: $tbl
+            #${log}::debug Insert_DATA: $data
+            #${log}::debug INSERT or ABORT INTO $tbl $colNames VALUES ($data)
+            db eval "INSERT or ABORT INTO $tbl ($colNames) VALUES ($data)"
+            
+        } else {
+            #${log}::debug Insert_COLS: [join $colNames ,]
+            #${log}::debug Insert_Data: [join $data ,]
+            set colNames [join $colNames ,]
+            set data [join $data ,]
+            db eval "INSERT or ABORT INTO $tbl ($colNames) VALUES ($data)"
+        }
     } else {
-        set colNames [join $colNames ,]
-        set data [join $data ,]
-        db eval "INSERT or ABORT INTO $tbl ($colNames) VALUES ($data)"
+        # Data exists, lets update...
+        #UPDATE COMPANY SET ADDRESS = 'Texas', SALARY = 20000.00;
+        #db eval "UPDATE $tbl SET "
     }
     
     #db eval {INSERT or ABORT INTO EventNotifications (ModID, EventName, EventSubstitutions EnableEventNotification)
@@ -209,7 +268,16 @@ proc eAssist_db::delete {table col args} {
     global log
     ${log}::debug --START-- [info level 1]
     
-    db eval "DELETE from $table WHERE $col='$args'"
+    set args [join $args]
+    
+    if {$col != ""} {
+        ${log}::debug "DELETE from $table WHERE $col='$args'"
+        db eval "DELETE from $table WHERE $col='$args'"
+    } else {
+        ${log}::debug "DELETE from $table WHERE rowid=$args"
+        #${log}::debug [db eval "DELETE from $table WHERE rowid='$args'"]
+        db eval "DELETE from $table WHERE rowid=$args"
+    }
 
     ${log}::debug --END-- [info level 1]
 } ;# eAssist_db::delete
@@ -263,9 +331,9 @@ proc eAssist_db::checkModuleName {moduleName} {
 
     if {[lsearch -nocase $ModNames $moduleName] == -1} {
             ${log}::debug Couldn't find $moduleName, inserting ...
-                db eval {INSERT or ABORT INTO Modules (ModuleName EnableModNotification)
-                    VALUES ($moduleName $emailSetup(mod,Notification))
-                }
+                #db eval {INSERT or ABORT INTO Modules (ModuleName EnableModNotification)
+                #    VALUES ($moduleName $emailSetup(mod,Notification))}
+                db eval {INSERT or ABORT INTO Modules (ModuleName) VALUES ($moduleName)}
     } else {
             ${log}::debug Found $moduleName!
     }
@@ -596,10 +664,14 @@ proc eAssist_db::dbSelectQuery {args} {
         foreach val $colNames {
             set pos [lsearch $colNames $val]; puts "Pos: $pos"
             set myCommand {[subst $[lrange $colNames %b %b]]}
-            lappend myNewCommand [string map "%b $pos" $myCommand]
+	    #${log}::debug myCommand: $myCommand
+            lappend myNewCommand [list [string map "%b $pos" $myCommand]]
+	    #${log}::debug myNewCommand: $myNewCommand
         }
             db eval "SELECT [join $colNames ,] FROM $tbl" {
                 lappend returnQuery "[join [subst $myNewCommand]]"
+		#lappend returnQuery "[subst $myNewCommand]"
+		#${log}::debug returnQuery: $returnQuery
             }
     }
     return $returnQuery
@@ -620,8 +692,8 @@ proc eAssist_db::dbWhereQuery {args} {
     #   
     #
     # SYNOPSIS
-    #   dbCSR::dbWhereQuery -columnNames ?value(s)? -table <tableName> -where <where clause>
-    #   Example: dbCSR::dbWhereQuery -columnNames {FirstName LastName} -table CSRS -where Status=1
+    #   eAssist_db::dbWhereQuery -columnNames ?value(s)? -table <tableName> -where <where clause>
+    #   Example: eAssist_db::dbWhereQuery -columnNames {FirstName LastName} -table CSRS -where Status=1
     #   
     #
     # FUNCTION
@@ -644,10 +716,11 @@ proc eAssist_db::dbWhereQuery {args} {
     global log
     
     foreach {key value} $args {
+        #${log}::debug KEY: $key VALUE: $value
         switch -- $key {
-            -columnNames {set colNames $value; puts "ColumnNames: $colNames"}
-            -table {set tbl $value; if {[llength $value] != 1} {return -code 1 [mc "wrong # args: Should be -table value]}}
-            -where {set where $value; if {[llength $value] != 1} {return -code 1 [mc "wrong # args: Should be -table value]}}
+            -columnNames {set colNames $value}
+            -table {set tbl $value; if {[llength $value] != 1} {return -code 1 [mc "wrong # args: Should be -table value"]}}
+            -where {set where [join $value]; if {[llength $value] == 0} {return -code 1 [mc "wrong # args: Should be -where value"]}}
             default {return -code 1 [mc "Unknown $key $value"]}
         }
     }
@@ -664,10 +737,13 @@ proc eAssist_db::dbWhereQuery {args} {
         
         
     if {[llength $colNames] == 1} {
+        #${log}::debug colNames: $colNames
+        #${log}::debug tbl: $tbl
+        #${log}::debug where: $where
         set returnQuery [db eval "SELECT $colNames FROM $tbl WHERE $where"]
     } else {
         foreach val $colNames {
-            set pos [lsearch $colNames $val]; puts "Pos: $pos"
+            set pos [lsearch $colNames $val] ;#puts "Pos: $pos"
             set myCommand {[subst $[lrange $colNames %b %b]]}
             lappend myNewCommand [string map "%b $pos" $myCommand]
         }
@@ -675,7 +751,190 @@ proc eAssist_db::dbWhereQuery {args} {
                 lappend returnQuery "[join [subst $myNewCommand]]"
             }
     }
-    return $returnQuery
+    
+    if {![info exists returnQuery]} {
+        ${log}::debug returnQuery not set, Could not find $where in $tbl
+        return 0
+        } else {
+             return $returnQuery            
+        }
+
 
 } ;# eAssist_db::dbWhereQuery
 
+
+proc eAssist_db::getRowID {tbl args} {
+    #****f* getRowID/eAssist_db
+    # CREATION DATE
+    #   10/15/2014 (Wednesday Oct 15)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssist_db::getRowID tbl args 
+    #
+    # FUNCTION
+    #	Retrieves the rowID of the passed arguments
+    #   args must be in [WHERE] format: <colName>=<value> AND <colName>=<value> 
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+    #${log}::debug $tbl
+    #${log}::debug $args
+    set args [join $args]
+
+    db eval "SELECT rowid FROM $tbl WHERE $args"
+
+    
+} ;# eAssist_db::getRowID
+
+
+proc eAssist_db::leftOuterJoin {args} {
+    #****f* leftOuterJoin/eAssist_db
+    # CREATION DATE
+    #   10/24/2014 (Friday Oct 24)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssist_db::leftOuterJoin -cols value -table value -jtable value -where value1...valueN
+    #
+    # FUNCTION
+    #	Issues a SELECT statement on the columns and tables given in the argument
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    foreach {key value} $args {
+        switch -- $key {
+            -cols   {set cols [join $value]}
+            -table  {set dbTable $value}
+            -jtable {set jdbTable $value}
+            -where  {set whereStmt [join $value]}
+        }
+    }
+    #${log}::debug cols: $cols
+    #${log}::debug table: $dbTable
+    #${log}::debug jtable: $jdbTable
+    #${log}::debug where: $whereStmt
+    
+    db eval "SELECT $cols FROM $dbTable LEFT OUTER JOIN $jdbTable WHERE $whereStmt"
+
+} ;# eAssist_db::leftOuterJoin
+
+proc ea::db::countQuantity {db dbTbl} {
+    #****f* countQuantity/ea::db
+    # CREATION DATE
+    #   02/15/2015 (Sunday Feb 15)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   ea::db::countQuantity  
+    #
+    # FUNCTION
+    #	Counts the Quantity column, and trims off the .0 which is returned by sum(*)
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    #set qty [string trim [$db eval "SELECT SUM(Quantity) FROM $dbTbl"] .0]
+    set qty [$db eval "SELECT SUM(Quantity) FROM $dbTbl"]
+    return $qty
+    
+} ;# ea::db::countQuantity
+
+
+proc ea::db::getUniqueValues {db dbCol dbTbl} {
+    #****f* getUniqueValues/ea::db
+    # CREATION DATE
+    #   02/18/2015 (Wednesday Feb 18)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   ea::db::getUniqueValues db dbCol dbTbl 
+    #
+    # FUNCTION
+    #	Retrieves the versions from the specified db and db table
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    set values [$db eval "SELECT distinct($dbCol) FROM $dbTbl"]
+
+    return $values
+
+} ;# ea::db::getUniqueValues

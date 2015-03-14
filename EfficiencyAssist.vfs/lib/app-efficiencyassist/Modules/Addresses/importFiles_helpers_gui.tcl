@@ -7,7 +7,7 @@
 #
 # $Revision: 507 $
 # $LastChangedBy: casey.ackels $
-# $LastChangedDate$
+# $LastChangedDate: 2015-03-11 17:33:06 -0700 (Wed, 11 Mar 2015) $
 #
 ########################################################################################
 
@@ -27,107 +27,105 @@
 # - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
-
-proc eAssistHelper::addDistTypes_GUI {} {
-    #****f* addDistTypes_GUI/eAssistHelper
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2011-2013 Casey Ackels
-    #
-    # FUNCTION
-    #	Add an address that wasn't in the source file
-    #
-    # SYNOPSIS
-    #
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #	
-    #
-    # NOTES
-    #
-    # SEE ALSO
-    #
-    #***
-    global log process dist files
-    ${log}::debug --START -- [info level 1]
-    
-	toplevel .d
-    wm transient .d .
-    wm title .d [mc ""]
-
-    # Put the window in the center of the parent window
-    set locX [expr {[winfo width . ] / 3 + [winfo x .]}]
-    set locY [expr {[winfo height . ] / 3 + [winfo y .]}]
-    wm geometry .d +${locX}+${locY}
-
-    focus .d
-	
-	set w(dType) [ttk::frame .d.frame1]
-	pack $w(dType) -expand yes -fill both -pady 5p -padx 5p
-	
-	ttk::label $w(dType).txt1 -text [mc "Attention"]
-	ttk::entry $w(dType).entry1
-	ttk::button $w(dType).btn1 -text [mc "Select an Address..."] -command {}
-	
-	ttk::label $w(dType).txt2 -text [mc "Company"]
-	ttk::entry $w(dType).entry2
-	
-	ttk::label $w(dType).txt3 -text [mc "Address1/Address2"]
-	ttk::entry $w(dType).entry3
-	ttk::entry $w(dType).entry4
-	
-	ttk::label $w(dType).txt4 -text [mc "Address3"]
-	ttk::entry $w(dType).entry5
-	
-	ttk::label $w(dType).txt5 -text [mc "City/State/Zip"]
-	ttk::entry $w(dType).entry6
-	ttk::entry $w(dType).entry7 -width 5
-	ttk::entry $w(dType).entry8 -width 10
-	
-	ttk::label $w(dType).txt6 -text [mc "Country/Phone"]
-	ttk::entry $w(dType).entry9
-	ttk::entry $w(dType).entry10
-	
-
-	#ttk::label $w(dType).txt2 -text [mc "Insert this address for each version?"]
-
-	ttk::button $w(dType).close -text [mc "Close"] -command {destroy .d}
-	
-	
-	#----- Grid
-	grid $w(dType).txt1 -column 0 -row 0 -sticky news
-	grid $w(dType).entry1 -column 1 -row 0 -sticky news
-	grid $w(dType).btn1 -column 2 -row 0 -sticky news
-	
-	grid $w(dType).txt2 -column 0 -row 1 -sticky news
-	grid $w(dType).entry2 -column 1 -row 1 -sticky news
-	
-	grid $w(dType).txt3 -column 0 -row 2 -sticky news
-	grid $w(dType).entry3 -column 1 -row 2 -sticky news
-	grid $w(dType).entry4 -column 2 -row 2 -sticky news
-	
-	grid $w(dType).txt4 -column 0 -row 3 -sticky news
-	grid $w(dType).entry5 -column 1 -row 3 -sticky news
-	
-	grid $w(dType).txt5 -column 0 -row 4 -sticky news
-	grid $w(dType).entry6 -column 1 -row 4 -sticky news
-	grid $w(dType).entry7 -column 2 -row 4 -sticky news
-	grid $w(dType).entry8 -column 3 -row 4 -sticky news
-	
-	grid $w(dType).txt6 -column 0 -row 5 -sticky news
-	grid $w(dType).entry9 -column 1 -row 5 -sticky news
-	grid $w(dType).entry10 -column 2 -row 5 -sticky news
-	
-	#grid $w(dType).txt2 -column 0 -row 1 -sticky news
-	grid $w(dType).close -column 3 -row 6 -sticky  news
-	
-    ${log}::debug --END -- [info level 1]
-} ;# eAssistHelper::addDistTypes_GUI
+#
+#proc eAssistHelper::addDistTypes_GUI {} {
+#    #****f* addDistTypes_GUI/eAssistHelper
+#    # AUTHOR
+#    #	Casey Ackels
+#    #
+#    # COPYRIGHT
+#    #	(c) 2011-2013 Casey Ackels
+#    #
+#    # FUNCTION
+#    #	Add an address that wasn't in the source file
+#    #
+#    # SYNOPSIS
+#    #
+#    #
+#    # CHILDREN
+#    #	N/A
+#    #
+#    # PARENTS
+#    #	
+#    #
+#    # NOTES
+#    #
+#    # SEE ALSO
+#    #
+#    #***
+#    global log process dist files
+#    
+#	toplevel .d
+#    wm transient .d .
+#    wm title .d [mc "Add Destination"]
+#
+#    # Put the window in the center of the parent window
+#    set locX [expr {[winfo width . ] / 3 + [winfo x .]}]
+#    set locY [expr {[winfo height . ] / 3 + [winfo y .]}]
+#    wm geometry .d +${locX}+${locY}
+#
+#	
+#	set w(dType) [ttk::frame .d.frame1]
+#	pack $w(dType) -expand yes -fill both -pady 5p -padx 5p
+#	
+#	ttk::label $w(dType).txt1 -text [mc "Attention"]
+#	ttk::entry $w(dType).entry1
+#	ttk::button $w(dType).btn1 -text [mc "Select an Address..."] -command {} -state disabled
+#	focu $w(dType).entry1
+#	
+#	ttk::label $w(dType).txt2 -text [mc "Company"]
+#	ttk::entry $w(dType).entry2
+#	
+#	ttk::label $w(dType).txt3 -text [mc "Address1/Address2"]
+#	ttk::entry $w(dType).entry3
+#	ttk::entry $w(dType).entry4
+#	
+#	ttk::label $w(dType).txt4 -text [mc "Address3"]
+#	ttk::entry $w(dType).entry5
+#	
+#	ttk::label $w(dType).txt5 -text [mc "City/State/Zip"]
+#	ttk::entry $w(dType).entry6
+#	ttk::entry $w(dType).entry7 -width 5
+#	ttk::entry $w(dType).entry8 -width 10
+#	
+#	ttk::label $w(dType).txt6 -text [mc "Country/Phone"]
+#	ttk::entry $w(dType).entry9
+#	ttk::entry $w(dType).entry10
+#	
+#
+#	#ttk::label $w(dType).txt2 -text [mc "Insert this address for each version?"]
+#
+#	ttk::button $w(dType).close -text [mc "Close"] -command {destroy .d}
+#	
+#	
+#	#----- Grid
+#	grid $w(dType).txt1 -column 0 -row 0 -sticky news
+#	grid $w(dType).entry1 -column 1 -row 0 -sticky news
+#	grid $w(dType).btn1 -column 2 -row 0 -sticky news
+#	
+#	grid $w(dType).txt2 -column 0 -row 1 -sticky news
+#	grid $w(dType).entry2 -column 1 -row 1 -sticky news
+#	
+#	grid $w(dType).txt3 -column 0 -row 2 -sticky news
+#	grid $w(dType).entry3 -column 1 -row 2 -sticky news
+#	grid $w(dType).entry4 -column 2 -row 2 -sticky news
+#	
+#	grid $w(dType).txt4 -column 0 -row 3 -sticky news
+#	grid $w(dType).entry5 -column 1 -row 3 -sticky news
+#	
+#	grid $w(dType).txt5 -column 0 -row 4 -sticky news
+#	grid $w(dType).entry6 -column 1 -row 4 -sticky news
+#	grid $w(dType).entry7 -column 2 -row 4 -sticky news
+#	grid $w(dType).entry8 -column 3 -row 4 -sticky news
+#	
+#	grid $w(dType).txt6 -column 0 -row 5 -sticky news
+#	grid $w(dType).entry9 -column 1 -row 5 -sticky news
+#	grid $w(dType).entry10 -column 2 -row 5 -sticky news
+#	
+#	#grid $w(dType).txt2 -column 0 -row 1 -sticky news
+#	grid $w(dType).close -column 3 -row 6 -sticky  news
+#	
+#} ;# eAssistHelper::addDistTypes_GUI
 
 
 proc eAssistHelper::insertItems {tbl} {
@@ -156,8 +154,8 @@ proc eAssistHelper::insertItems {tbl} {
     # SEE ALSO
     #
     #***
-    global log files headerParams dist carrierSetup packagingSetup txtVariable
-    ${log}::debug --START-- [info level 1]
+    global log files headerParams dist carrierSetup packagingSetup txtVariable 
+    #${log}::debug --START-- [info level 1]
     
     set w(di) .di
     if {[winfo exists $w(di)]} {destroy .di}
@@ -171,8 +169,6 @@ proc eAssistHelper::insertItems {tbl} {
     set locX [expr {[winfo width . ] / 3 + [winfo x .]}]
     set locY [expr {[winfo height . ] / 3 + [winfo y .]}]
     wm geometry $w(di) +${locX}+${locY}
-
-    focus $w(di)
 	
 	set f1 [ttk::frame $w(di).f1]
 	pack $f1 -expand yes -fill both -pady 5p -padx 5p
@@ -219,32 +215,35 @@ proc eAssistHelper::insertItems {tbl} {
 		foreach header $curCol {
 			incr x
 			incr i
-			${log}::debug Header: $header / Widgets: [lrange $headerParams($header) 2 2]
+			#${log}::debug Header: $header / Widgets: [lrange $headerParams($header) 2 2]
 			# Check to make sure that the column hasn't been hidden, if it is, lets stop the current loop.
 			if {[$tbl columncget $header -hide] == 1} {continue}
 			
-			set wid [string tolower [lrange $headerParams($header) 2 2]]
+			#set wid [catch {[string tolower [lrange $headerParams($header) 2 2]]} err]
+			set wid [db eval "SELECT Widget FROM Headers WHERE InternalHeaderName='$header'"]
+			
+			# default to ttk::entry
+			#if {$wid eq ""} {set wid ttk::entry}
 			
 			if {$wid eq "ttk::combobox"} {
 				switch -glob -- [string tolower $header] {
 					distributiontype	{
-						${log}::debug DistributionType
+						#${log}::debug DistributionType
 						ttk::label $f2.txt$i -text [mc "$header"]
-						$wid $f2.$x$header -values $dist(distributionTypes) -textvariable txtVariable
+						$wid $f2.$x$header -values $dist(distributionTypes) -textvariable txtVariable -width 35
 						
 						$f2.$x$header delete 0 end
 						$f2.$x$header configure -state readonly
 						
 						grid $f2.txt$i -column 0 -row $x -sticky news -pady 5p -padx 5p
 						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
-						
 						#$btnBar.ok configure -command "eAssistHelper::insValuesToTableCells [list $tbl] $txtVariable $origCells; destroy .di"
 						
 					}
-					carriermethod		{
-						${log}::debug CarrierMethod
+					shipvia		{
+						#${log}::debug CarrierMethod
 						ttk::label $f2.txt$i -text [mc "$header"]
-						$wid $f2.$x$header -values $carrierSetup(CarrierList) -textvariable txtVariable
+						$wid $f2.$x$header -values $carrierSetup(ShipViaName) -textvariable txtVariable -width 35
 						$f2.$x$header delete 0 end
 						$f2.$x$header configure -state readonly
 						
@@ -252,9 +251,9 @@ proc eAssistHelper::insertItems {tbl} {
 						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
 					}
 					packagetype			{
-						${log}::debug PackageType
+						#${log}::debug PackageType
 						ttk::label $f2.txt$i -text [mc "$header"]
-						$wid $f2.$x$header -values $packagingSetup(Packages) -textvariable txtVariable
+						$wid $f2.$x$header -values $packagingSetup(PackageType) -textvariable txtVariable -width 35
 						$f2.$x$header delete 0 end
 						$f2.$x$header configure -state readonly
 						
@@ -262,9 +261,9 @@ proc eAssistHelper::insertItems {tbl} {
 						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
 					}
 					containertype		{
-						${log}::debug ContainerType
+						#${log}::debug ContainerType
 						ttk::label $f2.txt$i -text [mc "$header"]
-						$wid $f2.$x$header -values $packagingSetup(Containers) -textvariable txtVariable
+						$wid $f2.$x$header -values $packagingSetup(ContainerType) -textvariable txtVariable -width 35
 						$f2.$x$header delete 0 end
 						$f2.$x$header configure -state readonly
 						
@@ -272,9 +271,9 @@ proc eAssistHelper::insertItems {tbl} {
 						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
 					}
 					shippingclass		{
-						${log}::debug ShippingClass
+						#${log}::debug ShippingClass
 						ttk::label $f2.txt$i -text [mc "$header"]
-						$wid $f2.$x$header -values $carrierSetup(ShippingClass) -textvariable txtVariable
+						$wid $f2.$x$header -values $carrierSetup(ShippingClass) -textvariable txtVariable -width 35
 						$f2.$x$header delete 0 end
 						$f2.$x$header configure -state readonly
 						
@@ -283,20 +282,22 @@ proc eAssistHelper::insertItems {tbl} {
 					}
 					default			{
 						${log}::notice Item not setup to use the ComboBox, displaying a generic text widget
-						ttk::entry $f2.$x$header -textvariable txtVariable
+						ttk::entry $f2.$x$header -textvariable txtVariable -width 35
 						
 						grid $f2.$x$header -column 0 -row $x -sticky news -pady 5p -padx 5p
 						}
 				}
 			} else {
-						${log}::debug General
+						#${log}::debug General
 						ttk::label $f2.txt$i -text [mc "$header"]
 						# Create the widget specified in Setup for the column; typically will be ttk::entry
-						$wid $f2.$x$header -textvariable txtVariable
+						#if {$wid eq ""} {set wid ttk::entry}
+						$wid $f2.$x$header -textvariable txtVariable -width 35
 				
 						grid $f2.txt$i -column 0 -row $x -sticky news -pady 5p -padx 5p
 						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
 			}
+			focus $f2.$x$header
 		}
 	
 	} else {
@@ -309,14 +310,14 @@ proc eAssistHelper::insertItems {tbl} {
 		$btnBar.ok configure -command {destroy .di}
 	}
 
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# eAssistHelper::insertItems
 
 
-proc eAssistHelper::projSetup {} {
-    #****f* projSetup/eAssisthelper
+proc eAssistHelper::importProgBar {args} {
+    #****f* importProgBar/eAssistHelper
     # CREATION DATE
-    #   09/08/2014 (Monday Sep 08)
+    #   11/18/2014 (Tuesday Nov 18)
     #
     # AUTHOR
     #	Casey Ackels
@@ -326,10 +327,70 @@ proc eAssistHelper::projSetup {} {
     #   
     #
     # SYNOPSIS
-    #   eAssisthelper::projSetup  
+    #   eAssistHelper::importProgBar args 
     #
     # FUNCTION
-    #	Launch the Project Setup gui, so we can assign the Job Number, Jot Title, Name and CSR
+    #	Displays a progress bar when importing a file.
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+	#	Set length: $::gwin(importpbar) configure -maximum <value>
+	# 	Update: $::gwin(importpbar) step <value>
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+	set w .pb
+    if {[winfo exists w]} {destroy $w}
+	
+	if {$args eq "destroy"} {destroy $w; return}
+
+    toplevel $w
+    wm transient $w .
+    wm title $w [mc "Progress Bar"]
+    
+    set locX [expr {[winfo screenwidth . ] / 4 + [winfo x .]}]
+    set locY [expr {[winfo screenheight . ] / 5 + [winfo y .]}]
+    wm geometry $w 150x75+${locX}+${locY}
+
+    set f1 [ttk::labelframe $w.f1 -text [mc "Importing Records"] -padding 10]
+    pack $f1 -fill both -expand yes -padx 5p -pady 5p
+	
+    set ::gwin(importpbar) [ttk::progressbar $f1.pbar]
+	
+	grid $::gwin(importpbar) -column 0 -row 0 -sticky news
+
+    
+} ;# eAssistHelper::importProgBar
+
+
+proc eAssistHelper::editNotes {} {
+    #****f* editNotes/eAssistHelper
+    # CREATION DATE
+    #   03/11/2015 (Wednesday Mar 11)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssistHelper::editNotes  
+    #
+    # FUNCTION
+    #	Displays the Notes window for the job level
     #   
     #   
     # CHILDREN
@@ -345,71 +406,101 @@ proc eAssistHelper::projSetup {} {
     #   
     #   
     #***
-    global log CSR job
+    global log job hist user
+	# Do not launch if a job has not been loaded
+	if {![info exists job(db,Name)]} {${log}::debug The job database has not been loaded yet; return}
 
-    set w(ps) .ps
-    if {[winfo exists $w(ps)]} {destroy .ps}
-
-    toplevel $w(ps)
-    wm transient $w(ps) .
-    wm title $w(ps) [mc "Project Information"]
+	set w .notes
+    eAssist_Global::detectWin $w -k
+	
+	# Setup the history array
+	set hist(log,User) $user(id)
+	set hist(log,Date) [ea::date::getTodaysDate]
+	
+	toplevel $w
+    wm transient $w .
+    wm title $w [mc "Job Level Notes"]
     
     set locX [expr {[winfo screenwidth . ] / 4 + [winfo x .]}]
     set locY [expr {[winfo screenheight . ] / 5 + [winfo y .]}]
-    wm geometry $w(ps) +${locX}+${locY}
+    wm geometry $w +${locX}+${locY}
 
-    set f1 [ttk::labelframe $w(ps).f1 -text [mc "Job Information"] -padding 10]
+	## Revision Frame
+	##
+    set f0 [ttk::frame $w.f0]
+    pack $f0 -fill both -expand yes -padx 5p
+	
+	ttk::label $f0.txt1 -text [mc "View Revision"]
+	ttk::combobox $f0.cbox -width 5 \
+							-values [$job(db,Name) eval "SELECT Notes_ID FROM NOTES"] \
+							-state readonly
+							#-postcommand 
+	ttk::button $f0.btn -text [mc "Refresh"] -command [list job::db::readNotes $f0.cbox $w.f1.txt $w.f2.bottom.txt]
+	
+	grid $f0.txt1 -column 0 -row 0 -pady 2p -padx 2p
+	grid $f0.cbox -column 1 -row 0 -pady 2p -padx 2p
+	grid $f0.btn -column 2 -row 0 -pady 2p -padx 2p
+
+	## Job Notes Frame
+	##
+    set f1 [ttk::labelframe $w.f1 -text [mc "Job Notes"] -padding 10]
     pack $f1 -fill both -expand yes -padx 5p -pady 5p
-    
-    
-    ttk::label $f1.txt1 -text [mc "CSR"]
-    ttk::combobox $f1.cbox1 -postcommand "dbCSR::getCSRID $f1.cbox1 {FirstName LastName}" -textvariable job(CSRName) -validate all -validatecommand {AutoComplete::AutoComplete %W %d %v %P [dbCSR::getCSRID "" {FirstName LastName}]}
-    focus $f1.txt1
-    
-    ttk::label $f1.txt1a -text [mc "Title"]
-    ttk::entry $f1.entry1a -textvariable job(Title) -validate all -validatecommand {AutoComplete::AutoComplete %W %d %v %P [list "Portland Monthly" "Seattle Met" Other]}
-		tooltip::tooltip $f1.entry1a [mc "Publication Title"]
-    
-    ttk::label $f1.txt2 -text [mc "Name"]
-    ttk::entry $f1.entry2 -textvariable job(Name)
-		tooltip::tooltip $f1.entry2 [mc "Job Name"] 
-    
-    ttk::label $f1.txt3 -text [mc "Number"]
-    ttk::entry $f1.entry3 -textvariable job(Number)
-		tooltip::tooltip $f1.entry3 [mc "Job Number"]
-    
-    grid $f1.txt1      -column 0 -row 0 -sticky nes -padx 3p -pady 3p
-    grid $f1.cbox1     -column 1 -row 0 -sticky news -padx 3p -pady 3p
-    grid $f1.txt1a     -column 0 -row 1 -sticky nes -padx 3p -pady 3p
-    grid $f1.entry1a   -column 1 -row 1 -sticky news -padx 3p -pady 3p
-    grid $f1.txt2      -column 0 -row 2 -sticky nes -padx 3p -pady 3p
-    grid $f1.entry2    -column 1 -row 2 -sticky news -padx 3p -pady 3p
-    grid $f1.txt3      -column 0 -row 3 -sticky nes -padx 3p -pady 3p
-    grid $f1.entry3    -column 1 -row 3 -sticky news -padx 3p -pady 3p
 	
-    #set f2 [ttk::labelframe $w(ps).f2 -text [mc "Piece Information"] -padding 10]
-    #pack $f2 -fill both -expand yes
-    #
-    #ttk::label $f2.txt1 -text [mc "Weight"]
-    #ttk::entry $f2.entry1
-    #
-    #ttk::label $f2.txt2 -text [mc "Thickness"]
-    #ttk::entry $f2.entry2
-    #
-    #grid $f2.txt1 -column 0 -row 0 -sticky nes
-    #grid $f2.entry1 -column 1 -row 0 -sticky news
-    #grid $f2.txt2 -column 0 -row 1 -sticky nes
-    #grid $f2.entry2 -column 1 -row 1 -sticky news
-    
-    set btnBar [ttk::frame $w(ps).btnBar -padding 10]
-    pack $btnBar -anchor se ;#-padx 5p -pady 5p
-    
-    ttk::button $btnBar.ok -text [mc "OK"] -command "destroy $w(ps)"
-    ttk::button $btnBar.import -text [mc "Import File"] -command "importFiles::fileImportGUI; destroy $w(ps)"
-    
-    grid $btnBar.ok -column 0 -row 0 -sticky news
-    grid $btnBar.import -column 1 -row 0 -sticky news
+	text $f1.txt -height 5 -yscrollcommand [list $f1.scrolly set]
+	ttk::scrollbar $f1.scrolly -orient v -command [list $f1.txt yview]
 	
+	grid $f1.txt -column 0 -row 0 -sticky news
+	grid $f1.scrolly -column 1 -row 0 -sticky nse
 	
+	grid columnconfigure $f1 0 -weight 2
+	grid rowconfigure $f1 0 -weight 2
+	
+	::autoscroll::autoscroll $f1.scrolly ;# Enable the 'autoscrollbar'
+	
+	## Log notes Frame
+	##
+    set f2 [ttk::labelframe $w.f2 -text [mc "Log Notes"] -padding 10]
+    pack $f2 -fill both -expand yes -padx 5p -pady 5p
+	
+	set f2_a [ttk::frame $f2.top]
+	pack $f2_a -fill both -expand yes
+	
+	ttk::label $f2_a.txt1a -text [mc User]
+	ttk::label $f2_a.txt1b -textvariable hist(log,User)
+	ttk::label $f2_a.txt2a -text [mc Date/Time]
+	ttk::label $f2_a.txt2b -textvariable hist(log,Date)
+	ttk::label $f2_a.txt2c -textvariable hist(log,Time)
+	
+	grid $f2_a.txt1a -column 0 -row 0 -sticky e -padx 2p
+	grid $f2_a.txt1b -column 1 -row 0 -sticky w
+	grid $f2_a.txt2a -column 0 -row 1 -sticky e -padx 2p
+	grid $f2_a.txt2b -column 1 -row 1 -sticky w
+	grid $f2_a.txt2c -column 2 -row 1 -sticky w
+	
+	set f2_b [ttk::frame $f2.bottom]
+	pack $f2_b -fill both -expand yes
+	
+	text $f2_b.txt -height 5 -yscrollcommand [list $f2_b.scrolly set]
+	ttk::scrollbar $f2_b.scrolly -orient v -command [list $f2_b.txt yview]
+
+	grid $f2_b.txt -column 0 -row 0 -sticky news
+	grid $f2_b.scrolly -column 1 -row 0 -sticky nse
+	
+	grid columnconfigure $f2_b 0 -weight 2
+	grid rowconfigure $f2_b 0 -weight 2
+	
+	::autoscroll::autoscroll $f2_b.scrolly ;# Enable the 'autoscrollbar'
+	
+	## Button Frame
+	##
+	set btn [ttk::frame $w.btns -padding 10]
+	pack $btn -padx 5p -pady 5p -anchor se
+	
+	ttk::button $btn.ok -text [mc "OK"] -command [list job::db::insertNotes $f1.txt $f2_b.txt]
+	ttk::button $btn.cancel -text [mc "Cancel"] -command [list destroy $w]
+	
+	grid $btn.ok -column 0 -row 0 -padx 5p -sticky e
+	grid $btn.cancel -column 1 -row 0 -sticky e
+
     
-} ;# eAssistHelper::projSetup
+} ;# eAssistHelper::editNotes

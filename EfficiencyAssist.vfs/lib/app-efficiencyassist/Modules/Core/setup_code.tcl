@@ -7,7 +7,7 @@
 #
 # $Revision: 475 $
 # $LastChangedBy: casey.ackels@gmail.com $
-# $LastChangedDate$
+# $LastChangedDate: 2015-02-22 12:50:13 -0800 (Sun, 22 Feb 2015) $
 #
 ########################################################################################
 
@@ -102,6 +102,7 @@ proc eAssistSetup::selectionChanged {tbl} {
     set G_currentSetupFrame [$tbl get $rowList]
      
      switch -- $G_currentSetupFrame {
+        Admin           {eAssistSetup::admin_GUI ; set GS(gui,lastFrame) admin_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
         Paths           {eAssistSetup::selectFilePaths_GUI ; set GS(gui,lastFrame) selectFilePaths_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
         Labels          {eAssistSetup::boxLabels_GUI ; set GS(gui,lastFrame) boxLabels_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
         Delimiters      {}
@@ -110,6 +111,7 @@ proc eAssistSetup::selectionChanged {tbl} {
         International   {eAssistSetup::international_GUI ; set GS(gui,lastFrame) international_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
         AddressHeaders  {eAssistSetup::addressHeaders_GUI ; set GS(gui,lastFrame) addressHeaders_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
         Carrier         {eAssistSetup::carrierMethod_GUI; set GS(gui,lastFrame) carrierMethod_GUI; ${log}::debug Current Frame: $G_currentSetupFrame}
+        Countries       {eAssistSetup::countries_GUI; set GS(gui,lastFrame) countries_GUI; ${log}::debug Current Frame: $G_currentSetupFrame}
         Packaging       {eAssistSetup::packagingTypes_GUI; set GS(gui,lastFrame) packagingTypes_GUI; ${log}::debug Current Frame: $G_currentSetupFrame}
         DistTypes       {eAssistSetup::distributionTypes_GUI ; set GS(gui,lastFrame) distributionTypes_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
         CSR             {eAssistSetup::customerService_GUI ; set GS(gui,lastFrame) customerService_GUI ; ${log}::debug current Frame: $G_currentSetupFrame}

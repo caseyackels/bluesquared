@@ -8,7 +8,7 @@
 #
 # $Revision: 169 $
 # $LastChangedBy: casey.ackels $
-# $LastChangedDate$
+# $LastChangedDate: 2014-12-23 12:26:36 -0800 (Tue, 23 Dec 2014) $
 #
 ########################################################################################
 
@@ -65,36 +65,35 @@ proc eAssistSetup::packagingTypes_GUI {} {
 
     ttk::label $f1.lbl -text [mc "Name"]
     ttk::entry $f1.entry -textvariable packagingSetup(enterContainerType)
-    listbox $f1.lbox -width 30
+    listbox $f1.lbox -width 30 \
+    		    -yscrollcommand [list $f1.scrolly set] \
+                -xscrollcommand [list $f1.scrollx set]
+        
+    ttk::scrollbar $f1.scrolly -orient v -command [list $f1.lbox yview]
+    ttk::scrollbar $f1.scrollx -orient h -command [list $f1.lbox xview]
+    
     
     ## Grid
     grid $f1.lbl -column 0 -row 0 -sticky e
     grid $f1.entry -column 1 -row 0 -sticky news
     grid $f1.lbox -column 1 -row 1 -sticky news
+    grid $f1.scrolly -column 2 -row 1 -sticky nse
+    grid $f1.scrollx -column 1 -row 2 -sticky ews
+    
+    # Enable the 'autoscrollbar'
+    ::autoscroll::autoscroll $f1.scrolly
+    ::autoscroll::autoscroll $f1.scrollx
+    
+    # Populate the listbox if we have existing data
+    eAssist_db::initContainers containers $f1.lbox
     
     ## Bindings
     # Enter
-    bind $f1.entry <Return> "eAssistSetup::addPackagingSetup CONTAINERS $f1.entry $f1.lbox"
-    # .. So both enter key's work the same way
-    bind $f1.entry <KP_Enter> "eAssistSetup::addPackagingSetup CONTAINERS $f1.entry $f1.lbox"
+    ea::tools::bindings $f1.entry {Return KP_Enter} "ea::tools::populateListbox add $f1.entry $f1.lbox Containers Container"
     
     # Delete
-    bind $f1.lbox <Delete> "eAssistSetup::delPackagingSetup CONTAINERS $f1.lbox"
-    bind $f1.lbox <BackSpace> "eAssistSetup::delPackagingSetup CONTAINERS $f1.lbox"
+    ea::tools::bindings $f1.entry {Delete BackSpace} "ea::tools::populateListbox delete $f1.entry $f1.lbox Containers Container"
 
-
-    
-    # Populate the listbox if we have existing data
-    #if {[info exists packagingSetup(ContainerType)] == 1} {
-    #    foreach item $packagingSetup(ContainerType) {
-    #        $f1.lbox insert end $item
-    #    }
-    #}
-    if {[info exists packagingSetup(Containers)] == 1} {
-            foreach item $packagingSetup(Containers) {
-                $f1.lbox insert end $item
-            }
-    }
     
     ##
     ## Frame 2
@@ -103,34 +102,52 @@ proc eAssistSetup::packagingTypes_GUI {} {
     grid $f2 -column 1 -row 0 -sticky news -padx 5p
     
     ttk::label $f2.lbl -text [mc "Name"]
-    ttk::entry $f2.entry -textvariable packagingSetup(enterPackageType)
-    listbox $f2.lbox -width 30
+    ttk::entry $f2.entry
+    listbox $f2.lbox -width 30 \
+    		    -yscrollcommand [list $f2.scrolly set] \
+                -xscrollcommand [list $f2.scrollx set]
+    
+    ttk::scrollbar $f2.scrolly -orient v -command [list $f2.lbox yview]
+    ttk::scrollbar $f2.scrollx -orient h -command [list $f2.lbox xview]
     
     grid $f2.lbl -column 0 -row 0 -sticky e
     grid $f2.entry -column 1 -row 0 -sticky news
     grid $f2.lbox -column 1 -row 1 -sticky news
     
-    ## Bindings
-    # Enter
-    bind $f2.entry <Return> "eAssistSetup::addPackagingSetup PACKAGES $f2.entry $f2.lbox"
-    # .. So both enter key's work the same way
-    bind $f2.entry <KP_Enter> "eAssistSetup::addPackagingSetup PACKAGES $f2.entry $f2.lbox"
+    grid $f2.scrolly -column 2 -row 1 -sticky nse
+    grid $f2.scrollx -column 1 -row 2 -sticky ews
     
-    # Delete
-    bind $f2.lbox <Delete> "eAssistSetup::delPackagingSetup PACKAGES $f2.lbox"
-    bind $f2.lbox <BackSpace> "eAssistSetup::delPackagingSetup PACKAGES $f2.lbox"
-    
+    # Enable the 'autoscrollbar'
+    ::autoscroll::autoscroll $f2.scrolly
+    ::autoscroll::autoscroll $f2.scrollx
     
     # Populate the listbox if we have existing data
+    eAssist_db::initContainers packages $f2.lbox
+    
+    ## Bindings
+    # Enter
+    ea::tools::bindings $f2.entry {Return KP_Enter} "ea::tools::populateListbox add $f2.entry $f2.lbox Packages Package"
+    #bind $f2.entry <Return> "eAssistSetup::addPackagingSetup PACKAGES $f2.entry $f2.lbox"
+    # .. So both enter key's work the same way
+    #bind $f2.entry <KP_Enter> "eAssistSetup::addPackagingSetup PACKAGES $f2.entry $f2.lbox"
+    
+    # Delete
+    ea::tools::bindings $f2.entry {Delete BackSpace} "ea::tools::populateListbox add $f2.entry $f2.lbox Packages Package"
+    #bind $f2.lbox <Delete> "eAssistSetup::delPackagingSetup PACKAGES $f2.lbox"
+    #bind $f2.lbox <BackSpace> "eAssistSetup::delPackagingSetup PACKAGES $f2.lbox"
+    
+    
+
     #if {[info exists packagingSetup(PackageType)] == 1} {
     #    foreach item $packagingSetup(PackageType) {
     #        $f2.lbox insert end $item
     #    }
     #}
-    if {[info exists packagingSetup(Packages)] == 1} {
-            foreach item $packagingSetup(Packages) {
-                $f2.lbox insert end $item
-            }
-    }
+    #set pkg [eAssist_db::dbSelectQuery -columnNames Package -table Packages]
+    #if {$pkg ne ""} {
+    #    foreach item $pkg {
+    #        $f2.lbox insert end $item
+    #    }
+    #}
 
 } ;#packagingTypes_GUI

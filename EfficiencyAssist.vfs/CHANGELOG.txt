@@ -1,10 +1,41 @@
-= Version 4.0.0 Beta 7 (September 2014)
+= Version 4.0.0 Beta 8 (March 2014)
 == Batch Maker
-* [UPDATE] Selecting a cell in the 'count' column will now select the entire row; selecting any cell not in the 'count' column will select single cells.
+* [NEW] Addresses are immediately inserted into the database upon importing files.
+* [NEW] If a version is not listed in an imported file, EA will automatically insert 'Version 1' (which is the default in EFI Monarch Planner)
+* [NEW] The display order of the columns are now configurable in SETUP.
+* [NEW] Customer, CSR, Job Name/Title and Number are now displayed in the header area of BM.
+* [NEW] Basic reporting has been implemented. When you view the report, it automatically saves it to disk. You will find it in the same folder where you've told EA to save your other files.
+* [NEW] There is now a Notes section which will print out on the Reports. There is an associated log section that you can write internal notes in. This does not print on the main report.
+* [NEW] Security - Anyone who launches EA will automatically be put into the db, and 'logged in'. If you have elevated privleges and are on someone else's computer, you can switch to your permissions.
+* [NEW] (Validation) Check Country/Zip - This will populate the country column with the correct 2 digit code. If the Zip and State do not match; we look assume the zip is correct, and change the state accordingly, then insert the associated country.
+* [UPDATE] Log settings are now per user instead of global.
+* [UPDATE] Importing a file is now much faster than before.
+* [UPDATE] Some data cleansing happens upon importing a file. Quotes, Single Quotes and Comma's are now automatically stripped out, and replaced with a space.
+* [UPDATE] Total Copies function now utilizes the sum() SQL command.
+
+== General
+* [UPDATE] Cursor selection in spreadsheet views now behaves as expected due to an update in a third party package. See the Development notes.
+
+== Development
+* [UPDATE] Updated Tablelist from 5.11 to 5.13
+* [UPDATE] Updated TWAPI from 4.0 to 4.1-dev
+
+--
+
+= Version 4.0.0 Beta 7 (February 2014)
+== Batch Maker
 * [NEW] Clicking on the headers will now sort the column.
+* [NEW] There is now a progress bar that appears after selecting 'IMPORT'.
+* [NEW] Customers, Titles and CSRs are now saved in the database. You can View/Modify/Add Customers. Titles and CSR associations are automatically entered.
+* [UPDATE] Selecting a cell in the 'count' column will now select the entire row; selecting any cell not in the 'count' column will select single cells.
+* [UPDATE] Records are added to the spreadsheet as soon as they are processed.
+
 
 == Core
-* [UPDATE] DB integration has started, Packages/Containers are the first widgets to insert/pull data from the db.
+* [NEW] DB integration has started, Packages/Containers are the first widgets to insert/pull data from the db.
+* [NEW] Ship Via's are now able to be created.
+* [NEW] Countries and Regions can now be entered. This will eventually be used to auto-populate the Country column in BM
+* 
 
 --
 

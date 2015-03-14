@@ -7,7 +7,7 @@
 #
 # $Revision: 508 $
 # $LastChangedBy: casey.ackels $
-# $LastChangedDate$
+# $LastChangedDate: 2015-03-12 13:09:23 -0700 (Thu, 12 Mar 2015) $
 #
 ########################################################################################
 
@@ -60,7 +60,7 @@ proc eAssist::parentGUI {} {
     #	N/A
     #
     #***
-    global program settings btn log mb options
+    global program settings btn log mb options user
     ${log}::debug Entering parentGUI
 
     set locX [expr {[winfo screenwidth . ] / 4 + [winfo x .]}]
@@ -68,8 +68,14 @@ proc eAssist::parentGUI {} {
     #wm geometry .wi 625x375+${locX}+${locY}
     wm geometry . 640x610+${locX}+${locY}
     
+    if {![info exists settings(currentModule)]} {
+        ${log}::debug currentModule not set!
+        set settings(currentModule) {Batch Maker}
+        set settings(currentModule_machine) [join $settings(currentModule) _]
+    }
+    
     wm protocol . WM_DELETE_WINDOW {eAssistSetup::SaveGlobalSettings; destroy .}
-    wm protocol . WM_SAVE_YOURSELF eAssistSetup::SaveGlobalSettings
+    wm protocol . WM_SAVE_YOURSELF {eAssistSetup::SaveGlobalSettings}
 
     
     wm title . $program(FullName)
@@ -79,27 +85,36 @@ proc eAssist::parentGUI {} {
     set mb [menu .mb]
     . configure -menu $mb
 
+    ### *** Main menu's are listed here. The sub-menu's are listed elsewhere.
     ## File
     menu $mb.file -tearoff 0 -relief raised -bd 2
 
     $mb add cascade -label [mc "File"] -menu $mb.file
-    #$mb.file add command -label [mc "Import File"] -command {importFiles::fileImportGUI}
-    #$mb.file add command -label [mc "Preferences..."] -command {eAssistPref::launchPreferences}
-    #$mb.file add command -label [mc "Export File"] -command {export::DataToExport} -state disabled
-    #$mb.file add command -label [mc "Exit"] -command {exit}
 
     ## Module Menu - This is a dynamic menu for the active module.
     menu $mb.modMenu -tearoff 0 -relief raised -bd 2
     $mb add cascade -label [mc "Edit"] -menu $mb.modMenu
 
+    # Start the gui
+    # All frames that make up the GUI are children to .container  
 
     ## Modules
-    menu $mb.module -tearoff 0 -relief raised -bd 2
-    $mb add cascade -label [mc "Module"] -menu $mb.module
+    if {[llength $user($user(id),modules)] > 1} {
+        # Create the main menu item
+        menu $mb.module -tearoff 0 -relief raised -bd 2
+        $mb add cascade -label [mc "Module"] -menu $mb.module
+        
+        # Add in the sub-menus
+        foreach mod [lsort $user($user(id),modules)] {
+            switch -- $mod {
+                "Batch Maker"   {$mb.module add command -label [mc "Batch Maker"] -command "ea::sec::modLauncher $mod"}
+                "Box Labels"    {$mb.module add command -label [mc "Box Labels"] -command "ea::sec::modLauncher $mod"}
+                Setup           {$mb.module add command -label [mc "Setup"] -command "ea::sec::modLauncher $mod"}
+                default         {${log}::critical "$mod: doesn't have a menu configuration setup."}
+            }
+        }
+    }
 
-    $mb.module add command -label [mc "Box Labels"] -command {set options(geom,[lindex $settings(currentModule) 0]) [wm geometry .]; eAssist::buttonBarGUI BoxLabels 0}
-    $mb.module add command -label [mc "Batch Maker"] -command {set options(geom,[lindex $settings(currentModule) 0]) [wm geometry .]; eAssist::buttonBarGUI BatchMaker 1}
-    $mb.module add command -label [mc "Setup"] -command {set options(geom,[lindex $settings(currentModule) 0]) [wm geometry .]; eAssist::buttonBarGUI Setup 2}
 
     ## Help
     menu $mb.help -tearoff 0 -relief raised -bd 2
@@ -108,13 +123,6 @@ proc eAssist::parentGUI {} {
     $mb.help add command -label [mc "About..."] -command { BlueSquared_About::aboutWindow 1}
     $mb.help add command -label [mc "Release Notes..."] -command { BlueSquared_About::aboutWindow 2}
 
-
-    ## Create Separator Frame
-    #set frame0 [ttk::frame .frame0]
-    #ttk::separator $frame0.separator -orient horizontal
-    #
-    #grid $frame0.separator - -sticky ew -ipadx 4i
-    #pack $frame0 -anchor n -fill x
 
     # Create the container frame
     ttk::frame .container
@@ -129,46 +137,17 @@ proc eAssist::parentGUI {} {
     
     ttk::button $btn(Bar).btn1
     ttk::button $btn(Bar).btn2
-
-    # Start the gui
-    # All frames that make up the GUI are children to .container  
-    if {![info exists settings(currentModule)]} {
-        set settings(currentModule) [list BatchMaker 1]
-    }
     
     #${log}::debug CurrentModule: $settings(currentModule)
     eAssist::buttonBarGUI $settings(currentModule)
 
     
     eAssist_GUI::editPopup
-    
-    ##
-    ## If this is the first startup for the machine on this version, we should launch the "New Feature Dialog"
-    ##
-    #if {$settings(newSettingsTxt) eq no} {
-    #    ### Check version and patchLevel to see if we are greater than those numbers, if so display the new version dialog.
-    #    #Error_Message::newVersion buttontxt buttoncmd VersionTxt
-    #    set mySettings(FullVersion) $program(Version).$program(PatchLevel)
-    #    Error_Message::newVersion [mc "View Settings"] "eassist_Preferences::prefGUI" This version changes how your files are opened and saved.\nPlease ensure that the files will save to an appropriate location.\nWould you like to go there now?
-    #    #Error_Message::errorMsg saveSettings1
-    #}
-    
-    #if {$settings(newSettingsTxt) eq yes} {
-    #    if {[info exists mySettings(FullVersion)]} {
-    #        #if {$settings(FullVersion) ne $program(Version).$program(PatchLevel)} {}
-    #        if {[string match $mySettings(FullVersion) $program(Version).$program(PatchLevel)] ne 1} {
-    #            Error_Message::newVersion "" "" EA Version $program(Version).$program(PatchLevel)
-    #            set mySettings(FullVersion) $program(Version).$program(PatchLevel)
-    #            #eassist_Preferences::saveConfig
-    #        }
-    #    }
-    #}
-    
 
-} ;# End of parentGUI
+} ;# End of eAssist::parentGUI
 
 
-proc eAssist::buttonBarGUI {args} {
+proc eAssist::buttonBarGUI {Module} {
     #****f* buttonBarGUI/eAssist
     # AUTHOR
     #	Casey Ackels
@@ -195,37 +174,38 @@ proc eAssist::buttonBarGUI {args} {
     #	N/A
     #
     #***
-    global log btn program settings mb options
-    ${log}::debug Entering buttonBarGUI
+    global log btn program settings mb options user
+    #${log}::debug Entering buttonBarGUI
+    set module [join $Module]
     
-    # save the geometry of the module that we are leaving
-    #set options(geom,[lindex $settings(currentModule) 0]) [wm geometry .]
-    #${log}::debug Geometry: $options(geom,[lindex $settings(currentModule) 0])
-
-    set module [lrange [join $args] 0 0]
-    set idx [lrange [join $args] 1 1]
+    # Update "BatchMaker" to "Batch Maker"
+    if {$module eq "BatchMaker"} {set module {Batch Maker}}
     
     set menuCount [$mb.module index end]
     
     # Enable/Disable the menu items depending on which one is active.
+    # Cycle through the items in the menu, if they match the active module, disable it. If the module doesn't match their list of permissible modules, disable it.
+    ${log}::debug User Modules: $user($user(id),modules)
     for {set x 0} {$menuCount >= $x} {incr x} {
-        if {$idx == $x} {
+            #${log}::debug Active Module: $module
+            #${log}::debug Module in list: [$mb.module entrycget $x -label]
+            #${log}::debug String Match: [string match [$mb.module entrycget $x -label] $module]
+            #${log}::debug LSEARCH: [lsearch $user($user(id),modules) $module]
+        if {[string match [$mb.module entrycget $x -label] $module] == 1 || [lsearch $user($user(id),modules) [$mb.module entrycget $x -label]] == -1} {
             $mb.module entryconfigure $x -state disable
         } else {
             $mb.module entryconfigure $x -state normal
         }
     }
     
-    #${log}::debug INDEX: [lrange $args 1 1]
     $mb.modMenu delete 0 end
     $mb.file delete 0 end
-        
-    ${log}::debug Entering - $module
     switch -- $module {
-        BoxLabels   {
+        "Box Labels"   {
             ${log}::debug Entering $module mode
             # .. remember what module we are in ..
-            set settings(currentModule) [list BoxLabels 0]
+            set settings(currentModule) $module
+            set settings(currentModule_machine) [join $module _]
             
             # .. setup the buttons on the button bar
             eAssist::remButtons $btn(Bar)
@@ -235,15 +215,19 @@ proc eAssist::buttonBarGUI {args} {
             # .. launch the mode
             Shipping_Gui::shippingGUI
             
+            # .. Setup the Geometry
+            eAssist_Global::getGeom $settings(currentModule_machine) 450x475
             # .. save the settings
             #eAssistSetup::SaveGlobalSettings
             lib::savePreferences
-            eAssist_Global::getGeom $module 450x475
         }
-        BatchMaker   {
+        "Batch Maker"   {
             ${log}::debug Entering $module mode
             # .. remember what module we are in ..
-            set settings(currentModule) [list BatchMaker 1]
+            #set settings(currentModule) [list $module 1]
+            set settings(currentModule) $module
+            set settings(currentModule_machine) [join $module _]
+
 
             # .. setup the buttons and status bar
             eAssist::remButtons $btn(Bar)
@@ -255,16 +239,19 @@ proc eAssist::buttonBarGUI {args} {
             # .. launch the mode
             importFiles::eAssistGUI
             
+            # .. Setup the geometry
+            eAssist_Global::getGeom $settings(currentModule_machine) 900x610+240+124
+            
             # .. save the settings
             #eAssistSetup::SaveGlobalSettings
             lib::savePreferences
-            #$mb.file entryconfigure 1 -state normal
-            eAssist_Global::getGeom $module 900x610+240+124
-            }
+        }
         Setup       {
             ${log}::debug Entering $module mode
             # .. remember what module we are in ..
-            set settings(currentModule) [list Setup 2]
+            #set settings(currentModule) [list Setup 2]
+            set settings(currentModule) $module
+            set settings(currentModule_machine) [join $module _]
 
             # .. setup the buttons on the button bar
             eAssist::remButtons $btn(Bar)
@@ -273,17 +260,25 @@ proc eAssist::buttonBarGUI {args} {
 
             # .. launch the mode
             eAssistSetup::eAssistSetup
-            
+
+            # .. Setup the geometry
+            eAssist_Global::getGeom $settings(currentModule_machine) 845x573+247+156
             # .. save the settings
             #eAssistSetup::SaveGlobalSettings
             lib::savePreferences
-            #$mb.file entryconfigure 1 -state disable
-            eAssist_Global::getGeom $module 845x573+247+156
         }
-        default     {}
+        default     {${log}::debug Hit the default: $module}
     }
     
-    $mb.file add command -label [mc "Exit"] -command {exit}
+    # If we do not have anything else in this menu; we don't need the separator bar. So lets skip it.
+    set fileMenuCount [$mb.file index end]
+    if {$fileMenuCount ne "none"} {
+        $mb.file add separator
+    }
+
+    # Adding menu items that should always be shown
+    $mb.file add command -label [mc "Change User"] -command {lib::showPwordWindow}
+    $mb.file add command -label [mc "Exit"] -command {eAssistSetup::SaveGlobalSettings ; exit}
     
     # Check the versions
     vUpdate::whatVersion
@@ -461,3 +456,47 @@ proc eAssist::statusBar {args} {
     
     ${log}::debug --END-- [info level 1]
 } ;# eAssist::statusBar
+
+
+proc eAssist::detectHeightWidth {} {
+    #****f* detectHeightWidth/eAssist
+    # CREATION DATE
+    #   10/30/2014 (Thursday Oct 30)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssist::detectHeightWidth args 
+    #
+    # FUNCTION
+    #	Figure out if we were maximized the last time we were closed
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    if {[winfo screenheight . ] == [winfo height .]} {
+        #wm attributes . -zoomed 1
+        wm state . zoomed
+        } elseif {[winfo screenwidth .] == [winfo width .]} {
+           #wm attributes . -zoomed 1
+           wm state . zoomed
+        }
+} ;# eAssist::detectHeightWidth

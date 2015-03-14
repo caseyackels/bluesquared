@@ -5,9 +5,9 @@
 #
 # Subversion
 #
-# $Revision$
-# $LastChangedBy$
-# $LastChangedDate$
+# $Revision: 259 $
+# $LastChangedBy: casey.ackels $
+# $LastChangedDate: 2012-12-01 15:40:27 -0800 (Sat, 01 Dec 2012) $
 #
 ########################################################################################
 

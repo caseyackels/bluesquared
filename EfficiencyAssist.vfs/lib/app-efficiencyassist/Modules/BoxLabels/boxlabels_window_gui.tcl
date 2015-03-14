@@ -9,7 +9,7 @@
 #
 # $Revision: 498 $
 # $LastChangedBy: casey.ackels $
-# $LastChangedDate$
+# $LastChangedDate: 2015-03-10 10:54:00 -0700 (Tue, 10 Mar 2015) $
 #
 ########################################################################################
 
@@ -59,7 +59,7 @@ proc shippingGUI {} {
     
     Shipping_Code::openHistory ;# Populate the variable so we don't get errors upon startup.
     
-    wm geometry . 450x475
+    #wm geometry . 450x475
     #set program(currentModule) BoxLabels
     #set currentModule BoxLabels
 

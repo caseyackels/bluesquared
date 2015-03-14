@@ -6,9 +6,9 @@
 #
 # Subversion
 #
-# $Revision$
-# $LastChangedBy$
-# $LastChangedDate$
+# $Revision: 601 $
+# $LastChangedBy: casey.ackels@gmail.com $
+# $LastChangedDate: 2015-02-20 14:52:43 -0800 (Fri, 20 Feb 2015) $
 #
 ########################################################################################
 
@@ -125,6 +125,9 @@ proc BlueSquared_About::aboutOpenFiles {about_Text changeLog_Text} {
             $wid tag configure NOTE \
                             -font {verdana 10 bold}
             
+            $wid tag configure NEW \
+                            -font {verdana 10 bold}
+            
         if {$item eq "about"} {
             $wid tag configure Normal \
                             -font {verdana 10} \
@@ -187,18 +190,19 @@ proc BlueSquared_About::aboutOpenFiles {about_Text changeLog_Text} {
                 set grpTag2 [string first \] $stringFormat]
                 set grpName [string range $stringFormat $grpTag1 $grpTag2]
                 
-                ${log}::debug string length: [string length $grpName]
-                ${log}::debug Full String: $stringFormat
+                #${log}::debug string length: [string length $grpName]
+                #${log}::debug Full String: $stringFormat
                 
                 switch -nocase $grpName {
                     [BUG] {set newTag BUG}
                     [UPDATE] {set newTag UPDATE}
                     [NOTE] {set newTag NOTE}
+                    [NEW]   {set newTag NEW}
                     default {${log}::debug no tag for: $grpName}
                 }
                 
-                ${log}::debug Line $idx / $idx.$grpTag1 _ $idx.$grpTag2 / inserting Group1 Tag
-                ${log}::debug String [string range $stringFormat $grpTag1 $grpTag2]
+                #${log}::debug Line $idx / $idx.$grpTag1 _ $idx.$grpTag2 / inserting Group1 Tag
+                #${log}::debug String [string range $stringFormat $grpTag1 $grpTag2]
                 if {$newTag != ""} {
                     # use [incr] because text widget starts at 1; [string] starts at 0
                     incr grpTag2

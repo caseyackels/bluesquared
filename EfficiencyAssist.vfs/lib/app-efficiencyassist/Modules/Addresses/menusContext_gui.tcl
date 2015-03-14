@@ -8,7 +8,7 @@
 #
 # $Revision: 169 $
 # $LastChangedBy: casey.ackels $
-# $LastChangedDate$
+# $LastChangedDate: 2015-03-03 07:27:58 -0800 (Tue, 03 Mar 2015) $
 #
 ########################################################################################
 
@@ -50,8 +50,8 @@ proc IFMenus::tblPopup {tbl mode mName} {
     #   importFiles::processFile
     #
     #***
-    global log files w
-    ${log}::debug --START-- [info level 1]
+    global log files w job
+    #${log}::debug --START-- [info level 1]
     # This is initialized in importFiles_code.tcl [importFiles::processFile]
     # This is bound to the Mouse button in importFiles_gui.tcl [importFiles::eAssistGUI]
     
@@ -85,7 +85,7 @@ proc IFMenus::tblPopup {tbl mode mName} {
     if {$mName eq ".splitTblMenu"} {
         # w(sVersf2).tbl / Split Table
         if {$mode eq "browse"} {
-            $mName add command -label [mc "Quick Fill..."] -command {eAssistHelper::insertItems $w(sVersf2).tbl}
+            $mName add command -label [mc "Quick Insert..."] -command {eAssistHelper::insertItems $w(sVersf2).tbl}
             $mName add command -label [mc "Copy"] -command {IFMenus::copyCell $w(sVersf2).tbl}
             $mName add command -label [mc "Paste"] -command {eAssistHelper::insValuesToTableCells -window $w(sVersf2).tbl [clipboard get] [$w(sVersf2).tbl curcellselection]}
             $mName add command -label [mc "Clear"] -command {IFMenus::clearItems $w(sVersf2).tbl}
@@ -97,7 +97,7 @@ proc IFMenus::tblPopup {tbl mode mName} {
             #$mName add command -label [mc "Delete Row"] -command {catch [$w(sVersf2).tbl delete [$w(sVersf2).tbl curselection]] err}
         } else {
             # Browse mode
-            $mName add command -label [mc "Copy Row"] -command {}
+            #$mName add command -label [mc "Copy Row"] -command {}
             $mName add command -label [mc "New Row"] -command {catch [$w(sVersf2).tbl insert [$w(sVersf2).tbl curselection] ""] err}
             $mName add command -label [mc "Delete Row"] -command {catch [$w(sVersf2).tbl delete [$w(sVersf2).tbl curselection]] err}
             $mName add command -label [mc "Display contents"] -command {${log}::debug [$w(sVersf2).tbl get [$w(sVersf2).tbl curselection]]}
@@ -105,29 +105,31 @@ proc IFMenus::tblPopup {tbl mode mName} {
     } else {
         # files(tab3f2).tbl / Main Table
         if {$mode eq "browse"} {
-            $mName add command -label [mc "Quick Fill..."] -command {eAssistHelper::insertItems $files(tab3f2).tbl}
-            $mName add command -label [mc "Copy"] -command {IFMenus::copyCell $files(tab3f2).tbl}
-            $mName add command -label [mc "Paste"] -command {eAssistHelper::insValuesToTableCells -menu $files(tab3f2).tbl [clipboard get] [$files(tab3f2).tbl curcellselection]}
+            $mName add command -label [mc "Quick Insert..."] -command {eAssistHelper::insertItems $files(tab3f2).tbl}
+            $mName add command -label [mc "Destination..."] -command {eAssistHelper::addDestination $files(tab3f2).tbl [lindex [$files(tab3f2).tbl getcells [$files(tab3f2).tbl curcellselection]] 0]}
+            $mName add command -label [mc "Copy"] -command {IFMenus::copyCell $files(tab3f2).tbl Menu}
+            $mName add command -label [mc "Paste"] -command {eAssistHelper::insValuesToTableCells -hotkey $files(tab3f2).tbl [clipboard get] [$files(tab3f2).tbl curcellselection]}
             $mName add command -label [mc "Clear"] -command {IFMenus::clearItems $files(tab3f2).tbl}
             $mName add separator
             $mName add command -label [mc "Copy Row"] -command {IFMenus::copyRow $files(tab3f2).tbl}
             $mName add command -label [mc "Paste Row"] -command {IFMenus::pasteRow $files(tab3f2).tbl}
-            $mName add command -label [mc "Clear Row Contents"] -command {IFMenus::clearRowContents $files(tab3f2).tbl}
-            $mName add command -label [mc "Insert Row"] -command {catch [$files(tab3f2).tbl insert [$files(tab3f2).tbl curselection] ""] err}
-            $mName add command -label [mc "Delete Row"] -command {catch [$files(tab3f2).tbl delete [$files(tab3f2).tbl curselection]] err}
+            #$mName add command -label [mc "Clear Row Contents"] -command {IFMenus::clearRowContents $files(tab3f2).tbl}
+            #$mName add command -label [mc "Insert Row"] -command {catch [$files(tab3f2).tbl insert [$files(tab3f2).tbl curselection] ""] err}
+            $mName add command -label [mc "Delete Row"] -command {IFMenus::deleteRow $files(tab3f2).tbl OrderNumber Addresses}
         } else {
             # Browse mode
-            $mName add command -label [mc "Copy Row"] -command {}
-            $mName add command -label [mc "New Row"] -command {catch [$files(tab3f2).tbl insert [$files(tab3f2).tbl curselection] ""] err}
-            $mName add command -label [mc "Delete Row"] -command {catch [$files(tab3f2).tbl delete [$files(tab3f2).tbl curselection]] err}
-            $mName add command -label [mc "Display contents"] -command {${log}::debug [$files(tab3f2).tbl get [$files(tab3f2).tbl curselection]]}
+            #$mName add command -label [mc "Copy Row"] -command {}
+            #$mName add command -label [mc "New Row"] -command {catch [$files(tab3f2).tbl insert [$files(tab3f2).tbl curselection] ""] err}
+            #$mName add command -label [mc "Delete Row"] -command {catch [$files(tab3f2).tbl delete [$files(tab3f2).tbl curselection]] err}
+            #$mName add command -label [mc "Display contents"] -command {${log}::debug [$files(tab3f2).tbl get [$files(tab3f2).tbl curselection]]}
         }
     }
         
         # Items that should always be displayed
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# IFMenus::tblPopup
+
 
 
 proc IFMenus::clearRowContents {tbl} {
@@ -156,7 +158,7 @@ proc IFMenus::clearRowContents {tbl} {
     #
     #***
     global log
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
     set cRow [$tbl curselection]
     
@@ -166,7 +168,7 @@ proc IFMenus::clearRowContents {tbl} {
     ## Insert new row
     catch [$tbl insert $cRow ""] err
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# IFMenus::clearRowContents
 
 
@@ -195,19 +197,88 @@ proc IFMenus::pasteRow {tbl} {
     # SEE ALSO
     #
     #***
-    global log
-    ${log}::debug --START-- [info level 1]
+    global log headerParent job
+
+    if {[clipboard get] eq ""} {return}
     
-    set cRow [$tbl curselection]
+    # Setup the headers
+    if {[info exists tmpHdr]} {unset tmpHdr}
+    foreach header $headerParent(headerList) {
+        lappend tmpHdr '$header'
+    }
+    set tmpHdr [join $tmpHdr ,]
     
-    ## Delete Row
-    catch [$tbl delete $cRow] err
+    # Setup the data, encapsulating the data with '' (literal values)
+    # Make sure we can properly handle the user selecting multiple rows.
+    foreach row [clipboard get] {  
+        foreach value [lrange $row 1 end] {
+            lappend tmpValue '$value'
+        }
+        set tmpValue [join $tmpValue ,]
+        
+        $job(db,Name) eval "INSERT INTO Addresses ($tmpHdr) VALUES ($tmpValue)"
+        
+        set rowID [$job(db,Name) last_insert_rowid]
+        $tbl insert end [$job(db,Name) eval "SELECT * FROM Addresses WHERE ROWID=$rowID"]
+        
+        unset tmpValue
+    }
     
-    ## Insert (paste) new row
-    catch [$tbl insert $cRow [clipboard get]] err
-	
-    ${log}::debug --END-- [info level 1]
+    # Update total copies
+    set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
+
 } ;# IFMenus::pasteRow
+
+
+proc IFMenus::deleteRow {tbl dbCol dbTbl} {
+    #****f* deleteRow/IFMenus
+    # CREATION DATE
+    #   02/19/2015 (Thursday Feb 19)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   IFMenus::deleteRow tbl dbCol dbTbl
+    #
+    # FUNCTION
+    #	Deletes the row in the widget and database
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log job
+
+    if {[$tbl curselection] != ""} {
+        # Remove the last entries first, or else the positions will change on us.
+        foreach line [lsort -integer -decreasing [$tbl curselection]] {
+                # $line = Line within the widget (numbering starts at 0)
+                # [$tbl getcells $line,0] = DB index number.
+                #${log}::debug DELETING Line: $line / [$tbl getcells $line,0]
+                $job(db,Name) eval "DELETE from $dbTbl where $dbCol='[$tbl getcells $line,0]'"
+                $tbl delete $line
+        }
+    }
+    
+    # Update total copies
+    set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
+
+} ;# IFMenus::deleteRow
 
 
 proc IFMenus::copyRow {tbl} {
@@ -236,17 +307,17 @@ proc IFMenus::copyRow {tbl} {
     #
     #***
     global log
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
     clipboard clear
     clipboard append [$tbl get [$tbl curselection]]
-    ${log}::debug Copy Row: [$tbl get [$tbl curselection]]
+    #${log}::debug Copy Row: [$tbl get [$tbl curselection]]
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# IFMenus::copyRow
 
 
-proc IFMenus::copyCell {tbl} {
+proc IFMenus::copyCell {tbl {method 0}} {
     #****f* copyCell/IFMenus
     # AUTHOR
     #	Casey Ackels
@@ -274,32 +345,56 @@ proc IFMenus::copyCell {tbl} {
     global log copy
     #${log}::debug --START-- [info level 1]
     
-    set Copy [$tbl getcells [$tbl curcellselection]]    
+    # row,col
+    # Same Row: {0,1 0,2}
+    # Same Column: {0,1 1,1}
+    # Row and Column: {0,1 0,2 1,1 1,2}
+    # 0,1 0,2
+    # 1,1 1,2
+    
+    set Copy [$tbl getcells [$tbl curcellselection]]
     set Cells [$tbl curcellselection]
+    #${log}::debug Copied Cells: $Cells
+    #${log}::debug Copied Data: $Copy
+    #${log}::debug is List? [string is list $Copy]
+    
+    if {$method != 0} {${log}::debug $method; set copy(method) $method}
     
     clipboard clear
     clipboard append $Copy
+    #${log}::debug CLIPBOARD: [clipboard get]
+    #{220 3rd Ave S} {Suite 100} {} Seattle
+    #220 3rd Ave S	Seattle
     
+    
+    #set Cells {0,1 0,2} ;# Same Row (1 Row, 2 Columns)
+    #set Cells {0,1 1,1} ; #Same Column (2 Rows, 1 Column)
+    #set Cells {0,1 0,2 1,1 1,2} ;# Multiple Rows/Columns (2 Rows, 2 Columns)
     if {[info exist tmp]} {unset tmp}
-    
     foreach item $Cells {
         lappend tmp [lindex [split $item ,] 0]
     }
+
+    set numOfRows [llength [lsort -unique $tmp]]
     
-    set colIdx [lrange [split $Cells ,] 0 0]
-    
-    foreach cell $tmp {
-        if {[string match $cell $colIdx] != 1} {
-            set tmp_direction Vertical
-        } else {
-            set tmp_direction Horizontal
-        }
+    if {[info exist colTmp]} {unset colTmp}
+    foreach item $Cells {
+        lappend colTmp [lindex [split $item ,] 1]
     }
+
+    set numOfCols [llength [lsort -unique $colTmp]]
     
-    set copy(orient) $tmp_direction
+    # Single Row
+    if {$numOfRows == 1} {set val Horizontal}
+    # Single Column
+    if {$numOfCols == 1} {set val Vertical}
+    # Multiple Rows and Columns
+    if {$numOfRows >= 2 && $numOfCols >= 2} {set val HorzVert}
+    
+    set copy(orient) $val
+    #${log}::debug $copy(orient) Copy!
+    
     set copy(cellsCopied) [llength $tmp]
-    
-    ${log}::debug $copy(orient) - No. Cells Copied: $copy(cellsCopied)
     
     #${log}::debug --END-- [info level 1]
 } ;# IFMenus::copyCell
@@ -467,7 +562,7 @@ proc IFMenus::toggleMenus {tbl YesNo hidePath showPath colName} {
     #
     #***
     global log files
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     # Removes the column name from one cascade menu and add it to the other.
     
     
@@ -480,8 +575,7 @@ proc IFMenus::toggleMenus {tbl YesNo hidePath showPath colName} {
         $hidePath delete $colName
         $showPath add command -label $colName -command "IFMenus::toggleMenus $tbl no $hidePath $showPath $colName"
     }
-    
-    
+
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# IFMenus::toggleMenus

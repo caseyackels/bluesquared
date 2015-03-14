@@ -9,7 +9,7 @@
 #
 # $Revision: 470 $
 # $LastChangedBy: casey.ackels@gmail.com $
-# $LastChangedDate$
+# $LastChangedDate: 2015-03-06 13:29:36 -0800 (Fri, 06 Mar 2015) $
 #
 ########################################################################################
 
@@ -969,51 +969,42 @@ proc Shipping_Code::onPrint_event {args} {
 	# set myText "Line 1 of the label"
 	# set emailBody "Body of the email: %b"
 	# string map "%b [list $myText]" $emailBody
-	set MacroList [linsert $::boxLabelsVars::eventOnPrintMacroLines end $::boxLabelsVars::eventOnPrintMacroBreakdown]
-	
-
-	foreach {key value} $args {
-		#${log}::debug Looking at $key $value
-		foreach macro $MacroList {
-			${log}::debug Searching for Macro: $macro
-			
+	foreach {key value} $args {		
 			# List all eligible sections for the macro's.
 			# We keep the same Subj variable, because we are continually re[set]ing it, an want to keep the original data.
 			# Once we hit the body, we go through an iterative process.
 			switch -- $key {
-				-line1		{${log}::debug Box Labels: Line1 $value
-							set Subj [string map "$macro [list $value]" $Subj]
-							set MappedBody [string map "$macro [list $value]" $Body]
-							${log}::debug New Subject: $Subj
+				-line1		{
+							set Subj [string map "%1 [list $value]" $Subj]
+							set Body [string map "%1 [list $value]" $Body]
 							}
 				-line2		{
-							set Subj [string map "$macro [list $value]" $Subj]
-							set MappedBody [string map "$macro [list $value]" $Body]
+							set Subj [string map "%2 [list $value]" $Subj]
+							set Body [string map "%2 [list $value]" $Body]
 							}
 				-line3		{
-							set Subj [string map "$macro [list $value]" $Subj]
-							set MappedBody [string map "$macro [list $value]" $Body]
+							set Subj [string map "%3 [list $value]" $Subj]
+							set Body [string map "%3 [list $value]" $Body]
 							}
 				-line4		{
-							set Subj [string map "$macro [list $value]" $Subj]
-							set MappedBody [string map "$macro [list $value]" $Body]
+							set Subj [string map "%4 [list $value]" $Subj]
+							set Body [string map "%4 [list $value]" $Body]
+
 							}
 				-line5		{
-							set Subj [string map "$macro [list $value]" $Subj]
-							set MappedBody [string map "$macro [list $value]" $Body]
+							set Subj [string map "%5 [list $value]" $Subj]
+							set Body [string map "%5 [list $value]" $Body]
 							}
 				-breakdown	{
-							${log}::debug Breakdown Value: $value
-							set Subj [string map "$macro [list $value]" $Subj]
-							set MappedBody [string map "$macro [list $value]" $Body]
+							set Subj [string map "%b [list $value]" $Subj]
+							set Body [string map "%b [list $value]" $Body]
 							}
 				default		{return -code 1 $wrongArgs}
 				
 			}
-		}
 	}
 
     #${log}::debug New Subject: $Subj
-	#${log}::debug New Body: $MappedBody		
-	mail::mail $::boxLabelsVars::cModName $eventName -subject $Subj -body $MappedBody
+	#${log}::debug New Body: $Body		
+	mail::mail $::boxLabelsVars::cModName $eventName -subject $Subj -body $Body
 } ;# Shipping_Code::emailBoxLabels

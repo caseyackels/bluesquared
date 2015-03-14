@@ -8,7 +8,7 @@
 #
 # $Revision: 169 $
 # $LastChangedBy: casey.ackels $
-# $LastChangedDate$
+# $LastChangedDate: 2015-03-11 17:33:06 -0700 (Wed, 11 Mar 2015) $
 #
 ########################################################################################
 
@@ -49,9 +49,10 @@ proc importFiles::fileImportGUI {} {
     # SEE ALSO
     #
     #***
-    global log w options mySettings headerParent process
+    global log w options mySettings headerParent process job
     #${log}::debug Height: [winfo height .] - [winfo x .]
     #${log}::debug Width: [winfo width .] - [winfo y .]
+    if {[eAssistHelper::checkProjSetup] == 1} {return}
     
     if {[winfo exists .wi] == 1} {destroy .wi}
     
@@ -86,7 +87,7 @@ proc importFiles::fileImportGUI {} {
     grid $f0.txt1 -column 0 -row 0 -pady 5p -sticky e ;#-padx 2p
     grid $f0.entry1 -column 1 -row 0 -pady 5p -sticky ew ;#-padx 2p
     
-    ttk::button $f0.btn1 -text [mc "Open File"] -command {importFiles::readFile [eAssist_Global::OpenFile "Open File" $mySettings(sourceFiles) file csv] $w(wi).lbox1.listbox}
+    ttk::button $f0.btn1 -text [mc "Open File"] -command {importFiles::readFile [eAssist_Global::OpenFile "Open File" $job(SaveFileLocation) file -ext csv -filetype {{Comma Separated Values} {.csv}}] $w(wi).lbox1.listbox}
     ttk::button $f0.btn2 -text [mc "Import"] -command {lib::savePreferences; importFiles::processFile $w(wi)} -state disabled
     #ttk::button $frame1a.btn3 -text [mc "Reset"] -command {{$log}::debug Reset Interface} -state disabled
     
@@ -98,9 +99,11 @@ proc importFiles::fileImportGUI {} {
         #set options(AutoAssignHeader) 1
         #set options(ClearExistingData) 1
     ttk::checkbutton $f0.chkbtn1 -text [mc "Auto-Assign Header Names"] -variable options(AutoAssignHeader)
-    ttk::checkbutton $f0.chkbtn2 -text [mc "Clear existing data before importing"] -variable options(ClearExistingData)
+    #ttk::checkbutton $f0.chkbtn2 -text [mc "Clear existing data before importing"] -variable options(ClearExistingData)
+        #tooltip::tooltip $f0.chkbtn2 [mc "This will remove existing data from the database!"]
+        
     grid $f0.chkbtn1 -column 0 -columnspan 2 -row 1 -sticky w
-    grid $f0.chkbtn2 -column 0 -columnspan 2 -row 2 -sticky w
+    #grid $f0.chkbtn2 -column 0 -columnspan 2 -row 2 -sticky w
 
     
     #ttk::label $frame1a.txt2 -text [mc "Number of Records:"]

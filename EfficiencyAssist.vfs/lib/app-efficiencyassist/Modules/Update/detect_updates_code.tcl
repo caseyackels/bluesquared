@@ -7,7 +7,7 @@
 #
 # $Revision: 384 $
 # $LastChangedBy: casey.ackels@gmail.com $
-# $LastChangedDate$
+# $LastChangedDate: 2015-03-04 19:02:39 -0800 (Wed, 04 Mar 2015) $
 #
 ########################################################################################
 
@@ -46,13 +46,15 @@ proc vUpdate::saveCurrentVersion {} {
     #
     #
     #***
-    global log cVersion program
+    global log cVersion program job
+    
+    if {![info exists program(dbVersion)]} {set program(dbVersion) ""}
     
     set firstRun 0
     ${log}::debug Entering SaveCurrentVersion
     
     # Check to see if we've ran this before ...
-    if {[info exists $program(Version)] == 0} {
+    if {[info exists program(Version)] == 0} {
         set firstRun 1
         ${log}::debug firstRun: $firstRun
     }
@@ -64,16 +66,22 @@ proc vUpdate::saveCurrentVersion {} {
         set cVersion(oldVersion) $program(Version)
         set cVersion(oldPatchLevel) $program(PatchLevel)
         set cVersion(oldbeta) $program(beta)
+        set cVersion(olddbVersion) $program(dbVersion)
     }
     
     set program(Version) 4
     set program(PatchLevel) 0.0 ;# Leading decimal is not needed
-    set program(beta) "Beta 6"
-    set program(Dev) 1
+    set program(beta) "Beta 8"
+    set program(Dev) 0
     set program(fullVersion) "$program(Version).$program(PatchLevel) $program(beta)"
+    
+    set program(dbVersion) "$program(Version).$program(PatchLevel)-1"
+    set job(db,currentSchemaVers) 3
     
     set program(Name) "Efficiency Assist"
     set program(FullName) "$program(Name) - $program(fullVersion)"
+    
+
     
     tk appname $program(Name)
 
@@ -149,7 +157,7 @@ proc vUpdate::whatVersion {} {
     }
     
     if {$cVersion(oldVersion) ne $program(Version)} {
-        ${log}::debug New Major Version detected, was $cVersion(oldVersion, now $program(Version)!
+        ${log}::debug New Major Version detected, was $cVersion(oldVersion), now $program(Version)!
         ${log}::debug Major Update, launching 'New Update' dialog ...
         set vers [mc "major"]
         set newVersionExpln [mc "Definition of major: This has numerous new features that are big or small. All of the updates that the previous minor releases had. This may contain more bugs."]
@@ -159,103 +167,61 @@ proc vUpdate::whatVersion {} {
     }
     
     if {$launchGui == 1} {
+        # Check the db schema
+        vUpdate::checkDBVers $program(Version).$program(PatchLevel)
+        
         set newVersionTxt [mc "A new $vers version has been detected"]
         vUpdate::newVersion $newVersionTxt $newVersionExpln
     }
 } ;#whatVersion
 
 
-proc vUpdate::newVersion {txt expln} {
-    #****f* newVersion/vUpdate
+proc vUpdate::checkDBVers {version} {
+    #****f* checkDBVers/vUpdate
+    # CREATION DATE
+    #   02/08/2015 (Sunday Feb 08)
+    #
     # AUTHOR
     #	Casey Ackels
     #
     # COPYRIGHT
-    #	(c) 2014 Casey Ackels
-    #
-    # FUNCTION
-    #	We are running a new version, so lets let the User know about it, and show the Changelog (if the user desires). This does not detect a new version to download!
+    #	(c) 2015 Casey Ackels
+    #   
     #
     # SYNOPSIS
-    #	N/A
+    #   vUpdate::checkDB version 
     #
+    # FUNCTION
+    #	Ensures the DB has been updated; if it hasn't. Exit gracefully.
+    #   
+    #   
     # CHILDREN
     #	N/A
-    #
+    #   
     # PARENTS
-    #	
-    #
+    #   
+    #   
     # NOTES
-    #   Using Arrays: cVersion, program
-    #
+    #   
+    #   
     # SEE ALSO
-    #
-    #
+    #   
+    #   
     #***
-    global log cVersion program
-    
-    # Connect to the code.google.com page and query a file ...
-    # https://docs.google.com/document/d/1k-O1ZjObXcCMcVYE8oNXUnWEq5GcPsHMQTaHdFgAxwk/edit?usp=sharing
-    
-    ##
-    ## Add proc to launch a dialog
-    ## [New Update: Version <4.3.1>]
-    ## [Old Version: 4.2.1]
-    ## [A new update has been installed]
-    ## [Would you like to view the changes?]
-    ## Buttons Yes/No (Yes opens up the Change Log), (No closes the update dialog)
-    set win .newVers
-    
-    if {[winfo exists $win]} {destroy $win}
-    toplevel $win
-    wm transient $win .
-    wm title $win [mc "New version detected"]
+    global log program
 
-    # Put the window in the center of the parent window
-    set locX [expr {[winfo screenwidth . ] / 4 + [winfo x .]}]
-    set locY [expr {[winfo screenheight . ] / 5 + [winfo y .]}]
-    wm geometry $win +${locX}+${locY}
+    # Current schema compat version
+    set getCompatVersion [eAssist_db::dbWhereQuery -columnNames ProgramVers -table Schema -where ProgramVers='$version']
+    
+    if {$getCompatVersion eq ""} {
+        ${log}::critical DB schema is not compatible with this version. Please update the database, before running $program(Name)!
+        } else {
+            ${log}::info DB Schema is compatible with this version of $program(Name)
+        }
 
-    focus $win
-	
-    # ----- Frame 1
-	set wvers(f1) [ttk::frame $win.frame1 -padding 10]
-	pack $wvers(f1) -fill both -expand yes  -pady 5p -padx 5p
     
-    ttk::label $wvers(f1).txt -text $txt
-    
-    ttk::label $wvers(f1).oldVersTxt -text [mc "Old Version:"]
-    ttk::label $wvers(f1).oldVersNum -text $cVersion(oldFullVersion)
-    
-    ttk::label $wvers(f1).newVersTxt -text [mc "New Version:"]
-    ttk::label $wvers(f1).newVersNum -text $program(fullVersion)
-    
-    ttk::label $wvers(f1).expln -text $expln
-    
-    # Grid
-    grid $wvers(f1).txt -column 0 -columnspan 2 -row 0 -pady 5p -padx 5p -sticky w
-    
-    grid $wvers(f1).oldVersTxt -column 0 -row 1 -sticky e
-    grid $wvers(f1).oldVersNum -column 1 -row 1 -sticky w
-    
-    grid $wvers(f1).newVersTxt -column 0 -row 2 -sticky e
-    grid $wvers(f1).newVersNum -column 1 -row 2 -sticky w
-    
-    grid $wvers(f1).expln -column 0 -columnspan 2 -row 3 -pady 5p -padx 5p -sticky w
-    
-    
-    # ----- Button Frame
-    set wvers(btn) [ttk::frame $win.btns]
-    pack $wvers(btn) -pady 5p -padx 5p -anchor se
-    
-    ttk::button $wvers(btn).chnglog -text [mc "View Release Notes"] -command {BlueSquared_About::aboutWindow 2; destroy .newVers}
-    ttk::button $wvers(btn).ok -text [mc "OK"] -command {lib::savePreferences; destroy .newVers}
-    
-    grid $wvers(btn).chnglog -column 0 -row 0 -sticky e -pady 5p -padx 5p -ipadx 3p
-    grid $wvers(btn).ok -column 1 -row 0 -sticky e -pady 5p -padx 5p
-    
-    
-} ;#newVersion
+} ;# vUpdate::checkDBVers
+
 
 #proc vUpdate::checkForUpdates {} {
 #    #****f* checkForUpdates/vUpdate

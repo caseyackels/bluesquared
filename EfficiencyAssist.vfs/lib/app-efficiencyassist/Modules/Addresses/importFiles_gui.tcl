@@ -7,7 +7,7 @@
 #
 # $Revision: 498 $
 # $LastChangedBy: casey.ackels $
-# $LastChangedDate$
+# $LastChangedDate: 2015-03-12 13:09:23 -0700 (Thu, 12 Mar 2015) $
 #
 ########################################################################################
 
@@ -61,15 +61,23 @@ proc importFiles::eAssistGUI {} {
     #	
     #
     #***
-    global log program w headerParent files mySettings process dist filter w options csmpls CSR job
+    global log program w headerParent files mySettings process dist filter w options csmpls CSR job settings user
     
+    #${log}::debug $settings(currentModule)
+    #${log}::debug $user($user(id),modules) [lsearch $user($user(id),modules) [lindex $settings(currentModule) 0]]
+    #
+    #if {[lsearch $user($user(id),modules) [lindex $settings(currentModule) 0]] == -1} {
+    #    ${log}::debug [parray user]
+    #    ${log}::debug Permission Denied.
+    #}
     # Clear the frames before continuing
     eAssist_Global::resetFrames parent
     
-    wm geometry . 900x610 ;# Width x Height
-    
     # Setup the Filter array
-    eAssist_Global::launchFilters
+   # eAssist_Global::launchFilters
+    
+    # Init vars - these overwrite the old flat file values, with values from the db
+    importFiles::initVars
     
     
     ##
@@ -78,8 +86,9 @@ proc importFiles::eAssistGUI {} {
     set frame0 [ttk::frame .container.frame0]
     pack $frame0 -expand yes -fill both -pady 5p -padx 5p
 
+
     ##
-    ## Notebook
+    ## Parent Notebook
     ##
     set w(nbk) [ttk::notebook $frame0.nbk]
     pack $w(nbk) -expand yes -fill both
@@ -96,153 +105,53 @@ proc importFiles::eAssistGUI {} {
 
     $w(nbk) select $w(nbk).f3
     
-    ##
-    ## - TAB 1
-    ##
     
-    #------------- Frame 1a - Top frame
-    #set frame1a [ttk::labelframe $w(nbk).f1.top -text [mc "Open file"]]
-    #pack $frame1a -side top -fill both -padx 5p -pady 5p
-    #
-    #ttk::label $frame1a.txt1 -text [mc "File Name:"]
-    #ttk::entry $frame1a.entry1 -textvariable process(fileName) -width 50
-    #
-    #grid $frame1a.txt1 -column 0 -row 0 -pady 5p -sticky e ;#-padx 2p
-    #grid $frame1a.entry1 -column 1 -row 0 -pady 5p -sticky ew ;#-padx 2p
-    #
-    #ttk::button $frame1a.btn1 -text [mc "Open File"] -command {importFiles::readFile [eAssist_Global::OpenFile "Open File" $mySettings(sourceFiles) file csv]}
-    #ttk::button $frame1a.btn2 -text [mc "Import"] -command {importFiles::processFile 2} -state disabled ;# The "2" designates the tab id.
-    ##ttk::button $frame1a.btn3 -text [mc "Reset"] -command {{$log}::debug Reset Interface} -state disabled
-    #
-    #grid $frame1a.btn1 -column 2 -row 0 -padx 5p
-    #grid $frame1a.btn2 -column 3 -row 0 -padx 3p
-    ##grid $frame1a.btn3 -column 4 -row 0 -padx 3p
-    #
-    ## This option should be saved, and read from the config file.
-    #    set options(AutoAssignHeader) 1
-    #ttk::checkbutton $frame1a.chkbtn1 -text [mc "Auto-Assign Header Names"] -variable options(AutoAssignHeader)
-    #grid $frame1a.chkbtn1 -column 0 -columnspan 2 -row 1 -sticky w
-    #
-    #
-    ##ttk::label $frame1a.txt2 -text [mc "Number of Records:"]
-    ##ttk::label $frame1a.entry2 -textvariable process(numOfRecords) -relief flat
+    
+    ## 
+    ## - TAB 1 (Process Planner Files) / First level
     ##
-    ##grid $frame1a.txt2 -column 0 -row 2 -sticky e
-    ##grid $frame1a.entry2 -column 1 -row 2 -sticky ew
-    #
-    ##------------- Frame 1 - Listbox for unassigned file headers
-    #set files(tab1f1) [ttk::labelframe $w(nbk).f1.lbox1 -text [mc "Unassigned Columns"]]
-    #pack $files(tab1f1) -side left -fill both -padx 5p -pady 5p ;#-ipady 2p -anchor nw -side left
-    #
-    #listbox $files(tab1f1).listbox \
-    #            -width 22 \
-    #            -selectbackground yellow \
-    #            -selectforeground black \
-    #            -exportselection no \
-    #            -selectmode single \
-    #            -yscrollcommand [list $files(tab1f1).scrolly set] \
-    #            -xscrollcommand [list $files(tab1f1).scrollx set]
-    #
-    #
-    #ttk::scrollbar $files(tab1f1).scrolly -orient v -command [list $files(tab1f1).listbox yview]
-    #ttk::scrollbar $files(tab1f1).scrollx -orient h -command [list $files(tab1f1).listbox xview]
-    #
-    #
-    #grid $files(tab1f1).listbox -column 0 -row 0 -sticky news
-    #grid columnconfigure $files(tab1f1) $files(tab1f1).listbox -weight 1
-    #grid rowconfigure $files(tab1f1) $files(tab1f1).listbox -weight 1
-    #
-    #grid $files(tab1f1).scrolly -column 1 -row 0 -sticky nse
-    #grid $files(tab1f1).scrollx -column 0 -row 1 -sticky ews
-    #
-    #
-    ## Enable the 'autoscrollbar'
-    #::autoscroll::autoscroll $files(tab1f1).scrolly
-    #::autoscroll::autoscroll $files(tab1f1).scrollx
-    #
-    ##-------------- Frame 2 - Listbox, available headers to map to.
-    #set files(tab1f2) [ttk::labelframe $w(nbk).f1.lbox2 -text [mc "Available Columns"]]
-    #pack $files(tab1f2) -side left -fill both -padx 5p -pady 5p
-    #
-    #listbox $files(tab1f2).listbox \
-    #            -width 25 \
-    #            -selectbackground yellow \
-    #            -selectforeground black \
-    #            -exportselection no \
-    #            -selectmode single \
-    #            -yscrollcommand [list $files(tab1f2).scrolly set] \
-    #            -xscrollcommand [list $files(tab1f2).scrollx set]
-    #
-    #if {[info exists headerParent(headerList)] != 0 } {
-    #    foreach item $headerParent(headerList) {
-    #        $files(tab1f2).listbox insert end $item
-    #    }
-    #    ${log}::debug Inserting masterHeader into files(tab1f2).listbox: $headerParent(headerList)
-    #}
-    #
-    #ttk::scrollbar $files(tab1f2).scrolly -orient v -command [list $files(tab1f2).listbox yview]
-    #ttk::scrollbar $files(tab1f2).scrollx -orient h -command [list $files(tab1f2).listbox xview]
-    #
-    #
-    #grid $files(tab1f2).listbox -column 0 -row 0 -sticky news
-    #grid columnconfigure $files(tab1f2) $files(tab1f2).listbox -weight 1
-    #grid rowconfigure $files(tab1f2) $files(tab1f2).listbox -weight 1
-    #
-    #grid $files(tab1f2).scrolly -column 1 -row 0 -sticky nse
-    #grid $files(tab1f2).scrollx -column 0 -row 1 -sticky ews
-    #
-    #
-    ## Enable the 'autoscrollbar'
-    #::autoscroll::autoscroll $files(tab1f2).scrolly
-    #::autoscroll::autoscroll $files(tab1f2).scrollx
+    set contFrame [ttk::frame $w(nbk).f3.cont]
+    pack $contFrame -fill x
+    
+    set custFrame [ttk::frame $contFrame.cf1 -padding 10]
+    grid $custFrame -column 0 -row 0 -sticky news
+
+    ttk::label $custFrame.txt2a -text [mc "Customer Name:"]
+    ttk::label $custFrame.txt2b -textvariable job(CustName) -width 35
+    
+    ttk::label $custFrame.txt3a -text [mc "CSR Name:"]
+    ttk::label $custFrame.txt3b -text csrname -textvariable job(CSRName) -width 35
+    
+    grid $custFrame.txt2a -column 0 -row 1 -sticky nse -padx 3p
+    grid $custFrame.txt2b -column 1 -row 1 -sticky nsw -ipady 1p -pady 1p
+    
+    grid $custFrame.txt3a -column 0 -row 2 -sticky nse -padx 3p
+    grid $custFrame.txt3b -column 1 -row 2 -sticky nsw -ipady 1p -pady 1p
+    
+    set jobFrame [ttk::frame $contFrame.jf1 -padding 10]
+    grid $jobFrame -column 1 -row 0 -sticky news
+    
+    ttk::label $jobFrame.txt4a -text [mc "Job Number:"]
+    ttk::label $jobFrame.txt4b -textvariable job(Number)
+    
+    ttk::label $jobFrame.txt5a -text [mc "Job Title/Name:"]
+    ttk::label $jobFrame.txt5b -textvariable job(Title)
+    ttk::label $jobFrame.txt6b -textvariable job(Name)
+
+    grid $jobFrame.txt4a -column 0 -row 0 -sticky nse -padx 3p
+    grid $jobFrame.txt4b -column 1 -row 0 -sticky nsw -ipady 1p -pady 1p
+    
+    grid $jobFrame.txt5a -column 0 -row 1 -sticky nse -padx 3p
+    grid $jobFrame.txt5b -column 1 -row 1 -sticky nsw -ipady 1p -pady 1p
+    grid $jobFrame.txt6b -column 2 -row 1 -sticky nsw -ipady 1p -pady 1p
     
 
-    ##--------------- Frame 2a - Buttons
-    #set files(tab1f2a) [ttk::frame $w(nbk).f1.btns]
-    #pack $files(tab1f2a) -side left -fill both -padx 5p -pady 5p
-    #
-    #ttk::button $files(tab1f2a).btn1 -text [mc "Add >"] -command {eAssistHelper::mapHeader} -state disabled
-    #ttk::button $files(tab1f2a).btn2 -text [mc "< Remove"] -command {eAssistHelper::unMapHeader} -state disabled
-    #
-    #grid $files(tab1f2a).btn1 -column 0 -row 0 -sticky n -pady 5p
-    #grid $files(tab1f2a).btn2 -column 0 -row 1 -sticky n -pady 5p
-    #
-    ##--------------- Frame 3 - Listbox, mapped headers
-    #set files(tab1f3) [ttk::labelframe $w(nbk).f1.lbox3 -text [mc "Mapped Columns"]]
-    #pack $files(tab1f3) -side left -fill both -padx 5p -pady 5p
-    #
-    #listbox $files(tab1f3).listbox \
-    #            -width 28 \
-    #            -selectbackground yellow \
-    #            -selectforeground black \
-    #            -exportselection no \
-    #            -selectmode single \
-    #            -yscrollcommand [list $files(tab1f3).scrolly set] \
-    #            -xscrollcommand [list $files(tab1f3).scrollx set]
-    #
-    #ttk::scrollbar $files(tab1f3).scrolly -orient v -command [list $files(tab1f3).listbox yview]
-    #ttk::scrollbar $files(tab1f3).scrollx -orient h -command [list $files(tab1f3).listbox xview]
-    #
-    #grid $files(tab1f3).listbox -column 0 -row 0 -sticky news
-    #grid columnconfigure $files(tab1f3) $files(tab1f3).listbox -weight 2
-    #grid rowconfigure $files(tab1f3) $files(tab1f3).listbox -weight 2
-    #
-    #grid $files(tab1f3).scrolly -column 1 -row 0 -sticky nse
-    #grid $files(tab1f3).scrollx -column 0 -row 1 -sticky ews
-    #
-    ## Enable the 'autoscrollbar'
-    #::autoscroll::autoscroll $files(tab1f3).scrolly
-    #::autoscroll::autoscroll $files(tab1f3).scrollx
-    
-    ##
-    ## - TAB 3
-    ##
-    
-    ##
-    ## Notebook 2
-    ##
+
+    ## Tab 1 (Destinations) / Second Level
+    ## 
     set nb [ttk::notebook $w(nbk).f3.nb]
-    pack $nb -expand yes -fill both
+    pack $nb -expand yes -fill both -padx 5p -pady 5p
+    #grid $nb -column 0 -row 3 -sticky news
 
     ttk::notebook::enableTraversal $nb
 
@@ -260,131 +169,12 @@ proc importFiles::eAssistGUI {} {
     ##
     set files(tab3f1a) [ttk::frame $nb.f1.f1]
     pack $files(tab3f1a) -side top -fill both ;# -padx 5p -pady 5p
-    
-    ##
-    ##------------- Frame 1a, Top Left Frame
-    ##
-    #set files(tab3f1a) [ttk::labelframe $nb.f1.f1.a -text [mc "Available Columns"]]
-    #pack $files(tab3f1a) -side left -fill both -padx 5p -pady 5p
-    #
-    ##ttk::label $files(tab3f1).txt1 -text [mc "Available Columns"]
-    #    set scrolly_lbox1 $files(tab3f1a).scrolly
-    #    set scrollx_lbox1 $files(tab3f1a).scrollx
-    #
-    #listbox $files(tab3f1a).lbox1 -width 20 \
-    #                            -yscrollcommand [list $scrolly_lbox1 set] \
-    #                            -xscrollcommand [list $scrollx_lbox1 set]
-    #
-    #ttk::scrollbar $scrolly_lbox1 -orient v -command [list $files(tab3f1a).lbox1 yview]
-    #ttk::scrollbar $scrollx_lbox1 -orient h -command [list $files(tab3f1a).lbox1 xview]
-    #    
-    ## Enable the 'autoscrollbar'
-    #::autoscroll::autoscroll $scrolly_lbox1
-    #::autoscroll::autoscroll $scrollx_lbox1
-    #
-    #ttk::button $files(tab3f1a).btn1 -text [mc "Add"] -command {eAssistHelper::unHideColumns}
-    #
-    #
-    ##------------- Grid Frame 1a  
-    ##grid $files(tab3f1).txt1 -column 0 -row 0 -sticky new
-    #grid $files(tab3f1a).lbox1 -column 1 -row 0 -sticky news
-    #grid $scrollx_lbox1 -column 1 -row 1 -sticky ew
-    #grid $scrolly_lbox1 -column 2 -row 0 -sticky ns
-    #
-    #grid $files(tab3f1a).btn1 -column 3 -row 0 -sticky new
 
-    
-    ##
-    ##------------- Frame 3a
-    ## Container frame
-    set files(f3a) [ttk::frame $nb.f1.f1.b]
-    pack $files(f3a) -side left -fill both -expand yes ;#-padx 5p -pady 5p
-    
-    # --- Job Info Frame
-    #set files(jobInfo) [ttk::labelframe $files(f3a).f1 -text [mc "Job Information"] -padding 10]
-    #grid $files(jobInfo) -column 0 -row 0 -sticky news -padx 5p -pady 5p -ipady 5p
-    #
-    #ttk::label $files(jobInfo).txt1 -text [mc "CSR"]
-    #ttk::combobox $files(jobInfo).cbox1 -values $CSR(Names) -textvariable job(CSRName)
-    #
-    #ttk::label $files(jobInfo).txt1a -text [mc "Title"]
-    #ttk::entry $files(jobInfo).entry1a -textvariable job(Title)
-    #tooltip::tooltip $files(jobInfo).entry1a [mc "Publication Title"]
-    #
-    #ttk::label $files(jobInfo).txt2 -text [mc "Name"]
-    #ttk::entry $files(jobInfo).entry2 -textvariable job(Name)
-    #tooltip::tooltip $files(jobInfo).entry2 [mc "Job Name"]
-    #
-    #ttk::label $files(jobInfo).txt3 -text [mc "Number"]
-    #ttk::entry $files(jobInfo).entry3 -textvariable job(Number)
-    #tooltip::tooltip $files(jobInfo).entry3 [mc "Job Number"]
-    #
-    #grid $files(jobInfo).txt1      -column 0 -row 0 -sticky nes -padx 3p -pady 3p
-    #grid $files(jobInfo).cbox1     -column 1 -row 0 -sticky news -padx 3p -pady 3p
-    #grid $files(jobInfo).txt1a     -column 0 -row 1 -sticky nes -padx 3p -pady 3p
-    #grid $files(jobInfo).entry1a   -column 1 -row 1 -sticky news -padx 3p -pady 3p
-    #grid $files(jobInfo).txt2      -column 0 -row 2 -sticky nes -padx 3p -pady 3p
-    #grid $files(jobInfo).entry2    -column 1 -row 2 -sticky news -padx 3p -pady 3p
-    #grid $files(jobInfo).txt3      -column 0 -row 3 -sticky nes -padx 3p -pady 3p
-    #grid $files(jobInfo).entry3    -column 1 -row 3 -sticky news -padx 3p -pady 3p
-    #
-    ## --- Piece Info Frame
-    #set files(pieceInfo) [ttk::labelframe $files(f3a).f2 -text [mc "Piece Information"] -padding 10]
-    #grid $files(pieceInfo) -column 1 -row 0 -sticky news -padx 5p -pady 5p
-    #
-    ## -- Widgets
-    #ttk::label $files(pieceInfo).txt2 -text [mc "Weight"] -state disabled
-    #ttk::entry $files(pieceInfo).entry2 -state disabled
-    #tooltip::tooltip $files(pieceInfo).entry2 [mc "Piece Weight"]
-    #
-    #
-    #ttk::label $files(pieceInfo).txt3 -text [mc "Thickness"] -state disabled
-    #ttk::entry $files(pieceInfo).entry3 -state disabled
-    #tooltip::tooltip $files(pieceInfo).entry3 [mc "Piece Thickness"]
-    #
-    #ttk::button $files(pieceInfo).btn -text [mc "Auto Assign Carrier"] -state disabled
-    #
-    ## Grid frame f3
-    ##grid $files(tab1).txt1 -column 0 -row 0 -sticky nes -padx 2p
-    ##grid $files(tab1).entry1 -column 1 -row 0 -sticky news -padx 2p
-    #grid $files(pieceInfo).txt2      -column 0 -row 1 -sticky nes -padx 3p -pady 2p
-    #grid $files(pieceInfo).entry2    -column 1 -row 1 -sticky news -padx 3p -pady 2p
-    #grid $files(pieceInfo).txt3      -column 0 -row 2 -sticky nes -padx 3p -pady 2p
-    #grid $files(pieceInfo).entry3    -column 1 -row 2 -sticky news -padx 3p -pady 2p
-    #grid $files(pieceInfo).btn       -column 0 -columnspan 2 -row 3 -sticky news -padx 3p -pady 2p
-    
-    
-    # --- Internal Samples Frame
-    #set files(internalSamples) [ttk::labelframe $files(f3a).f3 -text [mc "Internal Samples"] -padding 10]
-    #grid $files(internalSamples) -column 2 -row 0 -sticky news -sticky news -padx 5p -pady 5p
-    #
-    #ttk::label $files(internalSamples).txt1     -text [mc "Ticket"]
-    #ttk::label $files(internalSamples).txt1a    -textvariable csmpls(TicketTotal)
-    #ttk::label $files(internalSamples).txt2     -text [mc "CSR"]
-    #ttk::label $files(internalSamples).txt2a    -textvariable csmpls(CSRTotal)
-    #ttk::label $files(internalSamples).txt3     -text [mc "Sample Room"]
-    #ttk::label $files(internalSamples).txt3a    -textvariable csmpls(SmplRoomTotal)
-    #ttk::label $files(internalSamples).txt4     -text [mc "Sales"]
-    #ttk::label $files(internalSamples).txt4a    -textvariable csmpls(SalesTotal)
-    #ttk::button $files(internalSamples).btn1    -text [mc "Edit"] -command {eAssistHelper::addCompanySamples}
-    #
-    #
-    #------------- Grid Frame 1b
-    #grid $files(internalSamples).txt1   -column 0 -row 0 -sticky new -padx 2p
-    #grid $files(internalSamples).txt1a  -column 1 -row 0 -sticky new -padx 2p
-    #grid $files(internalSamples).txt2   -column 0 -row 1 -sticky new -padx 2p
-    #grid $files(internalSamples).txt2a  -column 1 -row 1 -sticky new -padx 2p
-    #grid $files(internalSamples).txt3   -column 0 -row 2 -sticky new -padx 2p
-    #grid $files(internalSamples).txt3a  -column 1 -row 2 -sticky new -padx 2p
-    #grid $files(internalSamples).txt4   -column 0 -row 3 -sticky new -padx 2p
-    #grid $files(internalSamples).txt4a  -column 1 -row 3 -sticky new -padx 2p
-    #grid $files(internalSamples).btn1   -column 1 -row 4 -sticky new ;#-padx 3p
-    
     ##
     #------------- Frame 2, Tablelist Notebook
     ##
-    set files(tab3f2) [ttk::labelframe $nb.f1.f2 -text [mc "Distribution"]]
-    pack $files(tab3f2) -side bottom -fill both -expand yes -padx 5p -pady 5p
+    set files(tab3f2) [ttk::frame $nb.f1.f2]
+    pack $files(tab3f2) -side bottom -fill both -expand yes
     
     
     set scrolly $files(tab3f2).scrolly
@@ -436,28 +226,35 @@ proc importFiles::eAssistGUI {} {
         set colName [$files(tab3f2).tbl columncget [$files(tab3f2).tbl containingcolumn %x] -name]
         #${log}::debug Column Name: $colName
         
-        if {$colName eq "count"} {
+        if {$colName eq "OrderNumber"} {
             $files(tab3f2).tbl configure -selecttype row
         } else {
             $files(tab3f2).tbl configure -selecttype cell
         }
     }
     
-# bind [.tbl bodytag] <Button-1> {printClickedCell %W %x %y}
-#
-#proc printClickedCell {w x y} {
-#    foreach {tbl x y} [tablelist::convEventFields $w $x $y] {}
-#    puts "clicked on cell [$tbl containingcell $x $y]"
-#}   
+    bind $bodyTag <Double-1> {
+        #${log}::debug Clicked on column %W %x %y
+        #${log}::debug Column Name: [$files(tab3f2).tbl containingcolumn %x]
+        #set colName [$files(tab3f2).tbl columncget [$files(tab3f2).tbl containingcolumn %x] -name]
+        #${log}::debug Column Name: $colName
+        if {$colName eq "OrderNumber"} {
+            eAssistHelper::addDestination $files(tab3f2).tbl [lindex [$files(tab3f2).tbl getcells [$files(tab3f2).tbl curcellselection]] 0]
+        }
+    }
+   
     
     bind $bodyTag <Control-v> {
-        eAssistHelper::insValuesToTableCells -hotkey $files(tab3f2).tbl [clipboard get] [$files(tab3f2).tbl curcellselection]
-        ${log}::debug Pressed <Control-V>
+        #eAssistHelper::insValuesToTableCells -hotkey $files(tab3f2).tbl [clipboard get] [$files(tab3f2).tbl curcellselection]
+        #${log}::debug CLIPBOARD _ CTRL+V t [split [clipboard get] \t]
+        #${log}::debug CLIPBOARD _ CTRL+V n [split [clipboard get] \n]
+        #${log}::debug CLIPBOARD _ CTRL+V _list [list [clipboard get]]
+        #${log}::debug Pressed <Control-V>
     }
     
     bind $bodyTag <Control-c> {
-        IFMenus::copyCell $files(tab3f2).tbl
-        ${log}::debug Pressed <Control-C>
+        #IFMenus::copyCell $files(tab3f2).tbl hotkey
+        #${log}::debug Pressed <Control-C>
     }
     
     # Begin labelTag
@@ -471,7 +268,9 @@ proc importFiles::eAssistGUI {} {
     
 #ttk::style map TEntry -fieldbackground [list focus yellow]
    
-
+    # Initialize popup menus
+    IFMenus::tblPopup $files(tab3f2).tbl browse .tblMenu
+    IFMenus::createToggleMenu $files(tab3f2).tbl
 
 } ;# importFiles::eAssistGUI
 
@@ -501,39 +300,64 @@ proc importFiles::initMenu {} {
     # SEE ALSO
     #
     #***
-    global log mb
-    ${log}::debug --START -- [info level 1]
+    global log mb files
+    #${log}::debug --START -- [info level 1]
     
     if {[winfo exists $mb.modMenu.quick]} {
         destroy $mb.modMenu.quick
     }
 
+    if {[winfo exists $mb.file.project]} {
+        destroy $mb.file.project
+    }
+    
+    if {[winfo exists $mb.file.reports]} {
+        destroy $mb.file.reports
+    }
+    
     $mb.modMenu delete 0 end
     $mb.file delete 0 end
     
     # Add Module specific Menus
-    $mb.file add command -label [mc "Project Information"] -command {eAssistHelper::projSetup}
+    menu $mb.file.project
+    $mb.file add cascade -label [mc "Project"] -menu $mb.file.project
+        $mb.file.project add command -label [mc "New..."] -command {customer::projSetup}
+        $mb.file.project add command -label [mc "Edit..."] -command {customer::projSetup edit}
+        $mb.file.project add command -label [mc "Open..."] -command {${log}::debug OPEN EXISTING PROJECT; job::db::open}
     $mb.file add command -label [mc "Import File"] -command {importFiles::fileImportGUI}
     $mb.file add command -label [mc "Export File"] -command {export::DataToExport} ;#-state disabled
+    
+    menu $mb.file.reports
+    $mb.file add cascade -label [mc "Reports"] -menu $mb.file.reports
+    $mb.file.reports add command -label [mc "General"] -command {job::reports::Viewer}
+    
+    #$mb.file add command -label [mc "Export File"] -command {export::newDataToExport}
     
     # Change menu name
     #$mb entryconfigure Edit -label Distribution
     # Add cascade
-    menu $mb.modMenu.quick
-    $mb.modMenu add cascade -label [mc "Quick Add"] -menu $mb.modMenu.quick 
+    #menu $mb.modMenu.quick
+    #$mb.modMenu add cascade -label [mc "Quick Add"] -menu $mb.modMenu.quick 
     #$mb.modMenu.quick add command -label [mc "JG Mail"]
     #$mb.modMenu.quick add command -label [mc "JG Inventory"]
     
-    $mb.modMenu add separator
+    #$mb.modMenu add separator
     
+    $mb.modMenu add command -label [mc "Notes"] -command {eAssistHelper::editNotes}
     $mb.modMenu add command -label [mc "Add Destination"] -command {eAssistHelper::addDestination $files(tab3f2).tbl}
     $mb.modMenu add command -label [mc "Filters..."] -command {eAssist_tools::FilterEditor} -state disable
+    
+    #Add Cascade for Validation functions
+    menu $mb.modMenu.validate
+    $mb.modMenu add cascade -label [mc "Valdiation"] -menu $mb.modMenu.validate
+    $mb.modMenu.validate add command -label [mc "Check Country against Zip"] -command {ea::validate::checkCountryAgainstZip; importFiles::highlightAllRecords $files(tab3f2).tbl}
     #$mb.modMenu add command -label [mc "Internal Samples"] -command {eAssistHelper::addCompanySamples} -state disable
     #$mb.modMenu add command -label [mc "Split"] -command {eAssistHelper::splitVersions}
+    $mb.modMenu add command -label [mc "Manage Customers..."] -command {customer::manage}
     
     $mb.modMenu add separator
     
     $mb.modMenu add command -label [mc "Preferences"] -command {eAssistPref::launchPreferences}
 	
-    ${log}::debug --END -- [info level 1]
+    #${log}::debug --END -- [info level 1]
 } ;# importFiles::initMenu

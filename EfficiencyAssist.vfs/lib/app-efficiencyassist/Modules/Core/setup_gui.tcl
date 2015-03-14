@@ -7,7 +7,7 @@
 #
 # $Revision: 478 $
 # $LastChangedBy: casey.ackels@gmail.com $
-# $LastChangedDate$
+# $LastChangedDate: 2015-02-22 12:50:13 -0800 (Sun, 22 Feb 2015) $
 #
 ########################################################################################
 
@@ -65,20 +65,8 @@ proc eAssistSetup::eAssistSetup {} {
     #***
     global G_setupFrame program tree log GS options settings
     
-    #set program(currentModule) Setup
-    #set currentModule Setup
-    
     # Reset frames before continuing
     eAssist_Global::resetFrames parent
-    
-    #eAssist_Global::getGeom [lindex $settings(currentModule) 0]
-    #
-    #if {[info exists options(geom,[lindex $settings(currentModule) 0])]} {
-    #    wm geometry . $options(geom,[lindex $settings(currentModule) 0])
-    #} else {
-    #    wm geometry . 700x610 ;# Width x Height
-    #}
-    
     
     # Create tree for Setup
     set tbl [ttk::frame .container.tree]
@@ -91,13 +79,13 @@ proc eAssistSetup::eAssistSetup {} {
     # Create groups and children
     # 
     # *** Add your new options to: eAssistSetup::selectionChanged in setup_code.tcl
-    set tree(groups) {BoxLabels BatchMaker Packaging DistTypes CSR Company Logging EmailSetup}
+    set tree(groups) {BoxLabels BatchMaker Packaging DistTypes CSR Company Logging EmailSetup Admin}
     #set tree(groups) [list BoxLabels BatchMaker Packaging DistTypes CSR Company Logging "Email Setup"]
     
     set tree(BoxLabelsChildren) [list Paths Labels Delimiters BoxHeaders ShipMethod Misc.] ;# when changing these, also change them in eAssistSetup::selectionChanged
         set BoxLabelsChildren_length [llength $tree(BoxLabelsChildren)] ;# so we can add new tree items without having to adjust manually. Used in following childLists.
     
-    set tree(BatchAddressesChildren) [list International AddressHeaders Carrier]
+    set tree(BatchAddressesChildren) [list International AddressHeaders Carrier Countries]
         set BatchAddressesChildren_length [llength $tree(BatchAddressesChildren)]
     
 
@@ -105,6 +93,7 @@ proc eAssistSetup::eAssistSetup {} {
     tablelist::tablelist $tbl.t -columns {18 ""}\
                                 -background white \
                                 -exportselection yes \
+                                -showlabels no \
                                 -yscrollcommand [list $tbl.scrolly set] \
                                 -xscrollcommand [list $tbl.scrollx set]
     
@@ -139,25 +128,18 @@ proc eAssistSetup::eAssistSetup {} {
     ##
     
     # Default window
-    #${log}::notice currentSetupFrame: [info exists $program(lastFrame)]
     ${log}::notice currentSetupFrame: [info exists GS(gui,lastFrame)]
 
-    #eAssistSetup::$program(lastFrame)
     if {[info exists GS(gui,lastFrame)] == 0} {
         set GS(gui,lastFrame) selectFilePaths_GUI
     }
     eAssistSetup::$GS(gui,lastFrame)
     
-    #$tbl.t selection set 1
-    #$tbl.t activate 1
-
-   
-
     ##
     ## Bindings
     ##
     # For Tree widget
-    bind $tbl.t <<TablelistSelect>> {eAssistSetup::selectionChanged %W} 
+    bind $tbl.t <<TablelistSelect>> {eAssistSetup::selectionChanged %W}
 
 } ;# eAssistSetup::eAssistSetup
 
@@ -386,10 +368,10 @@ proc eAssistSetup::boxLabels_GUI {} {
     tooltip::tooltip $w(bxFR2).entry3_2 [mc "Total number of fields in the label, not including the Qty field."]
     
     #------------- Bindings
-    bind all <<ComboboxSelected>> {
-        #eAssistSetup::viewBoxLabel [$w(bxFR2).cbox1_4 current]
-        eAssistSetup::viewBoxLabel $boxLabelInfo(currentBoxLabel)
-    }
+    #bind all <<ComboboxSelected>> {
+    #    #eAssistSetup::viewBoxLabel [$w(bxFR2).cbox1_4 current]
+    #    eAssistSetup::viewBoxLabel $boxLabelInfo(currentBoxLabel)
+    #}
     
     #set frame2 [ttk::labelframe $G_setupFrame.frame2 -text [mc "Define Box Labels Headers"]]
     #pack $frame2 -expand yes -fill both ;#-side top -anchor n -expand yes -fill both -padx 5p -pady 5p -ipady 2p
@@ -611,12 +593,12 @@ proc eAssistSetup::company_GUI {} {
     
     #-------- Bindings
 
-    bind [$frame2.listbox bodytag] <Double-1> {
-        if {$internal(table,currentRow) != 0} {
-            .container.setup.frame2.listbox delete [.container.setup.frame2.listbox curselection]        
-            incr internal(table,currentRow) -1
-        }
-    }
+    #bind [$frame2.listbox bodytag] <Double-1> {
+    #    if {$internal(table,currentRow) != 0} {
+    #        .container.setup.frame2.listbox delete [.container.setup.frame2.listbox curselection]        
+    #        incr internal(table,currentRow) -1
+    #    }
+    #}
   
 } ;# eAssistSetup::company_GUI
 

@@ -5,7 +5,7 @@
 #
 # Subversion
 #
-# $Revision$
+# $Revision: 612 $
 # $LastChangedBy: casey.ackels@gmail.com $
 # $LastChangedDate: 2014-09-12 19:06:03 -0700 (Fri, 12 Sep 2014) $
 #
@@ -28,6 +28,8 @@
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
 namespace eval eAssist_Global {}
+
+namespace eval ea::tools {}
 
 proc eAssist_Global::resetFrames {args} {
     #****f* resetFrames/eAssist_Global
@@ -95,9 +97,9 @@ proc eAssist_Global::resetSetupFrames {} {
         puts $child
     }
     
-    foreach child [winfo children .container.setup] {
-        destroy $child
-    }
+    #foreach child [winfo children .container.setup] {
+    #    destroy $child
+    #}
     
     #set savePage $args ;# Allows us to save what is on that page
 
@@ -132,11 +134,11 @@ proc eAssist_Global::checkVars {win {var ""}} {
     #
     #***
     global log program
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
 	
 	if {($var == "") || (![info exists $var])} {
-		${log}::debug Variable doesn't exist ... launching window.
+		#${log}::debug Variable doesn't exist ... launching window.
 	} else {
 		return $var
 	}
@@ -161,7 +163,7 @@ proc eAssist_Global::checkVars {win {var ""}} {
 	}
 					
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# eAssist_Global::checkVars
 
 
@@ -227,7 +229,8 @@ proc eAssist_Global::OpenFile {title initDir type args} {
     #   e.g. set file [eAssist_Global::OpenFile [mc "Pick File"] [pwd] file *.exe]
     #
     # SYNOPSIS
-    #	eAssist_Global::OpenFile <title> <initDir> <file|dir> <args(fileExtension)>
+    #	eAssist_Global::OpenFile <title> <initDir> <file|dir> ?fileExtension? ?File Type?
+	#	eAssist_Global::OpenFile [mc "Select Directory"] $mySettings(Home) dir 
     #
     # CHILDREN
     #	
@@ -242,30 +245,44 @@ proc eAssist_Global::OpenFile {title initDir type args} {
     #
     #***
 	global log
+	
+	# Set the defaults first, if the programmer specified values, the defaults will be overwritten
+	set ext .db
+	set ftype {
+		{Efficiency Assist Project} {.db}
+	}
+	
+	foreach {item value} $args {
+		switch -- $item {
+			-ext		{set ext $value}
+			-filetype	{set ftype [list $value]}
+		}
+	}
 
     if {$type eq "file"} {
         set filename [tk_getOpenFile \
                       -parent . \
                       -title $title \
                       -initialdir $initDir \
-                      -defaultextension $args]
+                      -defaultextension $ext \
+					  -filetypes $ftype]
     } else {
         set filename [tk_chooseDirectory \
                 -parent . \
                 -title $title \
                 -initialdir $initDir -title $title]
         }
-
+	
     # If we do not select a file name, and cancel out of the dialog, do not produce an error.
     if {$filename eq ""} {return}
 
-	${log}::debug filename: $filename
-    return $filename
+	${log}::debug filename: "$filename"
+    return "$filename"
 
 } ;# eAssist_Global::OpenFile
 
 
-proc eAssist_Global::SaveFile {fileName} {
+proc eAssist_Global::SaveFile {fileName {initDir 0}} {
     #****f* SaveFile/eAssist_Global
     # AUTHOR
     #	Casey Ackels
@@ -274,10 +291,10 @@ proc eAssist_Global::SaveFile {fileName} {
     #	(c) 2011-2014 Casey Ackels
     #
     # FUNCTION
-    #	Save file to specified directory
+    #	eAssist_Global::SaveFile <file name> ?directory?
     #
     # SYNOPSIS
-    #
+    #	Save file to specified directory
     #
     # CHILDREN
     #	N/A
@@ -291,12 +308,13 @@ proc eAssist_Global::SaveFile {fileName} {
     #
     #***
     global log mySettings
-    ${log}::debug --START-- [info level 1]
-	
-	if {$mySettings(outFilePath) == ""} {
-		set initDir [pwd]
-	} else {
-		set initDir $mySettings(outFilePath)
+    #${log}::debug --START-- [info level 1]
+	if {$initDir == 0} {
+		if {$mySettings(outFilePath) == ""} {
+			set initDir [pwd]
+		} else {
+			set initDir $mySettings(outFilePath)
+		}
 	}
 	
 	set types {
@@ -306,7 +324,7 @@ proc eAssist_Global::SaveFile {fileName} {
 	set filename [tk_getSaveFile \
 				  -filetypes $types \
 				  -defaultextension .csv \
-				  -initialdir $mySettings(outFilePath) \
+				  -initialdir $initDir \
 					-initialfile $fileName \
 					-parent . \
 					-title [mc "Choose where to save your file"] \
@@ -317,7 +335,7 @@ proc eAssist_Global::SaveFile {fileName} {
     if {$filename eq ""} {return}
 	
 	return $filename
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# eAssist_Global::SaveFile
 
 proc eAssist_Global::detectWin {args} {
@@ -346,7 +364,7 @@ proc eAssist_Global::detectWin {args} {
     #
     #***
     global log
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
     set vSwitch [lindex $args 0]
     set vWindow [lindex $args 1]
@@ -367,7 +385,7 @@ proc eAssist_Global::detectWin {args} {
         
     return $vWindow
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# eAssist_Global::detectWin
 
 proc eAssist_Global::at {time args} {
@@ -437,25 +455,43 @@ proc eAssist_Global::getGeom {module args} {
     #
     #***
     global log options
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
+	#${log}::debug CURRENT OPTIONS: $options(geom,$settings(currentModule))
     
 	if {[info exists options(geom,$module)]} {
 		wm geometry . $options(geom,$module)
 		${log}::notice Geometry exists for $module - Using $options(geom,$module)
+		
+		set dims [split $options(geom,$module) x]
+		set dims [split $dims +]
+		
+		set dims [join $dims]
+		#${log}::notice [winfo screenwidth .] == [lindex $dims 0]
+		#${log}::notice [winfo screenheight . ] == [lindex $dims 1]
+
+	
+		if {[winfo screenheight . ] == [lindex $dims 1]} {
+			#wm attributes . -zoomed 1
+			wm state . zoomed
+			} elseif {[winfo screenwidth .] == [lindex $dims 0]} {
+			   #wm attributes . -zoomed 1
+			   wm state . zoomed
+		}
 	} else {
 		wm geometry . $args
 		${log}::notice Geometry does NOT exist for $module - Using $args
 	}
 	
+	#lib::savePreferences
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# eAssist_Global::getGeom
 
 
-proc eAssist_Global::removeBraces {args} {
-    #****f* removeBraces/eAssist_Global
+proc eAssist_Global::validate {val validation char args} {
+    #****f* validate/eAssist_Global
     # CREATION DATE
-    #   09/16/2014 (Tuesday Sep 16)
+    #   10/11/2014 (Saturday Oct 11)
     #
     # AUTHOR
     #	Casey Ackels
@@ -465,10 +501,87 @@ proc eAssist_Global::removeBraces {args} {
     #   
     #
     # SYNOPSIS
-    #   eAssist_Global::removeBraces args 
+    #   eAssist_Global::validate %W %d %S args 
     #
     # FUNCTION
-    #	Remove unwanted braces from list element
+    #	Returns validated data
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+	if {$validation == 1} {
+		# we only care about prevalidation
+		#${log}::debug validation: $d
+		#${log}::debug val: $P
+		#${log}::debug char: $S
+		#set validation $d
+		#set val $P
+		#set char $S
+
+		set returnValue 1
+	} else { return 1}
+	
+    foreach {key value} $args {
+		switch -- $key {
+			-length	{ ${log}::debug Length: [string length $val] - $val
+					if {$value < [string length $val]} {bell; set returnValue 0; ${log}::debug only $value chars not ([string length $val]), breaking; break}
+				}
+			-alpha	{ ${log}::debug Alpha: [string is alpha $char] - $char
+					if {$value eq "no" & [string is alnum $char] == 1} {bell; set returnValue 0; ${log}::debug NaN, found one - breaking; break}
+					
+				}
+			-space	{ ${log}::debug Space: [string is space $char] - $char
+					if {$value eq "no" & [string is space $char] == 1} {bell; set returnValue 0; ${log}::debug No Spaces, found one - breaking; break}
+					
+				}
+			-punc	{ ${log}::debug Punc: [string is punc $char] - $char
+					if {$value eq "no" & [string is punc $char] == 1} {bell; set returnValue 0; ${log}::debug No Punctuation, found one - breaking; break}
+				}
+			-integer	{ ${log}::debug Integer: [string is integer $char] - $char
+					if {$value eq "only" & [string is integer $char] == 0} {bell; set returnValue 0; ${log}::debug Integers Only - breaking; break}
+				}
+			default	{${log}::debug -DEFAULT-}
+		}
+    }
+	
+return $returnValue
+    
+} ;# eAssist_Global::validate
+
+
+proc ea::tools::modifyButton {wid args} {
+    #****f* tools::modifyButton/ea
+    # CREATION DATE
+    #   10/20/2014 (Monday Oct 20)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   ea::tools::modifyButton args 
+    #
+    # FUNCTION
+    #	Modifies the button based on what was passed
+    #	wid = path to the widget
+    #	-text New name that the widget should have
+    #	-state normal or disabled
+    #	-command New command
     #   
     #   
     # CHILDREN
@@ -486,12 +599,218 @@ proc eAssist_Global::removeBraces {args} {
     #***
     global log
 
-    #set args [string trim $args \{]
-	#set args [string trim $args \}]
+    foreach {key value} $args {
+	switch -- $key {
+	    -text	{set btnConfig(txt) "-text $value"; ${log}::debug Set btnConfig(txt)}
+	    -state	{set btnConfig(state) "-state $value"; ${log}::debug Set btnConfig(state)}
+	    -command	{set btnConfig(command) "-command $value"; ${log}::debug Set btnConfig(command)}
+	    default	{${log}::notice [info level 1] $key doesn't exist}
+	}
+    }
 
+    if {[array exists btnConfig]} {
+	foreach val [array names btnConfig] {
+	    $wid configure {*}$btnConfig($val)
+	}
+	array unset btnConfig
+    }
+
+} ;# ea::tools::modifyButton
+
+proc ea::tools::bindings {wid binding cmd} {
+    #****f* bindings/ea::tools
+    # CREATION DATE
+    #   10/28/2014 (Tuesday Oct 28)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   ea::tools::bindings <wid> {binding1 .. bindingN} {cmd}
+    #
+    # FUNCTION
+    #	Add bindings to widgets; this is useful if adding multiple bindings for the same command.
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    foreach bd $binding {
+            bind $wid <$bd> $cmd
+    }
+
+} ;# ea::tools::bindings
+
+
+proc ea::tools::populateListbox {modify entryWid lBoxWid dbTable dbCol} {
+    #****f* populateListbox/ea::tools
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2011-2014 Casey Ackels
+    #
+    # FUNCTION
+    #   ea::tools::populateListbox add $f2.entry $f2.lbox Containers Container
+    #	Add values to listbox
+    #	entryWid = Path to widget
+    #   lBoxWid = Path to widget
+    #   dbTable = what it is, for the switch to work correctly
+    #   modify = add|delete
+    #
+    # SYNOPSIS
+    #   Updates the data in a list box.
+    #   Remove data from an entry field, insert/delete the data in the listbox
+    #
+    #
+    # CHILDREN
+    #	N/A
+    #
+    # PARENTS
+    #	
+    #
+    # NOTES
+    #   
+    #
+    # SEE ALSO
+    #
+    #***
+    global log
+    ${log}::debug --START-- [info level 1]
     
-} ;# eAssist_Global::removeBraces
+    ${log}::debug Adding $dbTable, $entryWid, $lboxWid
+    
+    switch -- $modify {
+        add     {if {[$entryWid get] == ""} {return} else {set entryValue [$entryWid get]}; $entryWid delete 0 end
+                # Insert into DB; must use quotes instead of curly braces to allow variable substituition
+                db eval "insert into ${dbTable}($dbCol) values('$entryValue')"
+            }
+        delete  {if {[$lboxWid curselection] == ""} {return}
+                # Delete the entry, then set the var to all values remaining values.
+                eAssist_db::delete $dbTable $dbCol [$lboxWid get [$lboxWid curselection]]
+            }
+        default {${log}::debug Unknown switch option: $modify}
+    }
+    
+    # Update the widgets with the new data ...
+    eAssist_db::initContainers $dbTable $listBox
 
+    ${log}::debug --END-- [info level 1]
+} ;# ea::tools::populateListbox
+
+
+proc ea::tools::formatFileName {} {
+    #****f* formatFileName/ea::tools
+    # CREATION DATE
+    #   02/13/2015 (Friday Feb 13)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   ea::tools::formatFileName  
+    #
+    # FUNCTION
+    #	Returns the formatted file name
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log mySettings job
+
+    set fileName $mySettings(job,fileName)
+    foreach item {Title Name Number} {
+        set item2 [string tolower $item]
+        #puts [string map [list %$item2 $job($item)] $mySettings(job,fileName)]
+        set fileName [string map [list %$item2 [join $job($item) -]] $fileName]
+    }
+	# sanitize
+	set fileName [string map {\\ _ / _ \" ""} $fileName]
+	set fileName [join $fileName _]
+
+	return $fileName
+} ;# ea::tools::formatFileName
+
+proc ea::tools::getGUID {args} {
+    #****f* getGUID/ea::tools
+    # CREATION DATE
+    #   03/11/2015 (Wednesday Mar 11)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   ea::tools::convertGUID -new|-convert
+	#   The default is -new if no args are supplied.
+    #
+    # FUNCTION
+    #	Creates a GUID using the TWAPI package; and depending on the flag it will return a converted X'093090394039403094 number, or the typical
+	#	{E0EB36A4-CB17-4020-829C-56E6D243313C} format.
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    set guid [twapi::new_guid]
+	
+	if {$args eq "-convert"} {
+		# clean the guid up, then append it to the default first two chars needed (For sqlite)
+		set guid [string map { \{ "" \} "" - ""} $guid]
+		
+		append formattedGUID X' $guid
+		return $formattedGUID
+	} else {
+		return $guid
+	}
+
+} ;# ea::tools::getGUID
 
 
 proc eAssist_Global::launchFilters {} {

@@ -6,7 +6,7 @@
 #
 # Subversion
 #
-# $Revision$
+# $Revision: 612 $
 # $LastChangedBy: casey.ackels $
 # $LastChangedDate: 2014-09-14 15:39:41 -0700 (Sun, 14 Sep 2014) $
 #
@@ -78,9 +78,9 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries autoscroll]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries csv]
-	lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.11]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.13]
 	#lappend ::auto_path [file join [file dirname [info script]] Libraries tcom3.9]
-	lappend ::auto_path [file join [file dirname [info script]] Libraries twapi]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries twapi_4.1-dev]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries about]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries debug] ;# Deprecated
@@ -89,6 +89,9 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries base64]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries smtp]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries Cawt_1.0.7]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries struct]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries report]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries cmdline]
 
 
 	##
@@ -125,6 +128,9 @@ proc 'eAssist_sourceReqdFiles {} {
 	package require base64
 	package require twapi
 	package require cawt
+	package require cmdline
+	package require struct
+	package require report
 	
 	
 	# Logger; MD5 are [package require]'d below.
@@ -152,22 +158,19 @@ proc 'eAssist_sourceReqdFiles {} {
 	source [file join [file dirname [info script]] Libraries saveSettings.tcl]
 	source [file join [file dirname [info script]] Libraries password_util.tcl]
 	source [file join [file dirname [info script]] Libraries AutoComplete.tcl]
+	source [file join [file dirname [info script]] Libraries dateFormatting.tcl]
     
 	loadSuffix ;# Initialize variables from StreetSuffixState.tcl
     
 	#load [file join [file dirname [info script]] Libraries twapi twapi_base.dll]
 	#load [file join [file dirname [info script]] Libraries sqlite3_3801 sqlite3801.dll] Sqlite3
 	#source [file join [file dirname [info script]] Libraries debug.tcl]
-	
-	if {[info exists logSettings(displayConsole)]} {
-		eAssistSetup::toggleConsole $logSettings(displayConsole)
-	}	
 
 } ;# 'eAssist_sourceReqdFiles
 
 
 proc 'eAssist_bootStrap {} {
-	global program log
+	global program log env
 	
 	set program(Home) [pwd]
 	
@@ -194,7 +197,7 @@ proc 'eAssist_bootStrap {} {
 	
 	set debug(onOff) on ;# Old - Still exists so we don't receive errors, on the instances where it still exists
 	set logSettings(loglevel) notice ;# Default to notice, over ridden if the user selects a different option
-	set logSettings(displayConsole) 0 ;# disable by default, same as above
+	set logSettings(displayConsole) 0 ;# disable by default, same as above. We read in the user settings file later; so if specific users want to see it, they will.
 
 	# initialize logging service
 	set log [logger::init log_svc]
@@ -232,15 +235,24 @@ proc 'eAssist_initVariables {} {
     # SEE ALSO
     #
     #***
-    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter logSettings auth options emailSetup emailEvent
+    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter logSettings auth options emailSetup emailEvent job user
 
 	#-------- CORE SETTINGS
-	if {$logSettings(displayConsole) == 1} {console show}
+	#if {$logSettings(displayConsole) == 1} {console show}
+	if {[info exists logSettings(displayConsole)]} {
+		eAssistSetup::toggleConsole $logSettings(displayConsole)
+	}
 	
 	# admin7954
 	set auth(adminPword) {$1$6JV2D0G7$RHuHLMxJuuQ3HWWG3wOML1}
 	set auth(adminSalt) {6JV2D0G7iPZ.xfGbLxnx}
 	
+	# Insert Setup into the Modules
+	eAssist_db::checkModuleName Setup
+	
+	# init the user array - This is reset on Change User!
+	ea::sec::initUser
+		
 	## Defaults
 	#
 	
@@ -285,12 +297,10 @@ proc 'eAssist_initVariables {} {
 	
 	if {![info exists options(ClearExistingData)]} {
 		# Clears data from BatchMaker if it exists; this is useful if you want to overwrite what is already there.
-		set options(ClearExistingData) 1
+		# 3/11/15 - Defaults to 0, we now have 'projects', and save data to a database. If a new project is started, the GUI is cleared out, and a new database is created.
+		set options(ClearExistingData) 0
 	}
     
-	
-
-	
 
 	#-------- Initialize variables
 	
@@ -312,6 +322,14 @@ proc 'eAssist_initVariables {} {
 					  SampleRoom 0 \
 					  Sales 0]
 	
+	array set job [list CustName "" \
+				   CustID "" \
+				   CSRName "" \
+				   Title "" \
+				   Name "" \
+				   Number "" \
+				   SaveFileLocation ""]
+	
 	# Filters
 	array set filter [list run,stripASCII_CC 1 \
 					  run,stripCC 1 \
@@ -332,11 +350,11 @@ proc 'eAssist_initVariables {} {
         # Default for finding the source import files
         set mySettings(sourceFiles) [file dirname $mySettings(Home)]
     }
-
-    #if {![info exists settings(importOrder)]} {
-    #    # Set default for headers; wording is used internally
-    #    set settings(importOrder) [list shipVia Company Consignee delAddr delAddr2 delAddr3 City State Zip Phone Quantity Version Date Contact Email 3rdParty]
-    #}
+	
+	if {![info exists mySettings(job,fileName)]} {
+		# Default for the file name
+		set mySettings(job,fileName) "%number %title %name"
+	}
 
     if {![info exists settings(shipvia3P)]} {
         # Set possible 3rd party shipvia codes
@@ -351,127 +369,7 @@ proc 'eAssist_initVariables {} {
     if {![info exists settings(BoxTareWeight)]} {
         # Box Tare Weight
         set settings(BoxTareWeight) .566
-    }
-
-    #
-    # Header
-    #
-    
-    #if {![info exists header(shipvia)]} {
-    #    set header(shipvia) [list ShipViaCode "ship via" shipvia]
-    #}
-    #
-    #if {![info exists header(company)]} {
-    #    set header(company) [list ShipToName company destination "company name"]
-    #}
-    #
-    #if {![info exists header(attention)]} {
-    #    # Variations on spelling of consignee
-    #    set header(attention) [list ShipToContact contact attention attn attn:]
-    #}
-    #
-    #if {![info exists header(address1)]} {
-    #    set header(address1) [list ShipToAddressline1 address address1 "address 1" add add1 "add 1" addr addr1 "addr 1"]
-    #}
-    #
-    #if {![info exists header(address2)]} {
-    #    set header(address2) [list ShipToAddressline2 address2 "address 2" add2 "add 2" addr2 "addr 2"]
-    #}
-    #
-    #if {![info exists header(address3)]} {
-    #    set header(address3) [list ShipToAddressline3 address3 "address 3" add3 "add 3" addr3 "addr 3"]
-    #}
-    #
-    #if {![info exists header(CityStateZip)]} {
-    #    set header(CityStateZip) [list city-state-zip city-st-zip "city state zip" "city st zip" csv state/region]
-    #}
-    #
-    #if {![info exists header(city)]} {
-    #    set header(city) [list City ShipToCity]
-    #}
-    #
-    #if {![info exists header(state)]} {
-    #    set header(state) [list ShipToState st st. state]
-    #}
-    #
-    #if {![info exists header(country)]} {
-    #    set header(country) [list country ShipToCountry]
-    #}
-    #
-    # if {![info exists header(zip)]} {
-    #    set header(zip) [list ShipToZipCode zip zipcode "zip code" postalcode "postal code" postal]
-    #}
-    #
-    #if {![info exists header(phone)]} {
-    #    set header(phone) [list phone ShipToPhone]
-    #}
-    #
-    #if {![info exists header(email)]} {
-    #    set header(email) [list email ShipToEmail]
-    #}
-    #
-    #if {![info exists header(shipdate)]} {
-    #    set header(shipdate) [list "Ship Date" shipdate]
-    #}
-    #
-    # if {![info exists header(BatchNumberReference)]} {
-    #    # This will hold the job number and a alpha at the end
-    #    # E.G 60155_A (or 60155A)
-    #    set header(BatchNumberReference) [list BatchNumberReference]
-    #}
-    #
-    #if {![info exists header(Reference1)]} {
-    #    # After we output the file, Reference1 will hold the job number
-    #    set header(Reference1) [list Reference1]
-    #}
-    #
-    #if {![info exists header(version)]} {
-    #    # This is used in the original file, and reassigned to the Reference2 column
-    #    set header(version) [list version vers]
-    #}
-    #
-    #if {![info exists header(Reference2)]} {
-    #    # After we output the file, Reference2 will hold the Version/Qty
-    #    set header(Reference2) [list Reference2]
-    #}
-    #
-    #if {![info exists header(quantity)]} {
-    #    # This is used in the original file, and reassigned to the Reference2 column
-    #    set header(quantity) [list quantity qty]
-    #}
-    #
-    #if {![info exists header(PackageQuantity)]} {
-    #    set header(PackageQuantity) [list PackageQuantity]
-    #}
-    #
-    #if {![info exists header(3rdPartyNumber)]} {
-    #    # 3P Account Number
-    #    set header(3rdPartyNumber) [list ThirdPartyAccountNumber "3rd Party" 3rdParty 3p]
-    #}
-    #
-    #if {![info exists header(3rdPartyCode)]} {
-    #    # Customer Code within Process Shipper
-    #    set header(3rdPartyCode) [list ThirdPartyID]
-    #}
-    #
-    #
-    #
-    ## - These are used internally
-    ## 8/28/2013 - Move this so we see them within Efficiency
-    #
-    #if {![info exists header(pieceweight)]} {
-    #    set header(pieceweight) [list pieceweight "pc weight" "piece weight" "pc wgt"]
-    #}
-    #
-    #if {![info exists header(fullbox)]} {
-    #    set header(fullbox) [list fullbox "full box"]
-    #}
-    #
-    #if {![info exists header(residential)]} {
-    #    # This column is used when we use address cleansing.
-    #    set header(residential) [list ResidentialDelivery]
-    #}
-    
+    }   
 	
 	# Schedule a time to check for updates
 	#eAssist_Global::at $program(checkUpdateTime) vUpdate::checkForUpdates
@@ -506,7 +404,7 @@ proc 'eAssist_checkPrefFile {} {
     #
     #***
     global log mySettings program env
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
 	set folderAccess ""
 	
@@ -578,7 +476,7 @@ proc 'eAssist_checkPrefFile {} {
 		return $state
 	}
 
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# 'eAssist_checkPrefFile
 
 
@@ -611,18 +509,7 @@ proc 'eAssist_loadSettings {} {
     #***
     global settings debug program header customer3P env mySettings international company shipVia3P tcl_platform setup logSettings log boxSettings boxLabelInfo intlSetup
 	global headerParent headerAddress headerParams headerBoxes GS_filePathSetup GS currentModule pref dist carrierSetup CSR packagingSetup options emailSetup
-	
 
-
-    # Set required configuration changes here, i.e.
-    # set cVersion(Setup,message) <informational message>
-    # set cVersion(Setup,newconfig) <setup page>, <setup page, ...
-    # set cVersion(Options,message) <informational message>
-    # set cVersion(Options,newconfig) <options page>, <options page>, ...
-    
-
-
-	
 	# Ensure we have proper permissions for the preferences file before continuing
 	'eAssist_checkPrefFile
 
@@ -639,7 +526,6 @@ proc 'eAssist_loadSettings {} {
 			set [lindex $l_line 0] [join [lrange $l_line 1 end] " "]
 			${log}::notice "Loaded variables ($myFile): $l_line"
 		}
-		
 		${log}::notice "Loaded variables ($myFile): Complete!"
 	}
     
@@ -657,7 +543,9 @@ proc 'eAssist_loadSettings {} {
                 if {$line == ""} {continue}
                 set l_line [split $line " "]
                 set [lindex $l_line 0] [join [lrange $l_line 1 end] " "]
+				${log}::notice "Loaded variables ($myFile): $l_line"
         }
+		${log}::notice "Loaded variables ($myFile): Complete!"
     }
 	
     # Initialize default values
@@ -667,30 +555,12 @@ proc 'eAssist_loadSettings {} {
 	# Set options in the Options DB
 	option add *tearOff 0
 	
-#	# check for updates
-#    set fd "" ;# Make sure we are cleared out before reusing.
-#	set updateFile [file join $program(updateFilePath) $program(updateFileName)]
-#    if {[catch {open $updateFile r} fd]} {
-#        ${log}::notice "File doesn't exist $program(updateFileName); loading defaults"
-#
-#    } else {
-#        set updateFile [split [read $fd] \n]
-#        catch {chan close $fd}
-#        
-#        foreach line $updateFile {
-#                if {$line == ""} {continue}
-#                set l_line [split $line " "]
-#                set [lindex $l_line 0] [join [lrange $l_line 1 end] " "]
-#                #${log}::notice "line: $line"
-#        }
-#    }
-	
-	
+	job::reports::initReportTables
 	# Get excel version
 	# Office 2003 = 11
 	# Office 2007 = 12
 }
-# Load required packages
+# Load required packages and DB
 'eAssist_bootStrap
 
 # Load required files / packages
