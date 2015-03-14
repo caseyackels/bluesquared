@@ -1,3 +1,0 @@
-Fonts:
-    Fake Receipt (ttf)
-    Pica (ttf)

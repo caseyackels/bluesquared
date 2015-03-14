@@ -1,3 +1,0 @@
-= Version 0.1 (November 2011)
-== Notes
-Project Started

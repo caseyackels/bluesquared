@@ -1,6 +1,0 @@
-NextGen-RM
------------------
-
-This was built as an exercise in coding. And is for entertainment only.
-
-Copyright (C) 2011

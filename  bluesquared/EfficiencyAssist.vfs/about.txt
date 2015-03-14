@@ -1,8 +1,0 @@
-= Efficiency Assist
---
-
-This project had been in the works since Spring of 2010, however nothing was actually started until a year later, in May 2011 when the absolute basics were finished.
-
-Casey Ackels created and currently maintains Efficiency Assist.
-
-Copyright (C) 2011-2014 Casey Ackels. All rights reserved.

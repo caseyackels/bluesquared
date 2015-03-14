@@ -1,1 +1,0 @@
-package ifneeded eAssist_email 1.0 "[list source [file join $dir email_code.tcl]]"
