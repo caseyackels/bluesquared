@@ -65,7 +65,6 @@ proc eAssist::parentGUI {} {
 
     set locX [expr {[winfo screenwidth . ] / 4 + [winfo x .]}]
     set locY [expr {[winfo screenheight . ] / 5 + [winfo y .]}]
-    #wm geometry .wi 625x375+${locX}+${locY}
     wm geometry . 640x610+${locX}+${locY}
     
     if {![info exists settings(currentModule)]} {
