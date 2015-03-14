@@ -1,0 +1,14 @@
+OrderNumber,ShipToCompany,ShipToAttention,ShipToAddressLine1,ShipToAddressLine2,ShipToAddressLine3,ShipToCity,ShipToState,ShipToPostalCode,ShipToCountry,ShipToPhone,Version,ShipQuantity,UserNotes,ShipToDate,DistributionType,ShipViaCode,3rdPartyBilling,ArriveDate,ContainerType,PackageType,ShippingClass,OrderType
+1,Kay Coffin,,2268 Almond Avenue,,,Sanger,CA,93657,US,,Version 1,20,,,07. UPS Import,017,,,,,Finished Product,Version
+2,Rita Williams,,211 Saratoga Court,,,Goleta,CA,93117,US,,Version 1,20,,,07. UPS Import,017,,,,,Finished Product,Version
+3,Monica Thompson,,22827 Cattail Lane,,,Moreno Valley,CA,92957,US,,Version 1,20,,,07. UPS Import,017,,,,,Finished Product,Version
+4,Cindy Holcomb,,2326 Tampa Ave,,,El Cajon,CA,92020,US,,Version 1,20,,,07. UPS Import,017,,,,,Finished Product,Version
+5,Kathleen Valenzuela,,6301 Spring Ridge Drive,,,Bakersfield,CA,93313,US,,Version 1,20,,,07. UPS Import,017,,,,,Finished Product,Version
+6,Karen Howard,,11167 East Keyes Road,,,Denair,CA,95316,US,,Version 1,20,,,07. UPS Import,017,,,,,Finished Product,Version
+7,Working Media Group,Michael M. Reilly,21 West 38th Street,13th Floor,VP - Media Consulting,New York,NY,10018,US,,Version 1,6,,,07. UPS Import,017,,,,,Finished Product,Version
+8,CalCPA,Cynthia Fabianski,1800 Gateway Drive Suite 200,,,San Mateo,CA,94404,US,,Version 1,300,,,07. UPS Import,017,,,,,Finished Product,Version
+9,CalCPA,Elizabeth Everson,1800 Gateway Drive Suite 200,,,San Mateo,CA,94404,US,,Version 1,200,,,07. UPS Import,017,,,,,Finished Product,Version
+10,NMS,Tim Tuttle,535 Brennan Street,,,San Jose,CA,95131,US,,Version 1,300,,,07. UPS Import,017,,,,,Finished Product,Version
+11,CalCPA,Patti Sustin,330 N. Brand Blvd. Ste. 710,,,Glendale,CA,91203,US,,Version 1,10,,,07. UPS Import,017,,,,,Finished Product,Version
+12,CalCPA,Dodi Ward,1201 K Street Ste. 1000,,,Sacramento,CA,95814-3922,US,,Version 1,10,,,07. UPS Import,017,,,,,Finished Product,Version
+13,Nienow & Tierney LLP,Stephen Tierney CPA,17822 17Th St Ste 305,,,Tustin,CA,92780-2181,US,,Version 1,40,,,07. UPS Import,017,,,,,Finished Product,Version

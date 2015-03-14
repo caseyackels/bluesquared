@@ -1,0 +1,427 @@
+Running test Excel-01_Basic.tcl ...
+Tcl version                   : 8.6.1
+Cawt version                  : 1.1.0
+Twapi version                 : 4.0.61
+Excel Version                 : 14.0 (Excel 2010)
+Excel filename extension      : .xlsx
+Active Printer                : WorkForce 630(Network) on Ne00:
+User Name                     : Casey Ackels
+Startup Pathname              : C:\Users\Casey\AppData\Roaming\Microsoft\Excel\XLSTART
+Templates Pathname            : C:\Users\Casey\AppData\Roaming\Microsoft\Templates\
+Add-ins Pathname              : C:\Users\Casey\AppData\Roaming\Microsoft\AddIns\
+Installation Pathname         : E:\Program Files (x86)\Office 2010\Office14
+User Folder Pathname          : C:\Users\Casey\Documents
+Appl. name (from Application) : Microsoft Excel
+Appl. name (from Workbook)    : Microsoft Excel
+Appl. name (from Worksheet)   : Microsoft Excel
+Appl. name (from Cells)       : Microsoft Excel
+Floating point separator      : .
+Check: ColumnCharToInt A (Expected: 1 Have: 1)
+Check: ColumnCharToInt M (Expected: 13 Have: 13)
+Check: ColumnCharToInt Z (Expected: 26 Have: 26)
+Check: GetColumnRange 2 7 (Expected: "B:G" Have: "B:G")
+Check: GetCellRange (1,2) (5,7) (Expected: "B1:G5" Have: "B1:G5")
+Printing ColumnIntToChar conversions:
+  1:   A   B   C   D   E   F   G   H   I   J 
+ 11:   K   L   M   N   O   P   Q   R   S   T 
+ 21:   U   V   W   X   Y   Z  AA  AB  AC  AD 
+ 31:  AE  AF  AG  AH  AI  AJ  AK  AL  AM  AN 
+ 41:  AO  AP  AQ  AR  AS  AT  AU  AV  AW  AX 
+ 51:  AY  AZ  BA  BB  BC  BD  BE  BF  BG  BH 
+ 61:  BI  BJ  BK  BL  BM  BN  BO  BP  BQ  BR 
+ 71:  BS  BT  BU  BV  BW  BX  BY  BZ  CA  CB 
+ 81:  CC  CD  CE  CF  CG  CH  CI  CJ  CK  CL 
+ 91:  CM  CN  CO  CP  CQ  CR  CS  CT  CU  CV 
+Testing column conversion procedures (both directions for 16384 columns) ...
+
+Running test Excel-02_Misc.tcl ...
+Check: Fill color of cell 2,1 (List length. Expected: 3 Have: 3)
+Check: Fill color of cell 3,1 (List length. Expected: 3 Have: 3)
+Check: Fill color of cell 4,1 (List length. Expected: 3 Have: 3)
+Check: cellId Formula (Expected: "=TODAY()" Have: "=TODAY()")
+  FormulaLocal: =TODAY()
+Check: Search Hallo (Expected: 2 Have: 2)
+Check: Search Hallo (Expected: "E3" Have: "E3")
+Check: Search HalliHallo (Expected: 0 Have: 0)
+Check: Search Holla (Expected: 2 Have: 2)
+Check: Search Holla (Expected: "E4" Have: "E4")
+Saving as Excel file: E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Excel-02_Misc.xlsx
+
+Running test Excel-03_Add.tcl ...
+Test Excel-03_Add.tcl failed: Call was rejected by callee.
+Running test Excel-04_Insert.tcl ...
+442 ms to set row values in RowVisible mode.
+Check: Number of used rows in RowVisible-0 (Expected: 100 Have: 100)
+Check: Number of used columns in RowVisible-0 (Expected: 10 Have: 10)
+Check: First used row in RowVisible-0 (Expected: 1 Have: 1)
+Check: First used column in RowVisible-0 (Expected: 1 Have: 1)
+Check: Last used row in RowVisible-0 (Expected: 100 Have: 100)
+Check: Last used column in RowVisible-0 (Expected: 10 Have: 10)
+Check: Number of used rows in RowVisible-1 (Expected: 100 Have: 100)
+Check: Number of used columns in RowVisible-1 (Expected: 10 Have: 10)
+Check: First used row in RowVisible-1 (Expected: 3 Have: 3)
+Check: First used column in RowVisible-1 (Expected: 2 Have: 2)
+Check: Last used row in RowVisible-1 (Expected: 102 Have: 102)
+Check: Last used column in RowVisible-1 (Expected: 11 Have: 11)
+Check: Number of used rows in RowVisible-2 (Expected: 100 Have: 100)
+Check: Number of used columns in RowVisible-2 (Expected: 10 Have: 10)
+Check: First used row in RowVisible-2 (Expected: 5 Have: 5)
+Check: First used column in RowVisible-2 (Expected: 3 Have: 3)
+Check: Last used row in RowVisible-2 (Expected: 104 Have: 104)
+Check: Last used column in RowVisible-2 (Expected: 12 Have: 12)
+405 ms to set row values in RowHidden mode.
+36 ms to set row values in MatrixVisible mode.
+36 ms to set row values in MatrixHidden mode.
+430 ms to set column values in ColumnVisible mode.
+411 ms to set column values in ColumnHidden mode.
+Saving as Excel file: E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Excel-04_Insert.xlsx
+
+Running test Excel-05_Ranges.tcl ...
+Test Excel-05_Ranges.tcl failed: Call was rejected by callee.
+Running test Excel-06_Chart.tcl ...
+Number of rows in worksheet   : 1048576
+Number of columns in worksheet: 16384
+Check: Number of rows in range (Expected: 10 Have: 10)
+Check: Number of columns in range (Expected: 3 Have: 3)
+Saving as Excel file: E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Excel-06_Chart.xlsx
+
+Running test Excel-07_Csv.tcl ...
+Test Excel-07_Csv.tcl failed: Call was rejected by callee.
+Running test Excel-08_Tablelist.tcl ...
+Filling source tablelist with data
+Check: GetTablelistHeader (List length. Expected: 5 Have: 5)
+Check: GetTablelistValues (Matrix rows. Expected: 10 Have: 10)
+TablelistToWorksheet: 48 ms (using header: true).
+WorksheetToTablelist: 27 ms (using header: true).
+Check: GetTablelistValues (Matrix rows. Expected: 10 Have: 10)
+TablelistToWorksheet: 2 ms (using header: false).
+WorksheetToTablelist: 17 ms (using header: false).
+Check: GetTablelistValues (Matrix rows. Expected: 10 Have: 10)
+Saving as Excel file: E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Excel-08_Tablelist.xlsx
+
+Running test Excel-09_WordTable.tcl ...
+Filling source table with data ...
+WordTableToWorksheet: 112 ms (using header: true).
+Check: GetMatrixValues (Matrix rows. Expected: 10 Have: 10)
+WorksheetToWordTable: 260 ms (using header: true).
+WordTableToWorksheet: 58 ms (using header: false).
+Check: GetMatrixValues (Matrix rows. Expected: 10 Have: 10)
+WorksheetToWordTable: 175 ms (using header: false).
+Saving as Excel file: E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Excel-09_WordTable.xlsx
+Saving as Word file : E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Excel-09_WordTable.docx
+
+Running test Excel-10_Matrix.tcl ...
+66 ms to put RAW image data into a Matlab file.
+74 ms to put Matlab matrix data into a RAW image file.
+Check: ReadMatlabFile (Matrix rows. Expected: 256 Have: 256)
+
+Running test Excel-11_RawImage.tcl ...
+RawImageFileToWorksheet: 132 ms (using header: true).
+WorksheetToRawImageFile: 100 ms (using header: true).
+RawImageFileToWorksheet: 74 ms (using header: false).
+WorksheetToRawImageFile: 103 ms (using header: false).
+Saving as Excel file: E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Excel-11_RawImage1.xlsx
+Convert raw image file testIn/gradient.raw to Excel file.
+Convert Excel file E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Excel-11_RawImage2.xlsx to raw image file.
+
+Running test Excel-12_MatlabFile.tcl ...
+MatlabFileToWorksheet: 170 ms (using header: true).
+WorksheetToMatlabFile: 121 ms (using header: true).
+MatlabFileToWorksheet: 89 ms (using header: false).
+WorksheetToMatlabFile: 125 ms (using header: false).
+Saving as Excel file: E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Excel-12_MatlabFile1.xlsx
+Convert Matlab file testIn/gradient.mat to Excel file.
+Convert Excel file E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Excel-12_MatlabFile2.xlsx to Matlab file.
+
+Running test Excel-13_MediaWiki.tcl ...
+Copy worksheet to MediaWiki file E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Excel-13_MediaWiki1.txt
+Copy MediaWiki file E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Excel-13_MediaWiki1.txt to Excel worksheet
+Copy MediaWiki file E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Excel-13_MediaWiki1.txt to Excel file
+Copy Excel file E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Excel-13_MediaWiki2.xlsx to MediaWiki file
+
+Running test Excel-14_Wikit.tcl ...
+Copy worksheet to Wikit file E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Excel-14_Wikit1.txt
+Copy Wikit file E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Excel-14_Wikit1.txt to Excel worksheet
+Copy Wikit file E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Excel-14_Wikit1.txt to Excel file
+Copy Excel file E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Excel-14_Wikit1.xlsx to Wikit file
+
+Running test Excel-15_Clipboard.tcl ...
+Copy worksheet to clipboard
+Copy clipboard to worksheet with offset
+Check: ClipboardToWorksheet (Matrix rows. Expected: 6 Have: 6)
+
+Running test Excel-16_SetGet.tcl ...
+Test Excel-16_SetGet.tcl failed: Call was rejected by callee.
+Running test Excel-17_Diff.tcl ...
+Test Excel-17_Diff.tcl failed: Call was rejected by callee.
+Running test Excel-18_SparseMatrix.tcl ...
+Check: Number of used rows in SetRowValues-0 (Expected: 4 Have: 4)
+Check: Number of used columns in SetRowValues-0 (Expected: 10 Have: 10)
+Check: First used row in SetRowValues-0 (Expected: 1 Have: 1)
+Check: First used column in SetRowValues-0 (Expected: 1 Have: 1)
+Check: Last used row in SetRowValues-0 (Expected: 4 Have: 4)
+Check: Last used column in SetRowValues-0 (Expected: 10 Have: 10)
+Check: Number of used rows in SetRowValues-1 (Expected: 4 Have: 4)
+Check: Number of used columns in SetRowValues-1 (Expected: 10 Have: 10)
+Check: First used row in SetRowValues-1 (Expected: 3 Have: 3)
+Check: First used column in SetRowValues-1 (Expected: 2 Have: 2)
+Check: Last used row in SetRowValues-1 (Expected: 6 Have: 6)
+Check: Last used column in SetRowValues-1 (Expected: 11 Have: 11)
+Check: Number of used rows in SetRowValues-2 (Expected: 4 Have: 4)
+Check: Number of used columns in SetRowValues-2 (Expected: 10 Have: 10)
+Check: First used row in SetRowValues-2 (Expected: 5 Have: 5)
+Check: First used column in SetRowValues-2 (Expected: 3 Have: 3)
+Check: Last used row in SetRowValues-2 (Expected: 8 Have: 8)
+Check: Last used column in SetRowValues-2 (Expected: 12 Have: 12)
+Check: Number of used rows in SetMatrixValues-0 (Expected: 4 Have: 4)
+Check: Number of used columns in SetMatrixValues-0 (Expected: 10 Have: 10)
+Check: First used row in SetMatrixValues-0 (Expected: 1 Have: 1)
+Check: First used column in SetMatrixValues-0 (Expected: 1 Have: 1)
+Check: Last used row in SetMatrixValues-0 (Expected: 4 Have: 4)
+Check: Last used column in SetMatrixValues-0 (Expected: 10 Have: 10)
+Check: Number of used rows in SetMatrixValues-1 (Expected: 4 Have: 4)
+Check: Number of used columns in SetMatrixValues-1 (Expected: 10 Have: 10)
+Check: First used row in SetMatrixValues-1 (Expected: 3 Have: 3)
+Check: First used column in SetMatrixValues-1 (Expected: 2 Have: 2)
+Check: Last used row in SetMatrixValues-1 (Expected: 6 Have: 6)
+Check: Last used column in SetMatrixValues-1 (Expected: 11 Have: 11)
+Check: Number of used rows in SetMatrixValues-2 (Expected: 4 Have: 4)
+Check: Number of used columns in SetMatrixValues-2 (Expected: 10 Have: 10)
+Check: First used row in SetMatrixValues-2 (Expected: 5 Have: 5)
+Check: First used column in SetMatrixValues-2 (Expected: 3 Have: 3)
+Check: Last used row in SetMatrixValues-2 (Expected: 8 Have: 8)
+Check: Last used column in SetMatrixValues-2 (Expected: 12 Have: 12)
+Saving as Excel file: E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Excel-18_SparseMatrix.xlsx
+
+Running test Excel-19_MarkLink.tcl ...
+Test Excel-19_MarkLink.tcl failed: Call was rejected by callee.
+Running test Excel-20_ImgUtil.tcl ...
+Test Excel-20_ImgUtil.tcl failed: Call was rejected by callee.
+
+Running test Ppt-01_Basic.tcl ...
+Tcl version              : 8.6.1
+Cawt version             : 1.1.0
+Twapi version            : 4.0.61
+PowerPoint Version       : 14.0 (PowerPoint 2010)
+PowerPoint extension     : .pptx
+Active Printer           : WorkForce 630(Network)
+User Name                : Method not available
+Startup Pathname         : Method not available
+Templates Pathname       : Method not available
+Add-ins Pathname         : Method not available
+Installation Pathname    : E:\Program Files (x86)\Office 2010\Office14
+User Folder Pathname     : Method not available
+Appl. name (from Application) : Microsoft PowerPoint
+Appl. name (from Presentation): Microsoft PowerPoint
+
+Running test Ppt-02_Misc.tcl ...
+Check: ViewType (Expected: 1 Have: 1)
+Check: ViewType (Expected: 7 Have: 7)
+Saving as PowerPoint file: E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Ppt-02_Misc.pptx
+Saving as GIF image files: E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Ppt-02_Misc_Gif
+
+Running test Ppt-03_Add.tcl ...
+Active presentation: ::oo::Obj42
+Active presentation: ::oo::Obj50
+Saving as PowerPoint file: E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Ppt-03_Add-1.pptx
+Saving as PowerPoint file: E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Ppt-03_Add-2.pptx
+
+Running test Ppt-04_Present.tcl ...
+Have 3 slides
+Have 0 SlideShows
+Have 1 SlideShows
+
+Running test Ppt-05_Export.tcl ...
+Test Ppt-05_Export.tcl failed: Exception occurred. PowerPoint could not open the file.
+Running test Ppt-06_CustomLayout.tcl ...
+Add slides from template file E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testIn/CustomLayout.potx
+Check: Number of layouts (Expected: 4 Have: 4)
+  Adding Layout 1 - Title
+  Adding Layout 2 - Title and content
+  Adding Layout 3 - 2 widgets
+  Adding Layout 4 - 6 widgets
+Check: Adding layout by name (Expected: "Layout 3 - 2 widgets" Have: "Layout 3 - 2 widgets")
+Check: Adding layout by special index end (Expected: "Layout 4 - 6 widgets" Have: "Layout 4 - 6 widgets")
+Saving as PowerPoint file: E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Ppt-06_CustomLayout.pptx
+
+
+Running test Word-01_Basic.tcl ...
+Tcl version              : 8.6.1
+Cawt version             : 1.1.0
+Twapi version            : 4.0.61
+Word Version             : 14.0 (Word 2010)
+Word filename extension  : .docx
+Active Printer           : WorkForce 630(Network)
+User Name                : Casey Ackels
+Startup Pathname         : c:\users\casey\appdata\roaming\microsoft\word\startup
+Templates Pathname       : Method not available
+Add-ins Pathname         : Method not available
+Installation Pathname    : E:\Program Files (x86)\Office 2010\Office14
+User Folder Pathname     : Method not available
+Appl. name (from Application) : Microsoft Word
+Appl. name (from Document)    : Microsoft Word
+
+Running test Word-02_Table.tcl ...
+Check: GetNumRows (Expected: 7 Have: 7)
+Check: GetNumColumns (Expected: 2 Have: 2)
+Check: GetColumnValues (List length. Expected: 4 Have: 4)
+Check: GetNumTables (Expected: 3 Have: 3)
+Check: Table 1 GetNumRows (Expected: 4 Have: 4)
+Check: Table 2 GetNumRows (Expected: 7 Have: 7)
+Check: Table 3 GetNumRows (Expected: 7 Have: 7)
+Saving as Word file: E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Word-02_Table.docx
+
+Running test Word-03_Text.tcl ...
+Check: Number of characters in empty document (Expected: 1 Have: 1)
+Check: Number of characters after adding text (Expected: 42 Have: 42)
+Selected first 5 characters:  0 5
+Saving as Word file: E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Word-03_Text.docx
+Saving as PDF file: E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Word-03_Text.pdf
+
+Running test Word-04_Find.tcl ...
+Test Word-04_Find.tcl failed: Error: Number of open documents (Expected: 1 Have: 3)Error: Number of open documents (Expected: 2 Have: 4)
+Running test Word-05_Report.tcl ...
+Check: Start index of selected range (Expected: 127 Have: 127)
+Check: End index of selected range (Expected: 248 Have: 248)
+Saving as Word file: E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Word-05_Report.docx
+
+
+Running test Outlook-01_Basic.tcl ...
+Tcl version              : 8.6.1
+Cawt version             : 1.1.0
+Twapi version            : 4.0.61
+Outlook Version          : 14.0 (Outlook 2010)
+Active Printer           : Method not available
+User Name                : Method not available
+Startup Pathname         : Method not available
+Templates Pathname       : Method not available
+Add-ins Pathname         : Method not available
+Installation Pathname    : Method not available
+User Folder Pathname     : Method not available
+Appl. name (from Application) : Outlook
+
+Running test Outlook-02_Mail.tcl ...
+Test Outlook-02_Mail.tcl failed: Operation aborted
+
+Running test Ocr-01_Basic.tcl ...
+Test Ocr-01_Basic.tcl failed: Cannot get or create MODI.Document object.
+Running test Ocr-02_Misc.tcl ...
+Test Ocr-02_Misc.tcl failed: Cannot get or create MODI.Document object.
+
+Running test Earth-01_Basic.tcl ...
+Test Earth-01_Basic.tcl failed: Cannot get or create GoogleEarth.ApplicationGE object.
+Running test Earth-02_MunichTour.tcl ...
+Test Earth-02_MunichTour.tcl failed: Saving as Excel file: E:/Projects/bluesquared/3rdPartyLibraries/Cawt-1.1.0-User/TestPrograms/testOut/Earth-02_MunichTour.xlsx
+
+Running test Matlab-01_Basic.tcl ...
+Test Matlab-01_Basic.tcl failed: Cannot get or create Matlab.Application object.
+Running test Matlab-02_MFile.tcl ...
+Test Matlab-02_MFile.tcl failed: Cannot get or create Matlab.Application object.
+
+Running test Explorer-01_Basic.tcl ...
+Tcl version                   : 8.6.1
+Cawt version                  : 1.1.0
+Twapi version                 : 4.0.61
+Active Printer                : Method not available
+User Name                     : Method not available
+Startup Pathname              : Method not available
+Templates Pathname            : Method not available
+Add-ins Pathname              : Method not available
+Installation Pathname         : C:\Program Files (x86)\Internet Explorer\
+User Folder Pathname          : Method not available
+Appl. name (from Application) : Internet Explorer
+
+Running test Explorer-02_Misc.tcl ...
+IsBusy: false
+IsBusy: false
+
+
+Checking Excel test coverage ...
+Scanning testfile ../CawtExcel/excelBasic.tcl
+Scanning testfile ../CawtExcel/excelChart.tcl
+Scanning testfile ../CawtExcel/excelConst.tcl
+Scanning testfile ../CawtExcel/excelCsv.tcl
+Scanning testfile ../CawtExcel/excelImgRaw.tcl
+Scanning testfile ../CawtExcel/excelMatlabFile.tcl
+Scanning testfile ../CawtExcel/excelMediaWiki.tcl
+Scanning testfile ../CawtExcel/excelTablelist.tcl
+Scanning testfile ../CawtExcel/excelUtil.tcl
+Scanning testfile ../CawtExcel/excelWikit.tcl
+Scanning testfile ../CawtExcel/excelWord.tcl
+Scanning testfile Excel-01_Basic.tcl
+Scanning testfile Excel-02_Misc.tcl
+Scanning testfile Excel-03_Add.tcl
+Scanning testfile Excel-04_Insert.tcl
+Scanning testfile Excel-05_Ranges.tcl
+Scanning testfile Excel-06_Chart.tcl
+Scanning testfile Excel-07_Csv.tcl
+Scanning testfile Excel-08_Tablelist.tcl
+Scanning testfile Excel-09_WordTable.tcl
+Scanning testfile Excel-10_Matrix.tcl
+Scanning testfile Excel-11_RawImage.tcl
+Scanning testfile Excel-12_MatlabFile.tcl
+Scanning testfile Excel-13_MediaWiki.tcl
+Scanning testfile Excel-14_Wikit.tcl
+Scanning testfile Excel-15_Clipboard.tcl
+Scanning testfile Excel-16_SetGet.tcl
+Scanning testfile Excel-17_Diff.tcl
+Scanning testfile Excel-18_SparseMatrix.tcl
+Scanning testfile Excel-19_MarkLink.tcl
+Scanning testfile Excel-20_ImgUtil.tcl
+186 procedures checked (3 obsolete)
+
+Checking Ppt test coverage ...
+Scanning testfile ../CawtPpt/pptBasic.tcl
+Scanning testfile ../CawtPpt/pptConst.tcl
+Scanning testfile ../CawtPpt/pptUtil.tcl
+Scanning testfile Ppt-01_Basic.tcl
+Scanning testfile Ppt-02_Misc.tcl
+Scanning testfile Ppt-03_Add.tcl
+Scanning testfile Ppt-04_Present.tcl
+Scanning testfile Ppt-05_Export.tcl
+Scanning testfile Ppt-06_CustomLayout.tcl
+37 procedures checked (0 obsolete)
+
+Checking Word test coverage ...
+Scanning testfile ../CawtWord/wordBasic.tcl
+Scanning testfile ../CawtWord/wordConst.tcl
+Scanning testfile ../CawtWord/wordUtil.tcl
+Scanning testfile Word-01_Basic.tcl
+Scanning testfile Word-02_Table.tcl
+Scanning testfile Word-03_Text.tcl
+Scanning testfile Word-04_Find.tcl
+Scanning testfile Word-05_Report.tcl
+::Word::GetCompatibilityMode not yet tested
+76 procedures checked (0 obsolete)
+
+Checking Outlook test coverage ...
+Scanning testfile ../CawtOutlook/outlookBasic.tcl
+Scanning testfile ../CawtOutlook/outlookConst.tcl
+Scanning testfile Outlook-01_Basic.tcl
+Scanning testfile Outlook-02_Mail.tcl
+6 procedures checked (0 obsolete)
+
+Checking Ocr test coverage ...
+Scanning testfile ../CawtOcr/ocrBasic.tcl
+Scanning testfile Ocr-01_Basic.tcl
+Scanning testfile Ocr-02_Misc.tcl
+9 procedures checked (0 obsolete)
+
+Checking Earth test coverage ...
+Scanning testfile ../CawtEarth/earthBasic.tcl
+Scanning testfile Earth-01_Basic.tcl
+Scanning testfile Earth-02_MunichTour.tcl
+6 procedures checked (0 obsolete)
+
+Checking Matlab test coverage ...
+Scanning testfile ../CawtMatlab/matlabBasic.tcl
+Scanning testfile Matlab-01_Basic.tcl
+Scanning testfile Matlab-02_MFile.tcl
+5 procedures checked (0 obsolete)
+
+Checking Explorer test coverage ...
+Scanning testfile ../CawtExplorer/explorerBasic.tcl
+Scanning testfile Explorer-01_Basic.tcl
+Scanning testfile Explorer-02_Misc.tcl
+8 procedures checked (0 obsolete)
+
