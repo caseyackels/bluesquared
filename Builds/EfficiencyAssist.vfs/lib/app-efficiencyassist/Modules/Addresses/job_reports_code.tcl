@@ -132,7 +132,7 @@ proc job::reports::Detailed {txt args} {
     #   
     #   
     #***
-    global log job env
+    global log job env comboDistTypes
 
     # Should be a user defined list ...
     set col "Company Quantity ShipVia Notes PackageType"
@@ -215,8 +215,10 @@ proc job::reports::Detailed {txt args} {
         
         # Get unique distribution types, for current version
         set DistTypes [$job(db,Name) eval "SELECT distinct(DistributionType) FROM addresses WHERE Version='$vers' ORDER BY DistributionType"]
+        if {[info exists comboDistTypes]} {unset comboDistTypes}
         set gateway 0
         foreach dist $DistTypes {
+                
             # DistType associated with current version
             # Output Summary for Distribution Type
             # Output Carrier, Company and Quantity
@@ -226,11 +228,18 @@ proc job::reports::Detailed {txt args} {
             set distTypeQty [$job(db,Name) eval "SELECT sum(Quantity) FROM Addresses WHERE Version='$vers' AND DistributionType='$dist'"]
             
             # If the distribution type matches, UPS IMPORT, lets provide a grouped breakdown instead of the individual shipment
-            if {$dist eq "07. UPS Import"} {
-                if {[info exists qty]} {unset qty}
+            # Handling the dist types that 'roll up' destinations into shipments.
+            if {$dist eq "07. UPS Import" || $dist eq "09. USPS Import"} {
+                set id [join [split $dist " "] ""]
+                
+                if {[info exists comboDistTypes($id,qty)]} {unset comboDistTypes($id,qty)}
+                lappend comboDistTypes(names) $dist
+                    
                 $job(db,Name) eval "SELECT Quantity FROM Addresses WHERE Version='$vers' AND DistributionType='$dist'" {
                     #${log}::debug $Quantity $Version
-                    lappend qty $Quantity
+                    lappend comboDistTypes($id,qty) $Quantity
+                    set comboDistTypes($id,distTypeNumofShipments) $distTypeNumOfShipments
+                    set comboDistTypes($id,distTypeQty) $distTypeQty
                 }
             
             } else {
@@ -245,6 +254,9 @@ proc job::reports::Detailed {txt args} {
                         set ShipType [join [db eval "SELECT ShipmentType from ShipVia WHERE ShipViaName='[join $ShipVia]'"]]
                         
                         if {$Company eq "JG Mail"} {set ShipType "JG Mail"}
+                        if {$Company eq "JG Inventory"} {set ShipType "JG Inventory"}
+                        if {$Company eq "JG Bindery"} {set ShipType "JG Bindery"}
+                        
                         ::job::reports::m insert row end [subst $cols]
                         
                         #$txt insert end "\t  $ShipVia, $Company - $Quantity\n"
@@ -253,6 +265,7 @@ proc job::reports::Detailed {txt args} {
             # End of the Distribution Type
             #$txt insert end "-\n"
         }
+        
         if {$gateway == 1} {
                 ::report::report r $colCount style captionedtable 1
                 $txt insert end [r printmatrix ::job::reports::m]
@@ -262,21 +275,38 @@ proc job::reports::Detailed {txt args} {
                 catch {::job::reports::m destroy}
                 catch {r destroy}
             }
-        if {[info exists qty]} {
-            # UPS Imports
-            $txt insert end "   <$dist> $distTypeNumOfShipments Shipments - $distTypeQty\n\n"
             
-            foreach single [lindex [Shipping_Code::extractFromList $qty] 0] {
-                #${log}::debug Singles: 1 Shipment of $single
-                $txt insert end "    1 Shipment of $single\n"
+        if {[info exists comboDistTypes]} {
+            foreach distType $comboDistTypes(names) {
+                set id [join [split $distType " "] ""]
+                $txt insert end "   <$distType> $comboDistTypes($id,distTypeNumofShipments) Shipments - $comboDistTypes($id,distTypeQty)\n\n"
+                
+                foreach single [lindex [Shipping_Code::extractFromList $comboDistTypes($id,qty)] 0] {
+                    #${log}::debug Singles: 1 Shipment of $single
+                    $txt insert end "    1 Shipment of $single\n"
+                }
+                
+                foreach groups [lrange [Shipping_Code::extractFromList $comboDistTypes($id,qty)] 1 end] {
+                    #${log}::debug Groups: [llength $groups] shipments of [lindex $groups 0]
+                    $txt insert end "    [llength $groups] Shipments of [lindex $groups 0]\n\n"
+                }
             }
-        
-            foreach groups [lrange [Shipping_Code::extractFromList $qty] 1 end] {
-                #${log}::debug Groups: [llength $groups] shipments of [lindex $groups 0]
-                $txt insert end "    [llength $groups] Shipments of [lindex $groups 0]\n"
-            }
-            unset qty
         }
+        #if {[info exists qty]} {
+        #    # UPS Imports
+        #    $txt insert end "   <$dist> $distTypeNumOfShipments Shipments - $distTypeQty\n\n"
+        #    
+        #    foreach single [lindex [Shipping_Code::extractFromList $qty] 0] {
+        #        #${log}::debug Singles: 1 Shipment of $single
+        #        $txt insert end "    1 Shipment of $single\n"
+        #    }
+        #
+        #    foreach groups [lrange [Shipping_Code::extractFromList $qty] 1 end] {
+        #        #${log}::debug Groups: [llength $groups] shipments of [lindex $groups 0]
+        #        $txt insert end "    [llength $groups] Shipments of [lindex $groups 0]\n"
+        #    }
+        #    unset qty
+        #}
         
         # End of the Version
         $txt insert end "\n"
