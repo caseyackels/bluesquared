@@ -292,21 +292,6 @@ proc job::reports::Detailed {txt args} {
                 }
             }
         }
-        #if {[info exists qty]} {
-        #    # UPS Imports
-        #    $txt insert end "   <$dist> $distTypeNumOfShipments Shipments - $distTypeQty\n\n"
-        #    
-        #    foreach single [lindex [Shipping_Code::extractFromList $qty] 0] {
-        #        #${log}::debug Singles: 1 Shipment of $single
-        #        $txt insert end "    1 Shipment of $single\n"
-        #    }
-        #
-        #    foreach groups [lrange [Shipping_Code::extractFromList $qty] 1 end] {
-        #        #${log}::debug Groups: [llength $groups] shipments of [lindex $groups 0]
-        #        $txt insert end "    [llength $groups] Shipments of [lindex $groups 0]\n"
-        #    }
-        #    unset qty
-        #}
         
         # End of the Version
         $txt insert end "\n"

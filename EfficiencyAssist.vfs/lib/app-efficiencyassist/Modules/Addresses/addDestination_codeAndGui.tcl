@@ -24,7 +24,7 @@
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
 
-proc eAssistHelper::addDestination {tblPath {id -1}} {
+proc eAssistHelper::addDestination {tblPath {id -1} args} {
     #****f* addDestination/eAssistHelper
     # AUTHOR
     #	Casey Ackels
@@ -137,15 +137,22 @@ proc eAssistHelper::addDestination {tblPath {id -1}} {
 #	}
 	
 	if {![info exists job(db,Name)]} {${log}::notice Tried to open "Add Destination" without an active job; return}
-	if {$id != -1} {
-		# We're editing an existing row ...
+    
+    
+	if {$id != -1 && $args eq ""} {
+		# We're editing an existing row record
 		# Populate the shipOrder array
 		${log}::debug Editing DB Row $id
 		eAssistHelper::loadShipOrderArray $job(db,Name) Addresses $id
-	} else {
-		# Reset Ship Order array
+	} elseif {$id != -1 && $args eq "combine"}
+		# We are combining orders together
+        # Reset Ship Order array
 		eAssistHelper::initShipOrderArray
-	}
+	} else {
+        # New Destination
+        # Reset Ship Order array
+		eAssistHelper::initShipOrderArray
+    }
 	
 	
     set win [eAssist_Global::detectWin -k .dest]
