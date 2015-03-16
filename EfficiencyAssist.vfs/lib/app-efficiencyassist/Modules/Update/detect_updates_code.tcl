@@ -71,7 +71,7 @@ proc vUpdate::saveCurrentVersion {} {
     
     set program(Version) 4
     set program(PatchLevel) 0.0 ;# Leading decimal is not needed
-    set program(beta) "Beta 8"
+    set program(beta) ""
     set program(Dev) 0
     set program(fullVersion) "$program(Version).$program(PatchLevel) $program(beta)"
     

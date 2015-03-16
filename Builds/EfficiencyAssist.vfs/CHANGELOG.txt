@@ -1,4 +1,8 @@
-= Version 4.0.0 Beta 8 (March 2014)
+= Version 4.0.0 (March 2015)
+Please see all 4.0.0 Beta entries for updates/changes and fixes.
+Released March 16th, 2015
+
+= Version 4.0.0 Beta 8 (March 2015)
 == Batch Maker
 * [NEW] Addresses are immediately inserted into the database upon importing files.
 * [NEW] If a version is not listed in an imported file, EA will automatically insert 'Version 1' (which is the default in EFI Monarch Planner)
@@ -22,7 +26,7 @@
 
 --
 
-= Version 4.0.0 Beta 7 (February 2014)
+= Version 4.0.0 Beta 7 (February 2015)
 == Batch Maker
 * [NEW] Clicking on the headers will now sort the column.
 * [NEW] There is now a progress bar that appears after selecting 'IMPORT'.
