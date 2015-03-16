@@ -51,7 +51,7 @@ proc eAssistPref::launchPreferences {} {
     #***
     global log program pref settings
     
-	set currentModule [lrange $settings(currentModule) 0 0]
+    set currentModule [lrange $settings(currentModule) 0 0]
 	
     toplevel .preferences
     wm transient .preferences .
@@ -74,22 +74,22 @@ proc eAssistPref::launchPreferences {} {
 
     
     switch -- [string tolower $currentModule] {
-        batchmaker   {${log}::debug Launching $currentModule; eAssistPref::launchBatchMakerPref} ;#eAssist_Global::resetFrames pref
-        boxlabels   {${log}::debug Launching $currentModule ; eAssistPref::launchBoxMakerPref} ;#eAssist_Global::resetFrames pref
-        setup       {${log}::debug Launching $currentModule} ;#eAssist_Global::resetFrames pref
-		default		{${log}::debug $currentModule isn't setup yet}
+        batchmaker	{${log}::debug Launching $currentModule; eAssistPref::launchBatchMakerPref} ;#eAssist_Global::resetFrames pref
+        boxlabels	{${log}::debug Launching $currentModule ; eAssistPref::launchBoxMakerPref} ;#eAssist_Global::resetFrames pref
+        setup		{${log}::debug Launching $currentModule} ;#eAssist_Global::resetFrames pref
+	default		{${log}::debug $currentModule isn't setup yet}
     }
 
     
     set btnBar [ttk::frame .preferences.btnBar]
     pack $btnBar -side bottom -anchor e -pady 8p -padx 5p
     
-	ttk::button $btnBar.change -text [mc "Change"] -command {lib::showPwordWindow .preferences.frame0}
+    ttk::button $btnBar.change -text [mc "Change"] -command {lib::showPwordWindow .preferences.frame0}
     ttk::button $btnBar.ok -text [mc "OK"] -command {lib::savePreferences; destroy .preferences}
     ttk::button $btnBar.cancel -text [mc "Cancel"] -command {destroy .preferences}
     
-	grid $btnBar.change -column 0 -row 3 -sticky nse -padx 20p
-	grid $btnBar.ok -column 1 -row 3 -sticky nse -padx 8p
+    grid $btnBar.change -column 0 -row 3 -sticky nse -padx 20p
+    grid $btnBar.ok -column 1 -row 3 -sticky nse -padx 8p
     grid $btnBar.cancel -column 2 -row 3 -sticky nse 
 
 } ;#eAssistPref::launchPreferences
@@ -135,14 +135,14 @@ proc eAssistPref::launchBatchMakerPref {} {
 	
     # Setup the tabs
     $pref(nb) add [ttk::frame $pref(nb).f1] -text [mc "File Paths"]
-	$pref(nb) add [ttk::frame $pref(nb).f2] -text [mc "Logging"]
+    $pref(nb) add [ttk::frame $pref(nb).f2] -text [mc "Logging"]
 
     $pref(nb) select $pref(nb).f1
     
     ##
     ## - Tab1
     ##
-	if {![info exists mySettings(job,fileName)]} {set mySettings(job,fileName) "%number %title %name"}
+    if {![info exists mySettings(job,fileName)]} {set mySettings(job,fileName) "%number %title %name"}
     
     set tab1 [ttk::labelframe $pref(nb).f1.tab1 -text [mc "File Paths"]]
     pack $tab1 -expand yes -fill both -padx 5p -pady 5p
@@ -169,23 +169,17 @@ proc eAssistPref::launchBatchMakerPref {} {
     grid $tab1.outFilesEntry -column 1 -row 1 -sticky ew -padx 5p -pady 5p
     grid $tab1.outFilesButton -column 2 -row 1 -sticky e -padx 5p -pady 5p
 	
-	grid $tab1.txt -column 0 -row 2 -sticky e -padx 5p -pady 5p
-	grid $tab1.entry -column 1 -row 2 -sticky ew -padx 5p -pady 5p
-	grid $tab1.txt2 -column 0 -columnspan 3 -row 3 -sticky ew -padx 5p -pady 5p
+    grid $tab1.txt -column 0 -row 2 -sticky e -padx 5p -pady 5p
+    grid $tab1.entry -column 1 -row 2 -sticky ew -padx 5p -pady 5p
+    grid $tab1.txt2 -column 0 -columnspan 3 -row 3 -sticky ew -padx 5p -pady 5p
 
     grid columnconfigure $tab1 1 -weight 2
     
     ##
     ## - Tab2
     ##
-	set tab2 [ttk::labelframe $pref(nb).f2.tab2 -text [mc "Logging"]]
+    set tab2 [ttk::labelframe $pref(nb).f2.tab2 -text [mc "Logging"]]
     pack $tab2 -expand yes -fill both -pady 5p -padx 5p
-	
-	
-
-
-
-
 
 } ;# eAssistPref::launchBatchMakerPref
 
