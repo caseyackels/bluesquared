@@ -235,7 +235,7 @@ proc 'eAssist_initVariables {} {
     # SEE ALSO
     #
     #***
-    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter logSettings auth options emailSetup emailEvent job user
+    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter auth options emailSetup emailEvent job user
 
 	#-------- CORE SETTINGS
 	#if {$logSettings(displayConsole) == 1} {console show}

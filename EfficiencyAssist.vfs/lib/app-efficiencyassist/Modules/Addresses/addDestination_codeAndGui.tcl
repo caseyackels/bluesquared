@@ -144,10 +144,17 @@ proc eAssistHelper::addDestination {tblPath {id -1} args} {
 		# Populate the shipOrder array
 		${log}::debug Editing DB Row $id
 		eAssistHelper::loadShipOrderArray $job(db,Name) Addresses $id
-	} elseif {$id != -1 && $args eq "combine"}
+	} elseif {$id != -1 && $args eq "combine"} {
 		# We are combining orders together
         # Reset Ship Order array
 		eAssistHelper::initShipOrderArray
+        ${log}::debug Combining orders: $id
+        foreach num $id {
+            #$files(tab3f2).tbl
+            lappend orderList [lindex [$tblPath getcells $num,OrderNumber] 0]
+        }
+        set shipOrder(Quantity) [$job(db,Name) eval "SELECT SUM(Quantity) from Addresses where OrderNumber in ([join $orderList ,])"]
+        ${log}::debug Total qty: $shipOrder(Quantity)
 	} else {
         # New Destination
         # Reset Ship Order array
@@ -573,6 +580,7 @@ proc eAssistHelper::saveDest {id tblPath db dbTbl} {
 		
 		set tblID [expr {$id - 1}]
 		foreach hdr $headerParent(headerList) {
+            ${log}::debug UPDATING: $hdr - $shipOrder($hdr)
 			$tblPath cellconfigure $tblID,$hdr -text $shipOrder($hdr)
 		}
 

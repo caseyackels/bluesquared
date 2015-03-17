@@ -72,6 +72,11 @@ proc eAssist::parentGUI {} {
         set settings(currentModule) {Batch Maker}
         set settings(currentModule_machine) [join $settings(currentModule) _]
     }
+    # Backwards compatability. This var used to hold two values.
+    if {[llength $settings(currentModule)] > 1} {
+            set settings(currentModule) {Batch Maker}
+            set settings(currentModule_machine) [join $settings(currentModule) _]
+        }
     
     wm protocol . WM_DELETE_WINDOW {eAssistSetup::SaveGlobalSettings; destroy .}
     wm protocol . WM_SAVE_YOURSELF {eAssistSetup::SaveGlobalSettings}
@@ -112,7 +117,11 @@ proc eAssist::parentGUI {} {
             }
         }
     } else {
-        $mb.module add command -label "NO GROUP"
+        if {$user($user(id),modules) != ""} {
+            $mb.module add command -label $user($user(id),modules)
+        } else {
+            $mb.module add command -label "NO GROUP"
+        }
     }
 
 
