@@ -428,7 +428,7 @@ proc eAssistHelper::editNotes {} {
 	## Revision Frame
 	##
     set f0 [ttk::frame $w.f0]
-    pack $f0 -fill both -expand yes -padx 5p
+    pack $f0 -fill both -padx 5p
 	
 	ttk::label $f0.txt1 -text [mc "View Revision"]
 	ttk::combobox $f0.cbox -width 5 \
@@ -444,9 +444,12 @@ proc eAssistHelper::editNotes {} {
 	## Job Notes Frame
 	##
     set f1 [ttk::labelframe $w.f1 -text [mc "Job Notes"] -padding 10]
-    pack $f1 -fill both -expand yes -padx 5p -pady 5p
+    pack $f1 -fill both -expand yes -padx 5p -pady 5p -anchor n
 	
-	text $f1.txt -height 5 -yscrollcommand [list $f1.scrolly set]
+	text $f1.txt -height 10 \
+				-wrap word \
+				-yscrollcommand [list $f1.scrolly set]
+	
 	ttk::scrollbar $f1.scrolly -orient v -command [list $f1.txt yview]
 	
 	grid $f1.txt -column 0 -row 0 -sticky news
@@ -460,10 +463,10 @@ proc eAssistHelper::editNotes {} {
 	## Log notes Frame
 	##
     set f2 [ttk::labelframe $w.f2 -text [mc "Log Notes"] -padding 10]
-    pack $f2 -fill both -expand yes -padx 5p -pady 5p
+    pack $f2 -fill both -expand yes -padx 5p -pady 5p -anchor n
 	
 	set f2_a [ttk::frame $f2.top]
-	pack $f2_a -fill both -expand yes
+	pack $f2_a -fill both
 	
 	ttk::label $f2_a.txt1a -text [mc User]
 	ttk::label $f2_a.txt1b -textvariable hist(log,User)
@@ -480,7 +483,10 @@ proc eAssistHelper::editNotes {} {
 	set f2_b [ttk::frame $f2.bottom]
 	pack $f2_b -fill both -expand yes
 	
-	text $f2_b.txt -height 5 -yscrollcommand [list $f2_b.scrolly set]
+	text $f2_b.txt -height 5 \
+					-wrap word \
+					-yscrollcommand [list $f2_b.scrolly set]
+	
 	ttk::scrollbar $f2_b.scrolly -orient v -command [list $f2_b.txt yview]
 
 	grid $f2_b.txt -column 0 -row 0 -sticky news

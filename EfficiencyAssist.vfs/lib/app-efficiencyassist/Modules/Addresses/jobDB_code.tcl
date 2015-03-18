@@ -87,13 +87,15 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber saveFileLocati
         );
         
         CREATE TABLE IF NOT EXISTS JobInformation (
-            Job_ID      INTEGER PRIMARY KEY AUTOINCREMENT,
-            HistID      VARCHAR (36) REFERENCES History (Hist_ID) ON UPDATE CASCADE,
-            CustID      TEXT,
-            CSRName     TEXT,
-            JobTitle    TEXT,
-            JobNumber   TEXT,
-            JobName     TEXT
+            Job_ID              INTEGER PRIMARY KEY AUTOINCREMENT,
+            HistID              VARCHAR (36) REFERENCES History (Hist_ID) ON UPDATE CASCADE,
+            CustID              TEXT,
+            CSRName             TEXT,
+            JobTitle            TEXT,
+            JobNumber           TEXT,
+            JobName             TEXT,
+            JobFirstShipDate    DATE,
+            JobBalanceShipDate  DATE
             
         );
         

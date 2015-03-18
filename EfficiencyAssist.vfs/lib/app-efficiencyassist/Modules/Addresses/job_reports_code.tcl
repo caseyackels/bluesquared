@@ -70,19 +70,13 @@ proc job::reports::Viewer {} {
     #ttk::combobox $f1.cbox1 -values {Version}
     
     text $f1.txt \
+                -wrap word \
                 -xscrollcommand [list $f1.scrollx set] \
                 -yscrollcommand [list $f1.scrolly set]
         
         # setup the autoscroll bars
     ttk::scrollbar $f1.scrollx -orient h -command [list $f1.txt xview]
     ttk::scrollbar $f1.scrolly -orient v -command [list $f1.txt yview]
-    
-    
-    #ttk::button $f1.btn1 -text "OK" -command {job::reports::DistributionType .rv.f1.txt [.rv.f1.cbox1 get]}
-    
-    #grid $f1.cbox1 -column 0 -row 0 -sticky nsw
-    #grid $f1.entry1 -column 0 -row 0 -sticky nsw
-    #grid $f1.btn1 -column 1 -row 0 -sticky ew
     
     grid $f1.txt -column 0 -row 1 -sticky news
     grid columnconfigure $f1 0 -weight 2
@@ -135,10 +129,10 @@ proc job::reports::Detailed {txt args} {
     global log job env comboDistTypes
 
     # Should be a user defined list ...
-    set col "Company Quantity ShipVia Notes PackageType"
+    set col "Company Notes Quantity PackageType ShipVia"
     
     
-    set addID [$job(db,Name) eval "SELECT OrderNumber FROM Addresses"]
+    set addID [$job(db,Name) eval "SELECT OrderNumber FROM Addresses WHERE Status=1"]
     set rowCount [llength $addID]
     
     set colCount [llength $col]
@@ -156,19 +150,19 @@ proc job::reports::Detailed {txt args} {
     $txt insert end "Job Number: $job(Number)\n"
     $txt insert end "Job Title/Name: $job(Title) / $job(Name)\n\n"
     
-    set numOfVersions [$job(db,Name) eval "SELECT count(distinct(Version)) FROM Addresses"]
-    $txt insert end "Number of Versions: $numOfVersions\n"
-
-    set numOfShipments [$job(db,Name) eval "SELECT count(*) FROM Addresses"]
-    $txt insert end "Number of Shipments: $numOfShipments\n"
+    set numOfVersions [$job(db,Name) eval "SELECT count(distinct(Version)) FROM Addresses WHERE Status=1"]
+    set numOfShipments [$job(db,Name) eval "SELECT count(*) FROM Addresses WHERE Status=1"]
+    set totalQtyOfShipments [$job(db,Name) eval "SELECT sum(Quantity) FROM Addresses WHERE Status=1"]
     
-    set totalQtyOfShipments [$job(db,Name) eval "SELECT sum(Quantity) FROM Addresses"]
-    $txt insert end "Total Quantity: $totalQtyOfShipments\n"
+    $txt insert end "$numOfVersions Versions, $numOfShipments Shipments, $totalQtyOfShipments Total Quantity\n"
+    #$txt insert end "Number of Versions: $numOfVersions\n"
+    #$txt insert end "Number of Shipments: $numOfShipments\n"    
+    #$txt insert end "Total Quantity: $totalQtyOfShipments\n"
 
     # Schema testing; this exists in version 3 and higher
     #set errStr "no such table:"
     if {[job::db::tableExists Notes] != ""} {
-        set jobNotes [join [lindex [$job(db,Name) eval "SELECT max(Notes_ID), Notes_Notes FROM Notes"] 1]]
+        set jobNotes [lindex [$job(db,Name) eval "SELECT max(Notes_ID), Notes_Notes FROM Notes"] 1]
         if {$jobNotes != ""} {
            $txt insert end "\nJob Notes: $jobNotes\n"
         }
@@ -192,13 +186,13 @@ proc job::reports::Detailed {txt args} {
 #------------------------------
     
     # Get unique versions
-    set versionNames [$job(db,Name) eval "SELECT distinct(Version) FROM Addresses ORDER BY Version ASC"]
+    set versionNames [$job(db,Name) eval "SELECT distinct(Version) FROM Addresses WHERE Status=1 ORDER BY Version ASC"]
     foreach vers $versionNames {
     # Output Version Name
-        set versNumOfShipments [$job(db,Name) eval "SELECT count(*) FROM Addresses WHERE Version='$vers'"]
-        set versQuantity [$job(db,Name) eval "SELECT sum(Quantity) FROM Addresses WHERE Version='$vers'"]
+        set versNumOfShipments [$job(db,Name) eval "SELECT count(*) FROM Addresses WHERE Version='$vers' AND Status=1"]
+        set versQuantity [$job(db,Name) eval "SELECT sum(Quantity) FROM Addresses WHERE Version='$vers' AND Status=1"]
         $txt insert end "====================\n\n"
-        $txt insert end "VERSION: $vers\n"
+        $txt insert end "Version: $vers\n"
         $txt insert end "Shipments: $versNumOfShipments - Quantity: $versQuantity\n"
         
         #if {[job::db::tableExists VersNotes] != ""} {
@@ -214,7 +208,7 @@ proc job::reports::Detailed {txt args} {
         ::job::reports::m insert row end $col ;# Add the headers
         
         # Get unique distribution types, for current version
-        set DistTypes [$job(db,Name) eval "SELECT distinct(DistributionType) FROM addresses WHERE Version='$vers' ORDER BY DistributionType"]
+        set DistTypes [$job(db,Name) eval "SELECT distinct(DistributionType) FROM addresses WHERE Version='$vers' AND Status=1 ORDER BY DistributionType"]
         if {[info exists comboDistTypes]} {unset comboDistTypes}
         set gateway 0
         foreach dist $DistTypes {
@@ -224,8 +218,8 @@ proc job::reports::Detailed {txt args} {
             # Output Carrier, Company and Quantity
             # Get total count for current distribution type
 
-            set distTypeNumOfShipments [$job(db,Name) eval "SELECT count(*) from Addresses WHERE Version='$vers' AND DistributionType='$dist'"]
-            set distTypeQty [$job(db,Name) eval "SELECT sum(Quantity) FROM Addresses WHERE Version='$vers' AND DistributionType='$dist'"]
+            set distTypeNumOfShipments [$job(db,Name) eval "SELECT count(*) from Addresses WHERE Version='$vers' AND DistributionType='$dist' AND Status=1"]
+            set distTypeQty [$job(db,Name) eval "SELECT sum(Quantity) FROM Addresses WHERE Version='$vers' AND DistributionType='$dist' AND Status=1"]
             
             # If the distribution type matches, UPS IMPORT, lets provide a grouped breakdown instead of the individual shipment
             # Handling the dist types that 'roll up' destinations into shipments.
@@ -235,7 +229,7 @@ proc job::reports::Detailed {txt args} {
                 if {[info exists comboDistTypes($id,qty)]} {unset comboDistTypes($id,qty)}
                 lappend comboDistTypes(names) $dist
                     
-                $job(db,Name) eval "SELECT Quantity FROM Addresses WHERE Version='$vers' AND DistributionType='$dist'" {
+                $job(db,Name) eval "SELECT Quantity FROM Addresses WHERE Version='$vers' AND DistributionType='$dist' AND Status=1" {
                     #${log}::debug $Quantity $Version
                     lappend comboDistTypes($id,qty) $Quantity
                     set comboDistTypes($id,distTypeNumofShipments) $distTypeNumOfShipments
@@ -245,7 +239,7 @@ proc job::reports::Detailed {txt args} {
             } else {
                 set gateway 1
                     # Output detailed shipment information
-                    $job(db,Name) eval "SELECT [join $col ,] FROM Addresses WHERE Version='$vers' AND DistributionType='$dist' ORDER BY Quantity" {
+                    $job(db,Name) eval "SELECT [join $col ,] FROM Addresses WHERE Version='$vers' AND DistributionType='$dist' AND Status=1 ORDER BY Quantity" {
                     #$job(db,Name) eval "SELECT ShipVia, Company, Quantity FROM Addresses WHERE Version='$vers' AND DistributionType='$dist' ORDER BY Quantity" {}
                         # Error capturing: Set a default value if nothing was put into the db
                         if {$ShipVia eq ""} {set ShipVia [mc "CARRIER NOT ASSIGNED"]}
