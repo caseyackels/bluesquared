@@ -239,7 +239,8 @@ proc importFiles::eAssistGUI {} {
         #set colName [$files(tab3f2).tbl columncget [$files(tab3f2).tbl containingcolumn %x] -name]
         #${log}::debug Column Name: $colName
         if {$colName eq "OrderNumber"} {
-            eAssistHelper::addDestination $files(tab3f2).tbl [lindex [$files(tab3f2).tbl getcells [$files(tab3f2).tbl curcellselection]] 0]
+            #eAssistHelper::addDestination $files(tab3f2).tbl [lindex [$files(tab3f2).tbl getcells [$files(tab3f2).tbl curcellselection]] 0]
+            eAssistHelper::addDestination $files(tab3f2).tbl -edit [$files(tab3f2).tbl curselection]
         }
     }
    
@@ -344,7 +345,7 @@ proc importFiles::initMenu {} {
     #$mb.modMenu add separator
     
     $mb.modMenu add command -label [mc "Notes"] -command {eAssistHelper::editNotes}
-    $mb.modMenu add command -label [mc "Add Destination"] -command {eAssistHelper::addDestination $files(tab3f2).tbl}
+    $mb.modMenu add command -label [mc "Add Destination"] -command {eAssistHelper::addDestination $files(tab3f2).tbl -add}
     $mb.modMenu add command -label [mc "Filters..."] -command {eAssist_tools::FilterEditor} -state disable
     
     #Add Cascade for Validation functions

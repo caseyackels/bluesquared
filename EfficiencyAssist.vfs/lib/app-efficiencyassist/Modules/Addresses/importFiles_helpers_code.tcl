@@ -479,7 +479,8 @@ proc eAssistHelper::insValuesToTableCells {type tbl txtVar cells} {
 	importFiles::highlightAllRecords $tbl
 	
 	# Get total copies
-    set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
+    #set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
+	job::db::getTotalCopies
 
 } ;# eAssistHelper::insValuesToTableCells
 

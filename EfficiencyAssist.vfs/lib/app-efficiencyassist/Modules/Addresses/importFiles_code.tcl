@@ -58,6 +58,7 @@ proc importFiles::initVars {args} {
     #set headerParent(headerList) [eAssist_db::dbSelectQuery -columnNames InternalHeaderName -table Headers]
     set headerParent(headerList) [db eval "SELECT InternalHeaderName FROM Headers ORDER BY DisplayOrder"]
     set headerParent(whiteList) [eAssist_db::dbWhereQuery -columnNames InternalHeaderName -table Headers -where AlwaysDisplay=1]
+    set headerParent(blackList) [list Status] ;# This is only for the columns that exist in the main table (addresses) that we never want to display
     set headerParent(ColumnCount) [db eval "SELECT Count (Header_ID) from Headers"]
     
     # Setup header array with subheaders
@@ -435,7 +436,8 @@ proc importFiles::processFile {win} {
     }
     
     # Get total copies
-    set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
+    #set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
+    job::db::getTotalCopies
     
     importFiles::highlightAllRecords $files(tab3f2).tbl
     
@@ -567,7 +569,8 @@ proc importFiles::startCmd {tbl row col text} {
                                         $tbl rejectinput
                                         return
                                     }
-                                set job(TotalCopies) [eAssistHelper::calcSamples $tbl $col]
+                                #set job(TotalCopies) [eAssistHelper::calcSamples $tbl $col]
+                                job::db::getTotalCopies
             }
             "containertype"     {
                                 $w configure -values $packagingSetup(ContainerType) -state readonly
@@ -693,7 +696,8 @@ proc importFiles::endCmd {tbl row col text} {
 
     $tbl cellconfigure $row,$col -background $backGround
 
-    set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
+    #set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
+    job::db::getTotalCopies
     
 	return $text
     #${log}::debug --END-- [info level 1]

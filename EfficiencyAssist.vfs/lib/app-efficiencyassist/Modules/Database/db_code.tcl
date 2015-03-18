@@ -858,7 +858,8 @@ proc eAssist_db::leftOuterJoin {args} {
 
 } ;# eAssist_db::leftOuterJoin
 
-proc ea::db::countQuantity {db dbTbl} {
+
+proc ea::db::countQuantity {db dbTbl dbCol args} {
     #****f* countQuantity/ea::db
     # CREATION DATE
     #   02/15/2015 (Sunday Feb 15)
@@ -871,10 +872,13 @@ proc ea::db::countQuantity {db dbTbl} {
     #   
     #
     # SYNOPSIS
-    #   ea::db::countQuantity  
+    #   ea::db::countQuantity <db name> <db table> <db column> ?db status col? ?status (0|1)?
+	#   Required: Db Name and DB Column
+	#	Optional: DB Status Column Name; defaults to Status
+	#	Optional: status value: defaults to 1
     #
     # FUNCTION
-    #	Counts the Quantity column, and trims off the .0 which is returned by sum(*)
+    #	Counts the given column from the given table and database.
     #   
     #   
     # CHILDREN
@@ -891,10 +895,19 @@ proc ea::db::countQuantity {db dbTbl} {
     #   
     #***
     global log
+	
+	if {$args eq ""} {set args "-statusName Status -status 1"}
+	foreach {key value} $args {
+		switch -- $key {
+			-statusName	{set dbStatusCol $value}
+			-status		{set status $value}
+		}
+	}
 
-    #set qty [string trim [$db eval "SELECT SUM(Quantity) FROM $dbTbl"] .0]
-    set qty [$db eval "SELECT SUM(Quantity) FROM $dbTbl"]
-    return $qty
+	
+    set value [$db eval "SELECT SUM($dbCol) FROM $dbTbl WHERE $dbStatusCol=$status"]
+    
+	return $value
     
 } ;# ea::db::countQuantity
 

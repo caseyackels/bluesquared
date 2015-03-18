@@ -131,6 +131,8 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber saveFileLocati
         lappend cTable "'$header' $dataType"
     }
 
+    # Columns that are always needed; similar to the OrderNumber column.
+    lappend cTable "'Status' BOOLEAN DEFAULT (1)"
 
     # Insert data into the History table
     set currentGUID [ea::tools::getGUID]
@@ -213,10 +215,13 @@ proc job::db::open {} {
 
     #set newHdr {$OrderNumber}
     foreach header [job::db::retrieveHeaderNames $job(db,Name) Addresses] {
+        if {$header eq "Status"} {continue}
+        lappend newHdrList $header
         lappend newHdr $$header
     }
     
     set headerParent(dbHeaderList) $newHdr
+    set headerParent(tblHeaderList) $newHdrList
     
     ## Check db schema to see if it needs to be updated ...
     job::db::updateDB
@@ -228,7 +233,7 @@ proc job::db::open {} {
     }
     
     # Insert the data into the tablelist
-    $job(db,Name) eval {SELECT * from Addresses} {
+    $job(db,Name) eval "SELECT [join $newHdrList ,] from Addresses WHERE Status=1" {
         #${log}::debug [$files(tab3f2).tbl insert end $newHdr]
         catch {$files(tab3f2).tbl insert end [subst $newHdr]} err
     }
@@ -248,7 +253,8 @@ proc job::db::open {} {
     importFiles::highlightAllRecords $files(tab3f2).tbl
     
     # Get total copies
-    set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
+    #set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
+    job::db::getTotalCopies
     
     # Init variables
     
@@ -312,7 +318,8 @@ proc job::db::write {db dbTbl dbTxt wid widCells {dbCol ""}} {
     $db eval "UPDATE $dbTbl SET $dbCol='$dbTxt' WHERE OrderNumber='$dbPK'"
     
     # Get total copies
-    set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
+    #set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
+    job::db::getTotalCopies
     
 } ;# job::db::write
 
@@ -339,7 +346,7 @@ proc job::db::multiWrite {db dbTbl dbCol dbSearchColVal dbSearchCol dbIdxValues}
     #   
     #
     # FUNCTION
-    #	Writes data to the DB and the tablelist widget at the same time. This is to be used if we have multiple cells to update.
+    #	Writes data to the DB then populates that tablelist widget. This is to be used if we have multiple cells to update.
     #	This uses the WHERE clause and IN expression.
     #   If multiple values are passed through dbIdxValues; they must be passed in, through a comma delimited list.
     #   
@@ -363,15 +370,15 @@ proc job::db::multiWrite {db dbTbl dbCol dbSearchColVal dbSearchCol dbIdxValues}
     #${log}::debug $db eval "UPDATE $dbTbl SET $dbCol='$dbSearchColVal' WHERE $dbSearchCol IN ($dbIdxValues)"
     $db eval "UPDATE $dbTbl SET $dbCol='$dbSearchColVal' WHERE $dbSearchCol IN ($dbIdxValues)"
     
+    # Get the total rows of the table
+    set dbVal [$db eval "SELECT $dbCol from $dbTbl WHERE Status=1"]
+    set dbValCount [llength $dbVal]
     
-    ## Test Data
-    #set nums [join {1 2 4 5 6} ,]
-    #set nums_split [split $nums ,]
-    set nums_split [split $dbIdxValues ,]
-    foreach row $nums_split {
-        set row [expr {$row - 1}] ;# Neccessary because the tablist widget starts at 0; db starts at 1.
-        #${log}::debug $files(tab3f2).tbl cellconfigure $row,$dbCol -text "$dbSearchColVal"
-        $files(tab3f2).tbl cellconfigure $row,$dbCol -text "$dbSearchColVal"
+    for {set x 0; set dbRow 1} {$x < $dbValCount} {incr x; incr dbRow} {
+        #${log}::debug $x - Widget Row
+        #${log}::debug $dbRow - DB Row
+        # We can't use -fillcolumn, because the values could vary.
+        $files(tab3f2).tbl cellconfigure $x,$dbCol -text [lindex $dbVal $x]
     }
     
 } ;# job::db::multiWrite
@@ -671,3 +678,41 @@ proc job::db::readNotes {cbox_wid job_wid log_wid} {
     $log_wid insert end $hist(log,Log)
 
 } ;# job::db::readNotes
+
+proc job::db::getTotalCopies {} {
+    #****f* getTotalCopies/job::db
+    # CREATION DATE
+    #   03/17/2015 (Tuesday Mar 17)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   job::db::getTotalCopies  
+    #
+    # FUNCTION
+    #	Wrapper around ea::db::countQuantity, to allow us to change neccessary sql in one place only
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log job
+
+    set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses Quantity -statusName Status -status 1]
+    
+} ;# job::db::getTotalCopies

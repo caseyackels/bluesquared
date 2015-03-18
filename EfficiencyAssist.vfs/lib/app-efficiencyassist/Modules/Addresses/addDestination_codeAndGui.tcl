@@ -17,14 +17,8 @@
 # Creates a window to add a new destination, instead of reimporting the source file.
 # ---- This file contains GUI and BACKEND code
 
-## Coding Conventions
-# - Namespaces: Firstword_Secondword
 
-# - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
-#   will be uppercase. I.E sourceFiles, sourceFileExample
-
-
-proc eAssistHelper::addDestination {tblPath {id -1} args} {
+proc eAssistHelper::addDestination {tblPath modifier {widRow -1}} {
     #****f* addDestination/eAssistHelper
     # AUTHOR
     #	Casey Ackels
@@ -33,7 +27,7 @@ proc eAssistHelper::addDestination {tblPath {id -1} args} {
     #	(c) 2011-2013 Casey Ackels
     #
     # FUNCTION
-    #	eAssistHelper::addDestination <tblPath>
+    #	eAssistHelper::addDestination <tblPath> <-add|-combine|-edit> ?widRow?
     #	tblPath is the path where you want the address inserted.
     #
     # SYNOPSIS
@@ -139,27 +133,58 @@ proc eAssistHelper::addDestination {tblPath {id -1} args} {
 	if {![info exists job(db,Name)]} {${log}::notice Tried to open "Add Destination" without an active job; return}
     
     
-	if {$id != -1 && $args eq ""} {
-		# We're editing an existing row record
-		# Populate the shipOrder array
-		${log}::debug Editing DB Row $id
-		eAssistHelper::loadShipOrderArray $job(db,Name) Addresses $id
-	} elseif {$id != -1 && $args eq "combine"} {
-		# We are combining orders together
-        # Reset Ship Order array
-		eAssistHelper::initShipOrderArray
-        ${log}::debug Combining orders: $id
-        foreach num $id {
-            #$files(tab3f2).tbl
-            lappend orderList [lindex [$tblPath getcells $num,OrderNumber] 0]
+    switch -- $modifier {
+        -add        {
+                        ${log}::debug Creating a new destination
+                        eAssistHelper::initShipOrderArray
         }
-        set shipOrder(Quantity) [$job(db,Name) eval "SELECT SUM(Quantity) from Addresses where OrderNumber in ([join $orderList ,])"]
-        ${log}::debug Total qty: $shipOrder(Quantity)
-	} else {
-        # New Destination
-        # Reset Ship Order array
-		eAssistHelper::initShipOrderArray
+        -edit       {
+                        ${log}::debug Editing an existing row
+                        set dbID [$tblPath getcells $widRow,OrderNumber]
+                        ${log}::debug Editing DB Row $dbID
+                        ${log}::debug Editing Widget Row: $widRow
+                        eAssistHelper::loadShipOrderArray $job(db,Name) Addresses $dbID
+        }
+        -combine    {
+                        eAssistHelper::initShipOrderArray
+                        ${log}::debug Combining Orders
+                        ${log}::debug Widget Rows: $widRow
+                        foreach num $widRow {
+                            lappend orderList [$tblPath getcells $num,OrderNumber]
+                        }
+                        ${log}::debug Order List: $orderList
+                        set shipOrder(Quantity) [$job(db,Name) eval "SELECT SUM(Quantity) from Addresses where OrderNumber in ([join $orderList ,])"]
+                        ${log}::debug Total qty: $shipOrder(Quantity)
+        }
+        default     {${log}::debug Not a valid option for eAssistHelper::addDestination, used $modifier}
     }
+    
+#	if {$dbID != -1 && $args eq ""} {
+#		# We're editing an existing row record
+#		# Populate the shipOrder array
+#        ${log}::debug Editing an existing row
+#		${log}::debug Editing DB Row $dbID
+#        ${log}::debug Editing Widget Row: $widRow
+#		eAssistHelper::loadShipOrderArray $job(db,Name) Addresses $dbID
+#        
+#	} elseif {$dbID != -1 && $args eq "combine"} {
+#		# We are combining orders together
+#        # Reset Ship Order array
+#		eAssistHelper::initShipOrderArray
+#        ${log}::debug Combining Orders: widRow: $widRow
+#		${log}::debug Editing DB Row $dbID
+#        ${log}::debug Editing Widget Row: $widRow
+#        foreach num $widRow {
+#            lappend orderList [$tblPath getcells $num,OrderNumber]
+#        }
+#        ${log}::debug Order List: $orderList
+#        set shipOrder(Quantity) [$job(db,Name) eval "SELECT SUM(Quantity) from Addresses where OrderNumber in ([join $orderList ,])"]
+#        ${log}::debug Total qty: $shipOrder(Quantity)
+#	} else {
+#        # New Destination
+#        # Reset Ship Order array
+#		eAssistHelper::initShipOrderArray
+#    }
 	
 	
     set win [eAssist_Global::detectWin -k .dest]
@@ -348,7 +373,7 @@ proc eAssistHelper::addDestination {tblPath {id -1} args} {
     pack $btnbar -pady 5 -padx 10p -anchor se
     
 	ttk::button $btnbar.close -text [mc "Cancel"] -command [list destroy $win]
-    ttk::button $btnbar.save -text [mc "Save"] -command [list eAssistHelper::saveDest $id $tblPath $job(db,Name) Addresses] -state disabled
+    ttk::button $btnbar.save -text [mc "Save"] -command [list eAssistHelper::saveDest $modifier $widRow $tblPath $job(db,Name) Addresses] -state disabled
 	
     #--------- Grid
     grid $btnbar.close -column 0 -row 0 -sticky news -padx 5p -pady 5p
@@ -539,7 +564,7 @@ proc eAssistHelper::initFGTextColor {args} {
 } ;# eAssistHelper::initFGTextColor
 
 
-proc eAssistHelper::saveDest {id tblPath db dbTbl} {
+proc eAssistHelper::saveDest {modifier widRow tblPath db dbTbl} {
     #****f* saveDest/eAssistHelper
     # AUTHOR
     #	Casey Ackels
@@ -548,7 +573,7 @@ proc eAssistHelper::saveDest {id tblPath db dbTbl} {
     #	(c) 2011-2013 Casey Ackels
     #
     # FUNCTION
-    #	Saves all entries from addDestination into the designated table, and also saves the address into the master list which is saved into $program(home)/addressList.txt
+    #	Saves all entries from addDestination into the designated table
     #
     # SYNOPSIS
     #
@@ -565,42 +590,102 @@ proc eAssistHelper::saveDest {id tblPath db dbTbl} {
     #
     #***
     global log program shipOrder job headerParent
+    
+    switch -- $modifier {
+        -add        {
+                    ## -- We are adding a new record
+                        if {[info exists insertRow]} {unset insertRow}
+                            set insertRow [list \'$OrderNumber']
+                        foreach hdr $headerParent(headerList) {
+                            lappend insertRow '$shipOrder($hdr)'
+                        }
+                    
+                        $job(db,Name) eval "INSERT OR ABORT INTO $dbTbl ([join $headerParent(headerList) ,]) VALUES ([join $insertRow ,])"
+                    
+                        set rowID [$db last_insert_rowid]
+                        $tblPath insert end [$db eval "SELECT [join $headerParent(headerList) ,] FROM $dbTbl where rowid=$rowID"]
+        }
+        -edit       {
+            		## -- We are updating a record
+                        set dbID [$tblPath getcells $widRow,OrderNumber]
+                        ${log}::debug ID = $dbID
+                        if {[info exists updateStatement] || [info exists headers]} {unset updateStatement; unset headers}
+                        #set headers [list \$OrderNumber] ;# Order Number is not part of the general header names, this perhaps, should be changed... It is our index in the Addresses Table
+                        foreach hdr $headerParent(headerList) {
+                            lappend updateStatement $hdr='$shipOrder($hdr)'
+                            #lappend headers $$hdr
+                        }
+                        #${log}::debug Update Statement: $db eval "UPDATE $dbTbl SET [join $updateStatement ,] WHERE rowid=$id"
+                        $db eval "UPDATE $dbTbl SET [join $updateStatement ,] WHERE OrderNumber=$dbID"
+                        
+                        #set tblID [expr {$id - 1}]
+                        foreach hdr $headerParent(headerList) {
+                            ${log}::debug UPDATING: $hdr - $shipOrder($hdr)
+                            $tblPath cellconfigure $widRow,$hdr -text $shipOrder($hdr)
+                        }
+        }
+        -combine    {
+                    ## -- Combine selected rows into one record
+                    if {[info exists dbIDs]} {unset dbIDs}
+                    foreach num $widRow {
+                        lappend dbIDs [$tblPath getcells $num,OrderNumber]
+                    }
+                    ${log}::debug Deleting OrderNumber from DB: $dbIDs
+                    $db eval "UPDATE $dbTbl SET Status = 0 WHERE OrderNumber in ([join $dbIDs ,])"
+                    
+                    ${log}::debug Deleting rows from Widget: [lsort -integer $widRow]
+                    $tblPath delete [lsort -integer $widRow]
+                    
+                    ${log}::debug Adding new row
+                    if {[info exists insertRow]} {unset insertRow}
+                        set insertRow [list \$OrderNumber]
+                    foreach hdr $headerParent(headerList) {
+                        lappend insertRow '$shipOrder($hdr)'
+                    }
+                
+                    $job(db,Name) eval "INSERT OR ABORT INTO $dbTbl (OrderNumber,[join $headerParent(headerList) ,]) VALUES ([join $insertRow ,])"
+                
+                    set rowID [$db last_insert_rowid]
+                    $tblPath insert end [$db eval "SELECT OrderNumber,[join $headerParent(headerList) ,] FROM $dbTbl where rowid=$rowID"]
+        }
+        default     {${log}::debug Not a valid option for eAssistHelper::saveDest, used $modifier}
+    }
 
-	if {$id != -1} {
-		## -- We are updating a record
-		#${log}::debug ID = $id
-		if {[info exists updateStatement] || [info exists headers]} {unset updateStatement; unset headers}
-		set headers [list \$OrderNumber] ;# Order Number is not part of the general header names, this perhaps, should be changed... It is our index in the Addresses Table
-		foreach hdr $headerParent(headerList) {
-			lappend updateStatement $hdr='$shipOrder($hdr)'
-			lappend headers $$hdr
-		}
-		#${log}::debug Update Statement: $db eval "UPDATE $dbTbl SET [join $updateStatement ,] WHERE rowid=$id"
-		$db eval "UPDATE $dbTbl SET [join $updateStatement ,] WHERE rowid=$id"
-		
-		set tblID [expr {$id - 1}]
-		foreach hdr $headerParent(headerList) {
-            ${log}::debug UPDATING: $hdr - $shipOrder($hdr)
-			$tblPath cellconfigure $tblID,$hdr -text $shipOrder($hdr)
-		}
-
-	} else {
-		## -- We are adding a new record
-		if {[info exists insertRow]} {unset insertRow}
-		foreach hdr $headerParent(headerList) {
-			lappend insertRow '$shipOrder($hdr)'
-		}
-	
-		$job(db,Name) eval "INSERT OR ABORT INTO $dbTbl ([join $headerParent(headerList) ,]) VALUES ([join $insertRow ,])"
-	
-		set rowID [$db last_insert_rowid]
-		$tblPath insert end [$db eval "SELECT * FROM $dbTbl where rowid=$rowID"]
-	}
+#	if {$dbID != -1} {
+#		## -- We are updating a record
+#		${log}::debug ID = $dbID
+#		if {[info exists updateStatement] || [info exists headers]} {unset updateStatement; unset headers}
+#		set headers [list \$OrderNumber] ;# Order Number is not part of the general header names, this perhaps, should be changed... It is our index in the Addresses Table
+#		foreach hdr $headerParent(headerList) {
+#			lappend updateStatement $hdr='$shipOrder($hdr)'
+#			lappend headers $$hdr
+#		}
+#		#${log}::debug Update Statement: $db eval "UPDATE $dbTbl SET [join $updateStatement ,] WHERE rowid=$id"
+#		$db eval "UPDATE $dbTbl SET [join $updateStatement ,] WHERE rowid=$dbID"
+#		
+#		#set tblID [expr {$id - 1}]
+#		foreach hdr $headerParent(headerList) {
+#            ${log}::debug UPDATING: $hdr - $shipOrder($hdr)
+#			$tblPath cellconfigure $widRow,$hdr -text $shipOrder($hdr)
+#		}
+#
+#	} else {
+#		## -- We are adding a new record
+#		if {[info exists insertRow]} {unset insertRow}
+#		foreach hdr $headerParent(headerList) {
+#			lappend insertRow '$shipOrder($hdr)'
+#		}
+#	
+#		$job(db,Name) eval "INSERT OR ABORT INTO $dbTbl ([join $headerParent(headerList) ,]) VALUES ([join $insertRow ,])"
+#	
+#		set rowID [$db last_insert_rowid]
+#		$tblPath insert end [$db eval "SELECT * FROM $dbTbl where rowid=$rowID"]
+#	}
 	
 	# Apply the highlights ... Technically we should also prevent the user from entering too much data into each field.
 	importFiles::highlightAllRecords $tblPath
 	
     # Get total copies
-    set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
+    job::db::getTotalCopies
 } ;# eAssistHelper::saveDest
 

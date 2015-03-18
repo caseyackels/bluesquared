@@ -93,13 +93,13 @@ proc eAssist_Global::resetSetupFrames {} {
     #***
     global savePage
     
-    foreach child [winfo children .container.setup] {
-        puts $child
-    }
-    
     #foreach child [winfo children .container.setup] {
-    #    destroy $child
+    #    puts $child
     #}
+    
+    foreach child [winfo children .container.setup] {
+        destroy $child
+    }
     
     #set savePage $args ;# Allows us to save what is on that page
 
