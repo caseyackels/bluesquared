@@ -5,7 +5,8 @@
 # Dependencies: See brass_launch_code.tcl
 
 proc loadSuffix {} {
-    global L_states L_streetSuffix L_secondaryUnit L_countryCodes
+    #global L_states L_streetSuffix L_secondaryUnit L_countryCodes
+    global filter
     
     # Below we reset the variables to [string tolower]
 
@@ -132,7 +133,7 @@ WY ]
 
 
 #Street Suffix:
-set L_streetSuffix [list ALLEY \
+set filter(addrStreetSuffix) [list ALLEY \
     ALLEE \
     ALLY \
     ALY \
@@ -694,7 +695,7 @@ set L_streetSuffix [list ALLEY \
     
 #Secondary Unit
 # Entries are: Name
-set L_secondaryUnit [list APARTMENT \
+set filter(secondaryUnits) [list APARTMENT \
 APT \
 BASEMENT \
 BSMT \
@@ -732,7 +733,8 @@ TRLR \
 UNIT \
 UPPER \
 UPPR \
-#]
+# \
+No.]
 
 # Countries
 # Entries are: Name, 2 digit code
@@ -1412,10 +1414,10 @@ Wisconsin \
 WI]
 
 
-set StreetSuffix(Road) [list Road Rd]
-#set L_states [string toupper $L_states]
-set L_streetSuffix [string toupper $L_streetSuffix]
-set L_secondaryUnit [string toupper $L_secondaryUnit]
+#set StreetSuffix(Road) [list Road Rd]
+##set L_states [string toupper $L_states]
+#set L_streetSuffix [string toupper $L_streetSuffix]
+#set L_secondaryUnit [string toupper $L_secondaryUnit]
 }
 # * Does not require secondary range number to follow
     

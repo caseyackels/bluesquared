@@ -280,8 +280,8 @@ proc job::db::write {db dbTbl dbTxt wid widCells {dbCol ""}} {
     #   
     #
     # SYNOPSIS
-    #   job::db::write db dbTbl dbCol dbTxt wid widCells
-    #   job::db::write <dbName> <dbTable> ?colName? <text> <widTbl> <row,col>
+    #   job::db::write db dbTbl dbTxt wid widCells ?dbCol?
+    #   job::db::write <dbName> <dbTable> <text> <widTbl> <row,col> ?Col Name?
     #
     # FUNCTION
     #	Writes data to the widget cell and database.
@@ -612,7 +612,7 @@ proc job::db::insertNotes {job_wid log_wid} {
     set logNotes [string map {' ''} [$log_wid get 0.0 end]]
     
 	# Insert into History table, then into Notes table
-    $job(db,Name) eval "INSERT INTO History (Hist_ID, Hist_User, Hist_Date, Hist_Time, Hist_Syslog) VALUES ('$currentGUID', '$user(id)', '[ea::date::getTodaysDate]', '[ea::date::currentTime]', '$logNotes')"
+    $job(db,Name) eval "INSERT INTO History (Hist_ID, Hist_User, Hist_Date, Hist_Time, Hist_Syslog) VALUES ('$currentGUID', '$user(id)', '[ea::date::getTodaysDate -db]', '[ea::date::currentTime]', '$logNotes')"
 	
 	$job(db,Name) eval "INSERT INTO Notes (HistID, Notes_Notes) VALUES ('$currentGUID', '$jobNotes')"
 
@@ -666,7 +666,7 @@ proc job::db::readNotes {cbox_wid job_wid log_wid} {
                                                 INNER JOIN Notes ON Notes.HistID = History.Hist_ID
                                             WHERE Notes.Notes_ID = $id"]]
     set hist(log,User) [lindex $historyItems 0]
-    set hist(log,Date) [lindex $historyItems 1]
+    set hist(log,Date) [ea::date::formatDate -db -std [lindex $historyItems 1]]
     set hist(log,Time) [lindex $historyItems 2]
     set hist(log,Log) [lrange $historyItems 3 end]
     

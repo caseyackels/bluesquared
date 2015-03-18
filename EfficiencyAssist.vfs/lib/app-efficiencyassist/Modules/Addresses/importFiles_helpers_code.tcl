@@ -342,9 +342,14 @@ proc eAssistHelper::insValuesToTableCells {type tbl txtVar cells} {
 	
 	
 	if {$txtVar == ""} {
-		${log}::debug txtVar doesn't exist, using $txtVariable
-			set txtVar $txtVariable
+		if {[info exists txtVariable]} {
+				${log}::debug txtVar doesn't exist, using $txtVariable
+				set txtVar $txtVariable ;# txtVariable is set for the columns that have the dropdown widget.
+		} else {
+			set txtVar "" ;# We just want to clear the cells
+		}
 	}
+	
 	
 	if {$type eq "-window"} {
 		foreach val $cells {

@@ -432,14 +432,14 @@ proc eAssistHelper::editNotes {} {
 	
 	ttk::label $f0.txt1 -text [mc "View Revision"]
 	ttk::combobox $f0.cbox -width 5 \
-							-values [$job(db,Name) eval "SELECT Notes_ID FROM NOTES"] \
-							-state readonly
-							#-postcommand 
-	ttk::button $f0.btn -text [mc "Refresh"] -command [list job::db::readNotes $f0.cbox $w.f1.txt $w.f2.bottom.txt]
+							-state readonly \
+							-postcommand "$f0.cbox configure -values [list [$job(db,Name) eval {SELECT Notes_ID FROM NOTES}]]"
+	
+	#ttk::button $f0.btn -text [mc "Refresh"] -command [list job::db::readNotes $f0.cbox $w.f1.txt $w.f2.bottom.txt]
 	
 	grid $f0.txt1 -column 0 -row 0 -pady 2p -padx 2p
 	grid $f0.cbox -column 1 -row 0 -pady 2p -padx 2p
-	grid $f0.btn -column 2 -row 0 -pady 2p -padx 2p
+	#grid $f0.btn -column 2 -row 0 -pady 2p -padx 2p
 
 	## Job Notes Frame
 	##
@@ -462,7 +462,7 @@ proc eAssistHelper::editNotes {} {
 	
 	## Log notes Frame
 	##
-    set f2 [ttk::labelframe $w.f2 -text [mc "Log Notes"] -padding 10]
+    set f2 [ttk::labelframe $w.f2 -text [mc "Internal Revision Notes"] -padding 10]
     pack $f2 -fill both -expand yes -padx 5p -pady 5p -anchor n
 	
 	set f2_a [ttk::frame $f2.top]
@@ -502,11 +502,17 @@ proc eAssistHelper::editNotes {} {
 	set btn [ttk::frame $w.btns -padding 10]
 	pack $btn -padx 5p -pady 5p -anchor se
 	
-	ttk::button $btn.ok -text [mc "OK"] -command [list job::db::insertNotes $f1.txt $f2_b.txt]
+	ttk::button $btn.ok -text [mc "OK"] -command "[list job::db::insertNotes $f1.txt $f2_b.txt]; destroy $w"
 	ttk::button $btn.cancel -text [mc "Cancel"] -command [list destroy $w]
 	
 	grid $btn.ok -column 0 -row 0 -padx 5p -sticky e
 	grid $btn.cancel -column 1 -row 0 -sticky e
+	
+	##
+	## Bindings
+	##
+	
+	bind $f0.cbox <<ComboboxSelected>> [list job::db::readNotes $f0.cbox $w.f1.txt $w.f2.bottom.txt]
 
     
 } ;# eAssistHelper::editNotes

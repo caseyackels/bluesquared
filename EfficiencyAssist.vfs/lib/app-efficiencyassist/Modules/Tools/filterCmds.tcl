@@ -16,14 +16,74 @@
 ## - Overview
 # Overview
 
-## Coding Conventions
-# - Namespaces: Firstword_Secondword
+namespace eval ea::filter {}
 
-# - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
-#   will be uppercase. I.E sourceFiles, sourceFileExample
+proc ea::filter::runFilters {widTbl columns} {
+    #****f* runFilters/ea::filter
+    # CREATION DATE
+    #   03/18/2015 (Wednesday Mar 18)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   ea::filter::runFilters <tablelist widget path> <list of columns> 
+    #
+    # FUNCTION
+    #	Cycles through the given columns and strips high-ascii from the data
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log job
+	set filters [list ea::filter::stripASCII_CC ea::filter::stripExtraSpaces ea::filter::stripUDL ea::filter::abbrvAddrState]
+	
+	${log}::debug Running [llength $filters] filters, on [llength $columns] Columns!
 
-proc eAssist_tools::stripASCII_CC {cellData ColumnName} {
-    #****f* stripASCII_CC/eAssist_tools
+	# Cycling through the columns
+    foreach col $columns {
+		# Retrieve column data
+		${log}::debug Column: $col
+        set colData [$widTbl getcolumns $col]
+        set i_row 0
+		# Cycling through the data
+        foreach item $colData {
+			# Running the filters
+			#${log}::debug row/item: $i_row / $item
+			if {$item == ""} {continue} ;# Don't try to process if there isn't data
+			foreach current_filter $filters {
+				${log}::debug Running $current_filter ...
+				set data [$current_filter $item $col]
+			}
+			if {![string match $item $data]} {
+				# Only write the data and update the widget if data has changed ...
+				job::db::write $job(db,Name) Addresses $data $widTbl $i_row,$col
+				${log}::debug CLEAN DATA: $data
+			}
+            incr i_row
+        }
+	}
+	${log}::debug Finished!
+} ;# ea::filter::runFilters $files(tab3f2).tbl {Company Attention Address1 Address2 City State}
+
+
+proc ea::filter::stripASCII_CC {cellData args} {
+    #****f* stripASCII_CC/ea::filter
     # AUTHOR
     #	Casey Ackels
     #
@@ -37,7 +97,7 @@ proc eAssist_tools::stripASCII_CC {cellData ColumnName} {
     #
     #
     # CHILDREN
-    #	eAssist_tools::stripExtraSpaces
+    #	
     #
     # PARENTS
     #	
@@ -50,22 +110,16 @@ proc eAssist_tools::stripASCII_CC {cellData ColumnName} {
     #
     #***
     global log filter counter
-    #${log}::debug --START-- [info level 1]
-    #if {$filter(run,stripASCII_CC) != 1} {${log}::debug Filter not set; return}
     
     #set newString [eAssist_tools::stripExtraSpaces [regsub -all {[^\u0020-\u007e]+} $cellData ""]]
     set newString [regsub -all {[^\u0020-\u007e]+} $cellData ""]
     set newString [join $newString]
 
-    incr filter(progbarProgress)
-    incr counter
-    update
     return $newString
-    #${log}::debug --END-- [info level 1]
-} ;# eAssist_tools::stripASCII_CC
+} ;# ea::filter::stripASCII_CC
 
 
-proc eAssist_tools::stripCC {cellData ColumnName} {
+proc eAssist_tools::stripCC {cellData} {
     #****f* stripCC/eAssist_tools
     # AUTHOR
     #	Casey Ackels
@@ -80,7 +134,7 @@ proc eAssist_tools::stripCC {cellData ColumnName} {
     #
     #
     # CHILDREN
-    #	eAssist_tools::stripExtraSpaces
+    #
     #
     # PARENTS
     #	
@@ -150,8 +204,8 @@ proc eAssist_tools::stripQuotes {cellData} {
 } ;# eAssist_tools::stripQuotes
 
 
-proc eAssist_tools::stripExtraSpaces {cellData} {
-    #****f* stripExtraSpaces/eAssist_tools
+proc ea::filter::stripExtraSpaces {cellData args} {
+    #****f* stripExtraSpaces/ea::filter
     # AUTHOR
     #	Casey Ackels
     #
@@ -168,7 +222,7 @@ proc eAssist_tools::stripExtraSpaces {cellData} {
     #	
     #
     # PARENTS
-    #	eAssist_tools::stripQuotes
+    #
     #
     # NOTES
     #   
@@ -177,8 +231,7 @@ proc eAssist_tools::stripExtraSpaces {cellData} {
     #
     #***
     global log filter
-    #${log}::debug --START-- [info level 1]
-    
+   
     # ... strip extra spaces
     if {$cellData == {} } {
         return
@@ -194,12 +247,11 @@ proc eAssist_tools::stripExtraSpaces {cellData} {
     set newString [join $newString]
 
     return $newString
-    #${log}::debug --END-- [info level 1]
-} ;# eAssist_tools::stripExtraSpaces
+} ;# ea::filter::stripExtraSpaces 
 
 
-proc eAssist_tools::stripUDL {cellData ColumnName} {
-    #****f* stripUDL/eAssist_tools
+proc ea::filter::stripUDL {cellData args} {
+    #****f* stripUDL/ea::filter
     # AUTHOR
     #	Casey Ackels
     #
@@ -223,8 +275,7 @@ proc eAssist_tools::stripUDL {cellData ColumnName} {
     # SEE ALSO
     #
     #***
-    global log filter counter
-    #${log}::debug --START-- [info level 1]
+    global log
 
 	# This will need to reference a saved list from the users profile/preferences file.
     set StripChars [list ' ` ~ . ? ! _ , : | $ ! + = ( ) ~]
@@ -235,15 +286,7 @@ proc eAssist_tools::stripUDL {cellData ColumnName} {
         #set newString [join [eAssist_tools::stripExtraSpaces [string map [list [concat \ $value] ""] $newString]]]
         set newString [join [string map [list [concat \ $value] ""] $newString]]
     }
-    
-    incr filter(progbarProgress)
-    incr counter
-    update
-    return $newString
-    
-    #$filter(f2).progbar step
-    #${log}::debug --END-- [info level 1]
-} ;# eAssist_tools::stripUDL
+} ;# ea::filter::stripUDL
 
 
 proc eAssistHelper::runFilters {} {
@@ -401,8 +444,8 @@ proc eAssistHelper::runFilters {} {
 } ;# eAssistHelper::runFilters
 
 
-proc eAssist_tools::abbrvAddrState {cellData ColumnName} {
-    #****f* abbrvAddrState/eAssist_tools
+proc ea::filter::abbrvAddrState {cellData args} {
+    #****f* abbrvAddrState/ea::filter
     # AUTHOR
     #	Casey Ackels
     #
@@ -411,7 +454,6 @@ proc eAssist_tools::abbrvAddrState {cellData ColumnName} {
     #
     # FUNCTION
     #	Abbreviate the addresses and states from most likely words to known abbreviations.
-    #   Args should contain: CellData then, ColumnNames - Passed down from [eAssistHelper::runFilters]
     #
     # SYNOPSIS
     #
@@ -420,7 +462,7 @@ proc eAssist_tools::abbrvAddrState {cellData ColumnName} {
     #	N/A
     #
     # PARENTS
-    #	eAssistHelper::runFilters
+    #	
     #
     # NOTES
     #
@@ -437,8 +479,8 @@ proc eAssist_tools::abbrvAddrState {cellData ColumnName} {
     set newString ""
     set whatChanged "Nothing Changed:"
     
-    # Stop processing if we aren't on a column that we want to process
-    switch -- $ColumnName {
+    ## Stop processing if we aren't on a column that we want to process
+    switch -- $args {
         Address1    {}
         Address2    {}
         State       {}
@@ -447,53 +489,50 @@ proc eAssist_tools::abbrvAddrState {cellData ColumnName} {
     
     # Run the data through the filters only if it exists for the corresponding column name  
     # Address 1 and 2, need multiple passes.
-    if {$ColumnName eq "Address1"} {
+    if {$args eq "Address1"} {
         #${log}::debug Before changes: $cellData
         
         # Cycle through our list of suffices to match against our cellData; if they do then lets map the words to our abbreviations
-        foreach item $filter(addrStreetSuffix) {
+        foreach item [string tolower $filter(addrStreetSuffix)] {
             set newItem [lsearch $cellDataWorking $item]
             
             if {$newItem != -1} {
                 set prefix [lrange $cellDataWorking 0 [expr {$newItem} -1]]
-                #${log}::debug Prefix: $prefix
+                ${log}::debug Prefix: $prefix
                 
                 set suffix [lrange $cellDataWorking $newItem end]
-                #${log}::debug Suffix: $suffix
+                ${log}::debug Suffix: $suffix
                 
                 #set suffix [join [string map $filter(addrStreetSuffix) $suffix]]
-                set suffix [string map $filter(addrStreetSuffix) $suffix]
+                set suffix [string map [string tolower $filter(addrStreetSuffix)] $suffix]
                 
-                set suffix [string map $filter(secondaryUnits) $suffix]
-                #${log}::debug Changed Suffix: $suffix
+                set suffix [string map [string tolower $filter(secondaryUnits)] $suffix]
+                ${log}::debug Changed Suffix: $suffix
                 
                 set cellData [string totitle "$prefix $suffix"]
-                #${log}::debug New Cell Data: $cellData
+                ${log}::debug New Cell Data: $cellData
             }
         }
         if {[string compare $cellDataWorking [string tolower $cellData]] != 0} {
             set whatChanged "Address1 Changed:"
         }
-        incr counter
     }
     
     # No need to cycle over lists that probably would never apply....
-    if {$ColumnName eq "Address2"} {
+    if {$args eq "Address2"} {
         set cellData [string map $filter(secondaryUnits) $cellDataWorking]
         
         if {[string compare $cellDataWorking [string tolower $cellData]] != 0} {
             set whatChanged "Address2 Changed:"
         }
-        incr counter
     }
     
-    if {$ColumnName eq "State"} {
-        set cellData [string map $filter(StateList) $cellDataWorking]
+    if {$args eq "State"} {
+        #set cellData [string map $filter(StateList) $cellDataWorking]
         
         if {[string compare $cellDataWorking [string tolower $cellData]] != 0} {
             set whatChanged "State Changed:"
         }
-        incr counter
     }
     
     # Set Title Case
@@ -511,7 +550,7 @@ proc eAssist_tools::abbrvAddrState {cellData ColumnName} {
     }
     
     if {![info exists newString]} {set newString $cellData}
-    ${log}::notice [info level 1] $whatChanged $cellDataOrig -to- $newString
+    ${log}::notice $whatChanged $cellDataOrig -to- $newString
     
     #$filter(f2).progbar step
     #return $cellData
@@ -519,4 +558,4 @@ proc eAssist_tools::abbrvAddrState {cellData ColumnName} {
     #update
     return $newString
     #${log}::debug --END-- [info level 1]
-} ;# eAssist_tools::abbrvAddrState
+} ;# ea::filter::abbrvAddrState

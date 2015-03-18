@@ -18,7 +18,7 @@
 
 namespace eval ea::date {}
 
-proc ea::date::formatDate {dateType str} {
+proc ea::date::formatDate {indate outdate str} {
     #****f* formatDate/ea::date
     # CREATION DATE
     #   03/04/2015 (Wednesday Mar 04)
@@ -55,10 +55,18 @@ proc ea::date::formatDate {dateType str} {
     #***
     global log
     
-    switch -- $dateType {
-        -std    {set dateFormat "%d-%m-%Y"}
-        -euro   {set dateFormat "%m-%d-%Y"}
-        default {set dateFormat "$value"}
+    switch -- $indate {
+        -std    {set dateFormat_indate %m-%d-%Y}
+        -euro   {set dateFormat_indate %d-%m-%Y}
+        -db     {set dateFormat_indate %Y-%d-%m}
+        default {set dateFormat_indate "$value"}
+    }
+    
+    switch -- $outdate {
+        -std    {set dateFormat_outdate %D}
+        -euro   {set dateFormat_outdate %d-%m-%Y}
+        -db     {set dateFormat_outdate %Y-%d-%m}
+        default {set dateFormat_outdate "$value"}
     }
 
     # Guard against the user, using slashes (/), instead of hyphens (-)
@@ -71,11 +79,11 @@ proc ea::date::formatDate {dateType str} {
     }
     
     
-    clock format [clock scan $str -format $dateFormat] -format %Y-%d-%m
+    clock format [clock scan $str -format $dateFormat_indate] -format $dateFormat_outdate
  
 } ;# ea::date::formatDate
 
-proc ea::date::getTodaysDate {} {
+proc ea::date::getTodaysDate {{dateType default}} {
     #****f* getTodaysDate/ea::date
     # CREATION DATE
     #   03/11/2015 (Wednesday Mar 11)
@@ -88,11 +96,10 @@ proc ea::date::getTodaysDate {} {
     #   
     #
     # SYNOPSIS
-    #   ea::date::getTodaysDate  
+    #   ea::date::getTodaysDate ?-std|-euro|-db?
     #
     # FUNCTION
-    #	Returns today's date in the format: yyy-dd-mm
-    #   2015-11-03
+    #	Returns today's date in the specified format. If no argument is given, returns today's date in the US format: mm/dd/yyyy
     #   
     #   
     # CHILDREN
@@ -110,11 +117,15 @@ proc ea::date::getTodaysDate {} {
     #***
     global log
 
-    #set currentDate [clock format [clock seconds] -format %T]
+    switch -- $dateType {
+        -std    {set dateFormat %m-%d-%Y}
+        -euro   {set dateFormat %d-%m-%Y}
+        -db     {set dateFormat %Y-%d-%m}
+        default {set dateFormat %D}
+    }
     
-    ea::date::formatDate -std [clock format [clock seconds] -format %D]
+    clock format [clock seconds] -format $dateFormat
 
-    
 } ;# ea::date::getTodaysDate
 
 proc ea::date::currentTime {} {

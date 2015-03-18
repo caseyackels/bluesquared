@@ -148,15 +148,21 @@ proc customer::projSetup {{modify new}} {
         tooltip::tooltip $f2.entry1 [mc "Location where you want to save this job."]
     ttk::button $f2.btn1 -text [mc "..."] -width 3 -command {customer::getFileSaveLocation}
     
-    ttk::label $f2.txt2 -text [mc "Ship Date"]
-    ttk::entry $f2.entry2 -textvariable job(ShipDate) -state disabled
-        tooltip::tooltip $f2.entry2 [mc "Enter the date that you want defaulted into all shipments - must be in MM/DD/YYYY format"]
+    ttk::label $f2.txt2 -text [mc "1st Ship Date"]
+    ttk::entry $f2.entry2 -textvariable job(JobFirstShipDate) -state disabled
+        tooltip::tooltip $f2.entry2 [mc "Must be in MM/DD/YYYY format"]
+		
+	ttk::label $f2.txt3 -text [mc "Balance Ship Date"]
+    ttk::entry $f2.entry3 -textvariable job(JobBalanceShipDate) -state disabled
+        tooltip::tooltip $f2.entry3 [mc "Must be in MM/DD/YYYY format"]
     
     grid $f2.txt1     -column 0 -row 0 -sticky nes -pady 3p -pady 3p
     grid $f2.entry1   -column 1 -row 0 -sticky ew -padx 3p -pady 3p
     grid $f2.btn1     -column 2 -row 0 -sticky ew -padx 2p -pady 3p
     grid $f2.txt2     -column 0 -row 1 -sticky nes -padx 3p -pady 3p
     grid $f2.entry2   -column 1 -columnspan 2 -row 1 -sticky ew -padx 3p -pady 3p
+	grid $f2.txt3     -column 0 -row 2 -sticky nes -padx 3p -pady 3p
+    grid $f2.entry3   -column 1 -columnspan 2 -row 2 -sticky ew -padx 3p -pady 3p
     
     ## Button Frame
     ##
@@ -164,7 +170,6 @@ proc customer::projSetup {{modify new}} {
     pack $btnBar -anchor se ;#-padx 5p -pady 5p
     
     ttk::button $btnBar.ok -text [mc "OK"] -command "customer::dbUpdateCustomer; destroy .ps" -state $btnOKState
-    #ttk::button $btnBar.import -text [mc "Import File"] -command "customer::dbUpdateCustomer; importFiles::fileImportGUI; destroy .ps" -state $btnIMPState
     ttk::button $btnBar.import -text [mc "Import File"] -command {customer::dbUpdateCustomer; job::db::createDB $job(CustID) $job(CSRName) $job(Title) $job(Name) $job(Number) $job(SaveFileLocation) ;\
                                                             importFiles::fileImportGUI; destroy .ps} -state $btnIMPState
     

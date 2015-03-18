@@ -50,21 +50,17 @@ proc eAssistPref::launchPreferences {} {
     #
     #***
     global log program pref settings
-    
-    set currentModule [lrange $settings(currentModule) 0 0]
 	
     toplevel .preferences
     wm transient .preferences .
-    wm title .preferences [mc "$currentModule Preferences"]
+    wm title .preferences [mc "$settings(currentModule) Preferences"]
 
     # Put the window in the center of the parent window
     set locX [expr {[winfo width . ] / 3 + [winfo x .]}]
     set locY [expr {[winfo height . ] / 3 + [winfo y .]}]
     wm geometry .preferences +${locX}+${locY}
 
-    focus .preferences
-    ${log}::debug which Preferences : $currentModule
-    
+    focus .preferences  
     
     ##
     ## Parent Frame
@@ -72,14 +68,7 @@ proc eAssistPref::launchPreferences {} {
     set pref(frame0) [ttk::frame .preferences.frame0]
     pack $pref(frame0) -expand yes -fill both -pady 5p -padx 5p
 
-    
-    switch -- [string tolower $currentModule] {
-        batchmaker	{${log}::debug Launching $currentModule; eAssistPref::launchBatchMakerPref} ;#eAssist_Global::resetFrames pref
-        boxlabels	{${log}::debug Launching $currentModule ; eAssistPref::launchBoxMakerPref} ;#eAssist_Global::resetFrames pref
-        setup		{${log}::debug Launching $currentModule} ;#eAssist_Global::resetFrames pref
-	default		{${log}::debug $currentModule isn't setup yet}
-    }
-
+    eAssistPref::launchPref[string tolower $settings(currentModule_machine)]
     
     set btnBar [ttk::frame .preferences.btnBar]
     pack $btnBar -side bottom -anchor e -pady 8p -padx 5p
@@ -95,8 +84,8 @@ proc eAssistPref::launchPreferences {} {
 } ;#eAssistPref::launchPreferences
 
 
-proc eAssistPref::launchBatchMakerPref {} {
-    #****f* launchBatchMakerPref/eAssistPref
+proc eAssistPref::launchPrefbatch_maker {} {
+    #****f* launchPrefbatch_maker/eAssistPref
     # AUTHOR
     #	Casey Ackels
     #
@@ -121,8 +110,9 @@ proc eAssistPref::launchBatchMakerPref {} {
     # SEE ALSO
     #
     #***
-    global log pref internal mySettings setup settings
-    # Reset Frames
+    global log pref mySettings settings
+    # Reset geometry
+    wm geometry .preferences 650x325
 
     ##
     ## Notebook
@@ -181,10 +171,10 @@ proc eAssistPref::launchBatchMakerPref {} {
     set tab2 [ttk::labelframe $pref(nb).f2.tab2 -text [mc "Logging"]]
     pack $tab2 -expand yes -fill both -pady 5p -padx 5p
 
-} ;# eAssistPref::launchBatchMakerPref
+} ;# eAssistPref::launchPrefbatch_maker
 
-proc eAssistPref::launchBoxMakerPref {} {
-    #****f* launchBoxMakerPref/eAssistPref
+proc eAssistPref::launchPrefbox_labels {} {
+    #****f* launchPrefbox_labels/eAssistPref
     # AUTHOR
     #	Casey Ackels
     #
@@ -209,7 +199,6 @@ proc eAssistPref::launchBoxMakerPref {} {
     #
     #***
     global log pref mySettings
-    ${log}::debug --START-- [info level 1]
 	
 	wm geometry .preferences 450x275
 	
@@ -276,5 +265,4 @@ proc eAssistPref::launchBoxMakerPref {} {
 	
 	eAssist_Global::widgetState disabled $pref(frame0)
 	
-    ${log}::debug --END-- [info level 1]
-} ;# eAssistPref::launchBoxMakerPref
+} ;# eAssistPref::launchPrefbox_labels
