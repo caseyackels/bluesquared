@@ -133,608 +133,390 @@ WY ]
 
 
 #Street Suffix:
-set filter(addrStreetSuffix) [list ALLEY \
-    ALLEE \
-    ALLY \
-    ALY \
-    ANNEX \
-    ANEX \
-    ANNX \
-    ANX \
-    ARCADE \
-    ARC \
-    AVENUE \
-    AV \
-    AVE \
-    AVEN \
-    AVENU \
-    AVN \
-    AVNUE \
-    BAYOO \
-    BAYOU \
-    BYU \
-    BEACH \
-    BCH \
-    BEND \
-    BND \
-    BLUFF \
-    BLUF \
-    BLF \
-    BLUFFS \
-    BLFS \
-    BOTTOM \
-    BOTTM \
-    BOT \
-    BTM \
-    BOULEVARD \
-    BOUL \
-    BOULV \
-    BLVD \
-    BRANCH \
-    BRNCH \
-    BR \
-    BRIDGE \
-    BRDGE \
-    BRG \
-    BROOK \
-    BRK \
-    BROOKS \
-    BRKS \
-    BURG \
-    BG \
-    BURGS \
-    BGS \
-    BYPASS \
-    BYPAS \
-    BYPA \
-    BYPS \
-    BYP \
-    CAMP \
-    CMP \
-    CP \
-    CANYON \
-    CANYN \
-    CNYN \
-    CYN \
-    CAPE \
-    CPE \
-    CAUSEWAY \
-    CAUSWAY \
-    CSWY \
-    CENTER \
-    CENTRE \
-    CNTER \
-    CENTR \
-    CNTR \
-    CENT \
-    CEN \
-    CTR \
-    CENTERS \
-    CTRS \
-    CIRCLE \
-    CIRCL \
-    CRCLE \
-    CRCL \
-    CIRC \
-    CIR \
-    CIRCLES \
-    CIRS \
-    CLIFF \
-    CLF \
-    CLIFFS \
-    CLFS \
-    CLUB \
-    CLB \
-    COMMON \
-    CMN \
-    CORNER \
-    COR \
-    CORNERS \
-    CORS \
-    COURSE \
-    CRSE \
-    COURT \
-    CRT \
-    CT \
-    COURTS \
-    CTS \
-    COVE \
-    CV \
-    COVES \
-    CVS \
-    CREEK \
-    CR \
-    CK \
-    CRK \
-    CRESCENT \
-    CRESENT \
-    CRECENT \
-    CRSCNT \
-    CRSENT \
-    CRSNT \
-    CRES \
-    CREST \
-    CRST \
-    CROSSING \
-    CRSSING \
-    CRSSNG \
-    XING \
-    CROSSROAD \
-    XRD \
-    CURVE \
-    CURV \
-    DALE \
-    DL \
-    DAM \
-    DM \
-    DIVIDE \
-    DIV \
-    DV \
-    DVD \
-    DRIVE \
-    DRIV \
-    DRV \
-    DR \
-    DRIVES \
-    DRS \
-    ESTATE \
-    EST \
-    ESTATES \
-    ESTS \
-    EXPRESSWAY \
-    EXPRESS \
-    EXP \
-    EXPR \
-    EXPW \
-    EXPY \
-    EXTENSION \
-    EXTNSN \
-    EXTN \
-    EXT \
-    EXTENSIONS \
-    EXTS \
-    FALL \
-    FALLS \
-    FLS \
-    FERRY \
-    FRRY \
-    FRY \
-    FIELD \
-    FLD \
-    FIELDS \
-    FLDS \
-    FLAT \
-    FLT \
-    FLATS \
-    FLTS \
-    FORD \
-    FRD \
-    FORDS \
-    FRDS \
-    FOREST \
-    FORESTS \
-    FRST \
-    FORGE \
-    FORG \
-    FRG \
-    FORGES \
-    FRGS \
-    FORK \
-    FRK \
-    FORKS \
-    FRKS \
-    FORT \
-    FRT \
-    FT \
-    FREEWAY \
-    FREEWY \
-    FRWAY \
-    FRWY \
-    FWY \
-    GARDEN \
-    GARDN \
-    GRDEN \
-    GRDN \
-    GDN \
-    GARDENS \
-    GRDNS \
-    GDNS \
-    GATEWAY \
-    GATEWY \
-    GATWAY \
-    GTWAY \
-    GTWY \
-    GLEN \
-    GLN \
-    GLENS \
-    GLNS \
-    GREEN \
-    GRN \
-    GREENS \
-    GRNS \
-    GROVE \
-    GROV \
-    GRV \
-    GROVES \
-    GRVS \
-    HARBOR \
-    HARBR \
-    HRBOR \
-    HARB \
-    HBR \
-    HARBORS \
-    HBRS \
-    HAVEN \
-    HAVN \
-    HVN \
-    HEIGHTS \
-    HEIGHT \
-    HGTS \
-    HT \
-    HTS \
-    HIGHWAY \
-    HIGHWY \
-    HIWAY \
-    HIWY \
-    HWAY \
-    HWY \
-    HILL \
-    HL \
-    HILLS \
-    HLS \
-    HOLLOW \
-    HOLLOWS \
-    HOLWS \
-    HLLW \
-    HOLW \
-    INLET \
-    INLT \
-    ISLAND \
-    ISLND \
-    IS \
-    ISLANDS \
-    ISLNDS \
-    ISS \
-    ISLES \
-    ISLE \
-    JUNCTION \
-    JUNCTON \
-    JCTION \
-    JUNCTN \
-    JCTN \
-    JCT \
-    JUNCTIONS \
-    JCTNS \
-    JCTS \
-    KEY \
-    KY \
-    KEYS \
-    KYS \
-    KNOLL \
-    KNOL \
-    KNL \
-    KNOLLS \
-    KNLS \
-    LAKE \
-    LK \
-    LAKES \
-    LKS \
-    LAND \
-    LANDING \
-    LNDNG \
-    LNDG \
-    LANE \
-    LANES \
-    LA \
-    LN \
-    LIGHT \
-    LGT \
-    LIGHTS \
-    LGTS \
-    LOAF \
-    LF \
-    LOCK \
-    LCK \
-    LOCKS \
-    LCKS \
-    LODGE \
-    LDGE \
-    LODG \
-    LDG \
-    LOOP \
-    LOOPS \
-    MALL \
-    MANOR \
-    MNR \
-    MANORS \
-    MNRS \
-    MEADOW \
-    MDW \
-    MEADOWS \
-    MEDOWS \
-    MDWS \
-    MEWS \
-    MILL \
-    ML \
-    MILLS \
-    MLS \
-    MISSION \
-    MISSN \
-    MSSN \
-    MSN \
-    MOTORWAY \
-    MTWY \
-    MOUNT \
-    MNT \
-    MT \
-    MOUNTAIN \
-    MOUNTIN \
-    MNTAIN \
-    MNTN \
-    MTIN \
-    MTN \
-    MOUNTAINS \
-    MNTNS \
-    MTNS \
-    NECK \
-    NCK \
-    ORCHARD \
-    ORCHRD \
-    ORCH \
-    OVAL \
-    OVL \
-    OVERPASS \
-    OPAS \
-    PARK \
-    PRK \
-    PARKS \
-    PARKWAY \
-    PARKWY \
-    PKWAY \
-    PKWY \
-    PARKWAYS \
-    PKWYS \
-    PKWY \
-    PASS \
-    PASSAGE \
-    PSGE \
-    PATH \
-    PATHS \
-    PIKE \
-    PIKES \
-    PINE \
-    PNE \
-    PINES \
-    PNES \
-    PLACE \
-    PL \
-    PLAIN \
-    PLN \
-    PLAINS \
-    PLAINES \
-    PLNS \
-    PLAZA \
-    PLZA \
-    PLZ \
-    POINT \
-    PT \
-    POINTS \
-    PTS \
-    PORT \
-    PRT \
-    PORTS \
-    PRTS \
-    PRAIRIE \
-    PRARIE \
-    PRR \
-    PR \
-    RADIAL \
-    RADIEL \
-    RAD \
-    RADL \
-    RAMP \
-    RANCHES \
-    RNCHS \
-    RANCH \
-    RNCH \
-    RAPID \
-    RPD \
-    RAPIDS \
-    RPDS \
-    REST \
-    RST \
-    RIDGE \
-    RDGE \
-    RDG \
-    RIDGES \
-    RDGS \
-    RIVER \
-    RIVR \
-    RVR \
-    RIV \
-    ROAD \
-    RD \
-    ROADS \
-    RDS \
-    ROUTE \
-    RTE \
-    ROW \
-    RUE \
-    RUN \
-    SHOAL \
-    SHL \
-    SHOALS \
-    SHLS \
-    SHORE \
-    SHOAR \
-    SHR \
-    SHORES \
-    SHOARS \
-    SHRS \
-    SKYWAY \
-    SKWY \
-    SPRING \
-    SPRNG \
-    SPNG \
-    SPG \
-    SPRINGS \
-    SPNGS \
-    SPGS \
-    SPUR \
-    SPURS \
-    SQUARE \
-    SQRE \
-    SQU \
-    SQR \
-    SQ \
-    SQUARES \
-    SQRS \
-    SQS \
-    STATION \
-    STATN \
-    STN \
-    STA \
-    STRAVENUE \
-    STRVNUE \
-    STRAVEN \
-    STRAVN \
-    STRVN \
-    STRAV \
-    STRA \
-    STREAM \
-    STREME \
-    STRM \
-    STREET \
-    ST \
-    STRT \
-    STR \
-    STREETS \
-    STS \
-    SUMITT \
-    SUMMIT \
-    SUMIT \
-    SMT \
-    TERRACE \
-    TERR \
-    TER \
-    THROUGHWAY \
-    TRWY \
-    TRACE \
-    TRACES \
-    TRCE \
-    TRACK \
-    TRACKS \
-    TRK \
-    TRAK \
-    TRAFFICWAY \
-    TRFY \
-    TRAIL \
-    TRAILS \
-    TRLS \
-    TR \
-    TRL \
-    TUNNELS \
-    TUNNEL \
-    TUNNL \
-    TUNEL \
-    TUNLS \
-    TUNL \
-    TURNPIKE \
-    TURNPK \
-    TPKE \
-    TRPK \
-    TPK \
-    TPKE \
-    UNDERPASS \
-    UPAS \
-    UNION \
-    UNIONS \
-    UN \
-    UNIONS \
-    UNS \
-    VALLEY \
-    VLLY \
-    VALLY \
-    VLY \
-    VALLEYS \
-    VLYS \
-    VIADUCT \
-    VIADCT \
-    VDCT \
-    VIA \
-    VIEW \
-    VW \
-    VIEWS \
-    VWS \
-    VILLIAGE \
-    VILLAGE \
-    VILLAG \
-    VILLG \
-    VILL \
-    VLG \
-    VILLAGES \
-    VLGS \
-    VILLE \
-    VL \
-    VISTA \
-    VIST \
-    VSTA \
-    VST \
-    VIS \
-    WALKS \
-    WALK \
-    WALL \
-    WAY \
-    WY \
-    WAYS \
-    WELL \
-    WL \
-    WELLS \
-    WLS ]
+set filter(addrStreetSuffix) [list ALLEE ALLEY \
+    ALLY ALLEY \
+    ALY ALLEY \
+    ANEX ANX \
+    ANNX ANX \
+    ANNEX ANX \
+    ARCADE ARC \
+    AVENUE AVE \
+    AV AVE \
+    AVEN AVE \
+    AVENU AVE \
+    AVN AVE \
+    AVNUE AVE \
+    BAYOO BYU \
+    BAYOU BYU \
+    BEACH BCH \
+    BEND BND \
+    BLUFF BLF \
+    BLUF BLF \
+    BLUFFS BLFS \
+    BOTTOM BTM \
+    BOTTM BTM \
+    BOT BTM \
+    BOULEVARD BLVD \
+    BOUL BLVD \
+    BOULV BLVD \
+    BRANCH BR \
+    BRNCH BR \
+    BRIDGE BRG \
+    BRDGE BRG \
+    BROOK BRK \
+    BROOKS BRKS \
+    BURG BG \
+    BURGS BGS \
+    BYPASS BYP \
+    BYPAS BYP \
+    BYPA BYP \
+    BYPS BYP \
+    CAMP CP \
+    CMP CP \
+    CANYON CYN \
+    CANYN CYN \
+    CNYN CYN \
+    CAPE CPE \
+    CAUSEWAY CSWY \
+    CAUSWAY CSWY \
+    CENTER CTR \
+    CENTRE CTR \
+    CNTER CTR \
+    CENTR CTR \
+    CNTR CTR \
+    CENT CTR \
+    CEN CTR \
+    CENTERS CTRS \
+    CIRCLE CIR \
+    CIRCL CIR \
+    CRCLE CIR \
+    CRCL CIR \
+    CIRC CIR \
+    CIRCLES CIRS \
+    CLIFF CLF \
+    CLIFFS CLFS \
+    CLUB CLB \
+    COMMON CMN\
+    COMMONS CMNS \
+    CORNER COR \
+    CORNERS CORS \
+    COURSE CRSE \
+    COURT CT \
+    CRT CT \
+    COURTS CTS \
+    CRTS CTS \
+    COVE CV \
+    COVES CVS \
+    CREEK CRK \
+    CR CRK \
+    CK CRK \
+    CRESCENT CRES \
+    CRESENT CRES \
+    CRECENT CRES \
+    CRSCNT CRES \
+    CRSENT CRES \
+    CRSNT CRES \
+    CREST CRST \
+    CROSSING XING \
+    CRSSING XING \
+    CRSSNG XING \
+    CROSSROAD XRD \
+    CROSSROADS XRDS \
+    CURVE CURV \
+    DALE DL \
+    DAM DM \
+    DIVIDE DV \
+    DIV DV \
+    DVD DV \
+    DRIVE DR \
+    DRIV DR \
+    DRV DR \
+    DRIVES DRS \
+    ESTATE EST \
+    ESTATES ESTS \
+    EXPRESSWAY EXPY \
+    EXPRESS EXPY \
+    EXP EXPY \
+    EXPR EXPY \
+    EXPW EXPY \
+    EXTENSION EXT \
+    EXTNSN EXT \
+    EXTN EXT \
+    EXTENSIONS EXTS \
+    FALL FALL \
+    FALLS FLS \
+    FERRY FRY \
+    FRRY FRY \
+    FIELD FLD \
+    FIELDS FLDS \
+    FLAT FLT \
+    FLATS FLTS \
+    FORD FRD \
+    FORDS FRDS \
+    FOREST FRST \
+    FORESTS FRST \
+    FORGE FRG \
+    FORG FRG \
+    FORGES FRGS \
+    FORK FRK \
+    FORKS FRKS \
+    FORT FT \
+    FRT FT \
+    FREEWAY FWY \
+    FREEWY FWY \
+    FRWAY FWY \
+    FRWY FWY \
+    GARDEN GDN \
+    GARDN GDN \
+    GRDEN GDN \
+    GRDN GDN \
+    GARDENS GDNS \
+    GRDNS GDNS \
+    GATEWAY GTWY \
+    GATEWY GTWY \
+    GATWAY GTWY \
+    GTWAY GTWY \
+    GLEN GLN \
+    GLENS GLNS \
+    GREEN GRN \
+    GREENS GRNS \
+    GROVE GRV \
+    GROV GRV \
+    GROVES GRVS \
+    HARBOR HBR \
+    HARBR HBR \
+    HRBOR HBR \
+    HARB HBR \
+    HARBORS HBRS \
+    HAVEN HVN \
+    HAVN HVN \
+    HEIGHTS HTS \
+    HEIGHT HTS \
+    HGTS HTS \
+    HT HTS \
+    HIGHWAY HWY \
+    HIGHWY HWY \
+    HIWAY HWY \
+    HIWY HWY \
+    HWAY HWY \
+    HILL HL \
+    HILLS HLS \
+    HOLLOW HOLW \
+    HOLLOWS HOLW \
+    HOLWS HOLW \
+    HLLW HOLW \
+    INLET INLT \
+    ISLAND IS \
+    ISLND IS \
+    ISLANDS ISS \
+    ISLNDS ISS \
+    ISLES ISLE \
+    JUNCTION JCT \
+    JUNCTON JCT \
+    JCTION JCT \
+    JUNCTN JCT \
+    JCTN JCT \
+    JUNCTIONS JCTS \
+    JCTNS JCTS \
+    KEY KY \
+    KEYS KYS \
+    KNOLL KNL \
+    KNOL KNL \
+    KNOLLS KNLS \
+    LAKE LK \
+    LAKES LKS \
+    LANDING LNDG \
+    LNDNG LNDG \
+    LANE LN \
+    LANES LN \
+    LA LN \
+    LIGHT LGT \
+    LIGHTS LGTS \
+    LOAF LF \
+    LOCK LCK \
+    LOCKS LCKS \
+    LODGE LDG \
+    LDGE LDG \
+    LODG LDG \
+    LP LOOP \
+    LOOPS LOOP \
+    MANOR MNR \
+    MANORS MNRS \
+    MEADOW MDW \
+    MEADOWS MDWS \
+    MEDOWS MDWS \
+    MILL ML \
+    MILLS MLS \
+    MISSION MSN \
+    MISSN MSN \
+    MSSN MSN \
+    MOTORWAY MTWY \
+    MOUNT MT \
+    MNT MT \
+    MOUNTAIN MTN \
+    MOUNTIN MTN \
+    MNTAIN MTN \
+    MNTN MTN \
+    MTIN MTN \
+    MOUNTAINS MTNS \
+    MNTNS MTNS \
+    NECK NCK \
+    ORCHARD ORCH \
+    ORCHRD ORCH \
+    OVL OVAL \
+    OVERPASS OPAS \
+    PRK PARK \
+    PARKS PARK \
+    PARKWAY PKWY \
+    PARKWY PKWY \
+    PKWAY PKWY \
+    PARKWAYS PKWY \
+    PKWYS PKWY \
+    PASSAGE PSGE \
+    PATHS PATH \
+    PIKES PIKE \
+    PINE PNE \
+    PINES PNES \
+    PLACE PL \
+    PLAIN PLN \
+    PLAINS PLNS \
+    PLAINES PLNS \
+    PLAZA PLZ \
+    PLZA PLZ \
+    POINT PT \
+    POINTS PTS \
+    PORT PRT \
+    PORTS PRTS \
+    PRAIRIE PR \
+    PRARIE PR \
+    PRR PR \
+    RADIAL RADL \
+    RADIEL RADL \
+    RAD RADL \
+    RANCHES RNCH \
+    RNCHS RNCH \
+    RANCH RNCH \
+    RAPID RPD \
+    RAPIDS RPDS \
+    REST RST \
+    RIDGE RDG \
+    RDGE RDG \
+    RIDGES RDGS \
+    RIVER RIV \
+    RIVR RIV \
+    RVR RIV \
+    ROAD RD \
+    ROADS RDS \
+    ROUTE RTE \
+    SHOAL SHL \
+    SHOALS SHLS \
+    SHORE SHR \
+    SHOAR SHR \
+    SHORES SHRS \
+    SHOARS SHRS \
+    SKYWAY SKWY \
+    SPRING SPG \
+    SPRNG SPG \
+    SPNG SPG \
+    SPRINGS SPGS \
+    SPNGS SPGS \
+    SPRNGS SPGS \
+    SPURS SPUR \
+    SQUARE SQ \
+    SQRE SQ \
+    SQU SQ \
+    SQR SQ \
+    SQUARES SQS \
+    SQRS SQS \
+    STATION STA \
+    STATN STA \
+    STN STA \
+    STRAVENUE STRA \
+    STRVNUE STRA \
+    STRAVEN STRA \
+    STRAVN STRA \
+    STRVN STRA \
+    STRAV STRA \
+    STREAM STRM \
+    STREME STRM \
+    STREET ST \
+    STRT ST \
+    STR ST \
+    STREETS STS \
+    SUMITT SMT \
+    SUMMIT SMT \
+    SUMIT SMT \
+    TERRACE TER \
+    TERR TER \
+    THROUGHWAY TER \
+    TRWY TER \
+    TRACE TRCE \
+    TRACES TRCE \
+    TRACK TRAK \
+    TRACKS TRAK \
+    TRK TRAK \
+    TRAFFICWAY TRFY \
+    TRAIL TRL \
+    TRAILS TRL \
+    TRLS TRL \
+    TR TRL \
+    TUNNELS TUNL \
+    TUNNEL TUNL \
+    TUNNL TUNL \
+    TUNEL TUNL \
+    TUNLS TUNL \
+    TURNPIKE TPKE \
+    TURNPK TPKE \
+    TRPK TPKE \
+    TPK TPKE \
+    UNDERPASS UPAS \
+    UNION UN \
+    UNIONS UNS \
+    VALLEY VLY \
+    VLLY VLY \
+    VALLY VLY \
+    VALLEYS VLYS \
+    VIADUCT VIA \
+    VIADCT VIA \
+    VDCT VIA \
+    VIEW VW \
+    VIEWS VWS \
+    VILLIAGE VLG \
+    VILLAGE VLG \
+    VILLAG VLG \
+    VILLG VLG\
+    VILL VLG \
+    VILLAGES VLGS \
+    VILLE VL \
+    VISTA VIS \
+    VIST VIS \
+    VSTA VIS \
+    VST VIS \
+    WALKS WALK \
+    WY WAY \
+    WELL WL \
+    WELLS WLS]
 
     
 #Secondary Unit
 # Entries are: Name
-set filter(secondaryUnits) [list APARTMENT \
-APT \
-BASEMENT \
-BSMT \
-BUILDING \
-BLDG \
-DEPARTMENT \
-DEPT \
-FLOOR \
-FRONT \
-FRNT \
-HANGAR \
-HNGR \
-LOBBY \
-LBBY \
-LOT \
-LOWER \
-LOWR \
-OFFICE \
-OFC \
-PENTHOUSE \
-PH \
-PIER \
-REAR \
-ROOM \
-RM \
-SIDE \
-SLIP \
-SPACE \
-SPC \
-STOP \
-SUITE \
-STE \
-TRAILER \
-TRLR \
-UNIT \
-UPPER \
-UPPR \
-# \
-No.]
+set filter(secondaryUnits) [list APARTMENT APT \
+BASEMENT BSMT \
+BUILDING BLDG \
+DEPARTMENT DEPT \
+FLOOR FL \
+FRONT FRNT \
+HANGAR HNGR \
+LOBBY LBBY \
+LOWER LOWR \
+OFFICE OFC \
+PENTHOUSE PH \
+ROOM RM \
+SPACE SPC \
+SUITE STE \
+TRAILER TRLR \
+UPPER UPPR \
+# NO.]
 
 # Countries
 # Entries are: Name, 2 digit code

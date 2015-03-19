@@ -1,6 +1,6 @@
 GS_filePathSetup(checkToggle) 0
-GS_filePathSetup(lookInDirectory) C:/Users/Casey.Ackels/Downloads
 GS_filePathSetup(labelDirectory) 
+GS_filePathSetup(lookInDirectory) C:/Users/Casey.Ackels/Downloads
 GS_filePathSetup(enable,Bartender) 1
 GS_filePathSetup(saveInDirectory) C:/Users/Casey.Ackels/Desktop
 company(address2) 

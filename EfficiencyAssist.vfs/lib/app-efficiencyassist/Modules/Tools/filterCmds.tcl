@@ -18,7 +18,7 @@
 
 namespace eval ea::filter {}
 
-proc ea::filter::runFilters {widTbl columns} {
+proc ea::filter::runFilters {widTbl columns filters} {
     #****f* runFilters/ea::filter
     # CREATION DATE
     #   03/18/2015 (Wednesday Mar 18)
@@ -51,7 +51,8 @@ proc ea::filter::runFilters {widTbl columns} {
     #   
     #***
     global log job
-	set filters [list ea::filter::stripASCII_CC ea::filter::stripExtraSpaces ea::filter::stripUDL ea::filter::abbrvAddrState]
+	#set filters [list ea::filter::stripASCII_CC ea::filter::stripExtraSpaces ea::filter::stripUDL ea::filter::abbrvAddrState]
+	#set filters [list ea::filter::stripUDL]
 	
 	${log}::debug Running [llength $filters] filters, on [llength $columns] Columns!
 
@@ -66,20 +67,22 @@ proc ea::filter::runFilters {widTbl columns} {
 			# Running the filters
 			#${log}::debug row/item: $i_row / $item
 			if {$item == ""} {continue} ;# Don't try to process if there isn't data
+			set data $item
 			foreach current_filter $filters {
-				${log}::debug Running $current_filter ...
-				set data [$current_filter $item $col]
+				#${log}::debug Running $current_filter ...
+				set data [$current_filter $data $col]
 			}
 			if {![string match $item $data]} {
 				# Only write the data and update the widget if data has changed ...
 				job::db::write $job(db,Name) Addresses $data $widTbl $i_row,$col
-				${log}::debug CLEAN DATA: $data
+				${log}::debug CLEAN DATA
+				${log}::debug WAS: $item NOW: $data
 			}
             incr i_row
         }
 	}
 	${log}::debug Finished!
-} ;# ea::filter::runFilters $files(tab3f2).tbl {Company Attention Address1 Address2 City State}
+} ;# ea::filter::runFilters $files(tab3f2).tbl {Company Attention Address1 Address2 City State} {ea::filter::stripASCII_CC ea::filter::stripExtraSpaces ea::filter::stripUDL ea::filter::abbrvAddrState}
 
 
 proc ea::filter::stripASCII_CC {cellData args} {
@@ -284,9 +287,12 @@ proc ea::filter::stripUDL {cellData args} {
 
     foreach value $StripChars {
         #set newString [join [eAssist_tools::stripExtraSpaces [string map [list [concat \ $value] ""] $newString]]]
-        set newString [join [string map [list [concat \ $value] ""] $newString]]
+        #set newString [join [string map [list [concat \ $value] ""] $newString]]
+		set newString [string map [list [concat \ $value] ""] $newString]
     }
-} ;# ea::filter::stripUDL
+	
+	return $newString
+} ;# ea::filter::stripUDL 32 E. 31st St.
 
 
 proc eAssistHelper::runFilters {} {
@@ -475,7 +481,7 @@ proc ea::filter::abbrvAddrState {cellData args} {
     
     # Keep source cellData and output cellData separate
     set cellDataWorking [string tolower $cellData]
-    set cellDataOrig $cellData
+    set cellDataOrig [string tolower $cellData]
     set newString ""
     set whatChanged "Nothing Changed:"
     
@@ -491,38 +497,45 @@ proc ea::filter::abbrvAddrState {cellData args} {
     # Address 1 and 2, need multiple passes.
     if {$args eq "Address1"} {
         #${log}::debug Before changes: $cellData
-        
-        # Cycle through our list of suffices to match against our cellData; if they do then lets map the words to our abbreviations
+        #set cellDataWorking [string map [string tolower $filter(addrStreetSuffix)] $cellDataWorking]
+		#set cellDataWorking [string map [string tolower $filter(secondaryUnits)] $cellDataWorking]
+		
+		#set cellDataWorking [string totitle $cellDataWorking]
+		
+        #Cycle through our list of suffices to match against our cellData; if they do then lets map the words to our abbreviations
         foreach item [string tolower $filter(addrStreetSuffix)] {
             set newItem [lsearch $cellDataWorking $item]
             
             if {$newItem != -1} {
-                set prefix [lrange $cellDataWorking 0 [expr {$newItem} -1]]
-                ${log}::debug Prefix: $prefix
+				# We don't want to try to manipulate this part of the address.
+				# 2400 Clarksville, or 8208 NE 5th
+                set prefix [lrange $cellDataWorking 0 [expr {$newItem - 1}]]
+                #${log}::debug Prefix: $prefix
                 
+				# Road, Street, Boulevard, etc
                 set suffix [lrange $cellDataWorking $newItem end]
-                ${log}::debug Suffix: $suffix
+                #${log}::debug Suffix: $suffix
                 
-                #set suffix [join [string map $filter(addrStreetSuffix) $suffix]]
+                # Try to match up the Suffix with our list of known spellings to the correct abbr.
                 set suffix [string map [string tolower $filter(addrStreetSuffix)] $suffix]
-                
                 set suffix [string map [string tolower $filter(secondaryUnits)] $suffix]
-                ${log}::debug Changed Suffix: $suffix
+                #${log}::debug Changed Suffix: $suffix
                 
-                set cellData [string totitle "$prefix $suffix"]
-                ${log}::debug New Cell Data: $cellData
+                #set cellData [string totitle "$prefix $suffix"]
+				#set cellDataWorking [string totitle "$prefix $suffix"]
+                #${log}::debug New Cell Data: $cellData
             }
         }
-        if {[string compare $cellDataWorking [string tolower $cellData]] != 0} {
+        if {[string compare $cellDataWorking $cellDataOrig] != 0} {
             set whatChanged "Address1 Changed:"
         }
     }
     
     # No need to cycle over lists that probably would never apply....
     if {$args eq "Address2"} {
-        set cellData [string map $filter(secondaryUnits) $cellDataWorking]
+        set cellDataWorking [string map [string tolower $filter(secondaryUnits)] $cellDataWorking]
         
-        if {[string compare $cellDataWorking [string tolower $cellData]] != 0} {
+        if {[string compare $cellDataWorking $cellDataOrig] != 0} {
             set whatChanged "Address2 Changed:"
         }
     }
@@ -530,14 +543,15 @@ proc ea::filter::abbrvAddrState {cellData args} {
     if {$args eq "State"} {
         #set cellData [string map $filter(StateList) $cellDataWorking]
         
-        if {[string compare $cellDataWorking [string tolower $cellData]] != 0} {
+        if {[string compare $cellDataWorking $cellDataOrig] != 0} {
             set whatChanged "State Changed:"
         }
     }
     
     # Set Title Case
-    set cellData [list {*}$cellData]
+    set cellData [list {*}$cellDataWorking]
     if {[info exists newString]} {unset newString}
+		
     foreach word $cellData {
         # Ensure that we set items with only one list item to all upper case.
         if {[llength $cellData] == 1} {
@@ -550,7 +564,7 @@ proc ea::filter::abbrvAddrState {cellData args} {
     }
     
     if {![info exists newString]} {set newString $cellData}
-    ${log}::notice $whatChanged $cellDataOrig -to- $newString
+    #${log}::notice $whatChanged $cellDataOrig -to- $newString
     
     #$filter(f2).progbar step
     #return $cellData
