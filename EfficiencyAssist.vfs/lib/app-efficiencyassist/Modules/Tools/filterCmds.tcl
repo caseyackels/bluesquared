@@ -496,36 +496,84 @@ proc ea::filter::abbrvAddrState {cellData args} {
     # Run the data through the filters only if it exists for the corresponding column name  
     # Address 1 and 2, need multiple passes.
     if {$args eq "Address1"} {
-        #${log}::debug Before changes: $cellData
-        #set cellDataWorking [string map [string tolower $filter(addrStreetSuffix)] $cellDataWorking]
-		#set cellDataWorking [string map [string tolower $filter(secondaryUnits)] $cellDataWorking]
+		# It is very likely that data that should be in Address2 ends up at the end of Address1.
+		# Lets account for that, and first look for these. If found, we can move them to the correct column.
+		# This will also help us, when trying to sanitize the real address1 data.
 		
-		#set cellDataWorking [string totitle $cellDataWorking]
+		#set cellDataWorking [string tolower {785 Market Street circle  Suite 900 Floor 25}]
+		foreach secUnit [string tolower $filter(secondaryUnits)] {
+			set secUnitIndex [lsearch $cellDataWorking $secUnit]
+			
+			# Ex. 785 Market St  Ste 900
+			if {$secUnitIndex != -1} {
+				# We have a match, grab the whole suffix
+				#set suffix [lrange $cellDataWorking $secUnitIndex end]
+				lappend secUnit_index $secUnitIndex
+			}
+		}
+		# Sanitize it, so it matches the USPS recommended abbr.
+		# We have the indices; now lets grab the data
+		if {[info exists secUnit_index]} {
+			set suffix_secUnitIndex [lindex [lsort -integer $secUnit_index] 0]
+			set suffix [lrange $cellDataWorking $suffix_secUnitIndex end]			
+			set suffix [string map [string tolower $filter(secondaryUnits)] $suffix]
+			${log}::debug SUFFIX: $suffix
+			
+			unset secUnit_index
+		}
 		
-        #Cycle through our list of suffices to match against our cellData; if they do then lets map the words to our abbreviations
-        foreach item [string tolower $filter(addrStreetSuffix)] {
-            set newItem [lsearch $cellDataWorking $item]
+		# We've found the suffix (address2 data), now lets find the address1 data and sanitize
+		foreach addr_suffix [string tolower $filter(addrStreetSuffix)] {
+            set addr_suffixIndex [lsearch $cellDataWorking $addr_suffix]
             
-            if {$newItem != -1} {
-				# We don't want to try to manipulate this part of the address.
-				# 2400 Clarksville, or 8208 NE 5th
-                set prefix [lrange $cellDataWorking 0 [expr {$newItem - 1}]]
-                #${log}::debug Prefix: $prefix
-                
-				# Road, Street, Boulevard, etc
-                set suffix [lrange $cellDataWorking $newItem end]
-                #${log}::debug Suffix: $suffix
-                
-                # Try to match up the Suffix with our list of known spellings to the correct abbr.
-                set suffix [string map [string tolower $filter(addrStreetSuffix)] $suffix]
-                set suffix [string map [string tolower $filter(secondaryUnits)] $suffix]
-                #${log}::debug Changed Suffix: $suffix
-                
-                #set cellData [string totitle "$prefix $suffix"]
-				#set cellDataWorking [string totitle "$prefix $suffix"]
-                #${log}::debug New Cell Data: $cellData
+            if {$addr_suffixIndex != -1} {
+				# Grab the part of the address that we want to manipulate; if we don't some addresses could be sanitized incorrectly.
+				lappend indice_addr1 $addr_suffixIndex
             }
         }
+		
+		if {[info exists indice_addr1]} {
+			# We found secondary address info ...
+			set addr_1Index [lindex [lsort -integer $indice_addr1] 0]
+		
+			if {[info exists suffix_secUnitIndex]} {
+				# split the data that we don't want, from the data that we do want.
+				# the value of addr_1 will be street, road, or any other Street type
+				set addr_1 [lrange $cellDataWorking $addr_1Index [expr {$suffix_secUnitIndex - 1}]]
+				set addr_1 [string map [string tolower $filter(addrStreetSuffix)] $addr_1]
+				
+				# Add the two strings back together again
+				set cellDataWorking [join "[lrange $cellDataWorking 0 [expr {$addr_1Index -1}]] $addr_1"]
+				${log}::debug ADDR_1: $addr_1
+			} else {
+				set cellDataWorking $cellDataWorking
+			}
+			
+			if {[info exists suffix]} {
+				set cellDataWorking [join "$cellDataWorking $suffix"]
+			}
+			unset indice_addr1
+		} else {
+			# No secondary address info was found ... Looking for the street type
+			foreach street [string tolower $filter(addrStreetSuffix)] {
+				set addr_streetIndex [lsearch $cellDataWorking $street]
+				
+				if {$addr_streetIndex != -1} {
+					lappend indice_street $addr_streetIndex
+				}
+			}
+			
+			if {[info exists indice_street]} {
+				set address [lrange $cellDataWorking 0 [expr {$indice_street - 1}]]
+				set street_name [lrange $cellDataWorking $indice_street end]
+				set street_name [string map [string tolower $filter(addrStreetSuffix)] $street_name]
+				
+				set cellDataWorking [join "$address $street_name"]
+			}
+		}
+		
+		${log}::debug Whole Addr: $cellDataWorking		
+
         if {[string compare $cellDataWorking $cellDataOrig] != 0} {
             set whatChanged "Address1 Changed:"
         }
@@ -548,7 +596,9 @@ proc ea::filter::abbrvAddrState {cellData args} {
         }
     }
     
-    # Set Title Case
+    ##
+	## Set Title Case
+	## 
     set cellData [list {*}$cellDataWorking]
     if {[info exists newString]} {unset newString}
 		
@@ -572,4 +622,5 @@ proc ea::filter::abbrvAddrState {cellData args} {
     #update
     return $newString
     #${log}::debug --END-- [info level 1]
-} ;# ea::filter::abbrvAddrState
+} ;# ea::filter::abbrvAddrState Address1 {785 Market Street circle  Suite 900 Floor 25}
+#ea::filter::runFilters $files(tab3f2).tbl {Address1 Address2} {ea::filter::abbrvAddrState}
