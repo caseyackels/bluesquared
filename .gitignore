@@ -1,7 +1,8 @@
 #################
 ## General
-Builds/
-builds/
+
+[Bb]uilds/
+[Tt]est [Ff]iles/
 EfficiencyAssist*.exe
 
 
