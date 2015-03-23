@@ -50,8 +50,7 @@ proc eAssist_tools::FilterEditor {} {
     # SEE ALSO
     #
     #***
-    global log filter
-    ${log}::debug --START-- [info level 1]
+    global log filter files
     ${log}::debug Launching Filter Editor ...
     
     if {[winfo exists .filterEditor] == 1} {destroy .filterEditor}
@@ -91,14 +90,32 @@ proc eAssist_tools::FilterEditor {} {
     
     # Setup the array for the filters
     # .. Frame 1 - create the children widgets
-    ttk::checkbutton $frame1.chkbtn1 -text [mc "Remove Hi-Bit Characters"] -command {eAssist_tools::closeFilterEditor reset} -variable filter(run,stripASCII_CC)
-    ttk::button      $frame1.btn     -text [mc "Edit..."] -command {} -state disabled
-    ttk::checkbutton $frame1.chkbtn2 -text [mc "Remove Control Characters"] -command {eAssist_tools::closeFilterEditor reset} -variable filter(run,stripCC)
-    ttk::checkbutton $frame1.chkbtn3 -text [mc "Abbreviate words in address"] -command {eAssist_tools::closeFilterEditor reset} -variable filter(run,abbrvAddrState) ;#-commnd {${log}::debug Abbreviate words ...}
-        tooltip::tooltip $frame1.chkbtn3 [mc "Affects only the columns: Address1, Address2 and State"]
+    ttk::checkbutton $frame1.chkbtn1 -text [mc "Remove Hi-Bit Characters"] \
+									-command {eAssist_tools::closeFilterEditor reset} \
+									-variable filter(run,stripASCII_CC) \
+									-onvalue ea::filter::stripASCII_CC
+		tooltip::tooltip $frame1.chkbtn1 [mc "Affects columns: Company, Attention, Address1, Address2, State, Zip, Country, Notes"]
     
-    ttk::checkbutton $frame1.chkbtn4 -text [mc "Remove Punctuation"] -command {eAssist_tools::closeFilterEditor reset} -variable filter(run,stripUDL)
-        tooltip::tooltip $frame1.chkbtn4 [mc "Affects all Columns! Re-assign your Distribution Types if you run this."]
+	ttk::button $frame1.btn -text [mc "Edit..."] -command {} -state disabled
+    
+	ttk::checkbutton $frame1.chkbtn2 -text [mc "Remove Control Characters"] \
+									-command {eAssist_tools::closeFilterEditor reset} \
+									-variable filter(run,stripExtraSpaces) \
+									-onvalue ea::filter::stripExtraSpaces
+		tooltip::tooltip $frame1.chkbtn2 [mc "Affects columns: Company, Attention, Address1, Address2, State, Zip, Country, Notes"]
+    
+	ttk::checkbutton $frame1.chkbtn3 -text [mc "Abbreviate words in address"] \
+									-command {eAssist_tools::closeFilterEditor reset} \
+									-variable filter(run,abbrvAddrState) \
+									-onvalue ea::filter::abbrvAddrState
+        tooltip::tooltip $frame1.chkbtn3 [mc "Affects columns: Address1, Address2, State"]
+    
+    ttk::checkbutton $frame1.chkbtn4 -text [mc "Remove Punctuation"] \
+									-command {eAssist_tools::closeFilterEditor reset} \
+									-variable filter(run,stripUDL) \
+									-onvalue ea::filter::stripUDL
+		tooltip::tooltip $frame1.chkbtn4 [mc "Affects columns: Company, Attention, Address1, Address2, State, Zip, Country, Notes"]
+        #tooltip::tooltip $frame1.chkbtn4 [mc "Affects all Columns! Re-assign your Distribution Types if you run this."]
     
     
 
@@ -122,15 +139,12 @@ proc eAssist_tools::FilterEditor {} {
     
     
     # .. Button Bar - create the children widgets
-    ttk::button $btnBar.ok -text [mc "OK"] -command {${log}::debug [time {eAssistHelper::runFilters}]}
+    ttk::button $btnBar.ok -text [mc "OK"] -command {ea::filter::runFilters $files(tab3f2).tbl}
     ttk::button $btnBar.cancel -text [mc "Close"] -command {eAssist_tools::closeFilterEditor kill .filterEditor}
 
     grid $btnBar.ok -column 0 -row 0 -pady 5p -padx 5p -sticky se 
     grid $btnBar.cancel -column 1 -row 0 -pady 5p -padx 5p -sticky se
 
-    
-	
-    ${log}::debug --END-- [info level 1]
 } ;# eAssist_tools::FilterEditor
 
 
@@ -160,7 +174,7 @@ proc eAssist_tools::closeFilterEditor {function args} {
     #
     #***
     global log filter
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
 
     
     switch -- $function {
@@ -175,5 +189,5 @@ proc eAssist_tools::closeFilterEditor {function args} {
         }
     }
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# eAssist_tools::closeFilterEditor

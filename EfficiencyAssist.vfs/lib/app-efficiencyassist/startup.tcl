@@ -331,10 +331,10 @@ proc 'eAssist_initVariables {} {
 				   SaveFileLocation ""]
 	
 	# Filters
-	array set filter [list run,stripASCII_CC 1 \
-					  run,stripCC 1 \
-					  run,stripUDL 1 \
-					  run,abbrvAddrState 1]
+	array set filter [list run,stripASCII_CC 0 \
+					  run,stripExtraSpaces 0 \
+					  run,stripUDL 0 \
+					  run,abbrvAddrState 0]
 	
     if {![info exists mySettings(outFilePath)]} {
         # Location for saving the file

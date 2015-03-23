@@ -346,7 +346,7 @@ proc importFiles::initMenu {} {
     
     $mb.modMenu add command -label [mc "Notes"] -command {eAssistHelper::editNotes}
     $mb.modMenu add command -label [mc "Add Destination"] -command {eAssistHelper::addDestination $files(tab3f2).tbl -add}
-    $mb.modMenu add command -label [mc "Filters..."] -command {eAssist_tools::FilterEditor} -state disable
+    $mb.modMenu add command -label [mc "Filters..."] -command {eAssist_tools::FilterEditor}
     
     #Add Cascade for Validation functions
     menu $mb.modMenu.validate

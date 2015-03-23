@@ -18,7 +18,7 @@
 
 namespace eval ea::filter {}
 
-proc ea::filter::runFilters {widTbl columns filters} {
+proc ea::filter::runFilters {widTbl} {
     #****f* runFilters/ea::filter
     # CREATION DATE
     #   03/18/2015 (Wednesday Mar 18)
@@ -31,10 +31,10 @@ proc ea::filter::runFilters {widTbl columns filters} {
     #   
     #
     # SYNOPSIS
-    #   ea::filter::runFilters <tablelist widget path> <list of columns> 
+    #   ea::filter::runFilters <tablelist widget path>
     #
     # FUNCTION
-    #	Cycles through the given columns and strips high-ascii from the data
+    #	Cycles through a set of columns; using the filters that the user selected in eAssist_tools::FilterEditor
     #   
     #   
     # CHILDREN
@@ -47,14 +47,30 @@ proc ea::filter::runFilters {widTbl columns filters} {
     #   
     #   
     # SEE ALSO
-    #   
+    #   eAssist_tools::FilterEditor
     #   
     #***
-    global log job
+    global log job filter
 	#set filters [list ea::filter::stripASCII_CC ea::filter::stripExtraSpaces ea::filter::stripUDL ea::filter::abbrvAddrState]
 	#set filters [list ea::filter::stripUDL]
+	set columns [list Attention Company Address1 Address2 City State Zip Notes]
+	
+
+	
+	if {[info exists filters]} {unset filters}
+	foreach fltr [array names filter] {
+		if {[string match run,* $fltr] != 0} {
+			if {$filter($fltr) != 0 && $filter($fltr) != 1} {
+				${log}::debug $filter($fltr) _ $fltr
+				lappend filters $filter($fltr)
+			}
+		}
+	}
+	# retrieve max records to filter and set the progress bar
+	$filter(f2).progbar configure -maximum [expr {[llength $filters] * [llength $columns]}]
 	
 	${log}::debug Running [llength $filters] filters, on [llength $columns] Columns!
+	
 
 	# Cycling through the columns
     foreach col $columns {
@@ -71,17 +87,20 @@ proc ea::filter::runFilters {widTbl columns filters} {
 			foreach current_filter $filters {
 				#${log}::debug Running $current_filter ...
 				set data [$current_filter $data $col]
+				incr filter(progbarProgress)
+				set filter(progbarFilterName) "Column: $col, Filter: $current_filter"
 			}
 			if {![string match $item $data]} {
 				# Only write the data and update the widget if data has changed ...
 				job::db::write $job(db,Name) Addresses $data $widTbl $i_row,$col
-				${log}::debug CLEAN DATA
-				${log}::debug WAS: $item NOW: $data
+				#${log}::debug CLEAN DATA
+				#${log}::debug WAS: $item NOW: $data
 			}
             incr i_row
         }
 	}
 	${log}::debug Finished!
+	set filter(progbarFilterName) Finished!
 } ;# ea::filter::runFilters $files(tab3f2).tbl {Company Attention Address1 Address2 City State} {ea::filter::stripASCII_CC ea::filter::stripExtraSpaces ea::filter::stripUDL ea::filter::abbrvAddrState}
 
 
@@ -163,48 +182,6 @@ proc eAssist_tools::stripCC {cellData} {
 	return $newString
     #${log}::debug --END-- [info level 1]
 } ;# eAssist_tools::stripCC
-
-
-proc eAssist_tools::stripQuotes {cellData} {
-    #****f* stripQuotes/eAssist_tools
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2011-2014 Casey Ackels
-    #
-    # FUNCTION
-    #	Strip Quotes from string
-    #
-    # SYNOPSIS
-    #
-    #
-    # CHILDREN
-    #	eAssist_tools::stripExtraSpaces
-    #
-    # PARENTS
-    #	
-    #
-    # NOTES
-    #   
-    #
-    # SEE ALSO
-    #
-    #***
-    global log filter counter
-    #${log}::debug --START-- [info level 1]
-    
-    #set newString [eAssist_tools::stripExtraSpaces [string map [list \" ""] $cellData]]
-    set newString [string map [list \" ""] $cellData]
-	set newString [join $newString]
-    
-    #$filter(f2).progbar step
-    incr filter(progbarProgress)
-    incr counter
-    update
-    return $newString
-    #${log}::debug --END-- [info level 1]
-} ;# eAssist_tools::stripQuotes
 
 
 proc ea::filter::stripExtraSpaces {cellData args} {
@@ -293,161 +270,6 @@ proc ea::filter::stripUDL {cellData args} {
 	
 	return $newString
 } ;# ea::filter::stripUDL 32 E. 31st St.
-
-
-proc eAssistHelper::runFilters {} {
-    #****f* runFilters/eAssistHelper
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2011-2013 Casey Ackels
-    #
-    # FUNCTION
-    #	Setups the loop before executing the filters
-    #
-    # SYNOPSIS
-    #
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #	
-    #
-    # NOTES
-    #
-    # SEE ALSO
-    #
-    #***
-    global log files headerParams filter counter
-    #${log}::debug --START-- [info level 1]
-    
-    set filter(progbarProgess) 0 ;# reset the progressbar before continuing
-	# Grab the list of columns that we want to execute on, then get a count of how many. This will allow us to only execute on desired columns, and bypass certain columns.
-    set ColumnCount [$files(tab3f2).tbl columncount]
-    
-	set RowCount [llength [$files(tab3f2).tbl getcells 0,0 end,0]]
-    
-    # build the runlist to determine which filters to run
-    if {[info exists filter(runList)]} {unset filter(runList)}
-    if {[info exists counter]} {unset counter}
-    
-    # ... get the values from the checkbuttons in the Filter Editor
-    foreach value [array names filter] {
-        if {[string match run,* $value] eq 1} {
-            if {$filter($value) eq 1} {
-                lappend filter(runList) [string trimleft $value run,]
-            }
-        }
-    }
-    # Check to make sure we have data in the runList, if we don't, set to 0.
-    if {![info exists filter(runList)]} {
-        set filter(runList) 0
-    }
-    
-    # filter(runList) could have the list of selected filters; or a single '0'. Regardless if we have a single filter, or '0'; lets specify the length as 2.
-    if {[llength $filter(runList)] == 1} {
-        if {![string is integer $filter(runList)]} {
-            set filterLength 2
-            ${log}::debug filterLength-1a: $filterLength
-        } else {
-            set filterLength 1
-            ${log}::debug filterLength-1b: $filterLength
-        }
-    } else {
-        set filterLength [expr [llength $filter(runList)] + 1]
-        ${log}::debug filterLength-2: $filterLength
-    }
-    
-    #return
-    
-    set data [$files(tab3f2).tbl getcells 0,0 end,end]
-    # .. add 1 for the 'always run' filter
-    foreach val $data {
-        if {$val != {} } {incr counter1}
-    }
-
-    
-    set progressBarMax [expr $filterLength * $counter1]
-    ${log}::debug progressBarMax: $progressBarMax
-
-    # Set the max length for the progress bar
-    set progMax $progressBarMax ;# number of filters plus 2 for before and after the filters run.
-    #${log}::debug ProgBar: $progMax
-    $filter(f2).progbar configure -maximum $progMax
-    
-
-    set filter(progbarFilterName) [mc "Starting the filters"]
-    
-    # This allows us to only filter on certain columns. The only column that we may want, is Notes, but we will want a special Punctuation filter for it.
-    set colBlackList [list Company Attention Address1 Address2 Address3 City State Zip Phone Quantity]
-    foreach col $colBlackList {
-        lappend idxCols [$files(tab3f2).tbl columnindex $col]
-    }
-	
-    #foreach value $filter(runList) {}      
-        # Master loop to cycle through each cell.
-        # Rows
-        for {set x 0} {$RowCount > $x} {incr x} {
-            if {$filter(stopRunning) == 1} {return}
-            set filter(progbarFilterName) [mc "Running $filterLength Filters..."]
-            update
-            
-            # Columns
-            #for {set y 0} {$ColumnCount > $y} {incr y} {}
-            foreach y $idxCols {
-
-                set ColumnName [$files(tab3f2).tbl columncget $y -name]
-                #${log}::debug Column Name: $ColumnName
-                
-                set cellData [eAssist_tools::stripExtraSpaces [$files(tab3f2).tbl getcell $x,$y]]
-                if {$cellData == {}} {incr filter(progbarProgress); update; continue} ;# Skip the empty cells
-                
-                # This filter should always run
-                set cellData [eAssist_tools::stripQuotes $cellData]
-                incr counter2
-                
-                
-                # Start Filters
-                if {$filter(runList) != 0} {
-                    foreach val $filter(runList) {
-                        set cellData [join [eAssist_tools::$val $cellData $ColumnName]]
-                    }
-                }
-    
-                if {[string length $cellData] > [lindex $headerParams($ColumnName) 0]} {
-                    # Set the background color
-                    ${log}::debug CellData greater than set parameter: $cellData
-                    if {[lindex $headerParams($ColumnName) 3] != ""} {
-                        set backGround [lindex $headerParams($ColumnName) 3]
-                        ${log}::debug Background color set for: $ColumnName
-                    } else {
-                        # default to yellow
-                        set backGround yellow
-                        ${log}::debug No Background color set, Defaulting: $ColumnName
-                    }
-                } else {
-                    set backGround ""
-                    #${log}::debug Passed the min. parameter: $ColumnName-$cellData
-                }
-                
-                if {$cellData != ""} {$files(tab3f2).tbl cellconfigure $x,$y -text $cellData -bg $backGround}
-                      
-            }
-        } ;# End masterloop
-
-    set filter(progbarFilterName) "Filters ... Complete"
-    update
-    
-    ${log}::debug Number of cells: $data
-    ${log}::debug Length of ProgressBar: $progressBarMax
-    ${log}::debug First Counter Total: $counter1
-    ${log}::debug Second Counter Total: $counter2
-    ${log}::debug Filter Counter Total: $counter
-    ${log}::debug Run List Length: [llength $filter(runList)]
-    #${log}::debug --END-- [info level 1]
-} ;# eAssistHelper::runFilters
 
 
 proc ea::filter::abbrvAddrState {cellData args} {
