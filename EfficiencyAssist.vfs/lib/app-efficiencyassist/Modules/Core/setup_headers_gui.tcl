@@ -229,6 +229,152 @@ proc eAssistSetup::addressHeaders_GUI {} {
 } ;# eAssistSetup::addressHeaders_GUI
 
 
+proc eAssistSetup::headersGUI {{mode add} widTable} {
+    #****f* headersGUI/eAssistSetup
+    # CREATION DATE
+    #   10/21/2014 (Tuesday Oct 21)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssistSetup::Headers args 
+    #
+    # FUNCTION
+    #	Add/Edit headers
+	#	mode = add|edit (add is default; edit will populate the widgets with the selected data)
+	#	tblWid = Path to the tablelist widget
+    #   
+    #   
+    # CHILDREN
+    #	ea::db::populateHeaderEditWindow
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   The prefixed number to the entry/combo/check widgets depicts which sequence they are in, within the DB.
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+    
+    set wid .modHeader
+	
+	if {[winfo exists $wid)] == 1} {destroy $wid}
+    
+    # .. Create the dialog window
+    toplevel $wid
+    wm transient $wid .
+    wm title $wid [mc "Add/Edit Headers"]
+
+    # Put the window in the center of the parent window
+    set locX [expr {[winfo width . ] / 3 + [winfo x .]}]
+    set locY [expr {[winfo height . ] / 3 + [winfo y .]}]
+    wm geometry $wid +${locX}+${locY}
+    
+    ##
+    ## CONTAINER 1 - Left Side
+    ##
+    set c1 [ttk::frame $wid.c1 -padding 5]
+    pack $c1 -side left -anchor ne
+    
+    ## ---------
+	## Frame 1 / Database Setup
+	set f1 [ttk::labelframe $c1.f1 -text [mc "Database Setup"] -padding 10]
+	#pack $f1 -padx 2p -pady 2p
+    grid $f1 -column 0 -row 0 -sticky news
+    
+    ttk::label $f1.txt00 -text [mc "Column Name"]
+    ttk::entry $f1.entry00
+    
+    ttk::label $f1.txt01 -text [mc "Data Type"]
+    ttk::combobox $f1.cbox01 -values [list INTEGER TEXT] \
+                                -state readonly
+    
+    ttk::checkbutton $f1.ckbtn01 -text [mc "Primary Key"]
+    
+    # ++ GRID FRAME 1 ++
+    grid $f1.txt00 -column 0 -row 0 -sticky nse
+    grid $f1.entry00 -column 1 -row 0 -sticky ew
+    
+    grid $f1.txt01 -column 0 -row 1 -sticky nse
+    grid $f1.cbox01 -column 1 -row 1 -sticky ew
+    
+    grid $f1.ckbtn01 -column 1 -row 2 -sticky nsw
+    
+    ##
+    ## CONTAINER 2 - Right Side
+    ##
+    set c2 [ttk::frame $wid.c2 -padding 5]
+    pack $c2 -side left -anchor ne
+    
+    ## ---------
+	## Frame 2 / Tablelist Setup    
+    set f2 [ttk::labelframe $c2.f2 -text [mc "Tablelist Setup"] -padding 10]
+    grid $f2 -column 0 -row 0 -sticky news
+
+
+    ttk::label $f2.txt00 -text [mc "Visible Name"]
+    ttk::entry $f2.entry00
+    
+    ttk::label $f2.txt01 -text [mc "Widget"]
+    ttk::combobox $f2.cbox01 -values [list ttk::entry ttk::combobox] \
+                                -state readonly
+    
+    ttk::label $f2.txt02 -text [mc "Data Type"]
+    ttk::combobox $f2.cbox02 -values [list ASCII ASCIINOCASE COMMAND DICTIONARY INTEGER REAL] \
+                            -state readonly
+    
+    ttk::label $f2.txt03 -text [mc "Starting Col. Width"]
+    ttk::entry $f2.entry03 -width 4
+    
+    #
+    # ++ GRID FRAME 2 ++
+    #
+    grid $f2.txt00 -column 0 -row 0 -sticky nse
+    grid $f2.entry00 -column 1 -row 0 -sticky ew
+    
+    grid $f2.txt01 -column 0 -row 1 -sticky nse
+    grid $f2.cbox01 -column 1 -row 1 -sticky ew
+    
+    grid $f2.txt02 -column 0 -row 2 -sticky nse
+    grid $f2.cbox02 -column 1 -row 2 -sticky ew
+    
+    grid $f2.txt03 -column 0 -row 3 -sticky nse
+    grid $f2.entry03 -column 1 -row 3 -sticky nsw
+    
+    ## ---------
+	## Frame 2a / Misc. Options
+    set f2a [ttk::labelframe $c2.f2a -text [mc "Misc. Options"] -padding 10]
+    grid $f2a -column 0 -row 1 -sticky news
+    
+    ttk::label $f2a.txt01 -text [mc "Max. String Length"]
+    ttk::entry $f2a.entry01 -width 4
+    
+    ttk::label $f2a.txt02 -text [mc "Highlight Color"]
+    ttk::entry $f2a.entry02
+    
+    #
+    # ++ GRID FRAME 2a ++
+    #
+    grid $f2a.txt01 -column 0 -row 0 -sticky nse
+    grid $f2a.entry01 -column 1 -row 0 -sticky w
+    
+    grid $f2a.txt02 -column 0 -row 1 -sticky nse
+    grid $f2a.entry02 -column 1 -row 1 -sticky ew
+
+
+} ;# eAssistSetup::headersGUI add .
+    
+    
+
 proc eAssistSetup::Headers {{mode add} widTable} {
     #****f* Headers/eAssistSetup
     # CREATION DATE
