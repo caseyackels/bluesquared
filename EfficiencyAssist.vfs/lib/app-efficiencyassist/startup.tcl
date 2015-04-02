@@ -336,6 +336,28 @@ proc 'eAssist_initVariables {} {
 					  run,stripUDL 0 \
 					  run,abbrvAddrState 0]
 	
+	# Job DB array
+	array set setupJobDB [list dbColName "" \
+						  dbDataType "" \
+						  dbPrimaryKey 0 \
+						  widLabelName "" \
+						  widLabelAlignment "" \
+						  widWidget "" \
+						  widFormat "" \
+						  widColAlignment "" \
+						  widStartColWidth "" \
+						  widMaxWidth "" \
+						  widResizeToLongestEntry 0 \
+						  widMaxStringLength "" \
+						  widHighlightColor "" \
+						  widUIGroup "" \
+						  widExportable 0 \
+						  widRequired 0 \
+						  widAlwaysDisplay 0 \
+						  widNeverDisplay 0 \
+						  widDynamic 0 \
+						  widDisplayOrder ""]
+	
     if {![info exists mySettings(outFilePath)]} {
         # Location for saving the file
         set mySettings(outFilePath) [file dirname $mySettings(Home)]

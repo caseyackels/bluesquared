@@ -280,19 +280,26 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     wm geometry $wid +${locX}+${locY}
     
     ##
+    ## CONTAINER 0 - Holds the containers
+    ##
+    set c0 [ttk::frame $wid.c0]
+    pack $c0 -expand yes -fill both
+    
+    ##
     ## CONTAINER 1 - Left Side
     ##
-    set c1 [ttk::frame $wid.c1 -padding 5]
+    set c1 [ttk::frame $c0.c1 -padding 5]
     pack $c1 -side left -anchor ne
     
     ## ---------
 	## Frame 1 / Database Setup
+    #
 	set f1 [ttk::labelframe $c1.f1 -text [mc "Database Setup"] -padding 10]
-	#pack $f1 -padx 2p -pady 2p
     grid $f1 -column 0 -row 0 -sticky news
     
     ttk::label $f1.txt00 -text [mc "Column Name"]
     ttk::entry $f1.entry00
+        focus $f1.entry00
     
     ttk::label $f1.txt01 -text [mc "Data Type"]
     ttk::combobox $f1.cbox01 -values [list INTEGER TEXT] \
@@ -300,7 +307,9 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     
     ttk::checkbutton $f1.ckbtn01 -text [mc "Primary Key"]
     
+    #
     # ++ GRID FRAME 1 ++
+    #
     grid $f1.txt00 -column 0 -row 0 -sticky nse
     grid $f1.entry00 -column 1 -row 0 -sticky ew
     
@@ -309,46 +318,124 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     
     grid $f1.ckbtn01 -column 1 -row 2 -sticky nsw
     
+    ## ---------
+	## Frame 1a / Sub Headers
+    #
+	set f1a [ttk::labelframe $c1.f1a -text [mc "Sub Headers"] -padding 10]
+    grid $f1a -column 0 -row 2 -sticky news
+    
+    ttk::label $f1a.txt01 -text [mc "Name"]
+    ttk::entry $f1a.entry01
+    ttk::button $f1a.btn01 -text [mc "Add"] -state disable
+    
+    listbox $f1a.lbox02 -height 16 -width 25 \
+                        -yscrollcommand [list $f1a.scrolly set] \
+                        -xscrollcommand [list $f1a.scrollx set]
+        
+        tooltip::tooltip $f1a.lbox02 [mc "Double-click an entry to edit"]
+    
+    ttk::button $f1a.btn02 -text [mc "Delete"] -state disable
+    
+	ttk::scrollbar $f1a.scrolly -orient v -command [list $f1a.lbox1 yview]
+    ttk::scrollbar $f1a.scrollx -orient h -command [list $f1a.lbox1 xview]
+	
+	::autoscroll::autoscroll $f1a.scrolly ;# Enable the 'autoscrollbar'
+    ::autoscroll::autoscroll $f1a.scrollx
+
+    
+    #
+    # ++ GRID FRAME 2 ++
+    #
+    grid $f1a.txt01 -column 0 -row 0 -sticky nse
+    grid $f1a.entry01 -column 1 -row 0 -sticky ew
+    grid $f1a.btn01 -column 3 -row 0 -sticky ew
+    
+    grid $f1a.lbox02 -column 1 -row 1 -sticky news
+    grid $f1a.btn02 -column 3 -row 1 -sticky new
+    
+    grid $f1a.scrolly -column 2 -row 1 -sticky ns
+    grid $f1a.scrollx -column 1 -row 2 -sticky ews
+    
+    #
+    # -- Bindings, FRAME 2 --
+    #
+    
+    bind $f1a.entry01 <FocusIn> [list $f1a.btn01 configure -state normal]
+    #bind $f1a.entry01 <FocusOut> [list $f1a.btn01 configure -state disable]
+    
     ##
     ## CONTAINER 2 - Right Side
     ##
-    set c2 [ttk::frame $wid.c2 -padding 5]
+    set c2 [ttk::frame $c0.c2 -padding 5]
     pack $c2 -side left -anchor ne
     
     ## ---------
-	## Frame 2 / Tablelist Setup    
+	## Frame 2 / Tablelist Setup
+    #
     set f2 [ttk::labelframe $c2.f2 -text [mc "Tablelist Setup"] -padding 10]
     grid $f2 -column 0 -row 0 -sticky news
 
 
-    ttk::label $f2.txt00 -text [mc "Visible Name"]
+    ttk::label $f2.txt00 -text [mc "Label Name"]
     ttk::entry $f2.entry00
+    
+    ttk::label $f2.txt04 -text [mc "Label Alignment"]
+    ttk::combobox $f2.cbox04 -values [list Left Center Right] \
+                                -state readonly
     
     ttk::label $f2.txt01 -text [mc "Widget"]
     ttk::combobox $f2.cbox01 -values [list ttk::entry ttk::combobox] \
                                 -state readonly
     
     ttk::label $f2.txt02 -text [mc "Data Type"]
-    ttk::combobox $f2.cbox02 -values [list ASCII ASCIINOCASE COMMAND DICTIONARY INTEGER REAL] \
+    ttk::combobox $f2.cbox02 -values [list ASCII ASCIINOCASE DICTIONARY INTEGER REAL] \
                             -state readonly
     
+    ttk::label $f2.txt06 -text [mc "Format"]
+    ttk::combobox $f2.cbox06 -values [list Date] -state readonly
+       
+    ttk::label $f2.txt05 -text [mc "Col. Alignment"]
+    ttk::combobox $f2.cbox05 -values [list Left Center Right] \
+                                -state readonly
+
     ttk::label $f2.txt03 -text [mc "Starting Col. Width"]
     ttk::entry $f2.entry03 -width 4
     
+    ttk::label $f2.txt07 -text [mc "Max. Width"]
+    ttk::entry $f2.entry07 -width 4
+    
+    ttk::checkbutton $f2.chkbtn08 -text [mc "Resize to longest entry"]
+  
     #
     # ++ GRID FRAME 2 ++
     #
     grid $f2.txt00 -column 0 -row 0 -sticky nse
     grid $f2.entry00 -column 1 -row 0 -sticky ew
     
-    grid $f2.txt01 -column 0 -row 1 -sticky nse
-    grid $f2.cbox01 -column 1 -row 1 -sticky ew
+    grid $f2.txt04 -column 0 -row 1 -sticky nse
+    grid $f2.cbox04 -column 1 -row 1 -sticky ew
     
-    grid $f2.txt02 -column 0 -row 2 -sticky nse
-    grid $f2.cbox02 -column 1 -row 2 -sticky ew
+    grid $f2.txt01 -column 0 -row 2 -sticky nse
+    grid $f2.cbox01 -column 1 -row 2 -sticky ew
     
-    grid $f2.txt03 -column 0 -row 3 -sticky nse
-    grid $f2.entry03 -column 1 -row 3 -sticky nsw
+    grid $f2.txt02 -column 0 -row 3 -sticky nse
+    grid $f2.cbox02 -column 1 -row 3 -sticky ew
+
+    grid $f2.txt06 -column 0 -row 4 -sticky nse
+    grid $f2.cbox06 -column 1 -row 4 -sticky ew
+    
+    grid $f2.txt05 -column 0 -row 5 -sticky nse
+    grid $f2.cbox05 -column 1 -row 5 -sticky ew
+    
+    grid $f2.txt03 -column 0 -row 6 -sticky nse
+    grid $f2.entry03 -column 1 -row 6 -sticky w
+
+    grid $f2.txt07 -column 0 -row 7 -sticky nse
+    grid $f2.entry07 -column 1 -row 7 -sticky w
+    
+    grid $f2.chkbtn08 -column 1 -row 8 -sticky nsw
+    
+
     
     ## ---------
 	## Frame 2a / Misc. Options
@@ -361,6 +448,19 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     ttk::label $f2a.txt02 -text [mc "Highlight Color"]
     ttk::entry $f2a.entry02
     
+    ttk::label $f2a.txt03 -text [mc "UI Group"]
+    ttk::combobox $f2a.cbox03 -values [list Address {Shipping Order} Other] \
+                                -state readonly
+    
+    ttk::checkbutton $f2a.chkbtn04 -text [mc "Exportable"]
+    ttk::checkbutton $f2a.chkbtn05 -text [mc "Required"]
+    
+    ttk::radiobutton $f2a.rbtn06 -text [mc "Always Display"]
+    ttk::radiobutton $f2a.rbtn07 -text [mc "Never Display"]
+    ttk::radiobutton $f2a.rbtn08 -text [mc "Dynamic"]
+        tooltip::tooltip $f2a.rbtn08 [mc "Display only if data exists"]
+    
+    
     #
     # ++ GRID FRAME 2a ++
     #
@@ -369,6 +469,30 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     
     grid $f2a.txt02 -column 0 -row 1 -sticky nse
     grid $f2a.entry02 -column 1 -row 1 -sticky ew
+    
+    grid $f2a.txt03 -column 0 -row 2 -sticky nse
+    grid $f2a.cbox03 -column 1 -row 2 -sticky ew
+    
+    grid $f2a.chkbtn04 -column 1 -row 3 -sticky nsw
+    grid $f2a.chkbtn05 -column 1 -row 4 -sticky nsw
+    
+    grid $f2a.rbtn06 -column 1 -row 6 -sticky nsw
+    grid $f2a.rbtn07 -column 1 -row 7 -sticky nsw
+    grid $f2a.rbtn08 -column 1 -row 8 -sticky nsw
+    
+    ##
+    ## CONTAINER 3 - Bottom (Control Buttons)
+    ##
+    set btn [ttk::frame $wid.btn -padding 15]
+    pack $btn -anchor se -padx 2p
+    
+    ttk::button $btn.btn_OK -text [mc "OK"]
+    ttk::button $btn.btn_okNew -text [mc "OK > New"]
+    ttk::button $btn.btn_Cancel -text [mc "Cancel"]
+    
+    grid $btn.btn_OK -column 0 -row 0
+    grid $btn.btn_okNew -column 1 -row 0
+    grid $btn.btn_Cancel -column 2 -row 0
 
 
 } ;# eAssistSetup::headersGUI add .
