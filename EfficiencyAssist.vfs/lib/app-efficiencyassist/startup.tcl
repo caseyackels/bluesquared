@@ -337,25 +337,40 @@ proc 'eAssist_initVariables {} {
 					  run,abbrvAddrState 0]
 	
 	# Job DB array
+	
+	# Everything else is TEXT
+	# dbColName - TEXT UNIQUE (NO SPECIAL CHARS)
+	# dbPrimaryKey - BOOLEAN
+	# widStartColWidth - INTEGER
+	# widMaxWidth - INTEGER
+	# widResizeToLongestEntry - BOOLEAN
+	# widMaxStringLength - INTEGER
+	# widExportable - BOOLEAN
+	# widRequired - BOOLEAN
+	# widDisplayMode - Can be: Always, Never, Dynamic
+	# 	DEFAULT: Dyanmic
+	# widDisplayOrder - INTEGER
+
+
 	array set setupJobDB [list dbColName "" \
 						  dbDataType "" \
 						  dbPrimaryKey 0 \
 						  widLabelName "" \
 						  widLabelAlignment "" \
 						  widWidget "" \
+						  widDataType "" \
 						  widFormat "" \
 						  widColAlignment "" \
+						  widLabelAlignment "" \
 						  widStartColWidth "" \
 						  widMaxWidth "" \
 						  widResizeToLongestEntry 0 \
 						  widMaxStringLength "" \
 						  widHighlightColor "" \
 						  widUIGroup "" \
-						  widExportable 0 \
+						  widExportable 1 \
 						  widRequired 0 \
-						  widAlwaysDisplay 0 \
-						  widNeverDisplay 0 \
-						  widDynamic 0 \
+						  widDisplayMode 
 						  widDisplayOrder ""]
 	
     if {![info exists mySettings(outFilePath)]} {
