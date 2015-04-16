@@ -235,7 +235,7 @@ proc 'eAssist_initVariables {} {
     # SEE ALSO
     #
     #***
-    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter auth options emailSetup emailEvent job user
+    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter auth options emailSetup emailEvent job user setupJobDB
 
 	#-------- CORE SETTINGS
 	#if {$logSettings(displayConsole) == 1} {console show}
@@ -350,9 +350,7 @@ proc 'eAssist_initVariables {} {
 	# widDisplayMode - Can be: Always, Never, Dynamic
 	# 	DEFAULT: Dyanmic
 	# widDisplayOrder - INTEGER
-
-
-	array set setupJobDB [list dbColName "" \
+	array set setupJobDB { dbColName "" \
 						  dbDataType "" \
 						  dbPrimaryKey 0 \
 						  widLabelName "" \
@@ -370,8 +368,8 @@ proc 'eAssist_initVariables {} {
 						  widUIGroup "" \
 						  widExportable 1 \
 						  widRequired 0 \
-						  widDisplayMode 
-						  widDisplayOrder ""]
+						  widDisplayMode Dynamic \
+						  widDisplayOrder ""}
 	
     if {![info exists mySettings(outFilePath)]} {
         # Location for saving the file

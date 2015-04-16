@@ -378,18 +378,26 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
 
     ttk::label $f2.txt00 -text [mc "Label Name"]
     ttk::entry $f2.entry00
+        tooltip::tooltip $f2.entry00 [mc "The header name of the column"]
     
     ttk::label $f2.txt04 -text [mc "Label Alignment"]
     ttk::combobox $f2.cbox04 -values [list Left Center Right] \
                                 -state readonly
+        tooltip::tooltip $f2.cbox04 [mc "The alignment of the header"]
     
     ttk::label $f2.txt01 -text [mc "Widget"]
     ttk::combobox $f2.cbox01 -values [list ttk::entry ttk::combobox] \
                                 -state readonly
+        tooltip::tooltip $f2.cbox01 [mc "This should always be ttk::entry unless specifying a list in the Values dropdown"]
+    
+    ttk::label $f2.txt01a -text [mc "Values"]
+    ttk::combobox $f2.cbox01a -values [list ShipVia Packages Containers Versions]
+        tooltip::tooltip $f2.cbox01a [mc "Versions is a dynamic list built by values in the imported file, or any added by the User"]
     
     ttk::label $f2.txt02 -text [mc "Data Type"]
     ttk::combobox $f2.cbox02 -values [list ASCII ASCIINOCASE DICTIONARY INTEGER REAL] \
                             -state readonly
+        tooltip::tooltip $f2.cbox02 [mc "This will allow the widge to sort correctly"]
     
     ttk::label $f2.txt06 -text [mc "Format"]
     ttk::combobox $f2.cbox06 -values [list Date] -state readonly
@@ -397,12 +405,15 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     ttk::label $f2.txt05 -text [mc "Col. Alignment"]
     ttk::combobox $f2.cbox05 -values [list Left Center Right] \
                                 -state readonly
+        tooltip::tooltip $f2.cbox05 [mc "The alignment of the data in the cells"]
 
     ttk::label $f2.txt03 -text [mc "Starting Col. Width"]
     ttk::entry $f2.entry03 -width 4
+        tooltip::tooltip $f2.entry03 [mc "This is the width of the column when we first open Efficiency Assist, before any data is imported or a project is opened."]
     
     ttk::label $f2.txt07 -text [mc "Max. Width"]
     ttk::entry $f2.entry07 -width 4
+        tooltip::tooltip $f2.entry07 [mc "The column will not expand past this width, unless resized by the user."]
     
     ttk::checkbutton $f2.chkbtn08 -text [mc "Resize to longest entry"]
   
@@ -418,22 +429,25 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     grid $f2.txt01 -column 0 -row 2 -sticky nse
     grid $f2.cbox01 -column 1 -row 2 -sticky ew
     
-    grid $f2.txt02 -column 0 -row 3 -sticky nse
-    grid $f2.cbox02 -column 1 -row 3 -sticky ew
+    grid $f2.txt01a -column 0 -row 3 -sticky nse
+    grid $f2.cbox01a -column 1 -row 3 -sticky ew
+    
+    grid $f2.txt02 -column 0 -row 4 -sticky nse
+    grid $f2.cbox02 -column 1 -row 4 -sticky ew
 
-    grid $f2.txt06 -column 0 -row 4 -sticky nse
-    grid $f2.cbox06 -column 1 -row 4 -sticky ew
+    grid $f2.txt06 -column 0 -row 5 -sticky nse
+    grid $f2.cbox06 -column 1 -row 5 -sticky ew
     
-    grid $f2.txt05 -column 0 -row 5 -sticky nse
-    grid $f2.cbox05 -column 1 -row 5 -sticky ew
+    grid $f2.txt05 -column 0 -row 6 -sticky nse
+    grid $f2.cbox05 -column 1 -row 6 -sticky ew
     
-    grid $f2.txt03 -column 0 -row 6 -sticky nse
-    grid $f2.entry03 -column 1 -row 6 -sticky w
+    grid $f2.txt03 -column 0 -row 7 -sticky nse
+    grid $f2.entry03 -column 1 -row 7 -sticky w
 
-    grid $f2.txt07 -column 0 -row 7 -sticky nse
-    grid $f2.entry07 -column 1 -row 7 -sticky w
+    grid $f2.txt07 -column 0 -row 8 -sticky nse
+    grid $f2.entry07 -column 1 -row 8 -sticky w
     
-    grid $f2.chkbtn08 -column 1 -row 8 -sticky nsw
+    grid $f2.chkbtn08 -column 1 -row 9 -sticky nsw
     
 
     
