@@ -257,7 +257,7 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     #   
     #   
     # NOTES
-    #   The prefixed number to the entry/combo/check widgets depicts which sequence they are in, within the DB.
+    #   
     #   
     # SEE ALSO
     #   
@@ -463,8 +463,9 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     ttk::entry $f2a.entry02
     
     ttk::label $f2a.txt03 -text [mc "UI Group"]
-    ttk::combobox $f2a.cbox03 -values [list Address {Shipping Order} Other] \
+    ttk::combobox $f2a.cbox03 -values [list Consignee {Shipping Order} Packaging Miscellaneous] \
                                 -state readonly
+        tooltip::tooltip $f2a.cbox03 [mc "This will help determine where this entry is placed: Both in the Form view and the Spreadsheet."]
     
     ttk::checkbutton $f2a.chkbtn04 -text [mc "Exportable"]
     ttk::checkbutton $f2a.chkbtn05 -text [mc "Required"]
