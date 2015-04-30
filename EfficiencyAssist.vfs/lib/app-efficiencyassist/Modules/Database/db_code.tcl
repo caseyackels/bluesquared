@@ -951,3 +951,63 @@ proc ea::db::getUniqueValues {db dbCol dbTbl} {
     return $values
 
 } ;# ea::db::getUniqueValues
+
+
+
+proc ea::db::initUserDefinedValues {args} {
+    #****f* initUserDefinedValues/ea::db
+    # CREATION DATE
+    #   04/30/2015 (Thursday Apr 30)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   ea::db::initUserDefinedValues args
+	#
+    #
+    # FUNCTION
+    #	Inserts database table/primary key and a description into a table that can then be displayed to the user as choices. Primarily used in Setup > Header Config
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+	# Inserts the table and primary key into the UserDefinedValues table, so that it can be used in the Header Config section.
+	# args = -desc <desc> -table <table name> -pk <primary key>
+	
+	foreach {key value} $args {
+		switch -- $key {
+			-pk		{set pk $value}
+			-table	{set tbl $value}
+			-desc	{set desc $value}
+			default	{}
+		}
+	}
+	
+	# check to make sure this hasn't already been inserted into the db; if it has we issue a debug notice.
+	set val [db eval "SELECT PrimaryKeyName from UserDefinedValues WHERE PrimaryKeyName = '$pk'"]
+	
+	if {$val eq ""} {
+		# Insert data
+		db eval "INSERT INTO UserDefinedValues (PrimaryKeyName, TableName, Description) VALUES ('$pk', '$tbl', '$desc')"
+	} else {
+		${log}::debug [info level 2] $pk has already been inserted into table: UserDefinedValues
+	}
+    
+} ;# ea::db::initUserDefinedValues

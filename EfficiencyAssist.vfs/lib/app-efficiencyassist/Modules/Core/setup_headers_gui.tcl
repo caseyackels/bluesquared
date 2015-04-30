@@ -305,7 +305,7 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     ttk::combobox $f1.cbox01 -values [list INTEGER TEXT] \
                                 -state readonly
     
-    ttk::checkbutton $f1.ckbtn01 -text [mc "Primary Key"]
+    #ttk::checkbutton $f1.ckbtn01 -text [mc "Primary Key"]
     
     #
     # ++ GRID FRAME 1 ++
@@ -316,7 +316,7 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     grid $f1.txt01 -column 0 -row 1 -sticky nse
     grid $f1.cbox01 -column 1 -row 1 -sticky ew
     
-    grid $f1.ckbtn01 -column 1 -row 2 -sticky nsw
+    #grid $f1.ckbtn01 -column 1 -row 2 -sticky nsw
     
     ## ---------
 	## Frame 1a / Sub Headers
