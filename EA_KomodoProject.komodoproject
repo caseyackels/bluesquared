@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Komodo Project File - DO NOT EDIT -->
+<project id="67046f93-d675-4754-a737-e728c42aa9b8" kpf_version="5" name="EA_KomodoProject.komodoproject">
+<preference-set idref="67046f93-d675-4754-a737-e728c42aa9b8" id="project" preftype="project">
+  <string id="import_exclude_matches">BlueSquirrel.vfs;Builds;Development;DistributionHelper.vfs;Fonts &amp; Icons;Installer;Komodo Settings;Mockups;NextGenRM.vfs;Test Files;TkTable2.10;UPS Rates;.komodotools;Database;Documentation</string>
+  <string id="import_include_matches">*.tcl;*.bat;*.txt</string>
+</preference-set>
+</project>
