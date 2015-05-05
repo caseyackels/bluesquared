@@ -22,6 +22,45 @@
 # - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
+proc ea::db::initHeaderVariables {} {
+    #****f* initHeaderVariables/ea::db
+    # CREATION DATE
+    #   05/04/2015 (Monday May 04)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   ea::db::initHeaderVariables  
+    #
+    # FUNCTION
+    #	Initilizes the variables dealing with the Header configuration section
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log setup
+
+    set setup(hdr,valuesList) [db eval "SELECT Description from UserDefinedValues"]
+
+    
+} ;# ea::db::initHeaderVariables
+
 proc ea::db::updateHeaderWidTbl {widTable dbTable cols} {
     #****f* updateHeaderWidTbl/ea::db
     # CREATION DATE

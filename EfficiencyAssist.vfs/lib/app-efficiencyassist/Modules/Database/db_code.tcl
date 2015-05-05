@@ -967,11 +967,10 @@ proc ea::db::initUserDefinedValues {args} {
     #   
     #
     # SYNOPSIS
-    #   ea::db::initUserDefinedValues args
-	#
+    #   ea::db::initUserDefinedValues -desc <desc> -table <table name> -pk <primary key column name>
     #
     # FUNCTION
-    #	Inserts database table/primary key and a description into a table that can then be displayed to the user as choices. Primarily used in Setup > Header Config
+    #	Inserts a database table name, primary key and a description into the UserDefinedValules database table that can then be displayed to the user as choices. Primarily used in Setup > Header Config
     #   
     #   
     # CHILDREN
@@ -981,6 +980,7 @@ proc ea::db::initUserDefinedValues {args} {
     #   
     #   
     # NOTES
+	# 	This proc should be added to all functions that provide a list of options (dropdown widget values), such as: Packages, Containers, Ship Via, etc.
     #   
     #   
     # SEE ALSO
@@ -988,26 +988,28 @@ proc ea::db::initUserDefinedValues {args} {
     #   
     #***
     global log
-	# Inserts the table and primary key into the UserDefinedValues table, so that it can be used in the Header Config section.
-	# args = -desc <desc> -table <table name> -pk <primary key>
+	# Inserts the table and primary key into the UserDefinedValues table, so that it can be used in the Header Config section. It populates the "Values" dropdown.
 	
 	foreach {key value} $args {
 		switch -- $key {
-			-pk		{set pk $value}
-			-table	{set tbl $value}
-			-desc	{set desc $value}
-			default	{}
+			-pk				{set pk $value}
+			-table			{set tbl $value}
+			-desc			{set desc $value}
+			-displayColumn	{set display $value}
+			default	{${log}::debug $key is unknown; return}
 		}
 	}
 	
-	# check to make sure this hasn't already been inserted into the db; if it has we issue a debug notice.
-	set val [db eval "SELECT PrimaryKeyName from UserDefinedValues WHERE PrimaryKeyName = '$pk'"]
+	# Insert the data; if the values are not unique, the err variable will be populated, and an error notice will be issued.
+	catch {db eval "INSERT INTO UserDefinedValues (PrimaryKeyName, TableName, Description, DisplayColValues) VALUES ('$pk', '$tbl', '$desc', '$display')"} err
 	
-	if {$val eq ""} {
-		# Insert data
-		db eval "INSERT INTO UserDefinedValues (PrimaryKeyName, TableName, Description) VALUES ('$pk', '$tbl', '$desc')"
-	} else {
-		${log}::debug [info level 2] $pk has already been inserted into table: UserDefinedValues
+	if {[info exists err]} {
+		if {$err != ""} {
+			${log}::notice [lindex [info level 0] 0]: $err - Used: $pk
+		} else {
+			${log}::notice [lindex [info level 0] 0]: Successfully inserted: $pk
+		}
 	}
+
     
 } ;# ea::db::initUserDefinedValues

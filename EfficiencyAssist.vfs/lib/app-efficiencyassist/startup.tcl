@@ -350,26 +350,27 @@ proc 'eAssist_initVariables {} {
 	# widDisplayMode - Can be: Always, Never, Dynamic
 	# 	DEFAULT: Dyanmic
 	# widDisplayOrder - INTEGER
-	array set setupJobDB { dbColName "" \
-						  dbDataType "" \
-						  dbPrimaryKey 0 \
-						  widLabelName "" \
-						  widLabelAlignment "" \
-						  widWidget "" \
-						  widDataType "" \
-						  widFormat "" \
-						  widColAlignment "" \
-						  widLabelAlignment "" \
-						  widStartColWidth "" \
-						  widMaxWidth "" \
-						  widResizeToLongestEntry 0 \
-						  widMaxStringLength "" \
-						  widHighlightColor "" \
-						  widUIGroup "" \
-						  widExportable 1 \
-						  widRequired 0 \
-						  widDisplayMode Dynamic \
-						  widDisplayOrder ""}
+	array set setupHeadersConfig  {
+							HeaderConfig_ID "" \
+							dbColName "" \
+							dbDataType "" \
+							widLabelName "" \
+							widLabelAlignment "" \
+							widWidget "" \
+							widValues "" \
+							widDataType "" \
+							widFormat "" \
+							widColAlignment "" \
+							widStartColWidth "" \
+							widMaxWidth "" \
+							widResizeToLongestEntry 0 \
+							widMaxStringLength "" \
+							widHighlightColor "" \
+							widUIGroup "" \
+							widUIPositionWeight 0 \
+							widExportable 1 \
+							widRequired 0 \
+							widDisplayType Dynamic}
 	
     if {![info exists mySettings(outFilePath)]} {
         # Location for saving the file
@@ -408,6 +409,11 @@ proc 'eAssist_initVariables {} {
 	
 	# Schedule a time to check for updates
 	#eAssist_Global::at $program(checkUpdateTime) vUpdate::checkForUpdates
+	
+	# Adding the available data to the UserDefinedValues table, which will show up in a dropdown on the Header Config page, in Setup.
+	ea::db::initUserDefinedValues -desc Packages -table Packages -pk Pkg_ID -displayColumn Package
+	ea::db::initUserDefinedValues -desc Container -table Containers -pk Container_ID -displayColumn Container
+	ea::db::initUserDefinedValues -desc "Ship Via" -table ShipVia -pk ShipVia_ID -displayColumn ShipViaName
 	
 
 } ;# 'eAssist_initVariables
