@@ -48,7 +48,7 @@ proc eAssistSetup::addressHeaders_GUI {} {
     # SEE ALSO
     #
     #***
-    global log G_setupFrame currentModule program headerParams headerParent
+    global log G_setupFrame currentModule program headerParams headerParent setupHeadersConfig
     global GUI w filters
     #variable GUI
     
@@ -57,6 +57,9 @@ proc eAssistSetup::addressHeaders_GUI {} {
     
     # Initialize the filters array
     #eAssist_Global::launchFilters
+    
+    # Initialize the setupHeadersConfig array
+    eAssistSetup::initsetupHeadersConfigArray
     
     ##
     ## Parent Frame
@@ -76,9 +79,9 @@ proc eAssistSetup::addressHeaders_GUI {} {
     set w(hdr_frame1b) [ttk::frame $w(hdr_frame1a).b]
     grid $w(hdr_frame1b) -column 0 -row 0 -sticky nsw
 
-    ttk::button $w(hdr_frame1b).btn1 -text [mc "Add"] -command {eAssistSetup::Headers add}
-    ttk::button $w(hdr_frame1b).btn2 -text [mc "Edit"] -command {eAssistSetup::Headers edit $w(hdr_frame1a).listbox}
-    ttk::button $w(hdr_frame1b).btn3 -text [mc "Delete"] -command {ea::db::delMasterHeader $w(hdr_frame1a).listbox}
+    ttk::button $w(hdr_frame1b).btn1 -text [mc "Add"] -command {eAssistSetup::headersGUI add $w(hdr_frame1a).listbox}
+    ttk::button $w(hdr_frame1b).btn2 -text [mc "Edit"] -command {}
+    ttk::button $w(hdr_frame1b).btn3 -text [mc "Delete"] -command {ea::db::delMasterHeader $w(hdr_frame1a).listbox} -state disabled
     
     grid $w(hdr_frame1b).btn1 -column 0 -row 0 -padx 2p -pady 0p -sticky new
     grid $w(hdr_frame1b).btn2 -column 1 -row 0 -padx 2p -pady 0p -sticky new
@@ -161,33 +164,33 @@ proc eAssistSetup::addressHeaders_GUI {} {
         $w(hdr_frame1a).listbox columnconfigure 12 -name "widMaxWidth" \
                                             -labelalign center
         
-        $w(hdr_frame1a).listbox columnconfigure 12 -name "widResizeToLongestEntry" \
+        $w(hdr_frame1a).listbox columnconfigure 13 -name "widResizeToLongestEntry" \
                                             -labelalign center
 		
-        $w(hdr_frame1a).listbox columnconfigure 12 -name "widMaxStringLength" \
+        $w(hdr_frame1a).listbox columnconfigure 14 -name "widMaxStringLength" \
                                             -labelalign center
         
-        $w(hdr_frame1a).listbox columnconfigure 12 -name "widHighlightColor" \
+        $w(hdr_frame1a).listbox columnconfigure 15 -name "widHighlightColor" \
                                             -labelalign center
         
-        $w(hdr_frame1a).listbox columnconfigure 12 -name "widUIGroup" \
+        $w(hdr_frame1a).listbox columnconfigure 16 -name "widUIGroup" \
                                             -labelalign center
         
-        $w(hdr_frame1a).listbox columnconfigure 12 -name "widUIPositionWeight" \
+        $w(hdr_frame1a).listbox columnconfigure 17 -name "widUIPositionWeight" \
                                             -labelalign center
         
-        $w(hdr_frame1a).listbox columnconfigure 12 -name "widExportable" \
+        $w(hdr_frame1a).listbox columnconfigure 18 -name "widExportable" \
                                             -labelalign center
         
-        $w(hdr_frame1a).listbox columnconfigure 12 -name "widRequired" \
+        $w(hdr_frame1a).listbox columnconfigure 19 -name "widRequired" \
                                             -labelalign center
         
-        $w(hdr_frame1a).listbox columnconfigure 12 -name "widDisplayType" \
+        $w(hdr_frame1a).listbox columnconfigure 20 -name "widDisplayType" \
                                             -labelalign center
 
 
     #ea::db::updateHeaderWidTbl $w(hdr_frame1a).listbox Headers "Header_ID InternalHeaderName OutputHeaderName HeaderMaxLength DefaultWidth Highlight Widget DisplayOrder Required AlwaysDisplay ResizeColumn"
-    
+    ea::db::updateHeaderWidTbl $w(hdr_frame1a).listbox HeadersConfig [array names setupHeadersConfig]
     
     ttk::scrollbar $w(hdr_frame1a).scrolly -orient v -command [list $w(hdr_frame1a).listbox yview]
     ttk::scrollbar $w(hdr_frame1a).scrollx -orient h -command [list $w(hdr_frame1a).listbox xview]
@@ -207,14 +210,10 @@ proc eAssistSetup::addressHeaders_GUI {} {
     ##----------
 	## Binding
 	bind [$w(hdr_frame1a).listbox bodytag] <Double-1> {
-		eAssistSetup::Headers edit $w(hdr_frame1a).listbox
+		eAssistSetup::headersGUI edit $w(hdr_frame1a).listbox
 		#[$w(hdr_frame1a).listbox get [$w(hdr_frame1a).listbox curselection]]
 	}
-	
-#    bind $w(hdr_frame1b).cbox1 <<ComboboxSelected>> {
-#        # Display the child headers associated with the parent header
-#		ea::db::getSubHeaders $masterHeader $w(hdr_frame1b).lbox1
-#    }
+
 	
 } ;# eAssistSetup::addressHeaders_GUI
 
@@ -232,11 +231,11 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     #   
     #
     # SYNOPSIS
-    #   eAssistSetup::Headers args 
+    #   eAssistSetup::headersGUI <add|edit|view> <table widget path> 
     #
     # FUNCTION
-    #	Add/Edit headers
-	#	mode = add|edit (add is default; edit will populate the widgets with the selected data)
+    #	Add/Edit/View headers
+	#	mode = add|edit|view (add is default; edit will populate the widgets with the selected data)
 	#	tblWid = Path to the tablelist widget
     #   
     #   
@@ -244,7 +243,7 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     #	ea::db::populateHeaderEditWindow
     #   
     # PARENTS
-    #   
+    #   eAssistSetup::addressHeaders_GUI
     #   
     # NOTES
     #   
@@ -277,7 +276,8 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     wm geometry $wid +${locX}+${locY}
     
     # Init the variables
-    ea::db::initHeaderVariables
+    eAssistSetup::initsetupHeadersConfigArray
+    ea::db::initHeaderVariables ;# Available options to populate the 'values' dropdown
     
     ##
     ## CONTAINER 0 - Holds the containers
@@ -298,14 +298,15 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     grid $f1 -column 0 -row 0 -sticky news
     
     ttk::label $f1.txt00 -text [mc "Column Name"]
-    ttk::entry $f1.entry00
+    ttk::entry $f1.entry00 -textvariable setupHeadersConfig(dbColName)
         focus $f1.entry00
     
     ttk::label $f1.txt01 -text [mc "Data Type"]
     ttk::combobox $f1.cbox01 -values [list TEXT INTEGER DATE TIME] \
+                                -textvariable setupHeadersConfig(dbDataType) \
                                 -state readonly
     
-    #ttk::checkbutton $f1.ckbtn01 -text [mc "Primary Key"]
+    ttk::checkbutton $f1.ckbtn01 -text [mc "Record Active"] -variable setupHeadersConfig(dbActive)
     
     #
     # ++ GRID FRAME 1 ++
@@ -316,7 +317,8 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     grid $f1.txt01 -column 0 -row 1 -sticky nse
     grid $f1.cbox01 -column 1 -row 1 -sticky ew
     
-    #grid $f1.ckbtn01 -column 1 -row 2 -sticky nsw
+    grid $f1.ckbtn01 -column 1 -row 2 -sticky nsw
+
     
     ## ---------
 	## Frame 1a / Sub Headers
@@ -326,7 +328,7 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     
     ttk::label $f1a.txt01 -text [mc "Name"]
     ttk::entry $f1a.entry01
-    ttk::button $f1a.btn01 -text [mc "Add"] -state disable -command "ea::db::addSubHeaders $w(hdr_frame1b).lbox1 $w(hdr_frame1b).entry1 $w(hdr_frame1b).cbox1"
+    ttk::button $f1a.btn01 -text [mc "Add"] -state disable ;#-command "ea::db::addSubHeaders $w(hdr_frame1b).lbox1 $w(hdr_frame1b).entry1 $w(hdr_frame1b).cbox1"
     
     listbox $f1a.lbox02 -height 16 -width 25 \
                         -yscrollcommand [list $f1a.scrolly set] \
@@ -334,7 +336,7 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
         
         tooltip::tooltip $f1a.lbox02 [mc "Double-click an entry to edit"]
     
-    ttk::button $f1a.btn02 -text [mc "Delete"] -state disable -command "ea::db::delSubHeaders $w(hdr_frame1b).lbox1 $w(hdr_frame1b).cbox1"
+    ttk::button $f1a.btn02 -text [mc "Delete"] -state disable ;#-command "ea::db::delSubHeaders $w(hdr_frame1b).lbox1 $w(hdr_frame1b).cbox1"
     
 	ttk::scrollbar $f1a.scrolly -orient v -command [list $f1a.lbox1 yview]
     ttk::scrollbar $f1a.scrollx -orient h -command [list $f1a.lbox1 xview]
@@ -377,45 +379,55 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
 
 
     ttk::label $f2.txt00 -text [mc "Label Name"]
-    ttk::entry $f2.entry00
+    ttk::entry $f2.entry00 -textvariable setupHeadersConfig(widLabelName)
         tooltip::tooltip $f2.entry00 [mc "The header name of the column"]
     
     ttk::label $f2.txt04 -text [mc "Label Alignment"]
     ttk::combobox $f2.cbox04 -values [list Left Center Right] \
+                                -textvariable setupHeadersConfig(widLabelAlignment) \
                                 -state readonly
         tooltip::tooltip $f2.cbox04 [mc "The alignment of the header"]
     
     ttk::label $f2.txt01 -text [mc "Widget"]
     ttk::combobox $f2.cbox01 -values [list ttk::entry ttk::combobox] \
+                                -textvariable setupHeadersConfig(widWidget) \
                                 -state readonly
         tooltip::tooltip $f2.cbox01 [mc "This should always be ttk::entry unless specifying a list in the Values dropdown"]
     
     ttk::label $f2.txt01a -text [mc "Values"]
-    ttk::combobox $f2.cbox01a -state readonly -values $setup(hdr,valuesList) 
-        #tooltip::tooltip $f2.cbox01a [mc "Versions is a dynamic list built by values in the imported file, or any added by the User"]
+    ttk::combobox $f2.cbox01a -values "$setup(hdr,valuesList) {}" \
+                                -textvariable setupHeadersConfig(widValues) \
+                                -state readonly
+        tooltip::tooltip $f2.cbox01a [mc "Versions is a dynamic list built by values in the imported file, or any added by the User"]
     
     ttk::label $f2.txt02 -text [mc "Data Type"]
     ttk::combobox $f2.cbox02 -values [list ASCII ASCIINOCASE DICTIONARY INTEGER REAL] \
+                            -textvariable setupHeadersConfig(widDataType) \
                             -state readonly
         tooltip::tooltip $f2.cbox02 [mc "This will allow the widget to sort correctly"]
     
     ttk::label $f2.txt06 -text [mc "Format"]
-    ttk::combobox $f2.cbox06 -values [list Date] -state readonly
+    ttk::combobox $f2.cbox06 -values [list Date ""] \
+                                -textvariable setupHeadersConfig(widFormat) \
+                                -state readonly
        
     ttk::label $f2.txt05 -text [mc "Col. Alignment"]
     ttk::combobox $f2.cbox05 -values [list Left Center Right] \
+                                -textvariable setupHeadersConfig(widColAlignment) \
                                 -state readonly
-        tooltip::tooltip $f2.cbox05 [mc "The alignment of the data in the cells"]
+       tooltip::tooltip $f2.cbox05 [mc "The alignment of the data in the cells"]
 
     ttk::label $f2.txt03 -text [mc "Starting Col. Width"]
-    ttk::entry $f2.entry03 -width 4 -validate all -validatecommand {eAssist_Global::validate %W %d %S -integer only}
+    ttk::entry $f2.entry03 -width 4 -validate all -validatecommand {eAssist_Global::validate %W %d %S -integer only} \
+                            -textvariable setupHeadersConfig(widStartColWidth)
         tooltip::tooltip $f2.entry03 [mc "This is the width of the column when we first open Efficiency Assist, before any data is imported or a project is opened."]
     
     ttk::label $f2.txt07 -text [mc "Max. Col. Width"]
-    ttk::entry $f2.entry07 -width 4 -validate all -validatecommand {eAssist_Global::validate %W %d %S -integer only}
+    ttk::entry $f2.entry07 -width 4 -validate all -validatecommand {eAssist_Global::validate %W %d %S -integer only} \
+                            -textvariable setupHeadersConfig(widMaxWidth)
         tooltip::tooltip $f2.entry07 [mc "The column will not expand past this width, unless resized by the user."]
     
-    ttk::checkbutton $f2.chkbtn08 -text [mc "Resize to longest entry"]
+    ttk::checkbutton $f2.chkbtn08 -text [mc "Resize to longest entry"] -variable setupHeadersConfig(widResizeToLongestEntry)
   
     #
     # ++ GRID FRAME 2 ++
@@ -457,27 +469,32 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     grid $f2a -column 0 -row 1 -sticky news
     
     ttk::label $f2a.txt01 -text [mc "Max. String Length"]
-    ttk::entry $f2a.entry01 -width 4 -validate all -validatecommand {eAssist_Global::validate %W %d %S -integer only}
+    ttk::entry $f2a.entry01 -width 4 -validate all -validatecommand {eAssist_Global::validate %W %d %S -integer only} \
+                                -textvariable setupHeadersConfig(widMaxStringLength)
     
     ttk::label $f2a.txt02 -text [mc "Highlight Color"]
-    ttk::entry $f2a.entry02
+    ttk::entry $f2a.entry02 -textvariable setupHeadersConfig(widHighlightColor)
     
     ttk::label $f2a.txt03 -text [mc "UI Group"]
     ttk::combobox $f2a.cbox03 -values [list Consignee {Shipping Order} Packaging Miscellaneous] \
+                                -textvariable setupHeadersConfig(widUIGroup) \
                                 -state readonly
         tooltip::tooltip $f2a.cbox03 [mc "This will help determine where this entry is placed: Both in the Form view and the Spreadsheet."]
         
-    ttk::label $f2a.txt04a -text [mc "UI Group Color"]
-    ttk::entry $f2a.entry04a
+    #ttk::label $f2a.txt04a -text [mc "UI Group Color"]
+    #ttk::entry $f2a.entry04a -textvariable setupHeadersConfig()
     
-    ttk::label $f2a.txt04b -text [mc "UI Group Weight"]
-    ttk::entry $f2a.entry04b -validate all -validatecommand {eAssist_Global::validate %W %d %S -integer only}
+    ttk::label $f2a.txt04b -text [mc "UI Position Weight"]
+    ttk::entry $f2a.entry04b -validate all -validatecommand {eAssist_Global::validate %W %d %S -integer only} \
+                                -textvariable setupHeadersConfig(widUIPositionWeight)
 
     ttk::label $f2a.text06 -text [mc "Display"]
-    ttk::combobox $f2a.cbox06 -values [list Always Never Dyanmic]
+    ttk::combobox $f2a.cbox06 -values [list Dynamic Always Never] \
+                                -textvariable setupHeadersConfig(widDisplayType) \
+                                -state readonly
     
-    ttk::checkbutton $f2a.chkbtn04 -text [mc "Exportable"]
-    ttk::checkbutton $f2a.chkbtn05 -text [mc "Required"]
+    ttk::checkbutton $f2a.chkbtn04 -text [mc "Exportable"] -variable setupHeadersConfig(widExportable)
+    ttk::checkbutton $f2a.chkbtn05 -text [mc "Required"] -variable setupHeadersConfig(widRequired)
     
     #
     # ++ GRID FRAME 2a ++
@@ -491,8 +508,8 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     grid $f2a.txt03 -column 0 -row 2 -sticky nse
     grid $f2a.cbox03 -column 1 -row 2 -sticky ew
     
-    grid $f2a.txt04a -column 0 -row 3 -sticky nse
-    grid $f2a.entry04a -column 1 -row 3 -sticky ew
+    #grid $f2a.txt04a -column 0 -row 3 -sticky nse
+    #grid $f2a.entry04a -column 1 -row 3 -sticky ew
     
     grid $f2a.txt04b -column 0 -row 4 -sticky nse
     grid $f2a.entry04b -column 1 -row 4 -sticky ew
@@ -509,7 +526,7 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     set btn [ttk::frame $wid.btn -padding 15]
     pack $btn -anchor se -padx 2p
     
-    ttk::button $btn.btn_OK -text [mc "OK"]
+    ttk::button $btn.btn_OK -text [mc "OK"] -command {ea::db::writeHeaderToDB widTable}
     ttk::button $btn.btn_okNew -text [mc "OK > New"]
     ttk::button $btn.btn_Cancel -text [mc "Cancel"]
     
