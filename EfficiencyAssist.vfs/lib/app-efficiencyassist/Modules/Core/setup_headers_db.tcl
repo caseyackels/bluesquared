@@ -95,13 +95,7 @@ proc ea::db::updateHeaderWidTbl {widTable dbTable cols} {
     #***
     global log
 
-    if {[info exists colName]} {unset colName}
-    set ColumnCount [$widTable columncount]
-    for {set x 1} {$x < $ColumnCount} {incr x} {
-        lappend colName [$widTable columncget $x -name]
-    }
-    
-    set region [eAssist_db::dbSelectQuery -columnNames $colName -table $dbTable]
+    set region [eAssist_db::dbSelectQuery -columnNames $cols -table $dbTable]
     if {[info exists region]} {
         $widTable delete 0 end
         
@@ -116,7 +110,7 @@ proc ea::db::updateHeaderWidTbl {widTable dbTable cols} {
 } ;# ea::db::updateHeaderWidTbl
 
 
-proc ea::db::writeHeaderToDB {widTable} {
+proc ea::db::writeHeaderToDB {widPath widTable dbTable} {
     #****f* writeHeaderToDB/ea::db
     # CREATION DATE
     #   10/21/2014 (Tuesday Oct 21)
@@ -133,8 +127,9 @@ proc ea::db::writeHeaderToDB {widTable} {
     #
     # FUNCTION
     #	Write/Update header configuration to the DB
-    #	widTable = Path to the widget
+    #	widPath = Path to the widgets
     #	dbTable = Table in the database that we are going to write to.
+    #   -save ok|new / Ok closes the widget; New clears the widget values
     #   
     #   
     # CHILDREN
@@ -150,32 +145,41 @@ proc ea::db::writeHeaderToDB {widTable} {
     #   
     #   
     #***
-    global log setupHeadersConfig
-    set dbTable HeadersConfig
+    global log tmp_headerOpts
 
-    ${log}::debug win: $widTable
-    ${log}::debug Database Table: $dbTable
+    ${log}::debug win: $widPath
     
-    foreach header [array names setupHeadersConfig] {
-        set data $setupHeadersConfig($header)
-        #${log}::debug Column: $header __ Data: $data
-        
-        if {$data != ""} {
-            lappend hdr_list $header
-            lappend data_list $data
+    set children [lsort [winfo children $widPath]]
+    if {[winfo exists valuesToInsert]} {unset valuesToInsert}
+    
+    # Retrieves data from each entry widget, and puts them into a list.
+    # Clear out all entry widgets
+    foreach item $children {
+        if {[string match -nocase *txt* $item] != 1} {
+            if {[string match -nocase *ckbtn* $item] == 1} {
+                foreach checkbtn [array names tmp_headerOpts] {
+                    if {[string match *$checkbtn $item]} {
+                        lappend valuesToInsert $tmp_headerOpts($checkbtn)
+                    }
+                }
+                
+            } else {
+                ${log}::debug $item - [join [$item get]]
+                lappend valuesToInsert [join [$item get]]
+            }
+            #$item delete 0 end
         }
     }
+
+
+    ${log}::debug Final valuesToInsert: $valuesToInsert
+    eAssist_db::dbInsert -columnNames "InternalHeaderName OutputHeaderName HeaderMaxLength DefaultWidth Highlight Widget DisplayOrder Required AlwaysDisplay ResizeColumn" -table $dbTable -data $valuesToInsert
     
-    ${log}::debug Inserting into $dbTable
-    #${log}::debug HEADERS: $hdr_list
-    #${log}::debug DATA: $data_list
+
+    # Read from DB to populate the widgets
+    ea::db::updateHeaderWidTbl $widTable Headers "Header_ID InternalHeaderName OutputHeaderName HeaderMaxLength DefaultWidth Highlight Widget DisplayOrder Required AlwaysDisplay ResizeColumn"
     
-    eAssist_db::dbInsert -columnNames $hdr_list -table $dbTable -data $data_list
-    
-    ## Read from DB to populate the widgets
-    ea::db::updateHeaderWidTbl $widTable $dbTable [array names setupHeadersConfig]
-    
-} ;# ea::db::writeHeaderToDB . HeaderConfig
+} ;# ea::db::writeHeaderToDB
 
 
 proc ea::db::populateHeaderEditWindow {widTable widPath dbTable} {
