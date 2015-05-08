@@ -335,42 +335,7 @@ proc 'eAssist_initVariables {} {
 					  run,stripExtraSpaces 0 \
 					  run,stripUDL 0 \
 					  run,abbrvAddrState 0]
-	
-	# Job DB array
-	
-	# Everything else is TEXT
-	# dbColName - TEXT UNIQUE (NO SPECIAL CHARS)
-	# dbPrimaryKey - BOOLEAN
-	# widStartColWidth - INTEGER
-	# widMaxWidth - INTEGER
-	# widResizeToLongestEntry - BOOLEAN
-	# widMaxStringLength - INTEGER
-	# widExportable - BOOLEAN
-	# widRequired - BOOLEAN
-	# widDisplayMode - Can be: Always, Never, Dynamic
-	# 	DEFAULT: Dyanmic
-	# widDisplayOrder - INTEGER
-	array set setupHeadersConfig  {
-							HeaderConfig_ID "" \
-							dbColName "" \
-							dbDataType "" \
-							widLabelName "" \
-							widLabelAlignment "" \
-							widWidget "" \
-							widValues "" \
-							widDataType "" \
-							widFormat "" \
-							widColAlignment "" \
-							widStartColWidth "" \
-							widMaxWidth "" \
-							widResizeToLongestEntry 0 \
-							widMaxStringLength "" \
-							widHighlightColor "" \
-							widUIGroup "" \
-							widUIPositionWeight 0 \
-							widExportable 1 \
-							widRequired 0 \
-							widDisplayType Dynamic}
+
 	
     if {![info exists mySettings(outFilePath)]} {
         # Location for saving the file

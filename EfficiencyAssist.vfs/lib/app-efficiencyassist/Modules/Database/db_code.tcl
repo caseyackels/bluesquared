@@ -980,7 +980,7 @@ proc ea::db::initUserDefinedValues {args} {
     #   
     #   
     # NOTES
-	# 	This proc should be added to all functions that provide a list of options (dropdown widget values), such as: Packages, Containers, Ship Via, etc.
+	# 	All registration should be done in the startup.tcl file; ['eAssist_initVariables] proc.
     #   
     #   
     # SEE ALSO
