@@ -79,7 +79,7 @@ proc eAssistSetup::addressHeaders_GUI {} {
     set w(hdr_frame1b) [ttk::frame $w(hdr_frame1a).b]
     grid $w(hdr_frame1b) -column 0 -row 0 -sticky nsw
 
-    ttk::button $w(hdr_frame1b).btn1 -text [mc "Add"] -command {eAssistSetup::headersGUI add}
+    ttk::button $w(hdr_frame1b).btn1 -text [mc "Add"] -command {eAssistSetup::headersGUI add $w(hdr_frame1a).listbox}
     ttk::button $w(hdr_frame1b).btn2 -text [mc "Edit"] -command {eAssistSetup::headersGUI edit $w(hdr_frame1a).listbox}
     ttk::button $w(hdr_frame1b).btn3 -text [mc "Delete"] -command {eAssistSetup::headersGUI $w(hdr_frame1a).listbox} -state disabled
     
@@ -119,9 +119,7 @@ proc eAssistSetup::addressHeaders_GUI {} {
                                         -movablerows yes \
                                         -editselectedonly 1 \
                                         -yscrollcommand [list $w(hdr_frame1a).scrolly set] \
-                                        -xscrollcommand [list $w(hdr_frame1a).scrollx set] \
-                                        -editstartcommand {eAssistSetup::startCmdHdr} \
-                                        -editendcommand {eAssistSetup::endCmdHdr}
+                                        -xscrollcommand [list $w(hdr_frame1a).scrollx set]
     
         $w(hdr_frame1a).listbox columnconfigure 0 -name "..." \
                                             -showlinenumbers 1 \
@@ -325,7 +323,6 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     
     ttk::label $f1a.txt01 -text [mc "Name"]
     ttk::entry $f1a.entry01
-    ttk::button $f1a.btn01 -text [mc "Add"] -state disable ;#-command "ea::db::addSubHeaders $w(hdr_frame1b).lbox1 $w(hdr_frame1b).entry1 $w(hdr_frame1b).cbox1"
     
     listbox $f1a.lbox02 -height 16 -width 25 \
                         -yscrollcommand [list $f1a.scrolly set] \
@@ -333,6 +330,7 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
         
         tooltip::tooltip $f1a.lbox02 [mc "Double-click an entry to edit"]
     
+    ttk::button $f1a.btn01 -text [mc "Add"] -command "eAssistSetup::addSubHeaderWid $f1a.entry01 $f1a.lbox02" -state disable
     ttk::button $f1a.btn02 -text [mc "Delete"] -state disable ;#-command "ea::db::delSubHeaders $w(hdr_frame1b).lbox1 $w(hdr_frame1b).cbox1"
     
 	ttk::scrollbar $f1a.scrolly -orient v -command [list $f1a.lbox1 yview]
@@ -348,10 +346,9 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     grid $f1a.txt01 -column 0 -row 0 -sticky nse
     grid $f1a.entry01 -column 1 -row 0 -sticky ew
     grid $f1a.btn01 -column 3 -row 0 -sticky ew
-    
-    grid $f1a.lbox02 -column 1 -row 1 -sticky news
     grid $f1a.btn02 -column 3 -row 1 -sticky new
     
+    grid $f1a.lbox02 -column 1 -row 1 -sticky news
     grid $f1a.scrolly -column 2 -row 1 -sticky ns
     grid $f1a.scrollx -column 1 -row 2 -sticky ews
     
@@ -360,7 +357,8 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     #
     
     bind $f1a.entry01 <FocusIn> [list $f1a.btn01 configure -state normal]
-    #bind $f1a.entry01 <FocusOut> [list $f1a.btn01 configure -state disable]
+    bind $f1a.entry01 <FocusOut> [list $f1a.btn01 configure -state disable]
+    bind $f1a.entry01 <Return> [list eAssistSetup::addSubHeaderWid $f1a.entry01 $f1a.lbox02]
     
     ##
     ## CONTAINER 2 - Right Side
@@ -524,7 +522,7 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     set btn [ttk::frame $wid.btn -padding 15]
     pack $btn -anchor se -padx 2p
     
-    ttk::button $btn.btn_OK -text [mc "OK"] -command {ea::db::writeHeaderToDB widTable}
+    ttk::button $btn.btn_OK -text [mc "OK"] -command "ea::db::writeHeaderToDB $widTable"
     ttk::button $btn.btn_okNew -text [mc "OK > New"]
     ttk::button $btn.btn_Cancel -text [mc "Cancel"]
     

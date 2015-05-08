@@ -668,12 +668,14 @@ proc eAssist_db::dbSelectQuery {args} {
             lappend myNewCommand [list [string map "%b $pos" $myCommand]]
 	    #${log}::debug myNewCommand: $myNewCommand
         }
-            db eval "SELECT [join $colNames ,] FROM $tbl" {
-                lappend returnQuery "[join [subst $myNewCommand]]"
-		#lappend returnQuery "[subst $myNewCommand]"
-		#${log}::debug returnQuery: $returnQuery
-            }
+		db eval "SELECT [join $colNames ,] FROM $tbl" {
+			lappend returnQuery "[join [subst $myNewCommand]]"
+			#lappend returnQuery "[subst $myNewCommand]"
+			#${log}::debug returnQuery: $returnQuery
+		}
     }
+	
+	if {![info exists returnQuery]} {set returnQuery 0}
     return $returnQuery
     
 } ;# eAssist_db::dbSelectQuery

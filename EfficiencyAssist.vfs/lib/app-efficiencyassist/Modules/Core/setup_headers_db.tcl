@@ -61,7 +61,7 @@ proc ea::db::initHeaderVariables {} {
     
 } ;# ea::db::initHeaderVariables
 
-proc ea::db::updateHeaderWidTbl {widTable dbTable cols} {
+proc ea::db::updateHeaderWidTbl {widTable} {
     #****f* updateHeaderWidTbl/ea::db
     # CREATION DATE
     #   10/22/2014 (Wednesday Oct 22)
@@ -100,18 +100,23 @@ proc ea::db::updateHeaderWidTbl {widTable dbTable cols} {
     set ColumnCount [$widTable columncount]
     for {set x 1} {$x < $ColumnCount} {incr x} {
             lappend colName [$widTable columncget $x -name]
+            #lappend colValues '$[widTable columncget $x -name]'
     }
     
-    set region [eAssist_db::dbSelectQuery -columnNames $colName -table $dbTable]
+    set region [eAssist_db::dbSelectQuery -columnNames $colName -table HeadersConfig]
+    #set region [eAssist_db::dbSelectQuery -columnNames Package -table HeadersConfig]
+    #set region [db eval "SELECT [join $colName ,] from HeadersConfig"]
 
-    if {[info exists region]} {
+    if {$region != 0} {
         $widTable delete 0 end
         
+        #db eval "SELECT [join $colName ,] from HeadersConfig" {
+        #    $widTable insert end "{} [join $colValues ,]
+        #}
         foreach value $region {
             # the quoting works for the tablelist widget; unknown for listboxes
             $widTable insert end "{} $value"
-            ${log}::debug insert end "{} $value"
-            
+            ${log}::debug insert end "{} $value"  
         }
     }
     
@@ -157,9 +162,13 @@ proc ea::db::writeHeaderToDB {widTable} {
 
     ${log}::debug win: $widTable
     ${log}::debug Database Table: $dbTable
+    # Setup the Index column
+    set hdr_list HeaderConfig_ID
+    set data_list [twapi::new_guid]
+        
     foreach header [array names setupHeadersConfig] {
         set data $setupHeadersConfig($header)
-        #${log}::debug Column: $header __ Data: $data
+        #${log}::debug Column: $header __ Data: $data      
         
         if {$data != ""} {
             lappend hdr_list $header
@@ -168,13 +177,13 @@ proc ea::db::writeHeaderToDB {widTable} {
     }
             
     ${log}::debug Inserting into $dbTable
-    #${log}::debug HEADERS: $hdr_list
-    #${log}::debug DATA: $data_list
+    ${log}::debug HEADERS: $hdr_list
+    ${log}::debug DATA: $data_list
     
     eAssist_db::dbInsert -columnNames $hdr_list -table $dbTable -data $data_list
     
     ## Read from DB to populate the widgets
-    ea::db::updateHeaderWidTbl $widTable $dbTable
+    ea::db::updateHeaderWidTbl $widTable
 
 } ;# ea::db::writeHeaderToDB
 
@@ -268,46 +277,8 @@ proc ea::db::populateHeaderEditWindow {widTable widPath dbTable} {
     
 } ;# ea::db::populateHeaderEditWindow
 
-proc ea::db::getInternalHeader {wid} {
-    #****f* getInternalHeader/ea::db
-    # CREATION DATE
-    #   10/22/2014 (Wednesday Oct 22)
-    #
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2014 Casey Ackels
-    #   
-    #
-    # SYNOPSIS
-    #   ea::db::populateMasterHeaderList wid
-    #
-    # FUNCTION
-    #	Retreives the list of Internal Headers
-    #   
-    #   
-    # CHILDREN
-    #	N/A
-    #   
-    # PARENTS
-    #   
-    #   
-    # NOTES
-    #   
-    #   
-    # SEE ALSO
-    #   
-    #   
-    #***
-    global log
 
-        
-    $wid configure -values [eAssist_db::dbSelectQuery -columnNames InternalHeaderName -table Headers]
-    
-} ;# ea::db::getInternalHeader
-
-proc ea::db::getSubHeaders {masterHeader widListBox args} {
+proc ea::db::getSubHeaders {args} {
     #****f* getSubHeaders/ea::db
     # CREATION DATE
     #   10/22/2014 (Wednesday Oct 22)
@@ -320,10 +291,10 @@ proc ea::db::getSubHeaders {masterHeader widListBox args} {
     #   
     #
     # SYNOPSIS
-    #   ea::db::getSubHeaders args 
+    #   ea::db::getSubHeaders ?widListBox? -header <Header PK>
     #
     # FUNCTION
-    #	Retrieves the subheader for the selected internal master header
+    #	Retrieves all subheaders in the database; or retrieves select headers associated with the parent header (key)
     #   
     #   
     # CHILDREN
@@ -340,23 +311,36 @@ proc ea::db::getSubHeaders {masterHeader widListBox args} {
     #   
     #***
     global log
+    
 
-    
-    ${log}::debug MasterHeader: $masterHeader / wid: $widListBox
-    # Clear the widget
-    $widListBox delete 0 end
-    
-    # Get the id of the header
-    set header_ID [eAssist_db::dbWhereQuery -columnNames Header_ID -table Headers -where InternalHeaderName='$masterHeader']
-    
-    set subHeaders [db eval "SELECT SubHeaderName FROM SubHeaders
-                                    LEFT OUTER JOIN Headers
-                                WHERE Header_ID = HeaderID
-                            AND HeaderID = '$header_ID'"]
-    
-    foreach subHeader [lsort $subHeaders] {
-        $widListBox insert end $subHeader
+    foreach {key value} $args {
+        switch -- $key {
+            -all    {set returnValue [eAssist_db::dbSelectQuery -columnNames SubHeaderName -table SubHeaders]}
+            -parent {
+                ${log}::debug key: $key, value: $value
+                set returnValue [join [db eval "SELECT Headers.InternalHeaderName, SubHeaderName from SubHeaders
+                                                    INNER JOIN Headers on SubHeaders.HeaderID = Headers.Header_ID
+                                                WHERE SubHeaderName = '$value'"]]
+            }
+        }
     }
+
+    return $returnValue
+    #${log}::debug MasterHeader: $masterHeader / wid: $widListBox
+    ## Clear the widget
+    #$widListBox delete 0 end
+    #
+    ## Get the id of the header
+    #set header_ID [eAssist_db::dbWhereQuery -columnNames Header_ID -table Headers -where InternalHeaderName='$masterHeader']
+    #
+    #set subHeaders [db eval "SELECT SubHeaderName FROM SubHeaders
+    #                                LEFT OUTER JOIN Headers
+    #                            WHERE Header_ID = HeaderID
+    #                        AND HeaderID = '$header_ID'"]
+    #
+    #foreach subHeader [lsort $subHeaders] {
+    #    $widListBox insert end $subHeader
+    #}
     
 } ;# ea::db::getSubHeaders
 
