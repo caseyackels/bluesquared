@@ -79,7 +79,7 @@ proc eAssistSetup::addressHeaders_GUI {} {
     set w(hdr_frame1b) [ttk::frame $w(hdr_frame1a).b]
     grid $w(hdr_frame1b) -column 0 -row 0 -sticky nsw
 
-    ttk::button $w(hdr_frame1b).btn1 -text [mc "Add"] -command {eAssistSetup::headersGUI add $w(hdr_frame1a).listbox}
+    ttk::button $w(hdr_frame1b).btn1 -text [mc "New"] -command {eAssistSetup::headersGUI add $w(hdr_frame1a).listbox}
     ttk::button $w(hdr_frame1b).btn2 -text [mc "Edit"] -command {eAssistSetup::headersGUI edit $w(hdr_frame1a).listbox}
     ttk::button $w(hdr_frame1b).btn3 -text [mc "Delete"] -command {eAssistSetup::headersGUI $w(hdr_frame1a).listbox} -state disabled
     
@@ -187,7 +187,6 @@ proc eAssistSetup::addressHeaders_GUI {} {
                                             -labelalign center
 
 
-    #ea::db::updateHeaderWidTbl $w(hdr_frame1a).listbox Headers "Header_ID InternalHeaderName OutputHeaderName HeaderMaxLength DefaultWidth Highlight Widget DisplayOrder Required AlwaysDisplay ResizeColumn"
     ea::db::updateHeaderWidTbl $w(hdr_frame1a).listbox
     
     ttk::scrollbar $w(hdr_frame1a).scrolly -orient v -command [list $w(hdr_frame1a).listbox yview]
@@ -253,18 +252,11 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     set wid .modHeader
 	
 	if {[winfo exists $wid)] == 1} {destroy $wid}
-        
-    switch -- $mode {
-        add     {set titleName [mc Add]}
-        edit    {set titleName [mc Edit]}
-        view    {set titleName [mc View]}
-        default {}
-    }
     
     # .. Create the dialog window
     toplevel $wid
     wm transient $wid .
-    wm title $wid "$titleName [mc {header configuration}]"
+    # The title and the modifiers between Add/Edit/View are at the end of this proc
 
     # Put the window in the center of the parent window
     set locX [expr {[winfo width . ] / 3 + [winfo x .]}]
@@ -323,6 +315,7 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     
     ttk::label $f1a.txt01 -text [mc "Name"]
     ttk::entry $f1a.entry01
+        tooltip::tooltip $f1a.entry01 [mc "This is not case sensitive."]
     
     listbox $f1a.lbox02 -height 16 -width 25 \
                         -yscrollcommand [list $f1a.scrolly set] \
@@ -522,13 +515,26 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     set btn [ttk::frame $wid.btn -padding 15]
     pack $btn -anchor se -padx 2p
     
-    ttk::button $btn.btn_OK -text [mc "OK"] -command "ea::db::writeHeaderToDB $widTable"
+    ttk::button $btn.btn_OK -text [mc "OK"] -command "ea::db::writeHeaderToDB $widTable $f1a.lbox02"
     ttk::button $btn.btn_okNew -text [mc "OK > New"]
-    ttk::button $btn.btn_Cancel -text [mc "Cancel"]
+    ttk::button $btn.btn_Cancel -text [mc "Cancel"] -command ""
     
     grid $btn.btn_OK -column 0 -row 0
     grid $btn.btn_okNew -column 1 -row 0
     grid $btn.btn_Cancel -column 2 -row 0
+    
+    switch -- $mode {
+        add     {set titleName [mc Add]}
+        edit    {set titleName [mc Edit]
+                    # Populate the setupHeadersConfig array
+                    ${log}::debug DB PK [$widTable getcells [$widTable curselection],HeaderConfig_ID [$widTable curselection],HeaderConfig_ID]
+                    ea::db::populateHeaderEditWindow $widTable $f1a.lbox02 HeadersConfig [$widTable getcells [$widTable curselection],HeaderConfig_ID [$widTable curselection],HeaderConfig_ID]
+    }
+        view    {set titleName [mc View]}
+        default {}
+    }
+    
+    wm title $wid "$titleName [mc {header configuration}]"
 
 
 } ;# eAssistSetup::headersGUI add .

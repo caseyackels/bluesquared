@@ -185,15 +185,12 @@ proc eAssistSetup::addSubHeaderWid {entryWid listboxWid} {
     # retrieve data from the entry widget
     set txt [$entryWid get]
     
-    # get list of records from the list box
-    #set records [$listboxWid get 0 end]
-    
-    # get list of records from db ...
+    # get list of records from listbox and db, so we can check against all options.
     set records [join [list [ea::db::getSubHeaders -all 1] [$listboxWid get 0 end]]]
     
     # check to see if it's a duplicate ...
-    ${log}::debug records: $records
-    ${log}::debug txt: $txt - [lsearch -nocase $records $txt]
+    #${log}::debug records: $records
+    #${log}::debug txt: $txt - [lsearch -nocase $records $txt]
     set foundRecord [lsearch -nocase $records $txt]
     if {$foundRecord == -1} {
         # everything checks out, lets insert and remove the data from the entry widget
@@ -201,8 +198,12 @@ proc eAssistSetup::addSubHeaderWid {entryWid listboxWid} {
         $entryWid delete 0 end
     } else {
         bell
-        $entryWid selection range 0 end
-        ${log}::debug Record is already used on Header [join [lindex [ea::db::getSubHeaders -parent [lindex $records $foundRecord]] 0]]
+        set answer [Error_Message::errorMsg SETUP001 [join [lindex [ea::db::getSubHeaders -parent [lindex $records $foundRecord]] 0]]]
+        ${log}::notice Record is already used on Header [join [lindex [ea::db::getSubHeaders -parent [lindex $records $foundRecord]] 0]]
+        if {$answer eq "ok"} {
+            focus $entryWid
+            $entryWid selection range 0 end
+        }
     }
 
     

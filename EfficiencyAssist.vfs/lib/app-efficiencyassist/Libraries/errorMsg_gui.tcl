@@ -94,6 +94,11 @@ proc Error_Message::errorMsg {code args} {
                             set message2 [mc "Error Location: %s" $code]
                             set title [mc $defaultTitle]
                             set icon warning}
+        SETUP001        {set message [mc "Record is already used on Header: %s" $args]
+                            set message2 [mc "Error Location: %s" $code]
+                            set title $dupeTitle
+                            set icon warning
+                        }
         default         {set message [mc "Unknown Error Message"]
                             set message2 ""
                             set title $defaultTitle

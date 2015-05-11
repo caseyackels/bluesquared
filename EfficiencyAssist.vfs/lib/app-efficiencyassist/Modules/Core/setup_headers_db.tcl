@@ -123,7 +123,7 @@ proc ea::db::updateHeaderWidTbl {widTable} {
 } ;# ea::db::updateHeaderWidTbl
 
 
-proc ea::db::writeHeaderToDB {widTable} {
+proc ea::db::writeHeaderToDB {widTable widSubHeaders} {
     #****f* writeHeaderToDB/ea::db
     # CREATION DATE
     #   10/21/2014 (Tuesday Oct 21)
@@ -179,6 +179,12 @@ proc ea::db::writeHeaderToDB {widTable} {
     ${log}::debug Inserting into $dbTable
     ${log}::debug HEADERS: $hdr_list
     ${log}::debug DATA: $data_list
+    ${log}::debug SubHeaders: [$widSubHeaders get 0 end]
+    
+    # Get subheader list from db; and compare it to what exists in the listbox. If it doesn't exist in the listbox but does in the DB. Delete it from the DB.
+    set dbSubHeaders [db eval "SELECT "]
+    
+    return
     
     eAssist_db::dbInsert -columnNames $hdr_list -table $dbTable -data $data_list
     
@@ -188,7 +194,7 @@ proc ea::db::writeHeaderToDB {widTable} {
 } ;# ea::db::writeHeaderToDB
 
 
-proc ea::db::populateHeaderEditWindow {widTable widPath dbTable} {
+proc ea::db::populateHeaderEditWindow {widTable widSubHeader dbTable pk} {
     #****f* populateHeaderEditWindow/ea::db
     # CREATION DATE
     #   10/22/2014 (Wednesday Oct 22)
@@ -207,6 +213,7 @@ proc ea::db::populateHeaderEditWindow {widTable widPath dbTable} {
     #	Populates the widgets with the selected data from the table widget
     #	widTbl = Path to the tablelist widget
     #   dbTbl = Table in the database that we want to query
+    #   pk = Primary Key value
     #   
     #   
     # CHILDREN
@@ -222,58 +229,41 @@ proc ea::db::populateHeaderEditWindow {widTable widPath dbTable} {
     #   
     #   
     #***
-    global log tmp tmp_headerOpts
+    global log setupHeadersConfig 
 
-    #${log}::debug tbl: $widTbl
+    #${log}::debug DATA: [db eval "SELECT * FROM HeadersConfig WHERE HeaderConfig_ID = '$pk'"]
     
-    set data [$widTable get [$widTable curselection]]
-    set dataEdited [lrange $data 2 end] ;# We don't want the count or index column
-    set tmp(db,ID) [lrange $data 1 1]
-    
-    #${log}::debug db_ID: $tmp(db,ID)
-    #${log}::debug data: $data
-    #${log}::debug data: $dataEdited
-    
-    set tmp(db,rowID) [eAssist_db::dbWhereQuery -columnNames rowid -table $dbTable -where Header_ID='$tmp(db,ID)']
-    
-    ${log}::debug DB DATA: [eAssist_db::dbWhereQuery -columnNames "InternalHeaderName Widget" -table $dbTable -where Header_ID='$tmp(db,ID)']
-    
-    set children [lsort [winfo children $widPath]]
-    foreach child $children {
-        if {[string match -nocase *txt* $child] != 1} {
-            lappend childlist $child
-        }
+    # Populate the array
+    db eval "SELECT * FROM HeadersConfig WHERE HeaderConfig_ID = '$pk'" {
+							set setupHeadersConfig(HeaderConfig_ID) "$HeaderConfig_ID"
+							set setupHeadersConfig(dbColName) "$dbColName"
+							set setupHeadersConfig(dbDataType) "$dbDataType"
+                            set setupHeadersConfig(dbActive) "$dbActive"
+							set setupHeadersConfig(widLabelName) "$widLabelName"
+							set setupHeadersConfig(widLabelAlignment) "$widLabelAlignment"
+							set setupHeadersConfig(widWidget) "$widWidget"
+							set setupHeadersConfig(widValues) "$widValues"
+							set setupHeadersConfig(widDataType) "$widDataType"
+							set setupHeadersConfig(widFormat) "$widFormat"
+							set setupHeadersConfig(widColAlignment) "$widColAlignment"
+							set setupHeadersConfig(widStartColWidth) "$widStartColWidth"
+							set setupHeadersConfig(widMaxWidth) "$widMaxWidth"
+							set setupHeadersConfig(widResizeToLongestEntry) "$widResizeToLongestEntry"
+							set setupHeadersConfig(widMaxStringLength) "$widMaxStringLength"
+							set setupHeadersConfig(widHighlightColor) "$widHighlightColor"
+							set setupHeadersConfig(widUIGroup) "$widUIGroup"
+							set setupHeadersConfig(widUIPositionWeight) "$widUIPositionWeight"
+							set setupHeadersConfig(widExportable) "$widExportable"
+							set setupHeadersConfig(widRequired) "$widRequired"
+							set setupHeadersConfig(widDisplayType) "$widDisplayType"
     }
-    ${log}::debug Avail Widgets: $childlist
     
-    set checkbtnArray [lsort [array names tmp_headerOpts]]
+    # Populate the sub-header listbox
+    foreach item [ea::db::getSubHeaders -fillListBox $setupHeadersConfig(HeaderConfig_ID)] {
+        $widSubHeader insert end $item
+    }
+    
 
-    set x 0
-    foreach item $childlist {
-        ${log}::debug Current Data: [lrange $dataEdited $x $x]
-        
-        if {[string match -nocase *ckbtn* $item] == 1} {
-            foreach checkbtn $checkbtnArray {
-                if {[string match *$checkbtn $item]} {
-                        #${log}::debug $item / $tmp_headerOpts($checkbtn) - [lrange $dataEdited $x $x]
-                        set tmp_headerOpts($checkbtn) [lrange $dataEdited $x $x]
-                }
-            }
-            
-        } elseif {[string match -nocase *cbox* $item] == 1} {
-                if {[join [lrange $dataEdited $x $x]] != ""} {
-                    #${log}::debug ISSUE_CBOX: [lrange $dataEdited $x $x]
-                    $item set [lrange $dataEdited $x $x]
-                }
-            } else {
-                    if {[join [lrange $dataEdited $x $x]] != ""} {
-                        #${log}::debug ISSUE: [lrange $dataEdited $x $x]
-                        #${log}::debug ISSUE: [string compare -nocase [lrange $dataEdited $x $x] {}] - DATA: [lrange $dataEdited $x $x]
-                        $item insert end [lrange $dataEdited $x $x]
-                    }
-                }
-        incr x
-    }
     
 } ;# ea::db::populateHeaderEditWindow
 
@@ -318,14 +308,25 @@ proc ea::db::getSubHeaders {args} {
             -all    {set returnValue [eAssist_db::dbSelectQuery -columnNames SubHeaderName -table SubHeaders]}
             -parent {
                 ${log}::debug key: $key, value: $value
-                set returnValue [join [db eval "SELECT Headers.InternalHeaderName, SubHeaderName from SubHeaders
-                                                    INNER JOIN Headers on SubHeaders.HeaderID = Headers.Header_ID
+                set returnValue [join [db eval "SELECT HeadersConfig.HeaderConfigID, SubHeaderName from SubHeaders
+                                                    INNER JOIN Headers on SubHeaders.HeaderConfigID = HeadersConfig.HeaderConfig_ID
                                                 WHERE SubHeaderName = '$value'"]]
+            }
+            -fillListBox    {
+                set returnValue [db eval "SELECT SubHeaderName FROM SubHeaders
+                                            LEFT OUTER JOIN HeadersConfig
+                                        WHERE HeaderConfig_ID = HeaderConfigID
+                                        AND HeaderConfigID = '$value'"]
             }
         }
     }
 
     return $returnValue
+#SELECT SubHeaderName FROM SubHeaders
+#LEFT OUTER JOIN HeadersConfig
+# WHERE HeaderConfig_ID = HeaderConfigID
+#AND HeaderConfigID = '175454CA-5944-47AA-AD99-A8753B67BAA7'
+    
     #${log}::debug MasterHeader: $masterHeader / wid: $widListBox
     ## Clear the widget
     #$widListBox delete 0 end
