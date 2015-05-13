@@ -159,6 +159,8 @@ proc ea::db::writeHeaderToDB {widTable widSubHeaders} {
     #***
     global log setupHeadersConfig
     set dbTable HeadersConfig
+    set diff_add ""
+    set diff_del ""
 
     ${log}::debug win: $widTable
     ${log}::debug Database Table: $dbTable
@@ -179,11 +181,33 @@ proc ea::db::writeHeaderToDB {widTable widSubHeaders} {
     ${log}::debug Inserting into $dbTable
     ${log}::debug HEADERS: $hdr_list
     ${log}::debug DATA: $data_list
-    ${log}::debug SubHeaders: [$widSubHeaders get 0 end]
+    
     
     # Get subheader list from db; and compare it to what exists in the listbox. If it doesn't exist in the listbox but does in the DB. Delete it from the DB.
-    set dbSubHeaders [db eval "SELECT "]
+    set dbSubHeadersList [db eval "SELECT SubHeaderName FROM SubHeaders"]
+    set widSubHeadersList [$widSubHeaders get 0 end]
     
+    set diff_add [struct::set difference $widSubHeadersList $dbSubHeadersList]
+    set diff_del [struct::set difference $dbSubHeadersList $widSubHeadersList]
+    
+    if {$diff_del != ""} {
+        # Check to see if the DB contains more entries
+        ${log}::notice Deleted SubHeader: $diff_del from $setupHeadersConfig(dbColName)
+        foreach delValue $diff_del {
+            db eval "DELETE FROM SubHeaders WHERE HeaderConfigID = '$setupHeadersConfig(HeaderConfig_ID)' AND SubHeaderName = '$delValue'"
+        }
+    }
+    
+    if {$diff_add != ""} {
+        # Check to see if the listbox contains more entries than the db
+        ${log}::notice Added SubHeader: $diff_add into $setupHeadersConfig(dbColName)
+        foreach addValue $diff_add {
+            db eval "INSERT INTO SubHeaders (SubHeaderName, HeaderConfigID) VALUES ('$addValue','$setupHeadersConfig(HeaderConfig_ID)')"
+        }
+    }
+    
+    ${log}::debug SubHeaders: [$widSubHeaders get 0 end]
+
     return
     
     eAssist_db::dbInsert -columnNames $hdr_list -table $dbTable -data $data_list
@@ -307,9 +331,9 @@ proc ea::db::getSubHeaders {args} {
         switch -- $key {
             -all    {set returnValue [eAssist_db::dbSelectQuery -columnNames SubHeaderName -table SubHeaders]}
             -parent {
-                ${log}::debug key: $key, value: $value
-                set returnValue [join [db eval "SELECT HeadersConfig.HeaderConfigID, SubHeaderName from SubHeaders
-                                                    INNER JOIN Headers on SubHeaders.HeaderConfigID = HeadersConfig.HeaderConfig_ID
+                #${log}::debug key: $key, value: $value
+                set returnValue [join [db eval "SELECT SubHeaderName from SubHeaders
+                                                    INNER JOIN HeadersConfig on SubHeaders.HeaderConfigID = HeadersConfig.HeaderConfig_ID
                                                 WHERE SubHeaderName = '$value'"]]
             }
             -fillListBox    {

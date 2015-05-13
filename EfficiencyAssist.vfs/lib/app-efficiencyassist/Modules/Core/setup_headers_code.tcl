@@ -208,3 +208,46 @@ proc eAssistSetup::addSubHeaderWid {entryWid listboxWid} {
 
     
 } ;# eAssistSetup::addSubHeaderWid $entryWid $listboxWid
+
+
+proc eAssistSetup::delSubHeaderWid {listboxWid delBtn} {
+    #****f* delSubHeaderWid/eAssistSetup
+    # CREATION DATE
+    #   05/12/2015 (Tuesday May 12)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssistSetup::delSubHeaderWid listboxWid delBtn
+    #
+    # FUNCTION
+    #	Removes the selected entrie(s) from the sub header listbox
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    # Guard against not having a selection.
+    if {[$listboxWid curselection]} {
+        $listboxWid delete [$listboxWid curselection]
+    }
+    
+    $delBtn configure -state disable
+} ;# eAssistSetup::delSubHeaderWid

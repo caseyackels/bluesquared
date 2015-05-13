@@ -323,8 +323,8 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
         
         tooltip::tooltip $f1a.lbox02 [mc "Double-click an entry to edit"]
     
-    ttk::button $f1a.btn01 -text [mc "Add"] -command "eAssistSetup::addSubHeaderWid $f1a.entry01 $f1a.lbox02" -state disable
-    ttk::button $f1a.btn02 -text [mc "Delete"] -state disable ;#-command "ea::db::delSubHeaders $w(hdr_frame1b).lbox1 $w(hdr_frame1b).cbox1"
+    ttk::button $f1a.btn01 -text [mc "Add"] -command [list eAssistSetup::addSubHeaderWid $f1a.entry01 $f1a.lbox02] -state disable
+    ttk::button $f1a.btn02 -text [mc "Delete"] -command [list eAssistSetup::delSubHeaderWid $f1a.lbox02 $f1a.btn02] -state disable
     
 	ttk::scrollbar $f1a.scrolly -orient v -command [list $f1a.lbox1 yview]
     ttk::scrollbar $f1a.scrollx -orient h -command [list $f1a.lbox1 xview]
@@ -348,10 +348,27 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     #
     # -- Bindings, FRAME 2 --
     #
+    set  ::eAssistSetup::helperRootWin $f1a
     
     bind $f1a.entry01 <FocusIn> [list $f1a.btn01 configure -state normal]
-    bind $f1a.entry01 <FocusOut> [list $f1a.btn01 configure -state disable]
+
+    bind $f1a.entry01 <FocusOut> {
+        if {[%W get] == ""} {$::eAssistSetup::helperRootWin.btn01 configure -state disable}
+    }
+        
     bind $f1a.entry01 <Return> [list eAssistSetup::addSubHeaderWid $f1a.entry01 $f1a.lbox02]
+    
+    bind $f1a.lbox02 <Delete> [list eAssistSetup::delSubHeaderWid $f1a.lbox02 $f1a.btn02]
+    
+    
+    bind $f1a.lbox02 <FocusIn> [list $f1a.btn02 configure -state normal]
+    bind $f1a.lbox02 <FocusOut> [list $f1a.btn02 configure -state disable]
+    
+    bind $f1a.lbox02 <Double-1> {
+        $::eAssistSetup::helperRootWin.entry01 insert end [%W get [%W curselection]]
+        focus -force $::eAssistSetup::helperRootWin.entry01
+        $::eAssistSetup::helperRootWin.entry01 icursor end
+    }
     
     ##
     ## CONTAINER 2 - Right Side
