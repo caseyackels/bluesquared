@@ -34,7 +34,7 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber saveFileLocati
     #   job::createDB custID csrName jobTitle jobName jobNumber saveFileLocation
     #
     # FUNCTION
-    #	Initialize a new Job database
+    #	Initialize a new Title database
     #   
     #   
     # CHILDREN
@@ -44,11 +44,20 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber saveFileLocati
     #   
     #   
     # NOTES
-    #   Schema Version Notes
-    #   v1. Tables: Address, Notes and JobInformation
-    #   v2. Altered Address table with proc [job::db::update_2]
-    #   v3. Added table: internalShipments, Modifications, UserNotes, JobNotes, VersNotes
-    #   v3. ShipDate and ArriveDate columns now use the DATE data type
+    #   Create the tables
+    #   Versions: Holds all versions, after being created a default entry should be inserted 'Version 1'; which is the default in EFI Monarch Planner
+    #   NoteTypes: Allows the user to identify 'note types' and if they should be included on reports or not.
+    #       This only controlled within the code; after the first creation a list of 'note types' should be inserted into the table. The user can then set some paramaters
+    #       i.e,. inactive, or doesn't show on any reports.
+    #   Notes: Holds all notes, including the identification on what note type it is. These notes can be set to 'inactive' also.
+    #   History: Nearly all tables are linked to a history table. This will help with figuring out who did what.
+    #   ExportType: (I'm questioning if we really need this) Allows the user to specify that the shipping order is a specific entry: Planner (Import file), Process Shipper (Import File), DoNotExport (Report Only)
+    #   SysInfo: Holds the schema information
+    #   TitleInformation: Contains all title info - Description, CSR, Customer, etc
+    #   JobInformation: All related information, including save locations
+    #   Published: Allows the distribution person to mark their work as 'published'. If anything changes after this is marked, revisions will be listed
+    #   Shipping Orders: This is our junction table to figure out what addresses match to specific jobs.
+    #   Addresses: This table has a few system columns, but outside of that it is controlled by the user.
     #   
     # SEE ALSO
     #   
@@ -56,98 +65,147 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber saveFileLocati
     #***
     global log job mySettings program env user
 
-    ${log}::notice Creating a new database for: $custID $jobTitle $jobName $jobNumber
+    ${log}::notice Creating a new database for: $custID $jobTitle
 
     set job(db,Name) [ea::tools::formatFileName]
     
     # Create the database
     sqlite3 $job(db,Name) [file join $saveFileLocation $job(db,Name).db] -create 1
     
-    # Create the tables
-        # UserNotes; Used internally for the distribution person(s)
-        # JobNotes; per job (any notes that pertain to the whole job)
-        # VersNotes; per version (any notes that are version specific)
-    
+
+    set job(db,Name) testTitle.db
+    sqlite3 $job(db,Name) $job(db,Name) -create 1
     $job(db,Name) eval {
+        CREATE TABLE Versions (
+            Version_ID    INTEGER PRIMARY KEY AUTOINCREMENT,
+            VersionName   TEXT    UNIQUE ON CONFLICT ROLLBACK
+                                  NOT NULL ON CONFLICT ROLLBACK,
+            VersionActive BOOLEAN NOT NULL ON CONFLICT ROLLBACK
+                                  UNIQUE ON CONFLICT ROLLBACK
+                                  DEFAULT (1)
+        );
         
-        CREATE TABLE IF NOT EXISTS History (
-            Hist_ID     VARCHAR (36) PRIMARY KEY ON CONFLICT ROLLBACK
-                                     UNIQUE ON CONFLICT ROLLBACK
+        -- # This table should be pre-populated, the only thing the user shoud be able to change is the "IncludeOnReports" column.
+        CREATE TABLE NoteTypes (
+            NoteType_ID      INTEGER PRIMARY KEY AUTOINCREMENT,
+            NoteType         TEXT    NOT NULL ON CONFLICT ROLLBACK,
+            IncludeOnReports BOOLEAN NOT NULL
+                                     DEFAULT (1),
+            Active           BOOLEAN DEFAULT (1) 
+                                     NOT NULL
+        );
+        
+
+        CREATE TABLE Notes (
+            Notes_ID   TEXT    PRIMARY KEY,
+            HistoryID  INTEGER NOT NULL ON CONFLICT ROLLBACK
+                               REFERENCES History (History_ID) ON UPDATE CASCADE,
+            NoteTypeID INTEGER REFERENCES NoteTypes (NoteType_ID) ON UPDATE CASCADE
+                               NOT NULL ON CONFLICT ROLLBACK,
+            NotesText  TEXT    NOT NULL ON CONFLICT ROLLBACK,
+            Active     BOOLEAN DEFAULT (1) 
+                               NOT NULL ON CONFLICT ROLLBACK
+        );
+
+        CREATE TABLE History (
+            History_ID TEXT PRIMARY KEY,
+            HistUser   TEXT NOT NULL ON CONFLICT ROLLBACK,
+            HistDate   DATE NOT NULL ON CONFLICT ROLLBACK,
+            HistTime   TIME NOT NULL ON CONFLICT ROLLBACK,
+            HistSysLog TEXT
+        );
+
+        CREATE TABLE ExportType (
+            ExportType_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            ExportTypes   TEXT    NOT NULL ON CONFLICT ROLLBACK,
+            Active        BOOLEAN DEFAULT (1) 
+        );
+        
+        CREATE TABLE SysInfo (
+            SysInfo_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            SysSchema  INTEGER UNIQUE
+                               NOT NULL,
+            HistoryID  TEXT    REFERENCES History (History_ID) ON UPDATE CASCADE
+        );
+        
+        CREATE TABLE TitleInformation (
+            TitleInformation_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            NotesID             TEXT    REFERENCES Notes (Notes_ID) ON UPDATE CASCADE,
+            HistoryID           TEXT    REFERENCES History (History_ID) ON UPDATE CASCADE
+                                        NOT NULL ON CONFLICT ROLLBACK,
+            CustCode            TEXT    NOT NULL ON CONFLICT ROLLBACK,
+            CSRName             TEXT    NOT NULL ON CONFLICT ROLLBACK,
+            TitleName           TEXT    NOT NULL ON CONFLICT ROLLBACK,
+            TitleSaveLocation   TEXT
+        );
+        
+        CREATE TABLE JobInformation (
+            --# JobInformation_ID = Job Number
+            JobInformation_ID  TEXT    UNIQUE ON CONFLICT ROLLBACK
+                                       NOT NULL ON CONFLICT ROLLBACK
+                                       PRIMARY KEY ASC ON CONFLICT ROLLBACK,
+            JobName            TEXT    NOT NULL ON CONFLICT ROLLBACK,
+            JobSaveLocation    TEXT    NOT NULL ON CONFLICT ROLLBACK,
+            JobFirstShipDate   DATE,
+            JobBalanceShipDate DATE,
+            TitleInformationID INTEGER REFERENCES TitleInformation (TitleInformation_ID) ON UPDATE CASCADE,
+            HistoryID          TEXT    REFERENCES History (History_ID) ON UPDATE CASCADE
+                                        NOT NULL ON CONFLICT ROLLBACK
+        );
+        
+        CREATE TABLE Published (
+            Published_ID     INTEGER PRIMARY KEY AUTOINCREMENT,
+            NotesID          TEXT    REFERENCES Notes (Notes_ID) ON UPDATE CASCADE,
+            JobInformationID TEXT    REFERENCES JobInformation (JobInformation_ID) ON UPDATE CASCADE
                                      NOT NULL ON CONFLICT ROLLBACK,
-            Hist_User   TEXT,
-            Hist_Date   DATE,
-            Hist_Time   TIME,
-            Hist_SysLog TEXT
+            PublishedRev     INTEGER NOT NULL ON CONFLICT ROLLBACK,
+            PublishedBy      TEXT    NOT NULL ON CONFLICT ROLLBACK,
+            PublishedDate    DATE    NOT NULL ON CONFLICT ROLLBACK,
+            PublishedTime    TIME    NOT NULL ON CONFLICT ROLLBACK
         );
         
-        CREATE TABLE IF NOT EXISTS Notes (
-            Notes_ID    INTEGER      PRIMARY KEY AUTOINCREMENT,
-            HistID      VARCHAR (36) REFERENCES History (Hist_ID) ON UPDATE CASCADE,
-            Notes_Notes TEXT
-        );
-        
-        CREATE TABLE IF NOT EXISTS JobInformation (
-            Job_ID              INTEGER PRIMARY KEY AUTOINCREMENT,
-            HistID              VARCHAR (36) REFERENCES History (Hist_ID) ON UPDATE CASCADE,
-            CustID              TEXT,
-            CSRName             TEXT,
-            JobTitle            TEXT,
-            JobNumber           TEXT,
-            JobName             TEXT,
-            JobFirstShipDate    DATE,
-            JobBalanceShipDate  DATE
-            
-        );
-        
-        CREATE TABLE IF NOT EXISTS SysInfo (
-            SysInfo_ID  INTEGER PRIMARY KEY AUTOINCREMENT,
-            HistID      VARCHAR (36) REFERENCES History (Hist_ID) ON UPDATE CASCADE,
-            ProgramVers TEXT,
-            SchemaVers  TEXT
-        );
-        
-        --# Added in DB Vers 3 (No update proc needed for this, since we aren't altering tables)
-        --# If intShp_shipment contains 1/YES, those destinations will NOT be included in the total
-        CREATE TABLE IF NOT EXISTS InternalShipments (
-            IntShp_ID   INTEGER PRIMARY KEY AUTOINCREMENT,
-            AddrID      INTEGER REFERENCES Addresses (OrderNumber)
-                            ON DELETE CASCADE
-                            ON UPDATE CASCADE,
-            IntShp_shipment BOOLEAN
+        CREATE TABLE ShippingOrders (
+            JobInformationID TEXT NOT NULL ON CONFLICT ROLLBACK
+                                    REFERENCES JobInformation (JobInformation_ID) ON UPDATE CASCADE,
+            AddressID        TEXT NOT NULL ON CONFLICT ROLLBACK
+                                  REFERENCES Addresses (Addresses_ID) ON UPDATE CASCADE
         );
     }
     
 
-    ## Grab the table fields from our main db.
-    set hdr [db eval {SELECT InternalHeaderName FROM Headers ORDER BY DisplayOrder}]
-    set cTable [list {OrderNumber INTEGER PRIMARY KEY AUTOINCREMENT}]
+    # Dynamically build the Addresses table using data from the main db (Headers Config)
+    set cTable [list \
+        {Addresses_ID    TEXT    UNIQUE ON CONFLICT ROLLBACK} \
+        {NotesID         TEXT    REFERENCES Notes (Notes_ID) ON UPDATE CASCADE} \
+        {AddressParentID TEXT} \
+        {AddressChildID  INTEGER} \
+        {Active          BOOLEAN DEFAULT (1) NOT NULL ON CONFLICT ROLLBACK} \
+        {VersionID       INTEGER REFERENCES Versions (Version_ID) ON UPDATE CASCADE}]
     
-    # Dynamically build the Addresses table
-    foreach header $hdr {
-        switch -- $header {
-            Quantity    {set dataType INTEGER}
-            ShipDate    {set dataType DATE}
-            ArriveDate  {set dataType DATE}
-            default     {set dataType TEXT}
-        }
-        lappend cTable "'$header' $dataType"
+    
+    db eval {SELECT dbColName, dbDataType FROM HeadersConfig} {
+        # Bypass the possiblity that the user entered 'versions'.
+        if {[string tolower $dbColName] eq "versions"} {continue}
+        lappend cTable "usr_$dbColName $dbDataType"
     }
+
+    $job(db,Name) eval "CREATE TABLE Addresses ( [join $cTable ,] )"
 
     # Columns that are always needed; similar to the OrderNumber column.
-    lappend cTable "'Status' BOOLEAN DEFAULT (1)"
+    #lappend cTable "'Status' BOOLEAN DEFAULT (1)"
 
-    # Insert data into the History table
-    set currentGUID [ea::tools::getGUID]
-    $job(db,Name) eval "INSERT INTO History (Hist_ID, Hist_User, Hist_Date, Hist_Time, Hist_Syslog) VALUES ('$currentGUID', '$user(id)', '[ea::date::getTodaysDate]', '[ea::date::currentTime]', 'Initializing database')"
-    
-    # Insert data into JobInformation table
-    $job(db,Name) eval "INSERT INTO JobInformation (HistID, CustID, CSRName, JobNumber, JobTitle, JobName) VALUES ('$currentGUID','$custID', '$csrName', '$jobNumber', '$jobTitle', '$jobName')"
-    
-    # Insert data into Sysinfo table
-    $job(db,Name) eval "INSERT INTO SysInfo (HistID, ProgramVers, SchemaVers) VALUES ('$currentGUID', '$program(Version).$program(PatchLevel)', '$job(db,currentSchemaVers)')"
-    
-    #set cTable [join $cTable ,]
-    $job(db,Name) eval "CREATE TABLE IF NOT EXISTS Addresses ( [join $cTable ,] )"
+    ## Insert data into the History table
+    #set currentGUID [ea::tools::getGUID]
+    #$job(db,Name) eval "INSERT INTO History (Hist_ID, Hist_User, Hist_Date, Hist_Time, Hist_Syslog) VALUES ('$currentGUID', '$user(id)', '[ea::date::getTodaysDate]', '[ea::date::currentTime]', 'Initializing database')"
+    #
+    ## Insert data into JobInformation table
+    #$job(db,Name) eval "INSERT INTO JobInformation (HistID, CustID, CSRName, JobNumber, JobTitle, JobName) VALUES ('$currentGUID','$custID', '$csrName', '$jobNumber', '$jobTitle', '$jobName')"
+    #
+    ## Insert data into Sysinfo table
+    #$job(db,Name) eval "INSERT INTO SysInfo (HistID, ProgramVers, SchemaVers) VALUES ('$currentGUID', '$program(Version).$program(PatchLevel)', '$job(db,currentSchemaVers)')"
+    #
+
+
        
 } ;# job::db::createDB
 #job::db::createDB SAGMED {Meredith Hunter} TEST001 Febraury 303603

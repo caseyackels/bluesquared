@@ -170,7 +170,14 @@ proc eAssist_db::dbInsert {args} {
     
     # See if this is a new entry or if we should update an entry ...
     set dbCheck [eAssist_db::dbWhereQuery -columnNames [lrange $colNames 0 0] -table $tbl -where [lrange $colNames 0 0]='[lrange $data 0 0]']
-    #${log}::debug After dbCheck: $dbCheck
+    #${log}::debug ColNames: $colNames [lrange $colNames 0 0]
+	#${log}::debug Table: $tbl
+	#${log}::debug WHERE: [lrange $colNames 0 0]='[lrange $data 0 0]'
+	#${log}::debug After dbCheck: $dbCheck
+	if {$dbCheck != ""} {
+		set tmp(db,rowID) [eAssist_db::getRowID $tbl [lrange $colNames 0 0]='$dbCheck']
+		${log}::debug We are updating record $dbCheck - [lrange $colNames 0 0] on $tbl 
+	}
     
     if {[info exists cleansedData]} {unset cleansedData}
     foreach item $data {
@@ -205,7 +212,9 @@ proc eAssist_db::dbInsert {args} {
             set tmp(db,rowID) ""
             return
         }
-    }
+    } else {
+		${log}::debug tmp(db,rowID) does not contain a rowid, are you updating or inserting?
+	}
     
     if {$dbCheck eq ""} {
         # No preexisting data, lets insert...
@@ -662,7 +671,7 @@ proc eAssist_db::dbSelectQuery {args} {
         set returnQuery [db eval "SELECT $colNames FROM $tbl"]
     } else {
         foreach val $colNames {
-            set pos [lsearch $colNames $val]; puts "Pos: $pos"
+            set pos [lsearch $colNames $val]
             set myCommand {[subst $[lrange $colNames %b %b]]}
 	    #${log}::debug myCommand: $myCommand
             lappend myNewCommand [list [string map "%b $pos" $myCommand]]

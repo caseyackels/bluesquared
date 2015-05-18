@@ -780,7 +780,7 @@ proc ea::tools::getGUID {args} {
     #
     # FUNCTION
     #	Creates a GUID using the TWAPI package; and depending on the flag it will return a converted X'093090394039403094 number, or the typical
-	#	{E0EB36A4-CB17-4020-829C-56E6D243313C} format.
+	#	{E0EB36A4-CB17-4020-829C-56E6D243313C} format. Without braces.
     #   
     #   
     # CHILDREN
@@ -807,7 +807,7 @@ proc ea::tools::getGUID {args} {
 		append formattedGUID X' $guid
 		return $formattedGUID
 	} else {
-		return $guid
+		return [join $guid]
 	}
 
 } ;# ea::tools::getGUID

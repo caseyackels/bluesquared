@@ -188,9 +188,9 @@ proc customer::projSetup {{modify new}} {
                 #${log}::debug $job(CustName)
             }
         } else {
-            ${log}::debug No ID was entered!
-            Error_Message::errorMsg BM002
-            focus .ps.f1.entry0a
+            #${log}::debug No ID was entered!
+            #Error_Message::errorMsg BM002
+            #focus .ps.f1.entry0a
         }
     }
     
@@ -207,8 +207,8 @@ proc customer::projSetup {{modify new}} {
             
             if {$job(CustID) == "" && $tmpCustID == ""} {
                 ${log}::debug No Data was found in the ID Field - Issuing warning notice.
-                Error_Message::errorMsg BM002
-                focus .ps.f1.entry0a
+                #Error_Message::errorMsg BM002
+                #focus .ps.f1.entry0a
             }
         }
     }

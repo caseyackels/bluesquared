@@ -100,19 +100,13 @@ proc ea::db::updateHeaderWidTbl {widTable} {
     set ColumnCount [$widTable columncount]
     for {set x 1} {$x < $ColumnCount} {incr x} {
             lappend colName [$widTable columncget $x -name]
-            #lappend colValues '$[widTable columncget $x -name]'
     }
     
     set region [eAssist_db::dbSelectQuery -columnNames $colName -table HeadersConfig]
-    #set region [eAssist_db::dbSelectQuery -columnNames Package -table HeadersConfig]
-    #set region [db eval "SELECT [join $colName ,] from HeadersConfig"]
 
     if {$region != 0} {
         $widTable delete 0 end
-        
-        #db eval "SELECT [join $colName ,] from HeadersConfig" {
-        #    $widTable insert end "{} [join $colValues ,]
-        #}
+
         foreach value $region {
             # the quoting works for the tablelist widget; unknown for listboxes
             $widTable insert end "{} $value"
@@ -123,7 +117,7 @@ proc ea::db::updateHeaderWidTbl {widTable} {
 } ;# ea::db::updateHeaderWidTbl
 
 
-proc ea::db::writeHeaderToDB {widTable widSubHeaders} {
+proc ea::db::writeHeaderToDB {action win widTable widSubHeaders} {
     #****f* writeHeaderToDB/ea::db
     # CREATION DATE
     #   10/21/2014 (Tuesday Oct 21)
@@ -136,12 +130,14 @@ proc ea::db::writeHeaderToDB {widTable widSubHeaders} {
     #   
     #
     # SYNOPSIS
-    #   ea::db::writeHeaderToDB widPath widTable dbTable 
+    #   ea::db::writeHeaderToDB action dbaction win widTable widSubHeaders
     #
     # FUNCTION
     #	Write/Update header configuration to the DB
+    #	action = single or multiple (single will close the dialog after editing, multiple will insert the data into the db; then clear all variables keeping the window open for more entries)
+    #   win = main dialog path
     #	widTable = Path to the widget
-    #   -save ok|new / Ok closes the widget; New clears the widget values
+    #	widSubHeaders = Path to the listbox holding the sub headers
     #   
     #   
     # CHILDREN
@@ -166,7 +162,14 @@ proc ea::db::writeHeaderToDB {widTable widSubHeaders} {
     ${log}::debug Database Table: $dbTable
     # Setup the Index column
     set hdr_list HeaderConfig_ID
-    set data_list [twapi::new_guid]
+
+    if {$setupHeadersConfig(HeaderConfig_ID) == ""} {
+        set setupHeadersConfig(HeaderConfig_ID) [ea::tools::getGUID]
+        set data_list $setupHeadersConfig(HeaderConfig_ID)
+    } else {
+        set data_list $setupHeadersConfig(HeaderConfig_ID)
+    }
+    
         
     foreach header [array names setupHeadersConfig] {
         set data $setupHeadersConfig($header)
@@ -207,13 +210,22 @@ proc ea::db::writeHeaderToDB {widTable widSubHeaders} {
     }
     
     ${log}::debug SubHeaders: [$widSubHeaders get 0 end]
-
-    return
     
     eAssist_db::dbInsert -columnNames $hdr_list -table $dbTable -data $data_list
     
-    ## Read from DB to populate the widgets
+    ## Read from DB to populate the tablelist widget
     ea::db::updateHeaderWidTbl $widTable
+    
+    switch -- $action {
+        single      {destroy $win}
+        multiple    {
+                        eAssistSetup::initsetupHeadersConfigArray
+                        # Clear out the sub header listbox
+                        $widSubHeaders delete 0 end
+                        # UX - Help the user by going back to the first entry widget
+                        focus -force $::eAssistSetup::helperRootWin_f1.entry00
+        }
+    }
 
 } ;# ea::db::writeHeaderToDB
 
@@ -346,26 +358,6 @@ proc ea::db::getSubHeaders {args} {
     }
 
     return $returnValue
-#SELECT SubHeaderName FROM SubHeaders
-#LEFT OUTER JOIN HeadersConfig
-# WHERE HeaderConfig_ID = HeaderConfigID
-#AND HeaderConfigID = '175454CA-5944-47AA-AD99-A8753B67BAA7'
-    
-    #${log}::debug MasterHeader: $masterHeader / wid: $widListBox
-    ## Clear the widget
-    #$widListBox delete 0 end
-    #
-    ## Get the id of the header
-    #set header_ID [eAssist_db::dbWhereQuery -columnNames Header_ID -table Headers -where InternalHeaderName='$masterHeader']
-    #
-    #set subHeaders [db eval "SELECT SubHeaderName FROM SubHeaders
-    #                                LEFT OUTER JOIN Headers
-    #                            WHERE Header_ID = HeaderID
-    #                        AND HeaderID = '$header_ID'"]
-    #
-    #foreach subHeader [lsort $subHeaders] {
-    #    $widListBox insert end $subHeader
-    #}
     
 } ;# ea::db::getSubHeaders
 
@@ -472,53 +464,3 @@ proc ea::db::delSubHeaders {widListbox widCombobox} {
     ea::db::getSubHeaders $masterHeader $widListbox
     
 } ;# ea::db::delSubHeaders
-
-
-proc ea::db::delMasterHeader {widTable} {
-    #****f* delMasterHeader/ea::db
-    # CREATION DATE
-    #   10/24/2014 (Friday Oct 24)
-    #
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2014 Casey Ackels
-    #   
-    #
-    # SYNOPSIS
-    #   ea::db::delMasterHeader widTable 
-    #
-    # FUNCTION
-    #	Deletes the selected headers; this will delete all child headers also
-    #   
-    #   
-    # CHILDREN
-    #	N/A
-    #   
-    # PARENTS
-    #   
-    #   
-    # NOTES
-    #   
-    #   
-    # SEE ALSO
-    #   
-    #   
-    #***
-    global log
-
-    
-    set data [$widTable get [$widTable curselection]]
-    #${log}::debug data: $data
-    
-    set curSelection [$widTable curselection]
-    set headerID [lrange $data 1 1]
-    
-    # Delete from the widget
-    $widTable delete $curSelection $curSelection
-    
-    # Delete from the DB
-    eAssist_db::delete Headers Header_ID $headerID
-    
-} ;# ea::db::delMasterHeader

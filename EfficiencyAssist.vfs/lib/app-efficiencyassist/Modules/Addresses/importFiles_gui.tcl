@@ -77,7 +77,7 @@ proc importFiles::eAssistGUI {} {
    # eAssist_Global::launchFilters
     
     # Init vars - these overwrite the old flat file values, with values from the db
-    importFiles::initVars
+    #importFiles::initVars
     
     
     ##
@@ -200,7 +200,7 @@ proc importFiles::eAssistGUI {} {
                                     -xscrollcommand [list $scrollx set]
 
     # Create the columns
-    importFiles::insertColumns $files(tab3f2).tbl
+    #importFiles::insertColumns $files(tab3f2).tbl
     
     ttk::scrollbar $scrolly -orient v -command [list $files(tab3f2).tbl yview]
     ttk::scrollbar $scrollx -orient h -command [list $files(tab3f2).tbl xview]

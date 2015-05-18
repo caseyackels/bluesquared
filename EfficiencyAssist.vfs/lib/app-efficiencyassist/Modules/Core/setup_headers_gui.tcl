@@ -283,6 +283,7 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
 	## Frame 1 / Database Setup
     #
 	set f1 [ttk::labelframe $c1.f1 -text [mc "Database Setup"] -padding 10]
+    set  ::eAssistSetup::helperRootWin_f1 $f1 ;# Instead of setting a global.
     grid $f1 -column 0 -row 0 -sticky news
     
     ttk::label $f1.txt00 -text [mc "Column Name"]
@@ -311,6 +312,7 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
 	## Frame 1a / Sub Headers
     #
 	set f1a [ttk::labelframe $c1.f1a -text [mc "Sub Headers"] -padding 10]
+    set  ::eAssistSetup::helperRootWin $f1a ;# Instead of setting a global.
     grid $f1a -column 0 -row 2 -sticky news
     
     ttk::label $f1a.txt01 -text [mc "Name"]
@@ -348,7 +350,6 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     #
     # -- Bindings, FRAME 2 --
     #
-    set  ::eAssistSetup::helperRootWin $f1a
     
     bind $f1a.entry01 <FocusIn> [list $f1a.btn01 configure -state normal]
 
@@ -404,7 +405,7 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
                                 -textvariable setupHeadersConfig(widValues) \
                                 -state readonly
         tooltip::tooltip $f2.cbox01a [mc "Versions is a dynamic list built by values in the imported file, or any added by the User"] 
-        #tooltip::tooltip $f2.cbox01a [mc "Versions is a dynamic list built by values in the imported file, or any added by the User"]
+        # This is populated in ['eAssist_initVariables]; using ea::db::initUserDefinedValues
     
     ttk::label $f2.txt02 -text [mc "Data Type"]
     ttk::combobox $f2.cbox02 -values [list ASCII ASCIINOCASE DICTIONARY INTEGER REAL] \
@@ -532,9 +533,9 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
     set btn [ttk::frame $wid.btn -padding 15]
     pack $btn -anchor se -padx 2p
     
-    ttk::button $btn.btn_OK -text [mc "OK"] -command "ea::db::writeHeaderToDB $widTable $f1a.lbox02"
-    ttk::button $btn.btn_okNew -text [mc "OK > New"]
-    ttk::button $btn.btn_Cancel -text [mc "Cancel"] -command ""
+    ttk::button $btn.btn_OK -text [mc "OK"] -command "ea::db::writeHeaderToDB single $wid $widTable $f1a.lbox02"
+    ttk::button $btn.btn_okNew -text [mc "OK > New"] -command "ea::db::writeHeaderToDB multiple $wid $widTable $f1a.lbox02"
+    ttk::button $btn.btn_Cancel -text [mc "Cancel"] -command "destroy $wid"
     
     grid $btn.btn_OK -column 0 -row 0
     grid $btn.btn_okNew -column 1 -row 0
@@ -555,160 +556,3 @@ proc eAssistSetup::headersGUI {{mode add} widTable} {
 
 
 } ;# eAssistSetup::headersGUI add .
-    
-    
-
-#proc eAssistSetup::Headers {{mode add} widTable} {
-#    #****f* Headers/eAssistSetup
-#    # CREATION DATE
-#    #   10/21/2014 (Tuesday Oct 21)
-#    #
-#    # AUTHOR
-#    #	Casey Ackels
-#    #
-#    # COPYRIGHT
-#    #	(c) 2014 Casey Ackels
-#    #   
-#    #
-#    # SYNOPSIS
-#    #   eAssistSetup::Headers args 
-#    #
-#    # FUNCTION
-#    #	Add/Edit headers
-#	#	mode = add|edit (add is default; edit will populate the widgets with the selected data)
-#	#	tblWid = Path to the tablelist widget
-#    #   
-#    #   
-#    # CHILDREN
-#    #	ea::db::populateHeaderEditWindow
-#    #   
-#    # PARENTS
-#    #   
-#    #   
-#    # NOTES
-#    #   The prefixed number to the entry/combo/check widgets depicts which sequence they are in, within the DB.
-#    #   
-#    # SEE ALSO
-#    #   
-#    #   
-#    #***
-#    global log tmp_headerOpts
-#	
-#	set wid .modHeader
-#	
-#	if {[winfo exists $wid)] == 1} {destroy $wid}
-#    
-#    # .. Create the dialog window
-#    toplevel $wid
-#    wm transient $wid .
-#    wm title $wid [mc "Add/Edit Headers"]
-#
-#    # Put the window in the center of the parent window
-#    set locX [expr {[winfo width . ] / 3 + [winfo x .]}]
-#    set locY [expr {[winfo height . ] / 3 + [winfo y .]}]
-#    wm geometry $wid +${locX}+${locY}
-#
-#	
-#	## --------
-#	## General setup
-#	array set tmp_headerOpts {
-#		07_ckbtn 0
-#		08_ckbtn 1
-#		09_ckbtn 0
-#	}
-#	
-#	
-#	## ---------
-#	## Frame 1 / General widgets
-#	
-#	set f1 [ttk::labelframe $wid.f1 -text [mc "Header Setup"] -padding 10]
-#	pack $f1 -padx 2p -pady 2p
-#	
-#    ttk::label $f1.txt1 -text [mc "Internal Header"]
-#	ttk::entry $f1.01_entry
-#	
-#	ttk::label $f1.txt2 -text [mc "Output Header"]
-#	ttk::entry $f1.02_entry
-#	
-#	ttk::label $f1.txt3 -text [mc "Max String Length"]
-#	ttk::entry $f1.03_entry -validate all -validatecommand {eAssist_Global::validate %W %d %S -integer only}
-#	
-#	ttk::label $f1.txt4 -text [mc "Column Width"]
-#	ttk::entry $f1.04_entry -validate all -validatecommand {eAssist_Global::validate %W %d %S -integer only}
-#	
-#	ttk::label $f1.txt5 -text [mc "Highlight"]
-#	ttk::combobox $f1.05_cbox -values [list "" Red Yellow] -state readonly -width 15
-#	
-#	ttk::label $f1.txt6 -text [mc "Widgets"]
-#	ttk::combobox $f1.06_cbox -values [list ttk::entry ttk::combobox] -state readonly -width 15
-#	
-#	ttk::label $f1.txt6a -text [mc "Display Order"]
-#	ttk::entry $f1.06a_entry -validate all -validatecommand {eAssist_Global::validate %W %d %S -integer only}
-#	
-#	ttk::checkbutton $f1.07_ckbtn -text [mc "Required"] -variable tmp_headerOpts(07_ckbtn)
-#	ttk::checkbutton $f1.08_ckbtn -text [mc "Always Display?"] -variable tmp_headerOpts(08_ckbtn)
-#	ttk::checkbutton $f1.09_ckbtn -text [mc "Resize to string width"] -variable tmp_headerOpts(09_ckbtn)
-#	
-#	
-#	
-#	grid $f1.txt1 -column 0 -row 0 -padx 2p -pady 2p -sticky e
-#	grid $f1.01_entry -column 1 -row 0 -padx 2p -pady 2p -sticky w
-#	
-#	grid $f1.txt2 -column 0 -row 1 -padx 2p -pady 2p -sticky e
-#	grid $f1.02_entry -column 1 -row 1 -padx 2p -pady 2p -sticky w
-#	
-#	grid $f1.txt3 -column 0 -row 2 -padx 2p -pady 2p -sticky e
-#	grid $f1.03_entry -column 1 -row 2 -padx 2p -pady 2p -sticky w
-#	
-#	grid $f1.txt4 -column 0 -row 3 -padx 2p -pady 2p -sticky e
-#	grid $f1.04_entry -column 1 -row 3 -padx 2p -pady 2p -sticky w	
-#	
-#	grid $f1.txt5 -column 0 -row 4 -padx 2p -pady 2p -sticky e
-#	grid $f1.05_cbox -column 1 -row 4 -padx 2p -pady 2p -sticky w
-#	
-#	grid $f1.txt6 -column 0 -row 5 -padx 2p -pady 2p -sticky e
-#	grid $f1.06_cbox -column 1 -row 5 -padx 2p -pady 2p -sticky w
-#	
-#	grid $f1.txt6a -column 0 -row 6 -padx 2p -pady 2p -sticky e
-#	grid $f1.06a_entry -column 1 -row 6 -padx 2p -pady 2p -sticky w
-#	
-#	grid $f1.07_ckbtn -column 1 -row 7 -sticky w
-#	grid $f1.08_ckbtn -column 1 -row 8 -sticky w
-#	grid $f1.09_ckbtn -column 1 -row 9 -sticky w
-#	
-#	## ---------
-#	## Buttons
-#	
-#	set btns [ttk::frame $wid.btns -padding 10]
-#	pack $btns -padx 2p -pady 2p -anchor se
-#	
-#	ttk::button $btns.cncl -text [mc "Cancel"] -command "destroy $wid"
-#	ttk::button $btns.save -text [mc "OK"] -command "ea::db::writeHeaderToDB $f1 $widTable Headers; destroy $wid"
-#	ttk::button $btns.svnew -text [mc "OK > New"] -state disable
-#	
-#	grid $btns.cncl -column 0 -row 0 -padx 2p -pady 2p -sticky e
-#	grid $btns.save -column 1 -row 0 -padx 2p -pady 2p -sticky e
-#	grid $btns.svnew -column 2 -row 0 -padx 2p -pady 2p -sticky e
-#	
-#	## --------
-#	## Options / Bindings
-#	focus $f1.01_entry
-#	
-#	#bind [$f2.tbl2 bodytag] <Double-ButtonRelease-1> 
-#	
-#	## --------
-#	## Commands
-#	switch -nocase $mode {
-#			"edit"	{
-#					#if {[info exists cols]} {unset cols}
-#					#set colCount [$tblWid columncount]
-#					#	for {set x 0} {$colCount > $x} {incr x} {
-#					#		puts [.container.setup.frame1.a.listbox columncget $x -name]
-#					#		lappend cols [.container.setup.frame1.a.listbox columncget $x -name]
-#					#	}
-#					ea::db::populateHeaderEditWindow $widTable $f1 Headers
-#				}
-#	}
-#
-#    
-#} ;# eAssistSetup::Headers

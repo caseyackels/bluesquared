@@ -379,6 +379,11 @@ proc 'eAssist_initVariables {} {
 	ea::db::initUserDefinedValues -desc Packages -table Packages -pk Pkg_ID -displayColumn Package
 	ea::db::initUserDefinedValues -desc Container -table Containers -pk Container_ID -displayColumn Container
 	ea::db::initUserDefinedValues -desc "Ship Via" -table ShipVia -pk ShipVia_ID -displayColumn ShipViaName
+	ea::db::initUserDefinedValues -desc "Distribution Type" -table DistributionTypes -pk DistributionType_ID -displayColumn DistTypeName
+	ea::db::initUserDefinedValues -desc "Shipping Class" -table ShippingClasses -pk ShippingClass_ID -displayColumn ShippingClass
+	
+	# This is dynamically populated, based on what is in the imported file and what the user types in. Default entry is "Version 1".
+	ea::db::initUserDefinedValues -desc Versions -table Versions -pk Version_ID -displayColumn VersionName
 	
 
 } ;# 'eAssist_initVariables
