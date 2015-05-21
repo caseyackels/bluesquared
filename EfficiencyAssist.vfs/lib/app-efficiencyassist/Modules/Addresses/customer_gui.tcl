@@ -37,7 +37,7 @@ proc customer::projSetup {{modify new}} {
     #   
     #
     # SYNOPSIS
-    #   eAssisthelper::projSetup  
+    #   customer::projSetup  
     #
     # FUNCTION
     #	Launch the Project Setup gui, so we can assign the Job Number, Jot Title, Name and CSR
@@ -68,7 +68,7 @@ proc customer::projSetup {{modify new}} {
     set locY [expr {[winfo screenheight . ] / 5 + [winfo y .]}]
     wm geometry .ps +${locX}+${locY}
 
-    set f1 [ttk::labelframe .ps.f1 -text [mc "Job Information"] -padding 10]
+    set f1 [ttk::labelframe .ps.f1 -text [mc "Title Information"] -padding 10]
     pack $f1 -fill both -expand yes -padx 5p -pady 5p
     
     # Two items for the btnState, one for each button. OK / Import File
@@ -108,7 +108,7 @@ proc customer::projSetup {{modify new}} {
                             -validatecommand [list AutoComplete::AutoComplete %W %d %v %P [customer::validateCustomer name $f1]]
 	
     ttk::label $f1.txt1a -text [mc "Title"]
-    ttk::entry $f1.entry1a -textvariable job(Title) -validate all \
+    ttk::entry $f1.entry1a -textvariable job(Title) ;#-validate all \
                             -validatecommand {AutoComplete::AutoComplete %W %d %v %P [customer::returnTitle $job(CustID)]}
 		tooltip::tooltip $f1.entry1a [mc "Publication Title"]
     
@@ -116,37 +116,41 @@ proc customer::projSetup {{modify new}} {
     ttk::combobox $f1.cbox1 -postcommand "dbCSR::getCSRID $f1.cbox1 {FirstName LastName}" \
                             -textvariable job(CSRName) -validate all \
                             -validatecommand {AutoComplete::AutoComplete %W %d %v %P [dbCSR::getCSRID "" {FirstName LastName}]}
+	
+	ttk::label $f1.txt2 -text [mc "Save Location"]
+	ttk::entry $f1.entry2 -textvariable job(TitleSaveFileLocation) -width 45
+	        tooltip::tooltip $f1.entry2 [mc "Location where you want to save this Title."]
+    ttk::button $f1.btn1 -text [mc "..."] -width 3 -command {customer::getFileSaveLocation title}
 
-    
-    ttk::label $f1.txt2 -text [mc "Name"]
-    ttk::entry $f1.entry2 -textvariable job(Name)
-		tooltip::tooltip $f1.entry2 [mc "Job Name"] 
-    
-    ttk::label $f1.txt3 -text [mc "Number"]
-    ttk::entry $f1.entry3 -textvariable job(Number)
-		tooltip::tooltip $f1.entry3 [mc "Job Number"]
-    
 	grid $f1.txt0	   -column 0 -row 0 -sticky nes -padx 3p -pady 3p
 	grid $f1.entry0a   -column 1 -row 0 -sticky w -padx 3p -pady 3p
 	grid $f1.entry0b   -column 2 -row 0 -sticky ew -padx 3p -pady 3p
     grid $f1.txt1a     -column 0 -row 1 -sticky nes -padx 3p -pady 3p
     grid $f1.entry1a   -column 1 -columnspan 2 -row 1 -sticky news -padx 3p -pady 3p
-    grid $f1.txt1      -column 0 -row 3 -sticky nes -padx 3p -pady 3p
-    grid $f1.cbox1     -column 1 -columnspan 2 -row 3 -sticky news -padx 3p -pady 3p
-    grid $f1.txt2      -column 0 -row 4 -sticky nes -padx 3p -pady 3p
-    grid $f1.entry2    -column 1 -columnspan 2 -row 4 -sticky news -padx 3p -pady 3p
-    grid $f1.txt3      -column 0 -row 5 -sticky nes -padx 3p -pady 3p
-    grid $f1.entry3    -column 1 -columnspan 2 -row 5 -sticky news -padx 3p -pady 3p
+    grid $f1.txt1      -column 0 -row 2 -sticky nes -padx 3p -pady 3p
+    grid $f1.cbox1     -column 1 -columnspan 2 -row 2 -sticky news -padx 3p -pady 3p
+    grid $f1.txt2      -column 0 -row 3 -sticky nes -padx 3p -pady 3p
+    grid $f1.entry2    -column 1 -columnspan 2 -row 3 -sticky news -padx 3p -pady 3p
+	grid $f1.btn1	   -column 3 -row 3 -sticky ew -padx 2p -pady 3p
+
     
-    ## Frame 2 - Misc Information
+    ## Frame 2 - Job Information
     ##
-    set f2 [ttk::labelframe .ps.f2 -text [mc "Misc. Information"] -padding 10]
+    set f2 [ttk::labelframe .ps.f2 -text [mc "Job Information"] -padding 10]
     pack $f2 -fill both -expand yes -padx 5p -pady 5p
+	
+    ttk::label $f2.txt0 -text [mc "Name"]
+    ttk::entry $f2.entry0 -textvariable job(Name) -width 57
+		tooltip::tooltip $f2.entry0 [mc "Job Name"] 
     
-    ttk::label $f2.txt1 -text [mc "Save Location"]
-    ttk::entry $f2.entry1 -textvariable job(SaveFileLocation) -width 45
-        tooltip::tooltip $f2.entry1 [mc "Location where you want to save this job."]
-    ttk::button $f2.btn1 -text [mc "..."] -width 3 -command {customer::getFileSaveLocation}
+    ttk::label $f2.txt1 -text [mc "Number"]
+    ttk::entry $f2.entry1 -textvariable job(Number)
+		tooltip::tooltip $f2.entry1 [mc "Job Number"]
+    
+    ttk::label $f2.txt1a -text [mc "Save Location"]
+    ttk::entry $f2.entry1a -textvariable job(JobSaveFileLocation) 
+        tooltip::tooltip $f2.entry1a [mc "Location where you want to save this Job."]
+    ttk::button $f2.btn1 -text [mc "..."] -width 3 -command {customer::getFileSaveLocation job}
     
     ttk::label $f2.txt2 -text [mc "1st Ship Date"]
     ttk::entry $f2.entry2 -textvariable job(JobFirstShipDate) -state disabled
@@ -156,21 +160,31 @@ proc customer::projSetup {{modify new}} {
     ttk::entry $f2.entry3 -textvariable job(JobBalanceShipDate) -state disabled
         tooltip::tooltip $f2.entry3 [mc "Must be in MM/DD/YYYY format"]
     
-    grid $f2.txt1     -column 0 -row 0 -sticky nes -pady 3p -pady 3p
-    grid $f2.entry1   -column 1 -row 0 -sticky ew -padx 3p -pady 3p
-    grid $f2.btn1     -column 2 -row 0 -sticky ew -padx 2p -pady 3p
-    grid $f2.txt2     -column 0 -row 1 -sticky nes -padx 3p -pady 3p
-    grid $f2.entry2   -column 1 -columnspan 2 -row 1 -sticky ew -padx 3p -pady 3p
-	grid $f2.txt3     -column 0 -row 2 -sticky nes -padx 3p -pady 3p
-    grid $f2.entry3   -column 1 -columnspan 2 -row 2 -sticky ew -padx 3p -pady 3p
+    grid $f2.txt0     -column 0 -row 0 -sticky nes -pady 3p -pady 3p
+    grid $f2.entry0   -column 1 -row 0 -sticky ew -padx 3p -pady 3p
+    grid $f2.txt1     -column 0 -row 1 -sticky nes -pady 3p -pady 3p
+    grid $f2.entry1   -column 1 -row 1 -sticky ew -padx 3p -pady 3p
+    grid $f2.txt1a    -column 0 -row 2 -sticky nes -pady 3p -pady 3p
+    grid $f2.entry1a  -column 1 -row 2 -sticky ew -padx 3p -pady 3p
+    grid $f2.btn1     -column 2 -row 2 -sticky ew -padx 2p -pady 3p
+    grid $f2.txt2     -column 0 -row 3 -sticky nes -padx 3p -pady 3p
+    grid $f2.entry2   -column 1 -columnspan 2 -row 3 -sticky ew -padx 3p -pady 3p
+	grid $f2.txt3     -column 0 -row 4 -sticky nes -padx 3p -pady 3p
+    grid $f2.entry3   -column 1 -columnspan 2 -row 4 -sticky ew -padx 3p -pady 3p
     
     ## Button Frame
     ##
     set btnBar [ttk::frame .ps.btnBar -padding 10]
     pack $btnBar -anchor se ;#-padx 5p -pady 5p
     
-    ttk::button $btnBar.ok -text [mc "OK"] -command "customer::dbUpdateCustomer; destroy .ps" -state $btnOKState
-    ttk::button $btnBar.import -text [mc "Import File"] -command {customer::dbUpdateCustomer; job::db::createDB $job(CustID) $job(CSRName) $job(Title) $job(Name) $job(Number) $job(SaveFileLocation) ;\
+    ttk::button $btnBar.ok -text [mc "OK"] -command {customer::dbUpdateCustomer;
+															job::db::createDB -tName $job(Title) -tCSR $job(CSRName) -tSaveLocation $job(TitleSaveFileLocation) -tCustCode $job(CustID) -tHistNote {Initial Entry} -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal job(JobBalanceShipDate) -jHistNote {Initial Job Entry} ;
+													destroy .ps} -state $btnOKState
+    #ttk::button $btnBar.import -text [mc "Import File"] -command {customer::dbUpdateCustomer; job::db::createDB $job(CustID) $job(CSRName) $job(Title) $job(Name) $job(Number) $job(SaveFileLocation) ;\
+                                                            importFiles::fileImportGUI; destroy .ps} -state $btnIMPState
+	ttk::button $btnBar.import -text [mc "Import File"] -command {customer::dbUpdateCustomer \
+																	job::db::createDB -tName "$job(Title)" -tCSR "$job(CSRName)" -tSaveLocation $job(TitleSaveFileLocation) -tCustCode $job(CustID) -tHistNote {Initial Entry} \
+																	-jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal job(JobBalanceShipDate) -jHistNote {Initial Job Entry} \
                                                             importFiles::fileImportGUI; destroy .ps} -state $btnIMPState
     
     grid $btnBar.ok -column 0 -row 0 -sticky news

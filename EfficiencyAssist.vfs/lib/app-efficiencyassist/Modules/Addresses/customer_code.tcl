@@ -621,7 +621,7 @@ proc customer::dbUpdateCustomer {} {
 } ;# customer::dbUpdateCustomer
 
 
-proc customer::getFileSaveLocation {} {
+proc customer::getFileSaveLocation {type} {
     #****f* getFileSaveLocation/customer
     # CREATION DATE
     #   02/13/2015 (Friday Feb 13)
@@ -634,7 +634,7 @@ proc customer::getFileSaveLocation {} {
     #   
     #
     # SYNOPSIS
-    #   customer::getFileSaveLocation  
+    #   customer::getFileSaveLocation <job|title>
     #
     # FUNCTION
     #	Wrapper for [eAssist_Global::OpenFile]; this will return our preferred save location for the selected title.
@@ -656,19 +656,34 @@ proc customer::getFileSaveLocation {} {
     #***
     global log job mySettings
     
-    if {$job(SaveFileLocation) ne ""} {
-        ${log}::debug SaveFileLocation exists, using: $job(SaveFileLocation)
-        set defaultLocation $job(SaveFileLocation)
+    switch -nocase $type {
+        title   {set fileLocation $job(TitleSaveFileLocation)}
+        job     {set fileLocation $job(JobSaveFileLocation)}
+        default {return -code error "Must pass a valid parameter - Title or Job"}
+    }
+
+    
+    if {$fileLocation != ""} {
+        ${log}::notice SaveFileLocation exists, using: $fileLocation
+        set defaultLocation  $fileLocation
+        
     } else {
         ${log}::debug SaveFileLocation doesn't exist, using: $mySettings(sourceFiles)
         set defaultLocation $mySettings(sourceFiles)
     }
-
-    set job(SaveFileLocation) [eAssist_Global::OpenFile [mc "Select Directory"] $defaultLocation dir]
     
-    if {[eAssist_Global::folderAccessibility $job(SaveFileLocation)] != 3} {
-        ${log}::debug WARNING! Cannot write to $job(SaveFileLocation)
-        set job(SaveFileLocation) ""
+    
+    set newSaveFileLocation [eAssist_Global::OpenFile [mc "Select Directory"] $defaultLocation dir]
+    
+    if {[eAssist_Global::folderAccessibility $newSaveFileLocation] != 3} {
+        ${log}::critical WARNING! Cannot write to $newSaveFileLocation
+        set newSaveFileLocation ""
+    }
+    
+    switch -nocase $type {
+        title   {set job(TitleSaveFileLocation) $newSaveFileLocation}
+        job     {set job(JobSaveFileLocation) $newSaveFileLocation}
+        default {return -code error "Must pass a valid parameter - Title or Job"}
     }
 
     

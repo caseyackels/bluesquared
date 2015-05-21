@@ -328,7 +328,10 @@ proc 'eAssist_initVariables {} {
 				   Title "" \
 				   Name "" \
 				   Number "" \
-				   SaveFileLocation ""]
+				   JobSaveFileLocation "" \
+				   TitleSaveFileLocation "" \
+				   JobFirstShipDate "" \
+				   JobBalanceShipDate ""]
 	
 	# Filters
 	array set filter [list run,stripASCII_CC 0 \

@@ -18,7 +18,20 @@
 
 namespace eval job::db {}
 
-proc job::db::createDB {custID csrName jobTitle jobName jobNumber saveFileLocation} {
+    #-tName
+    #-tcsr
+    #-tsavelocation
+    #-tcustcode
+    #-thistnote
+    #
+    #-jnumber
+    #-jname
+    #-jsavelocation
+    #-jshipstart
+    #-jshipbal
+    #-jhistnote
+
+proc job::db::createDB {args} {
     #****f* createDB/job::db
     # CREATION DATE
     #   02/08/2015 (Sunday Feb 08)
@@ -31,11 +44,12 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber saveFileLocati
     #   
     #
     # SYNOPSIS
-    #   job::createDB custID csrName jobTitle jobName jobNumber saveFileLocation
+    #   job::db::createDB -tName <value> -tCSR <value> -tSaveLocation <value> -tCustCode <value> -tHistNote <value> -jNumber <value> -jName <value> -jSaveLocation <value> -jShipStart <value> -jShipBal <value> -jHistNote <value>
+    #   All paramters are required.
     #
     # FUNCTION
     #	Initialize a new Title database
-    #   
+    #   job::db::createDB -tName {Portland Monthly} -tCSR {Meredith Hunter} -tSaveLocation {C:/tmp} -tCustCode TEMCUS -tHistNote {Init db} -jNumber 503455 -jName {June 2015} -jSaveLocation {C:/tmp/temp} -jShipStart 6-25-15 -jShipBal 6-28-15 -jHistNote {init job}
     #   
     # CHILDREN
     #	N/A
@@ -44,7 +58,9 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber saveFileLocati
     #   
     #   
     # NOTES
-    #   Create the tables
+    #   Create the database, populate it with the tables. Then immediately insert Title and Job information.
+    #   This proc should only be used to create the database initially. All other additions happen with [job::db::insertTitleInfo], and [job::db::insertJobInfo]
+    #
     #   Versions: Holds all versions, after being created a default entry should be inserted 'Version 1'; which is the default in EFI Monarch Planner
     #   NoteTypes: Allows the user to identify 'note types' and if they should be included on reports or not.
     #       This only controlled within the code; after the first creation a list of 'note types' should be inserted into the table. The user can then set some paramaters
@@ -60,28 +76,73 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber saveFileLocati
     #   Addresses: This table has a few system columns, but outside of that it is controlled by the user.
     #   
     # SEE ALSO
-    #   
+    #   job::db::insertTitleInfo, job::db::insertJobInfo
     #   
     #***
-    global log job mySettings program env user
+    global log job user
+    set currentProcName [lindex [info level 0] 0]
+    
+    foreach {key value} $args {
+        switch -nocase $key {
+            -tName          {#${log}::debug -tName $value
+                                set tName $value
+            }
+            -tCSR           {#${log}::debug -tCSR $value
+                                set tCSR $value
+            }
+            -tSaveLocation  {#${log}::debug -tsaveLocation $value
+                                set tSaveLocation $value
+            }
+            -tCustCode      {#${log}::debug -tCustCode $value
+                                set tCustCode $value
+            }
+            -tHistNote      {#${log}::debug -tHistNote $value
+                                set tHistNote $value
+            }
+            -jNumber        {#${log}::debug -jNumber $value
+                                set jNumber $value
+            }
+            -jName          {#${log}::debug -jName $value
+                                set jName $value
+            }
+            -jSaveLocation  {#${log}::debug -jSaveLocation $value
+                                set jSaveLocation $value
+            }
+            -jShipStart     {#${log}::debug -jShipStart $value
+                                set jShipStart $value
+            }
+            -jShipBal       {#${log}::debug -jShipBal $value
+                                set jShipBal $value
+            }
+            -jHistNote      {#${log}::debug -jHistNote $value
+                                set jHistNote $value
+            }
+            default         {${log}::critical $currentProcName [info level 0] Passed invalid args $args; return}
+        }
+    }
+    
+    # ensure we have the correct number of args
+    if {[llength $args] != 22} {
+        ${log}::critical $currentProcName [info level 0] \nDid not pass sufficient number of args: [llength $args] should be 22
+        return
+    }
 
-    ${log}::notice Creating a new database for: $custID $jobTitle
 
-    set job(db,Name) [ea::tools::formatFileName]
+    ${log}::notice Creating a new database for: $tCustCode $tName
+    #${log}::debug Formatted file name: $tCustCode, $tName, [join "$tCustCode [join [split $tName " "] ""]" _]
+    
+    set job(db,Name) [join "$tCustCode [join [split $tName " "] ""]" _]
     
     # Create the database
-    sqlite3 $job(db,Name) [file join $saveFileLocation $job(db,Name).db] -create 1
+    #sqlite3 $job(db,Name) [file join $tSaveLocation $job(db,Name).db] -create 1
+    # For Testing
+    sqlite3 $job(db,Name) $job(db,Name).db -create 1
     
-
-    set job(db,Name) testTitle.db
-    sqlite3 $job(db,Name) $job(db,Name) -create 1
     $job(db,Name) eval {
         CREATE TABLE Versions (
             Version_ID    INTEGER PRIMARY KEY AUTOINCREMENT,
-            VersionName   TEXT    UNIQUE ON CONFLICT ROLLBACK
-                                  NOT NULL ON CONFLICT ROLLBACK,
+            VersionName   TEXT    NOT NULL ON CONFLICT ROLLBACK,
             VersionActive BOOLEAN NOT NULL ON CONFLICT ROLLBACK
-                                  UNIQUE ON CONFLICT ROLLBACK
                                   DEFAULT (1)
         );
         
@@ -115,9 +176,9 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber saveFileLocati
             HistSysLog TEXT
         );
 
-        CREATE TABLE ExportType (
+        CREATE TABLE ExportTypes (
             ExportType_ID INTEGER PRIMARY KEY AUTOINCREMENT,
-            ExportTypes   TEXT    NOT NULL ON CONFLICT ROLLBACK,
+            ExportType   TEXT    NOT NULL ON CONFLICT ROLLBACK,
             Active        BOOLEAN DEFAULT (1) 
         );
         
@@ -180,7 +241,8 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber saveFileLocati
         {AddressParentID TEXT} \
         {AddressChildID  INTEGER} \
         {Active          BOOLEAN DEFAULT (1) NOT NULL ON CONFLICT ROLLBACK} \
-        {VersionID       INTEGER REFERENCES Versions (Version_ID) ON UPDATE CASCADE}]
+        {VersionID       INTEGER REFERENCES Versions (Version_ID) ON UPDATE CASCADE} \
+        {ExportTypeID    INTEGER REFERENCES ExportType (ExportType_ID) ON UPDATE CASCADE}]
     
     
     db eval {SELECT dbColName, dbDataType FROM HeadersConfig} {
@@ -190,26 +252,26 @@ proc job::db::createDB {custID csrName jobTitle jobName jobNumber saveFileLocati
     }
 
     $job(db,Name) eval "CREATE TABLE Addresses ( [join $cTable ,] )"
-
-    # Columns that are always needed; similar to the OrderNumber column.
-    #lappend cTable "'Status' BOOLEAN DEFAULT (1)"
-
-    ## Insert data into the History table
-    #set currentGUID [ea::tools::getGUID]
-    #$job(db,Name) eval "INSERT INTO History (Hist_ID, Hist_User, Hist_Date, Hist_Time, Hist_Syslog) VALUES ('$currentGUID', '$user(id)', '[ea::date::getTodaysDate]', '[ea::date::currentTime]', 'Initializing database')"
-    #
-    ## Insert data into JobInformation table
-    #$job(db,Name) eval "INSERT INTO JobInformation (HistID, CustID, CSRName, JobNumber, JobTitle, JobName) VALUES ('$currentGUID','$custID', '$csrName', '$jobNumber', '$jobTitle', '$jobName')"
-    #
-    ## Insert data into Sysinfo table
-    #$job(db,Name) eval "INSERT INTO SysInfo (HistID, ProgramVers, SchemaVers) VALUES ('$currentGUID', '$program(Version).$program(PatchLevel)', '$job(db,currentSchemaVers)')"
-    #
-
-
+    
+    
+    job::db::insertDefaultData
+    ${log}::notice Inserted default data...
+    
+    #INSERT TITLE AND GET ID
+    set titleID [job::db::insertTitleInfo -title $tName -csr $tCSR -saveLocation $tSaveLocation -custcode $tCustCode -histnote $tHistNote]
+    
+    #INSERT JOB
+    job::db::insertJobInfo -jNumber $jNumber -jName $jName -jSaveLocation $jSaveLocation -jDateShipStart $jShipStart -jDateShipBalance $jShipBal -titleid $titleID -histnote $jHistNote
        
 } ;# job::db::createDB
-#job::db::createDB SAGMED {Meredith Hunter} TEST001 Febraury 303603
 
+## TEST
+## CREATE DB
+#job::db::createDB SAGMED {Meredith Hunter} TEST001 Febraury 303603 {c:/tmp}
+## INSERT TITLE AND GET ID
+# set titleID [job::db::insertTitleInfo -title {Test Title} -csr {Lyn Lovell} -saveLocation {c:/tmp} -custcode {TEMCUS} -histnote {Initialize the Title DB}]
+## INSERT JOB
+#job::db::insertJobInfo -jNumber 304503 -jName {March 2015} -jSaveLocation {C:/tmp/job} -jDateShipStart 2015-05-20 -jDateShipBalance 2015-05-29 -titleid $titleID -histnote {Inserting a new Job}
 
 proc job::db::open {} {
     #****f* open/job::db
@@ -776,3 +838,210 @@ proc job::db::getTotalCopies {} {
     set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses Quantity -statusName Status -status 1]
     
 } ;# job::db::getTotalCopies
+
+
+proc job::db::insertDefaultData {} {
+    #****f* insertDefaultData/job::db
+    # CREATION DATE
+    #   05/19/2015 (Tuesday May 19)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   job::db::insertDefaultData  
+    #
+    # FUNCTION
+    #	Inserts default data into these tables: Versions, NoteTypes and ExportType
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log job
+
+    $job(db,Name) eval "INSERT INTO Versions (VersionName) VALUES ('Version 1')"
+    
+    foreach noteType [list Title Job Version {Distribution Type} {Shipping Order}] {
+        $job(db,Name) eval "INSERT INTO NoteTypes (NoteType) VALUES ('$noteType')"
+    }
+    
+    foreach exportType [list Planner {Process Shipper} Report] {
+        $job(db,Name) eval "INSERT INTO ExportTypes (ExportType) VALUES ('$exportType')"
+    }
+
+    
+} ;# job::db::insertDefaultData
+
+proc job::db::insertTitleInfo {args} {
+    #****f* insertTitleInfo/job::db
+    # CREATION DATE
+    #   05/19/2015 (Tuesday May 19)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   job::db::insertTitleInfo -title <value> -csr <value> -saveLocation <value> -custcode <value> -histnote 
+    #
+    # FUNCTION
+    #	Inserts title information into the TitleInformation table; returns the TitleInformation_ID value.
+    #   
+    #   
+    # CHILDREN
+    #	job::db::insertHistory
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log job
+    
+    if {[info exists hdrs]} {unset hdrs}
+    if {[info exists values]} {unset values}
+
+    foreach {key value} $args {
+        switch -- $key {
+            -title          {lappend hdrs TitleName; lappend values '$value'}
+            -csr            {lappend hdrs CSRName; lappend values '$value'}
+            -saveLocation   {lappend hdrs TitleSaveLocation; lappend values '$value'}
+            -custcode       {lappend hdrs CustCode; lappend values '$value'}
+            -histnote       {set histnote $value}
+        }
+    }
+    lappend hdrs HistoryID
+    lappend values '[job::db::insertHistory $histnote]'
+    
+    ${log}::debug Inserted Title Information into table: TitleInformation
+    $job(db,Name) eval "INSERT INTO TitleInformation([join $hdrs ,]) VALUES([join $values ,])"
+
+    return [$job(db,Name) eval "SELECT seq FROM sqlite_sequence WHERE name='TitleInformation'"]
+    
+} ;# job::db::insertTitleInfo -title {Test Title} -csr {Lyn Lovell} -saveLocation {c:/tmp} -custcode {TEMCUS} -histnote {Initialize the Title DB}
+
+proc job::db::insertJobInfo {args} {
+    #****f* insertJobInfo/job::db
+    # CREATION DATE
+    #   05/20/2015 (Wednesday May 20)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   job::db::insertJobInfo -jNumber <value> -jName <value> -jSaveLocation <value> -jDateShipStart <value> -jDateShipBalance <value> -titleid <value> -histnote <value>
+    #
+    # FUNCTION
+    #	Inserts the Job information
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   DB Table: JobInformation, History
+    #   DB Columns: JobName, JobInformation_ID, JobSaveLocation, JobFirstShipDate, JobBalanceShipDate, TitleInformationID
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log job
+
+    if {[info exists hdrs]} {unset hdrs}
+    if {[info exists values]} {unset values}
+
+    foreach {key value} $args {
+        switch -- $key {
+            -jNumber            {lappend hdrs JobInformation_ID; lappend values '$value'}
+            -jName              {lappend hdrs JobName; lappend values '$value'}
+            -jSaveLocation      {lappend hdrs JobSaveLocation; lappend values '$value'}
+            -jDateShipStart     {lappend hdrs JobFirstShipDate; lappend values '$value'}
+            -jDateShipBalance   {lappend hdrs JobBalanceShipDate; lappend values '$value'}
+            -titleid            {lappend hdrs TitleInformationID; lappend values $value; #No single quotes, this is an integer}
+            -histnote           {set histnote $value}
+        }
+    }
+    lappend hdrs HistoryID
+    lappend values '[job::db::insertHistory $histnote]'
+
+    ${log}::debug Inserted Job Information into table: JobInformation
+    ${log}::debug hdrs: $hdrs
+    ${log}::debug VALUES([join $values ,])
+    $job(db,Name) eval "INSERT INTO JobInformation([join $hdrs ,]) VALUES([join $values ,])"
+    
+} ;# job::db::insertJobInfo -jNumber 304503 -jName {March 2015} -jSaveLocation {C:/tmp/job} -jDateShipStart 2015-05-20 -jDateShipBalance 2015-05-29 -titleid <value> -histnote {Inserting a new Job}
+
+
+proc job::db::insertHistory {args} {
+    #****f* insertHistory/job::db
+    # CREATION DATE
+    #   05/19/2015 (Tuesday May 19)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   job::db::insertHistory args 
+    #
+    # FUNCTION
+    #	Inserts data into the history table, returns the HistoryID (GUID)
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log job user
+
+    set currentDate [ea::date::getTodaysDate -db]
+    set histGUID [ea::tools::getGUID]
+    set currentTime [ea::date::currentTime]
+
+    $job(db,Name) eval "INSERT INTO History (History_ID, HistUser, HistDate, HistTime, HistSysLog) VALUES ('$histGUID', '$user(id)', '$currentDate', '$currentTime', '[join $args]')"
+    
+    return $histGUID
+} ;# job::db::insertHistory

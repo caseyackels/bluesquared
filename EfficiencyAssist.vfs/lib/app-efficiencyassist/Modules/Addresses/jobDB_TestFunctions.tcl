@@ -11,75 +11,17 @@ proc populate {} {
     job::db::insertAddresses
 }
 
-proc job::db::setupSysTables {} {
-    #****f* setupSysTables/job::db
-    # CREATION DATE
-    #   05/18/2015 (Monday May 18)
-    #
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2015 Casey Ackels
-    #   
-    #
-    # SYNOPSIS
-    #   job::db::setupSysTables  
-    #
-    # FUNCTION
-    #	Setups the system tables
-    #   
-    #   
-    # CHILDREN
-    #	N/A
-    #   
-    # PARENTS
-    #   
-    #   
-    # NOTES
-    #   
-    #   
-    # SEE ALSO
-    #   
-    #   
-    #***
-    global log job program user
-
-    set currentDate [ea::date::getTodaysDate -db]
-    set histGUID [ea::tools::getGUID]
-    set currentTime [ea::date::currentTime]
-    # job::db::HistoryID -msg "Log Message, system generated"; returns ID
-    ## History Table
-    $job(db,Name) eval "INSERT INTO History (History_ID, HistUser, HistDate, HistTime) VALUES ('$histGUID', '$user(id)', '$currentDate', '$currentTime')"
+proc job::db::testSetupDB {} {
+    global log job
+## CREATE DB    
+    job::db::createDB SAGMED {Meredith Hunter} TEST001 Febraury 303603 {c:/tmp}
     
+## INSERT TITLE AND GET ID
+    set titleID [job::db::insertTitleInfo -title {Test Title} -csr {Lyn Lovell} -saveLocation {c:/tmp} -custcode {TEMCUS} -histnote {Initialize the Title DB}]
     
-    ## Title Information Table
-    set CustCode TEMCUS
-    set CSRName "TEST CSR"
-    set TitleName "Test Title"
-    $job(db,Name) eval "INSERT INTO TitleInformation (HistoryID, CustCode, CSRName, TitleName) VALUES ('$histGUID', '$CustCode', '$CSRName', '$TitleName')"
-    set titleInformationID [$job(db,Name) eval "SELECT seq FROM sqlite_sequence WHERE name='TitleInformation'"]
-    
-    ## Job Information Table
-    set tmp_title(JobInformation_ID) 304553
-    set tmp_title(JobName) "May 2015"
-    set tmp_title(JobSaveLocation) $program(Home)
-    set tmp_title(JobFirstShipDate) 2015-26-05
-    set tmp_title(JobBalanceShipDate) 2015-28-05
-    $job(db,Name) eval "INSERT INTO JobInformation (JobInformation_ID, JobName, JobSaveLocation, JobFirstShipDate, JobBalanceShipDate, TitleInformationID)
-                            VALUES ('$tmp_title(JobInformation_ID)',
-                                    '$tmp_title(JobName)',
-                                    '$tmp_title(JobSaveLocation)',
-                                    '$tmp_title(JobFirstShipDate)',
-                                    '$tmp_title(JobBalanceShipDate)',
-                                    '$titleInformationID')"
-                            
-    # Versions table
-    # default value
-    $job(db,Name) eval "INSERT INTO Versions (VersionName) VALUES ('Version 1')"
-    set versionID [$job(db,Name) eval "SELECT seq FROM sqlite_sequence WHERE name='Versions'"]
-    
-} ;# job::db::setupSysTables
+## INSERT JOB
+    job::db::insertJobInfo -jNumber 304503 -jName {March 2015} -jSaveLocation {C:/tmp/job} -jDateShipStart 2015-05-20 -jDateShipBalance 2015-05-29 -titleid $titleID -histnote {Inserting a new Job}
+}
 
 proc job::db::insertAddresses {} {
     #****f* insertAddresses/job::db
