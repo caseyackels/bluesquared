@@ -40,7 +40,7 @@ proc customer::projSetup {{modify new}} {
     #   customer::projSetup  
     #
     # FUNCTION
-    #	Launch the Project Setup gui, so we can assign the Job Number, Jot Title, Name and CSR
+    #	The Project Setup window is where you can create or edit a Title or Job.
     #   
     #   
     # CHILDREN
@@ -268,13 +268,13 @@ proc customer::manage {} {
     
     set locX [expr {[winfo screenwidth . ] / 4 + [winfo x .]}]
     set locY [expr {[winfo screenheight . ] / 5 + [winfo y .]}]
-    wm geometry $wid +${locX}+${locY}
+    wm geometry $wid 500x300+${locX}+${locY}
 
-    set f1 [ttk::label $wid.f1]
+    set f1 [ttk::frame $wid.f1]
     pack $f1 -fill both -expand yes -padx 5p -pady 5p
     
-    set f2 [ttk::label $wid.f2 -padding 10]
-    pack $f2 -fill both -expand yes -padx 5p -pady 5p
+    set f2 [ttk::frame $wid.f2 -padding 0]
+    pack $f2 -fill x -expand yes -anchor n -padx 5p -pady 5p
     
     ## Frame 1
     ttk::button $f1.btn0 -text [mc "View"] -command "customer::Modify view $f2.tbl"
@@ -293,7 +293,6 @@ proc customer::manage {} {
                                 10 "Code" center
                                 40 "Name" left} \
                                 -showlabels yes \
-                                -height 10 \
                                 -selectbackground yellow \
                                 -selectforeground black \
                                 -stripebackground lightblue \
@@ -313,8 +312,8 @@ proc customer::manage {} {
     ttk::scrollbar $f2.scrollx -orient h -command [list $f2.tbl xview]
 
     grid $f2.tbl -column 0 -row 0 -sticky news
-    grid columnconfigure $f2 $f2.tbl -weight 1
-    grid rowconfigure $f2 $f2.tbl -weight 1
+    grid columnconfigure $f2 0 -weight 2
+    #grid rowconfigure $f2 $f2.tbl -weight 2
     
     grid $f2.scrolly -column 1 -row 0 -sticky nse
     grid $f2.scrollx -column 0 -row 1 -sticky ews
@@ -322,7 +321,7 @@ proc customer::manage {} {
     ::autoscroll::autoscroll $f2.scrolly ;# Enable the 'autoscrollbar'
     ::autoscroll::autoscroll $f2.scrollx
     
-    set f3 [ttk::label $wid.f3 -padding 10]
+    set f3 [ttk::frame $wid.f3 -padding 10]
     pack $f3 -padx 5p -pady 5p -anchor se
     
     ttk::button $f3.btn0 -text [mc "Close"] -command [list destroy $wid]
@@ -536,7 +535,8 @@ proc customer::Modify {modify {tbl ""}} {
     tablelist::tablelist $ft2.tbl -columns {
                                                 0   "..." center
                                                 0   "CSR" left
-                                                0   "Title" left} \
+                                                0   "Title" left
+												0	"Save Location" left} \
                                         -showlabels yes \
                                         -height 20 \
                                         -width 50 \
@@ -555,8 +555,10 @@ proc customer::Modify {modify {tbl ""}} {
     $ft2.tbl columnconfigure 0 -name "count" \
                                         -showlinenumbers 1 \
                                         -labelalign center
-    
-    $ft2.tbl columnconfigure 2 -stretchable 1
+	
+	$ft2.tbl columnconfigure 1 -labelalign center    
+    $ft2.tbl columnconfigure 2 -labelalign center
+	$ft2.tbl columnconfigure 3 -labelalign center -stretchable 1
     
     ttk::scrollbar $ft2.scrolly -orient v -command [list $ft2.tbl yview]
     ttk::scrollbar $ft2.scrollx -orient h -command [list $ft2.tbl xview]
@@ -571,6 +573,8 @@ proc customer::Modify {modify {tbl ""}} {
     grid $ft2.scrollx -column 0 -row 1 -sticky ews
     
     grid $ft2.btn -column 1 -row 0 -sticky ne -padx 2p
+	
+	grid columnconfigure $ft2 0 -weight 2
     
     # Populate the title listbox
     customer::populateTitleWid $ft2.tbl [lindex $custList 0]

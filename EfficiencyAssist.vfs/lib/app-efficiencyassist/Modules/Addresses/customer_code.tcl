@@ -547,19 +547,26 @@ proc customer::populateTitleWid {tbl custID} {
     # Make sure the table is cleared
     $tbl delete 0 end
     
-    foreach title [db eval "SELECT TitleName FROM PubTitle WHERE CustID = '$custID'"] {
-        set getCSRname [db eval "SELECT FirstName,
-                            LastName
-                       FROM CSRs
-                            INNER JOIN
-                            PubTitle ON PubTitle.CSRID = CSRs.CSR_ID
-                      WHERE PubTitle.CustID = '$custID'
-                      AND PubTitle.TitleName = '$title'
-                      AND PubTitle.Status = '1'"]
-        
-        $tbl insert end [list "" $getCSRname $title]
-    }
-    
+    #foreach title [db eval "SELECT TitleName FROM PubTitle WHERE CustID = '$custID'"] {
+    #    set getCSRname [db eval "SELECT FirstName,
+    #                        LastName
+    #                   FROM CSRs
+    #                        INNER JOIN
+    #                        PubTitle ON PubTitle.CSRID = CSRs.CSR_ID
+    #                  WHERE PubTitle.CustID = '$custID'
+    #                  AND PubTitle.TitleName = '$title'
+    #                  AND PubTitle.Status = '1'"]
+    #    
+    #    $tbl insert end [list "" $getCSRname $title]
+    #}
+    #set custID temp
+    db eval "SELECT PubTitle.TitleName as Title, PubTitle.SaveLocation as Location, CSRs.FirstName ||' '|| CSRs.LastName as Name FROM CSRs
+                    INNER JOIN PubTitle on PubTitle.CSRID = CSRs.CSR_ID
+                    WHERE PubTitle.CustID = '$custID'
+                    AND PubTitle.Status = 1" {
+                        ${log}::debug $Name $Title $Location
+                        $tbl insert end [list "" $Name $Title $Location]
+                    }
     
 } ;# customer::populateTitleWid
 
