@@ -77,7 +77,7 @@ proc importFiles::eAssistGUI {} {
    # eAssist_Global::launchFilters
     
     # Init vars - these overwrite the old flat file values, with values from the db
-    #importFiles::initVars
+    importFiles::initVars
     
     
     ##

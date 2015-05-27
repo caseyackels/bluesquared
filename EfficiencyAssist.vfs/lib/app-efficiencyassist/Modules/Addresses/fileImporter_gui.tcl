@@ -87,7 +87,7 @@ proc importFiles::fileImportGUI {} {
     grid $f0.txt1 -column 0 -row 0 -pady 5p -sticky e ;#-padx 2p
     grid $f0.entry1 -column 1 -row 0 -pady 5p -sticky ew ;#-padx 2p
     
-    ttk::button $f0.btn1 -text [mc "Open File"] -command {importFiles::readFile [eAssist_Global::OpenFile "Open File" $job(SaveFileLocation) file -ext csv -filetype {{Comma Separated Values} {.csv}}] $w(wi).lbox1.listbox}
+    ttk::button $f0.btn1 -text [mc "Open File"] -command {importFiles::readFile [eAssist_Global::OpenFile "Open File" $job(JobSaveFileLocation) file -ext csv -filetype {{Comma Separated Values} {.csv}}] $w(wi).lbox1.listbox}
     ttk::button $f0.btn2 -text [mc "Import"] -command {lib::savePreferences; importFiles::processFile $w(wi)} -state disabled
     #ttk::button $frame1a.btn3 -text [mc "Reset"] -command {{$log}::debug Reset Interface} -state disabled
     
@@ -246,12 +246,224 @@ proc importFiles::enableButtons {args} {
     #
     #***
     global log
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
     
     foreach btn $args {
         $btn configure -state normal
     }
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# importFiles::enableButtons
+
+
+proc eAssistHelper::importProgBar {args} {
+    #****f* importProgBar/eAssistHelper
+    # CREATION DATE
+    #   11/18/2014 (Tuesday Nov 18)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2014 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssistHelper::importProgBar args 
+    #
+    # FUNCTION
+    #	Displays a progress bar when importing a file.
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+	#	Set length: $::gwin(importpbar) configure -maximum <value>
+	# 	Update: $::gwin(importpbar) step <value>
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log user
+
+	set w .pb
+    if {[winfo exists w]} {destroy $w}
+	
+	if {$args eq "destroy"} {destroy $w; return}
+
+    toplevel $w
+    wm transient $w .
+    wm title $w [mc "Progress Bar"]
+    
+    set locX [expr {[winfo screenwidth . ] / 4 + [winfo x .]}]
+    set locY [expr {[winfo screenheight . ] / 5 + [winfo y .]}]
+    wm geometry $w 300x200+${locX}+${locY}
+
+    set f1 [ttk::frame $w.f1 -padding 10]
+    pack $f1 -fill both -expand yes -padx 5p ;#-padx 5p -pady 5p
+	
+    set ::gwin(importpbar) [ttk::progressbar $f1.pbar]
+	ttk::label $f1.txt01a -text [mc "Records found in file:"]
+	ttk::label $f1.txt01b -text 2000 -textvariable user(fileRecordCount)
+	
+	grid $f1.txt01a -column 0 -row 0 -sticky w
+	grid $f1.txt01b -column 1 -row 0 -sticky e
+	grid $::gwin(importpbar) -column 0 -columnspan 2 -row 1 -sticky news
+	
+	set f2 [ttk::labelframe $w.f2 -text "Stats" -padding 10]
+	pack $f2 -fill both -expand yes -padx 5p ;#-padx 5p -pady 5p
+	
+	ttk::label $f2.txt01a -text [mc "New"]
+	ttk::label $f2.txt01b -textvariable user(fileRecordNew)
+	
+	ttk::label $f2.txt02a -text [mc "Matched Existing"]
+	ttk::label $f2.txt02b -textvariable user(fileRecordMatchedExisting)
+	
+	ttk::label $f2.txt03a -text [mc "Merged"]
+	ttk::label $f2.txt03b -textvariable user(fileRecordMerged)
+	
+	grid $f2.txt01a -column 0 -row 0 -sticky e
+	grid $f2.txt01b -column 1 -row 0 -sticky w
+	grid $f2.txt02a -column 0 -row 1 -sticky e
+	grid $f2.txt02b -column 1 -row 1 -sticky w
+	grid $f2.txt03a -column 0 -row 2 -sticky e
+	grid $f2.txt03b -column 1 -row 2 -sticky w
+	
+	set btns [ttk::frame $w.btns -padding 10]
+	pack $btns -anchor se
+	
+	ttk::button $btns.ok -text [mc "OK"] -command {}
+	grid $btns.ok -column 0 -row 0 -sticky se
+
+} ;# eAssistHelper::importProgBar
+
+
+proc eAssistHelper::MergeRecords {} {
+    #****f* MergeRecords/eAssistHelper
+    # CREATION DATE
+    #   05/26/2015 (Tuesday May 26)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # USAGE
+    #   eAssistHelper::MergeRecords  
+    #
+    # FUNCTION
+    #	Displays the Existing and new Records; allowing the user to tell the program if the new record really should be considerd new, or if the existing and new should be merged together
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # EXAMPLE
+    #   eAssistHelper::MergeRecords 
+    #
+    # NOTES
+    #   
+    #  
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+	set w .mr
+    if {[winfo exists w]} {destroy $w}
+	
+	#if {$args eq "destroy"} {destroy $w; return}
+
+    toplevel $w
+    wm transient $w .
+    wm title $w [mc "Progress Bar"]
+    
+    set locX [expr {[winfo screenwidth . ] / 4 + [winfo x .]}]
+    set locY [expr {[winfo screenheight . ] / 5 + [winfo y .]}]
+    wm geometry $w 475x300+${locX}+${locY}
+
+    set f1 [ttk::frame $w.f1 -padding 10]
+    pack $f1 -fill both -expand yes -padx 5p ;#-padx 5p -pady 5p
+    
+    ttk::label $f1.txt01 -text [mc "Are these two addresses the same?"]
+    pack $f1.txt01
+    
+    # Container for the two text widgets
+    set f2 [ttk::frame $w.f1.f2 -padding 8]
+    pack $f2 -fill both -expand yes
+    
+    # Existing addresses - Left Frame
+    set f2a [ttk::frame $f2.a -padding 2]
+    grid $f2a -column 0 -row 0 -sticky e
+    
+        ttk::label $f2a.txt_label -text [mc "Existing Address"]
+        text $f2a.txt -width 25 -height 10
+        
+        grid $f2a.txt_label -column 0 -row 0 -sticky n
+        grid $f2a.txt -column 0 -row 1 -sticky news
+        
+    # New Addresses - Right Frame
+    set f2b [ttk::frame $f2.b -padding 2]
+    grid $f2b -column 1 -row 0 -sticky w
+        
+        ttk::label $f2b.txt_label -text [mc "New Address"]
+        text $f2b.txt -width 25 -height 10
+        
+        grid $f2b.txt_label -column 0 -row 0 -sticky n
+        grid $f2b.txt -column 0 -row 1 -sticky news
+
+        
+    set f2c [ttk::frame $f2.c -padding 2]
+    grid $f2c -column 1 -row 2 -sticky e
+    
+        ttk::radiobutton $f2c.rbtn01 -text [mc "Keep New"]
+        ttk::radiobutton $f2c.rbtn02 -text [mc "Merge"]
+        
+        grid $f2c.rbtn01 -column 0 -row 0 -sticky w
+        grid $f2c.rbtn02 -column 0 -row 1 -sticky w  
+    
+        
+    # Buttons
+    set f3 [ttk::frame $w.f3 -padding 3]
+    pack $f3 -anchor e -padx 2p
+    
+    ttk::button $f3.ok -text [mc "OK"]
+    #ttk::button $f3.cncl -text [mc "Cancel"]
+    
+    grid $f3.ok -column 0 -row 0
+    #grid $f3.cncl -column 1 -row 0
+    
+insertTestData $f2a.txt $f2b.txt
+    
+} ;# eAssistHelper::MergeRecords
+
+proc insertTestData {txt1 txt2} {
+    # Setup the tags for formatting
+    
+    $txt1 tag config Normal -font {verdana 9}
+    $txt1 tag config bold -font {bold}
+    $txt1 tag config diff -font {verdana 9 bold} -background #FFB2B2
+    
+    $txt2 tag config Normal -font {verdana 9}
+    $txt2 tag config bold -font {bold}
+    $txt2 tag config diff -font {verdana 9 bold} -background #FFB2B2
+
+    foreach wid [list $txt1 $txt2] {
+        $wid insert end "Company Name\nAttention\nAddress1\nAddress2\n" Normal
+        $wid insert end "Address3\n" diff
+        $wid insert end "City\nState\nZip\nPhone\nCountry" {Normal bold}
+    }
+}

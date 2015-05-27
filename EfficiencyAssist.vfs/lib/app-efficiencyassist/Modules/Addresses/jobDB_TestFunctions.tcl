@@ -81,7 +81,7 @@ proc job::db::insertAddresses {} {
                             usr_ShippingClass)
                             VALUES ('$id', '$id','','1','SomeCo_$x','Manager','420$x Oak Tree Lane','','','Vancouver','WA','98661','US','5037909100','50$x','notes_$x','','','','','','','')"
                             
-        $job(db,Name) eval "INSERT INTO ShippingOrders (JobInformationID, AddressID) VALUES ('304553','$id')"
+        $job(db,Name) eval "INSERT INTO ShippingOrders (JobInformationID, AddressID) VALUES ('503545','$id')"
     }
 
     

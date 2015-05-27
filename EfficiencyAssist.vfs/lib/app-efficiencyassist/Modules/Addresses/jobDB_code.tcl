@@ -235,6 +235,8 @@ proc job::db::createDB {args} {
     
 
     # Dynamically build the Addresses table using data from the main db (Headers Config)
+    # AddressParentID - This is the ID of the first entry in that family
+    # AddressChildID - Incremented field: 0 (Duplicate), 1 (Original Entry) 2+ (revisions to the original record)
     set cTable [list \
         {Addresses_ID    TEXT    UNIQUE ON CONFLICT ROLLBACK} \
         {NotesID         TEXT    REFERENCES Notes (Notes_ID) ON UPDATE CASCADE} \

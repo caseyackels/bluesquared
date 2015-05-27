@@ -56,19 +56,15 @@ proc importFiles::initVars {args} {
     global log headerParent headerAddress dist carrierSetup packagingSetup shipOrder
 
     #set headerParent(headerList) [eAssist_db::dbSelectQuery -columnNames InternalHeaderName -table Headers]
-    set headerParent(headerList) [db eval "SELECT InternalHeaderName FROM Headers ORDER BY DisplayOrder"]
+    set headerParent(headerList) [db eval "SELECT dbColName FROM HeadersConfig ORDER BY widUIPositionWeight"]
     set headerParent(whiteList) [eAssist_db::dbWhereQuery -columnNames InternalHeaderName -table Headers -where AlwaysDisplay=1]
     set headerParent(blackList) [list Status] ;# This is only for the columns that exist in the main table (addresses) that we never want to display
     set headerParent(ColumnCount) [db eval "SELECT Count (Header_ID) from Headers"]
     
     # Setup header array with subheaders
     foreach hdr $headerParent(headerList) {
-        # Get the HeaderID
-        #set id [eAssist_db::dbWhereQuery -columnNames Header_ID -table Headers -where "InternalHeaderName='$hdr'"]
-        
         # Get the subheaders for the current header
-        #set $headerAddress($hdr) [eAssist_db::leftOuterJoin -cols SubHeaderName -table Headers -jtable SubHeaders -where "HeaderID=Header_ID AND InternalHeaderName='$hdr'"]
-        set headerAddress($hdr) [db eval "SELECT SubHeaderName FROM Headers LEFT OUTER JOIN SubHeaders WHERE HeaderID=Header_ID AND InternalHeaderName='$hdr'"]
+        set headerAddress($hdr) [db eval "SELECT SubHeaderName FROM HeadersConfig LEFT OUTER JOIN SubHeaders WHERE HeaderConfigID=HeaderConfig_ID AND dbColName='$hdr'"]
     }
     
     
@@ -152,16 +148,9 @@ proc importFiles::readFile {fileName lbox} {
                     }
                 
                 foreach hdr $headerParent(headerList) {
-                    # Get the HeaderID
-                    #set id [eAssist_db::dbWhereQuery -columnNames Header_ID -table Headers -where "InternalHeaderName='$hdr'"]
-                    
-                    # Get the subheaders for the current header
-                    #set subheaders [eAssist_db::leftOuterJoin -cols SubHeaderName -table SubHeaders -jtable Headers -where "HeaderID=Header_ID AND HeaderID=$id"]
                     
                     if {[lsearch -nocase $headerAddress($hdr) $temp] != -1} {
-                    #if {[lsearch -nocase $subheaders $temp] != -1} {}
-                        #${log}::debug Found a Header Match: [lsearch -nocase $headerAddress($hdr) $temp]
-                        #${log}::debug Number of matched headers: $hdr_lines
+                        # Searching the subheaders for a match ...
                         incr hdr_lines
                 
                         # Once we reach 4 matches lets stop looping
@@ -205,9 +194,13 @@ proc importFiles::readFile {fileName lbox} {
         if {$options(AutoAssignHeader) == 1} {
             foreach headerName $headerParent(headerList) {
                 # Get the HeaderID
-                set id [db eval "SELECT Header_ID FROM Headers WHERE InternalHeaderName='$headerName'"]
+                ## OLD set id [db eval "SELECT Header_ID FROM Headers WHERE InternalHeaderName='$headerName'"]
+                # UPDATED set id [db eval "SELECT HeaderConfig_ID FROM HeadersConfig WHERE dbColName='$headerName'"]
                 # Get the subheaders for the current header
-                set subheaders [db eval "SELECT SubHeaderName FROM SubHeaders LEFT OUTER JOIN Headers WHERE HeaderID=Header_ID AND HeaderID=$id"]
+                # UPDATED set subheaders [db eval "SELECT SubHeaderName FROM SubHeaders LEFT OUTER JOIN HeadersConfig WHERE HeaderConfigID=HeaderConfig_ID AND HeaderConfigID=$id"]
+               set subheaders [db eval "SELECT SubHeaderName FROM SubHeaders LEFT OUTER JOIN HeadersConfig
+                        WHERE HeaderConfigID=HeaderConfig_ID
+                    AND HeaderConfigID=(SELECT HeaderConfig_ID FROM HeadersConfig WHERE dbColName='$headerName')"]
                 
                 if {$process(Header) != ""} {
                     if {[lsearch -nocase $subheaders $header] != -1} {
@@ -297,6 +290,8 @@ proc importFiles::processFile {win} {
     set replaceBadChars [list ' "" , " " \" " "]
     
     foreach record $process(dataList) {
+        if {[info exists newRow]} {unset newRow}
+        if {[info exists header_order]} {unset header_order}
         # .. Skip over any 'blank' lines in found in the file
         if {[string is punc $record] == 1} {continue}
             
@@ -315,138 +310,182 @@ proc importFiles::processFile {win} {
                 set l_line [csv::split $record]
             }
         }
-
-        for {set x 0} {$headerParent(ColumnCount) > $x} {incr x} {
-            set ColumnName [$files(tab3f2).tbl columncget $x -name]
-           
+        
+        # Check to see if we have a versions column in the user file.
+        if {[lsearch $FileHeaders *Versions] == -1} {
+            lappend FileHeaders 99_Versions
+        }
+        
+        # FileHeader = 00_Company
+        foreach hdr $FileHeaders {
+            set pos [lrange [split $hdr _] 0 0]
+            if {[string compare $pos 00] == 0} {
+                           # This is the first record so we only want to strip the leading 0, not both.
+                           set pos 0
+                       } else {
+                           set pos [string trimleft $pos 0]
+                       }
+            set hdr_ [lrange [split $hdr _] 1 end]
+            set data [lrange $l_line $pos $pos]
             
-            # Figure out if the listData contains more chars than allowed; at the same time set the highlight configuration if it does exceed the limits
-            #set headerStringLength [join [eAssist_db::dbWhereQuery -columnNames HeaderMaxLength -table Headers -where InternalHeaderName='$ColumnName']]
-            #set bgColor [join [eAssist_db::dbWhereQuery -columnNames Highlight -table Headers -where InternalHeaderName='$ColumnName']]
-
-            set tmpHeader [lindex $FileHeaders [lsearch -nocase $FileHeaders *$ColumnName]]
-
-            set index [lrange [split $tmpHeader _] 0 0]
-            #set indexHdr [lrange [split $tmpHeader _] 1 1]
-         
-            #${log}::debug Current Column: $ColumnName
-            #${log}::debug tmpHeader: $tmpHeader
-
-            if {[string compare $index 00] == 0} {
-                # This is the first record so we only want to strip the leading 0, not both.
-                set index 0
-            } else {
-                set index [string trimleft $index 0]
+            # manipulate data; we know what column we are in, and we have the data.
+            switch -glob $hdr_ {
+                *Versions    {
+                                ${log}::debug VERSION: Insert into Version table, and return the ID
+                                ${log}::debug Check to see if the version exists in the db ...
+                                if {$data == ""} {
+                                    # Set the default version
+                                    set data [$job(db,Name) eval "SELECT Version_ID FROM Versions WHERE VersionName='Version 1' AND VersionActive=1"]
+                                } else {
+                                    set vers [$job(db,Name) eval "SELECT VersionName FROM Versions WHERE VersionName='$data' AND VersionActive=1"]
+                                    if {$vers == ""} {
+                                        # Version doesn't exist in the db yet; insert and return the ID
+                                        $job(db,Name) eval "INSERT INTO Versions (VersionName) values('[join $data]')"
+                                        set data [$job(db,Name) eval "SELECT max(Version_ID) FROM Versions WHERE VersionActive=1"]
+                                    } else {
+                                        set data [$job(db,Name) eval "SELECT Version_ID FROM Versions WHERE VersionName='$vers' AND VersionActive=1"]
+                                    }
+                                }
+                }
+                default     {}
             }
             
-            
-            if {$index eq ""} {
-
-                # Create a default version if, a version isn't found in the file. Planner defaults to 'Version 1'.
-                if {[$files(tab3f2).tbl columncget $x -name] eq "Version"} {
-                    ${log}::debug Found Version Column!
-                    lappend newRowDB "'Version 1'"
-                } else {
-                    lappend newRowDB ''
-                }
-                
-                if {[lsearch -nocase $headerParent(whiteList) $ColumnName] == -1} {
-                    # the header is on the whitelist, but we don't have any data in the file
-                    # If we dont have an index for it, then lets hide the column aswell.
-                    # This will not hide columns that have no data in it, just columns that were not in the original file.
-                    # WARNING - If importing more than one file it is possible for a column that has data in it from the first file, to be hidden by the second file.
-                
-                    #${log}::notice $ColumnName is not on the white list
-                    #${log}::notice $ColumnName doesn't contain any data
-                    #${log}::notice Hiding $ColumnName ...
-                    $files(tab3f2).tbl columnconfigure $x -hide yes
-                    
-                }
-
-            } else {
-                set listData [string trim [lindex $l_line $index]]
-                #${log}::debug l_line: $l_line
-                #${log}::debug Index: $index
-                #${log}::debug listData: $listData
-
-                # Dynamically build the list of versions
-                # the switch args, must equal the internal header name
-                switch -nocase $ColumnName {
-                    company     {set listData [string map $replaceBadChars $listData]}
-                    attention   {set listData [string map $replaceBadChars $listData]}
-                    address1    {set listData [string map $replaceBadChars $listData]}
-                    address2    {set listData [string map $replaceBadChars $listData]}
-                    address3    {set listData [string map $replaceBadChars $listData]}
-                    city        {set listData [string map $replaceBadChars $listData]}
-                    state       {set listData [string map $replaceBadChars $listData]}
-                    zip         {set listData [string map $replaceBadChars $listData]}
-                    version    {
-                                # There is another instance of this above, to handle the case where the file may not have a version colum at all.
-                                if {$listData eq ""} {set listData "Version 1"} else {set listData [string map $replaceBadChars $listData]}
-                                if {[lsearch $process(versionList) $listData] == -1} {
-                                        lappend process(versionList) $listData
-                                    }
-                        }
-                    quantity    {set listData [join [string map $replaceBadChars $listData] ""] ;# Make sure we don't have any spaces after replacing chars.}
-                    default     {set listData [join [string map $replaceBadChars $listData]] }
-                }               
-                set listData [string trim $listData]
-                # Create the list of values
-                lappend newRowDB '$listData'
-                }
+            lappend newRow '[join $data]'
+            lappend header_order $hdr_
+            #${log}::debug pos: $pos, header: $hdr - [lrange $l_line $pos $pos]
         }
 
-        # insert data into the db
-        #${log}::debug INSERT INTO Addresses ($job(db,ColOrder)) VALUES ([join $newRowDB ,])
-        $job(db,Name) eval "INSERT INTO Addresses ($job(db,ColOrder)) VALUES ([join $newRowDB ,])"
-
-        
-        # Update Progress Bar ...
-        $::gwin(importpbar) step 1
-        ${log}::debug Updating Progress Bar - [$::gwin(importpbar) cget -value]
-
-        unset newRowDB
-        set x 0
-        update
-    }
-    # Ensure the progress bar is at the max, by the time we get to this point
-    $::gwin(importpbar) configure -value $max
-    
-    # save the original version list as origVersionList, so we can keep the process(versionList) variable updated with user changed versions
-    if {[info exists process(versionList)]} {
-        set process(origVersionList) $process(versionList)
+        # Insert data into the DB
+        ${log}::debug [join $header_order ,]
+        ${log}::debug [join $newRow ,]
+        break
     }
 
-    ## Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
-    if {[$files(tab3f2).tbl findcolumnname OrderNumber] == -1} {
-        $files(tab3f2).tbl insertcolumns 0 0 "..."
-        $files(tab3f2).tbl columnconfigure 0 -name "OrderNumber" -labelalign center
-    }
-    
-    # Enable menu items
-    importFiles::enableMenuItems
-    
-    # Insert the data into the tablelist widget ...
-    set totalRows [$job(db,Name) eval "SELECT COUNT(*) FROM Addresses"]
-    #${log}::debug TotalRows: $totalRows
-    
-    for {set x 1} {$x <= $totalRows} {incr x} {
-        #${log}::debug Inserting record $x
-        $files(tab3f2).tbl insert end [$job(db,Name) eval "SELECT * FROM Addresses where ROWID=$x"]
-    }
-    
-    # Get total copies
-    #set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
-    job::db::getTotalCopies
-    
-    importFiles::highlightAllRecords $files(tab3f2).tbl
-    
-    # Destroy the progress bar window
-    eAssistHelper::importProgBar destroy
-    
-    ## Initialize popup menus
-    #IFMenus::tblPopup $files(tab3f2).tbl browse .tblMenu
-    IFMenus::createToggleMenu $files(tab3f2).tbl
+    #    for {set x 0} {$headerParent(ColumnCount) > $x} {incr x} {
+    #        set ColumnName [$files(tab3f2).tbl columncget $x -name]
+    #
+    #        set tmpHeader [lindex $FileHeaders [lsearch -nocase $FileHeaders *$ColumnName]]
+    #
+    #        set index [lrange [split $tmpHeader _] 0 0]
+    #     
+    #        #${log}::debug Current Column: $ColumnName
+    #        #${log}::debug tmpHeader: $tmpHeader
+    #
+    #        if {[string compare $index 00] == 0} {
+    #            # This is the first record so we only want to strip the leading 0, not both.
+    #            set index 0
+    #        } else {
+    #            set index [string trimleft $index 0]
+    #        }
+    #        
+    #        
+    #        if {$index eq ""} {
+    #
+    #            # Create a default version if, a version isn't found in the file. Planner defaults to 'Version 1'.
+    #            if {[$files(tab3f2).tbl columncget $x -name] eq "Version"} {
+    #                ${log}::debug Found Version Column!
+    #                lappend newRowDB "'Version 1'"
+    #            } else {
+    #                lappend newRowDB ''
+    #            }
+    #            
+    #            if {[lsearch -nocase $headerParent(whiteList) $ColumnName] == -1} {
+    #                # the header is on the whitelist, but we don't have any data in the file
+    #                # If we dont have an index for it, then lets hide the column aswell.
+    #                # This will not hide columns that have no data in it, just columns that were not in the original file.
+    #                # WARNING - If importing more than one file it is possible for a column that has data in it from the first file, to be hidden by the second file.
+    #            
+    #                #${log}::notice $ColumnName is not on the white list
+    #                #${log}::notice $ColumnName doesn't contain any data
+    #                #${log}::notice Hiding $ColumnName ...
+    #                $files(tab3f2).tbl columnconfigure $x -hide yes
+    #                
+    #            }
+    #
+    #        } else {
+    #            set listData [string trim [lindex $l_line $index]]
+    #            #${log}::debug l_line: $l_line
+    #            #${log}::debug Index: $index
+    #            #${log}::debug listData: $listData
+    #
+    #            # Dynamically build the list of versions
+    #            # the switch args, must equal the internal header name
+    #            switch -nocase $ColumnName {
+    #                company     {set listData [string map $replaceBadChars $listData]}
+    #                attention   {set listData [string map $replaceBadChars $listData]}
+    #                address1    {set listData [string map $replaceBadChars $listData]}
+    #                address2    {set listData [string map $replaceBadChars $listData]}
+    #                address3    {set listData [string map $replaceBadChars $listData]}
+    #                city        {set listData [string map $replaceBadChars $listData]}
+    #                state       {set listData [string map $replaceBadChars $listData]}
+    #                zip         {set listData [string map $replaceBadChars $listData]}
+    #                version    {
+    #                            # There is another instance of this above, to handle the case where the file may not have a version colum at all.
+    #                            if {$listData eq ""} {set listData "Version 1"} else {set listData [string map $replaceBadChars $listData]}
+    #                            if {[lsearch $process(versionList) $listData] == -1} {
+    #                                    lappend process(versionList) $listData
+    #                                }
+    #                    }
+    #                quantity    {set listData [join [string map $replaceBadChars $listData] ""] ;# Make sure we don't have any spaces after replacing chars.}
+    #                default     {set listData [join [string map $replaceBadChars $listData]] }
+    #            }               
+    #            set listData [string trim $listData]
+    #            # Create the list of values
+    #            lappend newRowDB '$listData'
+    #            }
+    #    }
+    #
+    #    # insert data into the db
+    #    #${log}::debug INSERT INTO Addresses ($job(db,ColOrder)) VALUES ([join $newRowDB ,])
+    #    $job(db,Name) eval "INSERT INTO Addresses ($job(db,ColOrder)) VALUES ([join $newRowDB ,])"
+    #
+    #    
+    #    # Update Progress Bar ...
+    #    $::gwin(importpbar) step 1
+    #    ${log}::debug Updating Progress Bar - [$::gwin(importpbar) cget -value]
+    #
+    #    unset newRowDB
+    #    set x 0
+    #    update
+    #}
+    ## Ensure the progress bar is at the max, by the time we get to this point
+    #$::gwin(importpbar) configure -value $max
+    #
+    ## save the original version list as origVersionList, so we can keep the process(versionList) variable updated with user changed versions
+    #if {[info exists process(versionList)]} {
+    #    set process(origVersionList) $process(versionList)
+    #}
+    #
+    ### Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
+    #if {[$files(tab3f2).tbl findcolumnname OrderNumber] == -1} {
+    #    $files(tab3f2).tbl insertcolumns 0 0 "..."
+    #    $files(tab3f2).tbl columnconfigure 0 -name "OrderNumber" -labelalign center
+    #}
+    #
+    ## Enable menu items
+    #importFiles::enableMenuItems
+    #
+    ## Insert the data into the tablelist widget ...
+    #set totalRows [$job(db,Name) eval "SELECT COUNT(*) FROM Addresses"]
+    ##${log}::debug TotalRows: $totalRows
+    #
+    #for {set x 1} {$x <= $totalRows} {incr x} {
+    #    #${log}::debug Inserting record $x
+    #    $files(tab3f2).tbl insert end [$job(db,Name) eval "SELECT * FROM Addresses where ROWID=$x"]
+    #}
+    #
+    ## Get total copies
+    ##set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
+    #job::db::getTotalCopies
+    #
+    #importFiles::highlightAllRecords $files(tab3f2).tbl
+    #
+    ## Destroy the progress bar window
+    #eAssistHelper::importProgBar destroy
+    #
+    ### Initialize popup menus
+    ##IFMenus::tblPopup $files(tab3f2).tbl browse .tblMenu
+    #IFMenus::createToggleMenu $files(tab3f2).tbl
     #${log}::debug --END-- [info level 1]
 } ;# importFiles::processFile
 
