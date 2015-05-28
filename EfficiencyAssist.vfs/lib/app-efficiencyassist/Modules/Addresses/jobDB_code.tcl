@@ -238,19 +238,19 @@ proc job::db::createDB {args} {
     # AddressParentID - This is the ID of the first entry in that family
     # AddressChildID - Incremented field: 0 (Duplicate), 1 (Original Entry) 2+ (revisions to the original record)
     set cTable [list \
-        {Addresses_ID    TEXT    UNIQUE ON CONFLICT ROLLBACK} \
-        {NotesID         TEXT    REFERENCES Notes (Notes_ID) ON UPDATE CASCADE} \
-        {AddressParentID TEXT} \
-        {AddressChildID  INTEGER} \
-        {Active          BOOLEAN DEFAULT (1) NOT NULL ON CONFLICT ROLLBACK} \
-        {VersionID       INTEGER REFERENCES Versions (Version_ID) ON UPDATE CASCADE} \
-        {ExportTypeID    INTEGER REFERENCES ExportType (ExportType_ID) ON UPDATE CASCADE}]
+        {SysAddresses_ID    TEXT    UNIQUE ON CONFLICT ROLLBACK} \
+        {SysNotesID         TEXT    REFERENCES Notes (Notes_ID) ON UPDATE CASCADE} \
+        {SysAddressParentID TEXT} \
+        {SysAddressChildID  INTEGER} \
+        {SysActive          BOOLEAN DEFAULT (1) NOT NULL ON CONFLICT ROLLBACK} \
+        {Versions       INTEGER REFERENCES Versions (Version_ID) ON UPDATE CASCADE} \
+        {SysExportTypeID    INTEGER REFERENCES ExportType (ExportType_ID) ON UPDATE CASCADE}]
     
     
     db eval {SELECT dbColName, dbDataType FROM HeadersConfig} {
         # Bypass the possiblity that the user entered 'versions'.
         if {[string tolower $dbColName] eq "versions"} {continue}
-        lappend cTable "usr_$dbColName $dbDataType"
+        lappend cTable "$dbColName $dbDataType"
     }
 
     $job(db,Name) eval "CREATE TABLE Addresses ( [join $cTable ,] )"
