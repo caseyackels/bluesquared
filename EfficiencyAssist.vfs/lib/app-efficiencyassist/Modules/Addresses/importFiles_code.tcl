@@ -328,37 +328,50 @@ proc importFiles::processFile {win} {
             set hdr_ [lrange [split $hdr _] 1 end]
             set data [lrange $l_line $pos $pos]
             
+            # Cleanse data
+            set data [string map $replaceBadChars $data]
+            # Remove leading/trailing spaces
+            set data [string trim [join $data]]
+            
             # manipulate data; we know what column we are in, and we have the data.
             switch -glob $hdr_ {
                 *Versions    {
                                 ${log}::debug VERSION: Insert into Version table, and return the ID
-                                ${log}::debug Check to see if the version exists in the db ...
                                 if {$data == ""} {
-                                    # Set the default version
+                                    # Set the default version; this should probably be a GUI default option, so we aren't hard-coding.
                                     set data [$job(db,Name) eval "SELECT Version_ID FROM Versions WHERE VersionName='Version 1' AND VersionActive=1"]
+                                    ${log}::debug No version detected, using the default.
                                 } else {
-                                    set vers [$job(db,Name) eval "SELECT VersionName FROM Versions WHERE VersionName='$data' AND VersionActive=1"]
+                                    ${log}::debug Checking to see if the (version [join $data]) exists in the db ...
+                                    set vers [join [$job(db,Name) eval "SELECT VersionName FROM Versions WHERE VersionName='$data' AND VersionActive=1"]]
                                     if {$vers == ""} {
                                         # Version doesn't exist in the db yet; insert and return the ID
-                                        $job(db,Name) eval "INSERT INTO Versions (VersionName) values('[join $data]')"
+                                        $job(db,Name) eval "INSERT INTO Versions (VersionName) values('$data')"
+                                        ${log}::debug Version was supplied, inserting into db...
                                         set data [$job(db,Name) eval "SELECT max(Version_ID) FROM Versions WHERE VersionActive=1"]
                                     } else {
-                                        set data [$job(db,Name) eval "SELECT Version_ID FROM Versions WHERE VersionName='$vers' AND VersionActive=1"]
+                                        ${log}::debug Version exists in db, assigning to address...
+                                        set data [$job(db,Name) eval "SELECT Version_ID FROM Versions WHERE VersionName='[join $vers]' AND VersionActive=1"]
+                                        ${log}::debug Version Data in DB: $data
                                     }
                                 }
                 }
                 default     {}
             }
             
-            lappend newRow '[join $data]'
+            lappend newRow '$data'
             lappend header_order $hdr_
-            #${log}::debug pos: $pos, header: $hdr - [lrange $l_line $pos $pos]
         }
+        set sysGUID [ea::tools::getGUID]
+        set header_order "SysAddresses_ID $header_order"
+        set newRow "$sysGUID $newRow"
+        
 
         # Insert data into the DB
         ${log}::debug [join $header_order ,]
         ${log}::debug [join $newRow ,]
-        break
+        $job(db,Name) eval "INSERT INTO Addresses ([join $header_order ,]) VALUES ([join $newRow ,])"
+        #break
     }
 
     #    for {set x 0} {$headerParent(ColumnCount) > $x} {incr x} {
@@ -447,7 +460,7 @@ proc importFiles::processFile {win} {
     #    unset newRowDB
     #    set x 0
     #    update
-    #}
+    #{}
     ## Ensure the progress bar is at the max, by the time we get to this point
     #$::gwin(importpbar) configure -value $max
     #

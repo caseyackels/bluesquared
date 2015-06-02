@@ -56,7 +56,7 @@ proc eAssistHelper::autoMap {masterHeader fileHeader} {
     #
     #***
     global log files process position headerParent w
-    ${log}::debug --START -- [info level 1]
+    #${log}::debug --START -- [info level 1]
 	
 	# setup the variables
 	set lboxOrig $w(wi).lbox1.listbox
@@ -79,21 +79,21 @@ proc eAssistHelper::autoMap {masterHeader fileHeader} {
 	set cSelection [lsearch -nocase $process(Header) $fileHeader]
 	
 	#set cSelection [expr {[lsearch -nocase [$w(wi).lbox2.listbox get 0 end] $masterHeader] + 1}]
-	${log}::debug cSelection: $cSelection
+	#${log}::debug cSelection: $cSelection
 	
 	if {[string length $cSelection] <= 1} {
 		set cSelection "0$cSelection"
 	} else {
-		${log}::debug cSelection has two digits: $cSelection
+		${log}::notice eAssistHelper::autoMap cSelection has two digits: $cSelection
 	}
 	
 	set position([join [list $cSelection $masterHeader] _]) ""
-	${log}::debug cSelection: $cSelection
-	${log}::debug masterHeader: $masterHeader
-	${log}::debug New Pos: [join [list [lsearch -nocase $process(Header) $masterHeader]] _]
-	
-	${log}::debug [lsort [array names position]]
-    ${log}::debug --END -- [info level 1]
+#	${log}::debug cSelection: $cSelection
+#	${log}::debug masterHeader: $masterHeader
+#	${log}::debug New Pos: [join [list [lsearch -nocase $process(Header) $masterHeader]] _]
+#	
+#	${log}::debug [lsort [array names position]]
+#    ${log}::debug --END -- [info level 1]
 } ;# eAssistHelper::autoMap
 
 

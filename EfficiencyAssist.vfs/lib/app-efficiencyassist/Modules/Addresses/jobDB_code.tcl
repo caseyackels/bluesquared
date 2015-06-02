@@ -141,7 +141,8 @@ proc job::db::createDB {args} {
     $job(db,Name) eval {
         CREATE TABLE Versions (
             Version_ID    INTEGER PRIMARY KEY AUTOINCREMENT,
-            VersionName   TEXT    NOT NULL ON CONFLICT ROLLBACK,
+            VersionName   TEXT    UNIQUE ON CONFLICT ROLLBACK
+                                  NOT NULL ON CONFLICT ROLLBACK,
             VersionActive BOOLEAN NOT NULL ON CONFLICT ROLLBACK
                                   DEFAULT (1)
         );
@@ -178,7 +179,7 @@ proc job::db::createDB {args} {
 
         CREATE TABLE ExportTypes (
             ExportType_ID INTEGER PRIMARY KEY AUTOINCREMENT,
-            ExportType   TEXT    NOT NULL ON CONFLICT ROLLBACK,
+            ExportType    TEXT    NOT NULL ON CONFLICT ROLLBACK,
             Active        BOOLEAN DEFAULT (1) 
         );
         
@@ -238,17 +239,19 @@ proc job::db::createDB {args} {
     # AddressParentID - This is the ID of the first entry in that family
     # AddressChildID - Incremented field: 0 (Duplicate), 1 (Original Entry) 2+ (revisions to the original record)
     set cTable [list \
-        {SysAddresses_ID    TEXT    UNIQUE ON CONFLICT ROLLBACK} \
+        {SysAddresses_ID    TEXT    PRIMARY KEY ON CONFLICT ROLLBACK
+                                    UNIQUE ON CONFLICT ROLLBACK
+                                    NOT NULL ON CONFLICT ROLLBACK} \
         {SysNotesID         TEXT    REFERENCES Notes (Notes_ID) ON UPDATE CASCADE} \
         {SysAddressParentID TEXT} \
         {SysAddressChildID  INTEGER} \
         {SysActive          BOOLEAN DEFAULT (1) NOT NULL ON CONFLICT ROLLBACK} \
-        {Versions       INTEGER REFERENCES Versions (Version_ID) ON UPDATE CASCADE} \
+        {Versions           INTEGER REFERENCES Versions (Version_ID) ON UPDATE CASCADE} \
         {SysExportTypeID    INTEGER REFERENCES ExportType (ExportType_ID) ON UPDATE CASCADE}]
     
     
     db eval {SELECT dbColName, dbDataType FROM HeadersConfig} {
-        # Bypass the possiblity that the user entered 'versions'.
+        # Bypass the possiblity that the user created a 'versions' column.
         if {[string tolower $dbColName] eq "versions"} {continue}
         lappend cTable "$dbColName $dbDataType"
     }
