@@ -372,8 +372,26 @@ proc importFiles::processFile {win} {
         ${log}::debug [join $newRow ,]
         $job(db,Name) eval "INSERT INTO Addresses ([join $header_order ,]) VALUES ([join $newRow ,])"
         #break
+        #Update Progress Bar ...
+        $::gwin(importpbar) step 1
+        ${log}::debug Updating Progress Bar - [$::gwin(importpbar) cget -value]
+        update
     }
     
+    ## Ensure the progress bar is at the max, by the time we are done with the loop
+    $::gwin(importpbar) configure -value $max
+    
+    ## Enable menu items
+    importFiles::enableMenuItems
+    
+    ## Destroy the progress bar window
+    eAssistHelper::importProgBar destroy
+    
+    ## Initialize popup menus
+    #IFMenus::tblPopup $files(tab3f2).tbl browse .tblMenu
+    IFMenus::createToggleMenu $files(tab3f2).tbl
+    
+    # Insert the data into the widget
     importFiles::insertIntoGUI $files(tab3f2).tbl
 
     #    for {set x 0} {$headerParent(ColumnCount) > $x} {incr x} {
@@ -565,6 +583,7 @@ proc importFiles::insertIntoGUI {wid} {
     }
     
     # Insert the columns into the widget
+    # The tablelist widget is initialized in importFiles_gui.tcl [importFiles::eAssistGUI]
     foreach col $hdrs_show {
         # get the config values
         set hdr_config [db eval "SELECT widStartColWidth, widLabelName, widLabelAlignment, widColAlignment, widWidget, widDataType from HeadersConfig where dbColName='$col'"]
@@ -579,14 +598,26 @@ proc importFiles::insertIntoGUI {wid} {
                                 
     }
     
-    # insert the data into the widget
+    ## insert the data into the widget
+    # first manipulate the column names; we need two lists. One for the 'select' args, and one for the variables.
     foreach hdr $hdrs_show {
-        lappend hdr_list $$hdr 
+        # look for a header that contains 'vers', because we need to append .VersionNames (Table: Versions, column VersionNames) so we can display the version name vs the version id
+        if {[string match -nocase *vers* $hdr]} {
+            ${log}::debug Found a vers match! $hdr
+
+            lappend hdr_list VersionName
+            lappend hdr_data \$VersionName
+        } else {
+            lappend hdr_list $hdr
+            lappend hdr_data $$hdr
+        }
     }
-    
-    $job(db,Name) eval "SELECT [join $hdrs_show ,] from Addresses" {
-        $wid insert end [subst $hdr_list]
-        ${log}::debug ROW: [subst $hdr_list]
+    #${log}::debug hdr_list: [join $hdr_list ,]
+    #${log}::debug hdr_data: [join $hdr_data ,]
+
+    $job(db,Name) eval "SELECT [join $hdr_list ,] from Addresses LEFT OUTER JOIN Versions ON Versions=Version_ID" {
+        $wid insert end [subst $hdr_data]
+        #${log}::debug ROW: [subst $hdr_data]
     }
 
 } ;# importFiles::insertIntoGUI $files(tab3f2).tbl

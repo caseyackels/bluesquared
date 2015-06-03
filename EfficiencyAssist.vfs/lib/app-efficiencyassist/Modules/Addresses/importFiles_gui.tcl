@@ -179,6 +179,7 @@ proc importFiles::eAssistGUI {} {
     
     set scrolly $files(tab3f2).scrolly
     set scrollx $files(tab3f2).scrollx
+    # Columns are configured in importFiles_code.tcl [importFiles::insertIntoGUI]
     tablelist::tablelist $files(tab3f2).tbl \
                                     -showlabels yes \
                                     -selectbackground lightblue \
