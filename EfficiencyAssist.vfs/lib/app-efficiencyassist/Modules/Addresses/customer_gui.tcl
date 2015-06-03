@@ -178,7 +178,7 @@ proc customer::projSetup {{modify new}} {
     pack $btnBar -anchor se ;#-padx 5p -pady 5p
     
     ttk::button $btnBar.ok -text [mc "OK"] -command {customer::dbUpdateCustomer;
-															job::db::createDB -tName $job(Title) -tCSR $job(CSRName) -tSaveLocation $job(TitleSaveFileLocation) -tCustCode $job(CustID) -tHistNote {Initial Entry} -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal job(JobBalanceShipDate) -jHistNote {Initial Job Entry} ;
+															job::db::createDB -tName $job(Title) -tCSR $job(CSRName) -tSaveLocation $job(TitleSaveFileLocation) -tCustCode $job(CustID) -tHistNote {Initial Entry} -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal $job(JobBalanceShipDate) -jHistNote {Initial Job Entry} ;
 													destroy .ps} -state $btnOKState
     #ttk::button $btnBar.import -text [mc "Import File"] -command {customer::dbUpdateCustomer; job::db::createDB $job(CustID) $job(CSRName) $job(Title) $job(Name) $job(Number) $job(SaveFileLocation) ;\
                                                             importFiles::fileImportGUI; destroy .ps} -state $btnIMPState

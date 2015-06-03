@@ -278,12 +278,12 @@ proc importFiles::processFile {win} {
     ${log}::debug configuring Progress Bar with -maximum $max
     #update
     
-    # Put the table headers in order ...
-    if {[info exists newCol]} {unset newCol}
-    foreach col $headerParent(headerList) {
-        lappend newCol '$col'
-    }
-    set job(db,ColOrder) [join $newCol ,]
+    ## Put the table headers in order ...
+    #if {[info exists newCol]} {unset newCol}
+    #foreach col $headerParent(headerList) {
+    #    lappend newCol '$col'
+    #}
+    #set job(db,ColOrder) [join $newCol ,]
     
     # This must be a balanced list
     # Only replace known 'bad' values. Commas, Apostrophe, and Quotes. Further filtering will be done by the user.
@@ -363,8 +363,8 @@ proc importFiles::processFile {win} {
             lappend header_order $hdr_
         }
         set sysGUID [ea::tools::getGUID]
-        set header_order "SysAddresses_ID $header_order"
-        set newRow "$sysGUID $newRow"
+        set header_order "SysAddresses_ID SysDateEntered $header_order"
+        set newRow "'$sysGUID' '[ea::date::getTodaysDate -db]' $newRow"
         
 
         # Insert data into the DB
@@ -373,6 +373,8 @@ proc importFiles::processFile {win} {
         $job(db,Name) eval "INSERT INTO Addresses ([join $header_order ,]) VALUES ([join $newRow ,])"
         #break
     }
+    
+    importFiles::insertIntoGUI $files(tab3f2).tbl
 
     #    for {set x 0} {$headerParent(ColumnCount) > $x} {incr x} {
     #        set ColumnName [$files(tab3f2).tbl columncget $x -name]
@@ -501,6 +503,93 @@ proc importFiles::processFile {win} {
     #IFMenus::createToggleMenu $files(tab3f2).tbl
     #${log}::debug --END-- [info level 1]
 } ;# importFiles::processFile
+
+proc importFiles::insertIntoGUI {wid} {
+    #****f* insertIntoGUI/importFiles
+    # CREATION DATE
+    #   06/02/2015 (Tuesday Jun 02)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # USAGE
+    #   importFiles::insertIntoGUI <wid> 
+    #
+    # FUNCTION
+    #	Creates the required columns in the tablelist widget; then inserts the data.
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # EXAMPLE
+    #   importFiles::insertIntoGUI 
+    #
+    # NOTES
+    #   
+    #  
+    # SEE ALSO
+    #   
+    #   
+    #***
+    #proc importFiles::insertIntoGUI {wid} {}
+    global log headerParent job
+
+    # Get columns that are:
+    #   Not Empty
+    #   Do not contain 'Never' for the display configuration
+    #   If data does not exist, check the display configuration to see if it is set for 'Always'
+    
+    # Create list of columns that do not have any data ...
+    if {[info exists hdrs_show]} {unset hdrs_show}
+    foreach hdr $headerParent(headerList) {
+        # Check the column config
+        set configValue [db eval "SELECT widDisplayType from HeadersConfig where dbColName='$hdr'"]
+
+        switch -- $configValue {
+            "Always"    {lappend hdrs_show $hdr}
+            "Dynamic"   {
+                            set values [$job(db,Name) eval "SELECT $hdr from Addresses WHERE ifnull($hdr, '') = ''"]
+                            if {$values == ""} {lappend hdrs_show $hdr}
+            }
+            "Never"     {continue}
+            default     {${log}::critical insertIntoGUI - $configValue is not a valid switch option!}
+        }
+    }
+    
+    # Insert the columns into the widget
+    foreach col $hdrs_show {
+        # get the config values
+        set hdr_config [db eval "SELECT widStartColWidth, widLabelName, widLabelAlignment, widColAlignment, widWidget, widDataType from HeadersConfig where dbColName='$col'"]
+        $wid insertcolumns end [lindex $hdr_config 0] [lindex $hdr_config 1]
+        $wid columnconfigure end -name $col \
+                                -labelalign [string tolower [lindex $hdr_config 2]] \
+                                -align [string tolower [lindex $hdr_config 3]] \
+                                -maxwidth 0 \
+                                -sortcommand [string tolower [lindex $hdr_config 5]] \
+                                -sortmode [string tolower [lindex $hdr_config 5]] \
+                                -editwindow [lindex $hdr_config 4]
+                                
+    }
+    
+    # insert the data into the widget
+    foreach hdr $hdrs_show {
+        lappend hdr_list $$hdr 
+    }
+    
+    $job(db,Name) eval "SELECT [join $hdrs_show ,] from Addresses" {
+        $wid insert end [subst $hdr_list]
+        ${log}::debug ROW: [subst $hdr_list]
+    }
+
+} ;# importFiles::insertIntoGUI $files(tab3f2).tbl
 
 
 proc importFiles::highlightAllRecords {tbl} {

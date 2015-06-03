@@ -246,6 +246,7 @@ proc job::db::createDB {args} {
         {SysAddressParentID TEXT} \
         {SysAddressChildID  INTEGER} \
         {SysActive          BOOLEAN DEFAULT (1) NOT NULL ON CONFLICT ROLLBACK} \
+        {SysDateEntered     DATE    NOT NULL ON CONFLICT ROLLBACK} \
         {Versions           INTEGER REFERENCES Versions (Version_ID) ON UPDATE CASCADE} \
         {SysExportTypeID    INTEGER REFERENCES ExportType (ExportType_ID) ON UPDATE CASCADE}]
     
