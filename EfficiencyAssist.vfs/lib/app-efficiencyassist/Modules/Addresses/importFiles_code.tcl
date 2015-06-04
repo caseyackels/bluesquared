@@ -266,7 +266,7 @@ proc importFiles::processFile {win} {
     # Index (i.e. 01, from 01_HeaderName)
     set FileHeaders [lsort [array names position]]
     #${log}::debug FileHeaders: $FileHeaders
-    
+
     
     # launch progress bar window
     eAssistHelper::importProgBar
@@ -276,15 +276,7 @@ proc importFiles::processFile {win} {
     set max [expr {$process(numOfRecords) + 1}]
     $::gwin(importpbar) configure -maximum $max
     ${log}::debug configuring Progress Bar with -maximum $max
-    #update
-    
-    ## Put the table headers in order ...
-    #if {[info exists newCol]} {unset newCol}
-    #foreach col $headerParent(headerList) {
-    #    lappend newCol '$col'
-    #}
-    #set job(db,ColOrder) [join $newCol ,]
-    
+
     # This must be a balanced list
     # Only replace known 'bad' values. Commas, Apostrophe, and Quotes. Further filtering will be done by the user.
     set replaceBadChars [list ' "" , " " \" " "]
