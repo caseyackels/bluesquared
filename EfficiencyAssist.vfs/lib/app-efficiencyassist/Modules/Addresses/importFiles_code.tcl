@@ -482,13 +482,13 @@ proc importFiles::processFile {win} {
     #}
     #
     ### Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
-    #if {[$files(tab3f2).tbl findcolumnname OrderNumber] == -1} {
-    #    $files(tab3f2).tbl insertcolumns 0 0 "..."
-    #    $files(tab3f2).tbl columnconfigure 0 -name "OrderNumber" -labelalign center
-    #}
+    if {[$files(tab3f2).tbl findcolumnname OrderNumber] == -1} {
+        $files(tab3f2).tbl insertcolumns 0 0 "..."
+        $files(tab3f2).tbl columnconfigure 0 -name "OrderNumber" -labelalign center
+    }
     #
     ## Enable menu items
-    #importFiles::enableMenuItems
+    importFiles::enableMenuItems
     #
     ## Insert the data into the tablelist widget ...
     #set totalRows [$job(db,Name) eval "SELECT COUNT(*) FROM Addresses"]
@@ -510,7 +510,7 @@ proc importFiles::processFile {win} {
     #
     ### Initialize popup menus
     ##IFMenus::tblPopup $files(tab3f2).tbl browse .tblMenu
-    #IFMenus::createToggleMenu $files(tab3f2).tbl
+    IFMenus::createToggleMenu $files(tab3f2).tbl
     #${log}::debug --END-- [info level 1]
 } ;# importFiles::processFile
 
@@ -578,16 +578,47 @@ proc importFiles::insertIntoGUI {wid} {
     # The tablelist widget is initialized in importFiles_gui.tcl [importFiles::eAssistGUI]
     foreach col $hdrs_show {
         # get the config values
-        set hdr_config [db eval "SELECT widStartColWidth, widLabelName, widLabelAlignment, widColAlignment, widWidget, widDataType from HeadersConfig where dbColName='$col'"]
-        $wid insertcolumns end [lindex $hdr_config 0] [lindex $hdr_config 1]
+        set hdr_config [db eval "SELECT widStartColWidth, widLabelName, widLabelAlignment, widColAlignment, widWidget, widDataType, widMaxWidth, widRequired, widResizeToLongestEntry from HeadersConfig where dbColName='$col'"]
+        
+        # Get the default start width, or the length of the label text; whichever is greater wins. (we don't want the label text cut off)
+        set resizeToLongestEntry [lindex $hdr_config 8]
+        set lenWidLabelName [string length [lindex $hdr_config 1]]
+        set widStartColWidth [lindex $hdr_config 0]
+        
+        
+        if {$lenWidLabelName >= $widStartColWidth} {
+            set colWidth $lenWidLabelName
+        } else {
+            set colWidth $widStartColWidth
+        }
+        
+        # Make sure we don't mistakenly set a dynamic width column shorter than the label text.
+        # If we are in a dynamic width column, and the strings are less than the text label, we do not honor the dynamic setting.
+        if {$resizeToLongestEntry == 1 && $lenWidLabelName != $colWidth} {
+            set colWidth 0
+        } else {
+            # Increase colWidth by 1 to help make the column a bit wider
+            incr colWidth
+        }
+        
+        ${log}::debug Using width: $colWidth - Column: $col
+        
+        $wid insertcolumns end $colWidth [lindex $hdr_config 1]
         $wid columnconfigure end -name $col \
                                 -labelalign [string tolower [lindex $hdr_config 2]] \
                                 -align [string tolower [lindex $hdr_config 3]] \
-                                -maxwidth 0 \
+                                -maxwidth [string tolower [lindex $hdr_config 6]] \
                                 -sortcommand [string tolower [lindex $hdr_config 5]] \
                                 -sortmode [string tolower [lindex $hdr_config 5]] \
-                                -editwindow [lindex $hdr_config 4]
-                                
+                                -width $colWidth
+        
+        # If this is a required column; colorize the label text
+        if {[lindex $hdr_config 7] == 1} {
+            $wid columnconfigure end -labelforeground red
+        }
+        
+
+        
     }
     
     ## insert the data into the widget
