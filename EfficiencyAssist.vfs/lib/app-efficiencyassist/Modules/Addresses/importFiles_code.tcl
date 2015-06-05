@@ -484,7 +484,7 @@ proc importFiles::processFile {win} {
     ### Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
     if {[$files(tab3f2).tbl findcolumnname OrderNumber] == -1} {
         $files(tab3f2).tbl insertcolumns 0 0 "..."
-        $files(tab3f2).tbl columnconfigure 0 -name "OrderNumber" -labelalign center
+        $files(tab3f2).tbl columnconfigure 0 -name "OrderNumber" -labelalign center -showlinenumbers 1
     }
     #
     ## Enable menu items
@@ -501,9 +501,9 @@ proc importFiles::processFile {win} {
     #
     ## Get total copies
     ##set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
-    #job::db::getTotalCopies
+    job::db::getTotalCopies
     #
-    #importFiles::highlightAllRecords $files(tab3f2).tbl
+    importFiles::highlightAllRecords $files(tab3f2).tbl
     #
     ## Destroy the progress bar window
     #eAssistHelper::importProgBar destroy

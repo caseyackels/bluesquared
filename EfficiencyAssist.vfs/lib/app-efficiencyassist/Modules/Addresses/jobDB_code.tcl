@@ -79,7 +79,7 @@ proc job::db::createDB {args} {
     #   job::db::insertTitleInfo, job::db::insertJobInfo
     #   
     #***
-    global log job user
+    global log job user w
     set currentProcName [lindex [info level 0] 0]
     
     foreach {key value} $args {
@@ -126,20 +126,27 @@ proc job::db::createDB {args} {
         ${log}::critical $currentProcName [info level 0] \nDid not pass sufficient number of args: [llength $args] should be 22
         return
     }
-
-
-    ${log}::notice Creating a new database for: $tCustCode $tName
-    #${log}::debug Formatted file name: $tCustCode, $tName, [join "$tCustCode [join [split $tName " "] ""]" _]
     
     set job(db,Name) [join "$tCustCode [join [split $tName " "] ""]" _]
     
+    # Update tab title
+    $w(nbk) tab $w(nbk).f3 -text "$tName / $jName"
+    
+    # Check to see if the db already exists; if it does launch the updateTitleDb proc
+    set dbExists [file exists [file join $tSaveLocation $job(db,Name).db]]
+    
+    if {$dbExists} {${log}::debug Database Exists, Updating existing data; return}
+
+
+    ${log}::notice Creating a new database for: $tCustCode $tName
+
     # Create the database
-    #sqlite3 $job(db,Name) [file join $tSaveLocation $job(db,Name).db] -create 1
+    sqlite3 $job(db,Name) [file join $tSaveLocation $job(db,Name).db] -create 1
     # For Testing
-    sqlite3 $job(db,Name) $job(db,Name).db -create 1
+    #sqlite3 $job(db,Name) $job(db,Name).db -create 1
     
     $job(db,Name) eval {
-        CREATE TABLE Versions (
+        CREATE TABLE IF NOT EXISTS Versions (
             Version_ID    INTEGER PRIMARY KEY AUTOINCREMENT,
             VersionName   TEXT    UNIQUE ON CONFLICT ROLLBACK
                                   NOT NULL ON CONFLICT ROLLBACK,
@@ -148,7 +155,7 @@ proc job::db::createDB {args} {
         );
         
         -- # This table should be pre-populated, the only thing the user shoud be able to change is the "IncludeOnReports" column.
-        CREATE TABLE NoteTypes (
+        CREATE TABLE IF NOT EXISTS NoteTypes (
             NoteType_ID      INTEGER PRIMARY KEY AUTOINCREMENT,
             NoteType         TEXT    NOT NULL ON CONFLICT ROLLBACK,
             IncludeOnReports BOOLEAN NOT NULL
@@ -158,7 +165,7 @@ proc job::db::createDB {args} {
         );
         
 
-        CREATE TABLE Notes (
+        CREATE TABLE IF NOT EXISTS Notes (
             Notes_ID   TEXT    PRIMARY KEY,
             HistoryID  INTEGER NOT NULL ON CONFLICT ROLLBACK
                                REFERENCES History (History_ID) ON UPDATE CASCADE,
@@ -169,7 +176,7 @@ proc job::db::createDB {args} {
                                NOT NULL ON CONFLICT ROLLBACK
         );
 
-        CREATE TABLE History (
+        CREATE TABLE IF NOT EXISTS History (
             History_ID TEXT PRIMARY KEY,
             HistUser   TEXT NOT NULL ON CONFLICT ROLLBACK,
             HistDate   DATE NOT NULL ON CONFLICT ROLLBACK,
@@ -177,20 +184,20 @@ proc job::db::createDB {args} {
             HistSysLog TEXT
         );
 
-        CREATE TABLE ExportTypes (
+        CREATE TABLE IF NOT EXISTS ExportTypes (
             ExportType_ID INTEGER PRIMARY KEY AUTOINCREMENT,
             ExportType    TEXT    NOT NULL ON CONFLICT ROLLBACK,
             Active        BOOLEAN DEFAULT (1) 
         );
         
-        CREATE TABLE SysInfo (
+        CREATE TABLE IF NOT EXISTS SysInfo (
             SysInfo_ID INTEGER PRIMARY KEY AUTOINCREMENT,
             SysSchema  INTEGER UNIQUE
                                NOT NULL,
             HistoryID  TEXT    REFERENCES History (History_ID) ON UPDATE CASCADE
         );
         
-        CREATE TABLE TitleInformation (
+        CREATE TABLE IF NOT EXISTS TitleInformation (
             TitleInformation_ID INTEGER PRIMARY KEY AUTOINCREMENT,
             NotesID             TEXT    REFERENCES Notes (Notes_ID) ON UPDATE CASCADE,
             HistoryID           TEXT    REFERENCES History (History_ID) ON UPDATE CASCADE
@@ -201,7 +208,7 @@ proc job::db::createDB {args} {
             TitleSaveLocation   TEXT
         );
         
-        CREATE TABLE JobInformation (
+        CREATE TABLE IF NOT EXISTS JobInformation (
             --# JobInformation_ID = Job Number
             JobInformation_ID  TEXT    UNIQUE ON CONFLICT ROLLBACK
                                        NOT NULL ON CONFLICT ROLLBACK
@@ -215,7 +222,7 @@ proc job::db::createDB {args} {
                                         NOT NULL ON CONFLICT ROLLBACK
         );
         
-        CREATE TABLE Published (
+        CREATE TABLE IF NOT EXISTS Published (
             Published_ID     INTEGER PRIMARY KEY AUTOINCREMENT,
             NotesID          TEXT    REFERENCES Notes (Notes_ID) ON UPDATE CASCADE,
             JobInformationID TEXT    REFERENCES JobInformation (JobInformation_ID) ON UPDATE CASCADE
@@ -226,11 +233,11 @@ proc job::db::createDB {args} {
             PublishedTime    TIME    NOT NULL ON CONFLICT ROLLBACK
         );
         
-        CREATE TABLE ShippingOrders (
+        CREATE TABLE IF NOT EXISTS ShippingOrders (
             JobInformationID TEXT NOT NULL ON CONFLICT ROLLBACK
                                     REFERENCES JobInformation (JobInformation_ID) ON UPDATE CASCADE,
             AddressID        TEXT NOT NULL ON CONFLICT ROLLBACK
-                                  REFERENCES Addresses (Addresses_ID) ON UPDATE CASCADE
+                                    REFERENCES Addresses (Addresses_ID) ON UPDATE CASCADE
         );
     }
     
@@ -257,7 +264,7 @@ proc job::db::createDB {args} {
         lappend cTable "$dbColName $dbDataType"
     }
 
-    $job(db,Name) eval "CREATE TABLE Addresses ( [join $cTable ,] )"
+    $job(db,Name) eval "CREATE TABLE IF NOT EXISTS Addresses ( [join $cTable ,] )"
     
     
     job::db::insertDefaultData
@@ -841,7 +848,7 @@ proc job::db::getTotalCopies {} {
     #***
     global log job
 
-    set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses Quantity -statusName Status -status 1]
+    set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses Quantity -statusName SysActive -status 1]
     
 } ;# job::db::getTotalCopies
 
@@ -862,7 +869,8 @@ proc job::db::insertDefaultData {} {
     #   job::db::insertDefaultData  
     #
     # FUNCTION
-    #	Inserts default data into these tables: Versions, NoteTypes and ExportType
+    #	Inserts default data upon Title db creation
+    #	tables: Versions, NoteTypes and ExportType
     #   
     #   
     # CHILDREN
@@ -1022,7 +1030,8 @@ proc job::db::insertHistory {args} {
     #   
     #
     # SYNOPSIS
-    #   job::db::insertHistory args 
+    #   job::db::insertHistory args
+    #   args = note for history transaction. e.g. "Removed address assignment from job #?????"
     #
     # FUNCTION
     #	Inserts data into the history table, returns the HistoryID (GUID)
