@@ -619,6 +619,9 @@ proc Disthelper_Code::writeOutPut {} {
             if {$11_Phone eq ""} {
                 set 11_Phone 5037909100
             }
+            if {$03_Attention eq ""} {
+                set 03_Attention MANAGER
+            }
         }
         
 

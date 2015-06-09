@@ -135,21 +135,21 @@ proc disthelper::parentGUI {} {
     ##
     ## If this is the first startup for the machine on this version, we should launch the "New Feature Dialog"
     ##
-    if {$settings(newSettingsTxt) eq no} {
-        ### Check version and patchLevel to see if we are greater than those numbers, if so display the new version dialog.
-        #Error_Message::newVersion buttontxt buttoncmd VersionTxt
-        set mySettings(FullVersion) $program(Version).$program(PatchLevel)
-        Error_Message::newVersion [mc "View Settings"] "Disthelper_Preferences::prefGUI" This version changes how your files are opened and saved.\nPlease ensure that the files will save to an appropriate location.\nWould you like to go there now?
-        #Error_Message::errorMsg saveSettings1
-    }
-    
-    if {$settings(newSettingsTxt) eq yes} {
-        if {[info exists mySettings(FullVersion)]} {
-            #if {$settings(FullVersion) ne $program(Version).$program(PatchLevel)} {}
-            if {[string match $mySettings(FullVersion) $program(Version).$program(PatchLevel)] ne 1} {
-                Error_Message::newVersion "" "" You are using a new update_1!
-            }
-        }
-    }
+    #if {$settings(newSettingsTxt) eq no} {
+    #    ### Check version and patchLevel to see if we are greater than those numbers, if so display the new version dialog.
+    #    #Error_Message::newVersion buttontxt buttoncmd VersionTxt
+    #    set mySettings(FullVersion) $program(Version).$program(PatchLevel)
+    #    Error_Message::newVersion [mc "View Settings"] "Disthelper_Preferences::prefGUI" This version changes how your files are opened and saved.\nPlease ensure that the files will save to an appropriate location.\nWould you like to go there now?
+    #    #Error_Message::errorMsg saveSettings1
+    #}
+    #
+    #if {$settings(newSettingsTxt) eq yes} {
+    #    if {[info exists mySettings(FullVersion)]} {
+    #        #if {$settings(FullVersion) ne $program(Version).$program(PatchLevel)} {}
+    #        if {[string match $mySettings(FullVersion) $program(Version).$program(PatchLevel)] ne 1} {
+    #            Error_Message::newVersion "" "" You are using a new update_1!
+    #        }
+    #    }
+    #}
 
 } ;# End of parentGUI
