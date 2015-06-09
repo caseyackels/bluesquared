@@ -220,6 +220,11 @@ proc 'distHelper_initVariables {} {
         # Set possible pre paid shipvia codes
         set settings(shipviaPP) [list 017 018]
     }
+    
+    # If changing this, you must also change the packingtype assignment in Disthelper_Helper::shipVia
+    if {![info exists settings(shipviaUSPS)]} {
+        set settings(shipviaUSPS) [list 201 202 203 204 205 208 213 215]
+    }
 
     if {![info exists settings(BoxTareWeight)]} {
         # Box Tare Weight

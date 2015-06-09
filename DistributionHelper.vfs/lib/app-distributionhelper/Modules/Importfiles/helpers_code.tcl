@@ -56,7 +56,7 @@ proc Disthelper_Helper::resetVars {args} {
     # SEE ALSO
     #
     #***
-    global GL_file GS_file GS_address GS_job GS_ship tempVars
+    global GL_file GS_file GS_address GS_job GS_ship tempVars maxtrix
 
     switch -- $args {
 	-resetGUI {
@@ -81,7 +81,7 @@ proc Disthelper_Helper::resetVars {args} {
 		    }
 
 		    array unset importFile
-
+            
 		    # Clear out the listbox
 		    .container.frame1.listbox delete 0 end
 
@@ -606,6 +606,7 @@ proc Disthelper_Helper::shipVia {l_line name} {
     } else {
                 set shipVia [list [lindex $l_line $importFile($name)]]
     }
+    
     
     switch -- $shipVia {
         201     {set packtype MediumFlatRateBox}

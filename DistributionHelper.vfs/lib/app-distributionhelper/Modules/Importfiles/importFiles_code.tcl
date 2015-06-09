@@ -319,6 +319,8 @@ proc Disthelper_Code::writeOutPut {} {
     #
     #***
     global GS_job GS_ship GS_address GL_file GS_file settings mySettings program importFile matrix intl ship
+    
+    if {[info exists matrix(importFile)]} {unset matrix(importFile)}
 
     # Get the indices of each element of the address/shipment information. Later we will use this to map the data.
     array set importFile "
@@ -624,6 +626,15 @@ proc Disthelper_Code::writeOutPut {} {
             }
         }
         
+        # This handles the USPS ship via's. There isn't a PKGID field on these labels, so we need to prefix the partial box into the attention to name field.
+        # e.g qty5 MANAGER
+        # We will also truncate the name if it exceeds the 35 char limit
+        if {[lsearch $settings(shipviaUSPS) $01_shipVia] != -1} {
+            set 03_Attention [Disthelper_Code::processAddresses Attention "QTY[lindex $val 1] $03_Attention"]
+        }
+        
+        
+        
 
         for {set x 1} {$x <= $totalBoxes} {incr x} {
             'debug Writing to file...
@@ -779,6 +790,14 @@ proc Disthelper_Code::writeOutPut {} {
     # Set the file path and name
     set outFile [file join $mySettings(outFilePath) "$GS_file(Name) EA GENERATED"]
     set xfile [file nativename [file normalize $outFile]]
+    
+    # Check to see if the file exists already, if it does lets delete it
+    if {[file exists $xfile.xls]} {
+        puts "EXISTS: $xfile.xls"
+        file delete -force -- "$xfile.xls"
+        puts "EXISTS After Deletion: [file exists $xfile.xls]"
+    }
+    puts "llength on records: $"
 
     Disthelper_Helper::Excel $xfile
      
