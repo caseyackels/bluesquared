@@ -15,7 +15,7 @@ IF NOT EXIST Builds\ (MKDIR Builds)
 
 REM Find out what project the user wants to build
 ::CHOICE /C:123 /M "1=BoxLabels 2=Efficiency Assist 3=NextGen-RM" %1
-set /p project= 1=BoxLabels 2=Efficiency Assist 3=ReceiptMaker NG ^>
+set /p project= 1=BoxLabels 2=Efficiency Assist 3=ReceiptMaker NG 4=DistributionHelper ^>
 set /p wrap= Do you want to build an executable? 1/0 ^>
 set /p installer= Would you like to create an installer? 1/0 ^>
 
@@ -23,12 +23,22 @@ set /p installer= Would you like to create an installer? 1/0 ^>
 ECHO.
 
 REM - Whatever number the user presses, we will then go to that category
+IF %project% == 4 GOTO DISTHELPER
 IF %project% == 3 GOTO NEXTGEN-RM
 IF %project% == 2 GOTO EA
 IF %project% == 1 GOTO BLUESQUIRREL
 GOTO END
 
 ECHO.
+
+:DISTHELPER
+:: Set program name
+set programName=DistributionHelper
+set programEXE=DistributionHelper.vfs
+
+set thirdparty=about autoscroll csv debug IconThemes img log md5 md5crypt sqlite3_3801 tablelist5.13 tcom3.9 tkdnd2.2 tooltip twapi_4.1-dev mime smtpd base64 cawt_1.0.7 cmdline struct report
+
+GOTO BUILDPROJECT
 
 :NEXTGEN-RM
 :: Set program name
@@ -108,6 +118,8 @@ ECHO Generating executable file...
 ECHO Please wait...
 cd Builds
 ..\base-tcl8.6-thread-win32-ix86.exe ..\sdx.kit wrap %programName%.exe -runtime ..\base-tk8.6-thread-win32-ix86.exe -writable
+ping -n 5 127.0.0.1>nul
+
 ::..\tclkitsh858.exe ..\sdx.kit wrap %programName%.exe -runtime ..\tclkit-858.exe -writable
 ::..\tclkit-tcl-win64-86.exe ..\sdx.kit wrap %programName%.exe -runtime ..\tclkit-tk-win64-86.exe
 

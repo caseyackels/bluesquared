@@ -78,6 +78,7 @@ proc 'distHelper_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tablelist5.4]
     lappend ::auto_path [file join [file dirname [info script]] Libraries tcom3.9]
     #lappend ::auto_path [file join [file dirname [info script]] Libraries twapi]
+    lappend ::auto_path [file join [file dirname [info script]] Libraries twapi_4.1-dev]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tooltip]
     lappend ::auto_path [file join [file dirname [info script]] Libraries about]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries debug]
@@ -100,7 +101,7 @@ proc 'distHelper_sourceReqdFiles {} {
 	package require tkdnd
 	package require Tablelist_tile 5.4
     package require tcom
-    #package require twapi
+    package require twapi
 	package require tooltip
 	package require autoscroll
 	package require csv
@@ -119,7 +120,7 @@ proc 'distHelper_sourceReqdFiles {} {
     
     loadSuffix ;# Initialize variables from StreetSuffixState.tcl
     
-    load [file join [file dirname [info script]] Libraries twapi twapi-x86-3.1.17.dll]
+    #load [file join [file dirname [info script]] Libraries twapi twapi-x86-3.1.17.dll]
     #source [file join [file dirname [info script]] Libraries debug.tcl]
 
         namespace import 'debug::'debug
@@ -151,7 +152,7 @@ proc 'distHelper_initVariables {} {
     # SEE ALSO
     #
     #***
-    global settings header mySettings env intl ship
+    global settings header mySettings env intl ship international
 
     # hackish, but this will allow us to add new defaults/settings without killing an existing config file.
     
@@ -340,6 +341,55 @@ proc 'distHelper_initVariables {} {
         # This column is used when we use address cleansing. We run it through Process Shipper once, then open it again in EA.
         set header(residential) [list ResidentialDelivery]
     }
+    
+    # International Array 
+    if {![info exists international(itemDesc,check)]} {
+        set international(itemDesc,check) 1
+    }
+    
+    if {![info exists international(uom)]} {
+        set international(uom) Each
+    }
+    
+    if {![info exists international(dutiesPayer)]} {
+        set international(dutiesPayer) SENDER
+    }
+    
+    if {![info exists international(dutiesPayerAcct)]} {
+        set international(dutiesPayerAcct) ""
+    }
+    
+    if {![info exists international(itemNum,check)]} {
+        set international(itemNum,check) 1
+    }
+    
+    if {![info exists international(itemQty,check)]} {
+        set international(itemQty,check) 1
+    }
+    
+    if {![info exists international(license)]} {
+        set international(license) NLR
+    }
+    
+    if {![info exists international(licenseDate,check)]} {
+        set international(licenseDate,check) 1
+    }
+    
+    if {![info exists international(countryOfOrigin)]} {
+        set international(countryOfOrigin) US
+    }
+    
+    if {![info exists international(termsOfShipment)]} {
+        set international(termsOfShipment) DDP
+    }
+    
+    if {![info exists international(unitValue)]} {
+        set international(unitValue) 1
+    }
+    
+    if {![info exists international(itemWeight,check)]} {
+        set international(itemWeight,check) 1
+    }  
     
 }
 

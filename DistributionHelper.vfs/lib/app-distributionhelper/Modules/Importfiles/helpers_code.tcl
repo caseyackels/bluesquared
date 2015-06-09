@@ -580,7 +580,7 @@ proc Disthelper_Helper::shipVia {l_line name} {
     # SEE ALSO
     #
     #***
-    global importFile settings GS_job header customer3P
+    global importFile settings GS_job header customer3P intl
     
     puts "Starting ShipVia"
 
@@ -603,13 +603,27 @@ proc Disthelper_Helper::shipVia {l_line name} {
         for {set x $x} {$x<3} {incr x} {append prefix 0}
         set shipVia $prefix[list [lindex $l_line $importFile($name)]]
 
-        } else {
+    } else {
                 set shipVia [list [lindex $l_line $importFile($name)]]
-        }
-        
-        # Fill the 3P variables with dummy data, it will be over written if we are actually doing 3P
-        set GS_job(3PCode) [list ""]
-        set GS_job(3PAccount) [list ""]
+    }
+    
+    switch -- $shipVia {
+        201     {set packtype MediumFlatRateBox}
+        202     {set packtype MediumFlatRateBox}
+        203     {set packtype Flat}
+        204     {set packtype Flat}
+        205     {set packtype Parcel}
+        208     {set packtype Parcel}
+        213     {set packtype Letter}
+        215     {set packtype Parcel}
+        default {set packtype ""}
+    }
+    
+    set intl(13_PackingType) $packtype
+
+    # Fill the 3P variables with dummy data, it will be over written if we are actually doing 3P
+    set GS_job(3PCode) [list ""]
+    set GS_job(3PAccount) [list ""]
 
     # Detect if we have a 3rd party ship via code
     if {[lsearch -nocase $settings(shipvia3P) $shipVia] != -1} {
@@ -629,6 +643,8 @@ proc Disthelper_Helper::shipVia {l_line name} {
         }
     }
 
+    puts "packtype: $packtype"
+    puts "PackingType: $intl(13_PackingType)"
     puts "shipVia_***: $shipVia"
     return [list $shipVia $GS_job(3PCode) $GS_job(3PAccount)]
 } ;# End Disthelper_Helper::shipVia

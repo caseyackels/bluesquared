@@ -347,15 +347,15 @@ proc Disthelper_Preferences::prefGUI {} {
     ttk::entry $tab5.contactEntry -textvariable company(contact)
     
     ttk::label $tab5.addr1Text -text [mc "AddressLine1"]
-    ttk::entry $tab5.addr1Entry -textvariable company(addr1)
+    ttk::entry $tab5.addr1Entry -textvariable company(address1)
     
     set company(addr2) ""
     ttk::label $tab5.addr2Text -text [mc "AddressLine2"]
-    ttk::entry $tab5.addr2Entry -textvariable company(addr2)
+    ttk::entry $tab5.addr2Entry -textvariable company(address2)
     
     set company(addr3) ""
     ttk::label $tab5.addr3Text -text [mc "AddressLine3"]
-    ttk::entry $tab5.addr3Entry -textvariable company(addr3)
+    ttk::entry $tab5.addr3Entry -textvariable company(address3)
     
     ttk::label $tab5.cityText -text [mc "City"]
     ttk::entry $tab5.cityEntry -textvariable company(city)
@@ -421,7 +421,6 @@ proc Disthelper_Preferences::prefGUI {} {
     ########################################################
     
     #ItemDescription
-        set international(itemDesc,check) 1
     ttk::label $tab6_left.itemDescText -text [mc "Item Description"]
     ttk::entry $tab6_left.itemDescEntry -textvariable international(itemDesc)
     ttk::checkbutton $tab6_left.itemDescCheck -text [mc "Use Default"] -variable international(itemDesc,check) \

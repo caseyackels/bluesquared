@@ -335,8 +335,8 @@ proc Disthelper_Code::international {country pieceweight date boxqty} {
             10_TermsOfShipment ""
             11_UnitValue ""
             12_ItemWeight ""
-            13_PackingType ""
         }
+        #13_PackingType ""
 
         array set ship {
             01_ShipFromName ""
@@ -371,12 +371,12 @@ proc Disthelper_Code::international {country pieceweight date boxqty} {
         set intl(10_TermsOfShipment) $international(termsOfShipment)
         set intl(11_UnitValue) $international(unitValue)
         set intl(12_ItemWeight) $pieceweight
-        set intl(13_PackingType) "" ;#$international(packingType)
+        #set intl(13_PackingType) "" ;#$international(packingType)
         
         set ship(01_ShipFromName) $company(name)
         set ship(02_ShipFromContact) $company(contact)
-        set ship(03_ShipFromAddressLine1) $company(addr1)
-        set ship(04_ShipFromAddressLine2) $company(addr2)
+        set ship(03_ShipFromAddressLine1) $company(address1)
+        set ship(04_ShipFromAddressLine2) $company(address2)
         set ship(05_ShipFromCity) $company(city)
         set ship(06_ShipFromState) $company(state)
         set ship(07_ShipFromCountry) $company(country)
