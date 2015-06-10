@@ -135,7 +135,7 @@ proc job::db::createDB {args} {
     # Check to see if the db already exists; if it does launch the updateTitleDb proc
     set dbExists [file exists [file join $tSaveLocation $job(db,Name).db]]
     
-    if {$dbExists} {${log}::debug Database Exists, Updating existing data; return}
+    if {$dbExists} {${log}::debug Database Exists, Updating existing data; job::db::UpdateJobData; return}
 
 
     ${log}::notice Creating a new database for: $tCustCode $tName
