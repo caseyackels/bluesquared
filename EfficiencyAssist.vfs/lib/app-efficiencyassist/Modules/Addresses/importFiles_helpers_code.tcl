@@ -289,7 +289,7 @@ proc eAssistHelper::resetImportInterface {args} {
     #
     #***
     global log w process position
-    ${log}::debug --START -- [info level 1]
+   # ${log}::debug --START -- [info level 1]
 	
 	
 	if {$args == 1} {
@@ -306,7 +306,7 @@ proc eAssistHelper::resetImportInterface {args} {
 		importFiles::eAssistGUI
 	}
 	
-    ${log}::debug --END -- [info level 1]
+    #${log}::debug --END -- [info level 1]
 } ;# eAssistHelper::resetImportInterface
 
 

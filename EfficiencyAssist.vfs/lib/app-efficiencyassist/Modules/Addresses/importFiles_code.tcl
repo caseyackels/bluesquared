@@ -899,73 +899,73 @@ proc importFiles::endCmd {tbl row col text} {
 } ;# importFiles::endCmd
 
 
-proc importFiles::insertColumns {tbl} {
-    #****f* insertColumns/importFiles
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2011-2014 Casey Ackels
-    #
-    # FUNCTION
-    #	Insert columns before populating them with data
-    #
-    # SYNOPSIS
-    #   importFiles::insertColumns <tbl>
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #	importFiles::eAssistGUI
-    #
-    # NOTES
-    #
-    # SEE ALSO
-    #
-    #***
-    global log headerParent headerParams dist
-    #${log}::debug --START-- [info level 1]
-
-    set x -1; #was -1
-    foreach hdr $headerParent(headerList) {
-        incr x
-        #set idx [lsearch -exact $headerParent(headerList) $hdr]
-        $tbl insertcolumns end 0 $hdr
-        
-        # Get the header configs that we'll need
-        set headerConfig [db eval "SELECT Widget,Required,DefaultWidth FROM Headers WHERE InternalHeaderName = '$hdr'"]
-        
-        # Set a default widget type
-        set myWidget [lindex $headerConfig 0]
-        if {$myWidget == ""} {
-            set myWidget ttk::entry
-        }
-        
-        
-        ## Query Headers table for values, then issue the columnconfigure command.
-        # Setting the label text color to red if it is a required column.
-        set reqCol [lindex $headerConfig 1]
-        
-        if {$reqCol == 1} {
-            set hdrFG red
-            } else {
-                set hdrFG black
-        }
-        
-        set widthCol [lindex $headerConfig 2]
-        if {$widthCol == ""} {set widthCol 0}
-
-        $tbl columnconfigure $x \
-                            -name $hdr \
-                            -labelalign center \
-                            -editable yes \
-                            -editwindow $myWidget \
-                            -labelforeground $hdrFG \
-                            -width $widthCol
-    }
-	
-} ;# importFiles::insertColumns
+#proc importFiles::insertColumns {tbl} {
+#    #****f* insertColumns/importFiles
+#    # AUTHOR
+#    #	Casey Ackels
+#    #
+#    # COPYRIGHT
+#    #	(c) 2011-2014 Casey Ackels
+#    #
+#    # FUNCTION
+#    #	Insert columns before populating them with data
+#    #
+#    # SYNOPSIS
+#    #   importFiles::insertColumns <tbl>
+#    #
+#    # CHILDREN
+#    #	N/A
+#    #
+#    # PARENTS
+#    #	importFiles::eAssistGUI
+#    #
+#    # NOTES
+#    #
+#    # SEE ALSO
+#    #
+#    #***
+#    global log headerParent headerParams dist
+#    #${log}::debug --START-- [info level 1]
+#
+#    set x -1; #was -1
+#    foreach hdr $headerParent(headerList) {
+#        incr x
+#        #set idx [lsearch -exact $headerParent(headerList) $hdr]
+#        $tbl insertcolumns end 0 $hdr
+#        
+#        # Get the header configs that we'll need
+#        set headerConfig [db eval "SELECT Widget,Required,DefaultWidth FROM Headers WHERE InternalHeaderName = '$hdr'"]
+#        
+#        # Set a default widget type
+#        set myWidget [lindex $headerConfig 0]
+#        if {$myWidget == ""} {
+#            set myWidget ttk::entry
+#        }
+#        
+#        
+#        ## Query Headers table for values, then issue the columnconfigure command.
+#        # Setting the label text color to red if it is a required column.
+#        set reqCol [lindex $headerConfig 1]
+#        
+#        if {$reqCol == 1} {
+#            set hdrFG red
+#            } else {
+#                set hdrFG black
+#        }
+#        
+#        set widthCol [lindex $headerConfig 2]
+#        if {$widthCol == ""} {set widthCol 0}
+#
+#        $tbl columnconfigure $x \
+#                            -name $hdr \
+#                            -labelalign center \
+#                            -editable yes \
+#                            -editwindow $myWidget \
+#                            -labelforeground $hdrFG \
+#                            -width $widthCol
+#    }
+#	
+#} ;# importFiles::insertColumns
 
 
 proc importFiles::enableMenuItems {} {
