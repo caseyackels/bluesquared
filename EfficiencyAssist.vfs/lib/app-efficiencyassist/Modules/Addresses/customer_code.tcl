@@ -623,9 +623,81 @@ proc customer::dbUpdateCustomer {} {
     # Insert the title, default status of '1'; so its active.
     set tmp(db,rowID) [eAssist_db::getRowID PubTitle TitleName='$job(Title)' AND CustID='$job(CustID)']
     eAssist_db::dbInsert -columnNames {TitleName CustID CSRID Status} -table PubTitle -data [list $job(Title) $job(CustID) $csrID 1]
-
-    
 } ;# customer::dbUpdateCustomer
+
+proc customer::dbUpdateJob {args} {
+    #****f* dbUpdateJob/customer
+    # CREATION DATE
+    #   06/25/2015 (Thursday Jun 25)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # USAGE
+    #   customer::dbUpdateJob args 
+    #
+    # FUNCTION
+    #	Inserts Job data into the database; this is used after the initial setup, i.e. when the user uses File > Open
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # EXAMPLE
+    #   customer::dbUpdateJob -jNumber <value>, -jName <value>, -jSaveLocation <value>, -jShipStart <value>, -jShipBal <value>, -jHistNote <value>
+    #
+    # NOTES
+    #   
+    #  
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log job
+
+    foreach {key value} $args {
+        switch -nocase $key {
+            -jNumber        {#${log}::debug -jNumber $value
+                                set jNumber $value
+            }
+            -jName          {#${log}::debug -jName $value
+                                set jName $value
+            }
+            -jSaveLocation  {#${log}::debug -jSaveLocation $value
+                                set jSaveLocation $value
+            }
+            -jShipStart     {#${log}::debug -jShipStart $value
+                                set jShipStart $value
+            }
+            -jShipBal       {#${log}::debug -jShipBal $value
+                                set jShipBal $value
+            }
+            -jHistNote      {#${log}::debug -jHistNote $value
+                                set jHistNote $value
+            }
+            default         {${log}::critical $currentProcName [info level 0] Passed invalid args $args; return}
+        }
+    }
+    
+
+    # Get titleID, set a HistNote if one wasn't passed and then issue the ::insertJobInfo command
+    set titleID [$job(db,Name) eval "SELECT max(TitleInformation_ID) from TitleInformation"]
+    
+    if {![info exists jHistNote] || $jHistNote == ""} {
+        set jHistNote [mc "Auto Generated: Job Information was updated by user"]
+    }
+    
+    # This command will figure out if we need to update or insert data into the the database.
+    job::db::insertJobInfo -jNumber $jNumber -jName $jName -jSaveLocation $jSaveLocation -jDateShipStart $jShipStart -jDateShipBalance $jShipBal -titleid $titleID -histnote $jHistNote
+    
+} ;# customer::dbUpdateJob
 
 
 proc customer::getFileSaveLocation {type} {

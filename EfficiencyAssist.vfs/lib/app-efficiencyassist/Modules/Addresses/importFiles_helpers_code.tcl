@@ -720,17 +720,24 @@ proc eAssistHelper::checkProjSetup {} {
     #***
     global log job
 	
-	foreach topic {SaveFileLocation CustID CSRName Title} {
-		if {$job($topic) eq ""} {incr i}
+	set modify new
+	foreach topic {TitleSaveFileLocation CustID CSRName Title Name Number JobSaveFileLocation} {
+		# Check to make sure the required variables are filled out.
+		if {$job($topic) eq ""} {
+				incr i; set modify edit
+				}
 	}
 
 	if {[info exists i]} {
-		${log}::debug The Project has not yet been set up yet, would you like to do it now?
+		#${log}::debug I: $i - Modify: $modify
+		#${log}::debug The Project has not yet been set up yet, would you like to do it now?
 		set answer [tk_messageBox -message [mc "Oops, we're missing information about the job."] \
 						-icon question -type yesno \
 						-detail [mc "Would you like to go to the Project Setup window?"]]
 				switch -- $answer {
-						yes {customer::projSetup}
+						yes {
+							customer::projSetup $modify
+							}
 						no {}
 				}
 		return 1

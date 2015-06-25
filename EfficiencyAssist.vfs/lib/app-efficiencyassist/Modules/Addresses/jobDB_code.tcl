@@ -133,9 +133,9 @@ proc job::db::createDB {args} {
     ea::helper::updateTabText "$tName"
     
     # Check to see if the db already exists; if it does launch the updateTitleDb proc
-    set dbExists [file exists [file join $tSaveLocation $job(db,Name).db]]
+    #set dbExists [file exists [file join $tSaveLocation $job(db,Name).db]]
     
-    if {$dbExists} {${log}::debug Database Exists, Updating existing data; job::db::UpdateJobData; return}
+    #if {$dbExists} {${log}::debug Database Exists, Updating existing data; job::db::UpdateJobData; return}
 
 
     ${log}::notice Creating a new database for: $tCustCode $tName
@@ -853,7 +853,7 @@ proc job::db::getTotalCopies {} {
     #***
     global log job
 
-    set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses Quantity -statusName SysActive -status 1]
+    set job(TotalCopies) [join [ea::db::countQuantity $job(db,Name) Addresses Quantity -statusName SysActive -status 1]]
     
 } ;# job::db::getTotalCopies
 
@@ -978,7 +978,7 @@ proc job::db::insertJobInfo {args} {
     #   job::db::insertJobInfo -jNumber <value> -jName <value> -jSaveLocation <value> -jDateShipStart <value> -jDateShipBalance <value> -titleid <value> -histnote <value>
     #
     # FUNCTION
-    #	Inserts the Job information
+    #	This proc will automatically figure out if we need to INSERT or UPDATE into the Database, then issue the correct command and syntax.
     #   
     #   
     # CHILDREN
@@ -989,7 +989,7 @@ proc job::db::insertJobInfo {args} {
     #   
     # NOTES
     #   DB Table: JobInformation, History
-    #   DB Columns: JobName, JobInformation_ID, JobSaveLocation, JobFirstShipDate, JobBalanceShipDate, TitleInformationID
+    #   DB Columns: JobName, JobInformation_ID, JobSaveLocation, JobFirstShipDate, JobBalanceShipDate, TitleInformationID, HistoryID
     #   
     # SEE ALSO
     #   
@@ -999,25 +999,56 @@ proc job::db::insertJobInfo {args} {
 
     if {[info exists hdrs]} {unset hdrs}
     if {[info exists values]} {unset values}
+    #set bypass yes
+    #set histnote ""
+    #${log}::debug args: [info level 0]
 
     foreach {key value} $args {
         switch -- $key {
-            -jNumber            {lappend hdrs JobInformation_ID; lappend values '$value'}
-            -jName              {lappend hdrs JobName; lappend values '$value'}
-            -jSaveLocation      {lappend hdrs JobSaveLocation; lappend values '$value'}
-            -jDateShipStart     {lappend hdrs JobFirstShipDate; lappend values '$value'}
-            -jDateShipBalance   {lappend hdrs JobBalanceShipDate; lappend values '$value'}
-            -titleid            {lappend hdrs TitleInformationID; lappend values $value; #No single quotes, this is an integer}
-            -histnote           {set histnote $value}
+            -jNumber            {lappend hdrs JobInformation_ID; lappend values '$value'; set jNumber '$value'}
+            -jName              {lappend hdrs JobName; lappend values '$value'; set jName '$value'}
+            -jSaveLocation      {lappend hdrs JobSaveLocation; lappend values '$value'; set jSaveLocation '$value'}
+            -jDateShipStart     {lappend hdrs JobFirstShipDate; lappend values '$value'; set jDateShipState '$value'}
+            -jDateShipBalance   {lappend hdrs JobBalanceShipDate; lappend values '$value'; set jDateShipBalance '$value'}
+            -titleid            {lappend hdrs TitleInformationID; lappend values $value; set titleid $value; # No single quotes, this is an integer}
+            -histnote           {lappend hdrs HistoryID; lappend values '[job::db::insertHistory $value]'}
         }
     }
-    lappend hdrs HistoryID
-    lappend values '[job::db::insertHistory $histnote]'
+    #lappend hdrs HistoryID
+    #lappend values '[job::db::insertHistory $histnote]'
+    #if {$bypass eq "yes"} {
+    #    set histnote '[job::db::insertHistory [mc "Auto Generated: Updated Job Information"]]'
+    #}
+    #${log}::debug histnote: $histnote . bypass $bypass
+    #return
+    # Check to see if we need to INSERT or UPDATE
+    # Check to see if job exists in the database
+    set jobExists [$job(db,Name) eval "SELECT JobInformation_ID from JobInformation where JobInformation_ID = $jNumber"]
+    
+    ${log}::debug Inserting into JobInformation, job exists? $jobExists
+    #${log}::debug hdrs: $hdrs
+    #${log}::debug VALUES([join $values ,])
+    
 
-    ${log}::debug Inserted Job Information into table: JobInformation
-    ${log}::debug hdrs: $hdrs
-    ${log}::debug VALUES([join $values ,])
-    $job(db,Name) eval "INSERT INTO JobInformation([join $hdrs ,]) VALUES([join $values ,])"
+    if {$jobExists != ""} {
+        ${log}::debug updating existing job info: $jNumber, $jName
+        $job(db,Name) eval "UPDATE JobInformation
+                                SET JobInformation_ID = $jNumber, JobName = $jName, JobSaveLocation = $jSaveLocation, TitleInformationID = $titleid; HistoryID = '$histnote'
+                                WHERE JobInformation_ID = $jNumber"
+    } else {
+        ${log}::debug inserting new info into db...
+        $job(db,Name) eval "INSERT INTO JobInformation([join $hdrs ,]) VALUES([join $values ,])"
+    }
+    
+    
+    #if {$blank eq insert} {
+    #    $job(db,Name) eval "INSERT INTO JobInformation([join $hdrs ,]) VALUES([join $values ,])"
+    #} elseif {$blank eq update} {
+    #    $job(db,Name) eval "UPDATE JobInformation
+    #                            SET JobInformation_ID = '$jNumber', JobName = '$jName', JobSaveLocation = '$jSaveLocation', JobFirstShipDate = '$jDateShipStart', JobBalanceShipDate = '$jDateShipBal'; TitleInformationID = $titleid; HistoryID = '$histnote'
+    #                            WHERE JobInformation_ID = $jNumber"
+    #}
+
     
 } ;# job::db::insertJobInfo -jNumber 304503 -jName {March 2015} -jSaveLocation {C:/tmp/job} -jDateShipStart 2015-05-20 -jDateShipBalance 2015-05-29 -titleid <value> -histnote {Inserting a new Job}
 

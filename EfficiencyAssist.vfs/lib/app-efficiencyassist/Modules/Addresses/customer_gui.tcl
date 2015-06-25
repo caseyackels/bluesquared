@@ -169,23 +169,25 @@ proc customer::projSetup {{modify new}} {
 					$btnBar.ok configure -command {customer::dbUpdateCustomer;
 															job::db::createDB -tName $job(Title) -tCSR $job(CSRName) -tSaveLocation $job(TitleSaveFileLocation) -tCustCode $job(CustID) -tHistNote {Initial Entry} -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal $job(JobBalanceShipDate) -jHistNote {Initial Job Entry} ;
 													destroy .ps}
-                    ${log}::debug NEW PROJECT - Clear all job text variables.
+                    #${log}::debug NEW PROJECT - Clear all job text variables.
                     if {[info exists job(db,Name)]} {
                         catch {close $job(db,Name)} ;# Close the db connection
                         foreach name [array names job] {
                             set job($name) ""
                         }
-                        ${log}::debug NEW PROJECT - Clear out tablelist widget
+                        #${log}::debug NEW PROJECT - Clear out tablelist widget
                         # Reset the inteface ...
                         eAssistHelper::resetImportInterface
                     }
                 }
         edit    {
-					$btnBar.ok configure -command {customer::dbUpdateCustomer; destroy .ps}
-					$btnBar.import configure -state disable -command {customer::dbUpdateCustomer; destroy .ps}
-                    ${log}::debug EDIT PROJECT - Disable 'IMPORT FILE' button
+					$btnBar.ok configure -command {customer::dbUpdateCustomer
+													customer::dbUpdateJob -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal $job(JobBalanceShipDate)
+													destroy .ps}
+					$btnBar.import configure -state disable ;#-command {customer::dbUpdateCustomer; destroy .ps}
+                    #${log}::debug EDIT PROJECT - Disable 'IMPORT FILE' button
                 }
-        default {${log}::debug PROJECT - Switch Arg not availabe: $modify for [info level 0]}       
+        default {${log}::debug [info level 0] - Switch Arg not availabe: $modify for [info level 0]}       
     }
     
     
