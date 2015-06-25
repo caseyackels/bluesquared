@@ -40,7 +40,7 @@ proc customer::projSetup {{modify new}} {
     #   customer::projSetup  
     #
     # FUNCTION
-    #	The Project Setup window is where you can create or edit a Title or Job.
+    #	The Project Setup window is where you can create or edit the Title or Job information.
     #   
     #   
     # CHILDREN
@@ -69,30 +69,7 @@ proc customer::projSetup {{modify new}} {
     wm geometry .ps +${locX}+${locY}
 
     set f1 [ttk::labelframe .ps.f1 -text [mc "Title Information"] -padding 10]
-    pack $f1 -fill both -expand yes -padx 5p -pady 5p
-    
-    # Two items for the btnState, one for each button. OK / Import File
-    switch -- $modify {
-        new     { set btnOKState normal; set btnIMPState normal
-                    ${log}::debug NEW PROJECT - Clear all job text variables.
-                    if {[info exists job(db,Name)]} {
-                        catch {close $job(db,Name)} ;# Close the db connection
-                        foreach name [array names job] {
-                            set job($name) ""
-                        }
-                        ${log}::debug NEW PROJECT - Clear out tablelist widget
-                        # Reset the inteface ...
-                        eAssistHelper::resetImportInterface
-                    }
-                }
-        edit    { set btnOKState normal; set btnIMPState disable
-                    ${log}::debug EDIT PROJECT - Disable 'IMPORT FILE' button
-                }
-        view    { set btnOKState normal; set btnIMPState disable
-                    ${log}::debug VIEW PROJECT - OK Button should be the only non-disable/readonly widget}
-        default {${log}::debug PROJECT - Switch Arg not availabe: $modify for [info level 0]}       
-    }
-    
+    pack $f1 -fill both -expand yes -padx 5p -pady 5p   
 
     set custNameList [db eval "SELECT CustName FROM Customer WHERE Status='1'"]
     
@@ -177,18 +154,39 @@ proc customer::projSetup {{modify new}} {
     set btnBar [ttk::frame .ps.btnBar -padding 10]
     pack $btnBar -anchor se ;#-padx 5p -pady 5p
     
-    ttk::button $btnBar.ok -text [mc "OK"] -command {customer::dbUpdateCustomer;
-															job::db::createDB -tName $job(Title) -tCSR $job(CSRName) -tSaveLocation $job(TitleSaveFileLocation) -tCustCode $job(CustID) -tHistNote {Initial Entry} -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal $job(JobBalanceShipDate) -jHistNote {Initial Job Entry} ;
-													destroy .ps} -state $btnOKState
-    #ttk::button $btnBar.import -text [mc "Import File"] -command {customer::dbUpdateCustomer; job::db::createDB $job(CustID) $job(CSRName) $job(Title) $job(Name) $job(Number) $job(SaveFileLocation) ;\
-                                                            importFiles::fileImportGUI; destroy .ps} -state $btnIMPState
+    ttk::button $btnBar.ok -text [mc "OK"] -command {destroy .ps} ;# Default command 
 	ttk::button $btnBar.import -text [mc "Import File"] -command {customer::dbUpdateCustomer \
 																	job::db::createDB -tName "$job(Title)" -tCSR "$job(CSRName)" -tSaveLocation $job(TitleSaveFileLocation) -tCustCode $job(CustID) -tHistNote {Initial Entry} \
 																	-jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal job(JobBalanceShipDate) -jHistNote {Initial Job Entry} \
-                                                            importFiles::fileImportGUI; destroy .ps} -state $btnIMPState
+                                                            importFiles::fileImportGUI; destroy .ps}
     
     grid $btnBar.ok -column 0 -row 0 -sticky news
     grid $btnBar.import -column 1 -row 0 -sticky news
+	
+    # Re-configure buttons and commands depending on what parameter was passed: New, Edit
+    switch -- $modify {
+        new     { 
+					$btnBar.ok configure -command {customer::dbUpdateCustomer;
+															job::db::createDB -tName $job(Title) -tCSR $job(CSRName) -tSaveLocation $job(TitleSaveFileLocation) -tCustCode $job(CustID) -tHistNote {Initial Entry} -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal $job(JobBalanceShipDate) -jHistNote {Initial Job Entry} ;
+													destroy .ps}
+                    ${log}::debug NEW PROJECT - Clear all job text variables.
+                    if {[info exists job(db,Name)]} {
+                        catch {close $job(db,Name)} ;# Close the db connection
+                        foreach name [array names job] {
+                            set job($name) ""
+                        }
+                        ${log}::debug NEW PROJECT - Clear out tablelist widget
+                        # Reset the inteface ...
+                        eAssistHelper::resetImportInterface
+                    }
+                }
+        edit    {
+					$btnBar.ok configure -command {customer::dbUpdateCustomer; destroy .ps}
+					$btnBar.import configure -state disable -command {customer::dbUpdateCustomer; destroy .ps}
+                    ${log}::debug EDIT PROJECT - Disable 'IMPORT FILE' button
+                }
+        default {${log}::debug PROJECT - Switch Arg not availabe: $modify for [info level 0]}       
+    }
     
     
     ## BINDINGS

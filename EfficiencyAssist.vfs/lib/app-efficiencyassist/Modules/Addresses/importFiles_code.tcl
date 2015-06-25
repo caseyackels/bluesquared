@@ -638,7 +638,9 @@ proc importFiles::insertIntoGUI {wid} {
     #${log}::debug hdr_list: [join $hdr_list ,]
     #${log}::debug hdr_data: [join $hdr_data ,]
 
-    $job(db,Name) eval "SELECT [join $hdr_list ,] from Addresses LEFT OUTER JOIN Versions ON Versions=Version_ID" {
+    $job(db,Name) eval "SELECT [join $hdr_list ,] from Addresses
+                            LEFT OUTER JOIN Versions ON Versions=Version_ID
+                            AND Addresses.SysActive = 1" {
         $wid insert end [subst $hdr_data]
         #${log}::debug ROW: [subst $hdr_data]
     }

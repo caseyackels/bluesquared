@@ -71,9 +71,6 @@ proc importFiles::fileImportGUI {} {
     focus .wi
     
     set w(wi) .wi
-    # .. make it so that the user can't see the main program, until after importing their file.
-    #catch {tkwait visibility .}
-    #catch {grab $w(wi)}
     
     
     #------------- Frame 1a - Top frame

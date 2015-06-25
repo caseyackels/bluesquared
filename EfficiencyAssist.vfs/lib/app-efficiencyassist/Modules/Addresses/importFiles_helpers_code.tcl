@@ -28,6 +28,48 @@
 #   will be uppercase. I.E sourceFiles, sourceFileExample
 
 namespace eval eAssistHelper {}
+namespace eval ea::helper {}
+
+proc ea::helper::updateTabText {txt} {
+    #****f* updateTabText/ea::helper
+    # CREATION DATE
+    #   06/24/2015 (Wednesday Jun 24)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # USAGE
+    #   ea::helper::updateTabText txt 
+    #
+    # FUNCTION
+    #	Updates the text on the title level tab
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # EXAMPLE
+    #   ea::helper::updateTabText "$titleName / $jobName"
+    #
+    # NOTES
+    #   
+    #  
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log w
+
+    $w(nbk) tab $w(nbk).f3 -text $txt
+
+} ;# ea::helper::updateTabText
 
 
 proc eAssistHelper::autoMap {masterHeader fileHeader} {
@@ -678,7 +720,7 @@ proc eAssistHelper::checkProjSetup {} {
     #***
     global log job
 	
-	foreach topic {Title Name Number} {
+	foreach topic {SaveFileLocation CustID CSRName Title} {
 		if {$job($topic) eq ""} {incr i}
 	}
 

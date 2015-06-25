@@ -130,7 +130,7 @@ proc job::db::createDB {args} {
     set job(db,Name) [join "$tCustCode [join [split $tName " "] ""]" _]
     
     # Update tab title
-    $w(nbk) tab $w(nbk).f3 -text "$tName / $jName"
+    ea::helper::updateTabText "$tName"
     
     # Check to see if the db already exists; if it does launch the updateTitleDb proc
     set dbExists [file exists [file join $tSaveLocation $job(db,Name).db]]
@@ -339,50 +339,55 @@ proc job::db::open {} {
     # Open the db
     sqlite3 $job(db,Name) $job(db,Name)
     
-    set job(SaveFileLocation) [file dirname $job(db,Name)]
-    set job(CustID) [join [$job(db,Name) eval {SELECT CustID FROM JobInformation}]]
-    set job(CSRName) [join [$job(db,Name) eval {SELECT CSRName FROM JobInformation}]]
-    set job(Number) [join [$job(db,Name) eval {SELECT JobNumber FROM JobInformation}]]
-    set job(Title) [join [$job(db,Name) eval {SELECT JobTitle FROM JobInformation}]]
-    set job(Name) [join [$job(db,Name) eval {SELECT JobName FROM JobInformation}]]
+    set job(CustID) [join [$job(db,Name) eval {SELECT CustCode FROM TitleInformation}]]
+    set job(CSRName) [join [$job(db,Name) eval {SELECT CSRName FROM TitleInformation}]]
+    set job(TitleSaveFileLocation) [join [$job(db,Name) eval {SELECT TitleSaveLocation FROM TitleInformation}]]
+    #set job(Number) [join [$job(db,Name) eval {SELECT JobNumber FROM JobInformation}]]
+    set job(Title) [join [$job(db,Name) eval {SELECT TitleName FROM TitleInformation}]]
+    #set job(Name) [join [$job(db,Name) eval {SELECT JobName FROM JobInformation}]]
     
     set job(CustName) [join [db eval "SELECT CustName From Customer where Cust_ID='$job(CustID)'"]]
+    
+    ea::helper::updateTabText "$job(Title)"
 
     #set newHdr {$OrderNumber}
-    foreach header [job::db::retrieveHeaderNames $job(db,Name) Addresses] {
-        if {$header eq "Status"} {continue}
-        lappend newHdrList $header
-        lappend newHdr $$header
-    }
-    
-    set headerParent(dbHeaderList) $newHdr
-    set headerParent(tblHeaderList) $newHdrList
+    #foreach header [job::db::retrieveHeaderNames $job(db,Name) Addresses] {
+    #    if {$header eq "Status"} {continue}
+    #    lappend newHdrList $header
+    #    lappend newHdr $$header
+    #}
+    #
+    #set headerParent(dbHeaderList) $newHdr
+    #set headerParent(tblHeaderList) $newHdrList
     
     ## Check db schema to see if it needs to be updated ...
-    job::db::updateDB
+    #job::db::updateDB
     
-    ## Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
-    if {[$files(tab3f2).tbl findcolumnname OrderNumber] == -1} {
-        $files(tab3f2).tbl insertcolumns 0 0 "..."
-        $files(tab3f2).tbl columnconfigure 0 -name "OrderNumber" -labelalign center
-    }
+
     
     # Insert the data into the tablelist
-    $job(db,Name) eval "SELECT [join $newHdrList ,] from Addresses WHERE Status=1" {
-        #${log}::debug [$files(tab3f2).tbl insert end $newHdr]
-        catch {$files(tab3f2).tbl insert end [subst $newHdr]} err
+    importFiles::insertIntoGUI $files(tab3f2).tbl
+    
+    # Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
+    if {[$files(tab3f2).tbl findcolumnname OrderNumber] == -1} {
+        $files(tab3f2).tbl insertcolumns 0 0 "..."
+        $files(tab3f2).tbl columnconfigure 0 -name "OrderNumber" -labelalign center -showlinenumbers 1
     }
-    
-    if {[info exists err]} {${log}::debug ERROR: $err}
-    
-    set headerWhiteList "$headerParent(whiteList) OrderNumber"
-    
-    for {set x 0} {$headerParent(ColumnCount) > $x} {incr x} {
-        set ColumnName [$files(tab3f2).tbl columncget $x -name]
-        if {[lsearch -nocase $headerWhiteList $ColumnName] == -1} {
-            $files(tab3f2).tbl columnconfigure $x -hide yes
-        }
-    }
+    #$job(db,Name) eval "SELECT [join $newHdrList ,] from Addresses WHERE SysActive=1" {
+    #    #${log}::debug [$files(tab3f2).tbl insert end $newHdr]
+    #    catch {$files(tab3f2).tbl insert end [subst $newHdr]} err
+    #}
+    #
+    #if {[info exists err]} {${log}::debug ERROR: $err}
+    #
+    #set headerWhiteList "$headerParent(whiteList) OrderNumber"
+    #
+    #for {set x 0} {$headerParent(ColumnCount) > $x} {incr x} {
+    #    set ColumnName [$files(tab3f2).tbl columncget $x -name]
+    #    if {[lsearch -nocase $headerWhiteList $ColumnName] == -1} {
+    #        $files(tab3f2).tbl columnconfigure $x -hide yes
+    #    }
+    #}
 
     # Apply the highlights
     importFiles::highlightAllRecords $files(tab3f2).tbl
@@ -393,7 +398,7 @@ proc job::db::open {} {
     
     # Init variables
     
-    set process(versionList) [ea::db::getUniqueValues $job(db,Name) Version Addresses]
+    #set process(versionList) [ea::db::getUniqueValues $job(db,Name) Version Addresses]
     ## Initialize popup menus
     #IFMenus::tblPopup $files(tab3f2).tbl browse .tblMenu
     IFMenus::createToggleMenu $files(tab3f2).tbl
