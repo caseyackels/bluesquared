@@ -481,11 +481,11 @@ proc importFiles::processFile {win} {
     #    set process(origVersionList) $process(versionList)
     #}
     #
-    ### Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
-    if {[$files(tab3f2).tbl findcolumnname OrderNumber] == -1} {
-        $files(tab3f2).tbl insertcolumns 0 0 "..."
-        $files(tab3f2).tbl columnconfigure 0 -name "OrderNumber" -labelalign center -showlinenumbers 1
-    }
+    #### Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
+    #if {[$files(tab3f2).tbl findcolumnname OrderNumber] == -1} {
+    #    $files(tab3f2).tbl insertcolumns 0 0 "..."
+    #    $files(tab3f2).tbl columnconfigure 0 -name "OrderNumber" -labelalign center -showlinenumbers 1
+    #}
     #
     ## Enable menu items
     importFiles::enableMenuItems
@@ -550,7 +550,7 @@ proc importFiles::insertIntoGUI {wid} {
     #   
     #***
     #proc importFiles::insertIntoGUI {wid} {}
-    global log headerParent job
+    global log headerParent job files
 
     # Get columns that are:
     #   Not Empty
@@ -566,8 +566,8 @@ proc importFiles::insertIntoGUI {wid} {
         switch -- $configValue {
             "Always"    {lappend hdrs_show $hdr}
             "Dynamic"   {
-                            set values [$job(db,Name) eval "SELECT $hdr from Addresses WHERE ifnull($hdr, '') = ''"]
-                            if {$values == ""} {lappend hdrs_show $hdr}
+                            set values [$job(db,Name) eval "SELECT $hdr from Addresses WHERE ifnull($hdr, '') != ''"]
+                            if {$values != ""} {lappend hdrs_show $hdr}
             }
             "Never"     {continue}
             default     {${log}::critical insertIntoGUI - $configValue is not a valid switch option!}
@@ -597,7 +597,7 @@ proc importFiles::insertIntoGUI {wid} {
         if {$resizeToLongestEntry == 1 && $lenWidLabelName != $colWidth} {
             set colWidth 0
         } else {
-            # Increase colWidth by 1 to help make the column a bit wider
+            # Increase colWidth by 1 to make the column a bit wider
             incr colWidth
         }
         
@@ -616,9 +616,6 @@ proc importFiles::insertIntoGUI {wid} {
         if {[lindex $hdr_config 7] == 1} {
             $wid columnconfigure end -labelforeground red
         }
-        
-
-        
     }
     
     ## insert the data into the widget
@@ -643,6 +640,12 @@ proc importFiles::insertIntoGUI {wid} {
                             AND Addresses.SysActive = 1" {
         $wid insert end [subst $hdr_data]
         #${log}::debug ROW: [subst $hdr_data]
+    }
+    
+    ### Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
+    if {[$files(tab3f2).tbl findcolumnname OrderNumber] == -1} {
+        $files(tab3f2).tbl insertcolumns 0 0 "..."
+        $files(tab3f2).tbl columnconfigure 0 -name "OrderNumber" -labelalign center -showlinenumbers 1
     }
 
 } ;# importFiles::insertIntoGUI $files(tab3f2).tbl

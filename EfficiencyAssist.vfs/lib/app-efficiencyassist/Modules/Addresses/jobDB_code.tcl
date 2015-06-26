@@ -342,51 +342,23 @@ proc job::db::open {} {
     set job(CustID) [join [$job(db,Name) eval {SELECT CustCode FROM TitleInformation}]]
     set job(CSRName) [join [$job(db,Name) eval {SELECT CSRName FROM TitleInformation}]]
     set job(TitleSaveFileLocation) [join [$job(db,Name) eval {SELECT TitleSaveLocation FROM TitleInformation}]]
-    #set job(Number) [join [$job(db,Name) eval {SELECT JobNumber FROM JobInformation}]]
     set job(Title) [join [$job(db,Name) eval {SELECT TitleName FROM TitleInformation}]]
-    #set job(Name) [join [$job(db,Name) eval {SELECT JobName FROM JobInformation}]]
     
     set job(CustName) [join [db eval "SELECT CustName From Customer where Cust_ID='$job(CustID)'"]]
     
     ea::helper::updateTabText "$job(Title)"
 
-    #set newHdr {$OrderNumber}
-    #foreach header [job::db::retrieveHeaderNames $job(db,Name) Addresses] {
-    #    if {$header eq "Status"} {continue}
-    #    lappend newHdrList $header
-    #    lappend newHdr $$header
-    #}
-    #
-    #set headerParent(dbHeaderList) $newHdr
-    #set headerParent(tblHeaderList) $newHdrList
-    
     ## Check db schema to see if it needs to be updated ...
     #job::db::updateDB
-    
 
     
     # Insert the data into the tablelist
     importFiles::insertIntoGUI $files(tab3f2).tbl
     
-    # Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
-    if {[$files(tab3f2).tbl findcolumnname OrderNumber] == -1} {
-        $files(tab3f2).tbl insertcolumns 0 0 "..."
-        $files(tab3f2).tbl columnconfigure 0 -name "OrderNumber" -labelalign center -showlinenumbers 1
-    }
-    #$job(db,Name) eval "SELECT [join $newHdrList ,] from Addresses WHERE SysActive=1" {
-    #    #${log}::debug [$files(tab3f2).tbl insert end $newHdr]
-    #    catch {$files(tab3f2).tbl insert end [subst $newHdr]} err
-    #}
-    #
-    #if {[info exists err]} {${log}::debug ERROR: $err}
-    #
-    #set headerWhiteList "$headerParent(whiteList) OrderNumber"
-    #
-    #for {set x 0} {$headerParent(ColumnCount) > $x} {incr x} {
-    #    set ColumnName [$files(tab3f2).tbl columncget $x -name]
-    #    if {[lsearch -nocase $headerWhiteList $ColumnName] == -1} {
-    #        $files(tab3f2).tbl columnconfigure $x -hide yes
-    #    }
+    ## Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
+    #if {[$files(tab3f2).tbl findcolumnname OrderNumber] == -1} {
+    #    $files(tab3f2).tbl insertcolumns 0 0 "..."
+    #    $files(tab3f2).tbl columnconfigure 0 -name "OrderNumber" -labelalign center -showlinenumbers 1
     #}
 
     # Apply the highlights
@@ -400,7 +372,6 @@ proc job::db::open {} {
     
     #set process(versionList) [ea::db::getUniqueValues $job(db,Name) Version Addresses]
     ## Initialize popup menus
-    #IFMenus::tblPopup $files(tab3f2).tbl browse .tblMenu
     IFMenus::createToggleMenu $files(tab3f2).tbl
 } ;# job::db::open
 
@@ -1014,21 +985,12 @@ proc job::db::insertJobInfo {args} {
             -histnote           {lappend hdrs HistoryID; lappend values '[job::db::insertHistory $value]'}
         }
     }
-    #lappend hdrs HistoryID
-    #lappend values '[job::db::insertHistory $histnote]'
-    #if {$bypass eq "yes"} {
-    #    set histnote '[job::db::insertHistory [mc "Auto Generated: Updated Job Information"]]'
-    #}
-    #${log}::debug histnote: $histnote . bypass $bypass
-    #return
+
     # Check to see if we need to INSERT or UPDATE
     # Check to see if job exists in the database
     set jobExists [$job(db,Name) eval "SELECT JobInformation_ID from JobInformation where JobInformation_ID = $jNumber"]
     
     ${log}::debug Inserting into JobInformation, job exists? $jobExists
-    #${log}::debug hdrs: $hdrs
-    #${log}::debug VALUES([join $values ,])
-    
 
     if {$jobExists != ""} {
         ${log}::debug updating existing job info: $jNumber, $jName
@@ -1039,17 +1001,7 @@ proc job::db::insertJobInfo {args} {
         ${log}::debug inserting new info into db...
         $job(db,Name) eval "INSERT INTO JobInformation([join $hdrs ,]) VALUES([join $values ,])"
     }
-    
-    
-    #if {$blank eq insert} {
-    #    $job(db,Name) eval "INSERT INTO JobInformation([join $hdrs ,]) VALUES([join $values ,])"
-    #} elseif {$blank eq update} {
-    #    $job(db,Name) eval "UPDATE JobInformation
-    #                            SET JobInformation_ID = '$jNumber', JobName = '$jName', JobSaveLocation = '$jSaveLocation', JobFirstShipDate = '$jDateShipStart', JobBalanceShipDate = '$jDateShipBal'; TitleInformationID = $titleid; HistoryID = '$histnote'
-    #                            WHERE JobInformation_ID = $jNumber"
-    #}
 
-    
 } ;# job::db::insertJobInfo -jNumber 304503 -jName {March 2015} -jSaveLocation {C:/tmp/job} -jDateShipStart 2015-05-20 -jDateShipBalance 2015-05-29 -titleid <value> -histnote {Inserting a new Job}
 
 
