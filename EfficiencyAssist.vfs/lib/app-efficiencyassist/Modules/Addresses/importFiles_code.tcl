@@ -566,6 +566,7 @@ proc importFiles::insertIntoGUI {wid} {
         switch -- $configValue {
             "Always"    {lappend hdrs_show $hdr}
             "Dynamic"   {
+                            # Only show columns if data exists.
                             set values [$job(db,Name) eval "SELECT $hdr from Addresses WHERE ifnull($hdr, '') != ''"]
                             if {$values != ""} {lappend hdrs_show $hdr}
             }
