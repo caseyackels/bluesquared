@@ -443,164 +443,166 @@ proc eAssistSetup::boxLabels_GUI {} {
 } ;# eAssistSetup::boxLabels_GUI
 
 
-proc eAssistSetup::company_GUI {} {
-    #****f* eAssistSetup/company_GUI
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2013 Casey Ackels
-    #
-    # FUNCTION
-    #	Specify the current company information; and account numbers.
-    #
-    # SYNOPSIS
-    #	N/A
-    #
-    # CHILDREN
-    #	
-    #
-    # PARENTS
-    #	
-    #
-    # NOTES
-    #
-    # SEE ALSO
-    #
-    #
-    #***
-    global G_setupFrame GS_program company internal setup
-    
-    #set currentModule company
-    eAssist_Global::resetSetupFrames ;# Reset all frames so we start clean
-    
-    set frame1 [ttk::labelframe $G_setupFrame.frame1 -text [mc "Company Information"]]
-    pack $frame1 -expand yes -fill both
-    
-    ttk::label $frame1.companyText -text [mc "Company Name"]
-    ttk::entry $frame1.companyEntry -textvariable company(company)
-    
-    ttk::label $frame1.contactText -text [mc "Contact"]
-    ttk::entry $frame1.contactEntry -textvariable company(contact)
-    
-    ttk::label $frame1.addr1Text -text [mc "Addr1/Addr2"]
-    ttk::entry $frame1.addr1Entry -textvariable company(address1)
-    set company(addr2) ""
-    ttk::entry $frame1.addr2Entry -textvariable company(address2)
-    
-    set company(addr3) ""
-    ttk::label $frame1.addr3Text -text [mc "Address 3"]
-    ttk::entry $frame1.addr3Entry -textvariable company(address3)
-    
-    ttk::label $frame1.cityText -text [mc "City/State/Zip"]
-    ttk::entry $frame1.cityEntry -textvariable company(city)
-    ttk::entry $frame1.stateEntry -textvariable company(state)
-    ttk::entry $frame1.zipEntry -textvariable company(zip)
-    
-    ttk::label $frame1.phoneText -text [mc "Phone"]
-    ttk::entry $frame1.phoneEntry -textvariable company(phone)
-    
-    #set company(country) "US"
-    ttk::label $frame1.countryText -text [mc "Country"]
-    ttk::entry $frame1.countryEntry -textvariable company(country)
-    
-    
-    #-------- Grid
-    grid $frame1.companyText -column 0 -row 0 -sticky e -pady 3p -padx 5p
-    grid $frame1.companyEntry -column 1 -row 0 -columnspan 3 -sticky ew
-    
-    grid $frame1.contactText -column 0 -row 1 -sticky e -pady 3p -padx 5p
-    grid $frame1.contactEntry -column 1 -row 1 -columnspan 3 -sticky ew
-    
-    grid $frame1.addr1Text -column 0 -row 2 -sticky e -pady 3p -padx 5p
-    grid $frame1.addr1Entry -column 1 -row 2 -columnspan 2 -sticky ew
-    grid $frame1.addr2Entry -column 3 -row 2 -sticky ew
-    
-    grid $frame1.addr3Text -column 0 -row 3 -sticky e -pady 3p -padx 5p
-    grid $frame1.addr3Entry -column 1 -row 3 -sticky ew
-    
-    grid $frame1.cityText -column 0 -row 4 -sticky e -pady 3p -padx 5p
-    grid $frame1.cityEntry -column 1 -row 4 -sticky ew
-    grid $frame1.stateEntry -column 2 -row 4 -sticky e
-    grid $frame1.zipEntry -column 3 -row 4 -sticky ew
-    
-    grid $frame1.phoneText -column 0 -row 5 -sticky e -pady 3p -padx 5p
-    grid $frame1.phoneEntry -column 1 -row 5 -columnspan 3  -sticky ew
-    
-    grid $frame1.countryText -column 0 -row 6 -sticky e -pady 3p -padx 5p
-    grid $frame1.countryEntry -column 1 -row 6 -columnspan 3 -sticky ew
-    
-    grid columnconfigure $frame1 1 -weight 1
+### This code is now in it's own file: setup_company_gui.tcl (7/7/2015)
 
-    
-    set frame2 [ttk::labelframe $G_setupFrame.frame2 -text [mc "Small Package Carriers"]]
-    pack $frame2 -expand yes -fill both
-    
-    set scrolly $frame2.scrolly
-    tablelist::tablelist $frame2.listbox \
-                -columns {
-                        10  "Carrier"   left
-                        0  "Account"   center
-                        0   "..."       center
-                        } \
-                -showlabels yes \
-                -stretch 1 \
-                -selectbackground yellow \
-                -selectforeground black \
-                -stripebackground lightblue \
-                -exportselection yes \
-                -showseparators yes \
-                -fullseparators yes \
-                -editstartcommand {eAssistSetup::startCmd} \
-                -editendcommand {eAssistSetup::endCmd} \
-                -yscrollcommand [list $scrolly set]
-        
-        $frame2.listbox columnconfigure 0 -name Carrier \
-                                            -labelalign center \
-                                            -editable yes \
-                                            -editwindow ttk::entry
-        
-        $frame2.listbox columnconfigure 1 -name Account \
-                                            -editable yes \
-                                            -editwindow ttk::entry
-        
-        $frame2.listbox columnconfigure 2 -name Delete \
-                                        -editable no
-    
-    set internal(table,currentRow) 0
-        
-        if {[info exists setup(smallPackageCarriers)]} {
-            #'debug Populate listobx - data exists
-                foreach carrier $setup(smallPackageCarriers) {
-                    #'debug inserting $customer
-                    $frame2.listbox insert end $carrier
-                    incr internal(table,currentRow)
-                }
-        }
-        
-    # Create the first line
-    $frame2.listbox insert end ""
-
-        
-    ttk::scrollbar $scrolly -orient v -command [list $frame2.listbox yview]
-        
-    grid $scrolly -column 1 -row 0 -sticky ns
-        
-    ::autoscroll::autoscroll $scrolly ;# Enable the 'autoscrollbar'
-    
-    grid $frame2.listbox -column 0 -row 0 -sticky news -padx 5p -pady 5p
-    grid columnconfigure $frame2 $frame2.listbox -weight 1
-    
-    #-------- Bindings
-
-    #bind [$frame2.listbox bodytag] <Double-1> {
-    #    if {$internal(table,currentRow) != 0} {
-    #        .container.setup.frame2.listbox delete [.container.setup.frame2.listbox curselection]        
-    #        incr internal(table,currentRow) -1
-    #    }
-    #}
-  
-} ;# eAssistSetup::company_GUI
+#proc eAssistSetup::company_GUI {} {
+#    #****f* eAssistSetup/company_GUI
+#    # AUTHOR
+#    #	Casey Ackels
+#    #
+#    # COPYRIGHT
+#    #	(c) 2013 Casey Ackels
+#    #
+#    # FUNCTION
+#    #	Specify the current company information; and account numbers.
+#    #
+#    # SYNOPSIS
+#    #	N/A
+#    #
+#    # CHILDREN
+#    #	
+#    #
+#    # PARENTS
+#    #	
+#    #
+#    # NOTES
+#    #
+#    # SEE ALSO
+#    #
+#    #
+#    #***
+#    global G_setupFrame GS_program company internal setup
+#    
+#    #set currentModule company
+#    eAssist_Global::resetSetupFrames ;# Reset all frames so we start clean
+#    
+#    set frame1 [ttk::labelframe $G_setupFrame.frame1 -text [mc "Company Information"]]
+#    pack $frame1 -expand yes -fill both
+#    
+#    ttk::label $frame1.companyText -text [mc "Company Name"]
+#    ttk::entry $frame1.companyEntry -textvariable company(company)
+#    
+#    ttk::label $frame1.contactText -text [mc "Contact"]
+#    ttk::entry $frame1.contactEntry -textvariable company(contact)
+#    
+#    ttk::label $frame1.addr1Text -text [mc "Addr1/Addr2"]
+#    ttk::entry $frame1.addr1Entry -textvariable company(address1)
+#    set company(addr2) ""
+#    ttk::entry $frame1.addr2Entry -textvariable company(address2)
+#    
+#    set company(addr3) ""
+#    ttk::label $frame1.addr3Text -text [mc "Address 3"]
+#    ttk::entry $frame1.addr3Entry -textvariable company(address3)
+#    
+#    ttk::label $frame1.cityText -text [mc "City/State/Zip"]
+#    ttk::entry $frame1.cityEntry -textvariable company(city)
+#    ttk::entry $frame1.stateEntry -textvariable company(state)
+#    ttk::entry $frame1.zipEntry -textvariable company(zip)
+#    
+#    ttk::label $frame1.phoneText -text [mc "Phone"]
+#    ttk::entry $frame1.phoneEntry -textvariable company(phone)
+#    
+#    #set company(country) "US"
+#    ttk::label $frame1.countryText -text [mc "Country"]
+#    ttk::entry $frame1.countryEntry -textvariable company(country)
+#    
+#    
+#    #-------- Grid
+#    grid $frame1.companyText -column 0 -row 0 -sticky e -pady 3p -padx 5p
+#    grid $frame1.companyEntry -column 1 -row 0 -columnspan 3 -sticky ew
+#    
+#    grid $frame1.contactText -column 0 -row 1 -sticky e -pady 3p -padx 5p
+#    grid $frame1.contactEntry -column 1 -row 1 -columnspan 3 -sticky ew
+#    
+#    grid $frame1.addr1Text -column 0 -row 2 -sticky e -pady 3p -padx 5p
+#    grid $frame1.addr1Entry -column 1 -row 2 -columnspan 2 -sticky ew
+#    grid $frame1.addr2Entry -column 3 -row 2 -sticky ew
+#    
+#    grid $frame1.addr3Text -column 0 -row 3 -sticky e -pady 3p -padx 5p
+#    grid $frame1.addr3Entry -column 1 -row 3 -sticky ew
+#    
+#    grid $frame1.cityText -column 0 -row 4 -sticky e -pady 3p -padx 5p
+#    grid $frame1.cityEntry -column 1 -row 4 -sticky ew
+#    grid $frame1.stateEntry -column 2 -row 4 -sticky e
+#    grid $frame1.zipEntry -column 3 -row 4 -sticky ew
+#    
+#    grid $frame1.phoneText -column 0 -row 5 -sticky e -pady 3p -padx 5p
+#    grid $frame1.phoneEntry -column 1 -row 5 -columnspan 3  -sticky ew
+#    
+#    grid $frame1.countryText -column 0 -row 6 -sticky e -pady 3p -padx 5p
+#    grid $frame1.countryEntry -column 1 -row 6 -columnspan 3 -sticky ew
+#    
+#    grid columnconfigure $frame1 1 -weight 1
+#
+#    
+#    set frame2 [ttk::labelframe $G_setupFrame.frame2 -text [mc "Small Package Carriers"]]
+#    pack $frame2 -expand yes -fill both
+#    
+#    set scrolly $frame2.scrolly
+#    tablelist::tablelist $frame2.listbox \
+#                -columns {
+#                        10  "Carrier"   left
+#                        0  "Account"   center
+#                        0   "..."       center
+#                        } \
+#                -showlabels yes \
+#                -stretch 1 \
+#                -selectbackground yellow \
+#                -selectforeground black \
+#                -stripebackground lightblue \
+#                -exportselection yes \
+#                -showseparators yes \
+#                -fullseparators yes \
+#                -editstartcommand {eAssistSetup::startCmd} \
+#                -editendcommand {eAssistSetup::endCmd} \
+#                -yscrollcommand [list $scrolly set]
+#        
+#        $frame2.listbox columnconfigure 0 -name Carrier \
+#                                            -labelalign center \
+#                                            -editable yes \
+#                                            -editwindow ttk::entry
+#        
+#        $frame2.listbox columnconfigure 1 -name Account \
+#                                            -editable yes \
+#                                            -editwindow ttk::entry
+#        
+#        $frame2.listbox columnconfigure 2 -name Delete \
+#                                        -editable no
+#    
+#    set internal(table,currentRow) 0
+#        
+#        if {[info exists setup(smallPackageCarriers)]} {
+#            #'debug Populate listobx - data exists
+#                foreach carrier $setup(smallPackageCarriers) {
+#                    #'debug inserting $customer
+#                    $frame2.listbox insert end $carrier
+#                    incr internal(table,currentRow)
+#                }
+#        }
+#        
+#    # Create the first line
+#    $frame2.listbox insert end ""
+#
+#        
+#    ttk::scrollbar $scrolly -orient v -command [list $frame2.listbox yview]
+#        
+#    grid $scrolly -column 1 -row 0 -sticky ns
+#        
+#    ::autoscroll::autoscroll $scrolly ;# Enable the 'autoscrollbar'
+#    
+#    grid $frame2.listbox -column 0 -row 0 -sticky news -padx 5p -pady 5p
+#    grid columnconfigure $frame2 $frame2.listbox -weight 1
+#    
+#    #-------- Bindings
+#
+#    #bind [$frame2.listbox bodytag] <Double-1> {
+#    #    if {$internal(table,currentRow) != 0} {
+#    #        .container.setup.frame2.listbox delete [.container.setup.frame2.listbox curselection]        
+#    #        incr internal(table,currentRow) -1
+#    #    }
+#    #}
+#  
+#} ;# eAssistSetup::company_GUI
 
 
 

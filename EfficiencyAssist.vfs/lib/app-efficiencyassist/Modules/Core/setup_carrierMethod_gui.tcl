@@ -54,7 +54,7 @@ proc eAssistSetup::carrierMethod_GUI {} {
     eAssist_Global::resetSetupFrames ;# Reset all frames so we start clean
     
     #-------- Container Frame
-    set frame0 [ttk::label $G_setupFrame.frame0]
+    set frame0 [ttk::frame $G_setupFrame.frame0]
     pack $frame0 -expand yes -fill both -pady 5p -padx 5p
     
     ##
