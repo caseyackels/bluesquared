@@ -36,7 +36,7 @@ proc eAssistSetup::company_GUI {{widType embed}} {
     #   
     #   
     #***
-    global log G_setupFrame
+    global log G_setupFrame masterAddr
 
     switch -- $widType {
         "embed"       {
@@ -68,28 +68,32 @@ proc eAssistSetup::company_GUI {{widType embed}} {
     #-------- Carrier accounts frame
     set fc0 [ttk::frame $win.fc0]
     pack $fc0 -expand yes -fill both -pady 5p -padx 5p
-    
+
     
     ## Address fields
     grid [ttk::label $fa0.txt_company -text [mc "Company"]] -column 0 -row 0 -padx 2p -pady 2p -sticky nse
-    grid [ttk::entry $fa0.entry_company -textvariable masterAddr(Company)] -column 1 -columnspan 2 -row 0 -padx 2p -pady 2p -sticky news
+    grid [ttk::entry $fa0.entry_company -textvariable masterAddr(Company) -width 35] -column 1 -columnspan 3 -row 0 -padx 2p -pady 2p -sticky news
+    grid [ttk::checkbutton $fa0.ckbtn_plant -text [mc "Plant"] -variable masterAddr(Plant)] -column 4 -row 0 -padx 2p -pady 2p -sticky nsw
     
-    grid [ttk::label $fa0.txt_attention -text [mc "Attention"]] -column 0 -row 1 -padx 2p -pady 2p -sticky nse
+    grid [ttk::label $fa0.txt_attention -text [mc "Attention/Phone"]] -column 0 -row 1 -padx 2p -pady 2p -sticky nse
     grid [ttk::entry $fa0.entry_attention -textvariable masterAddr(Attn)] -column 1 -columnspan 2  -row 1 -padx 2p -pady 2p -sticky news
+    grid [ttk::entry $fa0.entry_phone -textvariable masterAddr(Phone)] -column 3 -row 1 -padx 2p -pady 2p -sticky news
     
     grid [ttk::label $fa0.txt_addr -text [mc "Address"]] -column 0 -row 2 -padx 2p -pady 2p -sticky nse
-    grid [ttk::entry $fa0.entry_addr1 -textvariable masterAddr(Addr1)] -column 1 -columnspan 2  -row 2 -padx 2p -pady 2p -sticky news
-    grid [ttk::entry $fa0.entry_addr2 -textvariable masterAddr(Addr2)] -column 1 -columnspan 2  -row 3 -padx 2p -pady 2p -sticky news
-    grid [ttk::entry $fa0.entry_addr3 -textvariable masterAddr(Addr3)] -column 1 -columnspan 2  -row 4 -padx 2p -pady 2p -sticky news
+    grid [ttk::entry $fa0.entry_addr1 -textvariable masterAddr(Addr1)] -column 1 -columnspan 3  -row 2 -padx 2p -pady 2p -sticky news
+    grid [ttk::entry $fa0.entry_addr2 -textvariable masterAddr(Addr2)] -column 1 -columnspan 3  -row 3 -padx 2p -pady 2p -sticky news
+    grid [ttk::entry $fa0.entry_addr3 -textvariable masterAddr(Addr3)] -column 1 -columnspan 3  -row 4 -padx 2p -pady 2p -sticky news
     
     grid [ttk::label $fa0.txt_city -text [mc "City"]] -column 0 -row 5 -padx 2p -pady 2p -sticky nse
-    grid [ttk::entry $fa0.entry_city -textvariable masterAddr(City)] -column 1 -columnspan 2 -row 5 -padx 2p -pady 2p -sticky news
+    grid [ttk::entry $fa0.entry_city -textvariable masterAddr(City)] -column 1 -columnspan 3 -row 5 -padx 2p -pady 2p -sticky news
     
     grid [ttk::label $fa0.txt_stateZip -text [mc "State/Zip"]] -column 0 -row 6 -padx 2p -pady 2p -sticky nse
-    grid [ttk::entry $fa0.entry_state -textvariable masterAddr(StateAbbr) -width 3] -column 1 -row 6 -padx 2p -pady 2p
-    grid [ttk::entry $fa0.entry_zip -textvariable masterAddr(Zip)] -column 2 -row 6 -padx 2p -pady 2p -sticky news
+    grid [ttk::entry $fa0.entry_state -textvariable masterAddr(StateAbbr) -width 4] -column 1 -row 6 -padx 2p -pady 2p -sticky nws
+    grid [ttk::entry $fa0.entry_zip -textvariable masterAddr(Zip)] -column 2 -columnspan 2 -row 6 -padx 2p -pady 2p -sticky ew
     
     grid [ttk::label $fa0.txt_country -text [mc "Country Code"]] -column 0 -row 7 -padx 2p -pady 2p -sticky nse
-    grid [ttk::entry $fa0.entry_country -textvariable masterAddr(CtryCode) -width 3] -column 1 -columnspan 2 -row 7 -padx 2p -pady 2p -sticky nws
+    grid [ttk::entry $fa0.entry_country -textvariable masterAddr(CtryCode) -width 4] -column 1 -row 7 -padx 2p -pady 2p -sticky nws
+     
+    grid [ttk::checkbutton $fa0.ckbtn_active -text [mc "Active"] -variable masterAddr(Active)] -column 1 -columnspan 3 -row 8 -padx 2p -pady 2p -sticky nsw
 
 } ;# eAssistSetup::company_GUI standalone

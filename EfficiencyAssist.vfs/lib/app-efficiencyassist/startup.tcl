@@ -233,6 +233,7 @@ proc 'eAssist_initVariables {} {
     # NOTES
     #
     # SEE ALSO
+	#	file: db_initvars.tcl
     #
     #***
     global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter auth options emailSetup emailEvent job user setupJobDB
@@ -252,10 +253,11 @@ proc 'eAssist_initVariables {} {
 	
 	# init the user array - This is reset on Change User!
 	ea::sec::initUser
+	
+	# init the db variables
+	ea::db::init_vars
 		
 	## Defaults
-	#
-	
 	# Just in case we can't figure out where we last stopped
 	if {![info exists program(lastFrame)]} {
 		# Set default last frame for Setup
