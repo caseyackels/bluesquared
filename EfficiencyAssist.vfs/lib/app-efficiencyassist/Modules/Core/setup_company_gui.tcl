@@ -36,12 +36,13 @@ proc eAssistSetup::company_GUI {{widType embed}} {
     #   
     #   
     #***
-    global log G_setupFrame masterAddr
+    global log G_setupFrame masterAddr company
 
     switch -- $widType {
         "embed"       {
                         eAssist_Global::resetSetupFrames ;# Reset all frames so we start clean
                         set win $G_setupFrame
+                        eAssistSetup::populateCompanyArray ;# In this mode, we will be editing the Company not any other addresses
         }
         "standalone"  {
                         if {[winfo exists .companySetup] == 1} {destroy .companySetup}
@@ -61,19 +62,24 @@ proc eAssistSetup::company_GUI {{widType embed}} {
     ## Frame setup
     ##
     #-------- Address fields frame
-    set fa0 [ttk::frame $win.fa0]
+    set fa0 [ttk::labelframe $win.fa0 -text [mc "Company Address"]]
     pack $fa0 -expand yes -fill both -pady 5p -padx 5p
     
     
     #-------- Carrier accounts frame
-    set fc0 [ttk::frame $win.fc0]
+    set fc0 [ttk::labelframe $win.fc0 -text [mc "Carrier Accounts"]]
     pack $fc0 -expand yes -fill both -pady 5p -padx 5p
-
+    
+    #-------- Button frame
+    # Initially see the "change" button. Once clicked, it changes to "OK". All fields start out 'disabled'
+    set fb0 [ttk::frame $win.fb0]
+    pack $fb0 -anchor sw -pady 5p -padx 5p
     
     ## Address fields
+    ## 
     grid [ttk::label $fa0.txt_company -text [mc "Company"]] -column 0 -row 0 -padx 2p -pady 2p -sticky nse
     grid [ttk::entry $fa0.entry_company -textvariable masterAddr(Company) -width 35] -column 1 -columnspan 3 -row 0 -padx 2p -pady 2p -sticky news
-    grid [ttk::checkbutton $fa0.ckbtn_plant -text [mc "Plant"] -variable masterAddr(Plant)] -column 4 -row 0 -padx 2p -pady 2p -sticky nsw
+    #grid [ttk::checkbutton $fa0.ckbtn_plant -text [mc "Plant"] -variable masterAddr(Plant)] -column 4 -row 0 -padx 2p -pady 2p -sticky nsw
     
     grid [ttk::label $fa0.txt_attention -text [mc "Attention/Phone"]] -column 0 -row 1 -padx 2p -pady 2p -sticky nse
     grid [ttk::entry $fa0.entry_attention -textvariable masterAddr(Attn)] -column 1 -columnspan 2  -row 1 -padx 2p -pady 2p -sticky news
@@ -95,5 +101,25 @@ proc eAssistSetup::company_GUI {{widType embed}} {
     grid [ttk::entry $fa0.entry_country -textvariable masterAddr(CtryCode) -width 4] -column 1 -row 7 -padx 2p -pady 2p -sticky nws
      
     grid [ttk::checkbutton $fa0.ckbtn_active -text [mc "Active"] -variable masterAddr(Active)] -column 1 -columnspan 3 -row 8 -padx 2p -pady 2p -sticky nsw
+    
+    ## Carrier Accounts
+    ##
+    ## Frame $fc0
+    grid [tablelist::tablelist $fc0.tbl -columns {
+                                            0 ... center
+                                            0 Carrier center
+                                            0 Account center
+                                        } \
+                                        -showlabels yes \
+                                        -stripebackground yellow \
+                                        -showseparators yes \
+                                        -fullseparators yes
+                                        ] -column 0 -row 0 -padx 2p -pady 2p -sticky news
+    
+    $fc0.tbl columnconfigure 0 -showlinenumbers yes
+    $fc0.tbl columnconfigure 2 -stretch yes
+    
+    ## Button
+    ## 
 
 } ;# eAssistSetup::company_GUI standalone

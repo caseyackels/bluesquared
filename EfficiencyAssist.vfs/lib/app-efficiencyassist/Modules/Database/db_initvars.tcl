@@ -67,7 +67,7 @@ proc ea::db::init_masterAddr {} {
     #	N/A
     #   
     # PARENTS
-    #   
+    #   'eAssist_initVariables file: startup.tcl
     #   
     # EXAMPLE
     #   ea::db::init_masterAddr 
@@ -85,6 +85,7 @@ proc ea::db::init_masterAddr {} {
 	array set masterAddr {
 			ID          ""
 			Company     ""
+            Phone       ""
 			Plant       0
 			Attn        ""
 			Addr1       ""
@@ -93,6 +94,7 @@ proc ea::db::init_masterAddr {} {
 			City        ""
 			StateAbbr   ""
 			CtryCode    ""
+            Zip         ""
 			Active      1
 	}
     
@@ -122,18 +124,16 @@ proc ea::db::init_masterAddr {} {
     
     # Temp note Re-init the company() array from the values in the db.
     # Init Array: company()
-    array set company {
-        ${log}::debug Initializing Array: company()
-        address1 $masterAddr(Addr1)
-        address2 $masterAddr(Addr2)
-        address3 $masterAddr(Addr3)
-        city     $masterAddr(City)
-        company  $masterAddr(Company)
-        contact  $masterAddr(Attn)
-        country  $masterAddr(CtryCode)
-        name     $masterAddr(Company)
-        phone    $masterAddr(Phone)
-        state    $masterAddr(StateAbbr)
-        zip      $masterAddr(Zip)
-    }
+    ${log}::debug Initializing Array: company()
+    set company(address1) $masterAddr(Addr1)
+    set company(address2) $masterAddr(Addr2)
+    set company(address3) $masterAddr(Addr3)
+    set company(city) $masterAddr(City)
+    set company(company) $masterAddr(Company)
+    set company(contact) $masterAddr(Attn)
+    set company(country) $masterAddr(CtryCode)
+    set company(name) $masterAddr(Company)
+    set company(phone) $masterAddr(Phone)
+    set company(state) $masterAddr(StateAbbr)
+    set company(zip) $masterAddr(Zip)
 } ;# ea::db::init_masterAddr
