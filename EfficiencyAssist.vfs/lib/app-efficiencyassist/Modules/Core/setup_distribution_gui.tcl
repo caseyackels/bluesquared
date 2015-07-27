@@ -27,7 +27,7 @@ proc eAssistSetup::distributionTypes_GUI {} {
     # SEE ALSO
     #
     #***
-    global log G_setupFrame currentModule dist
+    global log G_setupFrame dist
     global GUI w
 
     eAssist_Global::resetSetupFrames ;# Reset all frames so we start clean
@@ -36,125 +36,74 @@ proc eAssistSetup::distributionTypes_GUI {} {
     ## Parent Frame
     ##
 
-    set w(dist_frame1) [ttk::labelframe $G_setupFrame.frame1 -text [mc "Distribution Types"]]
-    pack $w(dist_frame1) -expand yes -fill both -ipadx 5p -ipady 5p
+    set fd0 [ttk::labelframe $G_setupFrame.fd0 -text [mc "Distribution Types Setup"]]
+    pack $fd0 -expand yes -fill both -ipadx 5p -ipady 5p
+    
+    # Button frame
+    set fd0a [ttk::frame $fd0.fd0a]
+    pack $fd0a -anchor w
+    
+    # Tablelist widget
+    set fd0b [ttk::frame $fd0.fd0b]
+    pack $fd0b -expand yes -fill both
+    
+    grid [ttk::button $fd0a.add -text [mc "Add"] -command [list eAssistSetup::modify_distType add $fd0b.tbl]] -column 0 -row 0 -padx 2p -sticky w
+    grid [ttk::button $fd0a.del -text [mc "Delete"]] -column 1 -row 0 -padx 2p -sticky w
+    grid [ttk::button $fd0a.edit -text [mc "Edit"]] -column 2 -row 0 -padx 2p -sticky w
+    
+    tablelist::tablelist $fd0b.tbl -columns {
+                                            0 "..." center
+                                            0 "Distribution Type" center
+                                            0 "Default Shipping Type" center
+                                            0 "Active" center
+                                            } \
+                                            -showlabels yes \
+                                            -stripebackground yellow \
+                                            -showseparators yes \
+                                            -fullseparators yes
+                                            
+    $fd0b.tbl columnconfigure 0 -showlinenumbers yes
+    $fd0b.tbl columnconfigure 1 -width 20
+    $fd0b.tbl columnconfigure 2 -stretch yes
+    
+    grid $fd0b.tbl -column 0 -row 0 -padx 2p -pady 2p -sticky news
+
+    grid columnconfigure $fd0b 0 -weight 1
+    grid rowconfigure $fd0b 0 -weight 1
     
 
-    ttk::label $w(dist_frame1).label1 -text [mc "Distribution Type Name"]
-    ttk::entry $w(dist_frame1).entry1 -width 30
-	
-	ttk::button $w(dist_frame1).btn1 -text [mc "Add"] -command {eAssistSetup::modifyDistTypes add $w(dist_frame1).entry1 $w(dist_frame1).lbox1 DistTypeName DistributionTypes}
-    ttk::button $w(dist_frame1).btn2 -text [mc "Delete"] -command {eAssistSetup::modifyDistTypes delete $w(dist_frame1).entry1 $w(dist_frame1).lbox1 DistTypeName DistributionTypes}   
-    
-	listbox $w(dist_frame1).lbox1 -height 20 \
-                -width 30 \
-                -selectbackground yellow \
-                -selectforeground black \
-                -selectmode single \
-                -yscrollcommand [list $w(dist_frame1).scrolly set] \
-                -xscrollcommand [list $w(dist_frame1).scrollx set]
 
-    ttk::scrollbar $w(dist_frame1).scrolly -orient v -command [list $w(dist_frame1).listbox yview]
-    ttk::scrollbar $w(dist_frame1).scrollx -orient h -command [list $w(dist_frame1).listbox xview]
-    
-    grid $w(dist_frame1).scrolly -column 1 -row 0 -sticky nse
-    grid $w(dist_frame1).scrollx -column 0 -row 1 -sticky ews
-
-    # Enable the 'autoscrollbar'
-    ::autoscroll::autoscroll $w(dist_frame1).scrolly
-    ::autoscroll::autoscroll $w(dist_frame1).scrollx
-    
+    #ttk::scrollbar $w(dist_frame1).scrolly -orient v -command [list $w(dist_frame1).listbox yview]
+    #ttk::scrollbar $w(dist_frame1).scrollx -orient h -command [list $w(dist_frame1).listbox xview]
     #
-    #-------- Grid Frame 1a
+    #grid $w(dist_frame1).scrolly -column 1 -row 0 -sticky nse
+    #grid $w(dist_frame1).scrollx -column 0 -row 1 -sticky ews
     #
-    grid $w(dist_frame1).label1 -column 0 -row 0
-    grid $w(dist_frame1).entry1 -column 1 -row 0
-    grid $w(dist_frame1).btn1 -column 2 -row 0
-    
-    grid $w(dist_frame1).lbox1 -column 1 -row 1 -sticky news
-    grid $w(dist_frame1).btn2 -column 2 -row 1 -sticky new
-	
-	## ------
-	## Commands
-	# Populate the listbox
-	ea::db::getDistTypes $w(dist_frame1).lbox1
-    
+    ## Enable the 'autoscrollbar'
+    #::autoscroll::autoscroll $w(dist_frame1).scrolly
+    #::autoscroll::autoscroll $w(dist_frame1).scrollx
+
     
 	
 } ;# eAssistSetup::distributionTypes_GUI
 
-proc eAssistSetup::modifyDistTypes {method widEntryField widListbox cols dbTable} {
-    #****f* addToDistTypes/eAssistSetup
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2011-2013 Casey Ackels
-    #
-    # FUNCTION
-    #	
-    #
-    # SYNOPSIS
-    #
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #	
-    #
-    # NOTES
-    #
-    # SEE ALSO
-    #
-    #***
-    global log dist
-    
-    #$lbox insert end $distType
-    #set dist(distributionTypes) [$lbox get 0 end]
-    #
-    #$entryField delete 0 end
-	
-	set values [list [$widEntryField get]]
-	${log}::debug VALUES: $values
-	
-	switch -- $method {
-		add		{
-			# Add to DB
-			eAssist_db::dbInsert -columnNames $cols -table $dbTable -data $values
-			# Remove value from the entry widget
-			$widEntryField delete 0 end
-		}
-		delete	{
-			set values [$widListbox get [$widListbox curselection]]
-			eAssist_db::delete $dbTable $cols $values
-		}
-		default {${log}::debug [info level 1] $method isn't a valid option}
-	}
-		
-		# Refresh list
-		ea::db::getDistTypes $widListbox
-	
-} ;# eAssistSetup::addToDistTypes
-
-
-proc ea::db::getDistTypes {widListbox} {
-    #****f* getDistTypes/ea::db
+proc eAssistSetup::modify_distType {{mode add} tbl} {
+    #****f* modify_distType/eAssistSetup
     # CREATION DATE
-    #   10/24/2014 (Friday Oct 24)
+    #   07/27/2015 (Monday Jul 27)
     #
     # AUTHOR
     #	Casey Ackels
     #
     # COPYRIGHT
-    #	(c) 2014 Casey Ackels
+    #	(c) 2015 Casey Ackels
     #   
     #
-    # SYNOPSIS
-    #   ea::db::getDistTypes  
+    # USAGE
+    #   eAssistSetup::modify_distType mode tbl 
     #
     # FUNCTION
-    #	Retrieves the list of Distribution Types
+    #	Add/View/Edit entries for Distribution Types
     #   
     #   
     # CHILDREN
@@ -163,19 +112,82 @@ proc ea::db::getDistTypes {widListbox} {
     # PARENTS
     #   
     #   
+    # EXAMPLE
+    #   eAssistSetup::modify_distType add $tbl_path
+    #
     # NOTES
-    #   
-    #   
+    #   Default is 'add' mode.
+    #  
     # SEE ALSO
     #   
     #   
     #***
     global log
-
-    $widListbox delete 0 end
-	
-	foreach item [eAssist_db::dbSelectQuery -columnNames DistTypeName -table DistributionTypes] {
-		$widListbox insert end $item
-	}
     
-} ;# ea::db::getDistTypes
+    if {[winfo exists .distSetup] == 1} {destroy .companySetup}
+    
+    switch -- $mode {
+        "add"   {}
+        "view"  {}
+        "edit"  {}
+    }
+    
+    
+    set win .distSetup
+    toplevel $win
+    wm transient $win .
+    wm title $win [mc "[string toupper $mode] Distribution Types"] 
+    set locX [expr {[winfo screenwidth .] / 4}]
+    set locY [expr {[winfo screenheight .] / 4}]
+    wm geometry $win 625x375+${locX}+${locY}
+    focus $win
+    
+    ##
+    ## Parent Frame
+    ##
+    set fd [ttk::frame $win.fd]
+    pack $fd -expand yes -fill both -padx 2p -pady 2p
+
+    set fd0 [ttk::labelframe $fd.fd0 -text [mc "Configuration"]]
+    grid $fd0 -column 0 -row 0 -padx 2p -pady 2p -sticky news
+    
+    set fd1 [ttk::labelframe $fd.fd1 -text [mc "Assign Ship Methods"]]
+    grid $fd1 -column 1 -row 0 -padx 2p -pady 2p -sticky news
+    
+    # Configuration frame
+    grid [ttk::label $fd0.txt_distType -text [mc "Distribution Type"]] -column 0 -row 0 -padx 2p -sticky e
+    grid [ttk::entry $fd0.entry_distType] -column 1 -row 0 -sticky ew
+    
+    grid [ttk::label $fd0.txt_reporting -text [mc "-Reporting-"]] -column 0 -row 1 -sticky w
+    grid [ttk::checkbutton $fd0.summarize -text [mc "Summarize Shipments"]] -column 0 -row 2 -padx 2p -sticky w
+    
+    grid [ttk::label $fd0.txt_genFiles -text [mc "-Generated files for MIS-"]] -column 0 -row 3 -sticky w
+    grid [ttk::checkbutton $fd0.singleEntry -text [mc "Create single entry"]] -column 0 -row 4 -padx 2p -sticky w
+    grid [ttk::label $fd0.txt_useAddr -text [mc "Use address"]] -column 0 -row 5 -padx 2p -sticky e
+    grid [ttk::combobox $fd0.cbox_useAddr] -column 1 -columnspan 2 -row 5 -padx 2p -sticky ew
+    
+    # Ship methods frame
+    set shipType [eAssist_db::dbSelectQuery -columnNames ShipmentType -table ShipmentTypes]
+    
+    grid [ttk::label $fd1.txt_shipType -text [mc "Shipping Type"]] -column 0 -row 0 -sticky w
+    grid [ttk::combobox $fd1.cbox_shipType -values $shipType -state readonly] -column 1 -row 0 -sticky ew
+    
+    grid [ttk::label $fd1.txt_addCarriers -text [mc "Assign Carriers"]] -column 0 -row 1 -sticky w
+    grid [ttk::entry $fd1.entry_addCarriers] -column 1 -row 1 -sticky ew
+    grid [ttk::button $fd1.btn_addCarriers -text [mc "Add"]] -column 2 -row 1 -sticky ew -padx 2p
+    
+    grid [listbox $fd1.lbox_addCarriers] -column 1 -row 2 -sticky news
+    
+    grid rowconfigure $fd1 2
+    
+    
+    ## Button frame
+    #set fd0a [ttk::frame $fd0.fd0a]
+    #pack $fd0a -anchor w
+    #
+    ## Tablelist widget
+    #set fd0b [ttk::frame $fd0.fd0b]
+    #pack $fd0b -expand yes -fill both
+
+    
+} ;# eAssistSetup::modify_distType
