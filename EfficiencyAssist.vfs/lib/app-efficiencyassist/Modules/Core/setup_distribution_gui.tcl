@@ -1,27 +1,6 @@
 # Creator: Casey Ackels
 # Initial Date: March 12, 2011]
 # File Initial Date: 10/8/2013
-# Dependencies: 
-#-------------------------------------------------------------------------------
-#
-# Subversion
-#
-# $Revision: 338 $
-# $LastChangedBy: casey.ackels $
-# $LastChangedDate: 2014-10-25 16:11:53 -0700 (Sat, 25 Oct 2014) $
-#
-########################################################################################
-
-##
-## - Overview
-# Overview
-
-## Coding Conventions
-# - Namespaces: Firstword_Secondword
-
-# - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
-#   will be uppercase. I.E sourceFiles, sourceFileExample
-
 
 proc eAssistSetup::distributionTypes_GUI {} {
     #****f* distributionTypes_GUI/eAssistSetup
