@@ -122,7 +122,13 @@ proc eAssistSetup::modify_distType {{mode add} tbl} {
     #   
     #   
     #***
-    global log
+    global log tmp
+    set tmp(carrierValues) ""
+    #ttk::style configure TCombobox -background yellow
+    #ttk::style map TCombobox -background \
+    #[list disabled grey readonly grey]
+    #option add *TCombobox*Listbox.background yellow
+    
     
     if {[winfo exists .distSetup] == 1} {destroy .companySetup}
     
@@ -136,7 +142,7 @@ proc eAssistSetup::modify_distType {{mode add} tbl} {
     set win .distSetup
     toplevel $win
     wm transient $win .
-    wm title $win [mc "[string toupper $mode] Distribution Types"] 
+    wm title $win [mc "[string totitle $mode] Distribution Types"] 
     set locX [expr {[winfo screenwidth .] / 4}]
     set locY [expr {[winfo screenheight .] / 4}]
     wm geometry $win 625x375+${locX}+${locY}
@@ -168,26 +174,51 @@ proc eAssistSetup::modify_distType {{mode add} tbl} {
     
     # Ship methods frame
     set shipType [eAssist_db::dbSelectQuery -columnNames ShipmentType -table ShipmentTypes]
+    set shipTypeValue ""
     
     grid [ttk::label $fd1.txt_shipType -text [mc "Shipping Type"]] -column 0 -row 0 -sticky w
-    grid [ttk::combobox $fd1.cbox_shipType -values $shipType -state readonly] -column 1 -row 0 -sticky ew
+    grid [ttk::combobox $fd1.cbox_shipType -textvariable shipTypeValue -values $shipType -state readonly] -column 1 -row 0 -sticky ew
+        # Remove entries that could be in the 'addCarriers' cbox, this could happen if the user selects an option, then changes the 'ship type' filter.
+        bind $fd1.cbox_shipType <<ComboboxSelected>> "$fd1.cbox_addCarriers set {}"
     
     grid [ttk::label $fd1.txt_addCarriers -text [mc "Assign Carriers"]] -column 0 -row 1 -sticky w
-    grid [ttk::entry $fd1.entry_addCarriers] -column 1 -row 1 -sticky ew
+    grid [ttk::combobox $fd1.cbox_addCarriers -values test -postcommand [list eAssistSetup::populateDistTypeCarrierList $fd1]] -column 1 -row 1 -sticky ew
+        # Enable type-ahead searching
+        bind $fd1.cbox_addCarriers <FocusIn> [list eAssistSetup::populateDistTypeCarrierList $fd1]
+        bind $fd1.cbox_addCarriers <KeyRelease> [list AutoComplete::AutoCompleteComboBox $fd1.cbox_addCarriers %K]
+    
     grid [ttk::button $fd1.btn_addCarriers -text [mc "Add"]] -column 2 -row 1 -sticky ew -padx 2p
     
     grid [listbox $fd1.lbox_addCarriers] -column 1 -row 2 -sticky news
     
     grid rowconfigure $fd1 2
-    
-    
-    ## Button frame
-    #set fd0a [ttk::frame $fd0.fd0a]
-    #pack $fd0a -anchor w
-    #
-    ## Tablelist widget
-    #set fd0b [ttk::frame $fd0.fd0b]
-    #pack $fd0b -expand yes -fill both
 
-    
+    ## Button frame
+    set fda [ttk::frame $win.fda]
+    pack $fda -anchor e -padx 2p -pady 5p
+
+    grid [ttk::button $fda.ok -text [mc "OK"]] -column 0 -row 0 -padx 3p
+    grid [ttk::button $fda.cncl -text [mc "Cancel"]] -column 1 -row 0 -padx 3p
 } ;# eAssistSetup::modify_distType
+
+proc eAssistSetup::populateDistTypeCarrierList {wid} {
+    set shipTypeValue [$wid.cbox_shipType get]
+    
+    if {$shipTypeValue eq "-All-"} {
+            set whereValue "WHERE ShipmentType != '-All-'"
+    } else {
+            set whereValue "WHERE ShipmentType = '$shipTypeValue'"
+    }
+   
+    # issue db query
+    db eval "SELECT distinct(CarrierID), ShipmentType, Carriers.Name as Name FROM ShipVia
+                INNER JOIN Carriers
+                ON CarrierID = Carrier_ID
+                [subst $whereValue]
+                ORDER BY Name " {
+                    # append the result to a var that we can use to populate the cbox
+                    lappend carrierValues $Name
+    }
+    
+    $wid.cbox_addCarriers configure -values $carrierValues
+}

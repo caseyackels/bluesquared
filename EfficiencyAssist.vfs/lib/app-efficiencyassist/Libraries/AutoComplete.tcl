@@ -46,6 +46,7 @@ proc AutoComplete::AutoComplete {win action validation value valuelist {capitali
     #   
     # NOTES
     #   Found on http://wiki.tcl.tk/13267
+    #   ttk::combobox specific http://wiki.tcl.tk/15780
     #   
     # SEE ALSO
     #   
@@ -55,19 +56,19 @@ proc AutoComplete::AutoComplete {win action validation value valuelist {capitali
     
     if {[info exists newVal]} {unset newVal}
     switch -- [string tolower $capitalize] {
-        upper   {${log}::debug To Upper
+        upper   {
                     set newVal [string toupper $value]
-                    ${log}::debug To Upper: $value
+                    #${log}::debug To Upper: $value
                 }
-        title   {${log}::debug To Title
+        title   {
                     foreach val $value {
                         lappend newVal [string totitle $val]
                     }
                 
-                ${log}::debug To Title: $value
+                #${log}::debug To Title: $value
                 }
-        default {${log}::debug default}
-    }
+        default {${log}::notice [mc "AutoComplete: Capitalization will not be changed"]}
+    } 
 
     
     if {$action == 1 & $value != {} & [set pop [lsearch -nocase -inline $valuelist $value*]] != {}} {
