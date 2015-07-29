@@ -81,25 +81,11 @@ proc ea::db::init_masterAddr {} {
     #***
     global log masterAddr company
 
-        # [ARRAY] masterAddr, Plant and Active are set values, because those are also the defaults in the DB
-	array set masterAddr {
-			ID          ""
-			Company     ""
-            Phone       ""
-			Plant       0
-			Attn        ""
-			Addr1       ""
-			Addr2       ""
-			Addr3       ""
-			City        ""
-			StateAbbr   ""
-			CtryCode    ""
-            Zip         ""
-			Active      1
-	}
+    # Init the array
+    ea::db::reset_masterAddr
     
     # Query db to see if we have a plant setup. If we don't, the defaults that we set above will be used.
-    db eval "SELECT MasterAddr_ID, MasterAddr_Company, MasterAddr_Phone, MasterAddr_Plant, MasterAddr_Attn, MasterAddr_Addr1, MasterAddr_Addr2, MasterAddr_Addr3, MasterAddr_City, MasterAddr_StateAbbr, MasterAddr_Zip, MasterAddr_CtryCode, MasterAddr_Active
+    db eval "SELECT MasterAddr_ID, MasterAddr_Company, MasterAddr_Phone, MasterAddr_Plant, MasterAddr_Attn, MasterAddr_Addr1, MasterAddr_Addr2, MasterAddr_Addr3, MasterAddr_City, MasterAddr_StateAbbr, MasterAddr_Zip, MasterAddr_CtryCode, MasterAddr_Active, MasterAddr_Internal
                 FROM MasterAddresses
                     WHERE MasterAddr_Plant = 1
                 AND MasterAddr_Active = 1" {
@@ -117,12 +103,12 @@ proc ea::db::init_masterAddr {} {
                     set masterAddr(CtryCode) $MasterAddr_CtryCode
                     set masterAddr(Zip) $MasterAddr_Zip
                     set masterAddr(Active) $MasterAddr_Active
+                    set masterAddr(Internal) $MasterAddr_Internal
                 }
                 
     # Remove old config file settings
     array unset company
     
-    # Temp note Re-init the company() array from the values in the db.
     # Init Array: company()
     ${log}::debug Initializing Array: company()
     set company(address1) $masterAddr(Addr1)
@@ -137,3 +123,26 @@ proc ea::db::init_masterAddr {} {
     set company(state) $masterAddr(StateAbbr)
     set company(zip) $masterAddr(Zip)
 } ;# ea::db::init_masterAddr
+
+proc ea::db::reset_masterAddr {} {
+    global masterAddr
+    # Set the masterAddr to empty values
+    if {[info exists masterAddr]} {unset masterAddr}
+        
+    array set masterAddr {
+			ID          ""
+			Company     ""
+            Phone       ""
+			Plant       0
+			Attn        ""
+			Addr1       ""
+			Addr2       ""
+			Addr3       ""
+			City        ""
+			StateAbbr   ""
+			CtryCode    ""
+            Zip         ""
+			Active      1
+            Internal    0
+	}
+}

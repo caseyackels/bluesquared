@@ -116,10 +116,10 @@ proc eAssistSetup::editCompany {f editMode btn} {
         $btn configure -text [mc "Change"] -command [list eAssistSetup::editCompany $f normal $btn]
         
         ${log}::debug Check DB for Company Address
-        set companyExists [db eval "SELECT MasterAddr_ID, MasterAddr_Plant FROM MasterAddresses"]
+        set companyExists [db eval "SELECT MasterAddr_ID, MasterAddr_Plant FROM MasterAddresses WHERE MasterAddr_ID = '$masterAddr(ID)'"]
         if {$companyExists eq ""} {
             ${log}::debug Company doesn't exist, adding to the database...
-            set masterAddr(Plant) 1
+            #set masterAddr(Plant) 1 ;# Embedded mode will set this
             
             if {[info exists colList]} {unset colList}
             if {[info exists varList]} {unset varList}
@@ -158,8 +158,6 @@ proc eAssistSetup::editCompany {f editMode btn} {
                 
         
     } else {
-        #${log}::debug $btn configure -command editCompany $f readonly $btn
-        
         # setting window to readonly - just need to update the button command
         $btn configure -text [mc "Save"] -command [list eAssistSetup::editCompany $f readonly $btn]
     }
@@ -400,15 +398,6 @@ proc eAssistSetup::deleteCarrier {tbl} {
     #${log}::debug carrierAcct: $carrierAcct
     
     set carrierID [db eval "SELECT Carrier_ID FROM Carriers WHERE Name = '$carrierName'"]
-    
-    #set dbCheck ""
-    
-    # Check the db - Unneeded?? (7/2015)
-    #set dbCheck [db eval "SELECT CarrierAccts_Acct, CarrierID FROM CarrierAccts
-    #                        WHERE CarrierAccts_Acct = '$carrierAcct'
-    #                        AND CarrierID = $carrierID"]
-    
-    #${log}::debug dbCheck: $dbCheck
     
     
     db eval "DELETE FROM CarrierAccts

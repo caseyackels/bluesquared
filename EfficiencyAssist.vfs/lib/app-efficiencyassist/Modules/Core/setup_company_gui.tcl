@@ -52,8 +52,10 @@ proc eAssistSetup::company_GUI {{widType embed}} {
                         wm title $win [mc "Master Addresses"]
                         set locX [expr {[winfo screenwidth .] / 4}]
                         set locY [expr {[winfo screenheight .] / 4}]
-                        wm geometry $win 625x375+${locX}+${locY}
-                        focus $win
+                        wm geometry $win +${locX}+${locY}
+                        
+                        # We are adding a new entry; clear out masterAddr array
+                        ea::db::reset_masterAddr
         }
         default     {${log}::debug [info level 0] not a valid option for the switch statement: $widType}
     }
@@ -67,11 +69,11 @@ proc eAssistSetup::company_GUI {{widType embed}} {
     
     #-------- Address fields frame
     set fa1 [ttk::frame $fa0.fa1]
-    pack $fa1 -expand yes -fill both -padx 5p
+    grid $fa1 -column 0 -row 0 -sticky news -padx 2p -pady 2p
     
     #-------- Change/Update button
     set fa2 [ttk::frame $fa0.fa2]
-    pack $fa2 -anchor se -pady 2p -padx 5p
+    grid $fa2 -column 1 -row 1 -sticky se -padx 2p -pady 2p
     
     
     #-------- Carrier accounts main frame
@@ -79,21 +81,28 @@ proc eAssistSetup::company_GUI {{widType embed}} {
     pack $fc0 -expand yes -fill both -pady 5p -padx 5p
     
     set fc1 [ttk::frame $fc0.fc1] ;# frame for the add/delete buttons
-    pack $fc1 -expand yes -fill both
+    grid $fc1 -column 0 -row 0 -sticky e
     
     set fc2 [ttk::frame $fc0.fc2] ;# Frame for the tablelist
-    pack $fc2 -expand yes -fill both
+    grid $fc2 -column 0 -row 1 -sticky news
     
     #-------- Button frame
-    # Initially see the "change" button. Once clicked, it changes to "OK". All fields start out 'disabled'
-    #set fb0 [ttk::frame $win.fb0]
-    #pack $fb0 -anchor sw -pady 5p -padx 5p
+    set fb0 [ttk::frame $win.fb0]
+    pack $fb0 -anchor sw -pady 5p -padx 5p -anchor se
     
     ## Address fields
     ## 
     grid [ttk::label $fa1.txt_company -text [mc "Company"]] -column 0 -row 0 -padx 2p -pady 2p -sticky nse
     grid [ttk::entry $fa1.entry_company -textvariable masterAddr(Company) -width 35] -column 1 -columnspan 3 -row 0 -padx 2p -pady 2p -sticky news
-    #grid [ttk::checkbutton $fa0.ckbtn_plant -text [mc "Plant"] -variable masterAddr(Plant)] -column 4 -row 0 -padx 2p -pady 2p -sticky nsw
+    
+    if {$widType eq "standalone"} {
+        grid [ttk::checkbutton $fa1.ckbtn_internal -text [mc "Internal"] -variable masterAddr(Internal)] -column 4 -row 0 -padx 2p -pady 2p -sticky nsw
+        grid [ttk::checkbutton $fa1.ckbtn_active -text [mc "Active"] -variable masterAddr(Active)] -column 4 -row 1 -padx 2p -pady 2p -sticky nsw
+    } else {
+        # if we aren't standalone we are editing the 'ship from' address; and that will also be internal, so we need to set the var
+        set masterAddr(Internal) 1
+        set masterAddr(Active) 1
+    }
     
     grid [ttk::label $fa1.txt_attention -text [mc "Attention/Phone"]] -column 0 -row 1 -padx 2p -pady 2p -sticky nse
     grid [ttk::entry $fa1.entry_attention -textvariable masterAddr(Attn)] -column 1 -columnspan 2  -row 1 -padx 2p -pady 2p -sticky news
@@ -119,9 +128,8 @@ proc eAssistSetup::company_GUI {{widType embed}} {
         ${log}::debug child winfo $child
         $child configure -state readonly
     }
-    
-    #grid [ttk::checkbutton $fa0.ckbtn_active -text [mc "Active"] -variable masterAddr(Active)] -column 1 -columnspan 3 -row 8 -padx 2p -pady 2p -sticky nsw
-    grid [ttk::button $fa2.btn -text [mc "Change"] -command [list eAssistSetup::editCompany $fa1 normal $fa2.btn]] -column 3 -sticky se
+
+    grid [ttk::button $fa2.btn -text [mc "Change"] -command [list eAssistSetup::editCompany $fa1 normal $fa2.btn]] -column 4
     
     
     
@@ -130,9 +138,8 @@ proc eAssistSetup::company_GUI {{widType embed}} {
     
     grid [ttk::label $fc1.txtCarrier -text [mc "Carrier"]] -sticky e
     grid [ttk::label $fc1.txtAccount -text [mc "Account #"]] -sticky e
-    grid [ttk::entry $fc1.carrier \
-                                    -validate all \
-                                    -validatecommand [list AutoComplete::AutoComplete %W %d %v %P [db eval "SELECT Name from Carriers"]]
+    grid [ttk::entry $fc1.carrier -validate all \
+                                    -validatecommand [list AutoComplete::AutoComplete %W %d %v %P [db eval "SELECT Name from Carriers ORDER BY Name"]]
                                     ] -column 1 -row 0 -sticky ew
     grid [ttk::entry $fc1.account] -column 1 -row 1 -sticky ew
     grid [ttk::button $fc1.btnAdd -text [mc "Add"] -command [list eAssistSetup::editCarrier $fc2.tbl $fc1.carrier $fc1.account]] -column 2 -row 0 -sticky w
@@ -154,16 +161,16 @@ proc eAssistSetup::company_GUI {{widType embed}} {
     $fc2.tbl columnconfigure 2 -stretch yes
     
     grid $fc2.tbl -column 0 -columnspan 2 -row 1 -padx 2p -pady 2p -sticky news
-
     grid columnconfigure $fc2 0 -weight 1
-    
-
-    # Bindings
-    # Setup the bindings
-    set bodyTag [$fc2.tbl bodytag]
-    #bind $bodyTag <Double-1> [list getData [subst $fc2.tbl]]
-    bind $bodyTag <Double-1> "eAssistSetup::modifyCarrier $fc2.tbl $fc1.carrier $fc1.account"
-    #bind $bodyTag <Single-1> "${log}::debug Delete line ..."
+        set bodyTag [$fc2.tbl bodytag]
+        bind $bodyTag <Double-1> "eAssistSetup::modifyCarrier $fc2.tbl $fc1.carrier $fc1.account"
+        
+    # Only create if we are in standalone mode
+    if {$widType eq "standalone"} {
+        # Buttons
+        grid [ttk::button $fb0.ok -text [mc "OK"] -command {}] -column 0 -row 0 -sticky w
+        grid [ttk::button $fb0.cncl -text [mc "Cancel"] -command {} ] -column 1 -row 0 -sticky e
+    }
     
     # Populate tablelist widget
     eAssistSetup::populateCarrierTbl $fc2.tbl
