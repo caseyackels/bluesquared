@@ -122,8 +122,7 @@ proc eAssistSetup::modify_distType {{mode add} tbl} {
     #   
     #   
     #***
-    global log tmp
-    set tmp(carrierValues) ""
+    global log
     #ttk::style configure TCombobox -background yellow
     #ttk::style map TCombobox -background \
     #[list disabled grey readonly grey]
@@ -145,27 +144,28 @@ proc eAssistSetup::modify_distType {{mode add} tbl} {
     wm title $win [mc "[string totitle $mode] Distribution Types"] 
     set locX [expr {[winfo screenwidth .] / 4}]
     set locY [expr {[winfo screenheight .] / 4}]
-    wm geometry $win 625x375+${locX}+${locY}
-    focus $win
+    #wm geometry $win 670x320+${locX}+${locY}
+    wm geometry $win +${locX}+${locY}
     
     ##
     ## Parent Frame
     ##
     set fd [ttk::frame $win.fd]
-    pack $fd -expand yes -fill both -padx 2p -pady 2p
+    pack $fd -expand yes -fill both -padx 2p -pady 2p ;#-ipadx 3p -ipady 3p
 
-    set fd0 [ttk::labelframe $fd.fd0 -text [mc "Configuration"]]
-    grid $fd0 -column 0 -row 0 -padx 2p -pady 2p -sticky news
+    set fd0 [ttk::labelframe $fd.fd0 -text [mc "Configuration"] -padding 10]
+    grid $fd0 -column 0 -row 0 -padx 3p -pady 3p -sticky news
     
-    set fd1 [ttk::labelframe $fd.fd1 -text [mc "Assign Ship Methods"]]
-    grid $fd1 -column 1 -row 0 -padx 2p -pady 2p -sticky news
+    set fd1 [ttk::labelframe $fd.fd1 -text [mc "Assign Ship Methods"] -padding 10]
+    grid $fd1 -column 1 -row 0 -padx 3p -pady 3p -sticky news
     
     # Configuration frame
     grid [ttk::label $fd0.txt_distType -text [mc "Distribution Type"]] -column 0 -row 0 -padx 2p -sticky e
     grid [ttk::entry $fd0.entry_distType] -column 1 -row 0 -sticky ew
+        focus $fd0.entry_distType
     
     grid [ttk::label $fd0.txt_reporting -text [mc "-Reporting-"]] -column 0 -row 1 -sticky w
-    grid [ttk::checkbutton $fd0.summarize -text [mc "Summarize Shipments"]] -column 0 -row 2 -padx 2p -sticky w
+    grid [ttk::checkbutton $fd0.summarize -text [mc "Summarize Shipments"]] -column 0 -row 2 -padx 2p -pady 3p -sticky w
     
     grid [ttk::label $fd0.txt_genFiles -text [mc "-Generated files for MIS-"]] -column 0 -row 3 -sticky w
     grid [ttk::checkbutton $fd0.singleEntry -text [mc "Create single entry"]] -column 0 -row 4 -padx 2p -sticky w
@@ -174,7 +174,6 @@ proc eAssistSetup::modify_distType {{mode add} tbl} {
     
     # Ship methods frame
     set shipType [eAssist_db::dbSelectQuery -columnNames ShipmentType -table ShipmentTypes]
-    set shipTypeValue ""
     
     grid [ttk::label $fd1.txt_shipType -text [mc "Shipping Type"]] -column 0 -row 0 -sticky w
     grid [ttk::combobox $fd1.cbox_shipType -textvariable shipTypeValue -values $shipType -state readonly] -column 1 -row 0 -sticky ew
@@ -186,11 +185,15 @@ proc eAssistSetup::modify_distType {{mode add} tbl} {
         # Enable type-ahead searching
         bind $fd1.cbox_addCarriers <FocusIn> [list eAssistSetup::populateDistTypeCarrierList $fd1]
         bind $fd1.cbox_addCarriers <KeyRelease> [list AutoComplete::AutoCompleteComboBox $fd1.cbox_addCarriers %K]
+        #bind $fd1.cbox_addCarriers <Enter> [list eAssistSetup::addCarriertoListBox $fd1.cbox_addCarriers $fd1.lbox_addCarriers]
     
-    grid [ttk::button $fd1.btn_addCarriers -text [mc "Add"]] -column 2 -row 1 -sticky ew -padx 2p
+    grid [listbox $fd1.lbox_addCarriers -exportselection 1] -column 1 -row 2 -sticky news
     
-    grid [listbox $fd1.lbox_addCarriers] -column 1 -row 2 -sticky news
-    
+    grid [ttk::button $fd1.btn_addCarriers -text [mc "Add"] -command [list eAssistSetup::addCarriertoListBox $fd1.cbox_addCarriers $fd1.lbox_addCarriers]] -column 2 -row 1 -sticky ew -padx 2p
+        #bind $fd1.btn_addCarriers <Enter> [list eAssistSetup::addCarriertoListBox $fd1.cbox_addCarriers $fd1.lbox_addCarriers]
+
+    grid [ttk::button $fd1.btn_delCarriers -text [mc "Delete"] -command [${log}::debug Delete [$fd1.lbox_addCarriers curselection] ]] -column 2 -row 2 -sticky new -padx 2p -pady 2p
+
     grid rowconfigure $fd1 2
 
     ## Button frame
@@ -201,7 +204,17 @@ proc eAssistSetup::modify_distType {{mode add} tbl} {
     grid [ttk::button $fda.cncl -text [mc "Cancel"]] -column 1 -row 0 -padx 3p
 } ;# eAssistSetup::modify_distType
 
+
+proc eAssistSetup::populateDistTypeAddresses {} {
+    db eval "SELECT MasterAddr_Company FROM MasterAddresses
+            WHERE MasterAddr_Active = 1
+            AND MasterAddr_Internal = 1"
+}
+
 proc eAssistSetup::populateDistTypeCarrierList {wid} {
+    ##
+    ## This should be re-written so we create the first list from the DB (maybe when we open up this window?) then remove carriers from the list when we assign them.
+    ##
     set shipTypeValue [$wid.cbox_shipType get]
     
     if {$shipTypeValue eq "-All-"} {
@@ -221,4 +234,23 @@ proc eAssistSetup::populateDistTypeCarrierList {wid} {
     }
     
     $wid.cbox_addCarriers configure -values $carrierValues
+} ;# eAssistSetup::populateDistTypeCarrierList
+
+proc eAssistSetup::addCarriertoListBox {widEntry widLbox} {
+    global log
+    
+    set newData [$widEntry get]
+    set lboxData [$widLbox get 0 end]
+    
+    # check to make sure we aren't inserting existing data
+    if {[lsearch $lboxData $newData] == -1} {
+        # We didn't match any existing data, lets insert
+        $widLbox insert end [$widEntry get]
+        $widEntry delete 0 end
+    } else {
+        # Existing data found, lets just clear out the cbox widget
+        $widEntry delete 0 end
+    }
 }
+
+
