@@ -41,6 +41,9 @@ proc ea::db::init_vars {} {
     ${log}::debug Initializing Array: masterAddr()
     ea::db::init_masterAddr
     
+    ${log}::debug Initilizing Array: disttype()
+    ea::db::reset_disttype
+    
 } ;# ea::db::init_vars
 
 proc ea::db::init_masterAddr {} {
@@ -145,4 +148,19 @@ proc ea::db::reset_masterAddr {} {
 			Active      1
             Internal    0
 	}
+}
+
+proc ea::db::reset_disttype {} {
+    global disttype
+    
+    if {[info exists disttype]} {unset disttype}
+        
+    array set disttype [list summarize "" \
+                 singleEntry ""\
+                 useAddrName "" \
+                 distName "" \
+                 shipType "" \
+                 carriers "" \
+                 id "" \
+                 status 1]
 }
