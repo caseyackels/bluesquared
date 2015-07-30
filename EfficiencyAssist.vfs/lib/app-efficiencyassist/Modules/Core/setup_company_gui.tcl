@@ -96,8 +96,8 @@ proc eAssistSetup::company_GUI {{widType embed}} {
     grid [ttk::entry $fa1.entry_company -textvariable masterAddr(Company) -width 35] -column 1 -columnspan 3 -row 0 -padx 2p -pady 2p -sticky news
     
     if {$widType eq "standalone"} {
-        grid [ttk::checkbutton $fa1.ckbtn_internal -text [mc "Internal"] -variable masterAddr(Internal)] -column 4 -row 0 -padx 2p -pady 2p -sticky nsw
-        grid [ttk::checkbutton $fa1.ckbtn_active -text [mc "Active"] -variable masterAddr(Active)] -column 4 -row 1 -padx 2p -pady 2p -sticky nsw
+        grid [ttk::checkbutton $fa1.ckbtn_active -text [mc "Active"] -variable masterAddr(Active)] -column 4 -row 0 -padx 2p -pady 2p -sticky nsw
+        grid [ttk::checkbutton $fa1.ckbtn_internal -text [mc "Internal"] -variable masterAddr(Internal)] -column 4 -row 1 -padx 2p -pady 2p -sticky nsw
     } else {
         # if we aren't standalone we are editing the 'ship from' address; and that will also be internal, so we need to set the var
         set masterAddr(Internal) 1
@@ -168,8 +168,8 @@ proc eAssistSetup::company_GUI {{widType embed}} {
     # Only create if we are in standalone mode
     if {$widType eq "standalone"} {
         # Buttons
-        grid [ttk::button $fb0.ok -text [mc "OK"] -command {}] -column 0 -row 0 -sticky w
-        grid [ttk::button $fb0.cncl -text [mc "Cancel"] -command {} ] -column 1 -row 0 -sticky e
+        #grid [ttk::button $fb0.ok -text [mc "OK"] -command {}] -column 0 -row 0 -sticky w
+        grid [ttk::button $fb0.cncl -text [mc "Close"] -command {} ] -column 1 -row 0 -sticky e
     }
     
     # Populate tablelist widget

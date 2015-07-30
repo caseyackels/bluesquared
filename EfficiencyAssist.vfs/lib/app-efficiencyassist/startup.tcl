@@ -254,7 +254,7 @@ proc 'eAssist_initVariables {} {
 	# init the user array - This is reset on Change User!
 	ea::sec::initUser
 	
-	# init the db variables
+	# init variables (arrays usually)
 	ea::db::init_vars
 		
 	## Defaults
@@ -305,6 +305,7 @@ proc 'eAssist_initVariables {} {
     
 
 	#-------- Initialize variables
+	
 	
 	# Address Module
 	# All are used in the Internal Samples window
