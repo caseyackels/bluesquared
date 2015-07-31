@@ -37,7 +37,7 @@ proc eAssistSetup::populateDistTypeCarrierList {wid} {
 } ;# eAssistSetup::populateDistTypeCarrierList
 
 
-proc ea::db::writeDistTypeSetup {lbox win} {
+proc ea::db::writeDistTypeSetup {lbox win tbl} {
     #****if* writeDistTypeSetup/ea::db
     # CREATION DATE
     #   07/29/2015 (Wednesday Jul 29)
@@ -98,6 +98,9 @@ proc ea::db::writeDistTypeSetup {lbox win} {
     
     # Delete all data in tablelist; then repopulate it.
 
+    $tbl delete 0 end
+    eAssistSetup::populateDistTypeWidget $tbl
+    
     destroy $win
     
 } ;# ea::db::writeDistTypeSetup
