@@ -156,8 +156,10 @@ proc ea::db::reset_disttype {} {
     if {[info exists disttype]} {unset disttype}
         
     array set disttype [list summarize "" \
-                 singleEntry ""\
-                 useAddrName "" \
+                 rpt,singleEntry "" \
+                 expt,singleEntry "" \
+                 rpt,AddrName "" \
+                 expt,AddrName "" \
                  distName "" \
                  shipType "" \
                  carriers "" \

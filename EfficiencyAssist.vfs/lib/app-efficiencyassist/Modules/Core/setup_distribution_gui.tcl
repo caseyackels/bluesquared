@@ -161,13 +161,16 @@ proc eAssistSetup::modify_distType {{mode add} tbl} {
         focus $fd0.entry_distType
     grid [ttk::checkbutton $fd0.ckbtn_active -text [mc "Active"] -variable disttype(status)] -column 1 -columnspan 2 -row 1 -sticky w
     
-    grid [ttk::label $fd0.txt_reporting -text [mc "-Reporting-"]] -column 0 -row 2 -sticky w
+    grid [ttk::label $fd0.txt_reporting -text [mc "Reporting"]] -column 0 -row 2 -sticky w
     grid [ttk::checkbutton $fd0.summarize -text [mc "Summarize Shipments"] -variable disttype(summarize)] -column 0 -row 3 -padx 2p -pady 3p -sticky w
+    grid [ttk::checkbutton $fd0.rptSingleEntry -text [mc "Create single entry"] -variable disttype(rpt,singleEntry)] -column 0 -row 4 -padx 2p -sticky w
+    grid [ttk::label $fd0.txt_rptUseAddr -text [mc "Use address"]] -column 0 -row 5 -padx 2p -sticky e
+    grid [ttk::combobox $fd0.cbox_rptUseAddr -textvariable disttype(rpt,AddrName) -postcommand [list eAssistSetup::populateDistTypeAddresses $fd0.cbox_rptUseAddr]] -column 1 -columnspan 2 -row 5 -padx 2p -sticky ew
     
-    grid [ttk::label $fd0.txt_genFiles -text [mc "-Generated files for MIS-"]] -column 0 -row 4 -sticky w
-    grid [ttk::checkbutton $fd0.singleEntry -text [mc "Create single entry"] -variable disttype(singleEntry)] -column 0 -row 5 -padx 2p -sticky w
-    grid [ttk::label $fd0.txt_useAddr -text [mc "Use address"]] -column 0 -row 6 -padx 2p -sticky e
-    grid [ttk::combobox $fd0.cbox_useAddr -textvariable disttype(useAddrName) -postcommand [list eAssistSetup::populateDistTypeAddresses $fd0.cbox_useAddr]] -column 1 -columnspan 2 -row 6 -padx 2p -sticky ew
+    grid [ttk::label $fd0.txt_genFiles -text [mc "Generated files for MIS"]] -column 0 -row 6 -sticky w
+    grid [ttk::checkbutton $fd0.singleEntry -text [mc "Create single entry"] -variable disttype(expt,singleEntry)] -column 0 -row 7 -padx 2p -sticky w
+    grid [ttk::label $fd0.txt_useAddr -text [mc "Use address"]] -column 0 -row 8 -padx 2p -sticky e
+    grid [ttk::combobox $fd0.cbox_useAddr -textvariable disttype(expt,AddrName) -postcommand [list eAssistSetup::populateDistTypeAddresses $fd0.cbox_useAddr]] -column 1 -columnspan 2 -row 8 -padx 2p -sticky ew
         
     
     # Ship methods frame
@@ -196,7 +199,7 @@ proc eAssistSetup::modify_distType {{mode add} tbl} {
     pack $fda -anchor e -padx 2p -pady 5p
 
     grid [ttk::button $fda.ok -text [mc "OK"] -command [list ea::db::writeDistTypeSetup $fd1.lbox_addCarriers $win $tbl]] -column 0 -row 0 -padx 3p
-    grid [ttk::button $fda.cncl -text [mc "Cancel"] -command {destroy $win}] -column 1 -row 0 -padx 3p
+    grid [ttk::button $fda.cncl -text [mc "Cancel"] -command [list destroy $win]] -column 1 -row 0 -padx 3p
     
     switch -- $mode {
         "add"   {ea::db::reset_disttype}
@@ -211,7 +214,7 @@ proc eAssistSetup::addCarriertoListBox {widEntry widLbox} {
     
     set newData [$widEntry get]
     # check that we have data, the entrybox may be empty
-    if {$newData == ""} {${log}::debug \[eAssistSetup::addCarriertoListBox\] No data from carrier entry wid. Aborting.; return}
+    if {$newData == ""} {${log}::notice \[eAssistSetup::addCarriertoListBox\] No data from carrier entry wid. Aborting.; return}
     
     set lboxData [$widLbox get 0 end]
     

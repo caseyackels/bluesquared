@@ -162,28 +162,47 @@ proc eAssist::getDistributionTypeID {tbl lbox} {
     ${log}::debug distName: $distName
     ${log}::debug Data: [db eval "SELECT * FROM DistributionTypes WHERE DistTypeName = '$distName'"]
     
-    db eval "SELECT DistributionType_ID, DistTypeName, DistType_Status, DistType_Summarize, DistType_SingleEntry, DistType_AddrNameID, DistType_ShipTypeID
-                FROM DistributionTypes
+    # Retrieve DistType info
+    db eval "SELECT DistributionType_ID, DistTypeName, DistType_Status, ShipmentType FROM DistributionTypes
+                    INNER JOIN ShipmentTypes
+                    ON DistributionTypes.DistType_ShipTypeID = ShipmentTypes.ShipmentType_ID 
                 WHERE DistTypeName = '$distName'" {
-                    set disttype(id) $DistributionType_ID
-                    set disttype(distName) $DistTypeName
-                    set disttype(status) $DistType_Status
-                    set disttype(summarize) $DistType_Summarize
-                    set disttype(singleEntry) $DistType_SingleEntry
+                set disttype(id) $DistributionType_ID
+                set disttype(distName) $DistTypeName
+                set disttype(status) $DistType_Status
+                set disttype(shipType) $ShipmentType
                     
-                    if {$DistType_AddrNameID != ""} {
-                        set disttype(useAddrName) [db eval "SELECT MasterAddr_Company from MasterAddresses WHERE MasterAddr_ID = $DistType_AddrNameID"]
-                    } else {
-                        set disttype(useAddrName) ""
-                    }
-
-                    if {$DistType_ShipTypeID != ""} {
-                        set disttype(shipType) [db eval "SELECT ShipmentType from ShipmentTypes WHERE ShipmentType_ID = $DistType_ShipTypeID"]
-                    } else {
-                        set disttype(shipType) ""
-                    }
-
-    }
+                    #if {$DistType_ShipTypeID != ""} {
+                    #    set disttype(shipType) [db eval "SELECT ShipmentType from ShipmentTypes WHERE ShipmentType_ID = $DistType_ShipTypeID"]
+                    #} else {
+                    #    set disttype(shipType) ""
+                    #}
+                }
+                
+    # Retrieve RptConfig info
+    # RptActions = Summarize, Single Entry, Use Address
+    db eval "SELECT RptAction, RptMethod, MasterAddresses.MasterAddr_Company as Company FROM RptActions 
+        LEFT JOIN MasterAddresses
+        ON MasterAddresses.MasterAddr_ID = MasterAddrID
+        WHERE DistributionTypeID = $disttype(id)" {
+            
+            switch -nocase $RptAction {
+                "Summarize"         {set disttype(summarize) 1}
+                "Single Entry"      {if {$RptMethod eq "Report"} {
+                                            set disttype(rpt,singleEntry) 1
+                                        } else {
+                                            set disttype(expt,singleEntry) 1
+                                        }
+                                    }
+                "Address"           {if {$RptMethod eq "Report"} {
+                                            set disttype(rpt,AddrName) $Company
+                                        } else {
+                                            set disttype(expt,AddrName) $Company
+                                        }
+                                    }
+                default             {${log}::critical [info level 1] Invalid argument for switch. $RptAction}
+            }
+        }
     
     # Get the assigned carrier names and insert into the listbox ...
     db eval "SELECT Carriers.Name as Name FROM DistributionTypeCarriers
