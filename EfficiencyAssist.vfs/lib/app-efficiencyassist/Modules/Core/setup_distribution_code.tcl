@@ -66,13 +66,28 @@ proc ea::db::writeDistTypeSetup {lbox win tbl} {
     
     
     if {$disttype(id) == ""} {
-        ${log}::debug $disttype(distName) doesn't exist in db, adding...
-        db eval "INSERT INTO DistributionTypes (DistTypeName, DistType_Status, DistType_Summarize, DistType_SingleEntry, DistType_AddrNameID,DistType_ShipTypeID)
-                    VALUES ('$disttype(distName)', '$disttype(status)', '$disttype(summarize)', '$disttype(singleEntry)', '$addrID', '$shipTypeID')"
-
+        ${log}::notice $disttype(distName) doesn't exist in db, adding...
+        #db eval "INSERT INTO DistributionTypes (DistTypeName, DistType_Status, DistType_Summarize, DistType_SingleEntry, DistType_AddrNameID, DistType_ShipTypeID)
+        #            VALUES ('$disttype(distName)', '$disttype(status)', '$disttype(summarize)', '$disttype(singleEntry)', '$addrID', '$shipTypeID')"
+    
+        # TABLE: DistributionTypes
+        db eval "INSERT INTO DistributionTypes (DistTypeName, DistType_Status, DistType_ShipTypeID)
+                    VALUES ('$disttype(distName)', '$disttype(status)', '$shipTypeID')"
+                    
+        # TABLE: RptActions
+        foreach val {export report} {
+            foreach entry {AddrName singleEntry}
+                if {$val eq "export"} {
+                    db eval "INSERT INTO RptActions (RptAction, RptMethod, DistributionTypeID, MasterAddrID)
+                       VALUES ('$)"
+                } else {
+                    db eval "INSERT INTO RptActions (RptAction, RptMethod, DistributionTypeID, MasterAddrID)
+                       VALUES ('$)"
+                }
+        }        
         
     } else {
-        ${log}::debug $disttype(distName) exists in db, updating...
+        ${log}::notice $disttype(distName) exists in db, updating...
         db eval "UPDATE DistributionTypes SET DistTypeName='$disttype(distName)', DistType_Status=$disttype(status), DistType_Summarize=$disttype(summarize), DistType_SingleEntry=$disttype(singleEntry), DistType_AddrNameID=$addrID, DistType_ShipTypeID=$shipTypeID
                                         WHERE DistributionType_ID=$disttype(id)"
        
@@ -156,60 +171,66 @@ proc eAssist::getDistributionTypeID {tbl lbox} {
     set row_id [$tbl curselection]
     set row_data [$tbl get [$tbl curselection]]
     set distName [join [lindex $row_data 1]]
+    set disttype(distName) $distName
     
-    ${log}::debug row_id: $row_id
-    ${log}::debug row_data: $row_data
-    ${log}::debug distName: $distName
-    ${log}::debug Data: [db eval "SELECT * FROM DistributionTypes WHERE DistTypeName = '$distName'"]
+    #${log}::debug row_id: $row_id
+    #${log}::debug row_data: $row_data
+    #${log}::debug distName: $distName
+    #${log}::debug DB DistName: [db eval "SELECT * FROM DistributionTypes WHERE DistTypeName = '$distName'"]
     
-    # Retrieve DistType info
-    db eval "SELECT DistributionType_ID, DistTypeName, DistType_Status, ShipmentType FROM DistributionTypes
-                    INNER JOIN ShipmentTypes
-                    ON DistributionTypes.DistType_ShipTypeID = ShipmentTypes.ShipmentType_ID 
-                WHERE DistTypeName = '$distName'" {
-                set disttype(id) $DistributionType_ID
-                set disttype(distName) $DistTypeName
-                set disttype(status) $DistType_Status
-                set disttype(shipType) $ShipmentType
-                    
-                    #if {$DistType_ShipTypeID != ""} {
-                    #    set disttype(shipType) [db eval "SELECT ShipmentType from ShipmentTypes WHERE ShipmentType_ID = $DistType_ShipTypeID"]
-                    #} else {
-                    #    set disttype(shipType) ""
-                    #}
-                }
-                
-    # Retrieve RptConfig info
-    # RptActions = Summarize, Single Entry, Use Address
-    db eval "SELECT RptAction, RptMethod, MasterAddresses.MasterAddr_Company as Company FROM RptActions 
-        LEFT JOIN MasterAddresses
-        ON MasterAddresses.MasterAddr_ID = MasterAddrID
-        WHERE DistributionTypeID = $disttype(id)" {
-            
-            switch -nocase $RptAction {
-                "Summarize"         {set disttype(summarize) 1}
-                "Single Entry"      {if {$RptMethod eq "Report"} {
-                                            set disttype(rpt,singleEntry) 1
-                                        } else {
-                                            set disttype(expt,singleEntry) 1
+    catch {db eval "SELECT DistributionTypes.DistributionType_ID as DistributionType_ID,
+                            DistributionTypes.DistTypeName as DistTypeName,
+                            DistributionTypes.DistType_Status as DistType_Status,
+                            RptActions.RptAction as RptAction, 
+                            RptMethod.RptMethod as RptMethod,
+                            ShipmentTypes.ShipmentType as ShipmentType,
+                            MasterAddresses.MasterAddr_Company as Company FROM RptConfig
+                        INNER JOIN DistributionTypes ON DistributionTypeID = DistributionType_ID
+                        INNER JOIN ShipmentTypes ON ShipmentTypes.ShipmentType_ID = DistributionTypes.DistType_ShipTypeID
+                        INNER JOIN RptActions ON RptActionID = RptAction_ID
+                        INNER JOIN RptMethod ON RptMethodID = RptMethod_ID
+                        LEFT JOIN RptAddresses ON RptConfig_ID = RptConfigID
+                        LEFT JOIN MasterAddresses ON RptAddresses.MasterAddrID = MasterAddresses.MasterAddr_ID
+                    WHERE DistTypeName = '$distName'" {
+                                        set disttype(id) $DistributionType_ID
+                                        set disttype(distName) $DistTypeName
+                                        set disttype(status) $DistType_Status
+                                        set disttype(shipType) $ShipmentType
+                                        
+                                        switch -nocase $RptAction {
+                                                "Summarize" {
+                                                    set disttype(rpt,summarize) 1
+                                                }
+                                                "Single Entry" {
+                                                    if {$RptMethod eq "Report"} {
+                                                        set disttype(rpt,singleEntry) 1
+                                                    } else {
+                                                        set disttype(expt,singleEntry) 1
+                                                    }
+                                                }
+                                                "Address" {
+                                                    if {$RptMethod eq "Report"} {
+                                                        set disttype(rpt,AddrName) $Company
+                                                        } else {
+                                                            set disttype(expt,AddrName) $Company
+                                                        }
+                                                }
+                                                default {
+                                                    ${log}::critical [info level 1] Invalid argument for switch. $RptAction
+                                                }
                                         }
-                                    }
-                "Address"           {if {$RptMethod eq "Report"} {
-                                            set disttype(rpt,AddrName) $Company
-                                        } else {
-                                            set disttype(expt,AddrName) $Company
-                                        }
-                                    }
-                default             {${log}::critical [info level 1] Invalid argument for switch. $RptAction}
-            }
-        }
-    
-    # Get the assigned carrier names and insert into the listbox ...
-    db eval "SELECT Carriers.Name as Name FROM DistributionTypeCarriers
+                        set gateway 1
+                    }
+    }
+        if {[info exists gateway]} {
+            # Get the assigned carrier names and insert into the listbox ...
+            db eval "SELECT Carriers.Name as Name FROM DistributionTypeCarriers
                 INNER JOIN Carriers ON CarrierID = Carriers.Carrier_ID
                 WHERE DistributionTypeID = $disttype(id)" {
                     $lbox insert end $Name
                 }
+        }
+
 
 } ;# eAssist::getDistributionTypeID
 
