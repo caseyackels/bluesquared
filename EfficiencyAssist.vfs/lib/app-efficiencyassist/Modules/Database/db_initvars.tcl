@@ -155,9 +155,9 @@ proc ea::db::reset_disttype {} {
     
     if {[info exists disttype]} {unset disttype}
         
-    array set disttype [list summarize "" \
-                 rpt,singleEntry "" \
-                 expt,singleEntry "" \
+    array set disttype [list rpt,summarize 0 \
+                 rpt,singleEntry 0 \
+                 expt,singleEntry 0 \
                  rpt,AddrName "" \
                  expt,AddrName "" \
                  distName "" \

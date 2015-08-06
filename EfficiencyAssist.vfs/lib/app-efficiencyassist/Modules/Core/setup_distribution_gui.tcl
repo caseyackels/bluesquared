@@ -162,7 +162,7 @@ proc eAssistSetup::modify_distType {{mode add} tbl} {
     grid [ttk::checkbutton $fd0.ckbtn_active -text [mc "Active"] -variable disttype(status)] -column 1 -columnspan 2 -row 1 -sticky w
     
     grid [ttk::label $fd0.txt_reporting -text [mc "Reporting"]] -column 0 -row 2 -sticky w
-    grid [ttk::checkbutton $fd0.summarize -text [mc "Summarize Shipments"] -variable disttype(summarize)] -column 0 -row 3 -padx 2p -pady 3p -sticky w
+    grid [ttk::checkbutton $fd0.summarize -text [mc "Summarize Shipments"] -variable disttype(rpt,summarize)] -column 0 -row 3 -padx 2p -pady 3p -sticky w
     grid [ttk::checkbutton $fd0.rptSingleEntry -text [mc "Create single entry"] -variable disttype(rpt,singleEntry)] -column 0 -row 4 -padx 2p -sticky w
     grid [ttk::label $fd0.txt_rptUseAddr -text [mc "Use address"]] -column 0 -row 5 -padx 2p -sticky e
     grid [ttk::combobox $fd0.cbox_rptUseAddr -textvariable disttype(rpt,AddrName) -postcommand [list eAssistSetup::populateDistTypeAddresses $fd0.cbox_rptUseAddr]] -column 1 -columnspan 2 -row 5 -padx 2p -sticky ew
