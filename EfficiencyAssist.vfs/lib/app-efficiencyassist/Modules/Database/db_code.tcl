@@ -870,7 +870,7 @@ proc eAssist_db::leftOuterJoin {args} {
 } ;# eAssist_db::leftOuterJoin
 
 
-proc ea::db::countQuantity {db dbTbl dbCol args} {
+proc ea::db::countQuantity {titleDB jobNumber} {
     #****f* countQuantity/ea::db
     # CREATION DATE
     #   02/15/2015 (Sunday Feb 15)
@@ -883,13 +883,11 @@ proc ea::db::countQuantity {db dbTbl dbCol args} {
     #   
     #
     # SYNOPSIS
-    #   ea::db::countQuantity <db name> <db table> <db column> ?db status col? ?status (0|1)?
-	#   Required: Db Name and DB Column
-	#	Optional: DB Status Column Name; defaults to Status
-	#	Optional: status value: defaults to 1
+    #   ea::db::countQuantity <db name> <job number>
+
     #
     # FUNCTION
-    #	Counts the given column from the given table and database.
+    #	Counts quantity associated with shipping orders in the Shipping Orders table, and has an active status from the Addresses table.
     #   
     #   
     # CHILDREN
@@ -907,16 +905,11 @@ proc ea::db::countQuantity {db dbTbl dbCol args} {
     #***
     global log
 	
-	if {$args eq ""} {set args "-statusName Status -status 1"}
-	foreach {key value} $args {
-		switch -- $key {
-			-statusName	{set dbStatusCol $value}
-			-status		{set status $value}
-		}
-	}
-
-	
-    set value [$db eval "SELECT SUM($dbCol) FROM $dbTbl WHERE $dbStatusCol=$status"]
+	set value [$titleDB eval "SELECT SUM(Quantity) FROM ShippingOrders
+							INNER JOIN Addresses
+								ON AddressID = Addresses.SysAddresses_ID
+							WHERE JobInformationID = $jobNumber
+							AND Addresses.SysActive = 1"]
     
 	return $value
     

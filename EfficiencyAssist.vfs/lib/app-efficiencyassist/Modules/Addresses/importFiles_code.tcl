@@ -385,14 +385,21 @@ proc importFiles::processFile {win} {
         set newRow_shiporder "'$job(Number)' '$sysGUID' $newRow_shiporder"
         
         # Insert data into the DB
-        ${log}::debug [join $header_order_consignee ,]
-        ${log}::debug [join $newRow_consignee ,]
+        ${log}::debug HEADER: [join $header_order_consignee ,]
+        ${log}::debug CONSIGNEE: [join $newRow_consignee ,]
 
         
         $job(db,Name) eval "INSERT INTO Addresses ([join $header_order_consignee ,]) VALUES ([join $newRow_consignee ,])"
         $job(db,Name) eval "INSERT INTO ShippingOrders ([join $header_order_shiporder ,]) VALUES ([join $newRow_shiporder ,])"
         #break
         #Update Progress Bar ...
+        
+        # Clear variables
+        unset header_order_consignee
+        unset newRow_consignee
+        unset header_order_shiporder
+        unset newRow_shiporder
+        
         $::gwin(importpbar) step 1
         ${log}::debug Updating Progress Bar - [$::gwin(importpbar) cget -value]
         update
@@ -464,83 +471,77 @@ proc importFiles::insertIntoGUI {wid} {
     #   
     #   
     #***
-    #proc importFiles::insertIntoGUI {wid} {}
     global log headerParent job files
 
-    # Get columns that are:
-    #   Not Empty
-    #   Do not contain 'Never' for the display configuration
-    #   If data does not exist, check the display configuration to see if it is set for 'Always'
-    
-    # Create list of columns that do not have any data ...
     if {[info exists hdrs_show]} {unset hdrs_show}
-    foreach hdr $headerParent(headerList) {
-        # Check the column config
-        set configValue [db eval "SELECT widDisplayType FROM HeadersConfig WHERE dbColName='$hdr' AND dbActive=1"]
-        
-        if {[lsearch $headerParent(headerList,consignee) $hdr] != -1} {
-            set tbl Addresses
-            set hdr Addresses.$hdr
-        } elseif {[lsearch $headerParent(headerList,shippingorder) $hdr] != -1} {
-            set tbl ShippingOrders
-            set hdr ShippingOrders.$hdr
-        }
-
-        switch -- $configValue {
-            "Always"    {lappend hdrs_show $hdr}
-            "Dynamic"   {
-                            # Only show columns if data exists.
-                            set values [$job(db,Name) eval "SELECT $hdr from $tbl WHERE ifnull($hdr, '') != ''"]
-                            if {$values != ""} {lappend hdrs_show $hdr}
-            }
-            "Never"     {continue}
-            default     {${log}::critical insertIntoGUI - $configValue is not a valid switch option!}
-        }
-    }
-    
+   
     # Insert the columns into the widget
     # The tablelist widget is initialized in importFiles_gui.tcl [importFiles::eAssistGUI]
-    foreach col $hdrs_show {
-        # get the config values
-        set hdr_config [db eval "SELECT widStartColWidth, widLabelName, widLabelAlignment, widColAlignment, widWidget, widDataType, widMaxWidth, widRequired, widResizeToLongestEntry from HeadersConfig where dbColName='$col'"]
-        
-        # Get the default start width, or the length of the label text; whichever is greater wins. (we don't want the label text cut off)
-        set resizeToLongestEntry [lindex $hdr_config 8]
-        set lenWidLabelName [string length [lindex $hdr_config 1]]
-        set widStartColWidth [lindex $hdr_config 0]
-        
-        
-        if {$lenWidLabelName >= $widStartColWidth} {
-            set colWidth $lenWidLabelName
-        } else {
-            set colWidth $widStartColWidth
-        }
-        
-        # Make sure we don't mistakenly set a dynamic width column shorter than the label text.
-        # If we are in a dynamic width column, and the strings are less than the text label, we do not honor the dynamic setting.
-        if {$resizeToLongestEntry == 1 && $lenWidLabelName != $colWidth} {
-            set colWidth 0
-        } else {
-            # Increase colWidth by 1 to make the column a bit wider
-            incr colWidth
-        }
-        
-        ${log}::debug Using width: $colWidth - Column: $col
-        
-        $wid insertcolumns end $colWidth [lindex $hdr_config 1]
-        $wid columnconfigure end -name $col \
-                                -labelalign [string tolower [lindex $hdr_config 2]] \
-                                -align [string tolower [lindex $hdr_config 3]] \
-                                -maxwidth [string tolower [lindex $hdr_config 6]] \
-                                -sortcommand [string tolower [lindex $hdr_config 5]] \
-                                -sortmode [string tolower [lindex $hdr_config 5]] \
-                                -width $colWidth
-        
-        # If this is a required column; colorize the label text
-        if {[lindex $hdr_config 7] == 1} {
-            $wid columnconfigure end -labelforeground red
-        }
-    }
+    # get the config values
+        db eval "SELECT widStartColWidth,
+                                widLabelName,
+                                widLabelAlignment,
+                                widColAlignment,
+                                widWidget,
+                                widDataType,
+                                widMaxWidth,
+                                widRequired,
+                                widResizeToLongestEntry,
+                                widFormat,
+                                widDisplayType,
+                                widUIGroup,
+                                dbColName FROM HeadersConfig WHERE dbActive = 1" {
+                                    
+            # Check to see if we need to configure the column (Always, Dynamic (with data), or Never)
+            switch -- $widDisplayType {
+                "Dynamic"   {
+                                # Only show columns if data exists.
+                                # Exit the loop if data doesn't exist.
+                                if {$widUIGroup eq "Consignee"} {set tbl Addresses} else {set tbl ShippingOrders}
+                                set values [$job(db,Name) eval "SELECT $dbColName from $tbl WHERE ifnull($dbColName, '') != ''"]
+                                if {$values == ""} {continue}
+                }
+                "Never"     {continue}
+                "Always"    {}
+                default     {${log}::critical insertIntoGUI - $widDisplayType is not a valid switch option!}
+            }
+            
+
+            if {$widUIGroup eq "Consignee"} {set tbl Addresses} else {set tbl ShippingOrders}
+                ${log}::debug Table/Columns: $tbl.$dbColName
+                lappend hdrs_show "$tbl.$dbColName"
+
+            
+            set lenWidLabelName [string length $widLabelName]
+            
+            if {$lenWidLabelName >= $widStartColWidth} {
+                    set colWidth $lenWidLabelName
+                } else {
+                    set colWidth $widStartColWidth
+            }
+            
+            # Make sure we don't mistakenly set a dynamic width column shorter than the label text.
+            # If we are in a dynamic width column, and the strings are less than the text label, we do not honor the dynamic setting.
+            if {$widResizeToLongestEntry == 1 && $lenWidLabelName != $colWidth} {
+                set colWidth 0
+            } else {
+                # Increase colWidth by 1 to make the column a bit wider
+                incr colWidth
+            }
+            
+            $wid insertcolumns end $colWidth $widLabelName
+            $wid columnconfigure end -name $dbColName \
+                                    -labelalign [string tolower $widLabelAlignment] \
+                                    -align [string tolower $widColAlignment] \
+                                    -maxwidth $widMaxWidth \
+                                    -sortmode [string tolower $widDataType]
+            
+            # If this is a required column; colorize the label text
+            if {$widRequired == 1} {
+                $wid columnconfigure end -labelforeground red
+            }
+        } ;# End query for column configuration
+
     
     ## insert the data into the widget
     # first manipulate the column names; we need two lists. One for the 'select' args, and one for the variables.
@@ -553,25 +554,18 @@ proc importFiles::insertIntoGUI {wid} {
             lappend hdr_data \$VersionName
         } else {
             lappend hdr_list $hdr
-            lappend hdr_data $$hdr
+            lappend hdr_data $[lindex [split $hdr .] 1]
         }
     }
-    #${log}::debug hdr_list: [join $hdr_list ,]
-    #${log}::debug hdr_data: [join $hdr_data ,]
-
-    #$job(db,Name) eval "SELECT [join $hdr_list ,] from Addresses
-    #                        LEFT OUTER JOIN Versions ON Versions=Version_ID
-    #                        AND Addresses.SysActive = 1" {
-    #    $wid insert end [subst $hdr_data]
-    #    #${log}::debug ROW: [subst $hdr_data]
-    #}
     
     $job(db,Name) eval "SELECT [join $hdr_list ,] FROM ShippingOrders
                             INNER JOIN Addresses
                                 ON ShippingOrders.AddressID = Addresses.SysAddresses_ID
                             LEFT OUTER JOIN Versions
                                 ON Addresses.Versions = Versions.Version_ID
-                            WHERE Addresses.SysActive = 1"
+                            WHERE Addresses.SysActive = 1" {
+                                $wid insert end [subst $hdr_data]
+                            }
     
     ### Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
     if {[$files(tab3f2).tbl findcolumnname OrderNumber] == -1} {
@@ -618,25 +612,23 @@ proc importFiles::highlightAllRecords {tbl} {
 
     ## Master loop - increments through the Columns
     # Retrieve total number of columns
-    #set columnCount [expr {[$tbl columncount] - 1}] ;# when using this we start at 0, so we need to reduce this count by 1.
     set columnCount [$tbl columncount]
     for {set x 0} {$columnCount > $x} {incr x} {
         #puts $x
         set colName [$tbl columncget $x -name]
-        set maxLength [db eval "SELECT HeaderMaxLength FROM Headers where InternalHeaderName='$colName'"]
-        set backGround [join [db eval "SELECT Highlight FROM Headers where InternalHeaderName='$colName'"]]
+        set maxLength [db eval "SELECT widMaxStringLength FROM HeadersConfig where widLabelName='$colName'"]
+        set backGround [join [db eval "SELECT widHighlightColor FROM HeadersConfig where widLabelName='$colName'"]]
         if {$backGround eq ""} {set backGround yellow} ;# Default to yellow if nothing was customized.
         
         if {$maxLength eq ""} {continue} ;# Skip if we haven't set a value
         
-        # Retrieve column data
+        # Retrieve column data, and apply color if needed
         set colData [$tbl getcolumns $x]
         set i_row 0
         foreach item $colData {
             if {[string length $item] > $maxLength} {
                 $tbl cellconfigure $i_row,$x -bg $backGround
-                #puts "$tbl cellconfigure $i_row,$x -bg $backGround"
-                #puts "Name: $colName _ $maxLength _ DATA: $item index: $i_row,$x"
+
             } else {
                 $tbl cellconfigure $i_row,$x -bg ""
             }

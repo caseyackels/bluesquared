@@ -839,7 +839,7 @@ proc job::db::getTotalCopies {} {
     #***
     global log job
 
-    set job(TotalCopies) [join [ea::db::countQuantity $job(db,Name) Addresses Quantity -statusName SysActive -status 1]]
+    set job(TotalCopies) [join [ea::db::countQuantity $job(db,Name) $job(Number)]]
     
 } ;# job::db::getTotalCopies
 
