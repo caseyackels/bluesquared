@@ -14,9 +14,11 @@
 
 ##
 ## - Overview
-# Create the per job databases
+# Create the per title databases
 
 namespace eval job::db {}
+namespace eval title::db {}
+
 
     #-tName
     #-tcsr
@@ -142,10 +144,10 @@ proc job::db::createDB {args} {
 
     # Create the database
     sqlite3 $job(db,Name) [file join $tSaveLocation $job(db,Name).db] -create 1
-    # For Testing
-    #sqlite3 $job(db,Name) $job(db,Name).db -create 1
-    
+
+    ${log}::notice Title DB: Creating static tables...
     $job(db,Name) eval {
+        
         CREATE TABLE IF NOT EXISTS Versions (
             Version_ID    INTEGER PRIMARY KEY AUTOINCREMENT,
             VersionName   TEXT    UNIQUE ON CONFLICT ROLLBACK
@@ -154,7 +156,7 @@ proc job::db::createDB {args} {
                                   DEFAULT (1)
         );
         
-        -- # This table should be pre-populated, the only thing the user shoud be able to change is the "IncludeOnReports" column.
+        -- # This table is pre-populated by [job::db::insertDefaultData], the only thing the user shoud be able to change is the "IncludeOnReports" column.
         CREATE TABLE IF NOT EXISTS NoteTypes (
             NoteType_ID      INTEGER PRIMARY KEY AUTOINCREMENT,
             NoteType         TEXT    NOT NULL ON CONFLICT ROLLBACK,
@@ -183,13 +185,7 @@ proc job::db::createDB {args} {
             HistTime   TIME NOT NULL ON CONFLICT ROLLBACK,
             HistSysLog TEXT
         );
-
-        CREATE TABLE IF NOT EXISTS ExportTypes (
-            ExportType_ID INTEGER PRIMARY KEY AUTOINCREMENT,
-            ExportType    TEXT    NOT NULL ON CONFLICT ROLLBACK,
-            Active        BOOLEAN DEFAULT (1) 
-        );
-        
+       
         CREATE TABLE IF NOT EXISTS SysInfo (
             SysInfo_ID INTEGER PRIMARY KEY AUTOINCREMENT,
             SysSchema  INTEGER UNIQUE
@@ -205,11 +201,11 @@ proc job::db::createDB {args} {
             CustCode            TEXT    NOT NULL ON CONFLICT ROLLBACK,
             CSRName             TEXT    NOT NULL ON CONFLICT ROLLBACK,
             TitleName           TEXT    NOT NULL ON CONFLICT ROLLBACK,
-            TitleSaveLocation   TEXT
+            TitleSaveLocation   TEXT    NOT NULL ON CONFLICT ROLLBACK
         );
         
+        --# JobInformation_ID = Job Number
         CREATE TABLE IF NOT EXISTS JobInformation (
-            --# JobInformation_ID = Job Number
             JobInformation_ID  TEXT    UNIQUE ON CONFLICT ROLLBACK
                                        NOT NULL ON CONFLICT ROLLBACK
                                        PRIMARY KEY ASC ON CONFLICT ROLLBACK,
@@ -228,52 +224,73 @@ proc job::db::createDB {args} {
             JobInformationID TEXT    REFERENCES JobInformation (JobInformation_ID) ON UPDATE CASCADE
                                      NOT NULL ON CONFLICT ROLLBACK,
             PublishedRev     INTEGER NOT NULL ON CONFLICT ROLLBACK,
-            PublishedBy      TEXT    NOT NULL ON CONFLICT ROLLBACK,
-            PublishedDate    DATE    NOT NULL ON CONFLICT ROLLBACK,
-            PublishedTime    TIME    NOT NULL ON CONFLICT ROLLBACK
-        );
-        
-        CREATE TABLE IF NOT EXISTS ShippingOrders (
-            JobInformationID TEXT NOT NULL ON CONFLICT ROLLBACK
-                                    REFERENCES JobInformation (JobInformation_ID) ON UPDATE CASCADE,
-            AddressID        TEXT NOT NULL ON CONFLICT ROLLBACK
-                                    REFERENCES Addresses (Addresses_ID) ON UPDATE CASCADE
+            HistoryID        TEXT    REFERENCES History (History_ID) ON UPDATE CASCADE
+                                        NOT NULL ON CONFLICT ROLLBACK
         );
     }
     
+    # This table should be auto-generated, depending on what header is assigned to what group.
+    # Shipping Orders should contain groups: Shipping Order, Packaging
+    # Basic setup
+    set sTable [list \
+        {ShippingOrder_ID INTEGER PRIMARY KEY AUTOINCREMENT} \
+        {JobInformationID TEXT  NOT NULL ON CONFLICT ROLLBACK
+                                    REFERENCES JobInformation (JobInformation_ID) ON UPDATE CASCADE} \
+        {AddressID        TEXT  NOT NULL ON CONFLICT ROLLBACK
+                                    REFERENCES Addresses (Addresses_ID) ON UPDATE CASCADE}]
 
+    # Create the ShippingOrder table (Consignee group)
+    db eval {SELECT dbColName, dbDataType FROM HeadersConfig
+                WHERE widUIGroup <> 'Consignee'
+                ORDER BY widUIPositionWeight ASC, DBColName ASC} {
+        lappend sTable "$dbColName $dbDataType"
+    }
+
+    ${log}::notice Title DB: Creating Table:ShippingOrders (Group:Shipping Order, Packaging)
+    $job(db,Name) eval "CREATE TABLE IF NOT EXISTS ShippingOrders ( [join $sTable ,] )"
+    
+    
     # Dynamically build the Addresses table using data from the main db (Headers Config)
     # AddressParentID - This is the ID of the first entry in that family
     # AddressChildID - Incremented field: 0 (Duplicate), 1 (Original Entry) 2+ (revisions to the original record)
+    #   Duplicate: After importing, and user verification, if any duplicates exist (AddressChildID = 0), then we will delete those records.
     set cTable [list \
         {SysAddresses_ID    TEXT    PRIMARY KEY ON CONFLICT ROLLBACK
                                     UNIQUE ON CONFLICT ROLLBACK
                                     NOT NULL ON CONFLICT ROLLBACK} \
         {SysNotesID         TEXT    REFERENCES Notes (Notes_ID) ON UPDATE CASCADE} \
         {SysAddressParentID TEXT} \
-        {SysAddressChildID  INTEGER} \
+        {SysAddressChild    INTEGER} \
         {SysActive          BOOLEAN DEFAULT (1) NOT NULL ON CONFLICT ROLLBACK} \
-        {SysDateEntered     DATE    NOT NULL ON CONFLICT ROLLBACK} \
-        {Versions           INTEGER REFERENCES Versions (Version_ID) ON UPDATE CASCADE} \
-        {SysExportTypeID    INTEGER REFERENCES ExportType (ExportType_ID) ON UPDATE CASCADE}]
+        {HistoryID          TEXT    REFERENCES History (History_ID) ON UPDATE CASCADE
+                                        NOT NULL ON CONFLICT ROLLBACK} \
+        {Versions          INTEGER REFERENCES Versions (Version_ID) ON UPDATE CASCADE}]
     
-    
-    db eval {SELECT dbColName, dbDataType FROM HeadersConfig} {
+    # Create the Addresses table (Consignee group)
+    db eval {SELECT dbColName, dbDataType FROM HeadersConfig
+                WHERE widUIGroup = 'Consignee'
+                ORDER BY widUIPositionWeight ASC, DBColName ASC} {
         # Bypass the possiblity that the user created a 'versions' column.
-        if {[string tolower $dbColName] eq "versions"} {continue}
-        lappend cTable "$dbColName $dbDataType"
+        if {[string tolower $dbColName] eq "versions"} {
+                continue
+        } else {
+            lappend cTable "$dbColName $dbDataType"
+        }
     }
 
+    ${log}::notice Title DB: Creating Table:Addresses (Group:Consignee)
     $job(db,Name) eval "CREATE TABLE IF NOT EXISTS Addresses ( [join $cTable ,] )"
     
     
     job::db::insertDefaultData
-    ${log}::notice Inserted default data...
+    ${log}::notice Title DB: Inserted default data...
     
     #INSERT TITLE AND GET ID
     set titleID [job::db::insertTitleInfo -title $tName -csr $tCSR -saveLocation $tSaveLocation -custcode $tCustCode -histnote $tHistNote]
+    ${log}::notice Title DB: Inserted title data...
     
     #INSERT JOB
+    ${log}::notice Title DB: Inserted job data...
     job::db::insertJobInfo -jNumber $jNumber -jName $jName -jSaveLocation $jSaveLocation -jDateShipStart $jShipStart -jDateShipBalance $jShipBal -titleid $titleID -histnote $jHistNote
        
 } ;# job::db::createDB
@@ -428,8 +445,6 @@ proc job::db::write {db dbTbl dbTxt wid widCells {dbCol ""}} {
     set dbPK [$wid getcell [lindex [split $widCells ,] 0],0]
     $db eval "UPDATE $dbTbl SET $dbCol='$dbTxt' WHERE OrderNumber='$dbPK'"
     
-    # Get total copies
-    #set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
     job::db::getTotalCopies
     
 } ;# job::db::write
@@ -846,7 +861,7 @@ proc job::db::insertDefaultData {} {
     #
     # FUNCTION
     #	Inserts default data upon Title db creation
-    #	tables: Versions, NoteTypes and ExportType
+    #	Tables: Versions and NoteTypes
     #   
     #   
     # CHILDREN
@@ -866,14 +881,8 @@ proc job::db::insertDefaultData {} {
 
     $job(db,Name) eval "INSERT INTO Versions (VersionName) VALUES ('Version 1')"
     
-    foreach noteType [list Title Job Version {Distribution Type} {Shipping Order}] {
-        $job(db,Name) eval "INSERT INTO NoteTypes (NoteType) VALUES ('$noteType')"
-    }
-    
-    foreach exportType [list Planner {Process Shipper} Report] {
-        $job(db,Name) eval "INSERT INTO ExportTypes (ExportType) VALUES ('$exportType')"
-    }
-
+    $job(db,Name) eval "INSERT INTO NoteTypes (NoteType)
+                            VALUES ('Title'),('Job'),('Version'),('Distribution Type'),('Shipping Order')"
     
 } ;# job::db::insertDefaultData
 
@@ -926,7 +935,7 @@ proc job::db::insertTitleInfo {args} {
     lappend hdrs HistoryID
     lappend values '[job::db::insertHistory $histnote]'
     
-    ${log}::debug Inserted Title Information into table: TitleInformation
+    ${log}::notice Inserted Title Information into table: TitleInformation
     $job(db,Name) eval "INSERT INTO TitleInformation([join $hdrs ,]) VALUES([join $values ,])"
 
     return [$job(db,Name) eval "SELECT seq FROM sqlite_sequence WHERE name='TitleInformation'"]
@@ -990,15 +999,15 @@ proc job::db::insertJobInfo {args} {
     # Check to see if job exists in the database
     set jobExists [$job(db,Name) eval "SELECT JobInformation_ID from JobInformation where JobInformation_ID = $jNumber"]
     
-    ${log}::debug Inserting into JobInformation, job exists? $jobExists
+    ${log}::notice TitleDB: Inserting into JobInformation, job exists? $jobExists
 
     if {$jobExists != ""} {
-        ${log}::debug updating existing job info: $jNumber, $jName
+        ${log}::notice TitleDB: updating existing job info: $jNumber, $jName
         $job(db,Name) eval "UPDATE JobInformation
                                 SET JobInformation_ID = $jNumber, JobName = $jName, JobSaveLocation = $jSaveLocation, TitleInformationID = $titleid; HistoryID = '$histnote'
                                 WHERE JobInformation_ID = $jNumber"
     } else {
-        ${log}::debug inserting new info into db...
+        ${log}::notice TitleDB: Inserting new job info into db...
         $job(db,Name) eval "INSERT INTO JobInformation([join $hdrs ,]) VALUES([join $values ,])"
     }
 
@@ -1047,4 +1056,4 @@ proc job::db::insertHistory {args} {
     $job(db,Name) eval "INSERT INTO History (History_ID, HistUser, HistDate, HistTime, HistSysLog) VALUES ('$histGUID', '$user(id)', '$currentDate', '$currentTime', '[join $args]')"
     
     return $histGUID
-} ;# job::db::insertHistory
+} ;# job::db::insertHistory ?note?

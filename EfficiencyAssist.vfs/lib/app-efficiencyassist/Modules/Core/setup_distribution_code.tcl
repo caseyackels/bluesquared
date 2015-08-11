@@ -90,9 +90,6 @@ proc ea::db::writeDistTypeSetup {lbox win tbl} {
         ${log}::notice $disttype(distName) exists in db, updating...
         db eval "UPDATE DistributionTypes SET DistTypeName='$disttype(distName)',
                                                 DistType_Status=$disttype(status),
-                                                DistType_Summarize=$disttype(summarize),
-                                                DistType_SingleEntry=$disttype(singleEntry),
-                                                DistType_AddrNameID=$addrID,
                                                 DistType_ShipTypeID=$shipTypeID
                                         WHERE DistributionType_ID=$disttype(id)"
        
@@ -156,16 +153,16 @@ proc ea::db::writeRptConfig {} {
         db eval "SELECT RptAction_ID, RptMethod.RptMethod as RptMethod, RptActions.RptAction as RptAction FROM RptActions
             INNER JOIN RptMethod ON RptMethod.RptMethod_ID = RptActions.RptMethodID" {
                 # Set the exports
-                if {[string tolower $RptMethod] eq "export" && [string tolower $RptAction eq "single entry"]} {
+                if {[string tolower $RptMethod] eq "export" && [string tolower $RptAction] eq "single entry"} {
                     set exptSingleEntryID $RptAction_ID
                 }
                 
                 # Set the reports
-                if {[string tolower $RptMethod] eq "report" && [string tolower $RptAction eq "single entry"]} {
+                if {[string tolower $RptMethod] eq "report" && [string tolower $RptAction] eq "single entry"} {
                     set rptSingleEntryID $RptAction_ID
                 }
                 
-                if {[string tolower $RptMethod] eq "report" && [string tolower $RptAction eq "summarize"]} {
+                if {[string tolower $RptMethod] eq "report" && [string tolower $RptAction] eq "summarize"} {
                     set rptSummarizeID $RptAction_ID   
                 }
         }
@@ -176,14 +173,23 @@ proc ea::db::writeRptConfig {} {
             lappend RptActionValue "($disttype(id), $exptSingleEntryID)"
         }
         
+        if {$disttype(expt,AddrName) == "" && $disttype(expt,singleEntry) == 0} {
+            lappend RptActionValue "($disttype(id), $exptSingleEntryID)"
+        }
+        
         ## Reporting
         if {$disttype(rpt,AddrName) != "" && $disttype(rpt,singleEntry) != 0} {
+            lappend RptActionValue "($disttype(id), $rptSingleEntryID)"
+        }
+        
+        if {$disttype(rpt,AddrName) == "" && $disttype(rpt,singleEntry) == 0} {
             lappend RptActionValue "($disttype(id), $rptSingleEntryID)"
         }
         
         if {$disttype(rpt,summarize) == 1} {
             lappend RptActionValue "($disttype(id), $rptSummarizeID)"
         }
+
 
         
         # TABLE: RptConfig
