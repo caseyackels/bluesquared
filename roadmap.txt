@@ -1,0 +1,9 @@
+Roadmap
+
+* [DONE] Restructure Headers table in master db
+* [DONE] Add Companies to DB; Plant and Customers
+* [DONE] Update Distribution Types so reporting will be easier
+* [DONE] Restructure Title level DB (still referred to 'job' db)
+* Open existing title db up, and populate widget
+* Deduplication after importing
+** 
