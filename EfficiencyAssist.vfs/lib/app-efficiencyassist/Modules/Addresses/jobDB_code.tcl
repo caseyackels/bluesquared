@@ -336,6 +336,8 @@ proc job::db::open {} {
     #   
     #***
     global log job mySettings files headerParent process
+    
+    ${log}::notice Opening an existing database file...
 
     if {[info exists job(db,Name)] == 1} {
         ${log}::debug Previous job is open. Closing current job: $job(Title) $job(Name)
@@ -363,7 +365,18 @@ proc job::db::open {} {
     
     set job(CustName) [join [db eval "SELECT CustName From Customer where Cust_ID='$job(CustID)'"]]
     
-    ea::helper::updateTabText "$job(Title)"
+    # Set last job number, so we have a place to start
+    $job(db,Name) eval "SELECT JobInformation_ID, JobName, JobSaveLocation, JobFirstShipDate, JobBalanceShipDate, max(History.HistDate) FROM JobInformation
+                                                INNER JOIN History
+                                            ON JobInformation.HistoryID = History.History_ID" {
+                                                set job(Number) $JobInformation_ID
+                                                set job(Name) $JobName
+                                                set job(JobBalanceShipDate) $JobBalanceShipDate
+                                                set job(JobFirstShipDate) $JobFirstShipDate
+                                                set job(JobSaveFileLocation) $JobSaveLocation
+                                            }
+                                            
+    ea::helper::updateTabText "$job(Number): $job(Title) $job(Name)"
 
     ## Check db schema to see if it needs to be updated ...
     #job::db::updateDB
@@ -372,22 +385,12 @@ proc job::db::open {} {
     # Insert the data into the tablelist
     importFiles::insertIntoGUI $files(tab3f2).tbl
     
-    ## Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
-    #if {[$files(tab3f2).tbl findcolumnname OrderNumber] == -1} {
-    #    $files(tab3f2).tbl insertcolumns 0 0 "..."
-    #    $files(tab3f2).tbl columnconfigure 0 -name "OrderNumber" -labelalign center -showlinenumbers 1
-    #}
-
     # Apply the highlights
     importFiles::highlightAllRecords $files(tab3f2).tbl
     
     # Get total copies
-    #set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
     job::db::getTotalCopies
     
-    # Init variables
-    
-    #set process(versionList) [ea::db::getUniqueValues $job(db,Name) Version Addresses]
     ## Initialize popup menus
     IFMenus::createToggleMenu $files(tab3f2).tbl
 } ;# job::db::open
@@ -839,6 +842,8 @@ proc job::db::getTotalCopies {} {
     #***
     global log job
 
+    if {![info exists job(Number)]} {${log}::notice [info level 0] - [mc "Job Number isn't set; count label will not be updated."]; return}
+    
     set job(TotalCopies) [join [ea::db::countQuantity $job(db,Name) $job(Number)]]
     
 } ;# job::db::getTotalCopies
