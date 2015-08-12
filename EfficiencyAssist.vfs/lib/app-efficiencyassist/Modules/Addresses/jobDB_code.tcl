@@ -303,7 +303,7 @@ proc job::db::createDB {args} {
 ## INSERT JOB
 #job::db::insertJobInfo -jNumber 304503 -jName {March 2015} -jSaveLocation {C:/tmp/job} -jDateShipStart 2015-05-20 -jDateShipBalance 2015-05-29 -titleid $titleID -histnote {Inserting a new Job}
 
-proc job::db::open {} {
+proc job::db::open {args} {
     #****f* open/job::db
     # CREATION DATE
     #   02/08/2015 (Sunday Feb 08)
@@ -316,10 +316,11 @@ proc job::db::open {} {
     #   
     #
     # SYNOPSIS
-    #   job::db::load 
+    #   job::db::open ?args?
     #
     # FUNCTION
     #	Launches the browse dialog; loads the selected database based on the file that we've opened.
+    #	args = path to menu item to set to normal from disabled
     #   
     #   
     # CHILDREN
@@ -393,6 +394,9 @@ proc job::db::open {} {
     
     ## Initialize popup menus
     IFMenus::createToggleMenu $files(tab3f2).tbl
+    
+    # Allow the user to select the job menu
+    $args entryconfigure 1 -state normal
 } ;# job::db::open
 
 

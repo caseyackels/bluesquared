@@ -201,8 +201,6 @@ proc importFiles::eAssistGUI {} {
                                     -yscrollcommand [list $scrolly set] \
                                     -xscrollcommand [list $scrollx set]
 
-    # Create the columns
-    #importFiles::insertColumns $files(tab3f2).tbl
     
     ttk::scrollbar $scrolly -orient v -command [list $files(tab3f2).tbl yview]
     ttk::scrollbar $scrollx -orient h -command [list $files(tab3f2).tbl xview]
@@ -303,9 +301,8 @@ proc importFiles::initMenu {} {
     # SEE ALSO
     #
     #***
-    global log mb files
-    #${log}::debug --START -- [info level 1]
-    
+    global log mb files job
+
     if {[winfo exists $mb.modMenu.quick]} {
         destroy $mb.modMenu.quick
     }
@@ -323,13 +320,21 @@ proc importFiles::initMenu {} {
     
     # Add Module specific Menus
     menu $mb.file.project
-    $mb.file add cascade -label [mc "Project"] -menu $mb.file.project
-        $mb.file.project add command -label [mc "New..."] -command {customer::projSetup}
-        $mb.file.project add command -label [mc "Edit..."] -command {customer::projSetup edit}
-        $mb.file.project add command -label [mc "Open..."] -command {job::db::open}
+    $mb.file add cascade -label [mc "Title"] -menu $mb.file.project
+        # New Title allows you to add a Title and job at the same time. Edit only allows you to modify the Title
+        $mb.file.project add command -label [mc "New..."] -command {customer::projSetup newTitle $mb.file} ;# Activate the Job menu
+        $mb.file.project add command -label [mc "Edit..."] -command {customer::projSetup editTitle} ;# Read Only on the job level widgets
+        $mb.file.project add command -label [mc "Open..."] -command {job::db::open $mb.file} ;# Activate the Job menu
+    menu $mb.file.job
+    $mb.file add cascade -label [mc "Job"] -menu $mb.file.job -state disabled
+     # New Job requires a Title DB to be opened already or else the state is disabled. Edit Job allows you to modify the job info only.
+        $mb.file.job add command -label [mc "New..."] -command {customer::projSetup newJob} ;# Read Only on the Title level widgets
+        $mb.file.job add command -label [mc "Edit..."] -command {customer::projSetup editJob} ;# Read Only on the Title level widgets
+        $mb.file.job add command -label [mc "Open..."] -command {${log}::debug Open Job}
+    $mb.file add separator
     $mb.file add command -label [mc "Import File"] -command {importFiles::fileImportGUI}
     $mb.file add command -label [mc "Export File"] -command {export::DataToExport} ;#-state disabled
-    
+    $mb.file add separator
     menu $mb.file.reports
     $mb.file add cascade -label [mc "Reports"] -menu $mb.file.reports
     $mb.file.reports add command -label [mc "General"] -command {job::reports::Viewer}

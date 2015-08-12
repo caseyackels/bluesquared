@@ -24,7 +24,7 @@
 
 namespace eval customer {}
 
-proc customer::projSetup {{modify new}} {
+proc customer::projSetup {{modify newTitle} args} {
     #****f* projSetup/customer
     # CREATION DATE
     #   09/08/2014 (Monday Sep 08)
@@ -76,28 +76,31 @@ proc customer::projSetup {{modify new}} {
     ttk::label $f1.txt0 -text [mc "Customer"]
 	ttk::entry $f1.entry0a -width 12 -textvariable job(CustID) \
                             -validate all \
-                            -validatecommand [list AutoComplete::AutoComplete %W %d %v %P [customer::validateCustomer id $f1]]
+                            -validatecommand [list AutoComplete::AutoComplete %W %d %v %P [customer::validateCustomer id $f1]] \
+							-state disabled
     focus $f1.entry0a
 	
     ttk::combobox $f1.entry0b -width 45 -textvariable job(CustName) \
                             -values $custNameList \
                             -validate all \
-                            -validatecommand [list AutoComplete::AutoComplete %W %d %v %P [customer::validateCustomer name $f1]]
+                            -validatecommand [list AutoComplete::AutoComplete %W %d %v %P [customer::validateCustomer name $f1]] \
+							-state disabled
 	
     ttk::label $f1.txt1a -text [mc "Title"]
-    ttk::entry $f1.entry1a -textvariable job(Title) ;#-validate all \
+    ttk::entry $f1.entry1a -textvariable job(Title) -state disabled ;#-validate all \
                             -validatecommand {AutoComplete::AutoComplete %W %d %v %P [customer::returnTitle $job(CustID)]}
 		tooltip::tooltip $f1.entry1a [mc "Publication Title"]
     
     ttk::label $f1.txt1 -text [mc "CSR"]
     ttk::combobox $f1.cbox1 -postcommand "dbCSR::getCSRID $f1.cbox1 {FirstName LastName}" \
                             -textvariable job(CSRName) -validate all \
-                            -validatecommand {AutoComplete::AutoComplete %W %d %v %P [dbCSR::getCSRID "" {FirstName LastName}]}
+                            -validatecommand {AutoComplete::AutoComplete %W %d %v %P [dbCSR::getCSRID "" {FirstName LastName}]} \
+							-state disabled
 	
 	ttk::label $f1.txt2 -text [mc "Save Location"]
-	ttk::entry $f1.entry2 -textvariable job(TitleSaveFileLocation) -width 45
+	ttk::entry $f1.entry2 -textvariable job(TitleSaveFileLocation) -width 45 -state disabled
 	        tooltip::tooltip $f1.entry2 [mc "Location where you want to save this Title."]
-    ttk::button $f1.btn1 -text [mc "..."] -width 3 -command {customer::getFileSaveLocation title}
+    ttk::button $f1.btn1 -text [mc "..."] -width 3 -command {customer::getFileSaveLocation title} -state disabled
 
 	grid $f1.txt0	   -column 0 -row 0 -sticky nes -padx 3p -pady 3p
 	grid $f1.entry0a   -column 1 -row 0 -sticky w -padx 3p -pady 3p
@@ -117,17 +120,17 @@ proc customer::projSetup {{modify new}} {
     pack $f2 -fill both -expand yes -padx 5p -pady 5p
 	
     ttk::label $f2.txt0 -text [mc "Name"]
-    ttk::entry $f2.entry0 -textvariable job(Name) -width 57
+    ttk::entry $f2.entry0 -textvariable job(Name) -width 57 -state disabled
 		tooltip::tooltip $f2.entry0 [mc "Job Name"] 
     
     ttk::label $f2.txt1 -text [mc "Number"]
-    ttk::entry $f2.entry1 -textvariable job(Number)
+    ttk::entry $f2.entry1 -textvariable job(Number) -state disabled
 		tooltip::tooltip $f2.entry1 [mc "Job Number"]
     
     ttk::label $f2.txt1a -text [mc "Save Location"]
-    ttk::entry $f2.entry1a -textvariable job(JobSaveFileLocation) 
+    ttk::entry $f2.entry1a -textvariable job(JobSaveFileLocation) -state disabled
         tooltip::tooltip $f2.entry1a [mc "Location where you want to save this Job."]
-    ttk::button $f2.btn1 -text [mc "..."] -width 3 -command {customer::getFileSaveLocation job}
+    ttk::button $f2.btn1 -text [mc "..."] -width 3 -command {customer::getFileSaveLocation job} -state disabled
     
     ttk::label $f2.txt2 -text [mc "1st Ship Date"]
     ttk::entry $f2.entry2 -textvariable job(JobFirstShipDate) -state disabled
@@ -165,7 +168,7 @@ proc customer::projSetup {{modify new}} {
 	
     # Re-configure buttons and commands depending on what parameter was passed: New, Edit
     switch -- $modify {
-        new     { 
+        newTitle     { 
 					$btnBar.ok configure -command {customer::dbUpdateCustomer;
 															job::db::createDB -tName $job(Title) -tCSR $job(CSRName) -tSaveLocation $job(TitleSaveFileLocation) -tCustCode $job(CustID) -tHistNote {Initial Entry} -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal $job(JobBalanceShipDate) -jHistNote {Initial Job Entry} ;
 													destroy .ps}
@@ -179,14 +182,46 @@ proc customer::projSetup {{modify new}} {
                         # Reset the inteface ...
                         eAssistHelper::resetImportInterface
                     }
+					# Enable the widgets
+					foreach child [winfo child $f1] {
+						$child configure -state normal
+					}
+					
+					$args entryconfigure 1 -state normal
+					
                 }
-        edit    {
+        editTitle    {
 					$btnBar.ok configure -command {customer::dbUpdateCustomer
 													customer::dbUpdateJob -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal $job(JobBalanceShipDate)
 													destroy .ps}
 					$btnBar.import configure -state disable ;#-command {customer::dbUpdateCustomer; destroy .ps}
-                    #${log}::debug EDIT PROJECT - Disable 'IMPORT FILE' button
+                    # Enable the widgets
+					foreach child [winfo child $f1] {
+						$child configure -state normal
+					}
                 }
+		newJob		{
+					$btnBar.ok configure -command {customer::dbUpdateJob -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal $job(JobBalanceShipDate)
+													destroy .ps}
+						# Enable the widgets
+						foreach child [winfo child $f2] {
+							$child configure -state normal
+						}
+						focus $f2.entry0
+						
+						$f2.entry0 delete 0 end
+						$f2.entry1 delete 0 end
+						$f2.entry1a delete 0 end
+						$f2.entry2 delete 0 end
+						$f2.entry3 delete 0 end
+		}
+		editJob		{
+					$btnBar.ok configure -command {${log}::debug Editing a Job!}
+						# Enable the widgets
+						foreach child [winfo child $f2] {
+							$child configure -state normal
+						}
+		}
         default {${log}::debug [info level 0] - Switch Arg not availabe: $modify for [info level 0]}       
     }
     
@@ -201,10 +236,6 @@ proc customer::projSetup {{modify new}} {
                 set job(CustName) $tmpCustName
                 #${log}::debug $job(CustName)
             }
-        } else {
-            #${log}::debug No ID was entered!
-            #Error_Message::errorMsg BM002
-            #focus .ps.f1.entry0a
         }
     }
     
@@ -215,14 +246,10 @@ proc customer::projSetup {{modify new}} {
             set tmpCustID [join [db eval "SELECT Cust_ID FROM Customer WHERE CustName='$custName'"]]
                 if {$tmpCustID != ""} {
                     set job(CustID) $tmpCustID
-                    #${log}::debug $job(CustID)
                 }
-            #${log}::debug TempCustID wasn't found: Using $job(CustID), new customer?
             
             if {$job(CustID) == "" && $tmpCustID == ""} {
                 ${log}::debug No Data was found in the ID Field - Issuing warning notice.
-                #Error_Message::errorMsg BM002
-                #focus .ps.f1.entry0a
             }
         }
     }
