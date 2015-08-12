@@ -905,6 +905,8 @@ proc ea::db::countQuantity {titleDB jobNumber} {
     #***
     global log
 	
+	if {$titleDB == "" || $jobNumber == ""} {${log}::notice [info level 0] [mc "Job Number or Title DB was not supplied, aborting."]; return}
+	
 	set value [$titleDB eval "SELECT SUM(Quantity) FROM ShippingOrders
 							INNER JOIN Addresses
 								ON AddressID = Addresses.SysAddresses_ID
@@ -913,7 +915,7 @@ proc ea::db::countQuantity {titleDB jobNumber} {
     
 	return $value
     
-} ;# ea::db::countQuantity
+} ;# ea::db::countQuantity <db name> <job number>
 
 
 proc ea::db::getUniqueValues {db dbCol dbTbl} {
