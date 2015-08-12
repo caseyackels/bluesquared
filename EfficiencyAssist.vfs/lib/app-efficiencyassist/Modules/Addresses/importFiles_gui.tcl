@@ -326,7 +326,7 @@ proc importFiles::initMenu {} {
     $mb.file add cascade -label [mc "Project"] -menu $mb.file.project
         $mb.file.project add command -label [mc "New..."] -command {customer::projSetup}
         $mb.file.project add command -label [mc "Edit..."] -command {customer::projSetup edit}
-        $mb.file.project add command -label [mc "Open..."] -command {${log}::debug OPEN EXISTING PROJECT; job::db::open}
+        $mb.file.project add command -label [mc "Open..."] -command {job::db::open}
     $mb.file add command -label [mc "Import File"] -command {importFiles::fileImportGUI}
     $mb.file add command -label [mc "Export File"] -command {export::DataToExport} ;#-state disabled
     
