@@ -11,7 +11,8 @@ Roadmap
 * [DONE] Once a title is active the Job menu should be enabled
 * Control when to add/edit Jobs
 ** [DONE] When adding/editing a job, you should not be able to edit the Title info (Read only)
-** When opening a job, a tablelist widget will display all jobs for the active title.
+** [DONE] When opening a job, a tablelist widget will display the last job.
+** List all jobs in the title, allowing the user to select a job to make it active by showing the destinations.
 * Deduplication after importing
 ** Remove exact matches
 ** Show records that are near matches (Allow user to get out of this, and accept as new or deny all)
