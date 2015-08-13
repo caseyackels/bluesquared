@@ -201,8 +201,6 @@ proc customer::projSetup {{modify newTitle} args} {
 					}
                 }
 		newJob		{
-					$btnBar.ok configure -command {customer::dbUpdateJob -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal $job(JobBalanceShipDate)
-													destroy .ps}
 						# Enable the widgets
 						foreach child [winfo child $f2] {
 							$child configure -state normal
@@ -214,6 +212,12 @@ proc customer::projSetup {{modify newTitle} args} {
 						$f2.entry1a delete 0 end
 						$f2.entry2 delete 0 end
 						$f2.entry3 delete 0 end
+						
+						$btnBar.ok configure -command { eAssistHelper::resetImportInterface 1
+													customer::dbUpdateJob -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal $job(JobBalanceShipDate)
+													destroy .ps
+													}
+
 		}
 		editJob		{
 					$btnBar.ok configure -command {${log}::debug Editing a Job!}

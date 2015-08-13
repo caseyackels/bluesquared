@@ -309,8 +309,8 @@ proc importFiles::processFile {win} {
         set newRow_shiporder "'$job(Number)' '$sysGUID' $newRow_shiporder"
         
         # Insert data into the DB
-        ${log}::debug HEADER: [join $header_order_consignee ,]
-        ${log}::debug CONSIGNEE: [join $newRow_consignee ,]
+        #${log}::debug HEADER: [join $header_order_consignee ,]
+        #${log}::debug CONSIGNEE: [join $newRow_consignee ,]
 
         
         $job(db,Name) eval "INSERT INTO Addresses ([join $header_order_consignee ,]) VALUES ([join $newRow_consignee ,])"
@@ -332,15 +332,8 @@ proc importFiles::processFile {win} {
     ## Ensure the progress bar is at the max, by the time we are done with the loop
     $::gwin(importpbar) configure -value $max
     
-    ## Enable menu items
-    importFiles::enableMenuItems
-    
     ## Destroy the progress bar window
     eAssistHelper::importProgBar destroy
-    
-    ## Initialize popup menus
-    #IFMenus::tblPopup $files(tab3f2).tbl browse .tblMenu
-    IFMenus::createToggleMenu $files(tab3f2).tbl
     
     # Insert the data into the widget
     importFiles::insertIntoGUI $files(tab3f2).tbl
@@ -398,11 +391,15 @@ proc importFiles::insertIntoGUI {wid} {
     global log headerParent job files
 
     if {[info exists hdrs_show]} {unset hdrs_show}
-   
+        
+    # make sure we are starting new. Clear the columns and clear the table
+    #if {[$wid columncount] != 0} {$wid deletecolumns 0 end}
+    ${log}::debug Row Count 1: [$files(tab3f2).tbl size]
+        
     # Insert the columns into the widget
     # The tablelist widget is initialized in importFiles_gui.tcl [importFiles::eAssistGUI]
     # get the config values
-        db eval "SELECT widStartColWidth,
+    db eval "SELECT widStartColWidth,
                                 widLabelName,
                                 widLabelAlignment,
                                 widColAlignment,
@@ -432,7 +429,7 @@ proc importFiles::insertIntoGUI {wid} {
             
 
             if {$widUIGroup eq "Consignee"} {set tbl Addresses} else {set tbl ShippingOrders}
-                ${log}::debug Table/Columns: $tbl.$dbColName
+                #${log}::debug Table/Columns: $tbl.$dbColName
                 lappend hdrs_show "$tbl.$dbColName"
 
             
@@ -453,6 +450,7 @@ proc importFiles::insertIntoGUI {wid} {
                 incr colWidth
             }
             
+            
             $wid insertcolumns end $colWidth $widLabelName
             $wid columnconfigure end -name $dbColName \
                                     -labelalign [string tolower $widLabelAlignment] \
@@ -465,15 +463,20 @@ proc importFiles::insertIntoGUI {wid} {
                 $wid columnconfigure end -labelforeground red
             }
         } ;# End query for column configuration
+        
+    ${log}::debug Row Count 2: [$files(tab3f2).tbl size]
 
-    
-    ## insert the data into the widget
+    ${log}::debug hdrs_show: $hdrs_show
+    # insert the data into the widget
     # first manipulate the column names; we need two lists. One for the 'select' args, and one for the variables.
+    if {[info exists hdr_list]} {unset hdr_list}
+    if {[info exists hdr_data]} {unset hdr_data}
+    
     foreach hdr $hdrs_show {
         # look for a header that contains 'vers', because we need to append .VersionNames (Table: Versions, column VersionNames) so we can display the version name vs the version id
         if {[string match -nocase *vers* $hdr]} {
             #${log}::debug Found a vers match! $hdr
-
+    
             lappend hdr_list VersionName
             lappend hdr_data \$VersionName
         } else {
@@ -481,17 +484,19 @@ proc importFiles::insertIntoGUI {wid} {
             lappend hdr_data $[lindex [split $hdr .] 1]
         }
     }
-    
+
     $job(db,Name) eval "SELECT [join $hdr_list ,] FROM ShippingOrders
                             INNER JOIN Addresses
                                 ON ShippingOrders.AddressID = Addresses.SysAddresses_ID
                             LEFT OUTER JOIN Versions
                                 ON Addresses.Versions = Versions.Version_ID
-                            WHERE Addresses.SysActive = 1" {
-                                $wid insert end [subst $hdr_data]
+                            WHERE ShippingOrders.JobInformationID in ('$job(Number)')
+                            AND Addresses.SysActive = 1" {
+                                #$wid insert end [subst $hdr_data]
+                                $files(tab3f2).tbl insert end [subst $hdr_data]
                             }
-    
-    ### Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
+
+    ## Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
     if {[$files(tab3f2).tbl findcolumnname OrderNumber] == -1} {
         $files(tab3f2).tbl insertcolumns 0 0 "..."
         $files(tab3f2).tbl columnconfigure 0 -name "OrderNumber" -labelalign center -showlinenumbers 1
@@ -750,74 +755,6 @@ proc importFiles::endCmd {tbl row col text} {
     #${log}::debug --END-- [info level 1]
 } ;# importFiles::endCmd
 
-
-#proc importFiles::insertColumns {tbl} {
-#    #****f* insertColumns/importFiles
-#    # AUTHOR
-#    #	Casey Ackels
-#    #
-#    # COPYRIGHT
-#    #	(c) 2011-2014 Casey Ackels
-#    #
-#    # FUNCTION
-#    #	Insert columns before populating them with data
-#    #
-#    # SYNOPSIS
-#    #   importFiles::insertColumns <tbl>
-#    #
-#    # CHILDREN
-#    #	N/A
-#    #
-#    # PARENTS
-#    #	importFiles::eAssistGUI
-#    #
-#    # NOTES
-#    #
-#    # SEE ALSO
-#    #
-#    #***
-#    global log headerParent headerParams dist
-#    #${log}::debug --START-- [info level 1]
-#
-#    set x -1; #was -1
-#    foreach hdr $headerParent(headerList) {
-#        incr x
-#        #set idx [lsearch -exact $headerParent(headerList) $hdr]
-#        $tbl insertcolumns end 0 $hdr
-#        
-#        # Get the header configs that we'll need
-#        set headerConfig [db eval "SELECT Widget,Required,DefaultWidth FROM Headers WHERE InternalHeaderName = '$hdr'"]
-#        
-#        # Set a default widget type
-#        set myWidget [lindex $headerConfig 0]
-#        if {$myWidget == ""} {
-#            set myWidget ttk::entry
-#        }
-#        
-#        
-#        ## Query Headers table for values, then issue the columnconfigure command.
-#        # Setting the label text color to red if it is a required column.
-#        set reqCol [lindex $headerConfig 1]
-#        
-#        if {$reqCol == 1} {
-#            set hdrFG red
-#            } else {
-#                set hdrFG black
-#        }
-#        
-#        set widthCol [lindex $headerConfig 2]
-#        if {$widthCol == ""} {set widthCol 0}
-#
-#        $tbl columnconfigure $x \
-#                            -name $hdr \
-#                            -labelalign center \
-#                            -editable yes \
-#                            -editwindow $myWidget \
-#                            -labelforeground $hdrFG \
-#                            -width $widthCol
-#    }
-#	
-#} ;# importFiles::insertColumns
 
 
 proc importFiles::enableMenuItems {} {

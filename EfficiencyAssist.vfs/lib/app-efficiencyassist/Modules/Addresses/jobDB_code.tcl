@@ -131,8 +131,8 @@ proc job::db::createDB {args} {
     
     set job(db,Name) [join "$tCustCode [join [split $tName " "] ""]" _]
     
-    # Update tab title
-    ea::helper::updateTabText "$tName"
+    # Update tab title, see [job::db::insertJobInfo]
+    #ea::helper::updateTabText "$jNumber: $tName $jName"
     
     # Check to see if the db already exists; if it does launch the updateTitleDb proc
     #set dbExists [file exists [file join $tSaveLocation $job(db,Name).db]]
@@ -237,7 +237,7 @@ proc job::db::createDB {args} {
         {JobInformationID TEXT  NOT NULL ON CONFLICT ROLLBACK
                                     REFERENCES JobInformation (JobInformation_ID) ON UPDATE CASCADE} \
         {AddressID        TEXT  NOT NULL ON CONFLICT ROLLBACK
-                                    REFERENCES Addresses (Addresses_ID) ON UPDATE CASCADE}]
+                                    REFERENCES Addresses (SysAddresses_ID) ON UPDATE CASCADE}]
 
     # Create the ShippingOrder table (Consignee group)
     db eval {SELECT dbColName, dbDataType FROM HeadersConfig
@@ -355,14 +355,18 @@ proc job::db::open {args} {
     
     # Reset the inteface ...
     eAssistHelper::resetImportInterface
+    
 
     # Open the db
     sqlite3 $job(db,Name) $job(db,Name)
     
-    set job(CustID) [join [$job(db,Name) eval {SELECT CustCode FROM TitleInformation}]]
-    set job(CSRName) [join [$job(db,Name) eval {SELECT CSRName FROM TitleInformation}]]
-    set job(TitleSaveFileLocation) [join [$job(db,Name) eval {SELECT TitleSaveLocation FROM TitleInformation}]]
-    set job(Title) [join [$job(db,Name) eval {SELECT TitleName FROM TitleInformation}]]
+    $job(db,Name) eval "SELECT max(TitleInformation_ID), CustCode, CSRName, TitleSaveLocation, TitleName
+                            FROM TitleInformation" {
+                                set job(CustID) $CustCode
+                                set job(CSRName) $CSRName
+                                set job(TitleSaveFileLocation) $TitleSaveLocation
+                                set job(Title) $TitleName
+                            }
     
     set job(CustName) [join [db eval "SELECT CustName From Customer where Cust_ID='$job(CustID)'"]]
     
@@ -967,8 +971,10 @@ proc job::db::insertJobInfo {args} {
     #   job::db::insertJobInfo -jNumber <value> -jName <value> -jSaveLocation <value> -jDateShipStart <value> -jDateShipBalance <value> -titleid <value> -histnote <value>
     #
     # FUNCTION
-    #	This proc will automatically figure out if we need to INSERT or UPDATE into the Database, then issue the correct command and syntax.
-    #   
+    #	This proc will automatically figure out if we need to INSERT or UPDATE into the Database, then issue the correct command and syntax. If we are adding a new
+    #   job, we will reset the tablelist widget.
+    #   DB Table: JobInformation, History
+    #   DB Columns: JobName, JobInformation_ID, JobSaveLocation, JobFirstShipDate, JobBalanceShipDate, TitleInformationID, HistoryID
     #   
     # CHILDREN
     #	N/A
@@ -977,14 +983,13 @@ proc job::db::insertJobInfo {args} {
     #   
     #   
     # NOTES
-    #   DB Table: JobInformation, History
-    #   DB Columns: JobName, JobInformation_ID, JobSaveLocation, JobFirstShipDate, JobBalanceShipDate, TitleInformationID, HistoryID
+    #   
     #   
     # SEE ALSO
     #   
     #   
     #***
-    global log job
+    global log job files
 
     if {[info exists hdrs]} {unset hdrs}
     if {[info exists values]} {unset values}
@@ -1003,9 +1008,11 @@ proc job::db::insertJobInfo {args} {
             -histnote           {lappend hdrs HistoryID; lappend values '[job::db::insertHistory $value]'}
         }
     }
+    
+    # Update tab title
+    ea::helper::updateTabText "$job(Number): $job(Title) $job(Name)"
 
     # Check to see if we need to INSERT or UPDATE
-    # Check to see if job exists in the database
     set jobExists [$job(db,Name) eval "SELECT JobInformation_ID from JobInformation where JobInformation_ID = $jNumber"]
     
     ${log}::notice TitleDB: Inserting into JobInformation, job exists? $jobExists
@@ -1016,12 +1023,43 @@ proc job::db::insertJobInfo {args} {
                                 SET JobInformation_ID = $jNumber, JobName = $jName, JobSaveLocation = $jSaveLocation, TitleInformationID = $titleid; HistoryID = '$histnote'
                                 WHERE JobInformation_ID = $jNumber"
     } else {
-        ${log}::notice TitleDB: Inserting new job info into db...
+        ${log}::notice TitleDB: Inserting new job info into db, clearing out the tablelist widget
         $job(db,Name) eval "INSERT INTO JobInformation([join $hdrs ,]) VALUES([join $values ,])"
+        
+        # make sure we are starting new, remove rows and columns
+        if {[$files(tab3f2).tbl size] != 0} {$files(tab3f2).tbl delete 0 end}
+        if {[$files(tab3f2).tbl columncount] != 0} {$files(tab3f2).tbl deletecolumns 0 end}
+        #importFiles::insertIntoGUI $files(tab3f2).tbl
     }
 
 } ;# job::db::insertJobInfo -jNumber 304503 -jName {March 2015} -jSaveLocation {C:/tmp/job} -jDateShipStart 2015-05-20 -jDateShipBalance 2015-05-29 -titleid <value> -histnote {Inserting a new Job}
 
+
+proc job::db::showJob {jobNumber} {
+    #****if* showJob/job::db
+    # CREATION DATE
+    #   08/13/2015 (Thursday Aug 13)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   This will reset the tablelist widget, and bring in the job numbers that are passed through to the proc.
+    #   
+    #***
+    global log files
+    
+    $files(tab3f2).tbl delete 0 end
+    
+    db eval "SELECT"
+
+    
+
+    
+} ;# job::db::showJob
 
 proc job::db::insertHistory {args} {
     #****f* insertHistory/job::db
