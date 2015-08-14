@@ -158,10 +158,9 @@ proc customer::projSetup {{modify newTitle} args} {
     pack $btnBar -anchor se ;#-padx 5p -pady 5p
     
     ttk::button $btnBar.ok -text [mc "OK"] -command {destroy .ps} ;# Default command 
-	ttk::button $btnBar.import -text [mc "Import File"] -command {customer::dbUpdateCustomer \
-																	job::db::createDB -tName "$job(Title)" -tCSR "$job(CSRName)" -tSaveLocation $job(TitleSaveFileLocation) -tCustCode $job(CustID) -tHistNote {Initial Entry} \
-																	-jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal job(JobBalanceShipDate) -jHistNote {Initial Job Entry} \
-                                                            importFiles::fileImportGUI; destroy .ps}
+	ttk::button $btnBar.import -text [mc "Import File"] -command {customer::dbUpdateCustomer
+																	job::db::createDB -tName $job(Title) -tCSR $job(CSRName) -tSaveLocation $job(TitleSaveFileLocation) -tCustCode $job(CustID) -tHistNote {Initial Entry} -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal $job(JobBalanceShipDate) -jHistNote {Initial Job Entry}
+																	importFiles::fileImportGUI; destroy .ps}
     
     grid $btnBar.ok -column 0 -row 0 -sticky news
     grid $btnBar.import -column 1 -row 0 -sticky news

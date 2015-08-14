@@ -7,16 +7,16 @@ Roadmap - Version 4.1.0
 * [DONE] Open existing title db up, and populate widget with last job (The Job Name/Number should be displayed somewhere for UX)
 * Control when to add/edit Titles
 ** [DONE] When adding a new Title, you should also be able to add a Job
-** [IN PROGESS] When editing a title, you should only be able to edit the Title (Need to make sure DB commands work)
-** Make Import File button work when adding a title/job at the same time.
+** [DONE] When editing a title, you should only be able to edit the Title (Need to make sure DB commands work)
+** [DONE] Make Import File button work when adding a title/job at the same time.
 * [DONE] Once a title is active the Job menu should be enabled
 * Control when to add/edit Jobs
 ** [DONE] When adding/editing a job, you should not be able to edit the Title info (Read only)
 ** [DONE] When opening a job, a tablelist widget will display the last job.
 ** Make Import File button work when adding a job (disable button when editing)
 * Editing Jobs
-** OK Button should update the current job.
-** Import File button should be disabled.
+** [DONE] OK Button should update the current job.
+** [DONE] Import File button should be disabled.
 * Deduplication after importing
 ** Remove exact matches
 ** Show records that are near matches (Allow user to get out of this, and accept as new or deny all)
