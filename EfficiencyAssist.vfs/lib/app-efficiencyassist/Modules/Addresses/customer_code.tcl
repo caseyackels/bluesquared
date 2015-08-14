@@ -503,7 +503,7 @@ proc customer::returnTitle {custID} {
     #***
     global log
 
-    set titleList [db eval "SElECT TitleName FROM PubTitle WHERE CustID='$custID' AND Status='1'"]
+    set titleList [db eval "SElECT TitleName FROM TitleInformation WHERE CustID='$custID' AND Status='1'"]
     #${log}::debug Title List: $titleList
 
     return $titleList
@@ -546,24 +546,11 @@ proc customer::populateTitleWid {tbl custID} {
 
     # Make sure the table is cleared
     $tbl delete 0 end
-    
-    #foreach title [db eval "SELECT TitleName FROM PubTitle WHERE CustID = '$custID'"] {
-    #    set getCSRname [db eval "SELECT FirstName,
-    #                        LastName
-    #                   FROM CSRs
-    #                        INNER JOIN
-    #                        PubTitle ON PubTitle.CSRID = CSRs.CSR_ID
-    #                  WHERE PubTitle.CustID = '$custID'
-    #                  AND PubTitle.TitleName = '$title'
-    #                  AND PubTitle.Status = '1'"]
-    #    
-    #    $tbl insert end [list "" $getCSRname $title]
-    #}
-    #set custID temp
-    db eval "SELECT PubTitle.TitleName as Title, PubTitle.SaveLocation as Location, CSRs.FirstName ||' '|| CSRs.LastName as Name FROM CSRs
-                    INNER JOIN PubTitle on PubTitle.CSRID = CSRs.CSR_ID
-                    WHERE PubTitle.CustID = '$custID'
-                    AND PubTitle.Status = 1" {
+
+    db eval "SELECT TitleInformation.TitleName as Title, TitleInformation.SaveLocation as Location, CSRs.FirstName ||' '|| CSRs.LastName as Name FROM CSRs
+                    INNER JOIN TitleInformation on TitleInformation.CSRID = CSRs.CSR_ID
+                    WHERE TitleInformation.CustID = '$custID'
+                    AND TitleInformation.Status = 1" {
                         ${log}::debug $Name $Title $Location
                         $tbl insert end [list "" $Name $Title $Location]
                     }
@@ -605,24 +592,15 @@ proc customer::dbUpdateCustomer {} {
     #***
     global log job tmp
     
-    set csrList [db eval "SELECT CSR_ID, FirstName, LastName FROM CSRs"]
-    
-    foreach {id fname lname} $csrList {
-        #${log}::debug $id $fname $lname
-        if {[join [list $fname $lname] " "] eq "$job(CSRName)"} {set csrID $id}
-    }
+    set csrID [lindex [db eval "SELECT CSR_ID, FirstName || ' ' || LastName FROM CSRs WHERE FirstName || ' ' || LastName = '$job(CSRName)'"] 0]
 
-    #${log}::debug id: $job(CustID)
-    #${log}::debug custName: $job(CustName)
-    #${log}::debug title: $job(Title)
-    #${log}::debug csrID: $csrID
     # Insert the customer, default status of '1'; so its active.
     set tmp(db,rowID) [eAssist_db::getRowID Customer Cust_ID='$job(CustID)']
     eAssist_db::dbInsert -columnNames {Cust_ID CustName Status} -table Customer -data [list $job(CustID) $job(CustName) 1]
     
     # Insert the title, default status of '1'; so its active.
-    set tmp(db,rowID) [eAssist_db::getRowID PubTitle TitleName='$job(Title)' AND CustID='$job(CustID)']
-    eAssist_db::dbInsert -columnNames {TitleName CustID CSRID Status} -table PubTitle -data [list $job(Title) $job(CustID) $csrID 1]
+    set tmp(db,rowID) [eAssist_db::getRowID TitleInformation TitleName='$job(Title)' AND CustID='$job(CustID)']
+    eAssist_db::dbInsert -columnNames {TitleName CustID CSRID Status} -table TitleInformation -data [list $job(Title) $job(CustID) $csrID 1]
 } ;# customer::dbUpdateCustomer
 
 proc customer::dbUpdateJob {args} {

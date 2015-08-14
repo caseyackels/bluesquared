@@ -192,9 +192,9 @@ proc customer::projSetup {{modify newTitle} args} {
                 }
         editTitle    {
 					$btnBar.ok configure -command {customer::dbUpdateCustomer
-													customer::dbUpdateJob -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal $job(JobBalanceShipDate)
+													job::db::insertTitleInfo -title $job(Title) -csr $job(CSRName) -tSaveLocation $job(TitleSaveFileLocation) -tCustCode $job(CustID) -histnote {Updated Title Info, new record added}
 													destroy .ps}
-					$btnBar.import configure -state disable ;#-command {customer::dbUpdateCustomer; destroy .ps}
+					$btnBar.import configure -state disable
                     # Enable the widgets
 					foreach child [winfo child $f1] {
 						$child configure -state normal

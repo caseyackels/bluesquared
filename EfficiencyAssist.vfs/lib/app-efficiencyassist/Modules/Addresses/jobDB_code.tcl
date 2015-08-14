@@ -938,15 +938,19 @@ proc job::db::insertTitleInfo {args} {
 
     foreach {key value} $args {
         switch -- $key {
-            -title          {lappend hdrs TitleName; lappend values '$value'}
-            -csr            {lappend hdrs CSRName; lappend values '$value'}
-            -saveLocation   {lappend hdrs TitleSaveLocation; lappend values '$value'}
-            -custcode       {lappend hdrs CustCode; lappend values '$value'}
+            -title          {lappend hdrs TitleName; lappend values '$value'; set tName '$value'}
+            -csr            {lappend hdrs CSRName; lappend values '$value'; set tCSRName '$value'}
+            -saveLocation   {lappend hdrs TitleSaveLocation; lappend values '$value'; set tsaveLocation '$value'}
+            -custcode       {lappend hdrs CustCode; lappend values '$value'; set tCustCode '$value'}
             -histnote       {set histnote $value}
         }
     }
     lappend hdrs HistoryID
     lappend values '[job::db::insertHistory $histnote]'
+    
+    # Check to see if it the title has already been entered into the DB. if it has, we'll issue an update statement
+    
+    set titleExists [$job(db,Name) eval "SELECT * FROM TitleInformation WHERE TitleName=$tName"]
     
     ${log}::notice Inserted Title Information into table: TitleInformation
     $job(db,Name) eval "INSERT INTO TitleInformation([join $hdrs ,]) VALUES([join $values ,])"
@@ -993,9 +997,6 @@ proc job::db::insertJobInfo {args} {
 
     if {[info exists hdrs]} {unset hdrs}
     if {[info exists values]} {unset values}
-    #set bypass yes
-    #set histnote ""
-    #${log}::debug args: [info level 0]
 
     foreach {key value} $args {
         switch -- $key {
@@ -1019,8 +1020,9 @@ proc job::db::insertJobInfo {args} {
 
     if {$jobExists != ""} {
         ${log}::notice TitleDB: updating existing job info: $jNumber, $jName
+        ${log}::debug sql: SET JobInformation_ID = $jNumber, JobName = $jName, JobSaveLocation = $jSaveLocation, TitleInformationID = $titleid, HistoryID = $histnote
         $job(db,Name) eval "UPDATE JobInformation
-                                SET JobInformation_ID = $jNumber, JobName = $jName, JobSaveLocation = $jSaveLocation, TitleInformationID = $titleid; HistoryID = '$histnote'
+                                SET JobInformation_ID = $jNumber, JobName = $jName, JobSaveLocation = $jSaveLocation, TitleInformationID = $titleid, HistoryID = $histnote
                                 WHERE JobInformation_ID = $jNumber"
     } else {
         ${log}::notice TitleDB: Inserting new job info into db, clearing out the tablelist widget
