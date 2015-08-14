@@ -92,6 +92,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries struct]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries report]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries cmdline]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries soundex]
 
 
 	##
@@ -131,6 +132,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	package require cmdline
 	package require struct
 	package require report
+	package require soundex
 	
 	
 	# Logger; MD5 are [package require]'d below.
