@@ -1005,7 +1005,7 @@ proc job::db::insertJobInfo {args} {
             -jDateShipStart     {lappend hdrs JobFirstShipDate; lappend values '$value'; set jDateShipState '$value'}
             -jDateShipBalance   {lappend hdrs JobBalanceShipDate; lappend values '$value'; set jDateShipBalance '$value'}
             -titleid            {lappend hdrs TitleInformationID; lappend values $value; set titleid $value; # No single quotes, this is an integer}
-            -histnote           {lappend hdrs HistoryID; lappend values '[job::db::insertHistory $value]'}
+            -histnote           {set histnote '[job::db::insertHistory $value]'; lappend hdrs HistoryID; lappend values $histnote}
         }
     }
     

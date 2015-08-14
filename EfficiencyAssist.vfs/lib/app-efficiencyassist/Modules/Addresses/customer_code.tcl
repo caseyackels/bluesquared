@@ -682,7 +682,7 @@ proc customer::dbUpdateJob {args} {
             -jHistNote      {#${log}::debug -jHistNote $value
                                 set jHistNote $value
             }
-            default         {${log}::critical $currentProcName [info level 0] Passed invalid args $args; return}
+            default         {${log}::critical [info level 0] Passed invalid args $args; return}
         }
     }
     

@@ -220,11 +220,13 @@ proc customer::projSetup {{modify newTitle} args} {
 
 		}
 		editJob		{
-					$btnBar.ok configure -command {${log}::debug Editing a Job!}
+					$btnBar.ok configure -command {customer::dbUpdateJob -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal $job(JobBalanceShipDate)
+													destroy .ps}
 						# Enable the widgets
 						foreach child [winfo child $f2] {
 							$child configure -state normal
 						}
+						$btnBar.import configure -state disable
 		}
         default {${log}::debug [info level 0] - Switch Arg not availabe: $modify for [info level 0]}       
     }
