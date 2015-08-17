@@ -312,35 +312,13 @@ proc importFiles::processFile {win} {
         ${log}::debug HEADER: [join $header_order_consignee ,]
         ${log}::debug CONSIGNEE: [join $newRow_consignee ,]
         
-        return
-        
-        # Check DB to see if this record is already inserted
-        
-        $job(db,Name) eval "SELECT [join $header_order_consignee ,] FROM Addresses
-                                WHERE Company"
 
         $job(db,Name) eval "INSERT INTO Addresses ([join $header_order_consignee ,]) VALUES ([join $newRow_consignee ,])"
         
-        
-        ## USABLE!?!?!
-        # Exact matches
-        # First level: check Address and zip, does it match? 
-        # Second level: check Check Company, Address1, Zip
-        #$job(db,Name) eval "SELECT SysAddresses_ID,
-        #                            Company, count(Company),
-        #                            Attention, count(Attention),
-        #                            Address1, count(Address1),
-        #                            count(Zip) FROM Addresses
-        #                        GROUP BY Address1
-        #                        ORDER BY Company" {
-        #                        if {$count(Address1) == $count(Zip)} {
-        #                                lappend dupeIDs '$SysAddresses_ID'
-        #                                puts "$Company is listed twice"
-        #                            }
-        #                        }
-        #                        puts "dupeIDs: $dupeIDs"
-        
-        # Do deduping here, so we can assign the correct addressID in the ShippingOrders table
+        ##
+        ## DE DUPING
+        ## Inserting into Shipping Orders should happen in the dedupe window  
+        ##
         $job(db,Name) eval "INSERT INTO ShippingOrders ([join $header_order_shiporder ,]) VALUES ([join $newRow_shiporder ,])".
         
         # Clear variables

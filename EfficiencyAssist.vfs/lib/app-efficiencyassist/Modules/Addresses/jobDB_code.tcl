@@ -940,7 +940,7 @@ proc job::db::insertTitleInfo {args} {
         switch -- $key {
             -title          {lappend hdrs TitleName; lappend values '$value'; set tName '$value'}
             -csr            {lappend hdrs CSRName; lappend values '$value'; set tCSRName '$value'}
-            -saveLocation   {lappend hdrs TitleSaveLocation; lappend values '$value'; set tsaveLocation '$value'}
+            -saveLocation   {lappend hdrs TitleSaveLocation; lappend values '$value'; set tSaveLocation '$value'}
             -custcode       {lappend hdrs CustCode; lappend values '$value'; set tCustCode '$value'}
             -histnote       {set histnote $value}
         }
@@ -949,8 +949,6 @@ proc job::db::insertTitleInfo {args} {
     lappend values '[job::db::insertHistory $histnote]'
     
     # Check to see if it the title has already been entered into the DB. if it has, we'll issue an update statement
-    
-    set titleExists [$job(db,Name) eval "SELECT * FROM TitleInformation WHERE TitleName=$tName"]
     
     ${log}::notice Inserted Title Information into table: TitleInformation
     $job(db,Name) eval "INSERT INTO TitleInformation([join $hdrs ,]) VALUES([join $values ,])"
