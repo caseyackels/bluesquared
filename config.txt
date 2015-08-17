@@ -1,17 +1,14 @@
 GS_filePathSetup(checkToggle) 0
-GS_filePathSetup(lookInDirectory) C:/Users/Casey.Ackels/Downloads
 GS_filePathSetup(labelDirectory) 
 GS_filePathSetup(enable,Bartender) 1
-GS_filePathSetup(saveInDirectory) C:/Users/Casey.Ackels/Desktop
+company(country) US
+company(contact) Shipping Dept
 company(address2) 
 company(state) OR
+company(name) Journal Graphics
 company(city) Portland
 company(address3) 
 company(phone) 503-790-9100
 company(zip) 97210
-company(country) US
-company(contact) Shipping Dept.
-company(addr2) 
-company(addr3) 
-company(address1) 2840 NW 35th Ave
 company(company) Journal Graphics
+company(address1) 2840 NW 35th Ave

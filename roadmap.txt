@@ -18,6 +18,11 @@ Roadmap - Version 4.1.0
 ** [DONE] OK Button should update the current job.
 ** [DONE] Import File button should be disabled.
 * Deduplication after importing
+** Show two tablelist widgets (one for existing addresses; one for new addresses)
+*** Highlight one Existing, and one New; select the MERGE button
+*** Buttons: Merge, Replace with
+# Merge: Merges two addresses, keeping new data
+# Accept all as new: Inserts all addresses into DB as 'new' records
 ** Remove exact matches
 ** Show records that are near matches (Allow user to get out of this, and accept as new or deny all)
-** List all jobs in the title, allowing the user to select a job to make it active by showing the destinations.
+* List all jobs in the title, allowing the user to select a job to make it active by showing the destinations.
