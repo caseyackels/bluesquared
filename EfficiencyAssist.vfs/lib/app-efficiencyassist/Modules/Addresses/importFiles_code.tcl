@@ -300,7 +300,7 @@ proc importFiles::processFile {win} {
         }
         
         set sysGUID [ea::tools::getGUID]
-        set histNote [job::db::insertHistory [mc "Sys: Original Import"]]
+        set histNote [job::db::insertHistory [mc "Sys: Import - Addresses"]]
         
         set header_order_consignee "SysAddresses_ID SysAddressParentID HistoryID $header_order_consignee"
         set newRow_consignee "'$sysGUID' '$sysGUID' '$histNote' $newRow_consignee"
@@ -319,7 +319,7 @@ proc importFiles::processFile {win} {
         ## DE DUPING
         ## Inserting into Shipping Orders should happen in the dedupe window  
         ##
-        $job(db,Name) eval "INSERT INTO ShippingOrders ([join $header_order_shiporder ,]) VALUES ([join $newRow_shiporder ,])".
+        $job(db,Name) eval "INSERT INTO ShippingOrders ([join $header_order_shiporder ,]) VALUES ([join $newRow_shiporder ,])"
         
         # Clear variables
         unset header_order_consignee
@@ -355,6 +355,7 @@ proc importFiles::processFile {win} {
     ### Initialize popup menus
     IFMenus::createToggleMenu $files(tab3f2).tbl
 } ;# importFiles::processFile
+
 
 proc importFiles::insertIntoGUI {wid} {
     #****f* insertIntoGUI/importFiles

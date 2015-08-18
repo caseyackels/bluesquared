@@ -498,12 +498,13 @@ proc customer::returnTitle {custID} {
     #   Hardcoded to only show entries with a status of 1 (active)!
     #   
     # SEE ALSO
+    #   DB Tables: PubTitle
     #   
     #   
     #***
     global log
 
-    set titleList [db eval "SElECT TitleName FROM TitleInformation WHERE CustID='$custID' AND Status='1'"]
+    set titleList [db eval "SELECT TitleName FROM PubTitle WHERE CustID='$custID' AND Status='1'"]
     #${log}::debug Title List: $titleList
 
     return $titleList
@@ -599,8 +600,8 @@ proc customer::dbUpdateCustomer {} {
     eAssist_db::dbInsert -columnNames {Cust_ID CustName Status} -table Customer -data [list $job(CustID) $job(CustName) 1]
     
     # Insert the title, default status of '1'; so its active.
-    set tmp(db,rowID) [eAssist_db::getRowID TitleInformation TitleName='$job(Title)' AND CustID='$job(CustID)']
-    eAssist_db::dbInsert -columnNames {TitleName CustID CSRID Status} -table TitleInformation -data [list $job(Title) $job(CustID) $csrID 1]
+    set tmp(db,rowID) [eAssist_db::getRowID PubTitle TitleName='$job(Title)' AND CustID='$job(CustID)']
+    eAssist_db::dbInsert -columnNames {TitleName CustID CSRID Status} -table PubTitle -data [list $job(Title) $job(CustID) $csrID 1]
 } ;# customer::dbUpdateCustomer
 
 proc customer::dbUpdateJob {args} {

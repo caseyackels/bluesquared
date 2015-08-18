@@ -258,12 +258,14 @@ proc job::db::createDB {args} {
         {SysAddresses_ID    TEXT    PRIMARY KEY ON CONFLICT ROLLBACK
                                     UNIQUE ON CONFLICT ROLLBACK
                                     NOT NULL ON CONFLICT ROLLBACK} \
-        {SysNotesID         TEXT    REFERENCES Notes (Notes_ID) ON UPDATE CASCADE} \
+        {SysNotesID         TEXT    REFERENCES Notes (Notes_ID) ON UPDATE CASCADE
+                                                                ON DELETE CASCADE} \
         {SysAddressParentID TEXT} \
         {SysAddressChild    INTEGER} \
         {SysActive          BOOLEAN DEFAULT (1) NOT NULL ON CONFLICT ROLLBACK} \
         {HistoryID          TEXT    REFERENCES History (History_ID) ON UPDATE CASCADE
-                                        NOT NULL ON CONFLICT ROLLBACK} \
+                                                                    ON DELETE CASCADE
+                                    NOT NULL ON CONFLICT ROLLBACK} \
         {Versions          INTEGER REFERENCES Versions (Version_ID) ON UPDATE CASCADE}]
     
     # Create the Addresses table (Consignee group)

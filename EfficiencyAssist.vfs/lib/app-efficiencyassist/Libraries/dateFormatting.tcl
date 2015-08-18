@@ -120,7 +120,7 @@ proc ea::date::getTodaysDate {{dateType default}} {
     switch -- $dateType {
         -std    {set dateFormat %m-%d-%Y}
         -euro   {set dateFormat %d-%m-%Y}
-        -db     {set dateFormat %Y-%d-%m}
+        -db     {set dateFormat %Y-%m-%d}
         default {set dateFormat %D}
     }
     
