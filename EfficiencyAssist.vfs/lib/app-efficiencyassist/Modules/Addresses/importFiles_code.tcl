@@ -790,7 +790,7 @@ proc importFiles::enableMenuItems {} {
     #
     #***
     global log mb
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
     set menuCount [$mb.modMenu index end]
     
@@ -799,7 +799,7 @@ proc importFiles::enableMenuItems {} {
         catch {$mb.modMenu entryconfigure $x -state normal}
     }
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# importFiles::enableMenuItems
 
 

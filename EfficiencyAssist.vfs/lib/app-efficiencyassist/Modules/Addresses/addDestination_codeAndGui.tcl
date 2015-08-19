@@ -158,33 +158,6 @@ proc eAssistHelper::addDestination {tblPath modifier {widRow -1}} {
         }
         default     {${log}::debug Not a valid option for eAssistHelper::addDestination, used $modifier}
     }
-    
-#	if {$dbID != -1 && $args eq ""} {
-#		# We're editing an existing row record
-#		# Populate the shipOrder array
-#        ${log}::debug Editing an existing row
-#		${log}::debug Editing DB Row $dbID
-#        ${log}::debug Editing Widget Row: $widRow
-#		eAssistHelper::loadShipOrderArray $job(db,Name) Addresses $dbID
-#        
-#	} elseif {$dbID != -1 && $args eq "combine"} {
-#		# We are combining orders together
-#        # Reset Ship Order array
-#		eAssistHelper::initShipOrderArray
-#        ${log}::debug Combining Orders: widRow: $widRow
-#		${log}::debug Editing DB Row $dbID
-#        ${log}::debug Editing Widget Row: $widRow
-#        foreach num $widRow {
-#            lappend orderList [$tblPath getcells $num,OrderNumber]
-#        }
-#        ${log}::debug Order List: $orderList
-#        set shipOrder(Quantity) [$job(db,Name) eval "SELECT SUM(Quantity) from Addresses where OrderNumber in ([join $orderList ,])"]
-#        ${log}::debug Total qty: $shipOrder(Quantity)
-#	} else {
-#        # New Destination
-#        # Reset Ship Order array
-#		eAssistHelper::initShipOrderArray
-#    }
 	
 	
     set win [eAssist_Global::detectWin -k .dest]
@@ -404,7 +377,7 @@ proc eAssistHelper::addDestination {tblPath modifier {widRow -1}} {
 		}
 	}
     
-} ;# End eAssistHelper::addDestination
+} ;# eAssistHelper::addDestination $files(ta3f2).tbl -add
 
 
 
@@ -689,3 +662,40 @@ proc eAssistHelper::saveDest {modifier widRow tblPath db dbTbl} {
     job::db::getTotalCopies
 } ;# eAssistHelper::saveDest
 
+
+proc eAssistHelper::shippingOrder {} {
+    #****if* shippingOrder/eAssistHelper
+    # CREATION DATE
+    #   08/19/2015 (Wednesday Aug 19)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   
+    #   
+    #***
+    global log job
+
+    # Setup the vars
+    #set widUIGroups [db eval "SELECT DISTINCT widUIGroup FROM HeadersConfig
+    #                       WHERE dbActive = 1"]
+    
+    set widUIGroups [list Consignee ShippingOrder Packaging Miscellaneous]
+                           
+    foreach uiGroup $widUIGroups {
+        $job(db,Name) eval "SELECT widLabelName, widWidget, widValues, widRequired from HeadersConfig 
+                                WHERE widUIGroup = '$uiGroup'
+                                AND dbActive = 1
+                                ORDER BY widUIPositionWeight ASC, widLabelName ASC" {
+                                    ${log}::debug Building dialog
+                                    
+                                }
+    }
+    
+
+    
+} ;# eAssistHelper::shippingOrder
