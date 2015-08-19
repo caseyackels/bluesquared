@@ -205,7 +205,7 @@ proc job::db::createDB {args} {
         );
         
         --# JobInformation_ID = Job Number
-        CREATE TABLE IF NOT EXISTS JobInformation (
+        CREATE TABLE JobInformation (
             JobInformation_ID  TEXT    UNIQUE ON CONFLICT ROLLBACK
                                        NOT NULL ON CONFLICT ROLLBACK
                                        PRIMARY KEY ASC ON CONFLICT ROLLBACK,
@@ -213,9 +213,11 @@ proc job::db::createDB {args} {
             JobSaveLocation    TEXT    NOT NULL ON CONFLICT ROLLBACK,
             JobFirstShipDate   DATE,
             JobBalanceShipDate DATE,
-            TitleInformationID INTEGER REFERENCES TitleInformation (TitleInformation_ID) ON UPDATE CASCADE,
+            TitleInformationID INTEGER REFERENCES TitleInformation (TitleInformation_ID) ON UPDATE CASCADE
+                                       NOT NULL ON CONFLICT ROLLBACK,
             HistoryID          TEXT    REFERENCES History (History_ID) ON UPDATE CASCADE
-                                        NOT NULL ON CONFLICT ROLLBACK
+                                                                       ON DELETE CASCADE
+                                       NOT NULL ON CONFLICT ROLLBACK
         );
         
         CREATE TABLE IF NOT EXISTS Published (
