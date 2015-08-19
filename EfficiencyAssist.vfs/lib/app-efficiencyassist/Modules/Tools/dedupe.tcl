@@ -62,6 +62,8 @@ proc ea::dedupe::updateAddressIDs {} {
     #***
     global log
 
+    # The column names here are what we are looking at to tell if we have dupes or not.
+    #  *CAUTION* if an address is a near dupe, but has additional data in a column that isn't looked at, we will not know it!
     $job(db,Name) eval "SELECT DISTINCT Company, Attention, Address1 FROM Addresses WHERE SysActive=1" {
         #${log}::debug FIRST $Company, $Attention, $Address1
         lappend allAddresses "[list $Company] [list $Attention] [list $Address1]"
