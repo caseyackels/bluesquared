@@ -38,8 +38,8 @@ proc ea::dedupe::getExistingAddresses {mode addresses} {
                                     AND Attention='$Attention'
                                     AND Address1='$Address1'
                                     AND SysActive=1" {
-                                        lappend results
-                                        ${log}::debug ID: $hdate, $SysAddresses_ID, $Company, $Attention, $Address1
+                                        lappend results '$SysAddresses_ID'
+                                        #${log}::debug ID: $hdate, $SysAddresses_ID, $Company, $Attention, $Address1
                                     }
     }
     return $results
@@ -63,35 +63,35 @@ proc ea::dedupe::updateAddressIDs {} {
     global log
 
     $job(db,Name) eval "SELECT DISTINCT Company, Attention, Address1 FROM Addresses WHERE SysActive=1" {
-        ${log}::debug FIRST $Company, $Attention, $Address1
+        #${log}::debug FIRST $Company, $Attention, $Address1
         lappend allAddresses "[list $Company] [list $Attention] [list $Address1]"
     }
     
-    ea::dedupe::getExistingAddresses max $allAddresses
-    ea::dedupe::getExistingAddresses min $allAddresses
+    set remove_SysAddresses [ea::dedupe::getExistingAddresses max $allAddresses]
+    set insert_SysAddresses [ea::dedupe::getExistingAddresses min $allAddresses]
     unset allAddresses
 
     # Get list of ShippingOrder id's where the dupes are listed
     set shipOrderID [join [$job(db,Name) eval "SELECT ShippingOrder_ID FROM ShippingOrders
                                                 WHERE AddressID IN ([join $remove_SysAddresses ,])
-                                                AND JobInformationID = '$job(Number)'"]]
+                                                AND JobInformationID = '$job(Number)'"] ,]
     
     foreach ins $insert_SysAddresses del $remove_SysAddresses {
-        ${log}::debug Ins/Del: $ins - $del
+        #${log}::debug Ins/Del: $ins - $del
         lappend caseStatement "WHEN $del THEN $ins"
     }
 
     # Update good address ID into the ShippingOrders table
-    #$job(db,Name) eval
-    ${log}::debug "UPDATE ShippingOrders
+    $job(db,Name) eval "UPDATE ShippingOrders
                             SET AddressID = CASE AddressID
                                 [join $caseStatement]
                             END
                         WHERE ShippingOrder_ID IN ($shipOrderID)"
 
     # Delete the duplicates
-    #$job(db,Name) eveal "DELETE FROM Addresses WHERE SysAddresses_ID IN ([join $remove_SysAddresses ,])"
-    ${log}::debug Deleting record: DELETE FROM Addresses WHERE SysAddresses_ID IN ([join $remove_SysAddresses ,])
+    #${log}::debug Deleting record: DELETE FROM Addresses WHERE SysAddresses_ID IN ([join $remove_SysAddresses ,])
+    $job(db,Name) eval "DELETE FROM Addresses WHERE SysAddresses_ID IN ([join $remove_SysAddresses ,])"
+    
 
     unset remove_SysAddresses
     unset insert_SysAddresses
