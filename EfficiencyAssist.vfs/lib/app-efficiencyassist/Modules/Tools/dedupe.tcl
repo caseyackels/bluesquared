@@ -45,8 +45,8 @@ proc ea::dedupe::getExistingAddresses {mode addresses} {
     return $results
 } ;# ea::dedupe::getExistingAddresses
 
-proc ea::dedupe::updateAddressIDs {} {
-    #****if* updateAddressIDs/ea::dedupe
+proc ea::dedupe::exactMatch {args} {
+    #****if* exactMatch/ea::dedupe
     # CREATION DATE
     #   08/18/2015 (Tuesday Aug 18)
     #
@@ -57,17 +57,22 @@ proc ea::dedupe::updateAddressIDs {} {
     #	(c) 2015 Casey Ackels
     #   
     # NOTES
-    #   
+    #   accepts a list of columns from table:Addresses to do exact matching on
     #   
     #***
-    global log
+    global log job
 
     # The column names here are what we are looking at to tell if we have dupes or not.
     #  *CAUTION* if an address is a near dupe, but has additional data in a column that isn't looked at, we will not know it!
-    $job(db,Name) eval "SELECT DISTINCT Company, Attention, Address1 FROM Addresses WHERE SysActive=1" {
-        #${log}::debug FIRST $Company, $Attention, $Address1
-        lappend allAddresses "[list $Company] [list $Attention] [list $Address1]"
+    foreach var $args {
+        lappend varList \$$var
     }
+    
+    $job(db,Name) eval "SELECT DISTINCT [join $args ,] FROM Addresses WHERE SysActive=1" {
+        #${log}::debug FIRST $Company, $Attention, $Address1
+        lappend allAddresses [subst $varList]
+    }
+    unset varList
     
     set remove_SysAddresses [ea::dedupe::getExistingAddresses max $allAddresses]
     set insert_SysAddresses [ea::dedupe::getExistingAddresses min $allAddresses]
@@ -99,4 +104,4 @@ proc ea::dedupe::updateAddressIDs {} {
     unset insert_SysAddresses
     unset caseStatement
     
-} ;# ea::dedupe::updateAddressIDs
+} ;# ea::dedupe::exactMatch

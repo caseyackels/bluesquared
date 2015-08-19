@@ -393,6 +393,9 @@ proc importFiles::insertIntoGUI {wid} {
     #   
     #***
     global log headerParent job files
+    
+    # Run basic deduping
+    ea::dedupe::exactMatch Company Attention Address1 Address2 City State Zip
 
     if {[info exists hdrs_show]} {unset hdrs_show}
         
