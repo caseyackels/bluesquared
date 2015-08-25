@@ -678,24 +678,70 @@ proc eAssistHelper::shippingOrder {} {
     #   
     #   
     #***
-    global log job
+    global log job shippingOrder
+    
+    set win [eAssist_Global::detectWin -k .dest]
+    #${log}::debug Current Window: $win
+    toplevel $win
+    wm transient $win .
+    wm title $win [mc "Add Destination"]
+
+    # Put the window in the center of the parent window
+    set locX [expr {[winfo width . ] / 3 + [winfo x .]}]
+    set locY [expr {[winfo height . ] / 3 + [winfo y .]}]
+    wm geometry $win +${locX}+${locY}
 
     # Setup the vars
-    #set widUIGroups [db eval "SELECT DISTINCT widUIGroup FROM HeadersConfig
-    #                       WHERE dbActive = 1"]
+    eAssistHelper::initShipOrderArray
+    set widUIGroups [db eval "SELECT DISTINCT widUIGroup FROM HeadersConfig
+                           WHERE dbActive = 1"]
     
-    set widUIGroups [list Consignee ShippingOrder Packaging Miscellaneous]
+    #set widUIGroups [list Consignee "Shipping Order" Packaging Miscellaneous] ;# TODO this should be set in a global array
+
+    # Create the frames - We know what the categories are; so we don't need to add them dynamically
+    pack [set f3 [ttk::frame $win.f3]] -padx 5p -pady 5p -side bottom -anchor se
+        grid [ttk::button $f3.ok -text [mc "OK"] -command {}] -column 0 -row 0 -padx 2p -pady 2p -sticky ew
+        grid [ttk::button $f3.cncl -text [mc "Cancel"] -command {}] -column 1 -row 0 -padx 2p -pady 2p -sticky ew
+    
+    pack [set f1 [ttk::frame $win.f1]] -padx 5p -pady 5p -expand yes -fill both -side left
+        pack [ttk::labelframe $f1.consignee -text [mc "Consignee"] -padding 10] -anchor n -padx 0p -pady 0p
+    
+    pack [set f2 [ttk::frame $win.f2]] -padx 5p -pady 5p -expand yes -fill both -side right
+        pack [ttk::labelframe $f2.shippingOrder -text [mc "Shipping Order"] -padding 10] -expand yes -fill x -anchor n -padx 0p -pady 0p
+        pack [ttk::labelframe $f2.packaging -text [mc "Packaging"] -padding 10] -expand yes -fill x  -anchor n -padx 0p -pady 0p
+        pack [ttk::labelframe $f2.miscellaneous -text [mc "Miscellaneous"] -padding 10] -expand yes -fill x -anchor n -padx 0p -pady 0p
+    
+    ${log}::debug Building dialog
                            
     foreach uiGroup $widUIGroups {
-        $job(db,Name) eval "SELECT widLabelName, widWidget, widValues, widRequired from HeadersConfig 
+        
+        switch -- $uiGroup {
+            "Consignee"         {set widPath $f1.consignee}
+            "Shipping Order"    {set widPath $f2.shippingOrder}
+            "Packaging"         {set widPath $f2.packaging}
+            "Miscellaneous"     {set widPath $f2.miscellaneous}
+            default             { ${log}::debug [info level 0] invalid switch statement: $uiGroup }
+        }
+        
+        set textCol 0
+        set dataCol 1
+        set row 0
+        db eval "SELECT widLabelName, widWidget, widValues, widRequired, widMaxWidth from HeadersConfig 
                                 WHERE widUIGroup = '$uiGroup'
                                 AND dbActive = 1
                                 ORDER BY widUIPositionWeight ASC, widLabelName ASC" {
-                                    ${log}::debug Building dialog
+                                    # Label widget
+                                    grid [ttk::label $widPath.txt$row -text $widLabelName] -column $textCol -row $row -sticky e
                                     
+                                    # Entry/Combobox widget
+                                    # use a switch statement here so we use the correct parameters based on widget
+                                    grid [$widWidget $widPath.data$row -textvariable shippingOrder($widLabelName) -width $widMaxWidth] -column $dataCol -row $row -sticky ew
+                                    #grid columnconfigure $f2 1 -weight 2
+                                    
+                                    incr row   
                                 }
+                                incr textCol
+                                incr dataCol
     }
-    
-
     
 } ;# eAssistHelper::shippingOrder
