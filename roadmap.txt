@@ -23,6 +23,7 @@ Roadmap - Version 4.1.0
 *** Buttons: Merge, Replace with
 # Merge: Merges two addresses, keeping new data
 # Accept all as new: Inserts all addresses into DB as 'new' records
-** Remove exact matches
+** [DONE] Remove exact matches, by default
 ** Show records that are near matches (Allow user to get out of this, and accept as new or deny all)
-* List all jobs in the title, allowing the user to select a job to make it active by showing the destinations.
+* Menu Edit>Manage>Jobs. List all jobs in the title, allowing the user to select a job to make it active by showing the destinations.
+* Menu Edit>Manage>Versions. List all versions, allowing the user to Add/Rename/Disable. To View All or only Active or Inactive
