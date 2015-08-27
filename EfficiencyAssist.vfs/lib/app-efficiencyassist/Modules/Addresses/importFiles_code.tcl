@@ -309,8 +309,8 @@ proc importFiles::processFile {win} {
         set newRow_shiporder "'$job(Number)' '$sysGUID' $newRow_shiporder"
         
         # Insert data into the DB
-        ${log}::debug HEADER: [join $header_order_consignee ,]
-        ${log}::debug CONSIGNEE: [join $newRow_consignee ,]
+        #${log}::debug HEADER: [join $header_order_consignee ,]
+        #${log}::debug CONSIGNEE: [join $newRow_consignee ,]
         
 
         $job(db,Name) eval "INSERT INTO Addresses ([join $header_order_consignee ,]) VALUES ([join $newRow_consignee ,])"
@@ -339,7 +339,7 @@ proc importFiles::processFile {win} {
     eAssistHelper::importProgBar destroy
     
     # Insert the data into the widget
-    importFiles::insertIntoGUI $files(tab3f2).tbl
+    importFiles::insertIntoGUI $files(tab3f2).tbl -dedupe
 
     ## Enable menu items
     importFiles::enableMenuItems
@@ -357,7 +357,7 @@ proc importFiles::processFile {win} {
 } ;# importFiles::processFile
 
 
-proc importFiles::insertIntoGUI {wid} {
+proc importFiles::insertIntoGUI {wid args} {
     #****f* insertIntoGUI/importFiles
     # CREATION DATE
     #   06/02/2015 (Tuesday Jun 02)
@@ -394,8 +394,10 @@ proc importFiles::insertIntoGUI {wid} {
     #***
     global log headerParent job files
     
-    # Run basic deduping
-    ea::dedupe::exactMatch Company Attention Address1 Address2 City State Zip
+    if {$args eq "-dedupe"} {
+        # Run basic deduping
+        ea::dedupe::exactMatch Company Attention Address1 Address2 City State Zip
+    }
 
     if {[info exists hdrs_show]} {unset hdrs_show}
         

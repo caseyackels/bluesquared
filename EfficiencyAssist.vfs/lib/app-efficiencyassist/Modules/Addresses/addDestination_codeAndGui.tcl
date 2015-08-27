@@ -537,7 +537,7 @@ proc eAssistHelper::initFGTextColor {args} {
 } ;# eAssistHelper::initFGTextColor
 
 
-proc eAssistHelper::saveDest {modifier widRow tblPath db dbTbl} {
+proc eAssistHelper::saveDest {modifier widRow tblPath} {
     #****f* saveDest/eAssistHelper
     # AUTHOR
     #	Casey Ackels
@@ -566,17 +566,14 @@ proc eAssistHelper::saveDest {modifier widRow tblPath db dbTbl} {
     
     switch -- $modifier {
         -add        {
-                    ## -- We are adding a new record
-                        if {[info exists insertRow]} {unset insertRow}
-                            set insertRow [list \'$OrderNumber']
-                        foreach hdr $headerParent(headerList) {
-                            lappend insertRow '$shipOrder($hdr)'
-                        }
+                    # Add new record to db
+                    ea::db::writeSingleAddressToDB
                     
-                        $job(db,Name) eval "INSERT OR ABORT INTO $dbTbl ([join $headerParent(headerList) ,]) VALUES ([join $insertRow ,])"
+                    # Populate table
+                    ea::db::populateTablelist
                     
-                        set rowID [$db last_insert_rowid]
-                        $tblPath insert end [$db eval "SELECT [join $headerParent(headerList) ,] FROM $dbTbl where rowid=$rowID"]
+                    # Reset the array
+                    eAssistHelper::initShipOrderArray
         }
         -edit       {
             		## -- We are updating a record
@@ -663,7 +660,7 @@ proc eAssistHelper::saveDest {modifier widRow tblPath db dbTbl} {
 } ;# eAssistHelper::saveDest
 
 
-proc eAssistHelper::shippingOrder {} {
+proc eAssistHelper::shippingOrder {tbl} {
     #****if* shippingOrder/eAssistHelper
     # CREATION DATE
     #   08/19/2015 (Wednesday Aug 19)
@@ -678,7 +675,7 @@ proc eAssistHelper::shippingOrder {} {
     #   
     #   
     #***
-    global log job shippingOrder
+    global log job shipOrder files
     
     set win [eAssist_Global::detectWin -k .dest]
     #${log}::debug Current Window: $win
@@ -701,8 +698,8 @@ proc eAssistHelper::shippingOrder {} {
 
     # Create the frames - We know what the categories are; so we don't need to add them dynamically
     pack [set f3 [ttk::frame $win.f3]] -padx 5p -pady 5p -side bottom -anchor se
-        grid [ttk::button $f3.ok -text [mc "OK"] -command {}] -column 0 -row 0 -padx 2p -pady 2p -sticky ew
-        grid [ttk::button $f3.cncl -text [mc "Cancel"] -command {destroy $win}] -column 1 -row 0 -padx 2p -pady 2p -sticky ew
+        grid [ttk::button $f3.ok -text [mc "OK"] -command [list eAssistHelper::saveDest -add "" $files(tab3f2).tbl]] -column 0 -row 0 -padx 2p -pady 2p -sticky ew
+        grid [ttk::button $f3.cncl -text [mc "Cancel"] -command [list destroy $win]] -column 1 -row 0 -padx 2p -pady 2p -sticky ew
     
     pack [set f1 [ttk::frame $win.f1]] -padx 5p -pady 5p -expand yes -fill both -side left
         pack [ttk::labelframe $f1.consignee -text [mc "Consignee"] -padding 10] -anchor n -padx 0p -pady 0p
@@ -738,7 +735,7 @@ proc eAssistHelper::shippingOrder {} {
                                     switch -- $widWidget {
                                             ttk::entry      {
                                                 ${log}::debug Entry widget found: $widWidget - $widLabelName
-                                                set cmd "-textvariable shippingOrder($dbColName) -width $widMaxWidth"
+                                                set cmd "-textvariable shipOrder($dbColName) -width $widMaxWidth"
                                                 }
                                             ttk::combobox   {
                                                 ${log}::debug Combobox widget found: $widWidget - $widLabelName - $widValues
@@ -747,12 +744,12 @@ proc eAssistHelper::shippingOrder {} {
                                                 
                                                     if {[lindex $tbl 0] ne "Versions"} {
                                                         set values [db eval "SELECT [lindex $tbl 1] FROM [lindex $tbl 0]"]
-                                                        set cmd [list -textvariable shippingOrder($dbColName) -width $widMaxWidth -values $values]
+                                                        set cmd [list -textvariable shipOrder($dbColName) -width $widMaxWidth -values $values]
 
                                                     } else {
-                                                        set values [list Version1 Version2]
-                                                        #set values [$job(db,Name) eval "SELECT VersionName FROM VERSIONS WHERE VersionActive = 1"]
-                                                        set cmd [list -textvariable shippingOrder($dbColName) -width $widMaxWidth -values $values]
+                                                        #set values [list Version1 Version2]
+                                                        set values [$job(db,Name) eval "SELECT VersionName FROM VERSIONS WHERE VersionActive = 1"]
+                                                        set cmd [list -textvariable shipOrder($dbColName) -width $widMaxWidth -values $values]
                                                     }
                                                     
                                                 }
