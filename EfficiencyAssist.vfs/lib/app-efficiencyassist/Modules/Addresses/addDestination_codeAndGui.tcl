@@ -660,7 +660,7 @@ proc eAssistHelper::saveDest {modifier widRow tblPath} {
 } ;# eAssistHelper::saveDest
 
 
-proc eAssistHelper::shippingOrder {tbl} {
+proc eAssistHelper::shippingOrder {widTbl modifier} {
     #****if* shippingOrder/eAssistHelper
     # CREATION DATE
     #   08/19/2015 (Wednesday Aug 19)
@@ -672,6 +672,8 @@ proc eAssistHelper::shippingOrder {tbl} {
     #	(c) 2015 Casey Ackels
     #   
     # NOTES
+    #   widTbl = path to tablelist
+    #   modifer = -add|-edit 
     #   
     #   
     #***
@@ -691,14 +693,13 @@ proc eAssistHelper::shippingOrder {tbl} {
     # -----
 
     # Setup the vars
-    eAssistHelper::initShipOrderArray
     set widUIGroups [db eval "SELECT DISTINCT widUIGroup FROM HeadersConfig WHERE dbActive = 1"] ;# TODO this should be set in a global array
     
     # -----
 
     # Create the frames - We know what the categories are; so we don't need to add them dynamically
     pack [set f3 [ttk::frame $win.f3]] -padx 5p -pady 5p -side bottom -anchor se
-        grid [ttk::button $f3.ok -text [mc "OK"] -command [list eAssistHelper::saveDest -add "" $files(tab3f2).tbl]] -column 0 -row 0 -padx 2p -pady 2p -sticky ew
+        grid [ttk::button $f3.ok -text [mc "OK"] -command [list eAssistHelper::saveDest -add "" $widTbl]] -column 0 -row 0 -padx 2p -pady 2p -sticky ew
         grid [ttk::button $f3.cncl -text [mc "Cancel"] -command [list destroy $win]] -column 1 -row 0 -padx 2p -pady 2p -sticky ew
     
     pack [set f1 [ttk::frame $win.f1]] -padx 5p -pady 5p -expand yes -fill both -side left
@@ -773,6 +774,11 @@ proc eAssistHelper::shippingOrder {tbl} {
         if {[winfo children $fr] == ""} {
             pack forget $fr
         }
+    }
+    
+    switch -- $modifier {
+        -add        {eAssistHelper::initShipOrderArray}
+        -edit       {ea::db::populateShipOrder [ea::db::getRecord [$widTbl curselection]]}
     }
     
 } ;# eAssistHelper::shippingOrder

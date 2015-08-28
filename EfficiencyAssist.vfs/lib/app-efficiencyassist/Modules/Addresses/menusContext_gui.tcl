@@ -107,9 +107,10 @@ proc IFMenus::tblPopup {tbl mode mName} {
         if {$mode eq "browse"} {
             $mName add command -label [mc "Quick Insert..."] -command {eAssistHelper::insertItems $files(tab3f2).tbl}
             #$mName add command -label [mc "Edit Destination..."] -command {eAssistHelper::addDestination $files(tab3f2).tbl [$files(tab3f2).tbl curselection] [lindex [$files(tab3f2).tbl getcells [$files(tab3f2).tbl curcellselection]] 0]}
-            $mName add command -label [mc "Edit Destination..."] -command {eAssistHelper::addDestination $files(tab3f2).tbl -edit [$files(tab3f2).tbl curselection]}
+            $mName add command -label [mc "Edit Destination test..."] -command {eAssistHelper::shippingOrder $files(tab3f2).tbl -edit}
+			$mName add command -label [mc "Edit Destination..."] -command {eAssistHelper::addDestination $files(tab3f2).tbl -edit [$files(tab3f2).tbl curselection]}
 			$mName add command -label [mc "Combine Orders..."] -command {eAssistHelper::addDestination $files(tab3f2).tbl -combine [$files(tab3f2).tbl curselection]}
-			
+			$mName add separator
 			$mName add command -label [mc "Copy"] -command {IFMenus::copyCell $files(tab3f2).tbl Menu}
             $mName add command -label [mc "Paste"] -command {eAssistHelper::insValuesToTableCells -hotkey $files(tab3f2).tbl [clipboard get] [$files(tab3f2).tbl curcellselection]}
             $mName add command -label [mc "Clear"] -command {IFMenus::clearItems $files(tab3f2).tbl}

@@ -229,6 +229,8 @@ proc job::db::createDB {args} {
             HistoryID        TEXT    REFERENCES History (History_ID) ON UPDATE CASCADE
                                         NOT NULL ON CONFLICT ROLLBACK
         );
+        
+        PRAGMA foreign_keys = on
     }
     
     # This table should be auto-generated, depending on what header is assigned to what group.
@@ -237,9 +239,11 @@ proc job::db::createDB {args} {
     set sTable [list \
         {ShippingOrder_ID INTEGER PRIMARY KEY AUTOINCREMENT} \
         {JobInformationID TEXT  NOT NULL ON CONFLICT ROLLBACK
-                                    REFERENCES JobInformation (JobInformation_ID) ON UPDATE CASCADE} \
+                                    REFERENCES JobInformation (JobInformation_ID) ON DELETE NO ACTION
+                                                                                    ON UPDATE CASCADE} \
         {AddressID        TEXT  NOT NULL ON CONFLICT ROLLBACK
-                                    REFERENCES Addresses (SysAddresses_ID) ON UPDATE CASCADE}]
+                                    REFERENCES Addresses (SysAddresses_ID) ON DELETE NO ACTION
+                                                                            ON UPDATE CASCADE}]
 
     # Create the ShippingOrder table (Consignee group)
     db eval {SELECT dbColName, dbDataType FROM HeadersConfig
@@ -268,7 +272,8 @@ proc job::db::createDB {args} {
         {HistoryID          TEXT    REFERENCES History (History_ID) ON UPDATE CASCADE
                                                                     ON DELETE CASCADE
                                     NOT NULL ON CONFLICT ROLLBACK} \
-        {Versions          INTEGER REFERENCES Versions (Version_ID) ON UPDATE CASCADE}]
+        {Versions          INTEGER REFERENCES Versions (Version_ID) ON UPDATE CASCADE
+                                                                    ON DELETE NO ACTION}]
     
     # Create the Addresses table (Consignee group)
     db eval {SELECT dbColName, dbDataType FROM HeadersConfig
@@ -364,6 +369,7 @@ proc job::db::open {args} {
     # Open the db
     sqlite3 $job(db,Name) $job(db,Name)
     
+    $job(db,Name) eval "PRAGMA foreign_keys = on"
     $job(db,Name) eval "SELECT max(TitleInformation_ID), CustCode, CSRName, TitleSaveLocation, TitleName
                             FROM TitleInformation" {
                                 set job(CustID) $CustCode
