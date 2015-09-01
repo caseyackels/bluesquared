@@ -546,7 +546,7 @@ proc eAssistHelper::saveDest {modifier widRow tblPath} {
     #	(c) 2011-2013 Casey Ackels
     #
     # FUNCTION
-    #	Saves all entries from addDestination into the designated table
+    #	Gateway function - Issues functions based on the passed modifier
     #
     # SYNOPSIS
     #
@@ -562,7 +562,7 @@ proc eAssistHelper::saveDest {modifier widRow tblPath} {
     # SEE ALSO
     #
     #***
-    global log program shipOrder job headerParent
+    global log program shipOrder job headerParent title
     
     switch -- $modifier {
         -add        {
@@ -570,29 +570,17 @@ proc eAssistHelper::saveDest {modifier widRow tblPath} {
                     ea::db::writeSingleAddressToDB
                     
                     # Populate table
-                    ea::db::populateTablelist
+                    ea::db::populateTablelist -record new -widRow $widRow
                     
                     # Reset the array
                     eAssistHelper::initShipOrderArray
         }
         -edit       {
             		## -- We are updating a record
-                        set dbID [$tblPath getcells $widRow,OrderNumber]
-                        ${log}::debug ID = $dbID
-                        if {[info exists updateStatement] || [info exists headers]} {unset updateStatement; unset headers}
-                        #set headers [list \$OrderNumber] ;# Order Number is not part of the general header names, this perhaps, should be changed... It is our index in the Addresses Table
-                        foreach hdr $headerParent(headerList) {
-                            lappend updateStatement $hdr='$shipOrder($hdr)'
-                            #lappend headers $$hdr
-                        }
-                        #${log}::debug Update Statement: $db eval "UPDATE $dbTbl SET [join $updateStatement ,] WHERE rowid=$id"
-                        $db eval "UPDATE $dbTbl SET [join $updateStatement ,] WHERE OrderNumber=$dbID"
+                    ea::db::updateSingleAddressToDB
                         
-                        #set tblID [expr {$id - 1}]
-                        foreach hdr $headerParent(headerList) {
-                            ${log}::debug UPDATING: $hdr - $shipOrder($hdr)
-                            $tblPath cellconfigure $widRow,$hdr -text $shipOrder($hdr)
-                        }
+                    # Update the table
+                    ea::db::populateTablelist -record edit -widRow $widRow -id $title(shipOrder_id)
         }
         -combine    {
                     ## -- Combine selected rows into one record
@@ -620,37 +608,6 @@ proc eAssistHelper::saveDest {modifier widRow tblPath} {
         }
         default     {${log}::debug Not a valid option for eAssistHelper::saveDest, used $modifier}
     }
-
-#	if {$dbID != -1} {
-#		## -- We are updating a record
-#		${log}::debug ID = $dbID
-#		if {[info exists updateStatement] || [info exists headers]} {unset updateStatement; unset headers}
-#		set headers [list \$OrderNumber] ;# Order Number is not part of the general header names, this perhaps, should be changed... It is our index in the Addresses Table
-#		foreach hdr $headerParent(headerList) {
-#			lappend updateStatement $hdr='$shipOrder($hdr)'
-#			lappend headers $$hdr
-#		}
-#		#${log}::debug Update Statement: $db eval "UPDATE $dbTbl SET [join $updateStatement ,] WHERE rowid=$id"
-#		$db eval "UPDATE $dbTbl SET [join $updateStatement ,] WHERE rowid=$dbID"
-#		
-#		#set tblID [expr {$id - 1}]
-#		foreach hdr $headerParent(headerList) {
-#            ${log}::debug UPDATING: $hdr - $shipOrder($hdr)
-#			$tblPath cellconfigure $widRow,$hdr -text $shipOrder($hdr)
-#		}
-#
-#	} else {
-#		## -- We are adding a new record
-#		if {[info exists insertRow]} {unset insertRow}
-#		foreach hdr $headerParent(headerList) {
-#			lappend insertRow '$shipOrder($hdr)'
-#		}
-#	
-#		$job(db,Name) eval "INSERT OR ABORT INTO $dbTbl ([join $headerParent(headerList) ,]) VALUES ([join $insertRow ,])"
-#	
-#		set rowID [$db last_insert_rowid]
-#		$tblPath insert end [$db eval "SELECT * FROM $dbTbl where rowid=$rowID"]
-#	}
 	
 	# Apply the highlights ... Technically we should also prevent the user from entering too much data into each field.
 	importFiles::highlightAllRecords $tblPath
@@ -699,7 +656,9 @@ proc eAssistHelper::shippingOrder {widTbl modifier} {
 
     # Create the frames - We know what the categories are; so we don't need to add them dynamically
     pack [set f3 [ttk::frame $win.f3]] -padx 5p -pady 5p -side bottom -anchor se
-        grid [ttk::button $f3.ok -text [mc "OK"] -command [list eAssistHelper::saveDest -add "" $widTbl]] -column 0 -row 0 -padx 2p -pady 2p -sticky ew
+        ttk::button $f3.ok -text [mc "OK"]
+        grid $f3.ok -column 0 -row 0 -padx 2p -pady 2p -sticky ew
+    
         grid [ttk::button $f3.cncl -text [mc "Cancel"] -command [list destroy $win]] -column 1 -row 0 -padx 2p -pady 2p -sticky ew
     
     pack [set f1 [ttk::frame $win.f1]] -padx 5p -pady 5p -expand yes -fill both -side left
@@ -777,8 +736,16 @@ proc eAssistHelper::shippingOrder {widTbl modifier} {
     }
     
     switch -- $modifier {
-        -add        {eAssistHelper::initShipOrderArray}
-        -edit       {ea::db::populateShipOrder [ea::db::getRecord [$widTbl curselection]]}
+        -add        {
+            eAssistHelper::initShipOrderArray
+            $f3.ok configure -command "eAssistHelper::saveDest -add {} $widTbl; destroy .dest"
+            
+        }
+        -edit       {
+            ea::db::populateShipOrder [ea::db::getRecord [$widTbl curselection]]
+            #$f3.ok configure -command {ea::db::updateSingleAddressToDB; destroy .dest}
+            $f3.ok configure -command "eAssistHelper::saveDest -edit [$widTbl curselection] $widTbl; destroy .dest"
+        }
     }
     
 } ;# eAssistHelper::shippingOrder
