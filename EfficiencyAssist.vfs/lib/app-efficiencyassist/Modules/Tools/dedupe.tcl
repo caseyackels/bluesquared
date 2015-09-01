@@ -76,6 +76,12 @@ proc ea::dedupe::exactMatch {args} {
     
     set remove_SysAddresses [ea::dedupe::getExistingAddresses max $allAddresses]
     set insert_SysAddresses [ea::dedupe::getExistingAddresses min $allAddresses]
+    
+    # We didn't detect any dupes (probably 1st import?)
+    if {[string match $remove_SysAddresses $insert_SysAddresses] == 1} {return}
+    ${log}::debug remove_SysAddresses: $remove_SysAddresses
+    ${log}::debug insert_SysAddresses: $insert_SysAddresses
+    
     unset allAddresses
 
     # Get list of ShippingOrder id's where the dupes are listed

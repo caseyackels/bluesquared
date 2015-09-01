@@ -340,6 +340,12 @@ proc importFiles::processFile {win} {
     
     # Insert the data into the widget
     importFiles::insertIntoGUI $files(tab3f2).tbl -dedupe
+    
+    ## Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
+    if {[$files(tab3f2).tbl findcolumnname OrderNumber] == -1} {
+        $files(tab3f2).tbl insertcolumns 0 0 "..."
+        $files(tab3f2).tbl columnconfigure 0 -name "OrderNumber" -labelalign center -showlinenumbers 1
+    }
 
     ## Enable menu items
     importFiles::enableMenuItems
@@ -502,15 +508,10 @@ proc importFiles::insertIntoGUI {wid args} {
                             WHERE ShippingOrders.JobInformationID in ('$job(Number)')
                             AND Addresses.SysActive = 1" {
                                 #$wid insert end [subst $hdr_data]
+                                ${log}::debug hdr_list: $hdr_list
+                                ${log}::debug data: [subst $hdr_data]
                                 $files(tab3f2).tbl insert end [subst $hdr_data]
                             }
-
-    ## Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
-    if {[$files(tab3f2).tbl findcolumnname OrderNumber] == -1} {
-        $files(tab3f2).tbl insertcolumns 0 0 "..."
-        $files(tab3f2).tbl columnconfigure 0 -name "OrderNumber" -labelalign center -showlinenumbers 1
-    }
-
 } ;# importFiles::insertIntoGUI $files(tab3f2).tbl
 
 
