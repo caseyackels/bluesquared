@@ -578,33 +578,41 @@ proc eAssistHelper::saveDest {modifier widRow tblPath} {
         -edit       {
             		## -- We are updating a record
                     ea::db::updateSingleAddressToDB
+                    
+                    # Guard against the user selecting multiple rows when editing...
+                    set widRow [lindex $widRow 0]
                         
                     # Update the table
                     ea::db::populateTablelist -record edit -widRow $widRow -id $title(shipOrder_id)
         }
         -combine    {
                     ## -- Combine selected rows into one record
-                    if {[info exists dbIDs]} {unset dbIDs}
-                    foreach num $widRow {
-                        lappend dbIDs [$tblPath getcells $num,OrderNumber]
-                    }
-                    ${log}::debug Deleting OrderNumber from DB: $dbIDs
-                    $db eval "UPDATE $dbTbl SET Status = 0 WHERE OrderNumber in ([join $dbIDs ,])"
+                    ${log}::debug Combining rows $widRow
                     
-                    ${log}::debug Deleting rows from Widget: [lsort -integer $widRow]
-                    $tblPath delete [lsort -integer $widRow]
-                    
-                    ${log}::debug Adding new row
-                    if {[info exists insertRow]} {unset insertRow}
-                        set insertRow [list \$OrderNumber]
-                    foreach hdr $headerParent(headerList) {
-                        lappend insertRow '$shipOrder($hdr)'
+                    foreach row $widRow {
+                        ${log}::debug Record Num: [ea::db::getRecord $row]
                     }
-                
-                    $job(db,Name) eval "INSERT OR ABORT INTO $dbTbl (OrderNumber,[join $headerParent(headerList) ,]) VALUES ([join $insertRow ,])"
-                
-                    set rowID [$db last_insert_rowid]
-                    $tblPath insert end [$db eval "SELECT OrderNumber,[join $headerParent(headerList) ,] FROM $dbTbl where rowid=$rowID"]
+                    #if {[info exists dbIDs]} {unset dbIDs}
+                    #foreach num $widRow {
+                    #    lappend dbIDs [$tblPath getcells $num,OrderNumber]
+                    #}
+                    #${log}::debug Deleting OrderNumber from DB: $dbIDs
+                    #$db eval "UPDATE $dbTbl SET Status = 0 WHERE OrderNumber in ([join $dbIDs ,])"
+                    #
+                    #${log}::debug Deleting rows from Widget: [lsort -integer $widRow]
+                    #$tblPath delete [lsort -integer $widRow]
+                    #
+                    #${log}::debug Adding new row
+                    #if {[info exists insertRow]} {unset insertRow}
+                    #    set insertRow [list \$OrderNumber]
+                    #foreach hdr $headerParent(headerList) {
+                    #    lappend insertRow '$shipOrder($hdr)'
+                    #}
+                    #
+                    #$job(db,Name) eval "INSERT OR ABORT INTO $dbTbl (OrderNumber,[join $headerParent(headerList) ,]) VALUES ([join $insertRow ,])"
+                    #
+                    #set rowID [$db last_insert_rowid]
+                    #$tblPath insert end [$db eval "SELECT OrderNumber,[join $headerParent(headerList) ,] FROM $dbTbl where rowid=$rowID"]
         }
         default     {${log}::debug Not a valid option for eAssistHelper::saveDest, used $modifier}
     }
