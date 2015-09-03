@@ -28,5 +28,6 @@ Roadmap - Version 4.1.0
 * Menu Edit>Manage>Jobs. List all jobs in the title, allowing the user to select a job to make it active by showing the destinations.
 * Menu Edit>Manage>Versions. List all versions, allowing the user to Add/Rename/Disable. To View All or only Active or Inactive
 * [DONE] Add Ship Order records
-* [PARTIAL] Edit Ship Order Records
-
+* [DONE] Edit Ship Order Records
+* [DONE] Combine records into one order
+* Type-Ahead when typing in a Company name; when we hit a match populate all other address fields.
