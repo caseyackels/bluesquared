@@ -405,3 +405,108 @@ proc ea::db::populateShipOrderCombining {widTbl} {
 	unset id
 
 } ;# ea::db::populateShipOrderCombining $files(tab3f2).tbl
+
+
+proc ea::db::setConsigneeAutoComplete {data} {
+	#****if* setConsigneeAutoComplete/ea::db
+	# CREATION DATE
+	#   09/03/2015 (Thursday Sep 03)
+	#
+	# AUTHOR
+	#	Casey Ackels
+	#
+	# COPYRIGHT
+	#	(c) 2015 Casey Ackels
+	#   
+	# NOTES
+	#   Populates the consignee information of the shipOrder() array, based on the company name entered into the Company entry field
+	#   This only looks at addresses that are active, and exist in the 'master address' table.
+	#   
+	#***
+	global log shipOrder
+
+	#${log}::debug widget value: $data
+	db eval "SELECT MasterAddr_Attn,
+						MasterAddr_Addr1, MasterAddr_Addr2, MasterAddr_Addr3,
+                        MasterAddr_City, MasterAddr_StateAbbr, MasterAddr_Zip,
+						MasterAddr_CtryCode, MasterAddr_Phone
+                    FROM MasterAddresses
+						WHERE MasterAddr_Company = '[join $data]'
+						AND MasterAddr_Active = 1" {
+						set shipOrder(Attention) $MasterAddr_Attn
+						set shipOrder(Address1) $MasterAddr_Addr1
+						set shipOrder(Address2) $MasterAddr_Addr2
+						set shipOrder(Address3) $MasterAddr_Addr3
+						set shipOrder(City) $MasterAddr_City
+						set shipOrder(State) $MasterAddr_StateAbbr
+						set shipOrder(Zip) $MasterAddr_Zip
+						set shipOrder(Country) $MasterAddr_CtryCode
+						set shipOrder(Phone) $MasterAddr_Phone
+					}
+
+} ;# ea::db::setConsigneeAutoComplete
+
+
+proc ea::db::setShipOrderValues {disttype} {
+	#****if* setShipOrderValues/ea::db
+	# CREATION DATE
+	#   09/03/2015 (Thursday Sep 03)
+	#
+	# AUTHOR
+	#	Casey Ackels
+	#
+	# COPYRIGHT
+	#	(c) 2015 Casey Ackels
+	#   
+	# NOTES
+	#   
+	#   
+	#***
+	global log shipOrder job widgetPath
+
+	# disttype has a chance of being empty... lets quit if it is.
+	if {$disttype eq ""} {return}
+	
+	# Retrieve the Carrier ID's assigned to the distribution type
+	set carrierID [db eval "SELECT CarrierID FROM DistributionTypeCarriers
+								LEFT JOIN Carriers ON CarrierID = Carrier_ID
+								LEFT JOIN DistributionTypes ON DistributionTypeID = DistributionType_ID
+							WHERE DistTypeName = '$disttype'"]
+	
+	
+	# Set Ship Via values
+	db eval "SELECT ShipViaName FROM ShipVia WHERE CarrierID IN ([join $carrierID ,])" {
+		lappend shipViaValues $ShipViaName
+	}
+	
+	# No Carriers were assigned to the distribution type; filter out small package, or freight ship via's
+	if {![info exists shipViaValues]} {
+		#set shipViaValues ""
+		db eval "SELECT ShipViaName from ShipVia WHERE ShipmentType = (
+					SELECT ShipmentType from ShipmentTypes
+					INNER JOIN DistributionTypes on ShipmentType_ID = DistType_ShipTypeID
+				WHERE DistributionTypes.DistTypeName = '$disttype')" {
+						lappend shipViaValues $ShipViaName
+		}
+	}
+	#${log}::debug Ship Via Values: $shipViaValues
+	
+	# Configure Ship Via Widget
+	$widgetPath(ShipVia) configure -values $shipViaValues
+	
+	# If we only have one value, lets insert it into the field. If we have multiple clear out the widget so the user must select a value. If we don't and the user has to select
+	# a distribution type twice or more we could end up with incorrect data in the field.
+	if {$shipViaValues ne "" && [llength $shipViaValues] == 1} {
+		$widgetPath(ShipVia) set [join $shipViaValues]
+	} else {
+		$widgetPath(ShipVia) set ""
+	}
+	
+	unset shipViaValues
+
+	## Populate the ship via list based on the customer config setup
+	#SELECT ShipVia_ID, ShipViaName FROM CustomerShipVia
+	#	LEFT JOIN ShipVia ON ShipVia_ID = ShipViaID
+	#	WHERE CustID = 'SAGMED'
+
+} ;# ea::db::setShipOrderValues

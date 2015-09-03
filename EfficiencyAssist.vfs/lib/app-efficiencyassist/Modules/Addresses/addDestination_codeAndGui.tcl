@@ -637,7 +637,7 @@ proc eAssistHelper::shippingOrder {widTbl modifier} {
     #   
     #   
     #***
-    global log job shipOrder files
+    global log job shipOrder files widgetPath
     
     set win [eAssist_Global::detectWin -k .dest]
     #${log}::debug Current Window: $win
@@ -693,7 +693,7 @@ proc eAssistHelper::shippingOrder {widTbl modifier} {
                                     # Label widget
                                     if {$widRequired == 1} {set fgcolor red} else {set fgcolor black}
                                     grid [ttk::label $widPath.txt$row -text $widLabelName -foreground $fgcolor] -column $textCol -row $row -sticky e
-                                    
+                                                                       
                                     # Entry/Combobox widgets
                                     switch -- $widWidget {
                                             ttk::entry      {
@@ -705,6 +705,7 @@ proc eAssistHelper::shippingOrder {widTbl modifier} {
                                                 # Get the values
                                                 set tbl [db eval "SELECT TableName, DisplayColValues from UserDefinedValues where Description = '$widValues'"]
                                                 
+                                                    # Versions info
                                                     if {[lindex $tbl 0] ne "Versions"} {
                                                         set values [db eval "SELECT [lindex $tbl 1] FROM [lindex $tbl 0]"]
                                                         set cmd [list -textvariable shipOrder($dbColName) -width $widMaxWidth -values $values]
@@ -721,16 +722,17 @@ proc eAssistHelper::shippingOrder {widTbl modifier} {
                                                 #set cmd "-textvariable shippingOrder($widLabelName) -width $widMaxWidth"
                                                 }
                                     }
-
+                                    set widgetPath($dbColName) $widPath.data$row
+                                    
                                     grid [$widWidget $widPath.data$row {*}$cmd] -column $dataCol -row $row -sticky ew
                                     grid columnconfigure $widPath $dataCol -weight 2
-
-                                    incr row   
+                                                    
+                                    incr row
                                 }
                                 incr textCol
                                 incr dataCol
     }
-    
+
     # Check to see if we're using all of the created frames, if not unpack it.
     foreach fr [winfo children $win.f2] {
         if {[winfo children $fr] == ""} {
@@ -738,6 +740,28 @@ proc eAssistHelper::shippingOrder {widTbl modifier} {
         }
     }
     
+    # Create intelligence in the Company widget
+    set companyList [db eval "SELECT MasterAddr_Company FROM MasterAddresses WHERE MasterAddr_Internal = 1"]
+    #${log}::debug companyList $companyList
+    #${log}::debug widget: $companyWidget
+    $widgetPath(Company) configure -validate all -validatecommand [list AutoComplete::AutoComplete %W %d %v %P $companyList]
+    
+    ##
+    ## BINDINGS
+    ##
+    bind $widgetPath(Company)  <FocusOut> {
+        #${log}::debug widget value: [%W get]
+        ea::db::setConsigneeAutoComplete [%W get]
+    }
+    
+    bind $widgetPath(DistributionType)  <FocusOut> {
+        ea::db::setShipOrderValues [%W get]
+    }
+    #$widgetPath(DistributionType) configure -postcommand {ea::db::setShipOrderValues $shipOrder(DistributionType)}
+    
+    ##
+    ## CONFIGURATION based on modifier
+    ## 
     switch -- $modifier {
         -add        {
             eAssistHelper::initShipOrderArray

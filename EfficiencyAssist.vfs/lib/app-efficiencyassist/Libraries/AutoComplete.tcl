@@ -59,14 +59,17 @@ proc AutoComplete::AutoComplete {win action validation value valuelist {capitali
         upper   {
                     set newVal [string toupper $value]
                     #${log}::debug To Upper: $value
-                }
+        }
         title   {
                     foreach val $value {
                         lappend newVal [string totitle $val]
                     }
                 
                 #${log}::debug To Title: $value
-                }
+        }
+        1       {
+            # Nothing will change
+        }
         default {${log}::notice [mc "AutoComplete: Capitalization will not be changed"]}
     } 
 
