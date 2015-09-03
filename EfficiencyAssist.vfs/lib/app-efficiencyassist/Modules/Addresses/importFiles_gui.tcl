@@ -236,11 +236,11 @@ proc importFiles::eAssistGUI {} {
     bind $bodyTag <Double-1> {
         #${log}::debug Clicked on column %W %x %y
         #${log}::debug Column Name: [$files(tab3f2).tbl containingcolumn %x]
-        #set colName [$files(tab3f2).tbl columncget [$files(tab3f2).tbl containingcolumn %x] -name]
+        set colName [$files(tab3f2).tbl columncget [$files(tab3f2).tbl containingcolumn %x] -name]
         #${log}::debug Column Name: $colName
         if {$colName eq "OrderNumber"} {
-            #eAssistHelper::addDestination $files(tab3f2).tbl [lindex [$files(tab3f2).tbl getcells [$files(tab3f2).tbl curcellselection]] 0]
-            eAssistHelper::addDestination $files(tab3f2).tbl -edit [$files(tab3f2).tbl curselection]
+            eAssistHelper::shippingOrder $files(tab3f2).tbl -edit
+            ${log}::debug Current Row: [$files(tab3f2).tbl curselection]
         }
     }
    

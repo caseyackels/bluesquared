@@ -341,11 +341,6 @@ proc importFiles::processFile {win} {
     # Insert the data into the widget
     importFiles::insertIntoGUI $files(tab3f2).tbl -dedupe
     
-    ## Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
-    if {[$files(tab3f2).tbl findcolumnname OrderNumber] == -1} {
-        $files(tab3f2).tbl insertcolumns 0 0 "..."
-        $files(tab3f2).tbl columnconfigure 0 -name "OrderNumber" -labelalign center -showlinenumbers 1
-    }
 
     ## Enable menu items
     importFiles::enableMenuItems
@@ -392,7 +387,7 @@ proc importFiles::insertIntoGUI {wid args} {
     #   importFiles::insertIntoGUI 
     #
     # NOTES
-    #   
+    #   This is called when importing a new file AND when opening an existing database
     #  
     # SEE ALSO
     #   
@@ -408,7 +403,7 @@ proc importFiles::insertIntoGUI {wid args} {
     if {[info exists hdrs_show]} {unset hdrs_show}
         
     # make sure we are starting new. Clear the columns and clear the table
-    #if {[$wid columncount] != 0} {$wid deletecolumns 0 end}
+    if {[$wid columncount] != 0} {$wid deletecolumns 0 end}
     ${log}::debug Row Count 1: [$files(tab3f2).tbl size]
         
     # Insert the columns into the widget
@@ -508,10 +503,17 @@ proc importFiles::insertIntoGUI {wid args} {
                             WHERE ShippingOrders.JobInformationID in ('$job(Number)')
                             AND Addresses.SysActive = 1" {
                                 #$wid insert end [subst $hdr_data]
-                                ${log}::debug hdr_list: $hdr_list
-                                ${log}::debug data: [subst $hdr_data]
+                                #${log}::debug hdr_list: $hdr_list
+                                #${log}::debug data: [subst $hdr_data]
                                 $files(tab3f2).tbl insert end [subst $hdr_data]
                             }
+                            
+    ## Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
+    if {[$files(tab3f2).tbl findcolumnname OrderNumber] == -1} {
+        $files(tab3f2).tbl insertcolumns 0 0 "..."
+        $files(tab3f2).tbl columnconfigure 0 -name "OrderNumber" -labelalign center -showlinenumbers 1
+    }
+    
 } ;# importFiles::insertIntoGUI $files(tab3f2).tbl
 
 
