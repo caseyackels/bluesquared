@@ -380,7 +380,7 @@ proc customer::Modify {modify {tbl ""}} {
     #   
     #
     # SYNOPSIS
-    #   customer::Add <add|edit|view> ?Path to table widget?
+    #   customer::Modify <add|edit|view> ?Path to table widget?
     #
     # FUNCTION
     #	A Dialog which allows the user to, add, edit or view records for specific customers 
