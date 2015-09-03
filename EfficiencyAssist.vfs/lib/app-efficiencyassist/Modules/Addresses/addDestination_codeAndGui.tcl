@@ -587,32 +587,27 @@ proc eAssistHelper::saveDest {modifier widRow tblPath} {
         }
         -combine    {
                     ## -- Combine selected rows into one record
-                    ${log}::debug Combining rows $widRow
+                    ${log}::debug Remove rows ($widRow) from tablelist
                     
-                    foreach row $widRow {
-                        ${log}::debug Record Num: [ea::db::getRecord $row]
+                    # Delete rows from tablelist, bottom up so row id's don't change.
+                    foreach row [lsort -decreasing $widRow] {
+                        ${log}::debug Removing Row: $row
+                        $tblPath delete $row
                     }
-                    #if {[info exists dbIDs]} {unset dbIDs}
-                    #foreach num $widRow {
-                    #    lappend dbIDs [$tblPath getcells $num,OrderNumber]
-                    #}
-                    #${log}::debug Deleting OrderNumber from DB: $dbIDs
-                    #$db eval "UPDATE $dbTbl SET Status = 0 WHERE OrderNumber in ([join $dbIDs ,])"
-                    #
-                    #${log}::debug Deleting rows from Widget: [lsort -integer $widRow]
-                    #$tblPath delete [lsort -integer $widRow]
-                    #
-                    #${log}::debug Adding new row
-                    #if {[info exists insertRow]} {unset insertRow}
-                    #    set insertRow [list \$OrderNumber]
-                    #foreach hdr $headerParent(headerList) {
-                    #    lappend insertRow '$shipOrder($hdr)'
-                    #}
-                    #
-                    #$job(db,Name) eval "INSERT OR ABORT INTO $dbTbl (OrderNumber,[join $headerParent(headerList) ,]) VALUES ([join $insertRow ,])"
-                    #
-                    #set rowID [$db last_insert_rowid]
-                    #$tblPath insert end [$db eval "SELECT OrderNumber,[join $headerParent(headerList) ,] FROM $dbTbl where rowid=$rowID"]
+                    #${log}::debug Inserting into row [lindex $widRow 0]
+                    #return
+                    
+                    ${log}::debug Removing id's from ShippingOrders: $title(db_id,mult)
+                    $job(db,Name) eval "DELETE FROM ShippingOrders WHERE AddressID IN ([join $title(db_id,mult) ,])"
+                    
+                    ${log}::debug Inserting new address, and ShippingOrder
+                    # Add new record to db
+                    ea::db::writeSingleAddressToDB
+                    
+                    # Populate table, inserting new record into the first selection of the combined rows.
+                    ${log}::debug Inserting into row [lindex $widRow 0]
+                    ea::db::populateTablelist -record new -widRow [lindex $widRow 0]
+
         }
         default     {${log}::debug Not a valid option for eAssistHelper::saveDest, used $modifier}
     }
@@ -751,8 +746,13 @@ proc eAssistHelper::shippingOrder {widTbl modifier} {
         }
         -edit       {
             ea::db::populateShipOrder [ea::db::getRecord [$widTbl curselection]]
-            #$f3.ok configure -command {ea::db::updateSingleAddressToDB; destroy .dest}
             $f3.ok configure -command "eAssistHelper::saveDest -edit [$widTbl curselection] $widTbl; destroy .dest"
+        }
+        -combine    {
+            eAssistHelper::initShipOrderArray
+            # This will populate all fields; when combining only populate the fields that match on all selections.
+            ea::db::populateShipOrderCombining $widTbl
+            $f3.ok configure -command "eAssistHelper::saveDest -combine [list [$widTbl curselection]] $widTbl; destroy .dest"
         }
     }
     

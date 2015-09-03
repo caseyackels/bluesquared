@@ -272,6 +272,8 @@ proc ea::db::getRecord {row_id} {
 	#   
 	#***
 	global log files headerParent job
+	# testing
+	#set row_id [$files(tab3f2).tbl curselection]
 	
 	# Get list of available headers; this could change based on data in the db. So we must figure out what is active, and compare that to the headerParent array
 	set colCount [$files(tab3f2).tbl columncount]
@@ -297,18 +299,18 @@ proc ea::db::getRecord {row_id} {
 		}
 	}
 	
-	# Now we can grab the data from the tablelist, without causing errors
+	# Now we can grab the data from the tablelist. Guard against nulls.
 	foreach hdr $hdr_list_final {
-			lappend data_ "$hdr='[$files(tab3f2).tbl getcells $row_id,$hdr]'"
+			lappend data_ "ifnull($hdr,'')='[$files(tab3f2).tbl getcells $row_id,$hdr]'"
 	}
-
-	return [$job(db,Name) eval "SELECT SysAddresses_ID FROM Addresses WHERE [join $data_ " AND "]"]
 	
-	unset data_
+	#${log}::debug [info level 0] data: $data_
 	unset hdr_list
 	unset hdr_gui
 	unset hdr_list_final
-	
+		
+	return [$job(db,Name) eval "SELECT SysAddresses_ID FROM Addresses WHERE [join $data_ " AND "]"]
+
 } ;# ea::db::getRecord [$files(tab3f2).tbl curselection]
 
 
@@ -363,3 +365,43 @@ proc ea::db::populateShipOrder {db_id} {
 	unset hdr_list
 	
 } ;# ea::db::populateShipOrder [ea::db::getRecord [$files(tab3f2).tbl curselection]]
+
+
+proc ea::db::populateShipOrderCombining {widTbl} {
+	#****if* populateShipOrderCombining/ea::db
+	# CREATION DATE
+	#   09/03/2015 (Thursday Sep 03)
+	#
+	# AUTHOR
+	#	Casey Ackels
+	#
+	# COPYRIGHT
+	#	(c) 2015 Casey Ackels
+	#   
+	# NOTES
+	#   Compare values from the selected rows, if they are the same display them in the form. If they are different, display empty values.
+	#	Sum the quantity column.
+	#   
+	#***
+	global log shipOrder title job
+
+	foreach row [lsort [$widTbl curselection]] {
+				${log}::debug Record Num: [ea::db::getRecord $row]
+				lappend id '[ea::db::getRecord $row]'
+			}
+			
+	# Retrieve the total quantity
+	set shipOrder(Quantity) [$job(db,Name) eval "SELECT sum(Quantity) from ShippingOrders WHERE AddressID IN ([join $id ,])"]
+	
+	# Retrieve distinct values from the ShippingOrders table. Don't bother with the addresses table since most likely the data entered will be different.
+	$job(db,Name) eval "SELECT DISTINCT ShipDate, ContainerType, PackageType, ShippingClass FROM ShippingOrders WHERE AddressID IN ([join $id ,])" {
+		set shipOrder(ShipDate) $ShipDate
+		set shipOrder(ContainerType) $ContainerType
+		set shipOrder(PackageType) $PackageType
+		set shipOrder(ShippingClass) $ShippingClass
+	}
+
+	set title(db_id,mult) $id
+	unset id
+
+} ;# ea::db::populateShipOrderCombining $files(tab3f2).tbl

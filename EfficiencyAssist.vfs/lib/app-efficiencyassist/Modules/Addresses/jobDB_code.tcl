@@ -236,6 +236,7 @@ proc job::db::createDB {args} {
     # This table should be auto-generated, depending on what header is assigned to what group.
     # Shipping Orders should contain groups: Shipping Order, Packaging
     # Basic setup
+    # *** Table: ShippingOrders ***
     set sTable [list \
         {ShippingOrder_ID INTEGER PRIMARY KEY AUTOINCREMENT} \
         {JobInformationID TEXT  NOT NULL ON CONFLICT ROLLBACK
@@ -243,7 +244,8 @@ proc job::db::createDB {args} {
                                                                                     ON UPDATE CASCADE} \
         {AddressID        TEXT  NOT NULL ON CONFLICT ROLLBACK
                                     REFERENCES Addresses (SysAddresses_ID) ON DELETE NO ACTION
-                                                                            ON UPDATE CASCADE}]
+                                                                            ON UPDATE CASCADE
+                                                                            UNIQUE ON CONFLICT ROLLBACK}]
 
     # Create the ShippingOrder table (Consignee group)
     db eval {SELECT dbColName, dbDataType FROM HeadersConfig
@@ -260,6 +262,7 @@ proc job::db::createDB {args} {
     # AddressParentID - This is the ID of the first entry in that family
     # AddressChildID - Incremented field: 0 (Duplicate), 1 (Original Entry) 2+ (revisions to the original record)
     #   Duplicate: After importing, and user verification, if any duplicates exist (AddressChildID = 0), then we will delete those records.
+    # *** Table: Addresses ***
     set cTable [list \
         {SysAddresses_ID    TEXT    PRIMARY KEY ON CONFLICT ROLLBACK
                                     UNIQUE ON CONFLICT ROLLBACK
