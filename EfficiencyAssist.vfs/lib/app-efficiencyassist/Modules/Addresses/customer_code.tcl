@@ -548,9 +548,9 @@ proc customer::populateTitleWid {tbl custID} {
     # Make sure the table is cleared
     $tbl delete 0 end
 
-    db eval "SELECT TitleInformation.TitleName as Title, TitleInformation.SaveLocation as Location, CSRs.FirstName ||' '|| CSRs.LastName as Name FROM CSRs
-                    INNER JOIN TitleInformation on TitleInformation.CSRID = CSRs.CSR_ID
-                    WHERE TitleInformation.CustID = '$custID'
+    db eval "SELECT PubTitle.TitleName as Title, PubTitle.SaveLocation as Location, CSRs.FirstName ||' '|| CSRs.LastName as Name FROM CSRs
+                    INNER JOIN PubTitle on PubTitle.CSRID = CSRs.CSR_ID
+                    WHERE PubTitle.CustID = '$custID'
                     AND TitleInformation.Status = 1" {
                         ${log}::debug $Name $Title $Location
                         $tbl insert end [list "" $Name $Title $Location]
