@@ -30,4 +30,8 @@ Roadmap - Version 4.1.0
 * [DONE] Add Ship Order records
 * [DONE] Edit Ship Order Records
 * [DONE] Combine records into one order
-* Type-Ahead when typing in a Company name; when we hit a match populate all other address fields.
+* Add Destination
+** [DONE] Type-Ahead when typing in a Company name; when we hit a match populate all other address fields.
+** [DONE] When editing/adding a destination, populate fields (create new filtered dropdown selection) based on the distribution type
+*** [IN PROGRESS] Ship Via will either populate (if only one record is found, or the list will be filtered depending on what ship via is assigned to that dist type. This will also take into account the ship via values we place on the individual customer.
+

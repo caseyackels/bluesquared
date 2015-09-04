@@ -711,7 +711,6 @@ proc eAssistHelper::shippingOrder {widTbl modifier} {
                                                         set cmd [list -textvariable shipOrder($dbColName) -width $widMaxWidth -values $values]
 
                                                     } else {
-                                                        #set values [list Version1 Version2]
                                                         set values [$job(db,Name) eval "SELECT VersionName FROM VERSIONS WHERE VersionActive = 1"]
                                                         set cmd [list -textvariable shipOrder($dbColName) -width $widMaxWidth -values $values]
                                                     }
@@ -719,7 +718,6 @@ proc eAssistHelper::shippingOrder {widTbl modifier} {
                                                 }
                                             default         {
                                                 ${log}::critical [info level 0] default widget found: $widWidget - $widLabelName
-                                                #set cmd "-textvariable shippingOrder($widLabelName) -width $widMaxWidth"
                                                 }
                                     }
                                     set widgetPath($dbColName) $widPath.data$row
