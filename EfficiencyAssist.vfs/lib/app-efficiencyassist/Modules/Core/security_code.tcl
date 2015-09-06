@@ -70,7 +70,7 @@ proc ea::sec::initUser {{newUser 0}} {
                                             -- # get User
                                             INNER JOIN Users on SecGroups.UserID = Users.User_ID
                                             WHERE Users.UserLogin = '$user(id)'
-                                                AND Users.Users_Status = 1"]
+                                                AND Users.User_Status = 1"]
     if {$user($user(id),group) == ""} {
         set user($user(id),group) NoGroup
     }
@@ -84,7 +84,9 @@ proc ea::sec::initUser {{newUser 0}} {
                                             INNER JOIN SecGroupNames on SecGroupNames.SecGroupName_ID = SecGroups.SecGroupNameID
                                             WHERE SecGroupNames.SecGroupName = '$user($user(id),group)'
                                                 AND SecGroupNames.Status = 1"]
-    if {$user($user(id),modules) == ""} {
+    
+	# Throw an error/information dialog, telling the user that they are not in a group
+	if {$user($user(id),modules) == ""} {
         Error_Message::errorMsg EA001 "ID: $user(id)\nGroups: $user($user(id),group)\n\nLet your system administrator know that you need to be put into a group."
         #exit
     }
@@ -132,14 +134,7 @@ proc ea::sec::userExist {} {
 		${log}::info $env(USERNAME) is not in the Database. Adding ...
 		# Default password is <space>
 		db eval "INSERT INTO Users (UserLogin, UserPwd) VALUES ('[string tolower $env(USERNAME)]', ' ')"
-    
-        #set userID [db eval "SELECT UserID from Users where UserLogin='$env(USERNAME)'"]
-        
-        # Put them in the default NoGroup Group
-        #db eval "INSERT INTO SecGroups (SecGroupNameID, UserID) VALUES ('4','$userID')"
-        #set groupID [db eval "SELECT SecGrp_ID from SecGroups WHERE UserID='$userID'"]
-        ## using modID = 2; Batch Maker as a default
-        #db eval "INSERT INTO SecurityAccess (SecGrpID, ModID, SecAccess_Read, SecAccess_Modify, SecAccess_Delete) VALUES ('$groupID', '2', '1', '0', '0')"
+
 	} else {
 		${log}::info Found $userName in the database.
     }
@@ -196,7 +191,7 @@ proc ea::sec::changeUser {newUser} {
 } ;# ea::sec::changeUser
 
 
-proc ea::sec::setPasswd {pass} {
+proc ea::sec::setPasswd {pass {salt 0}} {
     #****f* setPasswd/ea::sec
     # CREATION DATE
     #   03/08/2015 (Sunday Mar 08)
@@ -209,10 +204,99 @@ proc ea::sec::setPasswd {pass} {
     #   
     #
     # SYNOPSIS
-    #   ea::sec::setPasswd args 
+    #   ea::sec::setPasswd ?salt? 
     #
     # FUNCTION
-    #	Inserts the users password into the DB, and create an associated salt
+    #	Creates a Salt and a Salted Password; returns Passwd, Salt
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+	if {$salt == 0} {
+		set salt [::md5crypt::salt 100]
+	}
+
+    set passwd [::md5crypt::md5crypt $pass $salt]
+	
+	return [list $passwd $salt]
+    
+} ;# ea::sec::setPasswd
+
+
+proc ea::db::writeUser {method userName userLogin {userEmail ""} {userStatus 1}} {
+    #****f* writeUser/ea::db
+    # CREATION DATE
+    #   09/06/2015 (Sunday Sep 06)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   ea::db::writeUser -insert|-update userName userLogin ?userEmail? ?userStatus? 
+    #
+    # FUNCTION
+    #	Writes the user info to the database, and returns the userID
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    if {$method eq "-insert"} {
+		${log}::debug Writing New user info to db: $userName, $userLogin, $userEmail, $userStatus
+		
+	} elseif {$method eq "-update"} {
+		
+	}
+
+    
+} ;# ea::db::writeUser
+
+proc ea::db::writePasswd {method passwd salt} {
+    #****f* writePasswd/ea::db
+    # CREATION DATE
+    #   09/05/2015 (Saturday Sep 05)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   ea::db::writePasswd -update|-insert passwd salt 
+    #
+    # FUNCTION
+    #	Inserts/Updates the password in the DB
     #   
     #   
     # CHILDREN
@@ -230,12 +314,14 @@ proc ea::sec::setPasswd {pass} {
     #***
     global log user
 
-    set salt [::md5crypt::salt 100]
-    set passwd [::md5crypt::md5crypt $pass $salt]
+	if {$method eq "-update"} {
+		db eval "UPDATE Users SET UserPwd = '$passwd', UserSalt = '$salt' WHERE UserLogin = '$user(id)'"
+		
+	} elseif {$method eq "-insert"} {
+		db eval "INSERT INTO Users (UserPwd, UserSalt) VALUES ('$passwd', '$salt') WHERE UserLogin = '$user(id)'"
+	}
 
-    db eval "UPDATE Users SET UserPwd = '$passwd', UserSalt = '$salt' WHERE UserLogin = '$user(id)'"
-    
-} ;# ea::sec::setPasswd
+} ;# ea::db::writePasswd
 
 proc ea::sec::authUser {userName pass} {
     #****f* authUser/ea::sec
@@ -351,3 +437,98 @@ proc ea::sec::modLauncher {args} {
 
     
 } ;# ea::sec::modLauncher
+
+proc ea::sec::validatePasswd {oldPasswd} {
+    #****f* validatePasswd/ea::sec
+    # CREATION DATE
+    #   09/05/2015 (Saturday Sep 05)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   ea::sec::validatePasswd <oldPasswd>
+    #
+    # FUNCTION
+    #	Validates the password that the user entered to the one that we have in the DB for that user
+	#	
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+	set pass_and_salt [ea::db::getPasswd]
+	set db_oldPasswd [lindex $pass_and_salt 0]
+	set db_oldSalt [lindex $pass_and_salt 1]
+	
+	# Salt/crypt user entered passwd
+	set userOldPasswd [ea::sec::setPasswd $oldPasswd $db_oldSalt]
+    
+	if {[string match $db_oldPasswd [lindex $userOldPasswd 0]]} {
+		${log}::debug Passwords match!
+	} else {
+		${log}::debug Passwords do not match. Try again.
+	}
+    
+} ;# ea::sec::validatePasswd
+
+
+proc ea::db::getPasswd {user} {
+    #****f* getPasswd/ea::db
+    # CREATION DATE
+    #   09/05/2015 (Saturday Sep 05)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   ea::db::getPasswd user 
+    #
+    # FUNCTION
+    #	Retrieves the password and salt from the database from the given user login
+	#	Returns: Password, Salt
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    db eval "SELECT UserPwd, UserSalt FROM Users WHERE UserLogin = '$user'" {
+		set db_oldPasswd $UserPwd
+		set db_oldSalt $UserSalt
+	}
+
+	return [list $UserPwd $UserSalt]
+    
+} ;# ea::db::getPasswd

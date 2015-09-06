@@ -27,8 +27,9 @@ proc eAssistSetup::readSecGroup {wid} {
     #***
     global log
     
+    $wid delete 0 end
+    
     db eval "SELECT SecGroupName_ID, SecGroupName, Status FROM SecGroupNames" {
-        
         $wid insert end [list {} $SecGroupName_ID $SecGroupName $Status]
     }
 
@@ -182,3 +183,90 @@ proc ea::db::populateSecGroupSingleEntry {widTbl {widRow ""} {dbid ""}} {
     set widSec(group,Name) ""
     set widSec(group,Active) 0
 } ;# ea::db::populateSecGroupSingleEntry
+
+proc eAssistSetup::populateSecUsersEdit {widTbl} {
+    #****f* populateSecUsersEdit/eAssistSetup
+    # CREATION DATE
+    #   09/05/2015 (Saturday Sep 05)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssistSetup::populateSecUsersEdit widTbl
+    #
+    # FUNCTION
+    #	Populates the Users tablelist widget from the database
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    $widTbl delete 0 end
+    
+    db eval "SELECT User_ID, UserLogin, UserName, UserEmail, User_Status FROM Users" {
+        $widTbl insert end [list {} $User_ID $UserLogin $UserName $UserEmail $User_Status]
+    }
+
+} ;# eAssistSetup::populateSecUsersEdit
+
+proc eAssistSetup::writeSecUsers {method widTbl userName userLogin userPasswd {userEmail ""} {userStatus 1}} {
+    #****f* writeSecUsers/eAssistSetup
+    # CREATION DATE
+    #   09/06/2015 (Sunday Sep 06)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   eAssistSetup::writeSecUsers -insert|-update <widTbl> <userName> <userLogin> <userPasswd> ?userEmail? ?userStatus?
+    #
+    # FUNCTION
+    #	Command function, which controls writing/updating user data including passwords
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   userEmail defaults to <empty> if not supplied
+    #   userStatus defaults to '1'
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    # Write user data to database
+    set usrID [ea::db::writeUser $method $userName $userLogin $userEmail $userStatus]
+    
+    # Write password to database
+    
+    # Populate new/updated entry in tablelist
+
+    
+} ;# eAssistSetup::writeSecUsers

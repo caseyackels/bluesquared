@@ -116,24 +116,36 @@ proc eAssistSetup::admin_GUI {args} {
     
     $nb select $nb.groups
     
-    # Tab 2, Subtab 1, Frame 1 (Groups)
+    # --- Groups
+    # Tab 2, Subtab 1, Frame 1
     set f1 [ttk::frame $nb.groups.f1 -padding 10]
     set widTmp(sec,group_f1) $f1
     pack $f1 -fill x
 
-    # Tab 2, Subtab 1, Frame 2 (Groups)
+    # --- Groups
+    # Tab 2, Subtab 1, Frame 2
     set f2 [ttk::frame $nb.groups.f2 -padding 10]
     set widTmp(sec,group_f2) $f2
     pack $f2 -expand yes -fill both
     
+    ## --- Users
+    # Tab 2, Subtab 2, Frame 1
+    set widTmp(sec,users_f1) [ttk::frame $nb.users.f1 -padding 10]
+    pack $widTmp(sec,users_f1) -fill x
     
-    # Tab 2, Subtab 1, Frame 1 (Groups)
+    ## --- Users
+    # Tab 2, Subtab 2, Frame 2
+    set widTmp(sec,users_f2) [ttk::frame $nb.users.f2 -padding 10]
+    pack $widTmp(sec,users_f2) -expand yes -fill both
+    
+    # --- Groups
+    # Tab 2, Subtab 1, Frame 1
     grid [ttk::label $f1.txt0 -text [mc "Group Name"]] -column 0 -row 0 -padx 2p -pady 2p
     grid [ttk::entry $f1.entry0 -textvariable widSec(group,Name)] -column 1 -row 0 -padx 2p -pady 2p
     grid [ttk::checkbutton $f1.ckbtn0 -text [mc "Active"] -variable widSec(group,Active)] -column 2 -row 0 -padx 2p -pady 2p
     grid [ttk::button $f1.btn0 -text [mc "Add"] -command {ea::db::insertSecGroup add $widTmp(sec,group_f2).listbox; ea::db::populateSecGroupSingleEntry $widTmp(sec,group_f2),listbox}] -column 3 -row 0 -padx 2p -pady 2p
     
-
+    # --- Groups
     # Tab 2, Subtab 1, Frame 2 (Groups)
     grid [tablelist::tablelist $f2.listbox -columns {
                                         0 "..." center
@@ -153,7 +165,7 @@ proc eAssistSetup::admin_GUI {args} {
     $f2.listbox columnconfigure 0 -name wid_id \
                                             -showlinenumbers 1 \
                                             -labelalign center
-    $f2.listbox columnconfigure 0 -name db_id
+    $f2.listbox columnconfigure 1 -name db_id
     $f2.listbox columnconfigure 2 -stretch yes
     
     grid [ttk::scrollbar $f2.scrolly -orient v -command [list $f2.listbox yview]] -column 1 -row 0 -sticky nse
@@ -170,7 +182,6 @@ proc eAssistSetup::admin_GUI {args} {
     eAssistSetup::readSecGroup $f2.listbox
     
     ## Binding
-    console show
     set widTmp(sec,group_wid_entry) $f2.listbox
     set widTmp(sec,group_wid_btn) $f1.btn0
     
@@ -185,5 +196,62 @@ proc eAssistSetup::admin_GUI {args} {
         }
     
     }
+    
+    # Users, Frame 1
+    console show
+    grid [ttk::label $widTmp(sec,users_f1).txt0 -text [mc "User Name"]] -column 0 -row 0 -padx 2p -pady 2p -sticky e
+    grid [ttk::entry $widTmp(sec,users_f1).entry0 -textvariable widSec(users,Name) -width 35] -column 1 -row 0 -padx 2p -pady 2p ;#-sticky ew
+    grid [ttk::button $widTmp(sec,users_f1).btn0 -text [mc "Add"] -command {eAssistSetup::writeSecUsers -insert $widSec(users,Name) $widSec(users,Login) $widSec(users,Passwd) $widSec(users,Email) $widSec(users,Active)}] -column 2 -row 0 -padx 2p -pady 2p ;#-sticky ew
+    
+    grid [ttk::label $widTmp(sec,users_f1).txt1 -text [mc "User Login"]] -column 0 -row 1 -padx 2p -pady 2p -sticky e
+    grid [ttk::entry $widTmp(sec,users_f1).entry1 -textvariable widSec(users,Login) -width 35] -column 1 -row 1 -padx 2p -pady 2p ;#-sticky ew
+    grid [ttk::button $widTmp(sec,users_f1).btn1 -text [mc "Clear"]] -column 2 -row 1 -padx 2p -pady 2p ;#-sticky ew
+    
+    grid [ttk::label $widTmp(sec,users_f1).txt2 -text [mc "Email"]] -column 0 -row 2 -padx 2p -pady 2p -sticky e
+    grid [ttk::entry $widTmp(sec,users_f1).entry2 -textvariable widSec(users,Email) -width 35] -column 1 -row 2 -padx 2p -pady 2p ;#-sticky ew
+    
+    grid [ttk::label $widTmp(sec,users_f1).txt3 -text [mc "Password"]] -column 0 -row 3 -padx 2p -pady 2p -sticky e
+    grid [ttk::entry $widTmp(sec,users_f1).entry3 -textvariable widSec(users,Passwd) -show *] -column 1 -row 3 -padx 2p -pady 2p -sticky ew
+    
+    grid [ttk::checkbutton $widTmp(sec,users_f1).ckbtn0 -text [mc "Active"] -variable widSec(users,Active)] -column 1 -row 6 -sticky w
+
+    # --- Users, Frame 2
+    # Tab 2, Subtab 2, Frame 2
+    grid [tablelist::tablelist $widTmp(sec,users_f2).listbox -columns {
+                                        0 "..." center
+                                        0 "Database ID" center
+                                        0 "Login" center
+                                        0 "User Name" center
+                                        0 "Email" center
+                                        0 "Active" center }\
+                                        -showlabels yes \
+                                        -stripebackground lightblue \
+                                        -exportselection yes \
+                                        -showseparators yes \
+                                        -fullseparators yes \
+                                        -editselectedonly 1 \
+                                        -yscrollcommand [list $widTmp(sec,users_f2).scrolly set] \
+                                        -xscrollcommand [list $widTmp(sec,users_f2).scrollx set]
+                                        ] -sticky news -column 0 -row 0
+    
+    $widTmp(sec,users_f2).listbox columnconfigure 0 -name wid_id \
+                                            -showlinenumbers 1 \
+                                            -labelalign center
+    $widTmp(sec,users_f2).listbox columnconfigure 1 -name db_id
+    $widTmp(sec,users_f2).listbox columnconfigure 2 -width 20
+    $widTmp(sec,users_f2).listbox columnconfigure 3 -width 35
+    $widTmp(sec,users_f2).listbox columnconfigure 4 -stretch yes
+    
+    grid [ttk::scrollbar $widTmp(sec,users_f2).scrolly -orient v -command [list $widTmp(sec,users_f2).listbox yview]] -column 1 -row 0 -sticky nse
+    grid [ttk::scrollbar $widTmp(sec,users_f2).scrollx -orient h -command [list $widTmp(sec,users_f2).listbox xview]] -column 0 -row 1 -sticky ews
+    
+    grid columnconfigure $widTmp(sec,users_f2) $widTmp(sec,users_f2).listbox -weight 2
+    grid rowconfigure $widTmp(sec,users_f2) $widTmp(sec,users_f2).listbox -weight 2
+    
+    # Enable the 'autoscrollbar'
+    ::autoscroll::autoscroll $widTmp(sec,users_f2).scrolly
+    ::autoscroll::autoscroll $widTmp(sec,users_f2).scrollx
+    
+    eAssistSetup::populateSecUsersEdit $widTmp(sec,users_f2).listbox
 
 } ;# eAssistSetup::admin_GUI
