@@ -70,7 +70,7 @@ proc ea::sec::initUser {{newUser 0}} {
                                             -- # get User
                                             INNER JOIN Users on SecGroups.UserID = Users.User_ID
                                             WHERE Users.UserLogin = '$user(id)'
-                                                AND Users.Users_Status = 1"]
+                                                AND Users.User_Status = 1"]
     if {$user($user(id),group) == ""} {
         set user($user(id),group) NoGroup
     }
