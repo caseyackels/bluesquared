@@ -60,6 +60,7 @@ proc ea::db::writeDistTypeSetup {lbox win tbl} {
     global log disttype
     
     set disttype(carriers) [$lbox get 0 end]
+    ${log}::debug Carriers: $lbox - [$lbox get 0 end]
     
     #set addrID [db eval "SELECT MasterAddr_ID from MasterAddresses WHERE MasterAddr_Company='$disttype(useAddrName)'"]
     #if {$addrID == ""} {
@@ -79,8 +80,30 @@ proc ea::db::writeDistTypeSetup {lbox win tbl} {
                     VALUES ('$disttype(distName)', '$disttype(status)', '$shipTypeID')"
         
         set disttype(id) [db last_insert_rowid]
+        if {$disttype(carriers) != ""} {
+            foreach carrier $disttype(carriers) {
+                    lappend carrierList '$carrier'
+            }
+            #${log}::debug carrierList: $carrierList
+            #set carrier_id [db eval "SELECT Carrier_ID FROM Carriers WHERE Name IN ([join $carrierList ,])"]
+            db eval "SELECT ShipViaName, ShipVia_ID, CarrierID FROM ShipVia 
+                                        INNER JOIN Carriers ON Carrier_ID = CarrierID
+                                    WHERE Carriers.Name IN ([join $carrierList ,])" {
+                                        lappend insertCarrierID "($disttype(id), $CarrierID, $ShipVia_ID)"
+                                    }
+            
+            #foreach id $carrier_id {
+            #    lappend insertCarrierID "($disttype(id), $id)"
+            #}
+            db eval "INSERT INTO DistributionTypeCarriers (DistributionTypeID, CarrierID, ShipViaID)
+                                VALUES [join $insertCarrierID ,]"
+            ${log}::notice [mc "SETUP:DistributionTypes - Reassigned Carriers to $disttype(distName)"]
+            
+            # Clean up
+            unset carrierList
+            unset insertCarrierID
+        }
         
-        ea::db::writeRptConfig
     } else {
         ##
         ## Updating existing data
@@ -103,12 +126,11 @@ proc ea::db::writeDistTypeSetup {lbox win tbl} {
                     lappend carrierList '$carrier'
             }
             #${log}::debug carrierList: $carrierList
-            
             #set carrier_id [db eval "SELECT Carrier_ID FROM Carriers WHERE Name IN ([join $carrierList ,])"]
             db eval "SELECT ShipViaName, ShipVia_ID, CarrierID FROM ShipVia 
                                         INNER JOIN Carriers ON Carrier_ID = CarrierID
                                     WHERE Carriers.Name IN ([join $carrierList ,])" {
-                                        lappend insertCarrierID "($disttype(id), $CarrierID, ShipVia_ID)"
+                                        lappend insertCarrierID "($disttype(id), $CarrierID, $ShipVia_ID)"
                                     }
             
             #foreach id $carrier_id {
@@ -122,11 +144,11 @@ proc ea::db::writeDistTypeSetup {lbox win tbl} {
             unset carrierList
             unset insertCarrierID
         }
-        
-        ## -- Table RptConfig
-        # Add values
-        ea::db::writeRptConfig
     }
+    
+    ## -- Table RptConfig
+    # Add values
+    ea::db::writeRptConfig
     
     # Delete all data in tablelist; then repopulate it.
     # 9.8.15 this should be removed and only the rowID should be deleted, then reinserted
@@ -161,16 +183,16 @@ proc ea::db::writeRptConfig {} {
         db eval "SELECT RptAction_ID, RptMethod.RptMethod as RptMethod, RptActions.RptAction as RptAction FROM RptActions
             INNER JOIN RptMethod ON RptMethod.RptMethod_ID = RptActions.RptMethodID" {
                 # Set the exports
-                if {[string tolower $RptMethod] eq "export" && [string tolower $RptAction] eq "single entry"} {
+                if {[string tolower $RptMethod] eq "export" && [string tolower $RptAction] eq "single entry" || [string tolower $RptAction] eq "default"} {
                     set exptSingleEntryID $RptAction_ID
                 }
                 
                 # Set the reports
-                if {[string tolower $RptMethod] eq "report" && [string tolower $RptAction] eq "single entry"} {
+                if {[string tolower $RptMethod] eq "report" && [string tolower $RptAction] eq "single entry" || [string tolower $RptAction] eq "default"} {
                     set rptSingleEntryID $RptAction_ID
                 }
                 
-                if {[string tolower $RptMethod] eq "report" && [string tolower $RptAction] eq "summarize"} {
+                if {[string tolower $RptMethod] eq "report" && [string tolower $RptAction] eq "summarize" || [string tolower $RptAction] eq "default"} {
                     set rptSummarizeID $RptAction_ID   
                 }
         }
@@ -198,15 +220,23 @@ proc ea::db::writeRptConfig {} {
             lappend RptActionValue "($disttype(id), $rptSummarizeID)"
         }
 
-
-        
         # TABLE: RptConfig
         # Remove data, if it doesn't exist the db won't complain.
         db eval "DELETE FROM RptConfig WHERE DistributionTypeID=$disttype(id)"
         ${log}::notice [mc "SETUP:DistributionTypes - Removed Distribution Type configurations associated with $disttype(distName)"]
         
-        db eval "INSERT INTO RptConfig (DistributionTypeID, RptActionID) VALUES [join $RptActionValue ,]"
-        ${log}::notice [mc "SETUP:DistributionTypes - Reassigned configurations to $disttype(distName)"]
+        # Make sure the RptActionValue exists; if it doesn't, we don't issue an INSERT statement
+        if {[info exists RptActionValue]} {
+            db eval "INSERT INTO RptConfig (DistributionTypeID, RptActionsID) VALUES [join $RptActionValue ,]"
+            ${log}::notice [mc "SETUP:DistributionTypes - Reassigned configurations to $disttype(distName)"]
+            
+            # Clean up
+            unset RptActionValue
+        }
+        
+        ## TODO INSERT/UPDATE INTO RptAddresses
+        
+        
 
 } ;# ea::db::writeRptConfig
 
@@ -283,39 +313,39 @@ proc eAssistSetup::getDistributionTypeID {tbl lbox} {
                         LEFT JOIN RptAddresses ON RptConfig_ID = RptConfigID
                         LEFT JOIN MasterAddresses ON RptAddresses.MasterAddrID = MasterAddresses.MasterAddr_ID
                     WHERE DistributionTypes.DistTypeName = '$distName'" {
-                                        set disttype(id) $DistributionType_ID
-                                        set disttype(distName) $DistTypeName
-                                        set disttype(status) $DistType_Status
-                                        set disttype(shipType) $ShipmentType
-                                        
-                                        switch -nocase $RptAction {
-                                                "Summarize" {
-                                                    set disttype(rpt,summarize) 1
-                                                }
-                                                "Single Entry" {
-                                                    if {$RptMethod eq "Report"} {
-                                                        set disttype(rpt,singleEntry) 1
-                                                    } else {
-                                                        set disttype(expt,singleEntry) 1
-                                                    }
-                                                }
-                                                "Address" {
-                                                    if {$RptMethod eq "Report"} {
-                                                        set disttype(rpt,AddrName) $Company
-                                                        } else {
-                                                            set disttype(expt,AddrName) $Company
-                                                        }
-                                                }
-                                                default {
-                                                    ${log}::critical [info level 1] Invalid argument for switch. $RptAction
-                                                }
+                        set disttype(id) $DistributionType_ID
+                        set disttype(distName) $DistTypeName
+                        set disttype(status) $DistType_Status
+                        set disttype(shipType) $ShipmentType
+                        
+                        switch -nocase $RptAction {
+                                "Summarize" {
+                                    set disttype(rpt,summarize) 1
+                                }
+                                "Single Entry" {
+                                    if {$RptMethod eq "Report"} {
+                                        set disttype(rpt,singleEntry) 1
+                                    } else {
+                                        set disttype(expt,singleEntry) 1
+                                    }
+                                }
+                                "Address" {
+                                    if {$RptMethod eq "Report"} {
+                                        set disttype(rpt,AddrName) $Company
+                                        } else {
+                                            set disttype(expt,AddrName) $Company
                                         }
+                                }
+                                default {
+                                    ${log}::critical [info level 1] Invalid argument for switch. $RptAction
+                                }
+                        }
                         set gateway 1
-                    }    
-        if {[info exists gateway]} {
+                    }
+    if {[info exists gateway]} {
             # If we don't have an entry in the Table: RptConfig, but we do in DistributionTypes, we will receive an error.
             # Get the assigned carrier names and insert into the listbox ...
-            db eval "SELECT Carriers.Name as Name FROM DistributionTypeCarriers
+            db eval "SELECT distinct(Carriers.Name) as Name FROM DistributionTypeCarriers
                 INNER JOIN Carriers ON CarrierID = Carriers.Carrier_ID
                 WHERE DistributionTypeID = $disttype(id)" {
                     $lbox insert end $Name
@@ -325,8 +355,8 @@ proc eAssistSetup::getDistributionTypeID {tbl lbox} {
 
 } ;# eAssistSetup::getDistributionTypeID
 
-proc eAssist::deleteDistributionTypeCarrier {lbox} {
-    #****if* deleteDistributionTypeCarrier/eAssist
+proc eAssistSetup::deleteDistributionTypeCarrier {lbox} {
+    #****if* deleteDistributionTypeCarrier/eAssistSetup
     # CREATION DATE
     #   07/29/2015 (Wednesday Jul 29)
     #
@@ -345,4 +375,4 @@ proc eAssist::deleteDistributionTypeCarrier {lbox} {
     #$lbox delete 0 end
     ${log}::debug selection: [$lbox curselection]
     $lbox delete [$lbox curselection]
-} ;# eAssist::deleteDistributionTypeCarrier
+} ;# eAssistSetup::deleteDistributionTypeCarrier
