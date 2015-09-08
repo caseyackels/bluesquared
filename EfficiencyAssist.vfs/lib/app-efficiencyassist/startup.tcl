@@ -381,12 +381,15 @@ proc 'eAssist_initVariables {} {
     }
 	
 	array set widSec [list group,Name "" \
-					  group,Active	0 \
-					  users,Name "" \
-					  users,Login "" \
-					  users,Active 0 \
-					  users,Email "" \
-				      users,Passwd ""]
+					  group,Active 0 \
+					  users,User_ID "" \
+					  users,UserName "" \
+					  users,UserLogin "" \
+					  users,User_Status 0 \
+					  users,UserEmail "" \
+				      users,UserPwd "" \
+					  users,UserSalt "" \
+					  users,wid_id ""]
 
 	# Schedule a time to check for updates
 	#eAssist_Global::at $program(checkUpdateTime) vUpdate::checkForUpdates

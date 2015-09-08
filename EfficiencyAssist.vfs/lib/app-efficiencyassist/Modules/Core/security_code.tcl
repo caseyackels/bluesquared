@@ -236,7 +236,7 @@ proc ea::sec::setPasswd {pass {salt 0}} {
 } ;# ea::sec::setPasswd
 
 
-proc ea::db::writeUser {method userName userLogin {userEmail ""} {userStatus 1}} {
+proc ea::db::writeUser {method userName userLogin userPasswd userSalt {userEmail ""} {userStatus 1}} {
     #****f* writeUser/ea::db
     # CREATION DATE
     #   09/06/2015 (Sunday Sep 06)
@@ -249,7 +249,7 @@ proc ea::db::writeUser {method userName userLogin {userEmail ""} {userStatus 1}}
     #   
     #
     # SYNOPSIS
-    #   ea::db::writeUser -insert|-update userName userLogin ?userEmail? ?userStatus? 
+    #   ea::db::writeUser -insert|-update userName userLogin userPassword userSalt ?userEmail? ?userStatus? 
     #
     # FUNCTION
     #	Writes the user info to the database, and returns the userID
@@ -272,15 +272,66 @@ proc ea::db::writeUser {method userName userLogin {userEmail ""} {userStatus 1}}
 
     if {$method eq "-insert"} {
 		${log}::debug Writing New user info to db: $userName, $userLogin, $userEmail, $userStatus
-		
+		db eval "INSERT OR ABORT INTO Users (UserName, UserLogin, UserPwd, UserSalt, UserEmail, User_Status)
+					VALUES ('$userName', '$userLogin', '$userPasswd', '$userSalt', '$userEmail', $userStatus)"
+	
 	} elseif {$method eq "-update"} {
+		db eval "UPDATE Users SET UserName='$userName', UserLogin='$userLogin', UserEmail='$userEmail', User_Status=$userStatus"
 		
-	}
+		# If the password field is populated, lets up date the db
+		if {$userPasswd ne ""} {
+			ea::db::writePasswd $method [ea::sec::setPasswd $userPasswd] $userLogin
+		}
+		
+		
+	}	
 
-    
 } ;# ea::db::writeUser
 
-proc ea::db::writePasswd {method passwd salt} {
+proc ea::db::getUser {method {id 0}} {
+    #****f* getUser/ea::db
+    # CREATION DATE
+    #   09/07/2015 (Monday Sep 07)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   ea::db::getUser method ?id?
+	#   id is only used when method is -update
+    #
+    # FUNCTION
+    #	Returns all user info
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    if {$method eq "-insert"} {
+		return [db eval "SELECT max(User_ID), UserLogin, UserName, UserEmail, User_Status FROM Users"]
+	
+	} elseif {$method eq "-update"} {
+		return [db eval "SELECT User_ID, UserLogin, UserName, UserEmail, User_Status FROM Users WHERE User_ID = $id"]
+	}
+
+} ;# ea::db::getUser
+proc ea::db::writePasswd {method passwd salt userLogin} {
     #****f* writePasswd/ea::db
     # CREATION DATE
     #   09/05/2015 (Saturday Sep 05)
@@ -293,7 +344,7 @@ proc ea::db::writePasswd {method passwd salt} {
     #   
     #
     # SYNOPSIS
-    #   ea::db::writePasswd -update|-insert passwd salt 
+    #   ea::db::writePasswd -update|-insert passwd salt userLogin
     #
     # FUNCTION
     #	Inserts/Updates the password in the DB
@@ -312,13 +363,13 @@ proc ea::db::writePasswd {method passwd salt} {
     #   
     #   
     #***
-    global log user
+    global log
 
 	if {$method eq "-update"} {
-		db eval "UPDATE Users SET UserPwd = '$passwd', UserSalt = '$salt' WHERE UserLogin = '$user(id)'"
+		db eval "UPDATE Users SET UserPwd = '$passwd', UserSalt = '$salt' WHERE UserLogin = '$userLogin'"
 		
 	} elseif {$method eq "-insert"} {
-		db eval "INSERT INTO Users (UserPwd, UserSalt) VALUES ('$passwd', '$salt') WHERE UserLogin = '$user(id)'"
+		db eval "INSERT INTO Users (UserPwd, UserSalt) VALUES ('$passwd', '$salt') WHERE UserLogin = '$userLogin'"
 	}
 
 } ;# ea::db::writePasswd
@@ -524,11 +575,12 @@ proc ea::db::getPasswd {user} {
     #***
     global log
 
-    db eval "SELECT UserPwd, UserSalt FROM Users WHERE UserLogin = '$user'" {
-		set db_oldPasswd $UserPwd
-		set db_oldSalt $UserSalt
-	}
-
-	return [list $UserPwd $UserSalt]
+#    db eval "SELECT UserPwd, UserSalt FROM Users WHERE UserLogin = '$user'" {
+#		set db_oldPasswd $UserPwd
+#		set db_oldSalt $UserSalt
+#	}
+#
+#	return [list $UserPwd $UserSalt]
+	return [db eval "SELECT UserPwd, UserSalt FROM Users WHERE UserLogin = '$user'"]
     
 } ;# ea::db::getPasswd

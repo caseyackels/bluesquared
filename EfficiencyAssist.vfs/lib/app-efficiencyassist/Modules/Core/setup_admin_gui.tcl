@@ -200,20 +200,22 @@ proc eAssistSetup::admin_GUI {args} {
     # Users, Frame 1
     console show
     grid [ttk::label $widTmp(sec,users_f1).txt0 -text [mc "User Name"]] -column 0 -row 0 -padx 2p -pady 2p -sticky e
-    grid [ttk::entry $widTmp(sec,users_f1).entry0 -textvariable widSec(users,Name) -width 35] -column 1 -row 0 -padx 2p -pady 2p ;#-sticky ew
-    grid [ttk::button $widTmp(sec,users_f1).btn0 -text [mc "Add"] -command {eAssistSetup::writeSecUsers -insert $widSec(users,Name) $widSec(users,Login) $widSec(users,Passwd) $widSec(users,Email) $widSec(users,Active)}] -column 2 -row 0 -padx 2p -pady 2p ;#-sticky ew
+    grid [ttk::entry $widTmp(sec,users_f1).entry0 -textvariable widSec(users,UserName) -width 35] -column 1 -row 0 -padx 2p -pady 2p ;#-sticky ew
+    grid [ttk::button $widTmp(sec,users_f1).btn0 -text [mc "Add"] -command {eAssistSetup::writeSecUsers -insert $widTmp(sec,users_f2).listbox [$widTmp(sec,users_f2).listbox curselection] \
+                                                                                $widSec(users,UserName) $widSec(users,UserLogin) $widSec(users,UserPwd) $widSec(users,UserEmail) \
+                                                                                $widSec(users,User_Status)}] -column 2 -row 0 -padx 2p -pady 2p ;#-sticky ew
     
     grid [ttk::label $widTmp(sec,users_f1).txt1 -text [mc "User Login"]] -column 0 -row 1 -padx 2p -pady 2p -sticky e
-    grid [ttk::entry $widTmp(sec,users_f1).entry1 -textvariable widSec(users,Login) -width 35] -column 1 -row 1 -padx 2p -pady 2p ;#-sticky ew
+    grid [ttk::entry $widTmp(sec,users_f1).entry1 -textvariable widSec(users,UserLogin) -width 35] -column 1 -row 1 -padx 2p -pady 2p ;#-sticky ew
     grid [ttk::button $widTmp(sec,users_f1).btn1 -text [mc "Clear"]] -column 2 -row 1 -padx 2p -pady 2p ;#-sticky ew
     
     grid [ttk::label $widTmp(sec,users_f1).txt2 -text [mc "Email"]] -column 0 -row 2 -padx 2p -pady 2p -sticky e
-    grid [ttk::entry $widTmp(sec,users_f1).entry2 -textvariable widSec(users,Email) -width 35] -column 1 -row 2 -padx 2p -pady 2p ;#-sticky ew
+    grid [ttk::entry $widTmp(sec,users_f1).entry2 -textvariable widSec(users,UserEmail) -width 35] -column 1 -row 2 -padx 2p -pady 2p ;#-sticky ew
     
     grid [ttk::label $widTmp(sec,users_f1).txt3 -text [mc "Password"]] -column 0 -row 3 -padx 2p -pady 2p -sticky e
-    grid [ttk::entry $widTmp(sec,users_f1).entry3 -textvariable widSec(users,Passwd) -show *] -column 1 -row 3 -padx 2p -pady 2p -sticky ew
+    grid [ttk::entry $widTmp(sec,users_f1).entry3 -textvariable widSec(users,UserPwd) -show *] -column 1 -row 3 -padx 2p -pady 2p -sticky ew
     
-    grid [ttk::checkbutton $widTmp(sec,users_f1).ckbtn0 -text [mc "Active"] -variable widSec(users,Active)] -column 1 -row 6 -sticky w
+    grid [ttk::checkbutton $widTmp(sec,users_f1).ckbtn0 -text [mc "Active"] -variable widSec(users,User_Status)] -column 1 -row 6 -sticky w
 
     # --- Users, Frame 2
     # Tab 2, Subtab 2, Frame 2
@@ -237,10 +239,11 @@ proc eAssistSetup::admin_GUI {args} {
     $widTmp(sec,users_f2).listbox columnconfigure 0 -name wid_id \
                                             -showlinenumbers 1 \
                                             -labelalign center
-    $widTmp(sec,users_f2).listbox columnconfigure 1 -name db_id
-    $widTmp(sec,users_f2).listbox columnconfigure 2 -width 20
-    $widTmp(sec,users_f2).listbox columnconfigure 3 -width 35
-    $widTmp(sec,users_f2).listbox columnconfigure 4 -stretch yes
+    $widTmp(sec,users_f2).listbox columnconfigure 1 -name User_ID
+    $widTmp(sec,users_f2).listbox columnconfigure 2 -name UserLogin -width 20
+    $widTmp(sec,users_f2).listbox columnconfigure 3 -name UserName -width 35
+    $widTmp(sec,users_f2).listbox columnconfigure 4 -name UserEmail -stretch yes
+    $widTmp(sec,users_f2).listbox columnconfigure 5 -name User_Status
     
     grid [ttk::scrollbar $widTmp(sec,users_f2).scrolly -orient v -command [list $widTmp(sec,users_f2).listbox yview]] -column 1 -row 0 -sticky nse
     grid [ttk::scrollbar $widTmp(sec,users_f2).scrollx -orient h -command [list $widTmp(sec,users_f2).listbox xview]] -column 0 -row 1 -sticky ews
@@ -253,5 +256,19 @@ proc eAssistSetup::admin_GUI {args} {
     ::autoscroll::autoscroll $widTmp(sec,users_f2).scrollx
     
     eAssistSetup::populateSecUsersEdit $widTmp(sec,users_f2).listbox
+    
+    ## Binding (double-click puts the data into the fields)
+    bind [$widTmp(sec,users_f2).listbox bodytag] <Double-1> {
+        # Reconfigure button
+        $widTmp(sec,users_f1).btn0 configure -command {eAssistSetup::writeSecUsers -update $widTmp(sec,users_f2).listbox [$widTmp(sec,users_f2).listbox curselection] \
+                                                                                $widSec(users,UserName) $widSec(users,UserLogin) $widSec(users,UserPwd) $widSec(users,UserEmail) \
+                                                                                $widSec(users,User_Status)}
+        set widRow [$widTmp(sec,users_f2).listbox curselection]
+        
+        for {set x 0} {$x < [$widTmp(sec,users_f2).listbox columncount]} {incr x} {
+            #${log}::debug
+            set widSec(users,[$widTmp(sec,users_f2).listbox columncget $x -name]) [$widTmp(sec,users_f2).listbox cellcget $widRow,$x -text]
+        }
+    }
 
 } ;# eAssistSetup::admin_GUI
