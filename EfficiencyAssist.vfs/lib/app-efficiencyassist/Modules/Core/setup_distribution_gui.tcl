@@ -203,7 +203,7 @@ proc eAssistSetup::modify_distType {{mode add} tbl} {
     
     switch -- $mode {
         "add"   {ea::db::reset_disttype}
-        "edit"  {ea::db::reset_disttype; eAssist::getDistributionTypeID $tbl $fd1.lbox_addCarriers}
+        "edit"  {ea::db::reset_disttype; eAssistSetup::getDistributionTypeID $tbl $fd1.lbox_addCarriers}
         "view"  {}
     }
 } ;# eAssistSetup::modify_distType

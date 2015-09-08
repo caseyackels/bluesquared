@@ -238,7 +238,7 @@ proc 'eAssist_initVariables {} {
 	#	file: db_initvars.tcl
     #
     #***
-    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter auth options emailSetup emailEvent job user setupJobDB
+    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter auth options emailSetup emailEvent job user setupJobDB widSec
 
 	#-------- CORE SETTINGS
 	#if {$logSettings(displayConsole) == 1} {console show}
@@ -378,8 +378,19 @@ proc 'eAssist_initVariables {} {
     if {![info exists settings(BoxTareWeight)]} {
         # Box Tare Weight
         set settings(BoxTareWeight) .566
-    }   
+    }
 	
+	array set widSec [list group,Name "" \
+					  group,Active 0 \
+					  users,User_ID "" \
+					  users,UserName "" \
+					  users,UserLogin "" \
+					  users,User_Status 0 \
+					  users,UserEmail "" \
+				      users,UserPwd "" \
+					  users,UserSalt "" \
+					  users,wid_id ""]
+
 	# Schedule a time to check for updates
 	#eAssist_Global::at $program(checkUpdateTime) vUpdate::checkForUpdates
 	

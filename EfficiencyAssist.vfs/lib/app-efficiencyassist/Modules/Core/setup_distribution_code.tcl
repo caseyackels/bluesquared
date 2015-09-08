@@ -98,21 +98,29 @@ proc ea::db::writeDistTypeSetup {lbox win tbl} {
         db eval "DELETE FROM DistributionTypeCarriers WHERE DistributionTypeID=$disttype(id)"
         ${log}::notice [mc "SETUP:DistributionTypes - Removed carriers associated with $disttype(distName)"]
         
-        if {[info exists carrierList]} {unset carrierList}
         if {$disttype(carriers) != ""} {
             foreach carrier $disttype(carriers) {
                     lappend carrierList '$carrier'
             }
             #${log}::debug carrierList: $carrierList
             
-            set carrier_id [db eval "SELECT Carrier_ID FROM Carriers WHERE Name IN ([join $carrierList ,])"]
+            #set carrier_id [db eval "SELECT Carrier_ID FROM Carriers WHERE Name IN ([join $carrierList ,])"]
+            db eval "SELECT ShipViaName, ShipVia_ID, CarrierID FROM ShipVia 
+                                        INNER JOIN Carriers ON Carrier_ID = CarrierID
+                                    WHERE Carriers.Name IN ([join $carrierList ,])" {
+                                        lappend insertCarrierID "($disttype(id), $CarrierID, ShipVia_ID)"
+                                    }
             
-            foreach id $carrier_id {
-                lappend insertCarrierID "($disttype(id), $id)"
-            }
-            db eval "INSERT INTO DistributionTypeCarriers (DistributionTypeID, CarrierID)
+            #foreach id $carrier_id {
+            #    lappend insertCarrierID "($disttype(id), $id)"
+            #}
+            db eval "INSERT INTO DistributionTypeCarriers (DistributionTypeID, CarrierID, ShipViaID)
                                 VALUES [join $insertCarrierID ,]"
             ${log}::notice [mc "SETUP:DistributionTypes - Reassigned Carriers to $disttype(distName)"]
+            
+            # Clean up
+            unset carrierList
+            unset insertCarrierID
         }
         
         ## -- Table RptConfig
@@ -121,7 +129,7 @@ proc ea::db::writeDistTypeSetup {lbox win tbl} {
     }
     
     # Delete all data in tablelist; then repopulate it.
-
+    # 9.8.15 this should be removed and only the rowID should be deleted, then reinserted
     $tbl delete 0 end
     eAssistSetup::populateDistTypeWidget $tbl
     
@@ -232,8 +240,8 @@ proc eAssistSetup::populateDistTypeWidget {wid} {
     
 } ;# eAssistSetup::populateDistTypeWidget <wid>
 
-proc eAssist::getDistributionTypeID {tbl lbox} {
-    #****if* getDistributionTypeID/eAssist
+proc eAssistSetup::getDistributionTypeID {tbl lbox} {
+    #****if* getDistributionTypeID/eAssistSetup
     # CREATION DATE
     #   07/29/2015 (Wednesday Jul 29)
     #
@@ -248,6 +256,7 @@ proc eAssist::getDistributionTypeID {tbl lbox} {
     #   
     #***
     global log disttype
+    ${log}::debug Launched getDistributionTypeID
 
     # Get id
     set row_id [$tbl curselection]
@@ -260,7 +269,7 @@ proc eAssist::getDistributionTypeID {tbl lbox} {
     #${log}::debug distName: $distName
     #${log}::debug DB DistName: [db eval "SELECT * FROM DistributionTypes WHERE DistTypeName = '$distName'"]
     
-    catch {db eval "SELECT DistributionTypes.DistributionType_ID as DistributionType_ID,
+    db eval "SELECT DistributionTypes.DistributionType_ID as DistributionType_ID,
                             DistributionTypes.DistTypeName as DistTypeName,
                             DistributionTypes.DistType_Status as DistType_Status,
                             RptActions.RptAction as RptAction, 
@@ -273,7 +282,7 @@ proc eAssist::getDistributionTypeID {tbl lbox} {
                         INNER JOIN RptMethod ON RptMethodID = RptMethod_ID
                         LEFT JOIN RptAddresses ON RptConfig_ID = RptConfigID
                         LEFT JOIN MasterAddresses ON RptAddresses.MasterAddrID = MasterAddresses.MasterAddr_ID
-                    WHERE DistTypeName = '$distName'" {
+                    WHERE DistributionTypes.DistTypeName = '$distName'" {
                                         set disttype(id) $DistributionType_ID
                                         set disttype(distName) $DistTypeName
                                         set disttype(status) $DistType_Status
@@ -302,8 +311,7 @@ proc eAssist::getDistributionTypeID {tbl lbox} {
                                                 }
                                         }
                         set gateway 1
-                    }
-    }
+                    }    
         if {[info exists gateway]} {
             # If we don't have an entry in the Table: RptConfig, but we do in DistributionTypes, we will receive an error.
             # Get the assigned carrier names and insert into the listbox ...
@@ -315,7 +323,7 @@ proc eAssist::getDistributionTypeID {tbl lbox} {
         }
 
 
-} ;# eAssist::getDistributionTypeID
+} ;# eAssistSetup::getDistributionTypeID
 
 proc eAssist::deleteDistributionTypeCarrier {lbox} {
     #****if* deleteDistributionTypeCarrier/eAssist
