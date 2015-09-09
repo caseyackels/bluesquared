@@ -272,12 +272,19 @@ proc eAssistSetup::writeSecUsers {method widTbl widRow userName userLogin userPa
     } elseif {$method eq "-update"} {
         # Record exists, now check to see if the password field was populated, if it was retrieve pass and salt from DB
         if {$userPassword ne ""} {
-            set passSalt [ea::db::getPasswd $userLogin]
-                set pass [lindex $passSalt 0]
-                set salt [lindex $passSalt 1]
+            # Retrieve old pass and salt
+            set oldPassSalt [ea::db::getPasswd $userLogin]
+                set pass [lindex $oldPassSalt 0]
+                set salt [lindex $oldPassSalt 1]
                 
-            # Compare new to old
-            set passSalt [ea::sec::setPasswd $userPasswd $salt]
+            # Generate new pass and salt based on userPasswd
+            set newPassSalt [ea::sec::setPasswd $userPasswd $salt]
+            
+            # Compare the two, if they don't match, 
+            if {![string match $oldPassSalt $newPassSalt]} {
+                
+            }
+            
         }
         
             

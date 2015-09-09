@@ -48,7 +48,7 @@ proc eAssistSetup::distributionTypes_GUI {} {
 
     grid [ttk::button $fd0a.add -text [mc "Add"] -command [list eAssistSetup::modify_distType add $fd0b.tbl]] -column 0 -row 0 -padx 2p -sticky w
     grid [ttk::button $fd0a.edit -text [mc "Edit"] -command [list eAssistSetup::modify_distType edit $fd0b.tbl]] -column 1 -row 0 -padx 2p -sticky w
-    grid [ttk::button $fd0a.del -text [mc "Delete"]] -column 2 -row 0 -padx 2p -sticky w
+    grid [ttk::button $fd0a.del -text [mc "Delete"] -command {${log}::debug Deleting Row - Function isn't constructed yet}] -column 2 -row 0 -padx 2p -sticky w
     
     
     tablelist::tablelist $fd0b.tbl -columns {
@@ -190,7 +190,7 @@ proc eAssistSetup::modify_distType {{mode add} tbl} {
     grid [listbox $fd1.lbox_addCarriers -selectmode extended] -column 1 -row 2 -sticky news
     
     grid [ttk::button $fd1.btn_addCarriers -text [mc "Add"] -command [list eAssistSetup::addCarriertoListBox $fd1.cbox_addCarriers $fd1.lbox_addCarriers]] -column 2 -row 1 -sticky ew -padx 2p
-    grid [ttk::button $fd1.btn_delCarriers -text [mc "Delete"] -command [list eAssist::deleteDistributionTypeCarrier $fd1.lbox_addCarriers]] -column 2 -row 2 -sticky new -padx 2p -pady 2p
+    grid [ttk::button $fd1.btn_delCarriers -text [mc "Delete"] -command [list eAssistSetup::deleteDistributionTypeCarrier $fd1.lbox_addCarriers]] -column 2 -row 2 -sticky new -padx 2p -pady 2p
 
     grid rowconfigure $fd1 2
 
@@ -203,7 +203,7 @@ proc eAssistSetup::modify_distType {{mode add} tbl} {
     
     switch -- $mode {
         "add"   {ea::db::reset_disttype}
-        "edit"  {ea::db::reset_disttype; eAssist::getDistributionTypeID $tbl $fd1.lbox_addCarriers}
+        "edit"  {ea::db::reset_disttype; eAssistSetup::getDistributionTypeID $tbl $fd1.lbox_addCarriers}
         "view"  {}
     }
 } ;# eAssistSetup::modify_distType
