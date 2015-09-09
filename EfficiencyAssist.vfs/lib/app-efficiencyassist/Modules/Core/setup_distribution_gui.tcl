@@ -171,6 +171,9 @@ proc eAssistSetup::modify_distType {{mode add} tbl} {
     grid [ttk::checkbutton $fd0.singleEntry -text [mc "Create single entry"] -variable disttype(expt,singleEntry)] -column 0 -row 7 -padx 2p -sticky w
     grid [ttk::label $fd0.txt_useAddr -text [mc "Use address"]] -column 0 -row 8 -padx 2p -sticky e
     grid [ttk::combobox $fd0.cbox_useAddr -textvariable disttype(expt,AddrName) -postcommand [list eAssistSetup::populateDistTypeAddresses $fd0.cbox_useAddr]] -column 1 -columnspan 2 -row 8 -padx 2p -sticky ew
+    grid [ttk::label $fd0.txt_useShipVia -text [mc "Use Ship Via"]] -column 0 -row 9 -padx 2p -sticky e
+    grid [ttk::combobox $fd0.cbox_shipVia -textvariable disttype(expt,shipVia) -postcommand [list eAssistSetup::populateShipViaDistType $fd0.cbox_shipVia] -width 35] -column 1 -columnspan 2 -row 9 -padx 2p -sticky ew
+    # postcommand proc: This proc should look to see if the ShipType is selected, if it is, filter the ship via list based on the value; if not return all ship via's.
         
     
     # Ship methods frame
@@ -228,5 +231,3 @@ proc eAssistSetup::addCarriertoListBox {widEntry widLbox} {
         $widEntry delete 0 end
     }
 }
-
-

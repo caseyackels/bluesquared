@@ -160,6 +160,7 @@ proc ea::db::reset_disttype {} {
                  expt,singleEntry 0 \
                  rpt,AddrName "" \
                  expt,AddrName "" \
+                 expt,shipVia "" \
                  distName "" \
                  shipType "" \
                  carriers "" \

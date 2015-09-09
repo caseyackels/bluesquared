@@ -447,7 +447,7 @@ proc ea::db::setConsigneeAutoComplete {data} {
 } ;# ea::db::setConsigneeAutoComplete
 
 
-proc ea::db::setShipOrderValues {disttype} {
+proc ea::db::setShipOrderValues {dist_type} {
 	#****if* setShipOrderValues/ea::db
 	# CREATION DATE
 	#   09/03/2015 (Thursday Sep 03)
@@ -465,30 +465,45 @@ proc ea::db::setShipOrderValues {disttype} {
 	global log shipOrder job widgetPath
 
 	# disttype has a chance of being empty... lets quit if it is.
-	if {$disttype eq ""} {return}
+	if {$dist_type eq ""} {return}
 	
-	# Retrieve the Carrier ID's assigned to the distribution type
-	set carrierID [db eval "SELECT CarrierID FROM DistributionTypeCarriers
-								LEFT JOIN Carriers ON CarrierID = Carrier_ID
-								LEFT JOIN DistributionTypes ON DistributionTypeID = DistributionType_ID
-							WHERE DistTypeName = '$disttype'"]
+	# Check if there are carriers setup on the customer level; use those if we do.
+	# If nothing is returned, we do not have specific carriers setup on the customer level...
+	# 		--WHERE ShipmentTypes.ShipmentType = 'Freight'
+	set shipViaValues [db eval "SELECT ShipVia.ShipViaName FROM DistributionTypes
+		INNER JOIN DistributionTypeCarriers on DistributionTypeCarriers.DistributionTypeID = DistributionTypes.DistributionType_ID
+		INNER JOIN ShipmentTypes on DistributionTypes.DistType_ShipTypeID = ShipmentTypes.ShipmentType_ID
+		INNER JOIN ShipVia on DistributionTypeCarriers.ShipViaID = ShipVia.ShipVia_ID
+		INNER JOIN CustomerShipVia on ShipVia.ShipVia_ID = CustomerShipVia.ShipViaID
+		WHERE DistTypeName = '$dist_type'
+		AND CustomerShipVia.CustID = '$job(CustID)'"]
 	
-	
-	# Set Ship Via values
-	db eval "SELECT ShipViaName FROM ShipVia WHERE CarrierID IN ([join $carrierID ,])" {
-		lappend shipViaValues $ShipViaName
-	}
-	
-	# No Carriers were assigned to the distribution type; filter out small package, or freight ship via's
-	if {![info exists shipViaValues]} {
-		#set shipViaValues ""
-		db eval "SELECT ShipViaName from ShipVia WHERE ShipmentType = (
-					SELECT ShipmentType from ShipmentTypes
-					INNER JOIN DistributionTypes on ShipmentType_ID = DistType_ShipTypeID
-				WHERE DistributionTypes.DistTypeName = '$disttype')" {
-						lappend shipViaValues $ShipViaName
+	if {$shipViaValues eq ""} {
+		unset shipViaValues
+		# Carrier hasn't been setup at the customer level, lets look at what was setup on the distribution type level
+		# Retrieve the Carrier ID's assigned to the distribution type
+		set carrierID [db eval "SELECT CarrierID FROM DistributionTypeCarriers
+									LEFT JOIN Carriers ON CarrierID = Carrier_ID
+									LEFT JOIN DistributionTypes ON DistributionTypeID = DistributionType_ID
+								WHERE DistTypeName = '$dist_type'"]
+		
+		# Set Ship Via values
+		db eval "SELECT ShipViaName FROM ShipVia WHERE CarrierID IN ([join $carrierID ,])" {
+			lappend shipViaValues $ShipViaName
+		}
+		
+		## No Carriers were assigned to the distribution type; filter out small package, or freight ship via's
+		if {![info exists shipViaValues]} {
+			#set shipViaValues ""
+			db eval "SELECT ShipViaName from ShipVia WHERE ShipmentType = (
+						SELECT ShipmentType from ShipmentTypes
+						INNER JOIN DistributionTypes on ShipmentType_ID = DistType_ShipTypeID
+					WHERE DistributionTypes.DistTypeName = '$dist_type')" {
+							lappend shipViaValues $ShipViaName
+			}
 		}
 	}
+
 	#${log}::debug Ship Via Values: $shipViaValues
 	
 	# Configure Ship Via Widget
@@ -503,10 +518,5 @@ proc ea::db::setShipOrderValues {disttype} {
 	}
 	
 	unset shipViaValues
-
-	## Populate the ship via list based on the customer config setup
-	#SELECT ShipVia_ID, ShipViaName FROM CustomerShipVia
-	#	LEFT JOIN ShipVia ON ShipVia_ID = ShipViaID
-	#	WHERE CustID = 'SAGMED'
 
 } ;# ea::db::setShipOrderValues

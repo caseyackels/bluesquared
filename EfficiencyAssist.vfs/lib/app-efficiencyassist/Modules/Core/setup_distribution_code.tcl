@@ -7,8 +7,35 @@ proc eAssistSetup::populateDistTypeAddresses {wid} {
                             WHERE MasterAddr_Active = 1
                             AND MasterAddr_Internal = 1"]
     $wid configure -values $values
-    
 }
+
+
+proc eAssistSetup::populateShipViaDistType {wid} {
+    #****if* populateShipViaDistType/eAssistSetup
+    # CREATION DATE
+    #   09/09/2015 (Wednesday Sep 09)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   
+    #   
+    #***
+    global log disttype
+
+    if {$disttype(shipType) ne ""} {
+        set shipViaList [db eval "SELECT ShipViaName FROM ShipVia WHERE ShipmentType = '$disttype(shipType)' ORDER BY ShipViaName"]
+    } else {
+        set shipViaList [db eval "SELECT ShipViaName FROM ShipVia ORDER BY ShipViaName"]
+    }
+    ${log}::debug dropdown: $wid
+    $wid configure -values $shipViaList
+} ;# eAssistSetup::populateShipViaDistType
+
 
 proc eAssistSetup::populateDistTypeCarrierList {wid} {
     ##
@@ -60,7 +87,7 @@ proc ea::db::writeDistTypeSetup {lbox win tbl} {
     global log disttype
     
     set disttype(carriers) [$lbox get 0 end]
-    ${log}::debug Carriers: $lbox - [$lbox get 0 end]
+    #${log}::debug Carriers: $lbox - [$lbox get 0 end]
     
     #set addrID [db eval "SELECT MasterAddr_ID from MasterAddresses WHERE MasterAddr_Company='$disttype(useAddrName)'"]
     #if {$addrID == ""} {
@@ -221,14 +248,14 @@ proc ea::db::writeRptConfig {} {
         # singleEntry = 1 or 0
         
         # AddrName and singleEntry contain data
-        if {$disttype(expt,AddrName) != "" && $disttype(expt,singleEntry) != 0} {
+        if {$disttype(expt,AddrName) != "" && $disttype(expt,singleEntry) != 0 && $disttype(expt,shipVia) != ""} {
             lappend RptActionValue "($disttype(id), $exptSingleEntryID)"
             set addExptAddress 1
-            ${log}::debug EXPORTS: Address and Checkbutton contain data: $disttype(expt,AddrName), $disttype(expt,singleEntry)
+            ${log}::debug EXPORTS: Address and Checkbutton contain data: $disttype(expt,AddrName), $disttype(expt,singleEntry) $disttype(expt,shipVia)
         }
         
         # AddrName and singleEntry are both blank
-        if {$disttype(expt,AddrName) == "" && $disttype(expt,singleEntry) == 0} {
+        if {$disttype(expt,AddrName) == "" && $disttype(expt,singleEntry) == 0 && $disttype(expt,shipVia) == ""} {
             #lappend RptActionValue "($disttype(id), $exptSingleEntryID)"
             lappend RptActionValue "($disttype(id), $exptDefaultID)"
             ${log}::debug EXPORTS: Address and Checkbutton are blank: $disttype(expt,AddrName), $disttype(expt,singleEntry)
@@ -267,13 +294,14 @@ proc ea::db::writeRptConfig {} {
             
             # Add Report Address
             if {$addRptAddress == 1} {
-                # Get RptConfig id
+                # Get RptConfig ID
                 set rptConfigID [db eval "SELECT RptConfig_ID FROM RptConfig
                                             WHERE DistributionTypeID = $disttype(id)
                                                 AND RptActionsID = $rptSingleEntryID"]
                 # Get Address ID
                 set masterAddrID [db eval "SELECT MasterAddr_ID FROM MasterAddresses
                                                 WHERE MasterAddr_Company = '$disttype(rpt,AddrName)'"]
+                
                 
                 # Delete existing entries
                 db eval "DELETE FROM RptAddresses WHERE RptConfigID = (SELECT RptConfigID FROM RptAddresses
@@ -292,13 +320,15 @@ proc ea::db::writeRptConfig {} {
                 # Get Address ID
                 set masterAddrID [db eval "SELECT MasterAddr_ID FROM MasterAddresses
                                                 WHERE MasterAddr_Company = '$disttype(expt,AddrName)'"]
+                # Get shipvia ID
+                set shipviaID [db eval "SELECT ShipVia_ID FROM ShipVia WHERE ShipViaName = '$disttype(expt,shipVia)'"]
                 
                 # Delete existing entries
                 db eval "DELETE FROM RptAddresses WHERE RptConfigID = (SELECT RptConfigID FROM RptAddresses
                                                                         INNER JOIN RptConfig on RptConfigID = RptConfig.RptConfig_ID
                                                                             WHERE RptConfig.DistributionTypeID = $disttype(id))"
                 # Insert into RptAddresses
-                db eval "INSERT INTO RptAddresses (RptConfigID, MasterAddrID) VALUES ($rptConfigID, $masterAddrID)"
+                db eval "INSERT INTO RptAddresses (RptConfigID, MasterAddrID, ShipViaID) VALUES ($rptConfigID, $masterAddrID, $shipviaID)"
             }
             # Clean up
             unset RptActionValue
@@ -372,11 +402,13 @@ proc eAssistSetup::getDistributionTypeID {tbl lbox} {
                             RptActions.RptAction as RptAction, 
                             RptMethod.RptMethod as RptMethod,
                             ShipmentTypes.ShipmentType as ShipmentType,
-                            MasterAddresses.MasterAddr_Company as Company FROM RptConfig
+                            MasterAddresses.MasterAddr_Company as Company,
+                            ShipVia.ShipViaName as shipVia FROM RptConfig
                         INNER JOIN DistributionTypes ON DistributionTypeID = DistributionType_ID
                         INNER JOIN ShipmentTypes ON ShipmentTypes.ShipmentType_ID = DistributionTypes.DistType_ShipTypeID
                         INNER JOIN RptActions ON RptActionsID = RptAction_ID
                         INNER JOIN RptMethod ON RptMethodID = RptMethod_ID
+                        INNER JOIN ShipVia ON RptAddresses.ShipViaID = ShipVia.ShipVia_ID
                         LEFT JOIN RptAddresses ON RptConfig_ID = RptConfigID
                         LEFT JOIN MasterAddresses ON RptAddresses.MasterAddrID = MasterAddresses.MasterAddr_ID
                     WHERE DistributionTypes.DistTypeName = '$distName'" {
@@ -396,6 +428,7 @@ proc eAssistSetup::getDistributionTypeID {tbl lbox} {
                                     } else {
                                         set disttype(expt,singleEntry) 1
                                         set disttype(expt,AddrName) $Company
+                                        set disttype(expt,shipVia) $shipVia
                                     }
                                 }
                                 default {
