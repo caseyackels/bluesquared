@@ -319,54 +319,42 @@ proc customer::dbAddShipVia {lbox custIDwid custNamewid} {
     set custID [$custIDwid get]
     set custName [list [$custNamewid get]]
     set shipViaList [$lbox get 0 end]
+    set haveCustID ""
     
-    ${log}::debug CustID: $custID
-    ${log}::debug CustName: $custName
-    ${log}::debug CustStatus: $cust(Status)
+    #${log}::debug CustID: $custID
+    #${log}::debug CustName: $custName
+    #${log}::debug CustStatus: $cust(Status)
     #${log}::debug DATA: $shipViaList
     
-    ## Check if the customer exists; if they don't lets add them.
-    set tmp(db,rowID) [eAssist_db::getRowID Customer Cust_ID='$custID']
-    eAssist_db::dbInsert -columnNames "Cust_ID CustName Status" -table Customer -data "$custID $custName $cust(Status)"
-    
-    # Remove ShipVia from DB
-    if {[info exists ::customer::shipViaDeleteList]} {
-        # Find out if these shipvia's exist in the DB associated with this custmer ID, if it does lets remove them from the DB if not, continue the loop.
-        foreach shipName [lsort -unique $::customer::shipViaDeleteList] {
-            #${log}::debug _DELETE_: [lsort -unique $::customer::shipViaDeleteList]
-            # Grab the db ID since all we have is the Name
-            set shipID [eAssist_db::dbWhereQuery -columnNames ShipVia_ID -table ShipVia -where "ShipViaName='$shipName'"]
-            
-            #if {$shipID != "" && $custID != ""} {}
-            # Make sure the shipID and custID exist
-            if {[eAssist_db::dbWhereQuery -columnNames ShipViaID -table CustomerShipVia -where "ShipViaID='$shipID' AND CustID='$custID'"] != ""} {
-                #eAssist_db::delete CustomerShipVia ShipViaID
-                db eval "DELETE from CustomerShipVia WHERE ShipViaID = '$shipID' AND CustID = '$custID'"
-            }
-        }
-        # Unset var, so we don't unintentionally try to delete shipvia's that don't exist.
-        #unset ::customer::shipViaDeleteList
+    # Check to see if custid is in db, if it isn't add it.
+    set haveCustID [db eval "SELECT cust_ID FROM Customer where cust_id = '$custID'"]
+    if {$haveCustID == ""} {
+        db eval "INSERT INTO Customer (Cust_ID, CustName, Status) VALUES ('$custID', '$CustName', $cust(Status))"
     }
     
-    # Skip if we don't have any shipvia changes
-    if {$shipViaList != ""} {
-        # Match the ShipVia's to their db ID's
-        if {[info exists shipviaIDs]} {unset shipviaIDs}
-        foreach item [lsort -unique $shipViaList] {
-            ${log}::debug GET ID: [eAssist_db::dbWhereQuery -columnNames ShipVia_ID -table ShipVia -where "ShipViaName='$item'"]
-            lappend shipviaIDs [eAssist_db::dbWhereQuery -columnNames ShipVia_ID -table ShipVia -where "ShipViaName='$item'"]
-        }
-        
-        # Insert the ShipVia's
-        foreach id $shipviaIDs {
-           ${log}::debug INSERT: $custID _ $id
-           #eAssist_db::dbInsert -columnNames "CustID ShipViaId" -table CustomerShipVia -data "$custID $id"
-           db eval "INSERT OR ABORT INTO CustomerShipVia (CustID, ShipViaID) VALUES ('$custID', '$id')"
-        }
+    # Remove all assignments in the db; so we don't have to keep track; we will add everything that is in the 'assigned' listbox later.
+    db eval "DELETE FROM CustomerShipVia WHERE CustID = '$custID'"
+    
+    set shipViaList [$lbox get 0 end]
+    
+    foreach shipvia $shipViaList {
+        lappend shipViaNameList '$shipvia'
     }
+    
+    # Retrieve all shipvia id's
+    set shipvia_idList [db eval "SELECT ShipVia_ID FROM ShipVia WHERE ShipViaName IN ([join $shipViaNameList ,])"]
+    
+    # Combine custid and shipvia id's into one list
+    foreach db_values $shipvia_idList {
+        lappend custid_shipvia "('$custID', $db_values)"
+    }
+    
+    # Add assignments to CustomerShipVia
+    db eval "INSERT INTO CustomerShipVia (CustID, ShipViaID) VALUES [join $custid_shipvia ,]"
    
+   unset shipViaNameList
+   unset custid_shipvia
 
-    
 } ;# customer::dbAddShipVia
 
 proc customer::validateEntry {okBtn addBtn remBtn wid entryValue} {
