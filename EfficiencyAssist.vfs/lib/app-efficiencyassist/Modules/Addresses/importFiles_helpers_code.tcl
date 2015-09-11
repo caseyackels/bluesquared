@@ -395,29 +395,44 @@ proc eAssistHelper::insValuesToTableCells {type tbl txtVar cells} {
 	
 	if {$type eq "-window"} {
 		foreach val $cells {
-			#${log}::debug Window Inserting $txtVar into $tbl - $val - $cells
-			#${log}::debug Window MULTIPLE CELLS: $txtVar - cells: $cells
-			#${log}::debug Selected Cells: [$tbl curcellselection]
+			# Create list that only has row numbers, then pass it to job::db::write once. Within job::db::write, we have a db statement using 'IN'.
+			set row [lindex [split $val ,] 0]
+			lappend rowList $row
+			lappend idList '[ea::db::getRecord $row]'
 			
-			#if {[llength $txtVar] != 1} {}
-			if {[llength $cells] != 1} {
-				# Pasting multiple cells
-				#foreach item $txtVar cell [$tbl curcellselection] {} ;# pasting into highlighted cells only
-				foreach cell $cells {
-					#${log}::debug Column Name: [$tbl columncget [lindex [split $cell ,] end] -name]
-					#${log}::debug Window Multiple Inserting $txtVar - $cell
-					#$tbl cellconfigure $cell -text $txtVar
-					#set colName [$tbl columncget [lindex [split $cell ,] end] -name]
-					job::db::write $job(db,Name) Addresses $txtVar $tbl $cell
-				}
-			} else {
-				# Pasting a single cell
-				#${log}::debug Window SINGLE CELL: $txtVar - $cells
-				#$tbl cellconfigure $val -text $txtVar
-				#$tbl cellconfigure $cells -text $txtVar
-				job::db::write $job(db,Name) Addresses $txtVar $tbl $cells
-			}
 		}
+		${log}::debug $tbl cellconfigure $cells -text $txtVar
+		set colName [$tbl columncget [lindex [join [split $cells ,]] 1] -name]
+		job::db::write $job(db,Name) {} $txtVar $tbl $cells $rowList $idList $colName
+		
+		# Clean up
+		unset rowList
+		unset idList
+		
+		#foreach val $cells {
+		#	#${log}::debug Window Inserting $txtVar into $tbl - $val - $cells
+		#	#${log}::debug Window MULTIPLE CELLS: $txtVar - cells: $cells
+		#	#${log}::debug Selected Cells: [$tbl curcellselection]
+		#	
+		#	#if {[llength $txtVar] != 1} {}
+		#	if {[llength $cells] != 1} {
+		#		# Pasting multiple cells
+		#		#foreach item $txtVar cell [$tbl curcellselection] {} ;# pasting into highlighted cells only
+		#		foreach cell $cells {
+		#			#${log}::debug Column Name: [$tbl columncget [lindex [split $cell ,] end] -name]
+		#			#${log}::debug Window Multiple Inserting $txtVar - $cell
+		#			#$tbl cellconfigure $cell -text $txtVar
+		#			#set colName [$tbl columncget [lindex [split $cell ,] end] -name]
+		#			job::db::write $job(db,Name) Addresses $txtVar $tbl $cell
+		#		}
+		#	} else {
+		#		# Pasting a single cell
+		#		#${log}::debug Window SINGLE CELL: $txtVar - $cells
+		#		#$tbl cellconfigure $val -text $txtVar
+		#		#$tbl cellconfigure $cells -text $txtVar
+		#		job::db::write $job(db,Name) Addresses $txtVar $tbl $cells
+		#	}
+		#}
 	} elseif {$type eq "-menu"} {
 		if {$copy(cellsCopied) >= 2} {
 			# Pasting multiple cells

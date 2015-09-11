@@ -417,7 +417,7 @@ proc job::db::open {args} {
 } ;# job::db::open
 
 
-proc job::db::write {db dbTbl dbTxt wid widCells {dbCol ""}} {
+proc job::db::write {db dbTbl dbTxt wid widCells widRows idList {dbCol ""}} {
     #****f* write/job::db
     # CREATION DATE
     #   02/13/2015 (Friday Feb 13)
@@ -430,12 +430,11 @@ proc job::db::write {db dbTbl dbTxt wid widCells {dbCol ""}} {
     #   
     #
     # SYNOPSIS
-    #   job::db::write db dbTbl dbTxt wid widCells ?dbCol?
-    #   job::db::write <dbName> <dbTable> <text> <widTbl> <row,col> ?Col Name?
+    #   job::db::write db dbTbl dbTxt wid widCells widRows idList ?dbCol?
+    #   job::db::write <dbName> <dbTable> <text> <widTbl> <row,col> ?Db Col Name?
     #
     # FUNCTION
     #	Writes data to the widget cell and database.
-    #	If the column name isn't already known, use two quotes; and this proc will figure it out, since we are receiving the row,cell value.
     #   
     #   
     # CHILDREN
@@ -451,24 +450,29 @@ proc job::db::write {db dbTbl dbTxt wid widCells {dbCol ""}} {
     #   
     #   
     #***
-    global log job
+    global log job headerParent
 
     if {$dbCol eq ""} {
         # retrieves the column name if we didn't pass it to the proc.
         set dbCol [$wid columncget [lindex [split $widCells ,] end] -name]
     }
     
-    #${log}::debug Updating COLUMN: $dbCol
-    #${log}::debug Updating Cells (should only ever have one): $widCells
-    #${log}::debug Updating VALUES to: $dbTxt
+    if {[lsearch $headerParent(headerList,consignee) $dbCol] != -1} {
+        set dbTbl Addresses
+    } elseif {[lsearch $headerParent(headerList,shippingorder) $dbCol] != -1} {
+        set dbTbl ShippingOrders   
+    }
     
-    # Update the tabelist widget
-    $wid cellconfigure $widCells -text $dbTxt
+    if {[string match -nocase *vers* $dbCol]} {
+        # This needs special handling
+        # Addresses contain a Versions column for the VersionID from the Version table.
+        # We must first look at the version table to see if there is an existing version; if there isn't we must add it.
+        # Then update all records with the correct version ID
+        set dbTbl Versions
+    }
     
-    # Update the DB
-    set dbPK [$wid getcell [lindex [split $widCells ,] 0],0]
-    $db eval "UPDATE $dbTbl SET $dbCol='$dbTxt' WHERE OrderNumber='$dbPK'"
-    
+    ${log}::debug sql: update $dbTbl SET $dbCol=$dbTxt WHERE AddressesID IN ([join $idList ,])
+
     job::db::getTotalCopies
     
 } ;# job::db::write

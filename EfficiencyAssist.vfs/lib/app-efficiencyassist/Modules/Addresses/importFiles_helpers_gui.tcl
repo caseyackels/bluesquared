@@ -105,7 +105,7 @@ proc eAssistHelper::insertItems {tbl} {
 	grid $btnBar.ok -column 0 -row 0 -sticky news -pady 5p -padx 5p
 	grid $btnBar.cancel -column 1 -row 0 -sticky news -pady 5p -pady 5p
 
-	# END GUI
+	#### END GUI
 	
 	# Guard against multiple cells being selected ...
 	# Var to use to get versions: $process(versionList)
@@ -119,7 +119,8 @@ proc eAssistHelper::insertItems {tbl} {
 			if {[$tbl columncget $header -hide] == 1} {continue}
 			
 			#set wid [catch {[string tolower [lrange $headerParams($header) 2 2]]} err]
-			set wid [db eval "SELECT Widget FROM Headers WHERE InternalHeaderName='$header'"]
+			#set wid [db eval "SELECT Widget FROM Headers WHERE InternalHeaderName='$header'"]
+			set wid [db eval "SELECT widWidget from HeadersConfig WHERE dbColName = '$header'"]
 			
 			# default to ttk::entry
 			#if {$wid eq ""} {set wid ttk::entry}

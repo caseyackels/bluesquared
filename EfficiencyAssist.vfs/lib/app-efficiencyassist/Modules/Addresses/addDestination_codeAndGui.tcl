@@ -587,25 +587,25 @@ proc eAssistHelper::saveDest {modifier widRow tblPath} {
         }
         -combine    {
                     ## -- Combine selected rows into one record
-                    ${log}::debug Remove rows ($widRow) from tablelist
+                    #${log}::debug Remove rows ($widRow) from tablelist
                     
                     # Delete rows from tablelist, bottom up so row id's don't change.
                     foreach row [lsort -decreasing $widRow] {
-                        ${log}::debug Removing Row: $row
+                        #${log}::debug Removing Row: $row
                         $tblPath delete $row
                     }
                     #${log}::debug Inserting into row [lindex $widRow 0]
                     #return
                     
-                    ${log}::debug Removing id's from ShippingOrders: $title(db_id,mult)
+                    #${log}::debug Removing id's from ShippingOrders: $title(db_id,mult)
                     $job(db,Name) eval "DELETE FROM ShippingOrders WHERE AddressID IN ([join $title(db_id,mult) ,])"
                     
-                    ${log}::debug Inserting new address, and ShippingOrder
+                    #${log}::debug Inserting new address, and ShippingOrder
                     # Add new record to db
                     ea::db::writeSingleAddressToDB
                     
                     # Populate table, inserting new record into the first selection of the combined rows.
-                    ${log}::debug Inserting into row [lindex $widRow 0]
+                    #${log}::debug Inserting into row [lindex $widRow 0]
                     ea::db::populateTablelist -record new -widRow [lindex $widRow 0]
 
         }

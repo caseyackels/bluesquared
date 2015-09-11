@@ -404,7 +404,7 @@ proc importFiles::insertIntoGUI {wid args} {
         
     # make sure we are starting new. Clear the columns and clear the table
     if {[$wid columncount] != 0} {$wid deletecolumns 0 end}
-    ${log}::debug Row Count 1: [$files(tab3f2).tbl size]
+    #${log}::debug Row Count 1: [$files(tab3f2).tbl size]
         
     # Insert the columns into the widget
     # The tablelist widget is initialized in importFiles_gui.tcl [importFiles::eAssistGUI]
@@ -474,9 +474,9 @@ proc importFiles::insertIntoGUI {wid args} {
             }
         } ;# End query for column configuration
         
-    ${log}::debug Row Count 2: [$files(tab3f2).tbl size]
+    #${log}::debug Row Count 2: [$files(tab3f2).tbl size]
 
-    ${log}::debug hdrs_show: $hdrs_show
+    #${log}::debug hdrs_show: $hdrs_show
     # insert the data into the widget
     # first manipulate the column names; we need two lists. One for the 'select' args, and one for the variables.
     if {[info exists hdr_list]} {unset hdr_list}
