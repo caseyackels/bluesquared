@@ -459,19 +459,45 @@ proc job::db::write {db dbTbl dbTxt wid widCells widRows idList {dbCol ""}} {
     
     if {[lsearch $headerParent(headerList,consignee) $dbCol] != -1} {
         set dbTbl Addresses
+        set addressID SysAddresses_ID
     } elseif {[lsearch $headerParent(headerList,shippingorder) $dbCol] != -1} {
-        set dbTbl ShippingOrders   
+        set dbTbl ShippingOrders
+        set addressID AddressID
     }
     
+    # Need to encapsulate in single quotes; Note: if inserting a Version we overwrite this var.
+    set dbTxt '$dbTxt'
+    
+    #set addressesID SysAddresses_ID
+    # Versions
     if {[string match -nocase *vers* $dbCol]} {
-        # This needs special handling
-        # Addresses contain a Versions column for the VersionID from the Version table.
+        # table:Addresses contain a Versions column for the VersionID from table:Version.
         # We must first look at the version table to see if there is an existing version; if there isn't we must add it.
-        # Then update all records with the correct version ID
-        set dbTbl Versions
+        #${log}::debug $job(db,Name) eval "SELECT VersionName from Versions WHERE VersionName='$dbTxt'"
+        set versionName [$job(db,Name) eval "SELECT VersionName from Versions WHERE VersionName='$dbTxt'"]
+
+        if {$versionName eq ""} {
+                    # Value doesn't exist in db, lets add it.
+                    $job(db,Name) eval "INSERT INTO Versions (VersionName) VALUES ('$dbTxt')"
+                    ${log}::debug Value doesn't exist in db, adding $dbTxt
+                    
+                    set dbTxt [$job(db,Name) eval "SELECT max(Version_ID) FROM Versions"]
+                    ${log}::debug Versions ID: $dbTxt
+            } else {
+                # We matched a version name, so we aren't adding a new one. get the id of the new version
+                set versID [$job(db,Name) eval "SELECT Version_ID FROM Versions WHERE VersionName='$dbTxt'"]
+                ${log}::debug $dbTxt exists in db - ID: $versID
+                
+                set dbTxt $versID
+            }
+
+        set dbTbl Addresses
+        #set addressesID AddressID
     }
+  
     
-    ${log}::debug sql: update $dbTbl SET $dbCol=$dbTxt WHERE AddressesID IN ([join $idList ,])
+    ${log}::debug sql: update $dbTbl SET $dbCol=$dbTxt WHERE $addressID IN ([join $idList ,])
+    $job(db,Name) eval "UPDATE $dbTbl SET $dbCol=$dbTxt WHERE $addressID IN ([join $idList ,])"
 
     job::db::getTotalCopies
     

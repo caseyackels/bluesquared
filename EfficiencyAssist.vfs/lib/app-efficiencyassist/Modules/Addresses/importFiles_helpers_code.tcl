@@ -401,7 +401,12 @@ proc eAssistHelper::insValuesToTableCells {type tbl txtVar cells} {
 			lappend idList '[ea::db::getRecord $row]'
 			
 		}
+		
 		${log}::debug $tbl cellconfigure $cells -text $txtVar
+		foreach cell $cells {
+			$tbl cellconfigure $cell -text $txtVar
+		}
+		
 		set colName [$tbl columncget [lindex [join [split $cells ,]] 1] -name]
 		job::db::write $job(db,Name) {} $txtVar $tbl $cells $rowList $idList $colName
 		
