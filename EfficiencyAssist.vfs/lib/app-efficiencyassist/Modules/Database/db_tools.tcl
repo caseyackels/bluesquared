@@ -38,6 +38,7 @@ proc ea::db::populateTablelist {args} {
 	#	-record new|existing
 	#   ?-db_id? = id of address that we want to display in the tablelist.
 	#   ?-widRow = Row that we want to update
+	#   ea::db::populateTablelist -record new|existing -db_id <id> -widRow <rowID>
 	#   
 	#***
 	global log job files title
@@ -104,7 +105,7 @@ proc ea::db::populateTablelist {args} {
                             WHERE ShippingOrders.JobInformationID in ('$job(Number)')
 							AND ShippingOrders.AddressID = '$db_id'
                             AND Addresses.SysActive = 1" {
-                                #$wid insert end [subst $hdr_data]
+                                # Removal of the old row happens if we're editing (this occurs in the if-else statement above)
                                 $files(tab3f2).tbl insert $widPosition [subst $hdr_data]
                             }
 							
@@ -213,6 +214,7 @@ proc ea::db::updateSingleAddressToDB {} {
 	#***
 	global log job shipOrder headerParent title
 
+	## Versions require special handling since, it is in another db table. We display the name to the user, but use the ID internally.
 	## Update/Insert versions first
 	# Does the version exist in the db?
 	set versionExists [$job(db,Name) eval "SELECT VersionName FROM Versions WHERE VersionName = '$shipOrder(Versions)'"]
@@ -220,12 +222,14 @@ proc ea::db::updateSingleAddressToDB {} {
 	if {$versionExists == ""} {
 		# We have a new entry, insert and retrieve the id
 		$job(db,Name) eval "INSERT INTO Versions (VersionName) VALUES ('$shipOrder(Versions)')"
+		set shipOrder(Versions) [$job(db,Name) eval "SELECT max(Version_ID) from Versions"]
+	} else {
+		set shipOrder(Versions) [$job(db,Name) eval "SELECT Version_ID FROM Versions WHERE VersionName = '$shipOrder(Versions)'"]
 	}
 	
-	set versID [$job(db,Name) eval "SELECT max(Version_ID) from Versions"]
 	
 	# Set value of version to the id
-	set shipOrder(Versions) $versID
+	#set shipOrder(Versions) $versID
 	
 	
 	# loop through the values that are for the Addresses table, then issue an update statement
@@ -468,7 +472,7 @@ proc ea::db::setShipOrderValues {dist_type} {
 	if {$dist_type eq ""} {return}
 	
 	# Check if there are carriers setup on the customer level; use those if we do.
-	# If nothing is returned, we do not have specific carriers setup on the customer level...
+	# If nothing is returned, check the ShipmentType (Freight, Small Package)
 	# 		--WHERE ShipmentTypes.ShipmentType = 'Freight'
 	set shipViaValues [db eval "SELECT ShipVia.ShipViaName FROM DistributionTypes
 		INNER JOIN DistributionTypeCarriers on DistributionTypeCarriers.DistributionTypeID = DistributionTypes.DistributionType_ID
@@ -478,6 +482,23 @@ proc ea::db::setShipOrderValues {dist_type} {
 		WHERE DistTypeName = '$dist_type'
 		AND CustomerShipVia.CustID = '$job(CustID)'"]
 	
+	${log}::debug shipViaValues: Carriers match dist type on the Customer level? $shipViaValues
+	# Compare shipment types from the shipvia's on the customer, to the shipment types set on the distribution type
+	if {$shipViaValues eq ""} {
+		set distShipType [join [db eval "SELECT ShipmentType from ShipmentTypes
+										INNER JOIN DistributionTypes on DistributionTypes.DistType_ShipTypeID = ShipmentTypes.ShipmentType_ID
+									WHERE DistributionTypes.DistTypeName = '$dist_type'"]]
+		
+		
+		set shipViaValues [db eval "SELECT ShipVia.ShipViaName FROM ShipVia
+										INNER JOIN CustomerShipVia on CustomerShipVia.ShipViaID = ShipVia.ShipVia_ID
+									WHERE CustomerShipVia.CustID = '$job(CustID)'
+									AND ShipVia.ShipmentType = '$distShipType'"]
+		
+		${log}::debug shipViaValues: Carriers match ship type on the Customer level? $shipViaValues
+	}
+	
+	# Nothing was found for the customer, list what is setup on the distribution type if available
 	if {$shipViaValues eq ""} {
 		unset shipViaValues
 		# Carrier hasn't been setup at the customer level, lets look at what was setup on the distribution type level
@@ -497,8 +518,8 @@ proc ea::db::setShipOrderValues {dist_type} {
 			#set shipViaValues ""
 			db eval "SELECT ShipViaName from ShipVia WHERE ShipmentType = (
 						SELECT ShipmentType from ShipmentTypes
-						INNER JOIN DistributionTypes on ShipmentType_ID = DistType_ShipTypeID
-					WHERE DistributionTypes.DistTypeName = '$dist_type')" {
+							INNER JOIN DistributionTypes on ShipmentType_ID = DistType_ShipTypeID
+						WHERE DistributionTypes.DistTypeName = '$dist_type')" {
 							lappend shipViaValues $ShipViaName
 			}
 		}
