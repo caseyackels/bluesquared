@@ -167,8 +167,8 @@ proc job::db::createDB {args} {
         );
         
 
-        CREATE TABLE IF NOT EXISTS Notes (
-            Notes_ID   TEXT    PRIMARY KEY,
+        CREATE TABLE IF NOT EXISTS Notes (       
+            Notes_ID   INTEGER PRIMARY KEY AUTOINCREMENT,
             HistoryID  INTEGER NOT NULL ON CONFLICT ROLLBACK
                                REFERENCES History (History_ID) ON UPDATE CASCADE,
             NoteTypeID INTEGER REFERENCES NoteTypes (NoteType_ID) ON UPDATE CASCADE
@@ -179,11 +179,15 @@ proc job::db::createDB {args} {
         );
 
         CREATE TABLE IF NOT EXISTS History (
-            History_ID TEXT PRIMARY KEY,
+            History_ID TEXT PRIMARY KEY
+                            NOT NULL ON CONFLICT ROLLBACK
+                            UNIQUE ON CONFLICT ROLLBACK,
             HistUser   TEXT NOT NULL ON CONFLICT ROLLBACK,
             HistDate   DATE NOT NULL ON CONFLICT ROLLBACK,
             HistTime   TIME NOT NULL ON CONFLICT ROLLBACK,
             HistSysLog TEXT
+            
+
         );
        
         CREATE TABLE IF NOT EXISTS SysInfo (
@@ -191,11 +195,12 @@ proc job::db::createDB {args} {
             SysSchema  INTEGER UNIQUE
                                NOT NULL,
             HistoryID  TEXT    REFERENCES History (History_ID) ON UPDATE CASCADE
+                                                                ON DELETE CASCADE
         );
         
         CREATE TABLE IF NOT EXISTS TitleInformation (
             TitleInformation_ID INTEGER PRIMARY KEY AUTOINCREMENT,
-            NotesID             TEXT    REFERENCES Notes (Notes_ID) ON UPDATE CASCADE,
+            NotesID             INTEGER REFERENCES Notes (Notes_ID) ON UPDATE CASCADE,
             HistoryID           TEXT    REFERENCES History (History_ID) ON UPDATE CASCADE
                                         NOT NULL ON CONFLICT ROLLBACK,
             CustCode            TEXT    NOT NULL ON CONFLICT ROLLBACK,
@@ -749,7 +754,7 @@ proc job::db::tableExists {dbTbl} {
     
 } ;# job::db::tableExists
 
-proc job::db::insertNotes {job_wid log_wid} {
+proc job::db::insertNotes {job_wid log_wid args} {
     #****f* insertNotes/job::db
     # CREATION DATE
     #   03/11/2015 (Wednesday Mar 11)
@@ -765,7 +770,7 @@ proc job::db::insertNotes {job_wid log_wid} {
     #   job::db::insertNotes args 
     #
     # FUNCTION
-    #	Inserts or updates the job notes
+    #	Inserts the job notes
     #   
     #   
     # CHILDREN
@@ -783,16 +788,34 @@ proc job::db::insertNotes {job_wid log_wid} {
     #***
     global log job user
 	
-    set currentGUID [ea::tools::getGUID]
+    set historyGUID [ea::tools::getGUID]
+    #set notesGUID [ea::tools::getGUID]
     
     # Clean up notes first
-    set jobNotes [string map {' ''} [$job_wid get 0.0 end]]
+    set jobNotes [join [string trim [string map {' ''} [$job_wid get 0.0 end]]]]
+    #set jobNotes [join [string trim [string map {' ''} [.notes.f1.txt get 0.0 end]]]]
+    ${log}::debug jobNotes: $job_wid $jobNotes
+    
+    
     set logNotes [string map {' ''} [$log_wid get 0.0 end]]
     
+    # Get Note Type (Levels): Title, Job, Version, DistributionType, ShippingOrder(?)
+    switch -- $args {
+        -title      {set noteTypeID Title}
+        -job        {set noteTypeID Job}
+        -version    {set noteTypeID Version}
+        -distributiontype   {set noteTypeID DistributionType}
+        -shippingorder  {set noteTypeID ShippingOrder}
+    }
+    
+    set noteType [$job(db,Name) eval "SELECT NoteType_ID FROM NoteTypes WHERE NoteType='$noteTypeID' AND Active=1"]
+    #${log}::debug noteType: $noteType
+    #${log}::debug noteType-sql: SELECT NoteType_ID FROM NoteTypes WHERE NoteType='$noteTypeID' AND Active=1
+    
 	# Insert into History table, then into Notes table
-    $job(db,Name) eval "INSERT INTO History (Hist_ID, Hist_User, Hist_Date, Hist_Time, Hist_Syslog) VALUES ('$currentGUID', '$user(id)', '[ea::date::getTodaysDate -db]', '[ea::date::currentTime]', '$logNotes')"
+    $job(db,Name) eval "INSERT INTO History (History_ID, HistUser, HistDate, HistTime, HistSyslog) VALUES ('$historyGUID', '$user(id)', '[ea::date::getTodaysDate -db]', '[ea::date::currentTime]', '$logNotes')"
 	
-	$job(db,Name) eval "INSERT INTO Notes (HistID, Notes_Notes) VALUES ('$currentGUID', '$jobNotes')"
+	$job(db,Name) eval "INSERT INTO Notes (HistoryID, NoteTypeID, NotesText) VALUES ('$historyGUID', $noteType,'$jobNotes')"
 
 } ;# job::db::insertNotes
 
@@ -832,17 +855,14 @@ proc job::db::readNotes {cbox_wid job_wid log_wid} {
     
     set id [$cbox_wid get]
     if {[info exists hist]} {unset hist}
-    
-    # Re-enable the widget
-    #$job_wid configure -state normal
 
     # Read the Job notes ...
-    set jobNotes [join [$job(db,Name) eval "SELECT Notes_Notes FROM Notes WHERE Notes_ID = $id"]]
+    set jobNotes [join [$job(db,Name) eval "SELECT NotesText FROM Notes WHERE Notes_ID = $id"]]
     
     # Read the log notes ...
-    set historyItems [join [$job(db,Name) eval "SELECT Hist_User, Hist_Date, Hist_Time, Hist_SysLog FROM History
-                                                INNER JOIN Notes ON Notes.HistID = History.Hist_ID
-                                            WHERE Notes.Notes_ID = $id"]]
+    set historyItems [join [$job(db,Name) eval "SELECT HistUser, HistDate, HistTime, HistSysLog FROM History
+                                                    INNER JOIN Notes ON Notes.HistoryID = History.History_ID
+                                                WHERE Notes.Notes_ID = $id"]]
     set hist(log,User) [lindex $historyItems 0]
     set hist(log,Date) [ea::date::formatDate -db -std [lindex $historyItems 1]]
     set hist(log,Time) [lindex $historyItems 2]
@@ -852,7 +872,6 @@ proc job::db::readNotes {cbox_wid job_wid log_wid} {
     # Clear out the widgets
     $job_wid delete 0.0 end
     $job_wid insert end $jobNotes
-    #$job_wid configure -state disabled
     
     $log_wid delete 0.0 end
     $log_wid insert end $hist(log,Log)

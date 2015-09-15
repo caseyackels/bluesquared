@@ -269,10 +269,13 @@ proc eAssistHelper::editNotes {} {
     set f0 [ttk::frame $w.f0]
     pack $f0 -fill both -padx 5p
 	
+	set revList [list [$job(db,Name) eval {SELECT Notes_ID FROM NOTES}]]
+	
 	ttk::label $f0.txt1 -text [mc "View Revision"]
 	ttk::combobox $f0.cbox -width 5 \
 							-state readonly \
-							-postcommand "$f0.cbox configure -values [list [$job(db,Name) eval {SELECT Notes_ID FROM NOTES}]]"
+							-postcommand "$f0.cbox configure -values $revList"
+
 	
 	#ttk::button $f0.btn -text [mc "Refresh"] -command [list job::db::readNotes $f0.cbox $w.f1.txt $w.f2.bottom.txt]
 	
@@ -341,7 +344,7 @@ proc eAssistHelper::editNotes {} {
 	set btn [ttk::frame $w.btns -padding 10]
 	pack $btn -padx 5p -pady 5p -anchor se
 	
-	ttk::button $btn.ok -text [mc "OK"] -command "[list job::db::insertNotes $f1.txt $f2_b.txt]; destroy $w"
+	ttk::button $btn.ok -text [mc "OK"] -command "[list job::db::insertNotes $f1.txt $f2_b.txt -job]; destroy $w"
 	ttk::button $btn.cancel -text [mc "Cancel"] -command [list destroy $w]
 	
 	grid $btn.ok -column 0 -row 0 -padx 5p -sticky e
@@ -352,6 +355,14 @@ proc eAssistHelper::editNotes {} {
 	##
 	
 	bind $f0.cbox <<ComboboxSelected>> [list job::db::readNotes $f0.cbox $w.f1.txt $w.f2.bottom.txt]
+	
+	## *****
+	## Show the latest revision automatically
+		
+	if {$revList ne ""} {
+		$f0.cbox set [lindex [join $revList] end]
+		job::db::readNotes $f0.cbox $w.f1.txt $w.f2.bottom.txt
+	}
 
     
 } ;# eAssistHelper::editNotes
