@@ -33,8 +33,16 @@ Roadmap - Version 4.1.0
 * Add Destination
 ** [DONE] Type-Ahead when typing in a Company name; when we hit a match populate all other address fields.
 ** [DONE] When editing/adding a destination, populate fields (create new filtered dropdown selection) based on the distribution type
-*** [IN PROGRESS] Ship Via will either populate (if only one record is found, or the list will be filtered depending on what ship via is assigned to that dist type.
-# Distribution Type, Ship Type (Freight Small Package, -ALL-), look at which freight type is assigned to distribution type.
-# Look at Ship Via's assigned to Title
-# Results will be A) what's assigned to the title and matches B) If no match found, display all ship via's and/or ship type for the selected distribution type This will also take into account the ship via values we place on the individual customer.
-
+*** [DONE] Ship Via will either populate (if only one record is found, or the list will be filtered depending on what ship via is assigned to that dist type.
+# [DONE] Distribution Type, Ship Type (Freight Small Package, -ALL-), look at which freight type is assigned to distribution type.
+# [DONE] Look at Ship Via's assigned to Title
+# [DONE] Results will be A) what's assigned to the title and matches B) If no match found, display all ship via's and/or ship type for the selected distribution type This will also take into account the ship via values we place on the individual customer.
+* Make the Menu Item "DELETE" work.
+* Finish security setup
+* Better User Preference window (Need a better framework for adding options, should be similar to Setup)
+* Save file paths for: Export Files
+* EXPORTS
+** Planner
+** Process Shipper
+** Import File
+* REPORTS
