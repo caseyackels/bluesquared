@@ -106,7 +106,6 @@ proc IFMenus::tblPopup {tbl mode mName} {
         # files(tab3f2).tbl / Main Table
         if {$mode eq "browse"} {
             $mName add command -label [mc "Quick Insert..."] -command {eAssistHelper::insertItems $files(tab3f2).tbl}
-            #$mName add command -label [mc "Edit Destination..."] -command {eAssistHelper::addDestination $files(tab3f2).tbl [$files(tab3f2).tbl curselection] [lindex [$files(tab3f2).tbl getcells [$files(tab3f2).tbl curcellselection]] 0]}
             $mName add command -label [mc "Edit Destination..."] -command {eAssistHelper::shippingOrder $files(tab3f2).tbl -edit}
 			$mName add command -label [mc "Combine Orders..."] -command {eAssistHelper::shippingOrder $files(tab3f2).tbl -combine}
 			$mName add separator

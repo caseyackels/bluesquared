@@ -169,7 +169,7 @@ proc eAssistSetup::company_GUI {{widType embed}} {
     if {$widType eq "standalone"} {
         # Buttons
         #grid [ttk::button $fb0.ok -text [mc "OK"] -command {}] -column 0 -row 0 -sticky w
-        grid [ttk::button $fb0.cncl -text [mc "Close"] -command {} ] -column 1 -row 0 -sticky e
+        grid [ttk::button $fb0.cncl -text [mc "Close"] -command {destroy $win} ] -column 1 -row 0 -sticky e
     }
     
     # Populate tablelist widget
