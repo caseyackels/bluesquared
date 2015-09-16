@@ -106,12 +106,18 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Modules vUpdate]
 	lappend ::auto_path [file join [file dirname [info script]] Modules Email]
 	
+	## Init namespaces
+	namespace eval ea::sec {} ;# do not use
+	namespace eval ea::code::sec {}
+	
+	# Setup, Admin
+	namespace eval ea::code::admin {}
+	namespace eval ea::db::admin {}
+	namespace eval ea::gui::admin {}
 
-	#
+
 	## Start the Package Require
-	#
-
-	## System Packages
+	# System Packages
 	package require msgcat
 	# Import msgcat namespace so we only have to use [mc]
 	namespace import msgcat::mc
@@ -240,6 +246,17 @@ proc 'eAssist_initVariables {} {
     #***
     global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter auth options emailSetup emailEvent job user setupJobDB widSec
 
+	# Init namespaces
+#    namespace eval ea {}
+#	namespace eval ea::code {}
+#	namespace eval ea::gui {}
+#	namespace eval ea::db {}
+	
+	# Setup, Admin
+	#namespace eval ea::code::admin {}
+	#namespace eval ea::db::admin {}
+	#namespace eval ea::gui::admin {}
+	
 	#-------- CORE SETTINGS
 	#if {$logSettings(displayConsole) == 1} {console show}
 	if {[info exists logSettings(displayConsole)]} {

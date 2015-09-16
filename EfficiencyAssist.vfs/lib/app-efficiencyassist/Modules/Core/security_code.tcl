@@ -16,8 +16,6 @@
 ## - Overview
 # Security related Procs
 
-namespace eval ea::sec {}
-
 
 proc ea::sec::initUser {{newUser 0}} {
     #****f* initUser/ea::sec
@@ -236,7 +234,7 @@ proc ea::sec::setPasswd {pass {salt 0}} {
 } ;# ea::sec::setPasswd
 
 
-proc ea::db::writeUser {method userName userLogin userPasswd userSalt {userEmail ""} {userStatus 1}} {
+proc ea::db::writeUser {method userName userLogin userPasswd userSalt {userEmail ""} {userStatus 1} {userID ""}} {
     #****f* writeUser/ea::db
     # CREATION DATE
     #   09/06/2015 (Sunday Sep 06)
@@ -249,7 +247,7 @@ proc ea::db::writeUser {method userName userLogin userPasswd userSalt {userEmail
     #   
     #
     # SYNOPSIS
-    #   ea::db::writeUser -insert|-update userName userLogin userPassword userSalt ?userEmail? ?userStatus? 
+    #   ea::db::writeUser -insert|-update userName userLogin userPassword userSalt ?userEmail? ?userStatus? ?userID?
     #
     # FUNCTION
     #	Writes the user info to the database, and returns the userID
@@ -276,16 +274,20 @@ proc ea::db::writeUser {method userName userLogin userPasswd userSalt {userEmail
 					VALUES ('$userName', '$userLogin', '$userPasswd', '$userSalt', '$userEmail', $userStatus)"
 	
 	} elseif {$method eq "-update"} {
-		db eval "UPDATE Users SET UserName='$userName', UserLogin='$userLogin', UserEmail='$userEmail', User_Status=$userStatus"
+		db eval "UPDATE Users SET UserName='$userName', UserLogin='$userLogin', UserEmail='$userEmail', User_Status=$userStatus
+					WHERE User_ID = $userID"
 		
 		# If the password field is populated, lets up date the db
 		if {$userPasswd ne ""} {
-			ea::db::writePasswd $method [ea::sec::setPasswd $userPasswd] $userLogin
+			set passwd [ea::db::getPasswd $userLogin]
+            set pass [lindex $passwd 0]
+            set salt [lindex $passwd 1]
+			
+			ea::db::writePasswd $method $pass $salt $userLogin
 		}
-		
-		
 	}	
 
+	return $userID
 } ;# ea::db::writeUser
 
 proc ea::db::getUser {method {id 0}} {
@@ -331,6 +333,8 @@ proc ea::db::getUser {method {id 0}} {
 	}
 
 } ;# ea::db::getUser
+
+
 proc ea::db::writePasswd {method passwd salt userLogin} {
     #****f* writePasswd/ea::db
     # CREATION DATE

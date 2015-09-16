@@ -11,10 +11,14 @@
 # $LastChangedDate: 2011-10-17 16:11:20 -0700 (Mon, 17 Oct 2011) $
 #
 ########################################################################################
-
 ##
 ## - Overview
 # Admin section
+# Admin namespaces
+# ea::code::admin
+# ea::gui::admin
+# ea::db::admin
+
 
 proc eAssistSetup::admin_GUI {args} {
     #****f* admin_GUI/eAssistSetup
@@ -48,7 +52,7 @@ proc eAssistSetup::admin_GUI {args} {
     #   
     #   
     #***
-    global log G_setupFrame program admin widSec widTmp
+    global log G_setupFrame program admin widSec widTmp sec
 
     eAssist_Global::resetSetupFrames ;# Reset all frames so we start clean
     
@@ -112,7 +116,7 @@ proc eAssistSetup::admin_GUI {args} {
     #
     $nb add [ttk::frame $nb.groups] -text [mc "Groups"]
     $nb add [ttk::frame $nb.users] -text [mc "Users"]
-    $nb add [ttk::frame $nbk.permissions] -text [mc "Permissions"]
+    $nb add [ttk::frame $nb.permissions] -text [mc "Permissions"]
     
     $nb select $nb.groups
     
@@ -137,6 +141,18 @@ proc eAssistSetup::admin_GUI {args} {
     # Tab 2, Subtab 2, Frame 2
     set widTmp(sec,users_f2) [ttk::frame $nb.users.f2 -padding 10]
     pack $widTmp(sec,users_f2) -expand yes -fill both
+    
+    ## --- Permissions
+    # Tab 2, Subtab 3, Frame 1
+    set widTmp(sec,perm_f1) [ttk::frame $nb.permissions.f1 -padding 10]
+    pack $widTmp(sec,perm_f1) -fill x
+    
+    ## --- Permissions
+    # Tab 2, Subtab 3, Frame 2
+    set widTmp(sec,perm_f2) [ttk::frame $nb.permissions.f2 -padding 10]
+    pack $widTmp(sec,perm_f2) -expand yes -fill both
+    
+    # **********
     
     # --- Groups
     # Tab 2, Subtab 1, Frame 1
@@ -198,7 +214,6 @@ proc eAssistSetup::admin_GUI {args} {
     }
     
     # Users, Frame 1
-    console show
     grid [ttk::label $widTmp(sec,users_f1).txt0 -text [mc "User Name"]] -column 0 -row 0 -padx 2p -pady 2p -sticky e
     grid [ttk::entry $widTmp(sec,users_f1).entry0 -textvariable widSec(users,UserName) -width 35] -column 1 -row 0 -padx 2p -pady 2p ;#-sticky ew
     grid [ttk::button $widTmp(sec,users_f1).btn0 -text [mc "Add"] -command {eAssistSetup::writeSecUsers -insert $widTmp(sec,users_f2).listbox [$widTmp(sec,users_f2).listbox curselection] \
@@ -260,15 +275,23 @@ proc eAssistSetup::admin_GUI {args} {
     ## Binding (double-click puts the data into the fields)
     bind [$widTmp(sec,users_f2).listbox bodytag] <Double-1> {
         # Reconfigure button
-        $widTmp(sec,users_f1).btn0 configure -command {eAssistSetup::writeSecUsers -update $widTmp(sec,users_f2).listbox [$widTmp(sec,users_f2).listbox curselection] \
+        $widTmp(sec,users_f1).btn0 configure -text [mc "Update"] -command {eAssistSetup::writeSecUsers -update $widTmp(sec,users_f2).listbox [$widTmp(sec,users_f2).listbox curselection] \
                                                                                 $widSec(users,UserName) $widSec(users,UserLogin) $widSec(users,UserPwd) $widSec(users,UserEmail) \
-                                                                                $widSec(users,User_Status)}
+                                                                                $widSec(users,User_Status) $widSec(users,User_ID)
+                                                        $widTmp(sec,users_f1).btn0 configure -text [mc "Add"]
+                                                        ea::code::admin::initWidSecArray -clear}
+                                                
+
         set widRow [$widTmp(sec,users_f2).listbox curselection]
-        
-        for {set x 0} {$x < [$widTmp(sec,users_f2).listbox columncount]} {incr x} {
-            #${log}::debug
-            set widSec(users,[$widTmp(sec,users_f2).listbox columncget $x -name]) [$widTmp(sec,users_f2).listbox cellcget $widRow,$x -text]
-        }
+        ea::code::admin::initWidSecArray -populate $widRow
     }
+    
+    ## --- Permissions
+    # Tab 2, Subtab 3, Frame 1
+    grid [ttk::label $widTmp(sec,perm_f1).txt0 -text [mc "Group"]] -column 0 -row 0 -pady 2p -padx 2p -sticky e
+    grid [ttk::combobox $widTmp(sec,perm_f1).cbox0 -values $sec(groupNames)] -column 1 -row 0 -pady 2p -padx 2p -sticky ew
+    
+    grid [ttk::label $widTmp(sec,perm_f1).txt1 -text [mc "Module"]] -column 0 -row 1 -pady 2p -padx 2p -sticky e
+    grid [ttk::combobox $widTmp(sec,perm_f1).cbox1 -values $program(moduleNames)] -column 1 -row 1 -pady 2p -padx 2p -sticky ew
 
 } ;# eAssistSetup::admin_GUI

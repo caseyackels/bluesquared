@@ -36,8 +36,14 @@ proc ea::db::init_vars {} {
     #   
     #   
     #***
-    global log             
+    global log program sec
+    
+    ${log}::debug Initilizing list of modules
+    set program(moduleNames) [eAssist_db::getDBModules]
 
+    ${log}::debug Initilizing list of security groups
+    set sec(groupNames) [ea::db::getGroupNames]
+    
     ${log}::debug Initializing Array: masterAddr()
     ea::db::init_masterAddr
     

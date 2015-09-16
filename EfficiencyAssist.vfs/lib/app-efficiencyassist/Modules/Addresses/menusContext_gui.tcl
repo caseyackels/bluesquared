@@ -109,15 +109,15 @@ proc IFMenus::tblPopup {tbl mode mName} {
             $mName add command -label [mc "Edit Destination..."] -command {eAssistHelper::shippingOrder $files(tab3f2).tbl -edit}
 			$mName add command -label [mc "Combine Orders..."] -command {eAssistHelper::shippingOrder $files(tab3f2).tbl -combine}
 			$mName add separator
-			$mName add command -label [mc "Copy"] -command {IFMenus::copyCell $files(tab3f2).tbl Menu}
-            $mName add command -label [mc "Paste"] -command {eAssistHelper::insValuesToTableCells -hotkey $files(tab3f2).tbl [clipboard get] [$files(tab3f2).tbl curcellselection]}
-            $mName add command -label [mc "Clear"] -command {IFMenus::clearItems $files(tab3f2).tbl}
+			#$mName add command -label [mc "Copy"] -command {IFMenus::copyCell $files(tab3f2).tbl Menu}
+            #$mName add command -label [mc "Paste"] -command {eAssistHelper::insValuesToTableCells -hotkey $files(tab3f2).tbl [clipboard get] [$files(tab3f2).tbl curcellselection]}
+            #$mName add command -label [mc "Clear"] -command {IFMenus::clearItems $files(tab3f2).tbl}
             $mName add separator
-            $mName add command -label [mc "Copy Row"] -command {IFMenus::copyRow $files(tab3f2).tbl}
-            $mName add command -label [mc "Paste Row"] -command {IFMenus::pasteRow $files(tab3f2).tbl}
+            $mName add command -label [mc "Clone"] -command {IFMenus::copyRow $files(tab3f2).tbl}
+            #$mName add command -label [mc "Paste Row"] -command {IFMenus::pasteRow $files(tab3f2).tbl}
             #$mName add command -label [mc "Clear Row Contents"] -command {IFMenus::clearRowContents $files(tab3f2).tbl}
             #$mName add command -label [mc "Insert Row"] -command {catch [$files(tab3f2).tbl insert [$files(tab3f2).tbl curselection] ""] err}
-            $mName add command -label [mc "Delete Row"] -command {IFMenus::deleteRow $files(tab3f2).tbl OrderNumber Addresses}
+            $mName add command -label [mc "Delete"] -command {IFMenus::deleteRow $files(tab3f2).tbl OrderNumber Addresses}
         } else {
             # Browse mode
             #$mName add command -label [mc "Copy Row"] -command {}

@@ -1,5 +1,38 @@
 # Creator: Casey Ackels
 # File Initial Date: 02 22,2015
+# Admin namespaces
+# ea::code::admin
+# ea::gui::admin
+# ea::db::admin
+
+
+proc ea::code::admin::initWidSecArray {mode {widRow ""}} {
+    #****if* initWidSecArray/ea::code::admin
+    # CREATION DATE
+    #   09/16/2015 (Wednesday Sep 16)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   widRow is only used when using -populate
+    #   
+    #***
+    global log widSec widTmp
+    
+    if {$mode eq "-populate"} {
+        for {set x 0} {$x < [$widTmp(sec,users_f2).listbox columncount]} {incr x} {
+                set widSec(users,[$widTmp(sec,users_f2).listbox columncget $x -name]) [$widTmp(sec,users_f2).listbox cellcget $widRow,$x -text]
+        }
+    } elseif {$mode eq "-clear"} {
+        for {set x 0} {$x < [$widTmp(sec,users_f2).listbox columncount]} {incr x} {
+                set widSec(users,[$widTmp(sec,users_f2).listbox columncget $x -name]) ""
+        }
+    }
+} ;# ea::code::admin::initWidSecArray
 
 proc eAssistSetup::readSecGroup {wid} {
     #****f* readSecGroup/eAssistSetup
@@ -226,7 +259,7 @@ proc eAssistSetup::populateSecUsersEdit {widTbl} {
 
 } ;# eAssistSetup::populateSecUsersEdit
 
-proc eAssistSetup::writeSecUsers {method widTbl widRow userName userLogin userPasswd {userEmail ""} {userStatus 1}} {
+proc eAssistSetup::writeSecUsers {method widTbl widRow userName userLogin userPasswd {userEmail ""} {userStatus 1} {userID ""}} {
     #****f* writeSecUsers/eAssistSetup
     # CREATION DATE
     #   09/06/2015 (Sunday Sep 06)
@@ -239,7 +272,7 @@ proc eAssistSetup::writeSecUsers {method widTbl widRow userName userLogin userPa
     #   
     #
     # SYNOPSIS
-    #   eAssistSetup::writeSecUsers -insert|-update <widTbl> <widRow> <userName> <userLogin> <userPasswd> ?userEmail? ?userStatus?
+    #   eAssistSetup::writeSecUsers -insert|-update <widTbl> <widRow> <userName> <userLogin> <userPasswd> ?userEmail? ?userStatus? ?userID?
     #
     # FUNCTION
     #	Command function, which controls writing/updating user data including passwords
@@ -263,6 +296,7 @@ proc eAssistSetup::writeSecUsers {method widTbl widRow userName userLogin userPa
     
     if {$method eq "-insert"} {
         # Adding a new record, password doesn't exist yet. Create Salt and encrypt.
+        ${log}::debug [info level 0] -insert
         set passSalt [ea::sec::setPasswd $userPasswd]
             set pass [lindex $passSalt 0]
             set salt [lindex $passSalt 1]
@@ -271,33 +305,36 @@ proc eAssistSetup::writeSecUsers {method widTbl widRow userName userLogin userPa
         
     } elseif {$method eq "-update"} {
         # Record exists, now check to see if the password field was populated, if it was retrieve pass and salt from DB
-        if {$userPassword ne ""} {
-            # Retrieve old pass and salt
-            set oldPassSalt [ea::db::getPasswd $userLogin]
-                set pass [lindex $oldPassSalt 0]
-                set salt [lindex $oldPassSalt 1]
-                
+        ${log}::debug [info level 0] -update
+        
+        ${log}::debug [info level 0] -update - Field is blank
+        # Retrieve old pass and salt - these get overwritten if a new pass is detected
+        set oldPassSalt [ea::db::getPasswd $userLogin]
+            set pass [lindex $oldPassSalt 0]
+            set salt [lindex $oldPassSalt 1]
+        
+        if {$userPasswd ne ""} {
             # Generate new pass and salt based on userPasswd
+            ${log}::debug [info level 0] -update - Field contains data
             set newPassSalt [ea::sec::setPasswd $userPasswd $salt]
             
-            # Compare the two, if they don't match, 
+            # Compare the two, if they don't match, update passwd in db.
             if {![string match $oldPassSalt $newPassSalt]} {
-                
+                ${log}::debug [info level 0] -update - Field contains a new password
+                set pass [lindex $newPassSalt 0]
+                set salt [lindex $newPassSalt 1]
             }
-            
         }
-        
             
         $widTbl delete $widRow
     }
     
     
     # Write user data to database
-    # usrID = users_id from the inserted/updated record
-    set usrID [ea::db::writeUser $method $userName $userLogin $pass $salt $userEmail $userStatus]
+    ea::db::writeUser $method $userName $userLogin $pass $salt $userEmail $userStatus $userID
     
     # Populate new/updated entry in tablelist
-    $widTbl insert $widRow "{} [ea::db::getUser $method $usrID]"
+    $widTbl insert $widRow "{} [ea::db::getUser $method $userID]"
 
     
 } ;# eAssistSetup::writeSecUsers

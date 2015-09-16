@@ -1019,3 +1019,32 @@ proc ea::db::initUserDefinedValues {args} {
 
     
 } ;# ea::db::initUserDefinedValues
+
+proc ea::db::getGroupNames {{mode -all}} {
+	#****if* getGroups/ea::db
+	# CREATION DATE
+	#   09/16/2015 (Wednesday Sep 16)
+	#
+	# AUTHOR
+	#	Casey Ackels
+	#
+	# COPYRIGHT
+	#	(c) 2015 Casey Ackels
+	#   
+	# NOTES
+	#   retrieves the group names which can be all, active or inactive. Defaults to all.
+	#   ea::db::getGroups -all|-active|-inactive
+	#   
+	#***
+	global log
+	
+	switch -- $mode {
+		-all		{set sql "Status = 1 OR Status = 0"}
+		-active		{set sql "Status = 1"}
+		-inactive	{set sql "Status = 0"}
+		default		{${log}::notice [info level 0] switch doesn't know that command: $mode}
+	}
+	
+	db eval "SELECT SecGroupName FROM SecGroupNames WHERE $sql"
+
+} ;# ea::db::getGroupNames
