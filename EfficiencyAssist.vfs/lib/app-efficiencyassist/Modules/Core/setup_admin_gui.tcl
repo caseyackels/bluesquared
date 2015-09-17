@@ -288,10 +288,49 @@ proc eAssistSetup::admin_GUI {args} {
     
     ## --- Permissions
     # Tab 2, Subtab 3, Frame 1
-    grid [ttk::label $widTmp(sec,perm_f1).txt0 -text [mc "Group"]] -column 0 -row 0 -pady 2p -padx 2p -sticky e
-    grid [ttk::combobox $widTmp(sec,perm_f1).cbox0 -values $sec(groupNames)] -column 1 -row 0 -pady 2p -padx 2p -sticky ew
+    # $sec(UserLogins) $program(moduleNames)
+    grid [ttk::label $widTmp(sec,perm_f1).txt0a -text [mc "Group"]] -column 0 -row 0 -pady 2p -padx 2p -sticky e
+    grid [ttk::combobox $widTmp(sec,perm_f1).cbox0a -values $sec(groupNames) \
+                                                    -state readonly] -column 1 -row 0 -pady 2p -padx 2p -sticky w
     
-    grid [ttk::label $widTmp(sec,perm_f1).txt1 -text [mc "Module"]] -column 0 -row 1 -pady 2p -padx 2p -sticky e
-    grid [ttk::combobox $widTmp(sec,perm_f1).cbox1 -values $program(moduleNames)] -column 1 -row 1 -pady 2p -padx 2p -sticky ew
+    grid [tablelist::tablelist $widTmp(sec,perm_f2).tbl -columns { 0 "..." center \
+                                                            20 "Module" center \
+                                                            10 "View" center \
+                                                            10 "Modify" center \
+                                                            10 "Delete" center} \
+                                                            -showlabels yes \
+                                                            -stripebackground lightblue \
+                                                            -exportselection yes \
+                                                            -showseparators yes \
+                                                            -fullseparators yes \
+                                                            -editselectedonly 1 \
+                                                            -editstartcommand ea::code::admin::editStartCmd \
+                                                            -editendcommand ea::code::admin::editEndCmd \
+                                                            -yscrollcommand [list $widTmp(sec,perm_f2).scrolly set] \
+                                                            -xscrollcommand [list $widTmp(sec,perm_f2).scrollx set]] -column 0 -row 0 -sticky news
+    
+    $widTmp(sec,perm_f2).tbl columnconfigure 0 -name db_id \
+                                            -showlinenumbers 1 \
+                                            -labelalign center
+    $widTmp(sec,perm_f2).tbl columnconfigure 1 -name module
+    $widTmp(sec,perm_f2).tbl columnconfigure 2 -name view -editable yes -editwindow ttk::combobox
+    $widTmp(sec,perm_f2).tbl columnconfigure 3 -name modify -editable yes -editwindow ttk::combobox
+    $widTmp(sec,perm_f2).tbl columnconfigure 4 -name delete -editable yes -editwindow ttk::combobox
+    
+    grid [ttk::scrollbar $widTmp(sec,perm_f2).scrolly -orient v -command [list $widTmp(sec,perm_f2).tbl yview]] -column 1 -row 0 -sticky nse
+    grid [ttk::scrollbar $widTmp(sec,perm_f2).scrollx -orient h -command [list $widTmp(sec,perm_f2).tbl xview]] -column 0 -row 1 -sticky ews
+    
+    grid columnconfigure $widTmp(sec,perm_f2) $widTmp(sec,perm_f2).tbl -weight 2
+    grid rowconfigure $widTmp(sec,perm_f2) $widTmp(sec,perm_f2).tbl -weight 2
+    
+    # Enable the 'autoscrollbar'
+    ::autoscroll::autoscroll $widTmp(sec,perm_f2).scrolly
+    ::autoscroll::autoscroll $widTmp(sec,perm_f2).scrollx
+
+    bind $widTmp(sec,perm_f1).cbox0a <<ComboboxSelected>> {
+        ea::db::admin::populateModPerms $widTmp(sec,perm_f2).tbl [$widTmp(sec,perm_f1).cbox0a get]
+    }
+
 
 } ;# eAssistSetup::admin_GUI
+

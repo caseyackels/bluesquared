@@ -338,3 +338,90 @@ proc eAssistSetup::writeSecUsers {method widTbl widRow userName userLogin userPa
 
     
 } ;# eAssistSetup::writeSecUsers
+proc ea::db::admin::populateModPerms {widTbl grpName} {
+    #****if* populateModPerms/ea::db::admin
+    # CREATION DATE
+    #   09/17/2015 (Thursday Sep 17)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   
+    #   
+    #***
+    global log
+
+    $widTbl delete 0 end
+    
+    db eval "SELECT Modules.ModuleName as ModName, SecAccess_Read, SecAccess_Write, SecAccess_Delete FROM SecurityAccess
+                INNER JOIN SecGroups ON SecurityAccess.SecGrpID = SecGroups.SecGrp_ID
+                INNER JOIN SecGroupNames ON SecGroups.SecGroupNameID = SecGroupNames.SecGroupName_ID
+                INNER Join Modules ON SecurityAccess.ModID = Modules.Mod_ID
+                WHERE SecGroupNames.SecGroupName = '$grpName'" {
+                    # Display yes or no, instead of 1 or 0
+                    set secRead [expr {$SecAccess_Read ? [mc "Yes"] : [mc "No"]}]
+                    set secWrite [expr {$SecAccess_Write ? [mc "Yes"] : [mc "No"]}]
+                    set secDel [expr {$SecAccess_Delete ? [mc "Yes"] : [mc "No"]}]
+
+                    $widTbl insert end "{} [list $ModName] $secRead $secWrite $secDel"
+                }
+
+    
+} ;# ea::db::admin::populateModPerms
+
+proc ea::code::admin::editStartCmd {tbl row col text} {
+    #****if* editStartCmd/ea::code::admin
+    # CREATION DATE
+    #   09/17/2015 (Thursday Sep 17)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   
+    #   
+    #***
+    global log
+
+    set w [$tbl editwinpath]
+    switch [$tbl columncget $col -name] {
+        view    {${log}::debug Col: $w; $w configure -values {Yes No} -editable no}
+        modify  {$w configure -values {Yes No} -editable no}
+        delete  {$w configure -values {Yes No} -editable no}
+    }
+    
+} ;# ea::code::admin::editStartCmd
+
+proc ea::code::admin::editEndCmd {tbl row col text} {
+    #****if* editEndCmd/ea::code::admin
+    # CREATION DATE
+    #   09/17/2015 (Thursday Sep 17)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   
+    #   
+    #***
+    global log
+
+    switch [$tbl columncget $col -name] {
+        view    {${log}::debug Value: $text}
+        modify  {${log}::debug Value: $text}
+        delete  {${log}::debug Value: $text}
+    }
+    
+
+    
+} ;# ea::code::admin::editEndCmd

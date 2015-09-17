@@ -1048,3 +1048,31 @@ proc ea::db::getGroupNames {{mode -all}} {
 	db eval "SELECT SecGroupName FROM SecGroupNames WHERE $sql"
 
 } ;# ea::db::getGroupNames
+
+proc ea::db::getUserList {mode} {
+	#****if* getUser/ea::db
+	# CREATION DATE
+	#   09/17/2015 (Thursday Sep 17)
+	#
+	# AUTHOR
+	#	Casey Ackels
+	#
+	# COPYRIGHT
+	#	(c) 2015 Casey Ackels
+	#   
+	# NOTES
+	#   mode can be one of: -login, -name, -email
+	#   
+	#***
+	global log
+	
+	switch -- $mode {
+		-login	{set column UserLogin}
+		-name 	{set column UserName}
+		-email	{set column UserEmail}
+		default	{${log}::debug [info level 0] unknown switch value. Should be: -login, -name or -email}
+	}
+
+	return [db eval "SELECT $column FROM Users"]
+
+} ;# ea::db::getUser

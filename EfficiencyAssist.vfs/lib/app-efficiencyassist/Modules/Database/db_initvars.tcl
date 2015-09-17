@@ -40,15 +40,20 @@ proc ea::db::init_vars {} {
     
     ${log}::debug Initilizing list of modules
     set program(moduleNames) [eAssist_db::getDBModules]
-
-    ${log}::debug Initilizing list of security groups
-    set sec(groupNames) [ea::db::getGroupNames]
-    
+   
     ${log}::debug Initializing Array: masterAddr()
     ea::db::init_masterAddr
     
     ${log}::debug Initilizing Array: disttype()
     ea::db::reset_disttype
+    
+    ${log}::debug Initilizing Array: sec()
+    ea::db::init_secArray
+    
+    # Populate individual vars
+    ${log}::debug Initilizing list of security groups
+    set sec(groupNames) [ea::db::getGroupNames]
+    set sec(UserLogins) [ea::db::getUserList -login]
     
 } ;# ea::db::init_vars
 
@@ -173,3 +178,25 @@ proc ea::db::reset_disttype {} {
                  id "" \
                  status 1]
 }
+proc ea::db::init_secArray {} {
+    #****if* init_secArray/ea::db
+    # CREATION DATE
+    #   09/17/2015 (Thursday Sep 17)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   
+    #   
+    #***
+    global log sec
+
+    array set sec { groupNames "" \
+                    UserLogins ""}
+
+    
+} ;# ea::db::init_secArray
