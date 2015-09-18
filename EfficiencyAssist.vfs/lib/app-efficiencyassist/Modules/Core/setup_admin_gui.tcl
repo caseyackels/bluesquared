@@ -304,18 +304,17 @@ proc eAssistSetup::admin_GUI {args} {
                                                             -showseparators yes \
                                                             -fullseparators yes \
                                                             -editselectedonly 1 \
+                                                            -selecttype cell \
                                                             -editstartcommand ea::code::admin::editStartCmd \
                                                             -editendcommand ea::code::admin::editEndCmd \
                                                             -yscrollcommand [list $widTmp(sec,perm_f2).scrolly set] \
                                                             -xscrollcommand [list $widTmp(sec,perm_f2).scrollx set]] -column 0 -row 0 -sticky news
     
-    $widTmp(sec,perm_f2).tbl columnconfigure 0 -name db_id \
-                                            -showlinenumbers 1 \
-                                            -labelalign center
+    $widTmp(sec,perm_f2).tbl columnconfigure 0 -name db_id -showlinenumbers 1
     $widTmp(sec,perm_f2).tbl columnconfigure 1 -name module
-    $widTmp(sec,perm_f2).tbl columnconfigure 2 -name view -editable yes -editwindow ttk::combobox
-    $widTmp(sec,perm_f2).tbl columnconfigure 3 -name modify -editable yes -editwindow ttk::combobox
-    $widTmp(sec,perm_f2).tbl columnconfigure 4 -name delete -editable yes -editwindow ttk::combobox
+    $widTmp(sec,perm_f2).tbl columnconfigure 2 -name SecAccess_Read ;#view -editable yes -editwindow ttk::combobox
+    $widTmp(sec,perm_f2).tbl columnconfigure 3 -name SecAccess_Write ;# modify -editable yes -editwindow ttk::combobox
+    $widTmp(sec,perm_f2).tbl columnconfigure 4 -name SecAccess_Delete ;# delete -editable yes -editwindow ttk::combobox
     
     grid [ttk::scrollbar $widTmp(sec,perm_f2).scrolly -orient v -command [list $widTmp(sec,perm_f2).tbl yview]] -column 1 -row 0 -sticky nse
     grid [ttk::scrollbar $widTmp(sec,perm_f2).scrollx -orient h -command [list $widTmp(sec,perm_f2).tbl xview]] -column 0 -row 1 -sticky ews
@@ -331,6 +330,35 @@ proc eAssistSetup::admin_GUI {args} {
         ea::db::admin::populateModPerms $widTmp(sec,perm_f2).tbl [$widTmp(sec,perm_f1).cbox0a get]
     }
 
+    set bodyTag [$widTmp(sec,perm_f2).tbl bodytag]
+    bind $bodyTag <Double-1> {
+        ${log}::debug Clicked on column %W %x %y
+        set colName [$widTmp(sec,perm_f2).tbl columncget [$widTmp(sec,perm_f2).tbl containingcolumn %x] -name]
+        ${log}::debug Column: $colName
+        
+        # stop if we are not in View, Edit, Delete cells
+        if {$colName eq "SecAccess_Read" || $colName eq "SecAccess_Write" || $colName eq "SecAccess_Delete"} {
+                set cellLocation [$widTmp(sec,perm_f2).tbl curcellselection]
+                ${log}::debug Cell $cellLocation
+                
+                set rowLocation [$widTmp(sec,perm_f2).tbl curselection]
+                ${log}::debug Row $rowLocation
+                
+                set modName [$widTmp(sec,perm_f2).tbl getcell $rowLocation,1]
+                ${log}::debug modName $modName
+               
+                set cellText [$widTmp(sec,perm_f2).tbl getcells $cellLocation]
+                
+                if {$cellText eq "Yes"} {set newText "No"} else {set newText "Yes"}
+                
+                ${log}::debug Cell Text: $cellText
+                ${log}::debug Change Text to: $newText [expr {$newText ? "1" : "0"}]
+                
+                $widTmp(sec,perm_f2).tbl cellconfigure $cellLocation -text $newText
+                
+                ea::db::admin::updateModPerms $colName [expr {$newText ? "1" : "0"}] $modName [$widTmp(sec,perm_f1).cbox0a get]
+        }
+    }
 
 } ;# eAssistSetup::admin_GUI
 

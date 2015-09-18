@@ -373,10 +373,10 @@ proc ea::db::admin::populateModPerms {widTbl grpName} {
     
 } ;# ea::db::admin::populateModPerms
 
-proc ea::code::admin::editStartCmd {tbl row col text} {
-    #****if* editStartCmd/ea::code::admin
+proc ea::db::admin::updateModPerms {col value modName groupName} {
+    #****if* updateModPerms/ea::db::admin
     # CREATION DATE
-    #   09/17/2015 (Thursday Sep 17)
+    #   09/18/2015 (Friday Sep 18)
     #
     # AUTHOR
     #	Casey Ackels
@@ -389,39 +389,14 @@ proc ea::code::admin::editStartCmd {tbl row col text} {
     #   
     #***
     global log
-
-    set w [$tbl editwinpath]
-    switch [$tbl columncget $col -name] {
-        view    {${log}::debug Col: $w; $w configure -values {Yes No} -editable no}
-        modify  {$w configure -values {Yes No} -editable no}
-        delete  {$w configure -values {Yes No} -editable no}
-    }
     
-} ;# ea::code::admin::editStartCmd
+    ${log}::debug $col $value $modName $groupName
 
-proc ea::code::admin::editEndCmd {tbl row col text} {
-    #****if* editEndCmd/ea::code::admin
-    # CREATION DATE
-    #   09/17/2015 (Thursday Sep 17)
-    #
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2015 Casey Ackels
-    #   
-    # NOTES
-    #   
-    #   
-    #***
-    global log
+    db eval "UPDATE SecurityAccess SET $col=$value
+                            WHERE ModID = (db eval {SELECT Mod_ID FROM Modules WHERE ModuleName = '$modName'})
+                            AND SecGrpID = (db eval {SELECT DISTINCT SecGroupNames.SecGroupName_ID FROM SecurityAccess
+                                                INNER JOIN SecGroups ON SecurityAccess.SecGrpID = SecGroups.SecGrp_ID
+                                                INNER JOIN SecGroupNames on SecGroups.secGroupNameID = SecGroupNames.SecGroupName_ID
+                                                WHERE SecGroupNames.SecGroupName = '$groupName'})" {${log}::debug Update is complete}
 
-    switch [$tbl columncget $col -name] {
-        view    {${log}::debug Value: $text}
-        modify  {${log}::debug Value: $text}
-        delete  {${log}::debug Value: $text}
-    }
-    
-
-    
-} ;# ea::code::admin::editEndCmd
+} ;# ea::db::admin::updateModPerms
