@@ -1076,3 +1076,48 @@ proc ea::db::getUserList {mode} {
 	return [db eval "SELECT $column FROM Users"]
 
 } ;# ea::db::getUser
+
+proc ea::db::getGroups {mode {status -active}} {
+    #****f* getGroups/ea::db
+    # CREATION DATE
+    #   09/19/2015 (Saturday Sep 19)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   ea::db::getGroups -id|-name -active|-inactive|-all
+    #
+    # FUNCTION
+    #	Retrieves the value returned by using the parameters given.
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+    switch -- $mode {
+        "-id"   {set col SecGroupName_ID}
+        "-name" {set col SecGroupName}
+        default {${log}::debug [info level 0] Unknown switch statement, aborting.; return}
+    }
+        
+    switch -- $status {
+        -active     { set actStatus 1}
+        -inactive   { set actStatus 0}
+        -all        { set actStatus "(1 OR 0)"}
+        default     {}
+    }
+    
+    return [db eval "SELECT $col FROM SecGroupNames WHERE Status = $actStatus"]
+
+} ;# ea::db::getGroups -name -active

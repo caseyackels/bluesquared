@@ -1,21 +1,7 @@
 # Creator: Casey Ackels
 # Initial Date: March 12, 2011]
 # File Initial Date: 03 08,2015
-# Dependencies: 
 #-------------------------------------------------------------------------------
-#
-# Subversion
-#
-# $Revision: 169 $
-# $LastChangedBy: casey.ackels $
-# $LastChangedDate: 2011-10-17 16:11:20 -0700 (Mon, 17 Oct 2011) $
-#
-########################################################################################
-
-##
-## - Overview
-# Security related Procs
-
 
 proc ea::sec::initUser {{newUser 0}} {
     #****f* initUser/ea::sec
@@ -30,7 +16,7 @@ proc ea::sec::initUser {{newUser 0}} {
     #   
     #
     # SYNOPSIS
-    #   ea::sec::initUser ?newUser? ?passwd?
+    #   ea::sec::initUser ?newUser?
     #
     # FUNCTION
     #	Initilize the user array with values from env(USERNAME)
@@ -74,14 +60,12 @@ proc ea::sec::initUser {{newUser 0}} {
     }
     
     set user($user(id),modules) [db eval "SELECT Modules.ModuleName FROM SecurityAccess
-                                            -- # get Group ID
-                                            INNER JOIN SecGroups ON SecGroups.SecGrp_ID = SecurityAccess.SecGrpID
-                                            -- # get Module Name
-                                            INNER JOIN Modules on Modules.Mod_ID = SecurityAccess.ModID
-                                            -- # get Group Name
-                                            INNER JOIN SecGroupNames on SecGroupNames.SecGroupName_ID = SecGroups.SecGroupNameID
-                                            WHERE SecGroupNames.SecGroupName = '$user($user(id),group)'
-                                                AND SecGroupNames.Status = 1"]
+											-- # get Module Name
+											INNER JOIN Modules on Modules.Mod_ID = SecurityAccess.ModID
+											-- # get Group Name
+											INNER JOIN SecGroupNames ON SecGroupNames.SecGroupName_ID = SecurityAccess.SecGrpNameID
+											  WHERE SecGroupNames.SecGroupName = '$user($user(id),group)'
+												AND SecGroupNames.Status = 1"]
     
 	# Throw an error/information dialog, telling the user that they are not in a group
 	if {$user($user(id),modules) == ""} {
@@ -234,7 +218,7 @@ proc ea::sec::setPasswd {pass {salt 0}} {
 } ;# ea::sec::setPasswd
 
 
-proc ea::db::writeUser {method userName userLogin userPasswd userSalt {userEmail ""} {userStatus 1} {userID ""}} {
+proc ea::db::writeUser {method userGroup userName userLogin userPasswd userSalt {userEmail ""} {userStatus 1} {userID ""}} {
     #****f* writeUser/ea::db
     # CREATION DATE
     #   09/06/2015 (Sunday Sep 06)
@@ -247,7 +231,7 @@ proc ea::db::writeUser {method userName userLogin userPasswd userSalt {userEmail
     #   
     #
     # SYNOPSIS
-    #   ea::db::writeUser -insert|-update userName userLogin userPassword userSalt ?userEmail? ?userStatus? ?userID?
+    #   ea::db::writeUser -insert|-update userGroup userName userLogin userPassword userSalt ?userEmail? ?userStatus? ?userID?
     #
     # FUNCTION
     #	Writes the user info to the database, and returns the userID
@@ -257,7 +241,7 @@ proc ea::db::writeUser {method userName userLogin userPasswd userSalt {userEmail
     #	N/A
     #   
     # PARENTS
-    #   
+    #   ea::db::admin::addUserToGroup, ea::db::writePasswd
     #   
     # NOTES
     #   
@@ -273,9 +257,11 @@ proc ea::db::writeUser {method userName userLogin userPasswd userSalt {userEmail
 		db eval "INSERT OR ABORT INTO Users (UserName, UserLogin, UserPwd, UserSalt, UserEmail, User_Status)
 					VALUES ('$userName', '$userLogin', '$userPasswd', '$userSalt', '$userEmail', $userStatus)"
 	
+		
 	} elseif {$method eq "-update"} {
 		db eval "UPDATE Users SET UserName='$userName', UserLogin='$userLogin', UserEmail='$userEmail', User_Status=$userStatus
 					WHERE User_ID = $userID"
+					
 		
 		# If the password field is populated, lets up date the db
 		if {$userPasswd ne ""} {
@@ -287,6 +273,8 @@ proc ea::db::writeUser {method userName userLogin userPasswd userSalt {userEmail
 		}
 	}	
 
+	ea::db::admin::addUserToGroup $userLogin $userGroup
+	
 	return $userID
 } ;# ea::db::writeUser
 
@@ -333,7 +321,6 @@ proc ea::db::getUser {method {id 0}} {
 	}
 
 } ;# ea::db::getUser
-
 
 proc ea::db::writePasswd {method passwd salt userLogin} {
     #****f* writePasswd/ea::db
@@ -436,7 +423,6 @@ proc ea::sec::authUser {userName pass} {
     }
    
 } ;# ea::sec::authUser
-
 
 proc ea::sec::modLauncher {args} {
     #****f* modLauncher/ea::sec
@@ -542,7 +528,6 @@ proc ea::sec::validatePasswd {oldPasswd} {
 	}
     
 } ;# ea::sec::validatePasswd
-
 
 proc ea::db::getPasswd {user} {
     #****f* getPasswd/ea::db
