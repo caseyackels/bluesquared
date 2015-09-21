@@ -60,7 +60,7 @@ proc eAssist_Global::resetFrames {args} {
     
     switch -- $args {
         parent  {foreach child [winfo children .container] {destroy $child} }
-        pref    {foreach child [winfo children .pref] {destroy $child} }
+        -pref    {foreach child [winfo children .pref.frame] {destroy $child} }
         default { ${log}::notice No option for $args - resetFrames }
     }
 } ;# eAssist_Global::resetFrames

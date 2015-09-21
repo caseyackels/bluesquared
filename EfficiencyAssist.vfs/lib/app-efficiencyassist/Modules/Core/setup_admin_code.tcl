@@ -228,7 +228,7 @@ proc ea::db::populateSecGroupSingleEntry {widTbl {widRow ""} {dbid ""}} {
     set widSec(group,Active) 0
 } ;# ea::db::populateSecGroupSingleEntry
 
-proc eAssistSetup::populateSecUsersEdit {widTbl} {
+proc eAssistSetup::populateSecUsersEdit {method widTbl {widRow end} {userLogin ""}} {
     #****f* populateSecUsersEdit/eAssistSetup
     # CREATION DATE
     #   09/05/2015 (Saturday Sep 05)
@@ -241,7 +241,7 @@ proc eAssistSetup::populateSecUsersEdit {widTbl} {
     #   
     #
     # SYNOPSIS
-    #   eAssistSetup::populateSecUsersEdit widTbl
+    #   eAssistSetup::populateSecUsersEdit -update|-populate widTbl ?widRow? ?userLogin?
     #
     # FUNCTION
     #	Populates the Users tablelist widget from the database
@@ -260,11 +260,9 @@ proc eAssistSetup::populateSecUsersEdit {widTbl} {
     #   
     #   
     #***
-    global log
-
-    $widTbl delete 0 end
-
-    db eval "SELECT SecGroupNames.SecGroupName as groupName,
+    global log tmp
+    
+    set sql "SELECT SecGroupNames.SecGroupName as groupName,
                     Users.User_ID as User_ID,
                     Users.UserLogin as UserLogin,
                     Users.UserName as UserName,
@@ -272,10 +270,21 @@ proc eAssistSetup::populateSecUsersEdit {widTbl} {
                     Users.User_Status as User_Status
                 FROM SecGroups
                     LEFT JOIN Users on Users.User_ID = SecGroups.UserID
-                    INNER JOIN SecGroupNames on SecGroupNames.SecGroupName_ID = SecGroups.SecGroupNameID
-                ORDER BY UserLogin" {
-                        $widTbl insert end [list {} $User_ID $groupName $UserLogin $UserName $UserEmail $User_Status]
-                    }
+                    INNER JOIN SecGroupNames on SecGroupNames.SecGroupName_ID = SecGroups.SecGroupNameID"
+
+    switch -- $method {
+        -update     {
+            append sql " WHERE SecGroups.UserID = (SELECT User_ID FROM Users WHERE UserLogin = '$userLogin')"
+        }
+        -populate   {
+        }
+        default     {${log}::debug [info level 0] unknown argument: $method}
+    }
+
+    db eval "$sql ORDER BY UserLogin" {
+        $widTbl insert $widRow [list {} $User_ID $groupName $UserLogin $UserName $UserEmail $User_Status]
+    }
+                    
 } ;# eAssistSetup::populateSecUsersEdit
 
 proc eAssistSetup::writeSecUsers {method widTbl widRow userGroup userName userLogin userPasswd {userEmail ""} {userStatus 1} {userID ""}} {
@@ -326,7 +335,7 @@ proc eAssistSetup::writeSecUsers {method widTbl widRow userGroup userName userLo
         # Record exists, now check to see if the password field was populated, if it was retrieve pass and salt from DB
         ${log}::debug [info level 0] -update
         
-        ${log}::debug [info level 0] -update - Field is blank
+        ${log}::debug [info level 0] -update - Password Field is blank, skipping...
         # Retrieve old pass and salt - these get overwritten if a new pass is detected
         set oldPassSalt [ea::db::getPasswd $userLogin]
             set pass [lindex $oldPassSalt 0]
@@ -334,7 +343,7 @@ proc eAssistSetup::writeSecUsers {method widTbl widRow userGroup userName userLo
         
         if {$userPasswd ne ""} {
             # Generate new pass and salt based on userPasswd
-            ${log}::debug [info level 0] -update - Field contains data
+            ${log}::debug [info level 0] -update - Password Field contains data, adding to db...
             set newPassSalt [ea::sec::setPasswd $userPasswd $salt]
             
             # Compare the two, if they don't match, update passwd in db.
@@ -344,7 +353,6 @@ proc eAssistSetup::writeSecUsers {method widTbl widRow userGroup userName userLo
                 set salt [lindex $newPassSalt 1]
             }
         }
-            
         $widTbl delete $widRow
     }
     
@@ -352,8 +360,8 @@ proc eAssistSetup::writeSecUsers {method widTbl widRow userGroup userName userLo
     # Write user data to database
     ea::db::writeUser $method $userGroup $userName $userLogin $pass $salt $userEmail $userStatus $userID
     
-    ## Populate new/updated entry in tablelist
-    $widTbl insert $widRow "{} [ea::db::getUser $method $userID]"
+    # Update the widget
+    eAssistSetup::populateSecUsersEdit -update $widTbl $widRow $userLogin
 
     
 } ;# eAssistSetup::writeSecUsers
@@ -449,9 +457,7 @@ proc ea::db::admin::addUserToGroup {userLogin userModule} {
     set module [db eval "SELECT SecGroupName_ID FROM SecGroupNames WHERE SecGroupName = '$userModule'"]
     
     # Delete all records if they already exist
-    db eval "DELETE FROM SecGroups
-                WHERE SecGroupNameID = $module
-                AND UserID = $userid"
+    db eval "DELETE FROM SecGroups WHERE UserID = $userid"
 
     # Now insert
     db eval "INSERT OR ABORT INTO SecGroups (SecGroupNameID, UserID)

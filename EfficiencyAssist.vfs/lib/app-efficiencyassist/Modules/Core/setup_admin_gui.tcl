@@ -277,12 +277,16 @@ proc eAssistSetup::admin_GUI {args} {
     ::autoscroll::autoscroll $widTmp(sec,users_f2).scrolly
     ::autoscroll::autoscroll $widTmp(sec,users_f2).scrollx
     
-    eAssistSetup::populateSecUsersEdit $widTmp(sec,users_f2).listbox
+    #eAssistSetup::populateSecUsersEdit -populate $widTmp(sec,users_f2).listbox
+    $widTmp(sec,users_f2).listbox delete 0 end
+    #$widTmp(sec,users_f2).listbox insert end "{} [eAssistSetup::populateSecUsersEdit -populate ]"
+    eAssistSetup::populateSecUsersEdit -populate $widTmp(sec,users_f2).listbox
     
     ## Binding (double-click puts the data into the fields)
     bind [$widTmp(sec,users_f2).listbox bodytag] <Double-1> {
+        set widRow [$widTmp(sec,users_f2).listbox curselection]
         # Reconfigure button
-        $widTmp(sec,users_f1).btn0 configure -text [mc "Update"] -command {eAssistSetup::writeSecUsers -update $widTmp(sec,users_f2).listbox [$widTmp(sec,users_f2).listbox curselection] \
+        $widTmp(sec,users_f1).btn0 configure -text [mc "Update"] -command {eAssistSetup::writeSecUsers -update $widTmp(sec,users_f2).listbox $widRow \
                                                                                 $widSec(users,Group) $widSec(users,UserName) $widSec(users,UserLogin) $widSec(users,UserPwd) \
                                                                                 $widSec(users,UserEmail) $widSec(users,User_Status) $widSec(users,User_ID)
                                                         $widTmp(sec,users_f1).btn0 configure -text [mc "Add"]

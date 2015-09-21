@@ -114,6 +114,11 @@ proc 'eAssist_sourceReqdFiles {} {
 	namespace eval ea::code::admin {}
 	namespace eval ea::db::admin {}
 	namespace eval ea::gui::admin {}
+	
+	# Preferences
+	namespace eval ea::code::pref {}
+	namespace eval ea::db::pref {}
+	namespace eval ea::gui::pref {}
 
 
 	## Start the Package Require
@@ -145,7 +150,6 @@ proc 'eAssist_sourceReqdFiles {} {
 	
 
 	## Efficiency Assist modules
-	#package require eAssist_Preferences
 	package require eAssist_core ;# Includes Preferences, and Setup mode
 	package require eAssist_ModImportFiles
 	package require eAssist_ModBoxLabels
@@ -275,6 +279,7 @@ proc 'eAssist_initVariables {} {
 	
 	# init variables (arrays usually)
 	ea::db::init_vars
+
 		
 	## Defaults
 	# Just in case we can't figure out where we last stopped

@@ -55,6 +55,11 @@ proc ea::db::init_vars {} {
     set sec(groupNames) [ea::db::getGroupNames]
     set sec(UserLogins) [ea::db::getUserList -login]
     
+    set program(BM,groups) [list Reports Exports Misc]
+    set program(SU,groups) ""
+    set program(BL,groups) ""
+    
+    
 } ;# ea::db::init_vars
 
 proc ea::db::init_masterAddr {} {

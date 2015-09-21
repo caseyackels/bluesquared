@@ -54,7 +54,7 @@ proc importFiles::initVars {args} {
     #   
     #   
     #***
-    global log headerParent headerAddress dist carrierSetup packagingSetup shipOrder
+    global log headerParent headerAddress dist carrierSetup packagingSetup shipOrder gui
 
     set headerParent(headerList) [db eval "SELECT dbColName FROM HeadersConfig WHERE dbActive = 1"]
     
@@ -123,11 +123,13 @@ proc importFiles::initModVariables {} {
     # SEE ALSO
     #
     #***
-    global log emailEvent desc
+    global log emailEvent desc gui
     
     # Name was changed, hence the inconsistency
     set desc(ModImportFiles) [mc "Batch Maker"]
     set emailEvent(ModBatchMaker) [list Export]
+    
+    set gui(nav_batchmaker) [list Reports Exports Settings Misc]
 
 } ;# initModVariables/importFiles
 

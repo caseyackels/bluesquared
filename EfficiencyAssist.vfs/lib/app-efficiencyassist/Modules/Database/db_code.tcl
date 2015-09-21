@@ -1121,3 +1121,101 @@ proc ea::db::getGroups {mode {status -active}} {
     return [db eval "SELECT $col FROM SecGroupNames WHERE Status = $actStatus"]
 
 } ;# ea::db::getGroups -name -active
+proc ea::db::getUserAccess {args} {
+	#****if* getUserAccess/ea::db
+	# CREATION DATE
+	#   09/21/2015 (Monday Sep 21)
+	#
+	# AUTHOR
+	#	Casey Ackels
+	#
+	# COPYRIGHT
+	#	(c) 2015 Casey Ackels
+	#   
+	# NOTES
+	#   ea::db::getUserAccess R,W,D
+	#   
+	#***
+	global log user
+	
+	if {$args eq ""} {return}
+	
+	set sql "SELECT Modules.ModuleName FROM SecurityAccess
+											-- # get Module Name
+											INNER JOIN Modules on Modules.Mod_ID = SecurityAccess.ModID
+											-- # get Group Name
+											INNER JOIN SecGroupNames ON SecGroupNames.SecGroupName_ID = SecurityAccess.SecGrpNameID
+											  WHERE SecGroupNames.SecGroupName = '$user($user(id),group)'
+												AND SecGroupNames.Status = 1"
+
+	set args [split $args ""]
+	
+	foreach key $args {
+		switch -- [string tolower $key] {
+			r		{append sql " AND SecurityAccess.SecAccess_Read = 1"}
+			w		{append sql " AND SecurityAccess.SecAccess_Write = 1"}
+			d		{append sql " AND SecurityAccess.SecAccess_Delete = 1"}
+			default	{
+				${log}::debug [info level 0] Unknown switch statement: $key, aborting...
+				return
+			}
+		}
+	}
+	
+	return [db eval $sql]
+
+} ;# ea::db::getUserAccess rwd
+
+proc ea::db::getModAccess {userid module} {
+	#****if* getModAccess/ea::db
+	# CREATION DATE
+	#   09/21/2015 (Monday Sep 21)
+	#
+	# AUTHOR
+	#	Casey Ackels
+	#
+	# COPYRIGHT
+	#	(c) 2015 Casey Ackels
+	#   
+	# NOTES
+	#   Returns Read, Write, Delet access (1 for yes, 0 for no)
+	#   
+	#***
+	global log
+
+	return [db eval "SELECT SecAccess_Read, SecAccess_Write, SecAccess_Delete from SecurityAccess
+			INNER JOIN Modules on Modules.Mod_ID = SecurityAccess.ModID
+			INNER JOIN SecGroups on SecGroups.SecGroupNameID = SecurityAccess.SecGrpNameID
+			INNER JOIN Users on SecGroups.UserID = Users.User_ID
+				WHERE Users.UserLogin = '$userid'
+			AND Modules.ModuleName = '$module'"]
+
+} ;# ea::db::getModAccess
+
+proc ea::db::getModInfo {args} {
+	#****if* getModInfo/ea::db
+	# CREATION DATE
+	#   09/21/2015 (Monday Sep 21)
+	#
+	# AUTHOR
+	#	Casey Ackels
+	#
+	# COPYRIGHT
+	#	(c) 2015 Casey Ackels
+	#   
+	# NOTES
+	#   
+	#   
+	#***
+	global log
+
+	foreach {key value} $args {
+		switch -- $key {
+			-code		{set value [db eval "SELECT ModuleCode FROM Modules WHERE ModuleName = '$value'"] }
+			-name 		{set value [db eval "SELECT ModuleName FROM Modules WHERE ModuleCode = '[string toupper $value]'"] }
+			default		{}
+		}
+	}
+	
+	return [join $value]
+} ;# ea::db::getModInfo
