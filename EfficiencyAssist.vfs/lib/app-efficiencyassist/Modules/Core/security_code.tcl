@@ -109,19 +109,26 @@ proc ea::sec::userExist {} {
     #   
     #***
     global log env user
+	
+	set defaultGroupID 3 ;# Should add a group called "NOGROUP" for the default
+	
+	set user_Name [string tolower $env(USERNAME)]
     
-    set userName [db eval "SELECT UserLogin FROM Users WHERE UserLogin='[string tolower $env(USERNAME)]'"]
+    set userName [db eval "SELECT UserLogin FROM Users WHERE UserLogin='$user_Name'"]
 	
 	if {$userName == ""} {
 		${log}::info $env(USERNAME) is not in the Database. Adding ...
 		# Default password is <space>
-		db eval "INSERT INTO Users (UserLogin, UserPwd) VALUES ('[string tolower $env(USERNAME)]', ' ')"
+		db eval "INSERT INTO Users (UserLogin, UserPwd) VALUES ('$userName', ' ')"
+		set user_id [db eval "SELECT max(User_ID) FROM Users WHERE UserLogin = '$user_Name'"]
+		
+		db eval "INSERT INTO SecGroups (SecGroupNameID, UserID) (1, $user_id)"
 
 	} else {
 		${log}::info Found $userName in the database.
     }
     
-    set userName [db eval "SELECT UserLogin FROM Users WHERE UserLogin='[string tolower $env(USERNAME)]'"]
+    set userName [db eval "SELECT UserLogin FROM Users WHERE UserLogin='$user_Name'"]
     return $userName
 
 } ;# ea::sec::userExist
