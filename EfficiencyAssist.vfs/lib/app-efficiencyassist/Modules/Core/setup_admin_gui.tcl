@@ -230,6 +230,11 @@ proc eAssistSetup::admin_GUI {args} {
     grid [ttk::label $widTmp(sec,users_f1).txt3 -text [mc "Password"]] -column 0 -row 3 -padx 2p -pady 2p -sticky e
     grid [ttk::entry $widTmp(sec,users_f1).entry3 -textvariable widSec(users,UserPwd) -show *] -column 1 -row 3 -padx 2p -pady 2p -sticky ew
     
+    grid [ttk::label $widTmp(sec,users_f1).txt4 -text [mc "Group"]] -column 0 -row 4 -padx 2p -pady 2p -sticky e
+    grid [ttk::combobox $widTmp(sec,users_f1).cbox4 -textvariable widSec(users,Group) \
+                                                    -postcommand {$widTmp(sec,users_f1).cbox4 configure -values [ea::db::getGroups -name -active]} \
+                                                    -state readonly] -column 1 -row 4 -padx 2p -pady 2p -sticky ew
+    
     grid [ttk::checkbutton $widTmp(sec,users_f1).ckbtn0 -text [mc "Active"] -variable widSec(users,User_Status)] -column 1 -row 6 -sticky w
 
     # --- Users, Frame 2
@@ -237,6 +242,7 @@ proc eAssistSetup::admin_GUI {args} {
     grid [tablelist::tablelist $widTmp(sec,users_f2).listbox -columns {
                                         0 "..." center
                                         0 "Database ID" center
+                                        0 "Group" center
                                         0 "Login" center
                                         0 "User Name" center
                                         0 "Email" center
@@ -255,10 +261,11 @@ proc eAssistSetup::admin_GUI {args} {
                                             -showlinenumbers 1 \
                                             -labelalign center
     $widTmp(sec,users_f2).listbox columnconfigure 1 -name User_ID
-    $widTmp(sec,users_f2).listbox columnconfigure 2 -name UserLogin -width 20
-    $widTmp(sec,users_f2).listbox columnconfigure 3 -name UserName -width 35
-    $widTmp(sec,users_f2).listbox columnconfigure 4 -name UserEmail -stretch yes
-    $widTmp(sec,users_f2).listbox columnconfigure 5 -name User_Status
+    $widTmp(sec,users_f2).listbox columnconfigure 2 -name Group -width 20
+    $widTmp(sec,users_f2).listbox columnconfigure 3 -name UserLogin -width 20
+    $widTmp(sec,users_f2).listbox columnconfigure 4 -name UserName -width 35
+    $widTmp(sec,users_f2).listbox columnconfigure 5 -name UserEmail -stretch yes
+    $widTmp(sec,users_f2).listbox columnconfigure 6 -name User_Status
     
     grid [ttk::scrollbar $widTmp(sec,users_f2).scrolly -orient v -command [list $widTmp(sec,users_f2).listbox yview]] -column 1 -row 0 -sticky nse
     grid [ttk::scrollbar $widTmp(sec,users_f2).scrollx -orient h -command [list $widTmp(sec,users_f2).listbox xview]] -column 0 -row 1 -sticky ews
@@ -276,8 +283,8 @@ proc eAssistSetup::admin_GUI {args} {
     bind [$widTmp(sec,users_f2).listbox bodytag] <Double-1> {
         # Reconfigure button
         $widTmp(sec,users_f1).btn0 configure -text [mc "Update"] -command {eAssistSetup::writeSecUsers -update $widTmp(sec,users_f2).listbox [$widTmp(sec,users_f2).listbox curselection] \
-                                                                                $widSec(users,UserName) $widSec(users,UserLogin) $widSec(users,UserPwd) $widSec(users,UserEmail) \
-                                                                                $widSec(users,User_Status) $widSec(users,User_ID)
+                                                                                $widSec(users,Group) $widSec(users,UserName) $widSec(users,UserLogin) $widSec(users,UserPwd) \
+                                                                                $widSec(users,UserEmail) $widSec(users,User_Status) $widSec(users,User_ID)
                                                         $widTmp(sec,users_f1).btn0 configure -text [mc "Add"]
                                                         ea::code::admin::initWidSecArray -clear}
                                                 
@@ -291,6 +298,7 @@ proc eAssistSetup::admin_GUI {args} {
     # $sec(UserLogins) $program(moduleNames)
     grid [ttk::label $widTmp(sec,perm_f1).txt0a -text [mc "Group"]] -column 0 -row 0 -pady 2p -padx 2p -sticky e
     grid [ttk::combobox $widTmp(sec,perm_f1).cbox0a -values $sec(groupNames) \
+                                                    -postcommand {$widTmp(sec,perm_f1).cbox0a configure -values [ea::db::getGroups -name -active]} \
                                                     -state readonly] -column 1 -row 0 -pady 2p -padx 2p -sticky w
     
     grid [tablelist::tablelist $widTmp(sec,perm_f2).tbl -columns { 0 "..." center \

@@ -140,7 +140,7 @@ proc ea::db::insertSecGroup {mode widTbl args} {
     #   
     #   
     # SEE ALSO
-    #   
+    #   TODO: Upon inserting into SecGroupNames, we need to insert into SecurityAccess also.
     #   
     #***
     global log widSec
@@ -150,7 +150,18 @@ proc ea::db::insertSecGroup {mode widTbl args} {
     if {$mode eq "add"} {
         # Insert into the db
         db eval "INSERT OR ABORT INTO SecGroupNames (SecGroupName, Status) VALUES ('$widSec(group,Name)','$widSec(group,Active)')"
-    
+        
+        set lastGroupID [db eval "SELECT MAX(SecGroupName_ID) FROM SecGroupNames"]
+        
+        set modIDs [db eval "SELECT Mod_ID from Modules ORDER BY Mod_ID"]
+        
+        foreach mod $modIDs  {
+            lappend sql_modsGroups "($lastGroupID, $mod)"
+        }
+        
+        ${log}::debug db eval "INSERT OR ABORT INTO SecurityAccess (SecGrpNameID, ModID) VALUES [join $sql_modsGroups ,]"
+        db eval "INSERT OR ABORT INTO SecurityAccess (SecGrpNameID, ModID) VALUES [join $sql_modsGroups ,]"
+        
     } elseif {$mode eq "update" && $args ne ""} {
         ${log}::debug Updating ID: $dbid - $widSec(group,Name)
         db eval "UPDATE SecGroupNames SET SecGroupName='$widSec(group,Name)', Status='$widSec(group,Active)' WHERE SecGroupName_ID=$dbid"
@@ -252,14 +263,22 @@ proc eAssistSetup::populateSecUsersEdit {widTbl} {
     global log
 
     $widTbl delete 0 end
-    
-    db eval "SELECT User_ID, UserLogin, UserName, UserEmail, User_Status FROM Users" {
-        $widTbl insert end [list {} $User_ID $UserLogin $UserName $UserEmail $User_Status]
-    }
 
+    db eval "SELECT SecGroupNames.SecGroupName as groupName,
+                    Users.User_ID as User_ID,
+                    Users.UserLogin as UserLogin,
+                    Users.UserName as UserName,
+                    Users.UserEmail as UserEmail,
+                    Users.User_Status as User_Status
+                FROM SecGroups
+                    LEFT JOIN Users on Users.User_ID = SecGroups.UserID
+                    INNER JOIN SecGroupNames on SecGroupNames.SecGroupName_ID = SecGroups.SecGroupNameID
+                ORDER BY UserLogin" {
+                        $widTbl insert end [list {} $User_ID $groupName $UserLogin $UserName $UserEmail $User_Status]
+                    }
 } ;# eAssistSetup::populateSecUsersEdit
 
-proc eAssistSetup::writeSecUsers {method widTbl widRow userName userLogin userPasswd {userEmail ""} {userStatus 1} {userID ""}} {
+proc eAssistSetup::writeSecUsers {method widTbl widRow userGroup userName userLogin userPasswd {userEmail ""} {userStatus 1} {userID ""}} {
     #****f* writeSecUsers/eAssistSetup
     # CREATION DATE
     #   09/06/2015 (Sunday Sep 06)
@@ -272,7 +291,7 @@ proc eAssistSetup::writeSecUsers {method widTbl widRow userName userLogin userPa
     #   
     #
     # SYNOPSIS
-    #   eAssistSetup::writeSecUsers -insert|-update <widTbl> <widRow> <userName> <userLogin> <userPasswd> ?userEmail? ?userStatus? ?userID?
+    #   eAssistSetup::writeSecUsers -insert|-update <widTbl> <widRow> <userGroup> <userName> <userLogin> <userPasswd> ?userEmail? ?userStatus? ?userID?
     #
     # FUNCTION
     #	Command function, which controls writing/updating user data including passwords
@@ -331,9 +350,9 @@ proc eAssistSetup::writeSecUsers {method widTbl widRow userName userLogin userPa
     
     
     # Write user data to database
-    ea::db::writeUser $method $userName $userLogin $pass $salt $userEmail $userStatus $userID
+    ea::db::writeUser $method $userGroup $userName $userLogin $pass $salt $userEmail $userStatus $userID
     
-    # Populate new/updated entry in tablelist
+    ## Populate new/updated entry in tablelist
     $widTbl insert $widRow "{} [ea::db::getUser $method $userID]"
 
     
@@ -358,8 +377,7 @@ proc ea::db::admin::populateModPerms {widTbl grpName} {
     $widTbl delete 0 end
     
     db eval "SELECT Modules.ModuleName as ModName, SecAccess_Read, SecAccess_Write, SecAccess_Delete FROM SecurityAccess
-                INNER JOIN SecGroups ON SecurityAccess.SecGrpID = SecGroups.SecGrp_ID
-                INNER JOIN SecGroupNames ON SecGroups.SecGroupNameID = SecGroupNames.SecGroupName_ID
+                INNER JOIN SecGroupNames ON SecurityAccess.SecGrpNameID = SecGroupNames.SecGroupName_ID
                 INNER Join Modules ON SecurityAccess.ModID = Modules.Mod_ID
                 WHERE SecGroupNames.SecGroupName = '$grpName'" {
                     # Display yes or no, instead of 1 or 0
@@ -393,10 +411,50 @@ proc ea::db::admin::updateModPerms {col value modName groupName} {
     ${log}::debug $col $value $modName $groupName
 
     db eval "UPDATE SecurityAccess SET $col=$value
-                            WHERE ModID = (db eval {SELECT Mod_ID FROM Modules WHERE ModuleName = '$modName'})
-                            AND SecGrpID = (db eval {SELECT DISTINCT SecGroupNames.SecGroupName_ID FROM SecurityAccess
-                                                INNER JOIN SecGroups ON SecurityAccess.SecGrpID = SecGroups.SecGrp_ID
-                                                INNER JOIN SecGroupNames on SecGroups.secGroupNameID = SecGroupNames.SecGroupName_ID
-                                                WHERE SecGroupNames.SecGroupName = '$groupName'})" {${log}::debug Update is complete}
+                            WHERE ModID = (SELECT Mod_ID FROM Modules WHERE ModuleName = '$modName')
+                            AND SecGrpNameID = (SELECT SecGroupName_ID FROM SecGroupNames
+                                                    WHERE SecGroupName = '$groupName')"
 
 } ;# ea::db::admin::updateModPerms
+
+proc ea::db::admin::addUserToGroup {userLogin userModule} {
+    #****f* addUserToGroup/ea::db::admin
+    # CREATION DATE
+    #   09/19/2015 (Saturday Sep 19)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # SYNOPSIS
+    #   ea::db::admin::addUserToGroup args 
+    #
+    # FUNCTION
+    #	Adds/Edits the User's assigned group. We delete any existing entries before inserting, so we don't have to keep track if we are adding (new) or editing (updating existing)
+    #   
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   
+    #   
+    #***
+    global log
+
+    set userid [db eval "SELECT User_ID from Users WHERE UserLogin = '$userLogin'"]
+    set module [db eval "SELECT SecGroupName_ID FROM SecGroupNames WHERE SecGroupName = '$userModule'"]
+    
+    # Delete all records if they already exist
+    db eval "DELETE FROM SecGroups
+                WHERE SecGroupNameID = $module
+                AND UserID = $userid"
+
+    # Now insert
+    db eval "INSERT OR ABORT INTO SecGroups (SecGroupNameID, UserID)
+                VALUES ($module, $userid)"
+    
+} ;# ea::db::admin::addUserToGroup
