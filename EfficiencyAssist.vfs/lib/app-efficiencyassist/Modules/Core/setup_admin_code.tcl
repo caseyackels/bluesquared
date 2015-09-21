@@ -260,6 +260,7 @@ proc eAssistSetup::populateSecUsersEdit {method widTbl {widRow end} {userLogin "
     #   
     #   
     #***
+<<<<<<< HEAD
     global log tmp
     
     set sql "SELECT SecGroupNames.SecGroupName as groupName,
@@ -285,6 +286,24 @@ proc eAssistSetup::populateSecUsersEdit {method widTbl {widRow end} {userLogin "
         $widTbl insert $widRow [list {} $User_ID $groupName $UserLogin $UserName $UserEmail $User_Status]
     }
                     
+=======
+    global log
+
+    $widTbl delete 0 end
+
+    db eval "SELECT SecGroupNames.SecGroupName as groupName,
+                    Users.User_ID as User_ID,
+                    Users.UserLogin as UserLogin,
+                    Users.UserName as UserName,
+                    Users.UserEmail as UserEmail,
+                    Users.User_Status as User_Status
+                FROM SecGroups
+                    LEFT JOIN Users on Users.User_ID = SecGroups.UserID
+                    INNER JOIN SecGroupNames on SecGroupNames.SecGroupName_ID = SecGroups.SecGroupNameID
+                ORDER BY UserLogin" {
+                        $widTbl insert end [list {} $User_ID $groupName $UserLogin $UserName $UserEmail $User_Status]
+                    }
+>>>>>>> affe2cecf50b4ceedf0aa7c04a7ee38ed84fe447
 } ;# eAssistSetup::populateSecUsersEdit
 
 proc eAssistSetup::writeSecUsers {method widTbl widRow userGroup userName userLogin userPasswd {userEmail ""} {userStatus 1} {userID ""}} {
@@ -360,8 +379,13 @@ proc eAssistSetup::writeSecUsers {method widTbl widRow userGroup userName userLo
     # Write user data to database
     ea::db::writeUser $method $userGroup $userName $userLogin $pass $salt $userEmail $userStatus $userID
     
+<<<<<<< HEAD
     # Update the widget
     eAssistSetup::populateSecUsersEdit -update $widTbl $widRow $userLogin
+=======
+    ## Populate new/updated entry in tablelist
+    $widTbl insert $widRow "{} [ea::db::getUser $method $userID]"
+>>>>>>> affe2cecf50b4ceedf0aa7c04a7ee38ed84fe447
 
     
 } ;# eAssistSetup::writeSecUsers
@@ -457,7 +481,13 @@ proc ea::db::admin::addUserToGroup {userLogin userModule} {
     set module [db eval "SELECT SecGroupName_ID FROM SecGroupNames WHERE SecGroupName = '$userModule'"]
     
     # Delete all records if they already exist
+<<<<<<< HEAD
     db eval "DELETE FROM SecGroups WHERE UserID = $userid"
+=======
+    db eval "DELETE FROM SecGroups
+                WHERE SecGroupNameID = $module
+                AND UserID = $userid"
+>>>>>>> affe2cecf50b4ceedf0aa7c04a7ee38ed84fe447
 
     # Now insert
     db eval "INSERT OR ABORT INTO SecGroups (SecGroupNameID, UserID)

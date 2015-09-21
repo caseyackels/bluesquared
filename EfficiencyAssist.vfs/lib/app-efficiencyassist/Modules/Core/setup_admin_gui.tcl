@@ -286,7 +286,11 @@ proc eAssistSetup::admin_GUI {args} {
     bind [$widTmp(sec,users_f2).listbox bodytag] <Double-1> {
         set widRow [$widTmp(sec,users_f2).listbox curselection]
         # Reconfigure button
+<<<<<<< HEAD
         $widTmp(sec,users_f1).btn0 configure -text [mc "Update"] -command {eAssistSetup::writeSecUsers -update $widTmp(sec,users_f2).listbox $widRow \
+=======
+        $widTmp(sec,users_f1).btn0 configure -text [mc "Update"] -command {eAssistSetup::writeSecUsers -update $widTmp(sec,users_f2).listbox [$widTmp(sec,users_f2).listbox curselection] \
+>>>>>>> affe2cecf50b4ceedf0aa7c04a7ee38ed84fe447
                                                                                 $widSec(users,Group) $widSec(users,UserName) $widSec(users,UserLogin) $widSec(users,UserPwd) \
                                                                                 $widSec(users,UserEmail) $widSec(users,User_Status) $widSec(users,User_ID)
                                                         $widTmp(sec,users_f1).btn0 configure -text [mc "Add"]
