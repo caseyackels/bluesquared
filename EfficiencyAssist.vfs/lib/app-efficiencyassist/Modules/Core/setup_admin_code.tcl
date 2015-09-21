@@ -263,11 +263,7 @@ proc eAssistSetup::populateSecUsersEdit {widTbl} {
     global log
 
     $widTbl delete 0 end
-    
-    #db eval "SELECT User_ID, UserLogin, UserName, UserEmail, User_Status FROM Users" {
-    #    $widTbl insert end [list {} $User_ID $UserLogin $UserName $UserEmail $User_Status]
-    #}
-    
+
     db eval "SELECT SecGroupNames.SecGroupName as groupName,
                     Users.User_ID as User_ID,
                     Users.UserLogin as UserLogin,
@@ -276,10 +272,10 @@ proc eAssistSetup::populateSecUsersEdit {widTbl} {
                     Users.User_Status as User_Status
                 FROM SecGroups
                     LEFT JOIN Users on Users.User_ID = SecGroups.UserID
-                    INNER JOIN SecGroupNames on SecGroupNames.SecGroupName_ID = SecGroups.SecGroupNameID" {
+                    INNER JOIN SecGroupNames on SecGroupNames.SecGroupName_ID = SecGroups.SecGroupNameID
+                ORDER BY UserLogin" {
                         $widTbl insert end [list {} $User_ID $groupName $UserLogin $UserName $UserEmail $User_Status]
-                }
-
+                    }
 } ;# eAssistSetup::populateSecUsersEdit
 
 proc eAssistSetup::writeSecUsers {method widTbl widRow userGroup userName userLogin userPasswd {userEmail ""} {userStatus 1} {userID ""}} {
@@ -356,7 +352,7 @@ proc eAssistSetup::writeSecUsers {method widTbl widRow userGroup userName userLo
     # Write user data to database
     ea::db::writeUser $method $userGroup $userName $userLogin $pass $salt $userEmail $userStatus $userID
     
-    # Populate new/updated entry in tablelist
+    ## Populate new/updated entry in tablelist
     $widTbl insert $widRow "{} [ea::db::getUser $method $userID]"
 
     
