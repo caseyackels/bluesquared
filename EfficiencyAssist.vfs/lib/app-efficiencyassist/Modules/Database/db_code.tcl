@@ -1121,7 +1121,7 @@ proc ea::db::getGroups {mode {status -active}} {
     return [db eval "SELECT $col FROM SecGroupNames WHERE Status = $actStatus"]
 
 } ;# ea::db::getGroups -name -active
-<<<<<<< HEAD
+
 proc ea::db::getUserAccess {args} {
 	#****if* getUserAccess/ea::db
 	# CREATION DATE
@@ -1220,5 +1220,3 @@ proc ea::db::getModInfo {args} {
 	
 	return [join $value]
 } ;# ea::db::getModInfo
-=======
->>>>>>> affe2cecf50b4ceedf0aa7c04a7ee38ed84fe447

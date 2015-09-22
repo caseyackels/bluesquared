@@ -167,7 +167,7 @@ proc eAssistSetup::admin_GUI {args} {
                                         0 "..." center
                                         0 "Database ID" center
                                         0 "Group" center
-                                        0 "Active" center }\
+                                        0 "Active" center } \
                                         -showlabels yes \
                                         -stripebackground lightblue \
                                         -exportselection yes \
@@ -246,7 +246,7 @@ proc eAssistSetup::admin_GUI {args} {
                                         0 "Login" center
                                         0 "User Name" center
                                         0 "Email" center
-                                        0 "Active" center }\
+                                        0 "Active" center } \
                                         -showlabels yes \
                                         -stripebackground lightblue \
                                         -exportselection yes \
@@ -258,8 +258,8 @@ proc eAssistSetup::admin_GUI {args} {
                                         ] -sticky news -column 0 -row 0
     
     $widTmp(sec,users_f2).listbox columnconfigure 0 -name wid_id \
-                                            -showlinenumbers 1 \
-                                            -labelalign center
+                                                    -showlinenumbers 1 \
+                                                    -labelalign center
     $widTmp(sec,users_f2).listbox columnconfigure 1 -name User_ID
     $widTmp(sec,users_f2).listbox columnconfigure 2 -name Group -width 20
     $widTmp(sec,users_f2).listbox columnconfigure 3 -name UserLogin -width 20
@@ -277,24 +277,21 @@ proc eAssistSetup::admin_GUI {args} {
     ::autoscroll::autoscroll $widTmp(sec,users_f2).scrolly
     ::autoscroll::autoscroll $widTmp(sec,users_f2).scrollx
     
-    #eAssistSetup::populateSecUsersEdit -populate $widTmp(sec,users_f2).listbox
+
     $widTmp(sec,users_f2).listbox delete 0 end
-    #$widTmp(sec,users_f2).listbox insert end "{} [eAssistSetup::populateSecUsersEdit -populate ]"
     eAssistSetup::populateSecUsersEdit -populate $widTmp(sec,users_f2).listbox
     
     ## Binding (double-click puts the data into the fields)
     bind [$widTmp(sec,users_f2).listbox bodytag] <Double-1> {
         set widRow [$widTmp(sec,users_f2).listbox curselection]
         # Reconfigure button
-<<<<<<< HEAD
-        $widTmp(sec,users_f1).btn0 configure -text [mc "Update"] -command {eAssistSetup::writeSecUsers -update $widTmp(sec,users_f2).listbox $widRow \
-=======
+        #$widTmp(sec,users_f1).btn0 configure -text [mc "Update"] -command {eAssistSetup::writeSecUsers -update $widTmp(sec,users_f2).listbox $widRow}
         $widTmp(sec,users_f1).btn0 configure -text [mc "Update"] -command {eAssistSetup::writeSecUsers -update $widTmp(sec,users_f2).listbox [$widTmp(sec,users_f2).listbox curselection] \
->>>>>>> affe2cecf50b4ceedf0aa7c04a7ee38ed84fe447
                                                                                 $widSec(users,Group) $widSec(users,UserName) $widSec(users,UserLogin) $widSec(users,UserPwd) \
                                                                                 $widSec(users,UserEmail) $widSec(users,User_Status) $widSec(users,User_ID)
-                                                        $widTmp(sec,users_f1).btn0 configure -text [mc "Add"]
-                                                        ea::code::admin::initWidSecArray -clear}
+                                                                            $widTmp(sec,users_f1).btn0 configure -text [mc "Add"]
+                                                                            ea::code::admin::initWidSecArray -clear
+                                                                        }
                                                 
 
         set widRow [$widTmp(sec,users_f2).listbox curselection]
