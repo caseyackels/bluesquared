@@ -3,6 +3,7 @@
 
 ## Namespace
 # ea::gui::pref
+package provide eAssist_Preferences 1.0
 
 proc ea::gui::pref::bm_reports {args} {
     #****if* bm_reports/ea::gui::pref

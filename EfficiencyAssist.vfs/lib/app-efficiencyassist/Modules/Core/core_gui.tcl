@@ -286,6 +286,7 @@ proc eAssist::buttonBarGUI {Module} {
     }
 
     # Adding menu items that should always be shown
+    $mb.file add command -label [mc "Preferences"] -command {ea::gui::pref::startPref}
     $mb.file add command -label [mc "Change User"] -command {lib::showPwordWindow}
     $mb.file add command -label [mc "Exit"] -command {eAssistSetup::SaveGlobalSettings ; exit}
     

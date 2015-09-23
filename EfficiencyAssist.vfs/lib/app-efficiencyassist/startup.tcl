@@ -120,8 +120,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	namespace eval ea::code::pref {}
 	namespace eval ea::db::pref {}
 	namespace eval ea::gui::pref {}
-
-
+	
 	## Start the Package Require
 	# System Packages
 	package require msgcat

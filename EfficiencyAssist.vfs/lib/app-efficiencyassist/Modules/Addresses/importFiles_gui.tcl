@@ -305,6 +305,10 @@ proc importFiles::initMenu {} {
     if {[winfo exists $mb.modMenu.quick]} {
         destroy $mb.modMenu.quick
     }
+    
+    if {[winfo exists $mb.modMenu.validate]} {
+        destroy $mb.modMenu.validate
+    }
 
     if {[winfo exists $mb.file.project]} {
         destroy $mb.file.project
@@ -312,6 +316,10 @@ proc importFiles::initMenu {} {
     
     if {[winfo exists $mb.file.reports]} {
         destroy $mb.file.reports
+    }
+    
+    if {[winfo exists $mb.file.job]} {
+        destroy $mb.file.job
     }
     
     $mb.modMenu delete 0 end
@@ -362,9 +370,9 @@ proc importFiles::initMenu {} {
     #$mb.modMenu add command -label [mc "Split"] -command {eAssistHelper::splitVersions}
     $mb.modMenu add command -label [mc "Manage Customers..."] -command {customer::manage}
     
-    $mb.modMenu add separator
-    
-    $mb.modMenu add command -label [mc "Preferences"] -command {eAssistPref::launchPreferences}
+    #$mb.modMenu add separator
+    #
+    #$mb.modMenu add command -label [mc "Preferences"] -command {ea::gui::pref::startPref}
 	
     #${log}::debug --END -- [info level 1]
 } ;# importFiles::initMenu
