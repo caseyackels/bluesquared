@@ -3,266 +3,170 @@
 # File Initial Date: 09 30,2013
 # Dependencies: 
 #-------------------------------------------------------------------------------
-#
-# Subversion
-#
-# $Revision: 468 $
-# $LastChangedBy: casey.ackels@gmail.com $
-# $LastChangedDate: 2015-02-06 13:20:21 -0800 (Fri, 06 Feb 2015) $
-#
-########################################################################################
+#} ;# eAssistPref::launchPrefbox_labels
 
-##
-## - Overview
-# core file for preferences to launch from
-
-## Coding Conventions
-# - Namespaces: Firstword_Secondword
-
-# - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
-#   will be uppercase. I.E sourceFiles, sourceFileExample
-
-namespace eval eAssistPref {}
-
-proc eAssistPref::launchPreferences {} {
-    #****f* launchPreferences/eAssistPref
+proc ea::gui::pref::startPref {} {
+    #****if* startPref/ea::gui::pref
+    # CREATION DATE
+    #   09/21/2015 (Monday Sep 21)
+    #
     # AUTHOR
     #	Casey Ackels
     #
     # COPYRIGHT
-    #	(c) 2011-2013 Casey Ackels
-    #
-    # FUNCTION
-    #	Launch the gui for the preferences. This is just a skeleton to create the window.
-    #
-    # SYNOPSIS
-    #
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #	
-    #
+    #	(c) 2015 Casey Ackels
+    #   
     # NOTES
-    #
-    # SEE ALSO
-    #
+    #   Launches the Preferences - Only displays preferences for the modules the user is allowed to view. If they can't modify/delete, then the widgets will be greyed out.
+    #   
     #***
-    global log program pref settings
-	
-    toplevel .preferences
-    wm transient .preferences .
-    wm title .preferences [mc "$settings(currentModule) Preferences"]
+    global log user gui program
+    
+    # Setup window
+    set w [toplevel .pref]
+    wm transient $w .
+    wm title $w [mc "User Preferences"]
 
     # Put the window in the center of the parent window
     set locX [expr {[winfo width . ] / 3 + [winfo x .]}]
     set locY [expr {[winfo height . ] / 3 + [winfo y .]}]
-    wm geometry .preferences +${locX}+${locY}
+    wm geometry $w 680x400+${locX}+${locY}
 
-    focus .preferences  
+    focus $w
     
-    ##
-    ## Parent Frame
-    ##
-    set pref(frame0) [ttk::frame .preferences.frame0]
-    pack $pref(frame0) -expand yes -fill both -pady 5p -padx 5p
-
-    eAssistPref::launchPref[string tolower $settings(currentModule_machine)]
+    # Create navigation tree
+    set gui(pref,nav) [ttk::frame $w.nav]
+    pack $gui(pref,nav) -fill both -side left -anchor nw -padx 5p -pady 5p -ipady 2p
     
-    set btnBar [ttk::frame .preferences.btnBar]
-    pack $btnBar -side bottom -anchor e -pady 8p -padx 5p
+    # Create main frame for all child widgets
+    # This will be populated by the respective functions
+    set gui(pref,container) [ttk::frame $w.frame]
+    pack $gui(pref,container) -expand yes -fill both -anchor n -padx 5p -pady 5p -ipady 2p
     
-    ttk::button $btnBar.change -text [mc "Change"] -command {lib::showPwordWindow .preferences.frame0}
-    ttk::button $btnBar.ok -text [mc "OK"] -command {lib::savePreferences; destroy .preferences}
-    ttk::button $btnBar.cancel -text [mc "Cancel"] -command {destroy .preferences}
+    # Button Bar
+    set gui(pref,btnBar) [ttk::frame .pref.btnBar]
+    pack $gui(pref,btnBar) -side bottom -anchor e -pady 8p -padx 5p
     
-    grid $btnBar.change -column 0 -row 3 -sticky nse -padx 20p
-    grid $btnBar.ok -column 1 -row 3 -sticky nse -padx 8p
-    grid $btnBar.cancel -column 2 -row 3 -sticky nse 
+    grid [ttk::button $gui(pref,btnBar).ok -text [mc "OK"] -command {lib::savePreferences; destroy .pref} -state disable] -column 1 -row 3 -sticky nse -padx 8p
+    grid [ttk::button $gui(pref,btnBar).cancel -text [mc "Cancel"] -command {destroy .pref}] -column 2 -row 3 -sticky nse
+    
+    
+    # Populate the nav frame
+    tablelist::tablelist $gui(pref,nav).tbl -columns {18 ""} \
+                                                        -background white \
+                                                        -exportselection yes \
+                                                        -showlabels no \
+                                                        -yscrollcommand [list $gui(pref,nav).scrolly set] \
+                                                        -xscrollcommand [list $gui(pref,nav).scrollx set]   
 
-} ;#eAssistPref::launchPreferences
+    grid $gui(pref,nav).tbl -column 0 -row 0 -sticky news
+    grid columnconfigure $gui(pref,nav) $gui(pref,nav).tbl -weight 1
+    grid rowconfigure $gui(pref,nav) $gui(pref,nav).tbl -weight 1
+    
+    ttk::scrollbar $gui(pref,nav).scrolly -orient v -command [list $gui(pref,nav).tbl yview]
+    ttk::scrollbar $gui(pref,nav).scrollx -orient h -command [list $gui(pref,nav).tbl xview]
+    
+    # Enable the 'autoscrollbar'
+    ::autoscroll::autoscroll $gui(pref,nav).scrolly
+    ::autoscroll::autoscroll $gui(pref,nav).scrollx
+    
 
+    # Insert Groups
+    set userMods [ea::db::getUserAccess r]
+    ${log}::debug userMods: $userMods
+    
+    foreach mod $userMods {
+        set modCode [db eval "SELECT ModuleCode FROM Modules WHERE ModuleName = '$mod'"]
+        set mod [join $mod ""]
+        # Inserting the main group name here
+        $gui(pref,nav).tbl insertchildlist root end [list $mod]
 
-proc eAssistPref::launchPrefbatch_maker {} {
-    #****f* launchPrefbatch_maker/eAssistPref
+        if {$program($modCode,groups) ne ""} {
+            ${log}::debug Making submenus: $mod / $modCode
+            ea::gui::pref::nav $modCode $program($modCode,groups)
+        }
+    }
+    
+    bind $gui(pref,nav).tbl <<TablelistSelect>> {ea::gui::pref::display %W}
+    
+    # MAYBE? This should be set to remember the last position that the user was on?
+    $gui(pref,nav).tbl selection clear 0 end
+    $gui(pref,nav).tbl selection set 1
+    #ea::gui::pref::[string tolower [$gui(pref,nav).tbl rowcget [$gui(pref,nav).tbl curselection] -name]]
+    ea::gui::pref::display $gui(pref,nav).tbl
+
+} ;# ea::gui::pref::startPref
+
+proc ea::gui::pref::display {nav} {
+    #****if* display/ea::gui::pref
+    # CREATION DATE
+    #   09/21/2015 (Monday Sep 21)
+    #
     # AUTHOR
     #	Casey Ackels
     #
     # COPYRIGHT
-    #	(c) 2011-2013 Casey Ackels
-    #
-    # FUNCTION
-    #	display the address preferences
-    #
-    # SYNOPSIS
-    #
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #	
-    #
+    #	(c) 2015 Casey Ackels
+    #   
     # NOTES
-    #   These are set per computer. So we cannot save these values to the same file that we save the Setup config to.
-    #
-    # SEE ALSO
-    #
+    #   Populate the menu in  ea::db::init_vars
+    #   
     #***
-    global log pref mySettings settings
-    # Reset geometry
-    wm geometry .preferences 650x325
+    global log user
 
-    ##
-    ## Notebook
-    ##
-    set pref(nb) [ttk::notebook $pref(frame0).nb]
-    pack $pref(nb) -expand yes -fill both
+    #${log}::debug Selection: [$nav curselection] [$nav get [$nav curselection]] [$nav rowcget [$nav curselection] -name ]
 
-    # Tab setup is in the corresponding proc
-    ttk::notebook::enableTraversal $pref(nb)
-	
-    # Setup the tabs
-    $pref(nb) add [ttk::frame $pref(nb).f1] -text [mc "File Paths"]
-    $pref(nb) add [ttk::frame $pref(nb).f2] -text [mc "Logging"]
-
-    $pref(nb) select $pref(nb).f1
+    set group [string tolower [$nav rowcget [$nav curselection] -name ]]
+    ${log}::debug Group: $group
     
-    ##
-    ## - Tab1
-    ##
-    if {![info exists mySettings(job,fileName)]} {set mySettings(job,fileName) "%number %title %name"}
+    set mod [ea::db::getModInfo -name [lindex [split $group _] 0]]
+    ${log}::debug mod: $mod
     
-    set tab1 [ttk::labelframe $pref(nb).f1.tab1 -text [mc "File Paths"]]
-    pack $tab1 -expand yes -fill both -padx 5p -pady 5p
+    set modAccess [ea::db::getModAccess $user(id) $mod]
+    ${log}::debug modAccess: $modAccess
     
-    ttk::label $tab1.sourceText -text [mc "Source Import Files"]
-    ttk::entry $tab1.sourceEntry -textvariable mySettings(sourceFiles)
-    ttk::button $tab1.sourceButton -text ... -command {set mySettings(sourceFiles) [eAssist_Global::OpenFile [mc "Choose Directory"] [pwd] dir]; ${log}::debug OpenFile: $mySettings(sourceFiles)}
+    # Add a new entry below, then  make sure the 'menu' item is also listed. look at notes above.
+    switch -- $group {
+        bl_filepaths    {ea::gui::pref::bl_filepaths $modAccess}
+        bm_filepaths    {ea::gui::pref::bm_filepaths $modAccess}
+        bm_reports      {${log}::debug Launching Reports; ea::gui::pref::bm_reports $modAccess}
+        bm_exports      {${log}::debug Launching Exports}
+        bm_misc         {${log}::debug Launching Misc}
+        default         {}
+    }
 
-    ttk::label $tab1.outFilesText -text [mc "Formatted Import Files"]
-    ttk::entry $tab1.outFilesEntry -textvariable mySettings(outFilePath)
-    ttk::button $tab1.outFilesButton -text ... -command {set mySettings(outFilePath) [eAssist_Global::OpenFile [mc "Choose Directory"] [pwd] dir]; ${log}::debug OpenFile: $mySettings(outFilePath)} 
+} ;# ea::gui::pref::display
 
-    ttk::label $tab1.txt -text [mc "Output File Name"]
-    ttk::entry $tab1.entry -textvariable mySettings(job,fileName)
-    ttk::label $tab1.txt2 -text "Job Number: %number\nJob Title: %title\nJob Name: %name"
-	
-	
-    #---- Grid
-    grid $tab1.sourceText -column 0 -row 0 -sticky e -padx 5p -pady 5p
-    grid $tab1.sourceEntry -column 1 -row 0 -sticky ew -padx 5p -pady 5p
-    grid $tab1.sourceButton -column 2 -row 0 -sticky e -padx 5p -pady 5p
-
-    grid $tab1.outFilesText -column 0 -row 1 -sticky e -padx 5p -pady 5p
-    grid $tab1.outFilesEntry -column 1 -row 1 -sticky ew -padx 5p -pady 5p
-    grid $tab1.outFilesButton -column 2 -row 1 -sticky e -padx 5p -pady 5p
-	
-    grid $tab1.txt -column 0 -row 2 -sticky e -padx 5p -pady 5p
-    grid $tab1.entry -column 1 -row 2 -sticky ew -padx 5p -pady 5p
-    grid $tab1.txt2 -column 0 -columnspan 3 -row 3 -sticky ew -padx 5p -pady 5p
-
-    grid columnconfigure $tab1 1 -weight 2
-    
-    ##
-    ## - Tab2
-    ##
-    set tab2 [ttk::labelframe $pref(nb).f2.tab2 -text [mc "Logging"]]
-    pack $tab2 -expand yes -fill both -pady 5p -padx 5p
-
-} ;# eAssistPref::launchPrefbatch_maker
-
-proc eAssistPref::launchPrefbox_labels {} {
-    #****f* launchPrefbox_labels/eAssistPref
+proc ea::gui::pref::nav {mod args} {
+    #****if* BatchMaker/ea::gui::pref
+    # CREATION DATE
+    #   09/21/2015 (Monday Sep 21)
+    #
     # AUTHOR
     #	Casey Ackels
     #
     # COPYRIGHT
-    #	(c) 2011-2014 Casey Ackels
-    #
-    # FUNCTION
-    #	Preferences for creating box labels
-    #
-    # SYNOPSIS
-    #
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #	
-    #
+    #	(c) 2015 Casey Ackels
+    #   
     # NOTES
-    #
-    # SEE ALSO
-    #
+    #   Add's items to the navigation tree
+    #   mod - module
+    #   args = list of subgroups
     #***
-    global log pref mySettings
-	
-	wm geometry .preferences 450x275
-	
-	ttk::label $pref(frame0).txt1 -text [mc "Bartender Path"]
-	ttk::entry $pref(frame0).entry1 -width 15 -textvariable mySettings(path,bartender)
-	ttk::button $pref(frame0).btn1 -text "..." -command {set mySettings(path,bartender) [eAssist_Global::OpenFile [mc "Bartender Path"] [pwd] file .exe]}
-	
-	grid $pref(frame0).txt1 -column 0 -row 0 -pady 5p -padx 5p -sticky e
-	grid $pref(frame0).entry1 -column 1 -row 0 -sticky ew
-	grid $pref(frame0).btn1 -column 2 -row 0
-	
-	ttk::label $pref(frame0).txt2 -text [mc "Label Directory"] 
-	ttk::entry $pref(frame0).entry2 -width 15 -textvariable mySettings(path,labelDir)
-	ttk::button $pref(frame0).btn2 -text "..." -command {set mySettings(path,labelDir) [eAssist_Global::OpenFile [mc "Choose Directory"] [pwd] dir]}
-	
-	grid $pref(frame0).txt2 -column 0 -row 1 -sticky e
-	grid $pref(frame0).entry2 -column 1 -row 1 -sticky ew
-	grid $pref(frame0).btn2 -column 2 -row 1
-	
-	ttk::label $pref(frame0).txt3 -text [mc "Wordpad"]
-	ttk::entry $pref(frame0).entry3 -width 15 -textvariable mySettings(path,wordpad)
-	ttk::button $pref(frame0).btn3 -text "..." -command {set mySettings(path,wordpad) [eAssist_Global::OpenFile [mc "Wordpad Path"] [pwd] file .exe]}
-	
-	grid $pref(frame0).txt3 -column 0 -row 2 -sticky e
-	grid $pref(frame0).entry3 -column 1 -row 2 -sticky ew
-	grid $pref(frame0).btn3 -column 2 -row 2
-	
-	ttk::label $pref(frame0).txt4 -text [mc "Printer Path"]
-	ttk::entry $pref(frame0).entry4 -width 15 -textvariable mySettings(path,printer)
-	#ttk::button $pref(frame0).btn4 -text "..." -command {set mySettings(path,printer) [eAssist_Global::OpenFile [mc "Choose Directory"] [pwd] dir]}
-		tooltip::tooltip $pref(frame0).entry4 [mc "i.e. \\vm-fileprint\\shipping-time"]
-	
-	grid $pref(frame0).txt4 -column 0 -row 3 -sticky e
-	grid $pref(frame0).entry4 -column 1 -row 3 -sticky ew
-	#grid $pref(frame0).btn4 -column 2 -row 3
-	
-	ttk::label $pref(frame0).txt5 -text [mc "Output file Path"]
-	ttk::entry $pref(frame0).entry5 -width 15 -textvariable mySettings(path,labelDBfile)
-		tooltip::tooltip $pref(frame0).entry5 [mc "The path to the DB that the Bartender Label is pointed to"]
-	ttk::button $pref(frame0).btn5 -text "..." -command {set mySettings(path,labelDBfile) [eAssist_Global::OpenFile [mc "Label DB Path"] [pwd] dir]}
-	
-	grid $pref(frame0).txt5 -column 0 -row 4 -sticky e
-	grid $pref(frame0).entry5 -column 1 -row 4 -sticky ew
-	grid $pref(frame0).btn5 -column 2 -row 4
-	
-	ttk::label $pref(frame0).txt6 -text [mc "Output file Name"]
-	ttk::entry $pref(frame0).entry6 -width 15 -textvariable mySettings(name,labelDBfile)
-		tooltip::tooltip $pref(frame0).entry6 [mc "The DB file name that the Bartender Label needs. Don't include an extension. We add '.csv' to the name."]
-	
-	grid $pref(frame0).txt6 -column 0 -row 5 -sticky e
-	grid $pref(frame0).entry6 -column 1 -row 5 -sticky ew
-	
-	ttk::label $pref(frame0).txt7 -text [mc "Break down File"]
-	ttk::entry $pref(frame0).entry7 -width 15 -textvariable mySettings(path,bdfile)
-		tooltip::tooltip $pref(frame0).entry7 [mc "Choose the name of your breakdown file. This file is used to send to the printer using WordPad."]
-		
-	grid $pref(frame0).txt7 -column 0 -row 6 -sticky e
-	grid $pref(frame0).entry7 -column 1 -row 6 -sticky ew
+    global log gui
+    
+    set rowCount [$gui(pref,nav).tbl size]
+    #${log}::debug rowcount: $rowCount
+    
+    set args [join $args]
+    #${log}::debug args: $args [llength $args]
+    
+    set node [expr {[$gui(pref,nav).tbl size] - 1}]
+    $gui(pref,nav).tbl insertchildlist $node end $args
 
-	
-	
-	
-	grid columnconfigure $pref(frame0) 1 -weight 1
-	
-	eAssist_Global::widgetState disabled $pref(frame0)
-	
-} ;# eAssistPref::launchPrefbox_labels
+    foreach group $args {
+        $gui(pref,nav).tbl configrows $rowCount -name [join "$mod $group" _]
+        incr rowCount
+    }
+
+} ;# ea::gui::pref::nav

@@ -75,7 +75,6 @@ proc ea::sec::initUser {{newUser 0}} {
     
 } ;# ea::sec::initUser
 
-
 proc ea::sec::userExist {} {
     #****f* userExist/ea::sec
     # CREATION DATE
@@ -223,7 +222,6 @@ proc ea::sec::setPasswd {pass {salt 0}} {
 	return [list $passwd $salt]
     
 } ;# ea::sec::setPasswd
-
 
 proc ea::db::writeUser {method userGroup userName userLogin userPasswd userSalt {userEmail ""} {userStatus 1} {userID ""}} {
     #****f* writeUser/ea::db
@@ -571,12 +569,45 @@ proc ea::db::getPasswd {user} {
     #***
     global log
 
-#    db eval "SELECT UserPwd, UserSalt FROM Users WHERE UserLogin = '$user'" {
-#		set db_oldPasswd $UserPwd
-#		set db_oldSalt $UserSalt
-#	}
-#
-#	return [list $UserPwd $UserSalt]
 	return [db eval "SELECT UserPwd, UserSalt FROM Users WHERE UserLogin = '$user'"]
-    
 } ;# ea::db::getPasswd
+
+proc ea::sec::getAccessState {method args} {
+	#****if* getAccessState/ea::sec
+	# CREATION DATE
+	#   09/23/2015 (Wednesday Sep 23)
+	#
+	# AUTHOR
+	#	Casey Ackels
+	#
+	# COPYRIGHT
+	#	(c) 2015 Casey Ackels
+	#   
+	# NOTES
+	#   Returns what state the OK, Cancel, Delete buttons should be
+	#
+	# USAGE
+	#	$gui(pref,btnBar).ok configure -state [ea::sec::getAccessState -w $args]
+	#   
+	#***
+	global log
+
+	set args [join [join $args]]
+	
+	# Read
+	lappend access [expr {[lindex [join $args] 0] ? "normal" : "disable"}]
+	# Write
+	lappend access [expr {[lindex [join $args] 1] ? "normal" : "disable"}]
+	# Delete
+	lappend access [expr {[lindex [join $args] 2] ? "normal" : "disable"}]
+	
+	switch -- $method {
+		-r		{set accessValue [lindex $access 0]}
+		-w		{set accessValue [lindex $access 1]}
+		-d		{set accessValue [lindex $access 2]}
+		-all	{set accessValue $access}
+		default	{${log}::debug [info level 0] Parameters must be one of: -r, -w, -d, -all; return}
+	}
+
+	return $accessValue
+} ;# ea::sec::getAccessState

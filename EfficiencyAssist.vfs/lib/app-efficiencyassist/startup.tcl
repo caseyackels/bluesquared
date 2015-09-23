@@ -105,6 +105,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Modules Tools]
 	lappend ::auto_path [file join [file dirname [info script]] Modules vUpdate]
 	lappend ::auto_path [file join [file dirname [info script]] Modules Email]
+	lappend ::auto_path [file join [file dirname [info script]] Modules Preferences]
 	
 	## Init namespaces
 	namespace eval ea::sec {} ;# do not use
@@ -154,6 +155,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	package require eAssist_ModImportFiles
 	package require eAssist_ModBoxLabels
 	package require aboutwindow
+	package require eAssist_Preferences
 	
 	# non-gui elements
 	package require eAssist_tools
