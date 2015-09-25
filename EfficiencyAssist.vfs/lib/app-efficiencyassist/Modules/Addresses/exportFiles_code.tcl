@@ -239,15 +239,26 @@ proc test-sql {} {
         lappend vals \$$cons
     }
     
+    #set headerParent_tmp1 [string map {ShipVia ShipViaName} $headerParent(headerList,shippingorder)]
     foreach shiporder $headerParent(headerList,shippingorder) {
-        lappend cols "ShippingOrders.$shiporder as $shiporder"
         lappend hdr $shiporder
-        lappend vals \$$shiporder
+        lappend cols "ShippingOrders.$shiporder as $shiporder"
+        
+        if {[string tolower $shiporder] eq "shipvia"} {
+            # ShipVia and ShipViaCode are both required in the columns sent to the db. But we only want one "ShipViaCode" in the values.
+            set shiporder ShipViaCode
+            lappend cols "ShipVia.ShipViaCode as ShipViaCode"
+            lappend vals \$ShipViaCode
+        } else {
+            lappend vals \$$shiporder
+        }
     }
     
     lappend cols "Versions.VersionName as Versions"
     lappend hdr Versions
     lappend vals "\$Versions"
+    
+    ${log}::debug vals: $vals
     #${log}::debug cols: $cols
     #${log}::debug vals: $vals
     
@@ -255,6 +266,7 @@ proc test-sql {} {
     
     # Write the headers
     chan puts $fd [::csv::join "$hdr OrderType"]
+    
     
     # *** Planner import file
     $job(db,Name) eval "SELECT [join $cols ,]
@@ -264,9 +276,8 @@ proc test-sql {} {
                             INNER JOIN db1.ShipVia ON ShippingOrders.ShipVia = ShipVia.ShipViaName
                         WHERE ShippingOrders.JobInformationID = $job(Number)
                         AND ShippingOrders.AddressID NOT IN ($blacklist)" {
-                            #chan puts $fd "[::csv::join [subst $vals] Versions]"
                             set record "[subst $vals] Version"
-                            ${log}::debug [::csv::join $record]
+                            #${log}::debug [::csv::join $record]
                             chan puts $fd [::csv::join $record]
                         }
                         
@@ -287,6 +298,7 @@ proc test-sql {} {
     #                        ShippingOrders.ShipDate, 
     #                        ShippingOrders.Quantity, 
     #                        ShippingOrders.ShipVia,
+    #                        ShipVia.ShipViaCode,
     #                        ShippingOrders.ArriveDate,
     #                        ShippingOrders.ContainerType,
     #                        ShippingOrders.PackageType,
@@ -297,6 +309,6 @@ proc test-sql {} {
     #                        INNER JOIN Versions ON Addresses.Versions = Versions.Version_ID
     #                        INNER JOIN db1.ShipVia ON ShippingOrders.ShipVia = ShipVia.ShipViaName
     #                    WHERE ShippingOrders.JobInformationID = $job(Number)" {
-    #                        puts "$Company $Attention $Address1 $Address2 $Address3 $City"
+    #                        puts "$Company $Attention $Address1 $Address2 $Address3 $City $ShipViaCode"
     #                    }
 }
