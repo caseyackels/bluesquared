@@ -11,6 +11,7 @@
 # $LastChangedDate: 2015-03-11 17:33:06 -0700 (Wed, 11 Mar 2015) $
 #
 ########################################################################################
+# ea::code::export
 
 namespace eval export {}
 
@@ -195,7 +196,9 @@ proc export::toFile {id fd} {
 
     # Write the data
     foreach item $id {
-            set record [$job(db,Name) eval "select [join $tmpHdr ,] from Addresses INNER JOIN db1.ShipVia ON Addresses.ShipVia = db1.ShipVia.ShipViaName WHERE OrderNumber='$item'"]
+            set record [$job(db,Name) eval "SELECT [join $tmpHdr ,] FROM Addresses
+                                                INNER JOIN db1.ShipVia ON Addresses.ShipVia = db1.ShipVia.ShipViaName
+                                            WHERE OrderNumber='$item'"]
             #${log}::debug $record
             chan puts $fd [::csv::join "$record Version"]
     }
@@ -204,4 +207,96 @@ proc export::toFile {id fd} {
     
 } ;# export::toFile
 
+proc test {} {
+    set cols [db eval "SELECT dbColName FROM HeadersConfig WHERE widExportable = 1 ORDER BY widUIPositionWeight, dbColName DESC"]
+    puts $cols
+}
 
+proc test-sql {} {
+    global log job headerParent
+    
+    # Assemble the file names, and issue any warnings
+    set fName [ea::tools::formatFileName]
+    
+    set saveLocation [join [$job(db,Name) eval "SELECT JobSaveLocation FROM JobInformation WHERE JobInformation_ID = $job(Number)"]]
+    set fd [open [file join $saveLocation $fName.csv] w]
+    
+    $job(db,Name) eval "SELECT AddressID FROM ShippingOrders
+                            INNER JOIN Addresses on Addresses.SysAddresses_ID = ShippingOrders.AddressID
+                            WHERE ShippingOrders.JobInformationID = '$job(Number)'
+                        AND Addresses.DistributionType LIKE '%import%'" {
+                            lappend blacklist '$AddressID'
+                        }
+    
+    set blacklist [join $blacklist ,]
+    
+    foreach cons $headerParent(headerList,consignee) {
+        # Creating the list of columns to query
+        lappend cols "Addresses.$cons as $cons"
+        # Creating the list of header names
+        lappend hdr $cons
+        # Creating the list of variables to display the values
+        lappend vals \$$cons
+    }
+    
+    foreach shiporder $headerParent(headerList,shippingorder) {
+        lappend cols "ShippingOrders.$shiporder as $shiporder"
+        lappend hdr $shiporder
+        lappend vals \$$shiporder
+    }
+    
+    lappend cols "Versions.VersionName as Versions"
+    lappend hdr Versions
+    lappend vals "\$Versions"
+    #${log}::debug cols: $cols
+    #${log}::debug vals: $vals
+    
+    $job(db,Name) eval "ATTACH 'EA_setup.edb' as db1"
+    
+    # Write the headers
+    chan puts $fd [::csv::join "$hdr OrderType"]
+    
+    # *** Planner import file
+    $job(db,Name) eval "SELECT [join $cols ,]
+                        FROM ShippingOrders
+                            INNER JOIN Addresses ON Addresses.SysAddresses_ID = ShippingOrders.AddressID
+                            INNER JOIN Versions ON Addresses.Versions = Versions.Version_ID
+                            INNER JOIN db1.ShipVia ON ShippingOrders.ShipVia = ShipVia.ShipViaName
+                        WHERE ShippingOrders.JobInformationID = $job(Number)
+                        AND ShippingOrders.AddressID NOT IN ($blacklist)" {
+                            #chan puts $fd "[::csv::join [subst $vals] Versions]"
+                            set record "[subst $vals] Version"
+                            ${log}::debug [::csv::join $record]
+                            chan puts $fd [::csv::join $record]
+                        }
+                        
+    chan close $fd
+                        
+    #$job(db,Name) eval "SELECT Addresses.Company as Company, 
+    #                        Addresses.Attention as Attention,
+    #                        Addresses.Address1 as Address1,
+    #                        Addresses.Address2 as Address2,
+    #                        Addresses.Address3 as Address3,
+    #                        Addresses.City as City,
+    #                        Addresses.State,
+    #                        Addresses.Country,
+    #                        Addresses.Phone,
+    #                        Addresses.DistributionType,
+    #                        Addresses.Notes,
+    #                        Versions.VersionName as Versions, 
+    #                        ShippingOrders.ShipDate, 
+    #                        ShippingOrders.Quantity, 
+    #                        ShippingOrders.ShipVia,
+    #                        ShippingOrders.ArriveDate,
+    #                        ShippingOrders.ContainerType,
+    #                        ShippingOrders.PackageType,
+    #                        ShippingOrders.ShippingClass,
+    #                        ShipVia.ShipViaCode
+    #                    FROM ShippingOrders
+    #                        INNER JOIN Addresses ON Addresses.SysAddresses_ID = ShippingOrders.AddressID
+    #                        INNER JOIN Versions ON Addresses.Versions = Versions.Version_ID
+    #                        INNER JOIN db1.ShipVia ON ShippingOrders.ShipVia = ShipVia.ShipViaName
+    #                    WHERE ShippingOrders.JobInformationID = $job(Number)" {
+    #                        puts "$Company $Attention $Address1 $Address2 $Address3 $City"
+    #                    }
+}

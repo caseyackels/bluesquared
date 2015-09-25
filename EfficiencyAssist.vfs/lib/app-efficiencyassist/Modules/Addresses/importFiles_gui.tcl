@@ -76,9 +76,10 @@ proc importFiles::eAssistGUI {} {
     # Setup the Filter array
    # eAssist_Global::launchFilters
     
+    # Set the vars
+    importFiles::initVars
 
-    
-    
+
     ##
     ## Parent Frame
     ##
