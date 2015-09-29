@@ -501,7 +501,8 @@ proc importFiles::insertIntoGUI {wid args} {
                             LEFT OUTER JOIN Versions
                                 ON Addresses.Versions = Versions.Version_ID
                             WHERE ShippingOrders.JobInformationID in ('$job(Number)')
-                            AND Addresses.SysActive = 1" {
+                            AND Addresses.SysActive = 1
+                            AND ShippingOrders.Hidden = 0" {
                                 #$wid insert end [subst $hdr_data]
                                 #${log}::debug hdr_list: $hdr_list
                                 #${log}::debug data: [subst $hdr_data]
