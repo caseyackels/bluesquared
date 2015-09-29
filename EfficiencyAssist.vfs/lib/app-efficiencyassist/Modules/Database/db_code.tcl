@@ -870,7 +870,7 @@ proc eAssist_db::leftOuterJoin {args} {
 } ;# eAssist_db::leftOuterJoin
 
 
-proc ea::db::countQuantity {titleDB jobNumber} {
+proc ea::db::countQuantity {args} {
     #****f* countQuantity/ea::db
     # CREATION DATE
     #   02/15/2015 (Sunday Feb 15)
@@ -883,8 +883,7 @@ proc ea::db::countQuantity {titleDB jobNumber} {
     #   
     #
     # SYNOPSIS
-    #   ea::db::countQuantity <db name> <job number>
-
+    #   ea::db::countQuantity -db <name> -job <number> -and <clause>
     #
     # FUNCTION
     #	Counts quantity associated with shipping orders in the Shipping Orders table, and has an active status from the Addresses table.
@@ -905,13 +904,28 @@ proc ea::db::countQuantity {titleDB jobNumber} {
     #***
     global log
 	
+	foreach {key value} $args {
+		switch -- $key {
+			-db		{set titleDB $value}
+			-job	{set jobNumber $value}
+			-and	{set and $value}
+			default	{${log}::debug [info level 0] invalid parameters, must be: -db, -job -where}
+		}
+	}
+	
 	if {$titleDB == "" || $jobNumber == ""} {${log}::notice [info level 0] [mc "Job Number or Title DB was not supplied, aborting."]; return}
 	
-	set value [$titleDB eval "SELECT SUM(Quantity) FROM ShippingOrders
+	set sql "SELECT SUM(Quantity) FROM ShippingOrders
 							INNER JOIN Addresses
 								ON AddressID = Addresses.SysAddresses_ID
-							WHERE JobInformationID = $jobNumber
-							AND Addresses.SysActive = 1"]
+							WHERE Addresses.SysActive = 1
+							AND JobInformationID = $jobNumber"
+	
+	if {[info exists and] && $and ne ""} {
+		set sql "$sql $and"
+	}
+	
+	set value [$titleDB eval $sql]
     
 	return $value
     
@@ -1220,3 +1234,56 @@ proc ea::db::getModInfo {args} {
 	
 	return [join $value]
 } ;# ea::db::getModInfo
+proc ea::db::getDistTypeConfig {args} {
+	#****if* getDistTypeConfig/ea::db
+	# CREATION DATE
+	#   09/28/2015 (Monday Sep 28)
+	#
+	# AUTHOR
+	#	Casey Ackels
+	#
+	# COPYRIGHT
+	#	(c) 2015 Casey Ackels
+	#   
+	# NOTES
+	#   This is tied to the configuration setup in the Rpt tables, and in the GUI: Setup, DistTypes
+	#   Parameters: -method Report|Export -action Single|Summarize|Default -disttype <distribution type name>
+	#   Returns: Address and ShipViaName
+	#   
+	#***
+	global log
+
+	foreach {key value} $args {
+		switch -- $key {
+			-method		{set method $value}
+			-action		{if {[string tolower $value] eq "single"} {set action "Single Entry"} else {set action $value}}
+			-disttype	{set disttype $value}
+			default		{${log}::debug [info level 0] args: $args is not a valid parameter. Should be: -method, -action, -disttype}
+		}
+	}
+	
+	db eval "SELECT MasterAddr_Company, MasterAddr_Attn,
+				MasterAddr_Addr1, MasterAddr_Addr2, MasterAddr_Addr3,
+				MasterAddr_City, MasterAddr_StateAbbr, MasterAddr_Zip,
+				MasterAddr_CtryCode,
+				MasterAddr_Phone,
+				ShipVia.ShipViaName
+			FROM MasterAddresses
+				INNER JOIN
+					RptAddresses ON RptAddresses.MasterAddrID = MasterAddresses.MasterAddr_ID
+				INNER JOIN
+					ShipVia ON RptAddresses.ShipViaID = ShipVia.ShipVia_ID
+				INNER JOIN
+					RptConfig ON RptAddresses.RptConfigID = RptConfig.RptConfig_ID
+				INNER JOIN
+					DistributionTypes ON RptConfig.DistributionTypeID = DistributionTypes.DistributionType_ID
+				INNER JOIN
+					RptActions ON RptConfig.RptActionsID = RptActions.RptAction_ID
+				INNER JOIN
+					RptMethod ON RptActions.RptMethodID = RptMethod.RptMethod_ID
+			WHERE RptMethod.RptMethod = '$method'
+				AND RptActions.RptAction = '$action'
+				AND DistributionTypes.DistTypeName = '$disttype'"
+
+	
+} ;# ea::db::getDistTypeConfig -method Export -action Single -disttype "06. JG Mail"

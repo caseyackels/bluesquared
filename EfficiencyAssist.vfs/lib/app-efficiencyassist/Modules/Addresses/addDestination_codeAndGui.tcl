@@ -570,6 +570,9 @@ proc eAssistHelper::saveDest {modifier widRow tblPath} {
                     # Populate table
                     ea::db::populateTablelist -record new -widRow $widRow
                     
+                    # Check to see if we just added a distribution type that uses a specific address in the exported batch files
+                    #ea::code::bm::writeHiddenShipment $shipOrder(DistributionType)
+                    
                     # Reset the array
                     eAssistHelper::initShipOrderArray
         }
@@ -582,6 +585,9 @@ proc eAssistHelper::saveDest {modifier widRow tblPath} {
                         
                     # Update the table
                     ea::db::populateTablelist -record edit -widRow $widRow -id $title(shipOrder_id)
+                    
+                    # Check to see if we just added a distribution type that uses a specific address in the exported batch files
+                    #ea::code::bm::writeHiddenShipment $shipOrder(DistributionType)
         }
         -combine    {
                     ## -- Combine selected rows into one record
@@ -615,6 +621,9 @@ proc eAssistHelper::saveDest {modifier widRow tblPath} {
 	
     # Get total copies
     job::db::getTotalCopies
+    
+    # Check to see if we just added a distribution type that uses a specific address in the exported batch files
+    ea::code::bm::writeHiddenShipment $shipOrder(DistributionType)
 } ;# eAssistHelper::saveDest
 
 
@@ -777,3 +786,62 @@ proc eAssistHelper::shippingOrder {widTbl modifier} {
     }
     
 } ;# eAssistHelper::shippingOrder
+proc ea::code::bm::writeHiddenShipment {disttype} {
+    #****if* writeHiddenShipment/ea::code::bm
+    # CREATION DATE
+    #   09/28/2015 (Monday Sep 28)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   Checks the current distribution types, if we have special requirements (single address) then we'll populate the shiporder() array, and issue a write statement
+    #   title(shipOrder_id), is relied upon in ea::db::updateSingleAddressToDB
+    #***
+    global log job shipOrder title
+
+    # Retrieve the address and shipvia name
+    set disttype_addr [ea::db::getDistTypeConfig -method Export -action Single -disttype "$disttype"]
+    if {$disttype_addr eq ""} {return} ;# No address was setup, we don't need a 'hidden' record
+        set shipOrder(Company) [lindex $disttype_addr 0]
+        set shipOrder(Attention) [lindex $disttype_addr 1]
+        set shipOrder(Address1) [lindex $disttype_addr 2]
+        set shipOrder(Address2) [lindex $disttype_addr 3]
+        set shipOrder(Address3) [lindex $disttype_addr 4]
+        set shipOrder(City) [lindex $disttype_addr 5]
+        set shipOrder(State) [lindex $disttype_addr 6]
+        set shipOrder(Zip) [lindex $disttype_addr 7]
+        set shipOrder(Country) [lindex $disttype_addr 8]
+        set shipOrder(Phone) [lindex $disttype_addr 9]
+        set shipOrder(ShipVia) [lindex $disttype_addr 10]
+        set shipOrder(Notes) ""
+        #set shipOrder(PackageType)
+        #set shipOrder(ContainerType)
+        #set shipOrder(DistributionType)
+        set shipOrder(Quantity) [ea::db::countQuantity -db $job(db,Name) -job $job(Number) -and "AND Addresses.DistributionType = '$disttype' AND ShippingOrders.Hidden = 0"]
+        #set shipOrder(ShipDate)
+        #set shipOrder(ShippingClass)
+        
+        # Convert back to the version name
+        ${log}::debug Version id: $shipOrder(Versions)
+        set shipOrder(Versions) [lindex [job::db::getVersion -id $shipOrder(Versions) -active 1] 1]
+        ${log}::debug Version Name: $shipOrder(Versions)
+        
+    
+    set title(shipOrder_id) [$job(db,Name) eval "SELECT SysAddresses_ID FROM Addresses WHERE Company LIKE '%$shipOrder(Company)%'"]
+
+    if {$title(shipOrder_id) ne ""} {
+        # Address Entry already exists; update.
+        ${log}::debug Address for $shipOrder(Company) exists
+        ea::db::updateSingleAddressToDB
+
+    } else {
+        # Doesn't exist; insert.
+        ${log}::debug Address for $shipOrder(Company) doesn't exist, adding.
+        ea::db::writeSingleAddressToDB 1
+    }
+    
+} ;# ea::code::bm::writeHiddenShipment "07. UPS Import"

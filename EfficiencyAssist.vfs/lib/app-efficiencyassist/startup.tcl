@@ -121,6 +121,11 @@ proc 'eAssist_sourceReqdFiles {} {
 	namespace eval ea::db::pref {}
 	namespace eval ea::gui::pref {}
 	
+	# Batch Maker
+	namespace eval ea::code::bm {}
+	namespace eval ea::db::bm {}
+	namespace eval ea::gui::bm	{}
+	
 	## Start the Package Require
 	# System Packages
 	package require msgcat

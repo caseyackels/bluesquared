@@ -104,7 +104,8 @@ proc ea::db::populateTablelist {args} {
                                 ON Addresses.Versions = Versions.Version_ID
                             WHERE ShippingOrders.JobInformationID in ('$job(Number)')
 							AND ShippingOrders.AddressID = '$db_id'
-                            AND Addresses.SysActive = 1" {
+                            AND Addresses.SysActive = 1
+							AND ShippingOrders.Hidden = 0" {
                                 # Removal of the old row happens if we're editing (this occurs in the if-else statement above)
                                 $files(tab3f2).tbl insert $widPosition [subst $hdr_data]
                             }
@@ -114,7 +115,7 @@ proc ea::db::populateTablelist {args} {
 	unset hdr_data
 } ;# ea::db::populateTablelist
 
-proc ea::db::writeSingleAddressToDB {} {
+proc ea::db::writeSingleAddressToDB {{hidden 0}} {
 	#****if* writeSingleAddressToDB/ea::db
 	# CREATION DATE
 	#   08/26/2015 (Wednesday Aug 26)
@@ -127,6 +128,8 @@ proc ea::db::writeSingleAddressToDB {} {
 	#   
 	# NOTES
 	#   Inserts data from the shipOrder() array into the title db.
+	#   Parameters: hidden 0|1; passing Zero is option. The Database defaults to that value if nothing is entered. This is used for when we have specific transforms for
+	#	distribution types. i.e. planner import vs process shipper import
 	#   
 	#***
 	global log headerParent job shipOrder title
@@ -155,7 +158,7 @@ proc ea::db::writeSingleAddressToDB {} {
 						}
 					}
 					set shipOrder($hdr_) $data
-					#${log}::debug shipOrder($hdr_) $shipOrder($hdr_)
+					${log}::debug shipOrder($hdr_) $shipOrder($hdr_)
 				}
 			
 			# Table: Addresses
@@ -181,10 +184,13 @@ proc ea::db::writeSingleAddressToDB {} {
 	set newRow_consignee "'$sysGUID' '$sysGUID' '$histNote' $newRow_consignee"
 	
 	#${log}::debug Creating Header and data for ShippingOrders
-	set header_order_shiporder "JobInformationID AddressID $header_order_shiporder"
-	set newRow_shiporder "'$job(Number)' '$sysGUID' $newRow_shiporder"
+	set header_order_shiporder "JobInformationID AddressID Hidden $header_order_shiporder"
+	set newRow_shiporder "'$job(Number)' '$sysGUID' $hidden $newRow_shiporder"
 
+	${log}::debug Inserting into Addresses: [join $newRow_consignee ,]
 	$job(db,Name) eval "INSERT INTO Addresses ([join $header_order_consignee ,]) VALUES ([join $newRow_consignee ,])"
+	
+	${log}::debug Inserting into ShippingOrders: [join $newRow_shiporder ,]
 	$job(db,Name) eval "INSERT INTO ShippingOrders ([join $header_order_shiporder ,]) VALUES ([join $newRow_shiporder ,])"
 	
 	set title(db_address,lastid) $sysGUID

@@ -243,14 +243,15 @@ proc job::db::createDB {args} {
     # Basic setup
     # *** Table: ShippingOrders ***
     set sTable [list \
-        {ShippingOrder_ID INTEGER PRIMARY KEY AUTOINCREMENT} \
-        {JobInformationID TEXT  NOT NULL ON CONFLICT ROLLBACK
+        {ShippingOrder_ID   INTEGER PRIMARY KEY AUTOINCREMENT} \
+        {JobInformationID   TEXT  NOT NULL ON CONFLICT ROLLBACK
                                     REFERENCES JobInformation (JobInformation_ID) ON DELETE NO ACTION
                                                                                     ON UPDATE CASCADE} \
-        {AddressID        TEXT  NOT NULL ON CONFLICT ROLLBACK
+        {AddressID          TEXT  NOT NULL ON CONFLICT ROLLBACK
                                     REFERENCES Addresses (SysAddresses_ID) ON DELETE NO ACTION
                                                                             ON UPDATE CASCADE
-                                                                            UNIQUE ON CONFLICT ROLLBACK}]
+                                                                            UNIQUE ON CONFLICT ROLLBACK} \
+        {Hidden             BOOLEAN DEFAULT (0) NOT NULL ON CONFLICT ROLLBACK}]
 
     # Create the ShippingOrder table (Consignee group)
     db eval {SELECT dbColName, dbDataType FROM HeadersConfig
@@ -258,6 +259,7 @@ proc job::db::createDB {args} {
                 ORDER BY widUIPositionWeight ASC, DBColName ASC} {
         lappend sTable "$dbColName $dbDataType"
     }
+
 
     ${log}::notice Title DB: Creating Table:ShippingOrders (Group:Shipping Order, Packaging)
     $job(db,Name) eval "CREATE TABLE IF NOT EXISTS ShippingOrders ( [join $sTable ,] )"
@@ -898,7 +900,7 @@ proc job::db::getTotalCopies {} {
     #   
     #   
     # CHILDREN
-    #	N/A
+    #	ea::db::countQuantity
     #   
     # PARENTS
     #   
@@ -914,7 +916,7 @@ proc job::db::getTotalCopies {} {
 
     if {![info exists job(Number)]} {${log}::notice [info level 0] - [mc "Job Number isn't set; count label will not be updated."]; return}
     
-    set job(TotalCopies) [join [ea::db::countQuantity $job(db,Name) $job(Number)]]
+    set job(TotalCopies) [ea::db::countQuantity -db $job(db,Name) -job $job(Number) -and "AND Hidden != 1"]
     
 } ;# job::db::getTotalCopies
 
@@ -1166,3 +1168,36 @@ proc job::db::insertHistory {args} {
     
     return $histGUID
 } ;# job::db::insertHistory ?note?
+
+proc job::db::getVersion {args} {
+    #****if* getVersion/job::db
+    # CREATION DATE
+    #   09/28/2015 (Monday Sep 28)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   Returns {id VersionName}
+    #   Only one of -name OR -id can be issued
+    #***
+    global log job
+
+    set active ""
+
+    foreach {key value} $args {
+        switch -- $key {
+            -name   {set where "VersionName='${value}'"}
+            -id     {set where "Version_ID=$value"}
+            -active {set active $value}
+            default {}
+        }
+    }
+    
+    if {$active == ""} {${log}::debug Must pass the -active parameter, aborting.; return} 
+
+    return [$job(db,Name) eval "SELECT Version_ID, VersionName FROM Versions WHERE VersionActive=$active AND $where"]
+} ;# job::db::getVersion
