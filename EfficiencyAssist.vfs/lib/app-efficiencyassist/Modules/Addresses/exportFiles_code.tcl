@@ -230,6 +230,9 @@ proc test-sql {} {
     
     set blacklist [join $blacklist ,]
     
+    ${log}::debug Need to create an entry for each listed: $blacklist
+    
+    
     foreach cons $headerParent(headerList,consignee) {
         # Creating the list of columns to query
         lappend cols "Addresses.$cons as $cons"
