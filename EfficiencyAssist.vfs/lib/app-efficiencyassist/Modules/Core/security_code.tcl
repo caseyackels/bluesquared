@@ -109,7 +109,7 @@ proc ea::sec::userExist {} {
     #***
     global log env user
 	
-	set defaultGroupID 3 ;# Should add a group called "NOGROUP" for the default
+	set defaultGroupID 3 ;# Warehouse - Should add a group called "NOGROUP" for the default
 	
 	set user_Name [string tolower $env(USERNAME)]
     
@@ -121,7 +121,7 @@ proc ea::sec::userExist {} {
 		db eval "INSERT INTO Users (UserLogin, UserPwd) VALUES ('$userName', ' ')"
 		set user_id [db eval "SELECT max(User_ID) FROM Users WHERE UserLogin = '$user_Name'"]
 		
-		db eval "INSERT INTO SecGroups (SecGroupNameID, UserID) (1, $user_id)"
+		db eval "INSERT INTO SecGroups (SecGroupNameID, UserID) ($defaultGroupID, $user_id)"
 
 	} else {
 		${log}::info Found $userName in the database.
