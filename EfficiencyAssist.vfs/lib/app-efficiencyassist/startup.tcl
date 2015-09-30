@@ -126,6 +126,10 @@ proc 'eAssist_sourceReqdFiles {} {
 	namespace eval ea::db::bm {}
 	namespace eval ea::gui::bm	{}
 	
+	# Reports (not really a module)
+	namespace eval ea::code::export {}
+	
+	
 	## Start the Package Require
 	# System Packages
 	package require msgcat

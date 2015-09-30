@@ -1287,3 +1287,55 @@ proc ea::db::getDistTypeConfig {args} {
 
 	
 } ;# ea::db::getDistTypeConfig -method Export -action Single -disttype "06. JG Mail"
+proc ea::db::getDistSetup {args} {
+    #****f* getDistSetup/ea::db
+    # CREATION DATE
+    #   09/30/2015 (Wednesday Sep 30)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # USAGE
+    #   ea::db::getDistSetup args 
+    #
+    # FUNCTION
+    #	Retrieves the distribution types that match the passed in paramaters
+	#
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # EXAMPLE
+    #   ea::db::getDistSetup 
+    #
+    # NOTES
+    #   
+    #  
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+
+        # Get the distribution types that are blacklisted
+    set method Export
+    set action "Single Entry"
+    db eval "SELECT DistributionTypes.DistTypeName as DistType FROM RptConfig
+                    INNER JOIN RptActions on RptActions.RptAction_ID = RptConfig.RptActionsID
+                    INNER JOIN DistributionTypes on DistributionTypes.DistributionType_ID = RptConfig.DistributionTypeID
+                    INNER JOIN RptMethod on RptMethod.RptMethod_ID = RptActions.RptMethodID
+                WHERE RptMethod = '$method'
+                    AND RptActions.RptAction = '$action'" {
+                        lappend dist_blacklist '$DistType'
+                    }
+
+    return $dist_blacklist
+#} ;# ea::db::getDistSetup

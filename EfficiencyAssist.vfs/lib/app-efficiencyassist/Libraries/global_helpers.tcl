@@ -812,6 +812,78 @@ proc ea::tools::getGUID {args} {
 
 } ;# ea::tools::getGUID
 
+proc ea::tools::assembleHeaders {} {
+    #****f* assembleHeaders/ea::tools
+    # CREATION DATE
+    #   09/29/2015 (Tuesday Sep 29)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # USAGE
+    #   ea::tools::exportHeaders 
+    #
+    # FUNCTION
+    #	Assembles the common column names into header packages.
+    #   -cols, Returns the database column names used in 'SELECT <column names>'; the calling proc will need to [join] it with commas
+    #   -file_hdr, Returns the database columns names, without any prefixs or other formatting. This is inserted into the first line of the exported file.
+    #   -vals, Used in conjunction with -cols, this is used to grab the data out of the database which is mapped to each column.
+    #   
+    #     
+    # EXAMPLE
+    #   set headers [ea::tools::assembleHeaders]
+    #   set cols [lindex $headers 0] 
+    #
+    # NOTES
+    #   
+    #  
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log headerParent
+       
+    foreach cons $headerParent(headerList,consignee) {
+        # Creating the list of columns to query
+        lappend cols "Addresses.$cons as $cons"
+        # Creating the list of header names
+        lappend hdr $cons
+        # Creating the list of variables to display the values
+        lappend vals \$$cons
+    }
+
+    foreach shiporder $headerParent(headerList,shippingorder) {
+        lappend hdr $shiporder
+        lappend cols "ShippingOrders.$shiporder as $shiporder"
+        
+        if {[string tolower $shiporder] eq "shipvia"} {
+            # ShipVia and ShipViaCode are both required in the columns sent to the db. But we only want one "ShipViaCode" in the values.
+            set shiporder ShipViaCode
+            lappend cols "ShipVia.ShipViaCode as ShipViaCode"
+            lappend vals \$ShipViaCode
+        } else {
+            lappend vals \$$shiporder
+        }
+    }
+
+    lappend cols "Versions.VersionName as Versions"
+    lappend hdr Versions
+    lappend vals "\$Versions"
+    
+    return [list $cols $hdr $vals]
+
+        # Switch statement so we return only what we want
+    #switch -- $args {
+    #    -cols       {return $returnValues}
+    #    -file_hdr   {return $returnValues}
+    #    -vals       {return $returnValues}
+    #    default     {${log}::debug [info level 0] Invalid parameter $args. Must be one of: -cols, -hdr, -vals}
+    #}
+} ;# ea::tools::assembleHeaders
 
 proc eAssist_Global::launchFilters {} {
     #****f* launchFilters/eAssist_Global

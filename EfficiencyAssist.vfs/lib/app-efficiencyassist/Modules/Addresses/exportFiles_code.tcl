@@ -212,106 +212,212 @@ proc test {} {
     puts $cols
 }
 
-proc test-sql {} {
+proc ea::code::export::toPlanner {args} {
+    #****f* toPlanner/ea::code::export
+    # CREATION DATE
+    #   09/29/2015 (Tuesday Sep 29)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # USAGE
+    #   ea::code::export::toPlanner args 
+    #
+    # FUNCTION
+    #	Exports all valid shipments to a file, so it can be imported into Planner
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # EXAMPLE
+    #   ea::code::export::toPlanner 
+    #
+    # NOTES
+    #   REQUIREMENT: Distribution Type, Ship Via must be set in the database or else those shipments will not be exported (they don't show up in the query)
+    #  
+    # SEE ALSO
+    #   
+    #   
+    #***
     global log job headerParent
+
+    set dist_blacklist [ea::db::getDistSetup]
+    #${log}::debug BlackList - Disttype: $dist_blacklist
     
-    # Assemble the file names, and issue any warnings
-    set fName [ea::tools::formatFileName]
-    
-    set saveLocation [join [$job(db,Name) eval "SELECT JobSaveLocation FROM JobInformation WHERE JobInformation_ID = $job(Number)"]]
-    set fd [open [file join $saveLocation $fName.csv] w]
-    
+    # Get list of addressid's that are part of the blacklisted distribution types
+    # Report: requires the different address, PLUS all addresses (summarized)
+    # Export: requires the different address (single entry)
     $job(db,Name) eval "SELECT AddressID FROM ShippingOrders
                             INNER JOIN Addresses on Addresses.SysAddresses_ID = ShippingOrders.AddressID
                             WHERE ShippingOrders.JobInformationID = '$job(Number)'
-                        AND Addresses.DistributionType LIKE '%import%'" {
+                        AND Addresses.DistributionType IN ([join $dist_blacklist ,])" {
                             lappend blacklist '$AddressID'
                         }
+                        #${log}::debug Blacklist - AddressID: $blacklist
     
-    set blacklist [join $blacklist ,]
-    
-    ${log}::debug Need to create an entry for each listed: $blacklist
-    
-    
-    foreach cons $headerParent(headerList,consignee) {
-        # Creating the list of columns to query
-        lappend cols "Addresses.$cons as $cons"
-        # Creating the list of header names
-        lappend hdr $cons
-        # Creating the list of variables to display the values
-        lappend vals \$$cons
-    }
-    
-    #set headerParent_tmp1 [string map {ShipVia ShipViaName} $headerParent(headerList,shippingorder)]
-    foreach shiporder $headerParent(headerList,shippingorder) {
-        lappend hdr $shiporder
-        lappend cols "ShippingOrders.$shiporder as $shiporder"
-        
-        if {[string tolower $shiporder] eq "shipvia"} {
-            # ShipVia and ShipViaCode are both required in the columns sent to the db. But we only want one "ShipViaCode" in the values.
-            set shiporder ShipViaCode
-            lappend cols "ShipVia.ShipViaCode as ShipViaCode"
-            lappend vals \$ShipViaCode
-        } else {
-            lappend vals \$$shiporder
-        }
-    }
-    
-    lappend cols "Versions.VersionName as Versions"
-    lappend hdr Versions
-    lappend vals "\$Versions"
-    
-    ${log}::debug vals: $vals
+    #foreach cons $headerParent(headerList,consignee) {
+    #    # Creating the list of columns to query
+    #    lappend cols "Addresses.$cons as $cons"
+    #    # Creating the list of header names
+    #    lappend hdr $cons
+    #    # Creating the list of variables to display the values
+    #    lappend vals \$$cons
+    #}
+    #
+    #foreach shiporder $headerParent(headerList,shippingorder) {
+    #    lappend hdr $shiporder
+    #    lappend cols "ShippingOrders.$shiporder as $shiporder"
+    #    
+    #    if {[string tolower $shiporder] eq "shipvia"} {
+    #        # ShipVia and ShipViaCode are both required in the columns sent to the db. But we only want one "ShipViaCode" in the values.
+    #        set shiporder ShipViaCode
+    #        lappend cols "ShipVia.ShipViaCode as ShipViaCode"
+    #        lappend vals \$ShipViaCode
+    #    } else {
+    #        lappend vals \$$shiporder
+    #    }
+    #}
+    #
+    #lappend cols "Versions.VersionName as Versions"
+    #lappend hdr Versions
+    #lappend vals "\$Versions"
+    set headers [ea::tools::assembleHeaders]
+        set cols [lindex $headers 0] 
+        set hdr [lindex $headers 1] 
+        set vals [lindex $headers 2] 
+
     #${log}::debug cols: $cols
     #${log}::debug vals: $vals
     
-    $job(db,Name) eval "ATTACH 'EA_setup.edb' as db1"
+    catch {$job(db,Name) eval "ATTACH 'EA_setup.edb' as db1"}
+    
+    # Assemble the file names, and issue any warnings
+    set fName [ea::tools::formatFileName]-planner
+    set fd [open [file join $job(JobSaveFileLocation) $fName.csv] w]
     
     # Write the headers
-    chan puts $fd [::csv::join "$hdr OrderType"]
+    chan puts $fd [::csv::join "$hdr OrderType"] 
     
-    
-    # *** Planner import file
+    # *** Basic Shipments
     $job(db,Name) eval "SELECT [join $cols ,]
                         FROM ShippingOrders
                             INNER JOIN Addresses ON Addresses.SysAddresses_ID = ShippingOrders.AddressID
                             INNER JOIN Versions ON Addresses.Versions = Versions.Version_ID
                             INNER JOIN db1.ShipVia ON ShippingOrders.ShipVia = ShipVia.ShipViaName
                         WHERE ShippingOrders.JobInformationID = $job(Number)
-                        AND ShippingOrders.AddressID NOT IN ($blacklist)" {
-                            set record "[subst $vals] Version"
-                            #${log}::debug [::csv::join $record]
-                            chan puts $fd [::csv::join $record]
-                        }
+                            AND ShippingOrders.AddressID NOT IN ([join $blacklist ,])" {
+                                #${log}::debug Record - [subst $vals] Version
+                                set record "[subst $vals] Version"
+                                #${log}::debug [::csv::join $record]
+                                chan puts $fd [::csv::join $record]
+                            }
+                            
+    # *** Blacklisted shipments
+    $job(db,Name) eval "SELECT [join $cols ,]
+                        FROM ShippingOrders
+                            INNER JOIN Addresses ON Addresses.SysAddresses_ID = ShippingOrders.AddressID
+                            INNER JOIN Versions ON Addresses.Versions = Versions.Version_ID
+                            INNER JOIN db1.ShipVia ON ShippingOrders.ShipVia = ShipVia.ShipViaName
+                        WHERE ShippingOrders.JobInformationID = $job(Number)
+                            AND ShippingOrders.Hidden = 1
+                            AND Addresses.DistributionType IN ([join $dist_blacklist ,])" {
+                                set record "[subst $vals] Version"
+                                #${log}::debug [::csv::join $record]
+                                chan puts $fd [::csv::join $record]
+                            }
                         
     chan close $fd
+    catch {$job(db,Name) eval "DETACH 'db1'"}
+} ;# ea::code::export::toPlanner
+
+proc ea::code::export::toProcessShipper {args} {
+    #****f* toProcessShipper/ea::code::export
+    # CREATION DATE
+    #   09/29/2015 (Tuesday Sep 29)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # USAGE
+    #   ea::code::export::toProcessShipper args 
+    #
+    # FUNCTION
+    #	Exports all shipments associated with 'import' distribution types.
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # EXAMPLE
+    #   ea::code::export::toProcessShipper 
+    #
+    # NOTES
+    #   
+    #  
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log job headerParent
+
+    set dist_blacklist [ea::db::getDistSetup]
+
+    $job(db,Name) eval "SELECT AddressID FROM ShippingOrders
+                            INNER JOIN Addresses on Addresses.SysAddresses_ID = ShippingOrders.AddressID
+                            WHERE ShippingOrders.JobInformationID = '$job(Number)'
+                        AND Addresses.DistributionType IN ([join $dist_blacklist ,])" {
+                            lappend blacklist '$AddressID'
+                        }
                         
-    #$job(db,Name) eval "SELECT Addresses.Company as Company, 
-    #                        Addresses.Attention as Attention,
-    #                        Addresses.Address1 as Address1,
-    #                        Addresses.Address2 as Address2,
-    #                        Addresses.Address3 as Address3,
-    #                        Addresses.City as City,
-    #                        Addresses.State,
-    #                        Addresses.Country,
-    #                        Addresses.Phone,
-    #                        Addresses.DistributionType,
-    #                        Addresses.Notes,
-    #                        Versions.VersionName as Versions, 
-    #                        ShippingOrders.ShipDate, 
-    #                        ShippingOrders.Quantity, 
-    #                        ShippingOrders.ShipVia,
-    #                        ShipVia.ShipViaCode,
-    #                        ShippingOrders.ArriveDate,
-    #                        ShippingOrders.ContainerType,
-    #                        ShippingOrders.PackageType,
-    #                        ShippingOrders.ShippingClass,
-    #                        ShipVia.ShipViaCode
-    #                    FROM ShippingOrders
-    #                        INNER JOIN Addresses ON Addresses.SysAddresses_ID = ShippingOrders.AddressID
-    #                        INNER JOIN Versions ON Addresses.Versions = Versions.Version_ID
-    #                        INNER JOIN db1.ShipVia ON ShippingOrders.ShipVia = ShipVia.ShipViaName
-    #                    WHERE ShippingOrders.JobInformationID = $job(Number)" {
-    #                        puts "$Company $Attention $Address1 $Address2 $Address3 $City $ShipViaCode"
-    #                    }
-}
+    set headers [ea::tools::assembleHeaders]
+        set cols [lindex $headers 0] 
+        set hdr [lindex $headers 1] 
+        set vals [lindex $headers 2] 
+
+    #${log}::debug cols: $cols
+    #${log}::debug vals: $vals
+    
+    catch {$job(db,Name) eval "ATTACH 'EA_setup.edb' as db1"}
+
+    foreach disttype $dist_blacklist {
+        # Assemble the file names, and issue any warnings
+        ${log}::debug disttype: $disttype
+        set hasData [$job(db,Name) eval "SELECT COUNT(Address1) FROM Addresses WHERE DistributionType = $disttype"]
+        if {1 <= $hasData} {
+            set fName [ea::tools::formatFileName]-[join $disttype ""]
+            set fd [open [file join $job(JobSaveFileLocation) $fName.csv] w]
+            # Write the headers
+            chan puts $fd [::csv::join "$hdr OrderType"]
+            
+            $job(db,Name) eval "SELECT [join $cols ,]
+                                FROM ShippingOrders
+                                    INNER JOIN Addresses ON Addresses.SysAddresses_ID = ShippingOrders.AddressID
+                                    INNER JOIN Versions ON Addresses.Versions = Versions.Version_ID
+                                    INNER JOIN db1.ShipVia ON ShippingOrders.ShipVia = ShipVia.ShipViaName
+                                WHERE ShippingOrders.JobInformationID = $job(Number)
+                                    AND ShippingOrders.Hidden = 0
+                                    AND Addresses.DistributionType IN ($disttype)" {
+                                        set record "[subst $vals] Version"
+                                        #${log}::debug [::csv::join $record]
+                                        chan puts $fd [::csv::join $record]
+                                    }
+            chan close $fd
+        }
+    }
+    catch {$job(db,Name) eval "DETACH 'db1'"}
+} ;# ea::code::export::toProcessShipper

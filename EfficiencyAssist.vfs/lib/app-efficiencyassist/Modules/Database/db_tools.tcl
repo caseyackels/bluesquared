@@ -233,11 +233,7 @@ proc ea::db::updateSingleAddressToDB {} {
 		set shipOrder(Versions) [$job(db,Name) eval "SELECT Version_ID FROM Versions WHERE VersionName = '$shipOrder(Versions)'"]
 	}
 	
-	
-	# Set value of version to the id
-	#set shipOrder(Versions) $versID
-	
-	
+
 	# loop through the values that are for the Addresses table, then issue an update statement
 	#unset address_update
 	foreach val $headerParent(headerList,consignee) {
@@ -547,3 +543,4 @@ proc ea::db::setShipOrderValues {dist_type} {
 	unset shipViaValues
 
 } ;# ea::db::setShipOrderValues
+
