@@ -880,7 +880,7 @@ proc job::db::readNotes {cbox_wid job_wid log_wid} {
 
 } ;# job::db::readNotes
 
-proc job::db::getTotalCopies {} {
+proc job::db::getTotalCopies {args} {
     #****f* getTotalCopies/job::db
     # CREATION DATE
     #   03/17/2015 (Tuesday Mar 17)
@@ -913,13 +913,71 @@ proc job::db::getTotalCopies {} {
     #   
     #***
     global log job
-
+    
     if {![info exists job(Number)]} {${log}::notice [info level 0] - [mc "Job Number isn't set; count label will not be updated."]; return}
+    if {$args ne ""} {
+        foreach {key value} $args {
+            switch -- $key {
+                -version    {set vers $value}
+                default     {return}
+            }
+        }
+    }
+    if {[info exists vers]} {set and "AND Hidden != 1 AND V"}
     
     set job(TotalCopies) [ea::db::countQuantity -db $job(db,Name) -job $job(Number) -and "AND Hidden != 1"]
     
 } ;# job::db::getTotalCopies
 
+proc job::db::getVersionCount {args} {
+    #****if* getVersionCount/job::db
+    # CREATION DATE
+    #   10/02/2015 (Friday Oct 02)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   
+    #   
+    #***
+    global log job
+
+    if {$args eq ""} {return}
+    
+    foreach {key value} $args {
+        switch -- $key {
+            -type       {set type $value}
+            -version    {set version $value}
+            -job        {set jobNumber $value}
+            -versActive {set versActive $value}
+            -addrActive {set addrActive $value}
+            default     {}
+        }
+    }
+    if {![info exists type]} {return}
+    if {![info exists versActive]} {set versActive 1}
+    if {![info exists addrActive]} {set addrActive 1}
+    
+    if {[string tolower $type] eq "countqty"} {
+        set colvalue sum(Quantity)
+    
+    } elseif {[string tolower $type] eq "numofversions"} {
+        set colvalue count(Quantity)
+    }
+
+    $job(db,Name) eval "SELECT $colvalue FROM ShippingOrders
+                            INNER JOIN Addresses ON Addresses.SysAddresses_ID = ShippingOrders.AddressID
+                            INNER JOIN Versions ON Addresses.Versions = Versions.Version_ID
+                                WHERE JobInformationID = '$jobNumber'
+                            AND Addresses.SysActive = $addrActive
+                            AND Versions.VersionActive = $versActive
+                            AND VersionName = '$version'"
+    
+} ;# job::db::getVersionCount -job $job(Number) -version <> -versActive 1 -addrActive 1
 
 proc job::db::insertDefaultData {} {
     #****f* insertDefaultData/job::db
@@ -1182,7 +1240,7 @@ proc job::db::getVersion {args} {
     #   
     # NOTES
     #   Returns {id VersionName}
-    #   Only one of -name OR -id can be issued
+    #   Only one of -name OR -id can be issued, if both are passed last match wins
     #***
     global log job
 
@@ -1201,3 +1259,184 @@ proc job::db::getVersion {args} {
 
     return [$job(db,Name) eval "SELECT Version_ID, VersionName FROM Versions WHERE VersionActive=$active AND $where"]
 } ;# job::db::getVersion
+
+proc job::db::getUsedVersions {args} {
+    #****if* getUsedVersions/job::db
+    # CREATION DATE
+    #   10/02/2015 (Friday Oct 02)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   With no paramters, all used (active and inactive) versions are returned
+    #   -job = Job Number that you want to query on
+    #   -active = 1|0 
+    #   
+    #***
+    global log job
+
+    if {$args ne ""} {
+        foreach {key value} $args {
+            switch -- $key {
+                -job    {set jobNumber $value}
+                -active {set active $value}
+                default {}
+           }
+        }
+    }
+    
+    # Set the basic sql statement
+    set sql "SELECT distinct(VersionName) FROM Addresses
+                        INNER JOIN Versions ON Versions.Version_ID = Addresses.Versions
+                        INNER JOIN ShippingOrders on ShippingOrders.AddressID = Addresses.SysAddresses_ID"
+    
+    if {[info exists active]} {
+        set where "WHERE Addresses.SysActive = $active"
+    } else {
+        # if nothing is supplied, return all used versions
+        set where "WHERE Addresses.SysActive = 1 OR 0"
+    }
+    
+    if {[info exists jobNumber]} {
+        # If a job number isn't supplied, return all jobs
+        set where "$where AND ShippingOrders.JobInformationID = '$jobNumber'"
+    }
+    
+    
+    return [$job(db,Name) eval "$sql $where ORDER BY VersionName ASC"]
+
+} ;# job::db::getUsedVersions -active 1 -job $job(Number)
+
+proc job::db::getNotes {args} {
+    #****if* getNotes/job::db
+    # CREATION DATE
+    #   10/01/2015 (Thursday Oct 01)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   Retuns the notes that match the given paramters.
+    #   -noteType <Title, Job, Version>
+    #   -includeOnReports 1|0
+    #   -noteTypeActive 1|0
+    #   -notesActive 1|0
+    #   
+    #***
+    global log job
+    
+    foreach {key value} $args {
+        switch -- $key {
+            -noteType           {set noteType $value}
+            -includeOnReports   {if {[string is integer $value]} {set includeOnReports $value} else {${log}::debug [info level 0] Paramter for $key must be an integer; return}}
+            -noteTypeActive     {if {[string is integer $value]} {set noteTypeActive $value} else {${log}::debug [info level 0] Paramter for $key must be an integer; return}}
+            -notesActive        {if {[string is integer $value]} {set notesActive $value} else {${log}::debug [info level 0] Paramter for $key must be an integer; return}}
+            default             {${log}::debug [info level 0] Invalid parameter - $value, must be on or all of: -noteType, -includeOnReports, -noteTypeActive, -notesActive; return}
+        }
+    }
+
+    set values [$job(db,Name) eval "SELECT max(Notes_ID), NotesText FROM Notes
+                                                INNER JOIN NoteTypes on Notes.NoteTypeID = NoteTypes.NoteType_ID
+                                                WHERE NoteType = '$noteType'
+                                                    AND NoteTypes.IncludeOnReports = $includeOnReports
+                                                    AND NoteTypes.Active = $noteTypeActive
+                                                    AND Notes.Active = $notesActive"]
+    return [lindex $values 1]
+    
+} ;# job::db::getNotes -noteType Job -includeOnReports 1 -noteTypeActive 1 -notesActive 1
+proc job::db::getUsedDistributionTypes {args} {
+    #****if* getUsedDistributionTypes/job::db
+    # CREATION DATE
+    #   10/02/2015 (Friday Oct 02)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   
+    #   
+    #***
+    global log job
+
+    foreach {key value} $args {
+        switch -- $key {
+            -version    {set version $value}
+            -unique     { if {$value eq "yes"} {
+                            set colvalue distinct(DistributionType)
+                            } elseif {$value eq "no"} {
+                                set colvalue DistributionType
+                            }
+                        }
+            -order      {set order $value}
+        }
+    }
+    
+    if {![info exists version]} {return}
+    if {![info exists colvalue]} {return}
+    if {![info exists order]} {set order ASC}
+
+    return [$job(db,Name) eval "SELECT $colvalue FROM ShippingOrders
+                                    INNER JOIN Addresses on ShippingOrders.AddressID = Addresses.SysAddresses_ID
+                                    INNER JOIN Versions on Versions.Version_ID = Addresses.Versions
+                                    WHERE Versions.VersionName = '$version'
+                                AND Versions.VersionActive = 1
+                                    ORDER BY Addresses.DistributionType $order"]
+} ;# job::db::getUsedDistributionTypes -version $vers -unique yes
+
+proc job::db::getDistTypeCounts {args} {
+    #****if* getDistTypeCounts/job::db
+    # CREATION DATE
+    #   10/02/2015 (Friday Oct 02)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   
+    #   
+    #***
+    global log job
+    
+    if {$args eq ""} {return}
+    
+    foreach {key value} $args {
+        switch -- $key {
+            -type       {set type $value}
+            -dist       {set dist $value}
+            -job        {set jobNumber $value}
+            -addrActive {set addrActive $value}
+            default     {}
+        }
+    }
+    if {![info exists type]} {return}
+    if {![info exists addrActive]} {set addrActive 1}
+    
+    if {[string tolower $type] eq "numofshipments"} {
+        set colvalue count(Quantity)
+    
+    } elseif {[string tolower $type] eq "qtyindisttype"} {
+        set colvalue sum(Quantity)
+    }
+
+    $job(db,Name) eval "SELECT $colvalue FROM ShippingOrders
+                            INNER JOIN Addresses ON Addresses.SysAddresses_ID = ShippingOrders.AddressID
+                            INNER JOIN Versions ON Addresses.Versions = Versions.Version_ID
+                                WHERE ShippingOrders.JobInformationID = '$jobNumber'
+                                    AND ShippingOrders.Hidden = 0
+                                    AND Addresses.SysActive = $addrActive
+                                    AND DistributionType = '$dist'"
+
+} ;# job::db::getDistTypeCounts -type countqty -dist $dist -job $job(Number)

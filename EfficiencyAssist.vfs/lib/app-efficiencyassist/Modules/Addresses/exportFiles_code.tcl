@@ -207,10 +207,6 @@ proc export::toFile {id fd} {
     
 } ;# export::toFile
 
-proc test {} {
-    set cols [db eval "SELECT dbColName FROM HeadersConfig WHERE widExportable = 1 ORDER BY widUIPositionWeight, dbColName DESC"]
-    puts $cols
-}
 
 proc ea::code::export::toPlanner {args} {
     #****f* toPlanner/ea::code::export
@@ -263,39 +259,11 @@ proc ea::code::export::toPlanner {args} {
                         }
                         #${log}::debug Blacklist - AddressID: $blacklist
     
-    #foreach cons $headerParent(headerList,consignee) {
-    #    # Creating the list of columns to query
-    #    lappend cols "Addresses.$cons as $cons"
-    #    # Creating the list of header names
-    #    lappend hdr $cons
-    #    # Creating the list of variables to display the values
-    #    lappend vals \$$cons
-    #}
-    #
-    #foreach shiporder $headerParent(headerList,shippingorder) {
-    #    lappend hdr $shiporder
-    #    lappend cols "ShippingOrders.$shiporder as $shiporder"
-    #    
-    #    if {[string tolower $shiporder] eq "shipvia"} {
-    #        # ShipVia and ShipViaCode are both required in the columns sent to the db. But we only want one "ShipViaCode" in the values.
-    #        set shiporder ShipViaCode
-    #        lappend cols "ShipVia.ShipViaCode as ShipViaCode"
-    #        lappend vals \$ShipViaCode
-    #    } else {
-    #        lappend vals \$$shiporder
-    #    }
-    #}
-    #
-    #lappend cols "Versions.VersionName as Versions"
-    #lappend hdr Versions
-    #lappend vals "\$Versions"
+
     set headers [ea::tools::assembleHeaders]
         set cols [lindex $headers 0] 
         set hdr [lindex $headers 1] 
         set vals [lindex $headers 2] 
-
-    #${log}::debug cols: $cols
-    #${log}::debug vals: $vals
     
     catch {$job(db,Name) eval "ATTACH 'EA_setup.edb' as db1"}
     

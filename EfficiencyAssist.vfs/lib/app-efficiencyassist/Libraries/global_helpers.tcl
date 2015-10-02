@@ -870,19 +870,9 @@ proc ea::tools::assembleHeaders {} {
         }
     }
 
-    lappend cols "Versions.VersionName as Versions"
-    lappend hdr Versions
-    lappend vals "\$Versions"
+    set cols [string map -nocase {{Addresses.Versions as Versions} {Versions.VersionName as Versions}} $cols]
     
     return [list $cols $hdr $vals]
-
-        # Switch statement so we return only what we want
-    #switch -- $args {
-    #    -cols       {return $returnValues}
-    #    -file_hdr   {return $returnValues}
-    #    -vals       {return $returnValues}
-    #    default     {${log}::debug [info level 0] Invalid parameter $args. Must be one of: -cols, -hdr, -vals}
-    #}
 } ;# ea::tools::assembleHeaders
 
 proc eAssist_Global::launchFilters {} {

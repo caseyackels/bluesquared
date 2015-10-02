@@ -90,9 +90,179 @@ proc job::reports::Viewer {} {
     
     $f1.txt delete 0.0 end
 
-    job::reports::Detailed $f1.txt
+    #job::reports::Detailed $f1.txt
+    job::reports::generic $f1.txt
 } ;# job::reports::Viewer
 
+proc job::reports::generic {txt} {
+    #****if* generic/job::reports
+    # CREATION DATE
+    #   10/01/2015 (Thursday Oct 01)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   
+    #   
+    #***
+    global log job user
+
+    # Should be a user defined list ...
+    set col "Company Notes Quantity PackageType ShipVia"
+    set colCount [llength $col]
+    
+    if {[info exists cols]} {unset cols}
+    foreach item $col {
+        lappend cols $$item
+    }
+
+    # Header - Job Name, Title, Num of Versions, Total Count
+    $txt insert end "Job Number: $job(Number)\n"
+    $txt insert end "Job Title/Name: $job(Title) / $job(Name)\n\n"
+    
+    # Set Variabls
+    set numOfShipments [$job(db,Name) eval "SELECT count(JobInformationID) FROM ShippingOrders WHERE JobInformationID = '$job(Number)'"]
+    set totalQtyOfShipments $job(TotalCopies)
+    # Get unique versions
+    set versionNames [job::db::getUsedVersions -active 1 -job $job(Number)]
+    set numOfVersions [llength $versionNames]
+    set dist_blacklist [ea::db::getDistSetup] ;# Disttypes that need special handling
+    
+    $txt insert end "$numOfVersions Versions, $numOfShipments Shipments, $totalQtyOfShipments Total Quantity\n"
+
+    set jobNotes [job::db::getNotes -noteType Job -includeOnReports 1 -noteTypeActive 1 -notesActive 1]
+        if {$jobNotes != ""} {
+           $txt insert end "\nJob Notes: $jobNotes\n"
+        }
+        $txt insert end \n
+    
+    # Core Code
+    foreach vers $versionNames {
+    # Output Version Name
+        set versNumOfShipments [job::db::getVersionCount -type NumOfVersions -job $job(Number) -version $vers -versActive 1 -addrActive 1]
+        set versQuantity [job::db::getVersionCount -type CountQty -job $job(Number) -version $vers -versActive 1 -addrActive 1]
+        
+        # Get unique distribution types, for current version
+        set DistTypes [job::db::getUsedDistributionTypes -version $vers -unique yes]
+        
+        $txt insert end "====================\n\n"
+        $txt insert end "Version: $vers\n"
+        $txt insert end "Shipments: $versNumOfShipments - Quantity: $versQuantity\n"
+        
+        # Create the matrix
+        struct::matrix::matrix m
+        ::job::reports::m add columns $colCount
+        ::job::reports::m insert row end $col ;# Add the headers
+        
+        set gateway 0
+        foreach dist $DistTypes {
+            ${log}::debug cycling through dist: $dist
+            # If the distribution type matches, UPS IMPORT, lets provide a grouped breakdown instead of the individual shipment
+            # Handling the dist types that 'roll up' destinations into shipments.
+            set clean_dist_blacklist [string map {' \"} $dist_blacklist]
+            set clean_dist_blacklist [string map {"\"" ""} $clean_dist_blacklist]
+            ${log}::debug clean blacklist: $clean_dist_blacklist
+            if {[lsearch $clean_dist_blacklist $dist] != -1} {
+                    # DistType associated with current version
+                    # Output Summary for Distribution Type
+                    # Output Carrier, Company and Quantity
+                    # Get total count for current distribution type
+                    ${log}::debug blacklist: Cycling through dist: $dist
+                    set distTypeNumOfShipments [job::db::getDistTypeCounts -type numOfShipments -dist $dist -job $job(Number)]
+                    set distTypeQty [job::db::getDistTypeCounts -type qtyInDistType -dist $dist -job $job(Number)]
+                    set id [join [split $dist " "] ""]
+                    
+                    if {[info exists comboDistTypes($id,qty)]} {unset comboDistTypes($id,qty)}
+                    lappend comboDistTypes(names) $dist
+
+                    $job(db,Name) eval "SELECT Quantity FROM ShippingOrders
+                            INNER JOIN Addresses ON Addresses.SysAddresses_ID = ShippingOrders.AddressID
+                            INNER JOIN Versions ON Addresses.Versions = Versions.Version_ID
+                                WHERE ShippingOrders.JobInformationID = '$job(Number)'
+                                    AND ShippingOrders.Hidden = 0
+                                    AND Versions.VersionName = '$vers'
+                                    AND DistributionType = '$dist'
+                                    AND Addresses.SysActive = 1" {
+                                lappend comboDistTypes($id,qty) $Quantity
+                                set comboDistTypes($id,distTypeNumofShipments) $distTypeNumOfShipments
+                                set comboDistTypes($id,distTypeQty) $distTypeQty
+                            }
+                
+                } else {
+                    set gateway 1
+                    ${log}::debug dist: $dist - creating single shipments
+                        # Output detailed shipment information
+                        $job(db,Name) eval "SELECT [join $col ,] FROM ShippingOrders
+                                                INNER JOIN Addresses on Addresses.SysAddresses_ID = ShippingOrders.AddressID
+                                                INNER JOIN Versions on Versions.Version_ID = Addresses.Versions
+                                                    WHERE ShippingOrders.JobInformationID = '$job(Number)'
+                                                        AND Versions.VersionName = '$vers'
+                                                        AND DistributionType = '$dist'
+                                                        AND Addresses.SysActive = 1
+                                                        AND Versions.VersionActive = 1
+                                                ORDER BY Quantity" {
+                                                    #${log}::debug Entering individual shipments...
+                                                    # Error capturing: Set a default value if nothing was put into the db
+                                                    if {$ShipVia eq ""} {set ShipVia [mc "CARRIER NOT ASSIGNED"]}
+                                                    if {$Company eq ""} {set Company [mc "COMPANY NOT ASSIGNED"]}
+                                                    if {$Quantity eq ""} {set Quantity [mc "QUANTITY NOT ASSIGNED"]}
+                                                    set ShipType [join [db eval "SELECT ShipmentType from ShipVia WHERE ShipViaName='[join $ShipVia]'"]]
+                                                    
+                                                    if {$Company eq "JG Mail"} {set ShipType "JG Mail"}
+                                                    if {$Company eq "JG Inventory"} {set ShipType "JG Inventory"}
+                                                    if {$Company eq "JG Bindery"} {set ShipType "JG Bindery"}
+                                                    
+                                                    ::job::reports::m insert row end [subst $cols]
+                                                    
+                                                    #$txt insert end "\t  $ShipVia, $Company - $Quantity\n"
+                                                }
+                }
+        } ;# end of distribution type
+        if {$gateway == 1} {
+                ::report::report r $colCount style captionedtable 1
+                $txt insert end [r printmatrix ::job::reports::m]
+                ::job::reports::m destroy 
+                r destroy
+        } else {
+                catch {::job::reports::m destroy}
+                catch {r destroy}
+        }
+        
+        if {[info exists comboDistTypes]} {
+            foreach distType $comboDistTypes(names) {
+                set id [join [split $distType " "] ""]
+                $txt insert end "   <$distType> $comboDistTypes($id,distTypeNumofShipments) Shipments - $comboDistTypes($id,distTypeQty)\n\n"
+                
+                foreach single [lindex [Shipping_Code::extractFromList $comboDistTypes($id,qty)] 0] {
+                    #${log}::debug Singles: 1 Shipment of $single
+                    $txt insert end "    1 Shipment of $single\n"
+                }
+                
+                foreach groups [lrange [Shipping_Code::extractFromList $comboDistTypes($id,qty)] 1 end] {
+                    #${log}::debug Groups: [llength $groups] shipments of [lindex $groups 0]
+                    $txt insert end "    [llength $groups] Shipments of [lindex $groups 0]\n\n"
+                }
+            }
+            unset comboDistTypes
+        }
+
+        $txt insert end "\n"
+    } ;# end of versions
+    
+    # output the report
+    set fd [open [file join $job(JobSaveFileLocation) [ea::tools::formatFileName]_report.txt] w+]
+    puts $fd [$txt get 0.0 end]
+    
+    # Insert user and date/time stamp
+    puts $fd [mc {Report Generated by: %1$s} $user(id)] ;# Should be $user(login)
+    puts $fd [clock format [clock seconds] -format "%A %D %I:%M %p"]
+    chan close $fd
+    
+} ;# job::reports::generic
 
 proc job::reports::Detailed {txt args} {
     #****f* Detailed/job::reports
@@ -128,72 +298,72 @@ proc job::reports::Detailed {txt args} {
     #***
     global log job env comboDistTypes
 
-    # Should be a user defined list ...
-    set col "Company Notes Quantity PackageType ShipVia"
-    
-    
-    set addID [$job(db,Name) eval "SELECT OrderNumber FROM Addresses WHERE Status=1"]
-    set rowCount [llength $addID]
-    
-    set colCount [llength $col]
-    
-    set newCol $col
-    # We don't want the shipvia code, we want the shipment type (freight, small package)
-    set newCol [string map {ShipVia ShipType} $newCol]
-    
-    if {[info exists cols]} {unset cols}
-    foreach item $newCol {
-        lappend cols $$item
-    }
-    
-    # Header - Job Name, Title, Num of Versions, Total Count
-    $txt insert end "Job Number: $job(Number)\n"
-    $txt insert end "Job Title/Name: $job(Title) / $job(Name)\n\n"
-    
-    set numOfVersions [$job(db,Name) eval "SELECT count(distinct(Version)) FROM Addresses WHERE Status=1"]
-    set numOfShipments [$job(db,Name) eval "SELECT count(*) FROM Addresses WHERE Status=1"]
-    set totalQtyOfShipments [$job(db,Name) eval "SELECT sum(Quantity) FROM Addresses WHERE Status=1"]
-    
-    $txt insert end "$numOfVersions Versions, $numOfShipments Shipments, $totalQtyOfShipments Total Quantity\n"
-    #$txt insert end "Number of Versions: $numOfVersions\n"
-    #$txt insert end "Number of Shipments: $numOfShipments\n"    
-    #$txt insert end "Total Quantity: $totalQtyOfShipments\n"
-
-    # Schema testing; this exists in version 3 and higher
-    #set errStr "no such table:"
-    if {[job::db::tableExists Notes] != ""} {
-        set jobNotes [lindex [$job(db,Name) eval "SELECT max(Notes_ID), Notes_Notes FROM Notes"] 1]
-        if {$jobNotes != ""} {
-           $txt insert end "\nJob Notes: $jobNotes\n"
-        }
-        $txt insert end \n
-    }
-    
-
-    ## Create the matrices
-    #struct::matrix::matrix m
-    #::job::reports::m add columns $colCount
-# -----------------------------
-    #::job::reports::m insert row end $col ;# Add the headers
-    #foreach row $addID {
-    #    $job(db,Name) eval "SELECT [join $col ,] from Addresses WHERE OrderNumber = $row" {
-    #        set ShipType [join [db eval "SELECT ShipmentType from ShipVia WHERE ShipViaName='[join $ShipVia]'"]]
-    #
-    #        if {$Company eq "JG Mail"} {set ShipType "JG Mail"}
-    #        ::job::reports::m insert row end [subst $cols]
-    #    }
-    #}
-#------------------------------
-    
-    # Get unique versions
-    set versionNames [$job(db,Name) eval "SELECT distinct(Version) FROM Addresses WHERE Status=1 ORDER BY Version ASC"]
-    foreach vers $versionNames {
-    # Output Version Name
-        set versNumOfShipments [$job(db,Name) eval "SELECT count(*) FROM Addresses WHERE Version='$vers' AND Status=1"]
-        set versQuantity [$job(db,Name) eval "SELECT sum(Quantity) FROM Addresses WHERE Version='$vers' AND Status=1"]
-        $txt insert end "====================\n\n"
-        $txt insert end "Version: $vers\n"
-        $txt insert end "Shipments: $versNumOfShipments - Quantity: $versQuantity\n"
+#    # Should be a user defined list ...
+#    set col "Company Notes Quantity PackageType ShipVia"
+#    
+#    
+#    set addID [$job(db,Name) eval "SELECT OrderNumber FROM Addresses WHERE Status=1"]
+#    set rowCount [llength $addID]
+#    
+#    set colCount [llength $col]
+#    
+#    set newCol $col
+#    # We don't want the shipvia code, we want the shipment type (freight, small package)
+#    set newCol [string map {ShipVia ShipType} $newCol]
+#    
+#    if {[info exists cols]} {unset cols}
+#    foreach item $newCol {
+#        lappend cols $$item
+#    }
+#    
+#    # Header - Job Name, Title, Num of Versions, Total Count
+#    $txt insert end "Job Number: $job(Number)\n"
+#    $txt insert end "Job Title/Name: $job(Title) / $job(Name)\n\n"
+#    
+#    set numOfVersions [$job(db,Name) eval "SELECT count(distinct(Version)) FROM Addresses WHERE Status=1"]
+#    set numOfShipments [$job(db,Name) eval "SELECT count(*) FROM Addresses WHERE Status=1"]
+#    set totalQtyOfShipments [$job(db,Name) eval "SELECT sum(Quantity) FROM Addresses WHERE Status=1"]
+#    
+#    $txt insert end "$numOfVersions Versions, $numOfShipments Shipments, $totalQtyOfShipments Total Quantity\n"
+#    #$txt insert end "Number of Versions: $numOfVersions\n"
+#    #$txt insert end "Number of Shipments: $numOfShipments\n"    
+#    #$txt insert end "Total Quantity: $totalQtyOfShipments\n"
+#
+#    # Schema testing; this exists in version 3 and higher
+#    #set errStr "no such table:"
+#    if {[job::db::tableExists Notes] != ""} {
+#        set jobNotes [lindex [$job(db,Name) eval "SELECT max(Notes_ID), Notes_Notes FROM Notes"] 1]
+#        if {$jobNotes != ""} {
+#           $txt insert end "\nJob Notes: $jobNotes\n"
+#        }
+#        $txt insert end \n
+#    }
+#    
+#
+#    ## Create the matrices
+#    #struct::matrix::matrix m
+#    #::job::reports::m add columns $colCount
+## -----------------------------
+#    #::job::reports::m insert row end $col ;# Add the headers
+#    #foreach row $addID {
+#    #    $job(db,Name) eval "SELECT [join $col ,] from Addresses WHERE OrderNumber = $row" {
+#    #        set ShipType [join [db eval "SELECT ShipmentType from ShipVia WHERE ShipViaName='[join $ShipVia]'"]]
+#    #
+#    #        if {$Company eq "JG Mail"} {set ShipType "JG Mail"}
+#    #        ::job::reports::m insert row end [subst $cols]
+#    #    }
+#    #}
+##------------------------------
+#    
+#    # Get unique versions
+#    set versionNames [$job(db,Name) eval "SELECT distinct(Version) FROM Addresses WHERE Status=1 ORDER BY Version ASC"]
+    #foreach vers $versionNames {
+    ## Output Version Name
+    #    set versNumOfShipments [$job(db,Name) eval "SELECT count(*) FROM Addresses WHERE Version='$vers' AND Status=1"]
+    #    set versQuantity [$job(db,Name) eval "SELECT sum(Quantity) FROM Addresses WHERE Version='$vers' AND Status=1"]
+    #    $txt insert end "====================\n\n"
+    #    $txt insert end "Version: $vers\n"
+    #    $txt insert end "Shipments: $versNumOfShipments - Quantity: $versQuantity\n"
         
         #if {[job::db::tableExists VersNotes] != ""} {
         #    set versNotes [join [$job(db,Name) eval "SELECT VersNotes_Notes FROM VersNotes WHERE VersNotes_Version = '$vers'"]]
@@ -203,23 +373,23 @@ proc job::reports::Detailed {txt args} {
         #}
         
         # Create the matrix
-        struct::matrix::matrix m
-        ::job::reports::m add columns $colCount
-        ::job::reports::m insert row end $col ;# Add the headers
-        
-        # Get unique distribution types, for current version
-        set DistTypes [$job(db,Name) eval "SELECT distinct(DistributionType) FROM addresses WHERE Version='$vers' AND Status=1 ORDER BY DistributionType"]
-        if {[info exists comboDistTypes]} {unset comboDistTypes}
-        set gateway 0
-        foreach dist $DistTypes {
-                
-            # DistType associated with current version
-            # Output Summary for Distribution Type
-            # Output Carrier, Company and Quantity
-            # Get total count for current distribution type
-
-            set distTypeNumOfShipments [$job(db,Name) eval "SELECT count(*) from Addresses WHERE Version='$vers' AND DistributionType='$dist' AND Status=1"]
-            set distTypeQty [$job(db,Name) eval "SELECT sum(Quantity) FROM Addresses WHERE Version='$vers' AND DistributionType='$dist' AND Status=1"]
+        #struct::matrix::matrix m
+        #::job::reports::m add columns $colCount
+        #::job::reports::m insert row end $col ;# Add the headers
+        #
+        ## Get unique distribution types, for current version
+        #set DistTypes [$job(db,Name) eval "SELECT distinct(DistributionType) FROM addresses WHERE Version='$vers' AND Status=1 ORDER BY DistributionType"]
+        #if {[info exists comboDistTypes]} {unset comboDistTypes}
+        #set gateway 0
+        #foreach dist $DistTypes {
+        #        
+        #    # DistType associated with current version
+        #    # Output Summary for Distribution Type
+        #    # Output Carrier, Company and Quantity
+        #    # Get total count for current distribution type
+        #
+        #    set distTypeNumOfShipments [$job(db,Name) eval "SELECT count(*) from Addresses WHERE Version='$vers' AND DistributionType='$dist' AND Status=1"]
+        #    set distTypeQty [$job(db,Name) eval "SELECT sum(Quantity) FROM Addresses WHERE Version='$vers' AND DistributionType='$dist' AND Status=1"]
             
             # If the distribution type matches, UPS IMPORT, lets provide a grouped breakdown instead of the individual shipment
             # Handling the dist types that 'roll up' destinations into shipments.
@@ -298,7 +468,7 @@ proc job::reports::Detailed {txt args} {
     puts $fd [$txt get 0.0 end]
     
     # Insert user and date/time stamp
-    puts $fd [mc {Report Generated by: %1$s} $env(USERNAME)]
+    puts $fd [mc {Report Generated by: %1$s} $env(USERNAME)] ;# Should be $user(login)
     puts $fd [clock format [clock seconds] -format "%A %D %I:%M %p"]
     chan close $fd
 
