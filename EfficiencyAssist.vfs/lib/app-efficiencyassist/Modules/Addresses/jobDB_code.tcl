@@ -975,7 +975,8 @@ proc job::db::getVersionCount {args} {
                                 WHERE JobInformationID = '$jobNumber'
                             AND Addresses.SysActive = $addrActive
                             AND Versions.VersionActive = $versActive
-                            AND VersionName = '$version'"
+                            AND VersionName = '$version'
+                            AND ShippingOrders.Hidden = 0"
     
 } ;# job::db::getVersionCount -job $job(Number) -version <> -versActive 1 -addrActive 1
 
@@ -1440,3 +1441,36 @@ proc job::db::getDistTypeCounts {args} {
                                     AND DistributionType = '$dist'"
 
 } ;# job::db::getDistTypeCounts -type countqty -dist $dist -job $job(Number)
+
+proc job::db::getShipDate {args} {
+    #****if* getShipDate/job::db
+    # CREATION DATE
+    #   10/05/2015 (Monday Oct 05)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   
+    #   
+    #***
+    global log job
+
+    foreach {key value} $args {
+        switch -- $key {
+            -max    {set exp max($value); set col $value}
+            -min    {set exp min($value); set col $value}
+            -all    {set exp distinct($value); set col $value}
+            default {${log}::debug [info level 0] Invalid parameter: $key, please use one of: -max, -min, -all}
+        }
+    }
+
+    $job(db,Name) eval "SELECT $exp FROM ShippingOrders
+                            WHERE JobInformationID = $job(Number)
+                            AND $col != ''
+                            AND Hidden = 0"
+    
+} ;# job::db::getShipDate

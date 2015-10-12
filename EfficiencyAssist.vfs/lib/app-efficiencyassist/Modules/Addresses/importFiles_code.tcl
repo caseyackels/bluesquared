@@ -282,6 +282,9 @@ proc importFiles::processFile {win} {
                                     }
                                 }
                 }
+                ship*date   {
+                    
+                }
                 default     {}
             }
             

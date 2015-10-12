@@ -562,6 +562,10 @@ proc eAssistHelper::saveDest {modifier widRow tblPath} {
     #***
     global log program shipOrder job headerParent title
     
+    if {$shipOrder(ShipDate) != ""} {
+        set shipOrder(ShipDate) [ea::date::formatDate -std -db $shipOrder(ShipDate)]
+    }
+    
     switch -- $modifier {
         -add        {
                     # Add new record to db
@@ -569,9 +573,6 @@ proc eAssistHelper::saveDest {modifier widRow tblPath} {
                     
                     # Populate table
                     ea::db::populateTablelist -record new -widRow $widRow
-                    
-                    # Check to see if we just added a distribution type that uses a specific address in the exported batch files
-                    #ea::code::bm::writeHiddenShipment $shipOrder(DistributionType)
                     
                     # Reset the array
                     eAssistHelper::initShipOrderArray
@@ -586,8 +587,6 @@ proc eAssistHelper::saveDest {modifier widRow tblPath} {
                     # Update the table
                     ea::db::populateTablelist -record edit -widRow $widRow -id $title(shipOrder_id)
                     
-                    # Check to see if we just added a distribution type that uses a specific address in the exported batch files
-                    #ea::code::bm::writeHiddenShipment $shipOrder(DistributionType)
         }
         -combine    {
                     ## -- Combine selected rows into one record
@@ -747,23 +746,22 @@ proc eAssistHelper::shippingOrder {widTbl modifier} {
     
     # Create intelligence in the Company widget
     set companyList [db eval "SELECT MasterAddr_Company FROM MasterAddresses WHERE MasterAddr_Internal = 1"]
-    #${log}::debug companyList $companyList
-    #${log}::debug widget: $companyWidget
     $widgetPath(Company) configure -validate all -validatecommand [list AutoComplete::AutoComplete %W %d %v %P $companyList]
+    
+    tooltip::tooltip $widgetPath(ShipDate) [mc "Must use mm/dd/yyyy format"]
+    tooltip::tooltip $widgetPath(ArriveDate) [mc "Must use mm/dd/yyyy format"]
     
     ##
     ## BINDINGS
     ##
     bind $widgetPath(Company)  <FocusOut> {
-        #${log}::debug widget value: [%W get]
         ea::db::setConsigneeAutoComplete [%W get]
     }
     
     bind $widgetPath(DistributionType)  <FocusOut> {
         ea::db::setShipOrderValues [%W get]
     }
-    #$widgetPath(DistributionType) configure -postcommand {ea::db::setShipOrderValues $shipOrder(DistributionType)}
-    
+
     ##
     ## CONFIGURATION based on modifier
     ## 
@@ -786,6 +784,7 @@ proc eAssistHelper::shippingOrder {widTbl modifier} {
     }
     
 } ;# eAssistHelper::shippingOrder
+
 proc ea::code::bm::writeHiddenShipment {disttype} {
     #****if* writeHiddenShipment/ea::code::bm
     # CREATION DATE

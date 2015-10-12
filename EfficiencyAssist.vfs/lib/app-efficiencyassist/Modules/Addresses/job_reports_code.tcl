@@ -112,17 +112,18 @@ proc job::reports::generic {txt} {
     global log job user
 
     # Should be a user defined list ...
-    set col "Company Notes Quantity PackageType ShipVia"
+    set col "Company Notes Quantity PackageType ShipVia DistributionType"
     set colCount [llength $col]
     
     if {[info exists cols]} {unset cols}
     foreach item $col {
-        lappend cols $$item
+        lappend cols "$$item"
     }
 
     # Header - Job Name, Title, Num of Versions, Total Count
-    $txt insert end "Job Number: $job(Number)\n"
-    $txt insert end "Job Title/Name: $job(Title) / $job(Name)\n\n"
+    $txt insert end "Job: $job(Number) $job(Title) / $job(Name)\n\n"
+    #$txt insert end "Job Title/Name: $job(Title) / $job(Name)\n\n"
+    $txt insert end "First Ship Date: [ea::date::formatDate -db -std [job::db::getShipDate -min ShipDate]]\n"
     
     # Set Variabls
     set numOfShipments [$job(db,Name) eval "SELECT count(JobInformationID) FROM ShippingOrders WHERE JobInformationID = '$job(Number)'"]
@@ -133,6 +134,7 @@ proc job::reports::generic {txt} {
     set dist_blacklist [ea::db::getDistSetup] ;# Disttypes that need special handling
     
     $txt insert end "$numOfVersions Versions, $numOfShipments Shipments, $totalQtyOfShipments Total Quantity\n"
+    
 
     set jobNotes [job::db::getNotes -noteType Job -includeOnReports 1 -noteTypeActive 1 -notesActive 1]
         if {$jobNotes != ""} {
@@ -151,7 +153,7 @@ proc job::reports::generic {txt} {
         
         $txt insert end "====================\n\n"
         $txt insert end "Version: $vers\n"
-        $txt insert end "Shipments: $versNumOfShipments - Quantity: $versQuantity\n"
+        $txt insert end "Shipments: $versNumOfShipments, Quantity: $versQuantity\n"
         
         # Create the matrix
         struct::matrix::matrix m
@@ -196,6 +198,8 @@ proc job::reports::generic {txt} {
                     set gateway 1
                     ${log}::debug dist: $dist - creating single shipments
                         # Output detailed shipment information
+                        ${log}::debug col: $col
+                        ${log}::debug cols: $cols
                         $job(db,Name) eval "SELECT [join $col ,] FROM ShippingOrders
                                                 INNER JOIN Addresses on Addresses.SysAddresses_ID = ShippingOrders.AddressID
                                                 INNER JOIN Versions on Versions.Version_ID = Addresses.Versions
@@ -204,18 +208,21 @@ proc job::reports::generic {txt} {
                                                         AND DistributionType = '$dist'
                                                         AND Addresses.SysActive = 1
                                                         AND Versions.VersionActive = 1
-                                                ORDER BY Quantity" {
+                                                ORDER BY Addresses.DistributionType, ShippingOrders.Quantity" {
                                                     #${log}::debug Entering individual shipments...
                                                     # Error capturing: Set a default value if nothing was put into the db
                                                     if {$ShipVia eq ""} {set ShipVia [mc "CARRIER NOT ASSIGNED"]}
                                                     if {$Company eq ""} {set Company [mc "COMPANY NOT ASSIGNED"]}
                                                     if {$Quantity eq ""} {set Quantity [mc "QUANTITY NOT ASSIGNED"]}
+                                                    
                                                     set ShipType [join [db eval "SELECT ShipmentType from ShipVia WHERE ShipViaName='[join $ShipVia]'"]]
+                                                    set cols [string map {$ShipVia $ShipType} $cols]
                                                     
                                                     if {$Company eq "JG Mail"} {set ShipType "JG Mail"}
                                                     if {$Company eq "JG Inventory"} {set ShipType "JG Inventory"}
                                                     if {$Company eq "JG Bindery"} {set ShipType "JG Bindery"}
                                                     
+                                                    ${log}::debug vals: [subst $cols]
                                                     ::job::reports::m insert row end [subst $cols]
                                                     
                                                     #$txt insert end "\t  $ShipVia, $Company - $Quantity\n"
@@ -235,7 +242,7 @@ proc job::reports::generic {txt} {
         if {[info exists comboDistTypes]} {
             foreach distType $comboDistTypes(names) {
                 set id [join [split $distType " "] ""]
-                $txt insert end "   <$distType> $comboDistTypes($id,distTypeNumofShipments) Shipments - $comboDistTypes($id,distTypeQty)\n\n"
+                $txt insert end "   <$distType> [mc "Shipments:"] $comboDistTypes($id,distTypeNumofShipments), [mc "Quantity:"] $comboDistTypes($id,distTypeQty)\n\n"
                 
                 foreach single [lindex [Shipping_Code::extractFromList $comboDistTypes($id,qty)] 0] {
                     #${log}::debug Singles: 1 Shipment of $single

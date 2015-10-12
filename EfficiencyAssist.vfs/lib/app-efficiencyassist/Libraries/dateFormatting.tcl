@@ -58,14 +58,14 @@ proc ea::date::formatDate {indate outdate str} {
     switch -- $indate {
         -std    {set dateFormat_indate %m-%d-%Y}
         -euro   {set dateFormat_indate %d-%m-%Y}
-        -db     {set dateFormat_indate %Y-%d-%m}
+        -db     {set dateFormat_indate %Y-%m-%d}
         default {set dateFormat_indate "$value"}
     }
     
     switch -- $outdate {
         -std    {set dateFormat_outdate %D}
         -euro   {set dateFormat_outdate %d-%m-%Y}
-        -db     {set dateFormat_outdate %Y-%d-%m}
+        -db     {set dateFormat_outdate %Y-%m-%d}
         default {set dateFormat_outdate "$value"}
     }
 
