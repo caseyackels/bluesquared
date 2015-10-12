@@ -37,12 +37,22 @@ Roadmap - Version 4.1.0
 # [DONE] Distribution Type, Ship Type (Freight Small Package, -ALL-), look at which freight type is assigned to distribution type.
 # [DONE] Look at Ship Via's assigned to Title
 # [DONE] Results will be A) what's assigned to the title and matches B) If no match found, display all ship via's and/or ship type for the selected distribution type This will also take into account the ship via values we place on the individual customer.
-* Make the Menu Item "DELETE" work.
-* Finish security setup
-* Better User Preference window (Need a better framework for adding options, should be similar to Setup)
+* Make the Menu Item "DELETE" work. This should just delete the shipping order, and delete the row in the widget
+* [DONE] Finish security setup
+* [DONE] Better User Preference window (Need a better framework for adding options, should be similar to Setup)
 * Save file paths for: Export Files
-* EXPORTS
-** Planner
-** Process Shipper
-** Import File
+* [DONE] EXPORTS
+** [DONE] Planner
+** [DONE] Process Shipper
+** [DONE] Import File
 * REPORTS
+
+ea::code::modName
+	ea::code::admin::addUser
+ea::gui::modName
+	ea::gui::admin::gui
+ea::db::title
+ea::db::admin
+ea::db::
+
+Tyler
