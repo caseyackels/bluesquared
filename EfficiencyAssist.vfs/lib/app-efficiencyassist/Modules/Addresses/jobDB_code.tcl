@@ -249,8 +249,7 @@ proc job::db::createDB {args} {
                                                                                     ON UPDATE CASCADE} \
         {AddressID          TEXT  NOT NULL ON CONFLICT ROLLBACK
                                     REFERENCES Addresses (SysAddresses_ID) ON DELETE NO ACTION
-                                                                            ON UPDATE CASCADE
-                                                                            UNIQUE ON CONFLICT ROLLBACK} \
+                                                                            ON UPDATE CASCADE} \
         {Hidden             BOOLEAN DEFAULT (0) NOT NULL ON CONFLICT ROLLBACK}]
 
     # Create the ShippingOrder table (Consignee group)
@@ -923,7 +922,7 @@ proc job::db::getTotalCopies {args} {
             }
         }
     }
-    if {[info exists vers]} {set and "AND Hidden != 1 AND V"}
+    #if {[info exists vers]} {set and "AND Hidden != 1 AND V"}
     
     set job(TotalCopies) [ea::db::countQuantity -db $job(db,Name) -job $job(Number) -and "AND Hidden != 1"]
     

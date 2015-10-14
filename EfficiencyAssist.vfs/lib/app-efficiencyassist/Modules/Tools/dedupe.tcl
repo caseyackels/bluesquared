@@ -102,7 +102,7 @@ proc ea::dedupe::exactMatch {args} {
                         WHERE ShippingOrder_ID IN ($shipOrderID)"
 
     # Delete the duplicates
-    #${log}::debug Deleting record: DELETE FROM Addresses WHERE SysAddresses_ID IN ([join $remove_SysAddresses ,])
+    ${log}::debug Deleting record: DELETE FROM Addresses WHERE SysAddresses_ID IN ([join $remove_SysAddresses ,])
     $job(db,Name) eval "DELETE FROM Addresses WHERE SysAddresses_ID IN ([join $remove_SysAddresses ,])"
     
 
