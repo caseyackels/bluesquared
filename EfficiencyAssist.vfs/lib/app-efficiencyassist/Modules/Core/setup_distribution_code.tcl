@@ -454,58 +454,13 @@ proc eAssistSetup::getDistributionTypeID {tbl lbox} {
                 ${log}::notice [info level 1] RptAction isn't setup, default is 'default': $RptAction}
         }
     }
-    
-    #db eval "SELECT DistributionTypes.DistributionType_ID as DistributionType_ID,
-    #                        DistributionTypes.DistTypeName as DistTypeName,
-    #                        DistributionTypes.DistType_Status as DistType_Status,
-    #                        RptActions.RptAction as RptAction, 
-    #                        RptMethod.RptMethod as RptMethod,
-    #                        ShipmentTypes.ShipmentType as ShipmentType,
-    #                        MasterAddresses.MasterAddr_Company as Company,
-    #                        ShipVia.ShipViaName as shipVia FROM RptConfig
-    #                    INNER JOIN DistributionTypes ON DistributionTypeID = DistributionType_ID
-    #                    INNER JOIN ShipmentTypes ON ShipmentTypes.ShipmentType_ID = DistributionTypes.DistType_ShipTypeID
-    #                    INNER JOIN RptActions ON RptActionsID = RptAction_ID
-    #                    INNER JOIN RptMethod ON RptMethodID = RptMethod_ID
-    #                    INNER JOIN ShipVia ON RptAddresses.ShipViaID = ShipVia.ShipVia_ID
-    #                    LEFT JOIN RptAddresses ON RptConfig_ID = RptConfigID
-    #                    LEFT JOIN MasterAddresses ON RptAddresses.MasterAddrID = MasterAddresses.MasterAddr_ID
-    #                WHERE DistributionTypes.DistTypeName = '$distName'" {
-    #                    set disttype(id) $DistributionType_ID
-    #                    set disttype(distName) $DistTypeName
-    #                    set disttype(status) $DistType_Status
-    #                    set disttype(shipType) $ShipmentType
-    #                    #set disttype(RptActions) $RptAction
-    #                    #${log}::debug rptAction: $RptAction
-    #                    ${log}::debug setting the disttype array
-    #                    
-    #                    #switch -nocase $RptAction {
-    #                    #        "Summarize" {
-    #                    #            set disttype(rpt,summarize) 1
-    #                    #        }
-    #                    #        "Single Entry" {
-    #                    #            if {[string tolower $RptMethod] eq "report"} {
-    #                    #                set disttype(rpt,singleEntry) 1
-    #                    #                set disttype(rpt,AddrName) $Company
-    #                    #            } else {
-    #                    #                set disttype(expt,singleEntry) 1
-    #                    #                set disttype(expt,AddrName) $Company
-    #                    #                set disttype(expt,shipVia) $shipVia
-    #                    #            }
-    #                    #        }
-    #                    #        default {
-    #                    #            ${log}::critical [info level 1] Invalid argument for switch. $RptAction
-    #                    #        }
-    #                    #}
-    #                    set gateway 1
-    #                }
-    #        # If we don't have an entry in the Table: RptConfig, but we do in DistributionTypes, we will receive an error.
-    #        # Get the assigned carrier names and insert into the listbox ...
-            db eval "SELECT distinct(Carriers.Name) as Name FROM DistributionTypeCarriers
-                INNER JOIN Carriers ON CarrierID = Carriers.Carrier_ID
-                WHERE DistributionTypeID = $disttype(id)" {
-                    $lbox insert end $Name
-                }
+    # If we don't have an entry in the Table: RptConfig, but we do in DistributionTypes, we will receive an error.
+    # Get the assigned carrier names and insert into the listbox ...
+        db eval "SELECT distinct(Carriers.Name) as Name FROM DistributionTypeCarriers
+            INNER JOIN Carriers ON CarrierID = Carriers.Carrier_ID
+            WHERE DistributionTypeID = $disttype(id)" {
+                $lbox insert end $Name
+            }
 
 
 } ;# eAssistSetup::getDistributionTypeID
