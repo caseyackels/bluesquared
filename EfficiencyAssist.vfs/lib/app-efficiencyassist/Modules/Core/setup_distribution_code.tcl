@@ -391,61 +391,121 @@ proc eAssistSetup::getDistributionTypeID {tbl lbox} {
     set distName [join [lindex $row_data 1]]
     set disttype(distName) $distName
     
-    #${log}::debug row_id: $row_id
-    #${log}::debug row_data: $row_data
-    #${log}::debug distName: $distName
-    #${log}::debug DB DistName: [db eval "SELECT * FROM DistributionTypes WHERE DistTypeName = '$distName'"]
+    ${log}::debug row_id: $row_id
+    ${log}::debug row_data: $row_data
+    ${log}::debug distName: $distName
+    #${log}::debug DistType Name: [db eval "SELECT DistTypeName FROM DistributionTypes WHERE DistTypeName = '$distName'"]
+    set disttype(id) [db eval "SELECT DistributionType_ID FROM DistributionTypes WHERE DistTypeName = '$disttype(distName)'"]
+    ${log}::debug DistType ID: $disttype(id)
     
-    db eval "SELECT DistributionTypes.DistributionType_ID as DistributionType_ID,
-                            DistributionTypes.DistTypeName as DistTypeName,
-                            DistributionTypes.DistType_Status as DistType_Status,
-                            RptActions.RptAction as RptAction, 
-                            RptMethod.RptMethod as RptMethod,
-                            ShipmentTypes.ShipmentType as ShipmentType,
-                            MasterAddresses.MasterAddr_Company as Company,
-                            ShipVia.ShipViaName as shipVia FROM RptConfig
-                        INNER JOIN DistributionTypes ON DistributionTypeID = DistributionType_ID
-                        INNER JOIN ShipmentTypes ON ShipmentTypes.ShipmentType_ID = DistributionTypes.DistType_ShipTypeID
-                        INNER JOIN RptActions ON RptActionsID = RptAction_ID
-                        INNER JOIN RptMethod ON RptMethodID = RptMethod_ID
-                        INNER JOIN ShipVia ON RptAddresses.ShipViaID = ShipVia.ShipVia_ID
-                        LEFT JOIN RptAddresses ON RptConfig_ID = RptConfigID
-                        LEFT JOIN MasterAddresses ON RptAddresses.MasterAddrID = MasterAddresses.MasterAddr_ID
-                    WHERE DistributionTypes.DistTypeName = '$distName'" {
-                        set disttype(id) $DistributionType_ID
-                        set disttype(distName) $DistTypeName
-                        set disttype(status) $DistType_Status
-                        set disttype(shipType) $ShipmentType
-                        
-                        switch -nocase $RptAction {
-                                "Summarize" {
-                                    set disttype(rpt,summarize) 1
-                                }
-                                "Single Entry" {
-                                    if {[string tolower $RptMethod] eq "report"} {
-                                        set disttype(rpt,singleEntry) 1
-                                        set disttype(rpt,AddrName) $Company
-                                    } else {
-                                        set disttype(expt,singleEntry) 1
-                                        set disttype(expt,AddrName) $Company
-                                        set disttype(expt,shipVia) $shipVia
-                                    }
-                                }
-                                default {
-                                    ${log}::critical [info level 1] Invalid argument for switch. $RptAction
-                                }
-                        }
-                        set gateway 1
-                    }
-    if {[info exists gateway]} {
-            # If we don't have an entry in the Table: RptConfig, but we do in DistributionTypes, we will receive an error.
-            # Get the assigned carrier names and insert into the listbox ...
+    set disttype(status) [db eval "SELECT DistType_Status FROM DistributionTypes WHERE DistTypeName = '$disttype(distName)'"]
+    ${log}::debug DistType Status: $disttype(status)
+    
+    set disttype(shipType) [join [db eval "SELECT ShipmentTypes.ShipmentType FROM DistributionTypes 
+                                                    INNER JOIN ShipmentTypes on ShipmentTypes.ShipmentType_ID = DistributionTypes.DistType_ShipTypeID
+                                                WHERE DistTypeName = '$disttype(distName)'"]]
+    ${log}::debug DistType ShipType: $disttype(shipType)
+    
+    #set disttype(RptActions) [db eval "SELECT RptMethod.RptMethod, RptActions.RptAction FROM RptConfig
+    #                                        INNER JOIN DistributionTypes on DistributionTypes.DistributionType_ID = RptConfig.DistributionTypeID
+    #                                        INNER JOIN RptActions on RptActions.RptAction_ID = RptConfig.RptActionsID
+    #                                        INNER JOIN RptMethod on RptMethod.RptMethod_ID = RptActions.RptMethodID
+    #                                            WHERE DistributionTypes.DistTypeName = '$distName'"]
+    
+    set disttype(RptActions) [db eval "SELECT RptMethod.RptMethod, RptActions.RptAction FROM RptConfig
+                                        INNER JOIN DistributionTypes ON DistributionTypeID = DistributionType_ID
+                                        INNER JOIN ShipmentTypes ON ShipmentTypes.ShipmentType_ID = DistributionTypes.DistType_ShipTypeID
+                                        INNER JOIN RptActions ON RptActionsID = RptAction_ID
+                                        INNER JOIN RptMethod ON RptMethodID = RptMethod_ID
+                                        --LEFT JOIN ShipVia ON RptAddresses.ShipViaID = ShipVia.ShipVia_ID
+                                        --LEFT JOIN RptAddresses ON RptConfig_ID = RptConfigID
+                                        --LEFT JOIN MasterAddresses ON RptAddresses.MasterAddrID = MasterAddresses.MasterAddr_ID
+                                                WHERE DistributionTypes.DistTypeName = '$disttype(distName)'"]
+    
+    set disttype(CompanyShipVia) [db eval "SELECT MasterAddresses.MasterAddr_Company, ShipVia.ShipViaName FROM RptConfig
+                                            INNER JOIN DistributionTypes ON DistributionTypeID = DistributionType_ID
+                                            INNER JOIN ShipmentTypes ON ShipmentTypes.ShipmentType_ID = DistributionTypes.DistType_ShipTypeID
+                                            INNER JOIN RptActions ON RptActionsID = RptAction_ID
+                                            INNER JOIN RptMethod ON RptMethodID = RptMethod_ID
+                                            INNER JOIN ShipVia ON RptAddresses.ShipViaID = ShipVia.ShipVia_ID
+                                            LEFT JOIN RptAddresses ON RptConfig_ID = RptConfigID
+                                            LEFT JOIN MasterAddresses ON RptAddresses.MasterAddrID = MasterAddresses.MasterAddr_ID
+                                                    WHERE DistributionTypes.DistTypeName = '$disttype(distName)'"]
+    
+    ${log}::debug RptActions: $disttype(RptActions)
+    
+    foreach {RptMethod RptAction} $disttype(RptActions) {
+        switch -nocase $RptAction {
+            "Summarize" {set disttype(rpt,summarize) 1}
+            "Single Entry" {
+                set Company [lindex $disttype(CompanyShipVia) 0]
+                set ShipViaName [lindex $disttype(CompanyShipVia) 1]
+                
+                if {[string tolower $RptMethod] eq "report"} {
+                    set disttype(rpt,singleEntry) 1
+                    set disttype(rpt,AddrName) $Company
+                } else {
+                    set disttype(expt,singleEntry) 1
+                    set disttype(expt,AddrName) $Company
+                    set disttype(expt,shipVia) $ShipViaName
+                }
+            }
+            default {
+                ${log}::notice [info level 1] RptAction isn't setup, default is 'default': $RptAction}
+        }
+    }
+    
+    #db eval "SELECT DistributionTypes.DistributionType_ID as DistributionType_ID,
+    #                        DistributionTypes.DistTypeName as DistTypeName,
+    #                        DistributionTypes.DistType_Status as DistType_Status,
+    #                        RptActions.RptAction as RptAction, 
+    #                        RptMethod.RptMethod as RptMethod,
+    #                        ShipmentTypes.ShipmentType as ShipmentType,
+    #                        MasterAddresses.MasterAddr_Company as Company,
+    #                        ShipVia.ShipViaName as shipVia FROM RptConfig
+    #                    INNER JOIN DistributionTypes ON DistributionTypeID = DistributionType_ID
+    #                    INNER JOIN ShipmentTypes ON ShipmentTypes.ShipmentType_ID = DistributionTypes.DistType_ShipTypeID
+    #                    INNER JOIN RptActions ON RptActionsID = RptAction_ID
+    #                    INNER JOIN RptMethod ON RptMethodID = RptMethod_ID
+    #                    INNER JOIN ShipVia ON RptAddresses.ShipViaID = ShipVia.ShipVia_ID
+    #                    LEFT JOIN RptAddresses ON RptConfig_ID = RptConfigID
+    #                    LEFT JOIN MasterAddresses ON RptAddresses.MasterAddrID = MasterAddresses.MasterAddr_ID
+    #                WHERE DistributionTypes.DistTypeName = '$distName'" {
+    #                    set disttype(id) $DistributionType_ID
+    #                    set disttype(distName) $DistTypeName
+    #                    set disttype(status) $DistType_Status
+    #                    set disttype(shipType) $ShipmentType
+    #                    #set disttype(RptActions) $RptAction
+    #                    #${log}::debug rptAction: $RptAction
+    #                    ${log}::debug setting the disttype array
+    #                    
+    #                    #switch -nocase $RptAction {
+    #                    #        "Summarize" {
+    #                    #            set disttype(rpt,summarize) 1
+    #                    #        }
+    #                    #        "Single Entry" {
+    #                    #            if {[string tolower $RptMethod] eq "report"} {
+    #                    #                set disttype(rpt,singleEntry) 1
+    #                    #                set disttype(rpt,AddrName) $Company
+    #                    #            } else {
+    #                    #                set disttype(expt,singleEntry) 1
+    #                    #                set disttype(expt,AddrName) $Company
+    #                    #                set disttype(expt,shipVia) $shipVia
+    #                    #            }
+    #                    #        }
+    #                    #        default {
+    #                    #            ${log}::critical [info level 1] Invalid argument for switch. $RptAction
+    #                    #        }
+    #                    #}
+    #                    set gateway 1
+    #                }
+    #        # If we don't have an entry in the Table: RptConfig, but we do in DistributionTypes, we will receive an error.
+    #        # Get the assigned carrier names and insert into the listbox ...
             db eval "SELECT distinct(Carriers.Name) as Name FROM DistributionTypeCarriers
                 INNER JOIN Carriers ON CarrierID = Carriers.Carrier_ID
                 WHERE DistributionTypeID = $disttype(id)" {
                     $lbox insert end $Name
                 }
-        }
 
 
 } ;# eAssistSetup::getDistributionTypeID

@@ -248,7 +248,7 @@ proc job::db::createDB {args} {
                                     REFERENCES JobInformation (JobInformation_ID) ON DELETE NO ACTION
                                                                                     ON UPDATE CASCADE} \
         {AddressID          TEXT  NOT NULL ON CONFLICT ROLLBACK
-                                    REFERENCES Addresses (SysAddresses_ID) ON DELETE NO ACTION
+                                    REFERENCES Addresses (SysAddresses_ID) ON DELETE CASCADE
                                                                             ON UPDATE CASCADE} \
         {Hidden             BOOLEAN DEFAULT (0) NOT NULL ON CONFLICT ROLLBACK}]
 
