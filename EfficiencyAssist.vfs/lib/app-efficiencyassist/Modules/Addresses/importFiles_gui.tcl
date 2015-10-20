@@ -210,68 +210,17 @@ proc importFiles::eAssistGUI {} {
         
     ::autoscroll::autoscroll $scrolly ;# Enable the 'autoscrollbar'
     ::autoscroll::autoscroll $scrollx ;# Enable the 'autoscrollbar'
-
-    # Setup the bindings
-    set bodyTag [$files(tab3f2).tbl bodytag]
-    set labelTag [$files(tab3f2).tbl labeltag]
-    set editWinTag [$files(tab3f2).tbl editwintag]
     
-    # Begin bodyTag
-    #bind $bodyTag <<Button3>> +[list tk_popup .tblMenu %X %Y]
-    
-    # Toggle between selecting a row, or a single cell
-    bind $bodyTag <Button-1> {
-        #${log}::debug Clicked on column %W %x %y
-        #${log}::debug Column Name: [$files(tab3f2).tbl containingcolumn %x]
-        set colName [$files(tab3f2).tbl columncget [$files(tab3f2).tbl containingcolumn %x] -name]
-        #${log}::debug Column Name: $colName
-        
-        if {$colName eq "OrderNumber"} {
-            $files(tab3f2).tbl configure -selecttype row
-        } else {
-            $files(tab3f2).tbl configure -selecttype cell
-        }
-    }
-    
-    bind $bodyTag <Double-1> {
-        #${log}::debug Clicked on column %W %x %y
-        #${log}::debug Column Name: [$files(tab3f2).tbl containingcolumn %x]
-        set colName [$files(tab3f2).tbl columncget [$files(tab3f2).tbl containingcolumn %x] -name]
-        #${log}::debug Column Name: $colName
-        if {$colName eq "OrderNumber"} {
-            eAssistHelper::shippingOrder $files(tab3f2).tbl -edit
-            ${log}::debug Current Row: [$files(tab3f2).tbl curselection]
-        }
-    }
-   
-    
-    bind $bodyTag <Control-v> {
-        #eAssistHelper::insValuesToTableCells -hotkey $files(tab3f2).tbl [clipboard get] [$files(tab3f2).tbl curcellselection]
-        #${log}::debug CLIPBOARD _ CTRL+V t [split [clipboard get] \t]
-        #${log}::debug CLIPBOARD _ CTRL+V n [split [clipboard get] \n]
-        #${log}::debug CLIPBOARD _ CTRL+V _list [list [clipboard get]]
-        #${log}::debug Pressed <Control-V>
-    }
-    
-    bind $bodyTag <Control-c> {
-        #IFMenus::copyCell $files(tab3f2).tbl hotkey
-        #${log}::debug Pressed <Control-C>
-    }
-    
-    # Begin labelTag
-    bind $labelTag <Button-3> +[list tk_popup .tblToggleColumns %X %Y]
-    #bind $labelTag <Enter> {tooltip::tooltip $labelTag testing}
-
     #----- GRID
     grid $files(tab3f2).tbl -column 0 -row 0 -sticky news -padx 5p -pady 5p
     grid columnconfigure $files(tab3f2) $files(tab3f2).tbl -weight 2
     grid rowconfigure $files(tab3f2) $files(tab3f2).tbl -weight 2
-    
+
+    #----- Bindings
+    # Bindings are set in: eAssistHelper::resetImportInterface
+
+
 #ttk::style map TEntry -fieldbackground [list focus yellow]
-   
-    # Initialize popup menus
-    IFMenus::tblPopup $files(tab3f2).tbl browse .tblMenu
-    IFMenus::createToggleMenu $files(tab3f2).tbl
 
 } ;# importFiles::eAssistGUI
 
@@ -339,6 +288,8 @@ proc importFiles::initMenu {} {
         $mb.file.job add command -label [mc "New..."] -command {customer::projSetup newJob} ;# Read Only on the Title level widgets
         $mb.file.job add command -label [mc "Edit..."] -command {customer::projSetup editJob} ;# Read Only on the Title level widgets
         $mb.file.job add command -label [mc "Open..."] -command {${log}::debug Open Job}
+        $mb.file.job add separator
+        $mb.file.job add command -label [mc "Publish"] -command {${log}::debug Publishing ...}
     $mb.file add separator
     $mb.file add command -label [mc "Import File"] -command {importFiles::fileImportGUI}
     $mb.file add command -label [mc "Export File"] -command {export::DataToExport} ;#-state disabled

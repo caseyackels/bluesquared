@@ -330,9 +330,8 @@ proc eAssistHelper::resetImportInterface {args} {
     # SEE ALSO
     #
     #***
-    global log w process position
-   # ${log}::debug --START -- [info level 1]
-	
+    global log w process position files
+
 	
 	if {$args == 1} {
 	# Clear out the variables
@@ -348,7 +347,60 @@ proc eAssistHelper::resetImportInterface {args} {
 		importFiles::eAssistGUI
 	}
 	
-    #${log}::debug --END -- [info level 1]
+	${log}::debug configuring the bindings ...
+	# Setup the bindings
+    set bodyTag [$files(tab3f2).tbl bodytag]
+    set labelTag [$files(tab3f2).tbl labeltag]
+    set editWinTag [$files(tab3f2).tbl editwintag]
+    
+    # Begin bodyTag
+    #bind $bodyTag <<Button3>> +[list tk_popup .tblMenu %X %Y]
+	# Toggle between selecting a row, or a single cell
+	bind $bodyTag <Button-1> {
+		#${log}::debug Clicked on column %W %x %y
+		#${log}::debug Column Name: [$files(tab3f2).tbl containingcolumn %x]
+		set colName [$files(tab3f2).tbl columncget [$files(tab3f2).tbl containingcolumn %x] -name]
+		#${log}::debug Column Name: $colName
+		
+		if {$colName eq "OrderNumber"} {
+			$files(tab3f2).tbl configure -selecttype row
+		} else {
+			$files(tab3f2).tbl configure -selecttype cell
+		}
+	}
+	
+	bind $bodyTag <Double-1> {
+		#${log}::debug Clicked on column %W %x %y
+		#${log}::debug Column Name: [$files(tab3f2).tbl containingcolumn %x]
+		set colName [$files(tab3f2).tbl columncget [$files(tab3f2).tbl containingcolumn %x] -name]
+		#${log}::debug Column Name: $colName
+		if {$colName eq "OrderNumber"} {
+			eAssistHelper::shippingOrder $files(tab3f2).tbl -edit
+			${log}::debug Current Row: [$files(tab3f2).tbl curselection]
+		}
+	}
+   
+	
+	bind $bodyTag <Control-v> {
+		#eAssistHelper::insValuesToTableCells -hotkey $files(tab3f2).tbl [clipboard get] [$files(tab3f2).tbl curcellselection]
+		#${log}::debug CLIPBOARD _ CTRL+V t [split [clipboard get] \t]
+		#${log}::debug CLIPBOARD _ CTRL+V n [split [clipboard get] \n]
+		#${log}::debug CLIPBOARD _ CTRL+V _list [list [clipboard get]]
+		#${log}::debug Pressed <Control-V>
+	}
+	
+	bind $bodyTag <Control-c> {
+		#IFMenus::copyCell $files(tab3f2).tbl hotkey
+		#${log}::debug Pressed <Control-C>
+	}
+		# Initialize popup menus
+		IFMenus::tblPopup $files(tab3f2).tbl browse .tblMenu
+		IFMenus::createToggleMenu $files(tab3f2).tbl
+    
+    # Begin labelTag
+    bind $labelTag <Button-3> +[list tk_popup .tblToggleColumns %X %Y]
+    #bind $labelTag <Enter> {tooltip::tooltip $labelTag testing}
+
 } ;# eAssistHelper::resetImportInterface
 
 
