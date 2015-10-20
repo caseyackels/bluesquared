@@ -159,6 +159,7 @@ proc importFiles::setJobArray {} {
 				   JobSaveFileLocation "" \
 				   TitleSaveFileLocation "" \
 				   JobFirstShipDate "" \
-				   JobBalanceShipDate ""]
+				   JobBalanceShipDate "" \
+                   ForestCert ""]
         
 } ;# importFiles::setJobArray

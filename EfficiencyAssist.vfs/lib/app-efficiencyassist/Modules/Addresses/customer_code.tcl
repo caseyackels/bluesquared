@@ -281,8 +281,13 @@ proc customer::deleteFromlbox {lbox custID} {
 
 } ;# customer::deleteFromlbox
 
+proc ea::db::customer::ForestCertification {win} {
+    $win configure -values [db eval "SELECT ForestType.ForestTypeDesc || ' / ' || ForestOrg.ForestOrgNum FROM ForestType
+												INNER JOIN ForestOrg on ForestOrg.ForestOrg_ID = ForestType.ForestType_ID
+												WHERE ForestType.Active = 1"]
+}
 
-proc customer::dbAddShipVia {lbox custIDwid custNamewid} {
+proc customer::dbAddShipVia {modify lbox custIDwid custNamewid} {
     #****f* dbAddShipVia/customer
     # CREATION DATE
     #   01/13/2015 (Tuesday Jan 13)
@@ -315,6 +320,11 @@ proc customer::dbAddShipVia {lbox custIDwid custNamewid} {
     #   
     #***
     global log cust tmp
+    
+    switch -- $modify {
+        view    {return}
+        default {}
+    }
 
     set custID [$custIDwid get]
     set custName [list [$custNamewid get]]
@@ -649,6 +659,9 @@ proc customer::dbUpdateJob {args} {
             -jHistNote      {#${log}::debug -jHistNote $value
                                 set jHistNote $value
             }
+            -jForestCert    {
+                                set jForestCert $value
+            }
             default         {${log}::critical [info level 0] Passed invalid args $args; return}
         }
     }
@@ -662,7 +675,7 @@ proc customer::dbUpdateJob {args} {
     }
     
     # This command will figure out if we need to update or insert data into the the database.
-    job::db::insertJobInfo -jNumber $jNumber -jName $jName -jSaveLocation $jSaveLocation -jDateShipStart $jShipStart -jDateShipBalance $jShipBal -titleid $titleID -histnote $jHistNote
+    job::db::insertJobInfo -jNumber $jNumber -jName $jName -jSaveLocation $jSaveLocation -jDateShipStart $jShipStart -jDateShipBalance $jShipBal -titleid $titleID -histnote $jHistNote -jForestCert $jForestCert
     
 } ;# customer::dbUpdateJob
 

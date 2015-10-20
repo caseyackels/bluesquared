@@ -131,14 +131,9 @@ proc customer::projSetup {{modify newTitle} args} {
     ttk::entry $f2.entry1a -textvariable job(JobSaveFileLocation) -state disabled
         tooltip::tooltip $f2.entry1a [mc "Location where you want to save this Job."]
     ttk::button $f2.btn1 -text [mc "..."] -width 3 -command {customer::getFileSaveLocation job} -state disabled
-    
-    ttk::label $f2.txt2 -text [mc "1st Ship Date"]
-    ttk::entry $f2.entry2 -textvariable job(JobFirstShipDate) -state disabled
-        tooltip::tooltip $f2.entry2 [mc "Must be in MM/DD/YYYY format"]
-		
-	ttk::label $f2.txt3 -text [mc "Balance Ship Date"]
-    ttk::entry $f2.entry3 -textvariable job(JobBalanceShipDate) -state disabled
-        tooltip::tooltip $f2.entry3 [mc "Must be in MM/DD/YYYY format"]
+
+	grid [ttk::label $f2.txt2 -text [mc "Forest Certification"]] -column 0 -row 3 -sticky nes
+	grid [ttk::combobox $f2.cbox2 -textvariable job(ForestCert) -postcommand [list ea::db::customer::ForestCertification $f2.cbox2] -state disabled] -column 1 -row 3 -sticky ew
     
     grid $f2.txt0     -column 0 -row 0 -sticky nes -pady 3p -pady 3p
     grid $f2.entry0   -column 1 -row 0 -sticky ew -padx 3p -pady 3p
@@ -147,10 +142,6 @@ proc customer::projSetup {{modify newTitle} args} {
     grid $f2.txt1a    -column 0 -row 2 -sticky nes -pady 3p -pady 3p
     grid $f2.entry1a  -column 1 -row 2 -sticky ew -padx 3p -pady 3p
     grid $f2.btn1     -column 2 -row 2 -sticky ew -padx 2p -pady 3p
-    grid $f2.txt2     -column 0 -row 3 -sticky nes -padx 3p -pady 3p
-    grid $f2.entry2   -column 1 -columnspan 2 -row 3 -sticky ew -padx 3p -pady 3p
-	grid $f2.txt3     -column 0 -row 4 -sticky nes -padx 3p -pady 3p
-    grid $f2.entry3   -column 1 -columnspan 2 -row 4 -sticky ew -padx 3p -pady 3p
     
     ## Button Frame
     ##
@@ -159,7 +150,7 @@ proc customer::projSetup {{modify newTitle} args} {
     
     ttk::button $btnBar.ok -text [mc "OK"] -command {destroy .ps} ;# Default command 
 	ttk::button $btnBar.import -text [mc "Import File"] -command {customer::dbUpdateCustomer
-																	job::db::createDB -tName $job(Title) -tCSR $job(CSRName) -tSaveLocation $job(TitleSaveFileLocation) -tCustCode $job(CustID) -tHistNote {Initial Entry} -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal $job(JobBalanceShipDate) -jHistNote {Initial Job Entry}
+																	job::db::createDB -tName $job(Title) -tCSR $job(CSRName) -tSaveLocation $job(TitleSaveFileLocation) -tCustCode $job(CustID) -tHistNote {Initial Entry} -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jForestCert $job(ForestCert) -jHistNote {Initial Job Entry}
 																	importFiles::fileImportGUI; destroy .ps}
     
     grid $btnBar.ok -column 0 -row 0 -sticky news
@@ -213,13 +204,13 @@ proc customer::projSetup {{modify newTitle} args} {
 						$f2.entry3 delete 0 end
 						
 						$btnBar.ok configure -command { eAssistHelper::resetImportInterface 1
-													customer::dbUpdateJob -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal $job(JobBalanceShipDate)
+													customer::dbUpdateJob -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal $job(JobBalanceShipDate) -jForestCert $job(ForestCert)
 													destroy .ps
 													}
 
 		}
 		editJob		{
-					$btnBar.ok configure -command {customer::dbUpdateJob -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal $job(JobBalanceShipDate)
+					$btnBar.ok configure -command {customer::dbUpdateJob -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal $job(JobBalanceShipDate) -jForestCert $job(ForestCert)
 													destroy .ps}
 						# Enable the widgets
 						foreach child [winfo child $f2] {
@@ -614,7 +605,7 @@ proc customer::Modify {modify {tbl ""}} {
     ##
     ## Control Buttons
     # After we close the customer ship via window; refresh the main customer list, so that if we added a customer or deactivated a customer, we will now see the results.
-    ttk::button $btns.btn0 -text [mc "OK"] -command "customer::dbAddShipVia $f3a.lbox $f0a.entry1 $f0a.entry2; destroy $wid; customer::manage" -state btnState
+    ttk::button $btns.btn0 -text [mc "OK"] -command "customer::dbAddShipVia $modify $f3a.lbox $f0a.entry1 $f0a.entry2; destroy $wid; customer::manage" -state btnState
     ttk::button $btns.btn1 -text [mc "Cancel"] -command "destroy $wid"
     
     grid $btns.btn0 -column 0 -row 0

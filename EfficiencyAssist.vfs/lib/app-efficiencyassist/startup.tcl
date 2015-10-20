@@ -128,6 +128,11 @@ proc 'eAssist_sourceReqdFiles {} {
 	
 	# Reports (not really a module)
 	namespace eval ea::code::export {}
+    
+    # Customer GUI/Info
+    namespace eval ea::code::customer {}
+    namespace eval ea::gui::customer {}
+    namespace eval ea::db::customer {}
 	
 	
 	## Start the Package Require
@@ -368,7 +373,8 @@ proc 'eAssist_initVariables {} {
 				   JobSaveFileLocation "" \
 				   TitleSaveFileLocation "" \
 				   JobFirstShipDate "" \
-				   JobBalanceShipDate ""]
+				   JobBalanceShipDate "" \
+                   ForestCert ""]
 	
 	# Filters
 	array set filter [list run,stripASCII_CC 0 \

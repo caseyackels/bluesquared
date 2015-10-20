@@ -119,6 +119,9 @@ proc job::db::createDB {args} {
             -jHistNote      {#${log}::debug -jHistNote $value
                                 set jHistNote $value
             }
+            -jForestCert    {
+                                set jForestCert $value
+            }
             default         {${log}::critical $currentProcName [info level 0] Passed invalid args $args; return}
         }
     }
@@ -218,6 +221,7 @@ proc job::db::createDB {args} {
             JobSaveLocation    TEXT    NOT NULL ON CONFLICT ROLLBACK,
             JobFirstShipDate   DATE,
             JobBalanceShipDate DATE,
+            JobForestCert      TEXT,
             TitleInformationID INTEGER REFERENCES TitleInformation (TitleInformation_ID) ON UPDATE CASCADE
                                        NOT NULL ON CONFLICT ROLLBACK,
             HistoryID          TEXT    REFERENCES History (History_ID) ON UPDATE CASCADE
@@ -309,7 +313,7 @@ proc job::db::createDB {args} {
     
     #INSERT JOB
     ${log}::notice Title DB: Inserted job data...
-    job::db::insertJobInfo -jNumber $jNumber -jName $jName -jSaveLocation $jSaveLocation -jDateShipStart $jShipStart -jDateShipBalance $jShipBal -titleid $titleID -histnote $jHistNote
+    job::db::insertJobInfo -jNumber $jNumber -jName $jName -jSaveLocation $jSaveLocation -jDateShipStart $jShipStart -jDateShipBalance $jShipBal -titleid $titleID -histnote $jHistNote -jForestCert $jForestCert
        
 } ;# job::db::createDB
 
@@ -361,7 +365,7 @@ proc job::db::open {args} {
     if {[info exists job(db,Name)] == 1} {
         ${log}::debug Previous job is open. Closing current job: $job(Title) $job(Name)
         $job(db,Name) close
-        }
+    }
         
     set job(db,Name) [eAssist_Global::OpenFile [mc "Open Project"] $mySettings(sourceFiles) file -ext .db -filetype {{Efficiency Assist Project} {.db}}]
     
@@ -1127,6 +1131,7 @@ proc job::db::insertJobInfo {args} {
             -jDateShipBalance   {lappend hdrs JobBalanceShipDate; lappend values '$value'; set jDateShipBalance '$value'}
             -titleid            {lappend hdrs TitleInformationID; lappend values $value; set titleid $value; # No single quotes, this is an integer}
             -histnote           {set histnote '[job::db::insertHistory $value]'; lappend hdrs HistoryID; lappend values $histnote}
+            -jForestCert        {lappend hdrs JobForestCert; lappend values $value; set jForestCert '$value'}
         }
     }
     
@@ -1142,7 +1147,12 @@ proc job::db::insertJobInfo {args} {
         ${log}::notice TitleDB: updating existing job info: $jNumber, $jName
         ${log}::debug sql: SET JobInformation_ID = $jNumber, JobName = $jName, JobSaveLocation = $jSaveLocation, TitleInformationID = $titleid, HistoryID = $histnote
         $job(db,Name) eval "UPDATE JobInformation
-                                SET JobInformation_ID = $jNumber, JobName = $jName, JobSaveLocation = $jSaveLocation, TitleInformationID = $titleid, HistoryID = $histnote
+                                SET JobInformation_ID = $jNumber,
+                                    JobName = $jName,
+                                    JobSaveLocation = $jSaveLocation,
+                                    TitleInformationID = $titleid,
+                                    HistoryID = $histnote,
+                                    JobForestCert = $jForestCert
                                 WHERE JobInformation_ID = $jNumber"
     } else {
         ${log}::notice TitleDB: Inserting new job info into db, clearing out the tablelist widget
