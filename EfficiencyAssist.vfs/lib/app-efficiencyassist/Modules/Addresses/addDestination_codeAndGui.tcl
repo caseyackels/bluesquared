@@ -820,22 +820,32 @@ proc ea::code::bm::writeHiddenShipment {disttype} {
         #set shipOrder(PackageType)
         #set shipOrder(ContainerType)
         #set shipOrder(DistributionType)
-        set shipOrder(Quantity) [ea::db::countQuantity -db $job(db,Name) -job $job(Number) -and "AND Addresses.DistributionType = '$disttype' AND ShippingOrders.Hidden = 0"]
+        set shipOrder(Quantity) [ea::db::countQuantity -db $job(db,Name) -job $job(Number) -and "AND Addresses.DistributionType = '$disttype' AND ShippingOrders.Hidden = 0 AND Versions.Version_ID=$shipOrder(Versions)"]
         #set shipOrder(ShipDate)
         #set shipOrder(ShippingClass)
         
-        # Convert back to the version name
+        # This is the Version ID
         ${log}::debug Version id: $shipOrder(Versions)
+    
+    set title(shipOrder_id) [$job(db,Name) eval "SELECT SysAddresses_ID FROM Addresses WHERE Company LIKE '%$shipOrder(Company)%' AND Versions=$shipOrder(Versions)"]
+    
+        # Convert to Name
         set shipOrder(Versions) [lindex [job::db::getVersion -id $shipOrder(Versions) -active 1] 1]
         ${log}::debug Version Name: $shipOrder(Versions)
-        
-    
-    set title(shipOrder_id) [$job(db,Name) eval "SELECT SysAddresses_ID FROM Addresses WHERE Company LIKE '%$shipOrder(Company)%'"]
 
     if {$title(shipOrder_id) ne ""} {
-        # Address Entry already exists; update.
-        ${log}::debug Address for $shipOrder(Company) exists
-        ea::db::updateSingleAddressToDB
+        # Entry was in the database, check to see if it exists as a shippingorder on the current job.
+        set existsOnJob [$job(db,Name) eval "SELECT AddressID FROM ShippingOrders WHERE JobInformationID = '$job(Number)' AND AddressID = '$title(shipOrder_id)'"]
+        ${log}::debug Entry Exists, listed in ShippingOrders? $existsOnJob
+        
+        if {$existsOnJob eq ""} {
+            # Insert record into the shipping table
+            $job(db,Name) eval "INSERT INTO ShippingOrders (AddressID, JobInformationID, Hidden) VALUES ('$title(shipOrder_id)', '$job(Number)', 1)"
+        } else {
+            # Address Entry already exists; update.
+            ${log}::debug Address for $shipOrder(Company) exists, updating...
+            ea::db::updateSingleAddressToDB
+        }
 
     } else {
         # Doesn't exist; insert.

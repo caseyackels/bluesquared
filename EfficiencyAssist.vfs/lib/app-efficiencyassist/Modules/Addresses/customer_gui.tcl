@@ -149,7 +149,7 @@ proc customer::projSetup {{modify newTitle} args} {
     pack $btnBar -anchor se ;#-padx 5p -pady 5p
     
     ttk::button $btnBar.ok -text [mc "OK"] -command {destroy .ps} ;# Default command 
-	ttk::button $btnBar.import -text [mc "Import File"] -command {customer::dbUpdateCustomer
+	ttk::button $btnBar.import -text [mc "Import File"] -state disable -command {customer::dbUpdateCustomer
 																	job::db::createDB -tName $job(Title) -tCSR $job(CSRName) -tSaveLocation $job(TitleSaveFileLocation) -tCustCode $job(CustID) -tHistNote {Initial Entry} -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jForestCert $job(ForestCert) -jHistNote {Initial Job Entry}
 																	importFiles::fileImportGUI; destroy .ps}
     
@@ -195,17 +195,24 @@ proc customer::projSetup {{modify newTitle} args} {
 						foreach child [winfo child $f2] {
 							$child configure -state normal
 						}
+						$btnBar.import configure -state normal
 						focus $f2.entry0
 						
 						$f2.entry0 delete 0 end
 						$f2.entry1 delete 0 end
 						$f2.entry1a delete 0 end
-						$f2.entry2 delete 0 end
-						$f2.entry3 delete 0 end
+						#$f2.entry2 delete 0 end
+						#$f2.entry3 delete 0 end
 						
 						$btnBar.ok configure -command { eAssistHelper::resetImportInterface 1
 													customer::dbUpdateJob -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal $job(JobBalanceShipDate) -jForestCert $job(ForestCert)
 													destroy .ps
+													}
+													
+						$btnBar.import configure -command { eAssistHelper::resetImportInterface 1
+													customer::dbUpdateJob -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal $job(JobBalanceShipDate) -jForestCert $job(ForestCert)
+													destroy .ps
+													importFiles::fileImportGUI
 													}
 
 		}
@@ -216,7 +223,6 @@ proc customer::projSetup {{modify newTitle} args} {
 						foreach child [winfo child $f2] {
 							$child configure -state normal
 						}
-						$btnBar.import configure -state disable
 		}
         default {${log}::debug [info level 0] - Switch Arg not availabe: $modify for [info level 0]}       
     }

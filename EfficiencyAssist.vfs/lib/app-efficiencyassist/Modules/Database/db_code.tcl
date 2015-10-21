@@ -917,9 +917,11 @@ proc ea::db::countQuantity {args} {
 	
 	set sql "SELECT SUM(Quantity) FROM ShippingOrders
 							INNER JOIN Addresses
-								ON AddressID = Addresses.SysAddresses_ID
+								ON ShippingOrders.AddressID = Addresses.SysAddresses_ID
+							INNER JOIN Versions
+								on Addresses.Versions = Versions.Version_ID
 							WHERE Addresses.SysActive = 1
-							AND JobInformationID = $jobNumber"
+							AND ShippingOrders.JobInformationID = '$jobNumber'"
 	
 	if {[info exists and] && $and ne ""} {
 		set sql "$sql $and"

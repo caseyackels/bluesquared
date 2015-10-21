@@ -128,7 +128,7 @@ proc ea::db::writeSingleAddressToDB {{hidden 0}} {
 	#   
 	# NOTES
 	#   Inserts data from the shipOrder() array into the title db.
-	#   Parameters: hidden 0|1; passing Zero is option. The Database defaults to that value if nothing is entered. This is used for when we have specific transforms for
+	#   Parameters: hidden 0|1; passing Zero is optional. The Database defaults to that value if nothing is entered. This is used for when we have specific transforms for
 	#	distribution types. i.e. planner import vs process shipper import
 	#   
 	#***

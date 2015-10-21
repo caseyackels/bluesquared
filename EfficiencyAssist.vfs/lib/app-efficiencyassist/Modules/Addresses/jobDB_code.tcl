@@ -394,7 +394,7 @@ proc job::db::open {args} {
     set job(CustName) [join [db eval "SELECT CustName From Customer where Cust_ID='$job(CustID)'"]]
     
     # Set last job number, so we have a place to start
-    $job(db,Name) eval "SELECT JobInformation_ID, JobName, JobSaveLocation, JobFirstShipDate, JobBalanceShipDate, max(History.HistDate) FROM JobInformation
+    $job(db,Name) eval "SELECT JobInformation_ID, JobName, JobSaveLocation, JobFirstShipDate, JobBalanceShipDate, max(History.HistDate), max(History.HistTime) FROM JobInformation
                                                 INNER JOIN History
                                             ON JobInformation.HistoryID = History.History_ID" {
                                                 set job(Number) $JobInformation_ID
@@ -1131,7 +1131,7 @@ proc job::db::insertJobInfo {args} {
             -jDateShipBalance   {lappend hdrs JobBalanceShipDate; lappend values '$value'; set jDateShipBalance '$value'}
             -titleid            {lappend hdrs TitleInformationID; lappend values $value; set titleid $value; # No single quotes, this is an integer}
             -histnote           {set histnote '[job::db::insertHistory $value]'; lappend hdrs HistoryID; lappend values $histnote}
-            -jForestCert        {lappend hdrs JobForestCert; lappend values $value; set jForestCert '$value'}
+            -jForestCert        {lappend hdrs JobForestCert; lappend values '$value'; set jForestCert '$value'}
         }
     }
     
@@ -1156,7 +1156,9 @@ proc job::db::insertJobInfo {args} {
                                 WHERE JobInformation_ID = $jNumber"
     } else {
         ${log}::notice TitleDB: Inserting new job info into db, clearing out the tablelist widget
-        $job(db,Name) eval "INSERT INTO JobInformation([join $hdrs ,]) VALUES([join $values ,])"
+        ${log}::debug hdrs: [join $hdrs ,]
+        ${log}::debug values: [join $values ,]
+        $job(db,Name) eval "INSERT INTO JobInformation ([join $hdrs ,]) VALUES ([join $values ,])"
         
         # make sure we are starting new, remove rows and columns
         if {[$files(tab3f2).tbl size] != 0} {$files(tab3f2).tbl delete 0 end}
