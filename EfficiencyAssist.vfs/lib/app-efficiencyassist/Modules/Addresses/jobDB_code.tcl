@@ -933,7 +933,7 @@ proc job::db::getTotalCopies {args} {
 } ;# job::db::getTotalCopies
 
 proc job::db::getVersionCount {args} {
-    #****if* getVersionCount/job::db
+    #****f* getVersionCount/job::db
     # CREATION DATE
     #   10/02/2015 (Friday Oct 02)
     #
@@ -944,7 +944,13 @@ proc job::db::getVersionCount {args} {
     #	(c) 2015 Casey Ackels
     #   
     # NOTES
-    #   
+    #   Valid args are
+    #       -type (one of: countqty, numofversions, name)
+    #       -version <version name> ; defaults to all versions
+    #       -job <job Number> ; defaults to current active job $job(Number)
+    #       -versActive 1|0 ; defaults to 1
+    #       -addrActive 1|0 ; defaults to 1
+    #       -hidden 1|0 ; defaults to 0 
     #   
     #***
     global log job
@@ -954,33 +960,40 @@ proc job::db::getVersionCount {args} {
     foreach {key value} $args {
         switch -- $key {
             -type       {set type $value}
-            -version    {set version $value}
-            -job        {set jobNumber $value}
-            -versActive {set versActive $value}
-            -addrActive {set addrActive $value}
-            default     {}
+            -version    {lappend and "VersionName = '$value'"}
+            -job        {set jobNumber $value; lappend and "JobInformationID = '$value'"}
+            -versActive {set versActive $value; lappend and "Versions.VersionActive = $value"}
+            -addrActive {set addrActive $value; lappend and "Addresses.SysActive = $value"}
+            -hidden     {set hidden $value; lappend and "ShippingOrders.Hidden = $value"}
+            default     {${log}::debug [info level 0] switch parameter $key isn't valid}
         }
     }
-    if {![info exists type]} {return}
-    if {![info exists versActive]} {set versActive 1}
-    if {![info exists addrActive]} {set addrActive 1}
+    
+    if {![info exists type]} {${log}::debug Type doesn't exist, must be one of: countqty, numofversions, name; return}
+    if {![info exists jobNumber]} {lappend and "JobInformationID = $job(Number)"}
+    if {![info exists versActive]} {lappend and "Versions.VersionActive = 1"}
+    if {![info exists addrActive]} {lappend and "Addresses.SysActive = 1"}
+    if {![info exists hidden]} {lappend and "ShippingOrders.Hidden = 0"}
+    
     
     if {[string tolower $type] eq "countqty"} {
         set colvalue sum(Quantity)
     
     } elseif {[string tolower $type] eq "numofversions"} {
         set colvalue count(Quantity)
+        
+    } elseif {[string tolower $type] eq "names"} {
+        set colvalue "DISTINCT(Versions.VersionName) as Versions"
     }
 
-    $job(db,Name) eval "SELECT $colvalue FROM ShippingOrders
+    set and [join $and " AND "]
+    set sql "SELECT $colvalue FROM ShippingOrders
                             INNER JOIN Addresses ON Addresses.SysAddresses_ID = ShippingOrders.AddressID
                             INNER JOIN Versions ON Addresses.Versions = Versions.Version_ID
-                                WHERE JobInformationID = '$jobNumber'
-                            AND Addresses.SysActive = $addrActive
-                            AND Versions.VersionActive = $versActive
-                            AND VersionName = '$version'
-                            AND ShippingOrders.Hidden = 0"
-    
+                            WHERE $and"
+                            
+    $job(db,Name) eval $sql
+
 } ;# job::db::getVersionCount -job $job(Number) -version <> -versActive 1 -addrActive 1
 
 proc job::db::insertDefaultData {} {

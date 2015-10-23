@@ -133,6 +133,11 @@ proc 'eAssist_sourceReqdFiles {} {
     namespace eval ea::code::customer {}
     namespace eval ea::gui::customer {}
     namespace eval ea::db::customer {}
+    
+    # Adding samples
+    namespace eval ea::code::samples {}
+    namespace eval ea::gui::samples {}
+    namespace eval ea::db::samples {}
 	
 	
 	## Start the Package Require
