@@ -63,7 +63,8 @@ proc ea::gui::samples::SampleGUI {} {
     set locX [expr {[winfo width . ] / 3 + [winfo x .]}]
     set locY [expr {[winfo height . ] / 3 + [winfo y .]}]
     #wm geometry .csmpls 625x400+${locX}+${locY}
-	wm geometry $win 625x490+${locX}+${locY}
+	#wm geometry $win 625x490+${locX}+${locY}
+    wm geometry $win +${locX}+${locY}
 	
 	# // Get the most updated list of the versions
 	set process(versionList) [job::db::getVersionCount -type names -job $job(Number)]
@@ -111,16 +112,16 @@ proc ea::gui::samples::SampleGUI {} {
 
     
     set f2a [ttk::frame $f0.f2a -padding 10]
-    grid $f2a -column 0 -row 1 -sticky nes -pady 2p -padx 2p
+    grid $f2a -column 0 -columnspan 2 -row 1 -sticky nws -pady 2p -padx 2p
     
     # Versions
     grid [ttk::label $f2a.txt0 -text [mc "Version"]] -column 0 -row 0 -pady 2p -padx 2p -sticky e
-    grid [ttk::combobox $f2a.cbox0 -values $process(versionList) -width 35] -column 1 -row 0 -pady 2p -padx 2p -sticky ew
+    grid [ttk::combobox $f2a.cbox0 -values $process(versionList) -width 35] -column 1 -columnspan 2 -row 0 -pady 2p -padx 2p -sticky ew
     grid [ttk::checkbutton $f2a.ckbtn0 -text [mc "Assign to all versions"]] -column 1 -row 1 -pady 2p -padx 2p -sticky w
     
     # Quantity and control button
     grid [ttk::label $f2a.txt1 -text [mc "Quantity"]] -column 0 -row 2 -pady 2p -padx 2p -sticky e
-    grid [ttk::entry $f2a.addEntry -textvariable entryTxt] -column 1 -row 2 -pady 2p -padx 2p -sticky e
+    grid [ttk::entry $f2a.addEntry -textvariable entryTxt] -column 1 -row 2 -pady 2p -padx 2p -sticky ew
 	grid [ttk::button $f2a.btn -text [mc "Add"] -command {}] -column 2 -row 2 -pady 2p -padx 2p
 	#
 	# Frame, Table
@@ -150,7 +151,8 @@ proc ea::gui::samples::SampleGUI {} {
 								-movablerows no \
 								-editselectedonly 1 \
                                 -selectmode extended \
-                                -selecttype cell \
+                                -selecttype row \
+                                -height 5 \
 								-editstartcommand {eAssistHelper::editStartSmpl} \
 								-editendcommand {eAssistHelper::editEndSmpl} \
 								-yscrollcommand [list $scrolly set] \
