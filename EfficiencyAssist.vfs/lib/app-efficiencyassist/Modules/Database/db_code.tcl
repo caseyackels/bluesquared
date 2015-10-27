@@ -919,7 +919,7 @@ proc ea::db::countQuantity {args} {
 							INNER JOIN Addresses
 								ON ShippingOrders.AddressID = Addresses.SysAddresses_ID
 							INNER JOIN Versions
-								on Addresses.Versions = Versions.Version_ID
+								on ShippingOrders.Versions = Versions.Version_ID
 							WHERE Addresses.SysActive = 1
 							AND ShippingOrders.JobInformationID = '$jobNumber'"
 	

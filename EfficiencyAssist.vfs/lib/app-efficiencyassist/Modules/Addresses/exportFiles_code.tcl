@@ -313,7 +313,7 @@ proc ea::code::export::toPlanner {args} {
     $job(db,Name) eval "SELECT [join $cols ,]
                         FROM ShippingOrders
                             INNER JOIN Addresses ON Addresses.SysAddresses_ID = ShippingOrders.AddressID
-                            INNER JOIN Versions ON Addresses.Versions = Versions.Version_ID
+                            INNER JOIN Versions ON ShippingOrders.Versions = Versions.Version_ID
                             INNER JOIN db1.ShipVia ON ShippingOrders.ShipVia = ShipVia.ShipViaName
                         WHERE ShippingOrders.JobInformationID = $job(Number)
                             AND ShippingOrders.Hidden = 1
@@ -396,7 +396,7 @@ proc ea::code::export::toProcessShipper {args} {
             $job(db,Name) eval "SELECT [join $cols ,]
                                 FROM ShippingOrders
                                     INNER JOIN Addresses ON Addresses.SysAddresses_ID = ShippingOrders.AddressID
-                                    INNER JOIN Versions ON Addresses.Versions = Versions.Version_ID
+                                    INNER JOIN Versions ON ShippingOrders.Versions = Versions.Version_ID
                                     INNER JOIN db1.ShipVia ON ShippingOrders.ShipVia = ShipVia.ShipViaName
                                 WHERE ShippingOrders.JobInformationID = $job(Number)
                                     AND ShippingOrders.Hidden = 0

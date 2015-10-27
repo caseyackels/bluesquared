@@ -160,7 +160,7 @@ proc customer::projSetup {{modify newTitle} args} {
     switch -- $modify {
         newTitle     { 
 					$btnBar.ok configure -command {customer::dbUpdateCustomer;
-															job::db::createDB -tName $job(Title) -tCSR $job(CSRName) -tSaveLocation $job(TitleSaveFileLocation) -tCustCode $job(CustID) -tHistNote {Initial Entry} -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal $job(JobBalanceShipDate) -jHistNote {Initial Job Entry} ;
+															job::db::createDB -tName $job(Title) -tCSR $job(CSRName) -tSaveLocation $job(TitleSaveFileLocation) -tCustCode $job(CustID) -tHistNote {Initial Entry} -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart $job(JobFirstShipDate) -jShipBal $job(JobBalanceShipDate) -jForestCert $job(ForestCert) -jHistNote {Initial Job Entry} ;
 													destroy .ps}
                     #${log}::debug NEW PROJECT - Clear all job text variables.
                     if {[info exists job(db,Name)]} {

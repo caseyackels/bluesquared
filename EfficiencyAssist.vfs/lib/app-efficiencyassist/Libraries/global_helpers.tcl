@@ -870,7 +870,7 @@ proc ea::tools::assembleHeaders {} {
         }
     }
 
-    set cols [string map -nocase {{Addresses.Versions as Versions} {Versions.VersionName as Versions}} $cols]
+    set cols [string map -nocase {{ShippingOrders.Versions as Versions} {Versions.VersionName as Versions}} $cols]
     
     return [list $cols $hdr $vals]
 } ;# ea::tools::assembleHeaders

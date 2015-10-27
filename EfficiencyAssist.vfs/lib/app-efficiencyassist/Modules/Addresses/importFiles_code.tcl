@@ -442,7 +442,7 @@ proc importFiles::insertIntoGUI {wid args} {
             
 
             if {$widUIGroup eq "Consignee"} {set tbl Addresses} else {set tbl ShippingOrders}
-                #${log}::debug Table/Columns: $tbl.$dbColName
+                ${log}::debug Table/Columns: $tbl.$dbColName
                 lappend hdrs_show "$tbl.$dbColName"
 
             
@@ -490,19 +490,21 @@ proc importFiles::insertIntoGUI {wid args} {
         if {[string match -nocase *vers* $hdr]} {
             #${log}::debug Found a vers match! $hdr
     
-            lappend hdr_list VersionName
+            lappend hdr_list "Versions.VersionName as VersionName"
             lappend hdr_data \$VersionName
         } else {
             lappend hdr_list $hdr
             lappend hdr_data $[lindex [split $hdr .] 1]
         }
     }
+    ${log}::debug hdr_list: $hdr_list
+    ${log}::debug hdr_data: $hdr_data
 
     $job(db,Name) eval "SELECT [join $hdr_list ,] FROM ShippingOrders
                             INNER JOIN Addresses
                                 ON ShippingOrders.AddressID = Addresses.SysAddresses_ID
                             LEFT OUTER JOIN Versions
-                                ON Addresses.Versions = Versions.Version_ID
+                                ON ShippingOrders.Versions = Versions.Version_ID
                             WHERE ShippingOrders.JobInformationID in ('$job(Number)')
                             AND Addresses.SysActive = 1
                             AND ShippingOrders.Hidden = 0" {

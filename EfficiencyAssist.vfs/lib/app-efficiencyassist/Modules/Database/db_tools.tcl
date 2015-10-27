@@ -101,7 +101,7 @@ proc ea::db::populateTablelist {args} {
                             INNER JOIN Addresses
                                 ON ShippingOrders.AddressID = Addresses.SysAddresses_ID
                             LEFT OUTER JOIN Versions
-                                ON Addresses.Versions = Versions.Version_ID
+                                ON ShippingOrders.Versions = Versions.Version_ID
                             WHERE ShippingOrders.JobInformationID in ('$job(Number)')
 							AND ShippingOrders.AddressID = '$db_id'
                             AND Addresses.SysActive = 1
@@ -360,7 +360,7 @@ proc ea::db::populateShipOrder {db_id} {
                             INNER JOIN Addresses
                                 ON ShippingOrders.AddressID = Addresses.SysAddresses_ID
                             LEFT OUTER JOIN Versions
-                                ON Addresses.Versions = Versions.Version_ID
+                                ON ShippingOrders.Versions = Versions.Version_ID
                             WHERE ShippingOrders.JobInformationID in ('$job(Number)')
                             AND Addresses.SysAddresses_ID = '$db_id'" {
 								foreach item [array names shipOrder] {

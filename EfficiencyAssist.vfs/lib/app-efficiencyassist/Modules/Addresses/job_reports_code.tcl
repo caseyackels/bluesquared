@@ -183,7 +183,7 @@ proc job::reports::generic {txt} {
 
                     $job(db,Name) eval "SELECT Quantity FROM ShippingOrders
                             INNER JOIN Addresses ON Addresses.SysAddresses_ID = ShippingOrders.AddressID
-                            INNER JOIN Versions ON Addresses.Versions = Versions.Version_ID
+                            INNER JOIN Versions ON ShippingOrders.Versions = Versions.Version_ID
                                 WHERE ShippingOrders.JobInformationID = '$job(Number)'
                                     AND ShippingOrders.Hidden = 0
                                     AND Versions.VersionName = '$vers'
@@ -202,7 +202,7 @@ proc job::reports::generic {txt} {
                         ${log}::debug cols: $cols
                         $job(db,Name) eval "SELECT [join $col ,] FROM ShippingOrders
                                                 INNER JOIN Addresses on Addresses.SysAddresses_ID = ShippingOrders.AddressID
-                                                INNER JOIN Versions on Versions.Version_ID = Addresses.Versions
+                                                INNER JOIN Versions on Versions.Version_ID = ShippingOrders.Versions
                                                     WHERE ShippingOrders.JobInformationID = '$job(Number)'
                                                         AND Versions.VersionName = '$vers'
                                                         AND DistributionType = '$dist'

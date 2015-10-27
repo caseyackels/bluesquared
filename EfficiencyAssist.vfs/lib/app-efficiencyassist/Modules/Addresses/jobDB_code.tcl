@@ -127,8 +127,8 @@ proc job::db::createDB {args} {
     }
     
     # ensure we have the correct number of args
-    if {[llength $args] != 22} {
-        ${log}::critical $currentProcName [info level 0] \nDid not pass sufficient number of args: [llength $args] should be 22
+    if {[llength $args] != 24} {
+        ${log}::critical $currentProcName [info level 0] \nDid not pass sufficient number of args: [llength $args] should be 24
         return
     }
     
@@ -254,15 +254,21 @@ proc job::db::createDB {args} {
         {AddressID          TEXT  NOT NULL ON CONFLICT ROLLBACK
                                     REFERENCES Addresses (SysAddresses_ID) ON DELETE CASCADE
                                                                             ON UPDATE CASCADE} \
-        {Hidden             BOOLEAN DEFAULT (0) NOT NULL ON CONFLICT ROLLBACK}]
+        {Hidden             BOOLEAN DEFAULT (0) NOT NULL ON CONFLICT ROLLBACK}  \
+        {Versions          INTEGER REFERENCES Versions (Version_ID) ON UPDATE CASCADE
+                                                                    ON DELETE NO ACTION}]
 
     # Create the ShippingOrder table (Consignee group)
     db eval {SELECT dbColName, dbDataType FROM HeadersConfig
                 WHERE widUIGroup <> 'Consignee'
                 ORDER BY widUIPositionWeight ASC, DBColName ASC} {
-        lappend sTable "$dbColName $dbDataType"
+                    # Bypass the possiblity that the user created a 'versions' column.
+                    if {[string tolower $dbColName] eq "versions"} {
+                            continue
+                    } else {
+                        lappend sTable "$dbColName $dbDataType"
+                    }
     }
-
 
     ${log}::notice Title DB: Creating Table:ShippingOrders (Group:Shipping Order, Packaging)
     $job(db,Name) eval "CREATE TABLE IF NOT EXISTS ShippingOrders ( [join $sTable ,] )"
@@ -284,20 +290,13 @@ proc job::db::createDB {args} {
         {SysActive          BOOLEAN DEFAULT (1) NOT NULL ON CONFLICT ROLLBACK} \
         {HistoryID          TEXT    REFERENCES History (History_ID) ON UPDATE CASCADE
                                                                     ON DELETE CASCADE
-                                    NOT NULL ON CONFLICT ROLLBACK} \
-        {Versions          INTEGER REFERENCES Versions (Version_ID) ON UPDATE CASCADE
-                                                                    ON DELETE NO ACTION}]
+                                    NOT NULL ON CONFLICT ROLLBACK}]
     
     # Create the Addresses table (Consignee group)
     db eval {SELECT dbColName, dbDataType FROM HeadersConfig
                 WHERE widUIGroup = 'Consignee'
                 ORDER BY widUIPositionWeight ASC, DBColName ASC} {
-        # Bypass the possiblity that the user created a 'versions' column.
-        if {[string tolower $dbColName] eq "versions"} {
-                continue
-        } else {
             lappend cTable "$dbColName $dbDataType"
-        }
     }
 
     ${log}::notice Title DB: Creating Table:Addresses (Group:Consignee)
@@ -989,7 +988,7 @@ proc job::db::getVersionCount {args} {
     set and [join $and " AND "]
     set sql "SELECT $colvalue FROM ShippingOrders
                             INNER JOIN Addresses ON Addresses.SysAddresses_ID = ShippingOrders.AddressID
-                            INNER JOIN Versions ON Addresses.Versions = Versions.Version_ID
+                            INNER JOIN Versions ON ShippingOrders.Versions = Versions.Version_ID
                             WHERE $and"
                             
     $job(db,Name) eval $sql
@@ -1316,7 +1315,7 @@ proc job::db::getUsedVersions {args} {
     
     # Set the basic sql statement
     set sql "SELECT distinct(VersionName) FROM Addresses
-                        INNER JOIN Versions ON Versions.Version_ID = Addresses.Versions
+                        INNER JOIN Versions ON Versions.Version_ID = ShippingOrders.Versions
                         INNER JOIN ShippingOrders on ShippingOrders.AddressID = Addresses.SysAddresses_ID"
     
     if {[info exists active]} {
@@ -1412,7 +1411,7 @@ proc job::db::getUsedDistributionTypes {args} {
 
     return [$job(db,Name) eval "SELECT $colvalue FROM ShippingOrders
                                     INNER JOIN Addresses on ShippingOrders.AddressID = Addresses.SysAddresses_ID
-                                    INNER JOIN Versions on Versions.Version_ID = Addresses.Versions
+                                    INNER JOIN Versions on Versions.Version_ID = ShippingOrders.Versions
                                     WHERE Versions.VersionName = '$version'
                                 AND Versions.VersionActive = 1
                                     ORDER BY Addresses.DistributionType $order"]
@@ -1458,7 +1457,7 @@ proc job::db::getDistTypeCounts {args} {
 
     $job(db,Name) eval "SELECT $colvalue FROM ShippingOrders
                             INNER JOIN Addresses ON Addresses.SysAddresses_ID = ShippingOrders.AddressID
-                            INNER JOIN Versions ON Addresses.Versions = Versions.Version_ID
+                            INNER JOIN Versions ON ShippingOrders.Versions = Versions.Version_ID
                                 WHERE ShippingOrders.JobInformationID = '$jobNumber'
                                     AND ShippingOrders.Hidden = 0
                                     AND Addresses.SysActive = $addrActive
