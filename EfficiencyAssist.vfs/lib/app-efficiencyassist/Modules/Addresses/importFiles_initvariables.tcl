@@ -163,3 +163,43 @@ proc importFiles::setJobArray {} {
                    ForestCert ""]
         
 } ;# importFiles::setJobArray
+
+proc importFiles::setShipOrderArray {} {
+    #****if* setShipOrderArray/importFiles
+    # CREATION DATE
+    #   10/30/2015 (Friday Oct 30)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   Initializes the shipOrder array with default values
+    #   
+    #***
+    global log shipOrder
+
+    array set shipOrder [list Address1 "" \
+                                Address2 "" \
+                                Address3 "" \
+                                ArriveDate "" \
+                                Attention "" \
+                                City "" \
+                                Company "" \
+                                ContainerType "" \
+                                Country "" \
+                                DistributionType "" \
+                                Notes "" \
+                                PackageType "" \
+                                Phone "" \
+                                Quantity "" \
+                                ShipDate "" \
+                                ShipVia "" \
+                                ShippingClass "" \
+                                State "" \
+                                Versions "" \
+                                Zip ""]
+
+} ;# importFiles::setShipOrderArray

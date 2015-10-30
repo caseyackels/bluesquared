@@ -1,219 +1,12 @@
 # Creator: Casey Ackels
 # Initial Date: March 12, 2011]
 # File Initial Date: 10 24,2013
-# Dependencies: 
-#-------------------------------------------------------------------------------
-#
-# Subversion
-#
-# $Revision: 478 $
-# $LastChangedBy: casey.ackels@gmail.com $
-# $LastChangedDate: 2014-09-14 21:48:00 -0700 (Sun, 14 Sep 2014) $
-#
-########################################################################################
-
 ##
 ## - Overview
 # Assign Internal (Company) samples.
 
-## Coding Conventions
-# - Namespaces: Firstword_Secondword
-
-# - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
-#   will be uppercase. I.E sourceFiles, sourceFileExample
-
-
-proc eAssistHelper::editStartSmpl {tbl row col text} {
-    #****f* editStartSmpl/eAssistHelper
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2011-2013 Casey Ackels
-    #
-    # FUNCTION
-    #	Start Command for editing the Company Sample table
-    #
-    # SYNOPSIS
-    #
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #	
-    #
-    # NOTES
-    #
-    # SEE ALSO
-    #
-    #***
-    global log csmpls
-    ${log}::debug --START-- [info level 1]
-
-	# This table only contains columns which require integers only. So, we can make this a global requirement.
-	
-	if {![string is integer $text]} {
-		bell
-		tk_messageBox -title "Error" -icon error -message \
-									[mc "Only numbers are allowed"]
-		$tbl rejectinput
-		return
-	}
-	
-	eAssistHelper::detectColumn $tbl $row $col $text
-   
-    return $text
-
-    ${log}::debug --END-- [info level 1]
-} ;# eAssistHelper::editStartSmpl
-
-
-proc eAssistHelper::editEndSmpl {tbl row col text} {
-    #****f* editEndSmpl/eAssistHelper
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2011-2013 Casey Ackels
-    #
-    # FUNCTION
-    #	End Command for editing the Company Sample table
-    #
-    # SYNOPSIS
-    #
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #	
-    #
-    # NOTES
-    #
-    # SEE ALSO
-    #
-    #***
-    global log csmpls
-    ${log}::debug --START-- [info level 1]
-	# This table only contains columns which require integers only. So, we can make this a global requirement.
-	
-	if {![string is integer $text]} {
-		bell
-		tk_messageBox -title "Error" -icon error -message \
-									[mc "Only numbers are allowed"]
-		$tbl rejectinput
-		return
-	}
-	
-	
-	eAssistHelper::detectColumn $tbl $row $col $text
-    
-    return $text
-
-    ${log}::debug --END-- [info level 1]
-} ;# eAssistHelper::editEndSmpl
-
-
-proc eAssistHelper::detectColumn {tbl row {col 0} {text 0}} {
-    #****f* detectColumn/eAssistHelper
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2011-2014 Casey Ackels
-    #
-    # FUNCTION
-    #	Figure out which column are are in, and [switch] accordingly
-    #
-    # SYNOPSIS
-	# 	eAssistHelper::detectColumn <tbl> <row> ?column? ?text?
-    #
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #	
-    #
-    # NOTES
-    #
-    # SEE ALSO
-    #
-    #***
-    global log csmpls
-    ${log}::debug --START-- [info level 1]
-	
-	# Update the internal list with the current text so that we can run calculations on it.
-	if {$row != ""} {
-		$tbl cellconfigure $row,$col -text $text
-	}
-
-	switch -glob [string tolower [$tbl columncget $col -name]] {
-            "ticket"		{ set csmpls(TicketTotal)	[eAssistHelper::calcSamples $tbl $col] }
-            "csr"			{ set csmpls(CSRTotal)		[eAssistHelper::calcSamples $tbl $col] }
-            "sampleroom"	{ set csmpls(SmplRoomTotal) [eAssistHelper::calcSamples $tbl $col] }
-			"sales"			{ set csmpls(SalesTotal)	[eAssistHelper::calcSamples $tbl $col] }
-			default			{ ${log}::notice -[info level 1]- Column -[$tbl columncget $col -name]- not found! }
-    }
-	
-    ${log}::debug --END-- [info level 1]
-} ;# eAssistHelper::detectColumn
-
-
-proc eAssistHelper::calcSamples {tbl col} {
-    #****f* calcSamples/eAssistHelper
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2011-2013 Casey Ackels
-    #
-    # FUNCTION
-    #	Calculate the sample totals
-    #
-    # SYNOPSIS
-    #	eAssistHelper::calcSamples <tbl> <col>
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #	
-    #
-    # NOTES
-    #
-    # SEE ALSO
-    #
-    #***
-    global log
-    ${log}::debug --START -- [info level 1]
-
-	set myList [string map [list \{\} 0] [$tbl getcolumn $col]]
-	set returnCount [catch {expr [join $myList +]} err]
-	#${log}::debug Column Count: $returnCount
-	
-	if {$returnCount == 1} {
-		Error_Message::errorMsg BM001
-		#${log}::debug Cannot sum quantity, Alpha-Numerics!
-		#${log}::debug Error: $err
-		#${log}::debug myList: $myList
-		#${log}::debug Return: $returnCount
-		return
-	} else {
-		# err, will contain the total count.
-		set returnCount $err
-		#${log}::debug ColumnCount(returnCount): $returnCount
-	}
-	
-
-	return $returnCount
-    ${log}::debug --END -- [info level 1]
-} ;# eAssistHelper::calcSamples
-
-
-proc eAssistHelper::quickAddSmpls {win entryTxt} {
-    #****f* quickAddSmpls/eAssistHelper
+proc ea::code::samples::quickAddSmpls {win entryWid} {
+    #****f* quickAddSmpls/ea::code::samples
     # AUTHOR
     #	Casey Ackels
     #
@@ -238,102 +31,139 @@ proc eAssistHelper::quickAddSmpls {win entryTxt} {
     # SEE ALSO
     #
     #***
-    global log csmpls w
-    ${log}::debug --START-- [info level 1]
+    global log csmpls
+    
+    set entryTxt [$entryWid get]
+
+    if {$csmpls(assignAllVersions) == 1} {
+        ${log}::debug Assigning quantity to all versions
+        set cmd {$win fillcolumn $x $entryTxt}
+    
+    } else {
+        ${log}::debug Assigning quantity to a specific version
+        ${log}::debug Looking for Version $csmpls(activeVersion)
+        
+        # Guard against the user not selecting a version, and not selecting 'all versions' checkbutton
+        if {$csmpls(activeVersion) eq ""} {return}
+        
+        # Find out which row our version is on
+        set versRow [$win searchcolumn Version $csmpls(activeVersion)]
+        ${log}::debug $versRow
+
+        set cmd {$win cellconfigure $versRow,$x -text $entryTxt}
+    }
     
 	for {set x 0} {[$win columncount] > $x} {incr x} {
-		#${log}::debug Column Names [$win columncget $x -name]
 		set currentColumn [$win columncget $x -name]
+        #${log}::debug Column Names: $currentColumn
+        #
+        #if {$currentColumn eq "Version"} {
+        #    ${log}::debug Version Column
+        #    ${log}::debug Current Version: [$win getcells end,Version]
+        #}
 		
 		foreach value [array names csmpls] {
 			if {[string match $value $currentColumn] == 1} {
 				if {$csmpls($value) == 1} {
-					$win fillcolumn $x $entryTxt
-					eAssistHelper::detectColumn $win "" $x
+					#$win fillcolumn $x $entryTxt
+                    eval $cmd
+					#eAssistHelper::detectColumn $win "" $x
 					# Reset the checkbutton
 					set csmpls($value) 0
-
 				}
 			}
 		}
 	}
 	
 	# Clear the entry widget
-	$w(csmpls.f2).addEntry delete 0 end
+	$entryWid delete 0 end
+} ;# ea::code::samples::quickAddSmpls
 
-    ${log}::debug --END-- [info level 1]
-} ;# eAssistHelper::quickAddSmpls
-
-
-proc eAssistHelper::saveCSMPLS {tblFrom tblTo} {
-    #****f* saveCSMPLS/eAssistHelper
+proc ea::code::samples::setVersState {cbox} {
+    #****if* setVersState/ea::code::samples
+    # CREATION DATE
+    #   10/29/2015 (Thursday Oct 29)
+    #
     # AUTHOR
     #	Casey Ackels
     #
     # COPYRIGHT
-    #	(c) 2011-2013 Casey Ackels
-    #
-    # FUNCTION
-    #	Process the allocated samples.
-    #
-    # SYNOPSIS
-    #	eAssistHelper::saveCSMPLS <tbl>
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #	
-    #
+    #	(c) 2015 Casey Ackels
+    #   
     # NOTES
-    #
-    # SEE ALSO
-    #
+    #   Clears out the version combobox and sets the state.
+    #   
     #***
-    global log csmpls w process files company
-    ${log}::debug --START-- [info level 1]
-	
-	set columnCount [$tblTo columncount]
-	set rowCount [$tblFrom size]
-	
-	for {set x 0} {$rowCount > $x} {incr x} {
-		set vers [lindex $process(versionList) $x]
-		# add up all listed quantities
-		set tmpList [string map [list \{\} 0] [lrange [$tblFrom get $x] 2 end]]
-		set returnCount [expr [join $tmpList +]]
-		
-		# Reset for each row
-		if {[info exists insertCompany]} {unset insertCompany}
-		
-		for {set i 0} {$columnCount > $i} {incr i} {
-			set col [string tolower [$files(tab3f2).tbl columncget $i -name]]
-			${log}::debug Column: $col
-			#puts [lsearch [array names company] $col]
+    global log csmpls
+    
+    set cstate [$cbox cget -state]
+    
+    if {$cstate eq "readonly"} {
+        # Issue disabling commands
+        $cbox configure -state normal
+        $cbox delete 0 end
+        $cbox configure -state disabled
+    } else {
+        # Issue enabling commands
+        $cbox configure -state readonly
+        # clear the 'all versions' checkbutton
+        set csmpls(assignAllVersions) 0
+    }
+    
+} ;# ea::code::samples::setVersState
 
-			set companyIndex [lsearch [array names company] $col]
-			if {$companyIndex ne -1} {
-				lappend insertCompany $company([lindex [array names company] $companyIndex])
-			
-			} else {
-				switch -nocase $col {
-					version				{lappend insertCompany $vers}
-					quantity			{lappend insertCompany $returnCount}
-					distributiontype	{lappend insertCompany $csmpls(distributionType)}
-					packagetype			{lappend insertCompany $csmpls(packageType)}
-					default				{lappend insertCompany ""}
-				}
-			}
-		}
-		
-
-		# .. finally, we'll insert the compiled data
-		if {$returnCount != 0} {
-			# If we received any counts, other than 0, lets insert a row for it.
-			${log}::debug INSERT: $tblTo $insertCompany
-			$tblTo insert end $insertCompany
-			#puts "tblTo $insertCompany"
-		}
-	}  
-	
-    ${log}::debug --END-- [info level 1]
-} ;# eAssistHelper::saveCSMPLS
+proc ea::code::samples::writeToDB {widTbl} {
+    #****if* writeToDB/ea::db::samples
+    # CREATION DATE
+    #   10/30/2015 (Friday Oct 30)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   
+    #   
+    #***
+    global log shipOrder csmpls job
+    
+    # Reset the shipOrder array
+    importFiles::setShipOrderArray
+    
+    # Check to see if an address was entered for this distribution type
+    set disttype_addr [ea::db::getDistTypeConfig -method Report -action Single -disttype "$csmpls(distributionType)"]
+    if {$disttype_addr eq ""} {${log}::critical [info level 0] There is not a company setup for this distribution type; return}
+    
+    # Populate the shipOrder array
+    set shipOrder(Company) [lindex $disttype_addr 0]
+    set shipOrder(Attention) [lindex $disttype_addr 1]
+    set shipOrder(Address1) [lindex $disttype_addr 2]
+    set shipOrder(Address2) [lindex $disttype_addr 3]
+    set shipOrder(Address3) [lindex $disttype_addr 4]
+    set shipOrder(City) [lindex $disttype_addr 5]
+    set shipOrder(State) [lindex $disttype_addr 6]
+    set shipOrder(Zip) [lindex $disttype_addr 7]
+    set shipOrder(Country) [lindex $disttype_addr 8]
+    set shipOrder(Phone) [lindex $disttype_addr 9]
+    set shipOrder(ShipVia) [lindex $disttype_addr 10]
+    
+    # Variables that don't exist in the disttype_addr var
+    set shipOrder(DistributionType) "$csmpls(distributionType)"
+    
+    # write out the records per version
+    foreach record [$widTbl get 0 end] {
+        set qtys [join [join [lrange $record 2 end]] +]
+        if {$qtys ne ""} {
+            ${log}::debug Set the Quantity to: [expr $qtys]
+        }
+        #${log}::debug catch var: $err
+        set vers [join [lindex $record 1]]
+        ${log}::debug Set the Version to: $vers - [job::db::getVersionCount -type id -job $job(Number) -version "$vers" -versActive 1 -addrActive 1]
+        ${log}::debug Inserting shipOrder() into tbl:Addresses and tbl:ShippingOrders
+        ${log}::debug Insert Sample data into tbl:InternalSamples
+        ${log}::debug [join "ShippingOrders_ID [lrange $record 2 end]" ,]
+    }
+    
+} ;# ea::db::samples::writeToDB

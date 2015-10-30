@@ -239,6 +239,16 @@ proc job::db::createDB {args} {
                                         NOT NULL ON CONFLICT ROLLBACK
         );
         
+        CREATE TABLE InternalSamples (
+            InternalSamples_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            ShippingOrderID    INTEGER REFERENCES ShippingOrders (ShippingOrder_ID) ON DELETE CASCADE
+                                                                                    ON UPDATE CASCADE,
+            Ticket             INTEGER,
+            CSR                INTEGER,
+            SampleRoom         INTEGER,
+            Sales              INTEGER
+        );
+        
         PRAGMA foreign_keys = on
     }
     
@@ -944,7 +954,7 @@ proc job::db::getVersionCount {args} {
     #   
     # NOTES
     #   Valid args are
-    #       -type (one of: countqty, numofversions, name)
+    #       -type (one of: countqty, numofversions, names, id) Returns the value for the type given
     #       -version <version name> ; defaults to all versions
     #       -job <job Number> ; defaults to current active job $job(Number)
     #       -versActive 1|0 ; defaults to 1
@@ -983,6 +993,9 @@ proc job::db::getVersionCount {args} {
         
     } elseif {[string tolower $type] eq "names"} {
         set colvalue "DISTINCT(Versions.VersionName) as Versions"
+    
+    } elseif {[string tolower $type] eq "id"} {
+        set colvalue "DISTINCT(Versions.Version_ID) as id"
     }
 
     set and [join $and " AND "]
@@ -993,7 +1006,7 @@ proc job::db::getVersionCount {args} {
                             
     $job(db,Name) eval $sql
 
-} ;# job::db::getVersionCount -job $job(Number) -version <> -versActive 1 -addrActive 1
+} ;# job::db::getVersionCount -type id -job $job(Number) -version <> -versActive 1 -addrActive 1
 
 proc job::db::insertDefaultData {} {
     #****f* insertDefaultData/job::db
@@ -1375,6 +1388,7 @@ proc job::db::getNotes {args} {
     return [lindex $values 1]
     
 } ;# job::db::getNotes -noteType Job -includeOnReports 1 -noteTypeActive 1 -notesActive 1
+
 proc job::db::getUsedDistributionTypes {args} {
     #****if* getUsedDistributionTypes/job::db
     # CREATION DATE

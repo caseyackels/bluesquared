@@ -83,7 +83,6 @@ proc ea::gui::samples::SampleGUI {} {
 	grid $f1 -column 0 -row 0 -sticky news -pady 2p -padx 2p
 	
 
-	# Variable's must match names that are listed in the Table, or else this will break.
 	grid [ttk::checkbutton $f1.ticket -text [mc "Ticket"] -variable csmpls(Ticket)] -column 0 -row 0 -pady 1p -padx 2p -sticky w
 	grid [ttk::checkbutton $f1.csr -text [mc "CSR"] -variable csmpls(CSR)] -column 0 -row 1 -pady 1p -padx 2p -sticky w
 	grid [ttk::checkbutton $f1.smplrm -text [mc "Sample Room"] -variable csmpls(SampleRoom)] -column 1 -row 0 -pady 1p -padx 2p -sticky w
@@ -95,7 +94,7 @@ proc ea::gui::samples::SampleGUI {} {
 	set f2 [ttk::labelframe $f0.f2 -text [mc "Packaging"] -padding 10]
 	grid $f2 -column 1 -row 0 -sticky news -pady 2p -padx 2p
 	
-	# Search for the "internal" samples. This is dangerous, and we should create a an option on the DistributionType Setup
+	# Search for the "internal" samples. This is dangerous, and we should create an option on the DistributionType Setup
 	set csmpls(distributionType) [lindex $dist(distributionTypes) [lsearch $dist(distributionTypes) *02*]]
         grid [ttk::label $f2.txt1 -text [mc "Distribution Type"]] -column 0 -row 0 -pady 2p -padx 5p -sticky nes
         grid [ttk::combobox $f2.cbox1 -values $dist(distributionTypes) \
@@ -113,28 +112,29 @@ proc ea::gui::samples::SampleGUI {} {
     
     set f2a [ttk::frame $f0.f2a -padding 10]
     grid $f2a -column 0 -columnspan 2 -row 1 -sticky nws -pady 2p -padx 2p
+	
+    # Frame, Tablelist
+	set f3 [ttk::frame $f0.f3 -padding 10]
+	grid $f3 -column 0 -columnspan 2 -row 2 -sticky news -pady 2p -padx 2p
     
     # Versions
     grid [ttk::label $f2a.txt0 -text [mc "Version"]] -column 0 -row 0 -pady 2p -padx 2p -sticky e
-    grid [ttk::combobox $f2a.cbox0 -values $process(versionList) -width 35] -column 1 -columnspan 2 -row 0 -pady 2p -padx 2p -sticky ew
-    grid [ttk::checkbutton $f2a.ckbtn0 -text [mc "Assign to all versions"]] -column 1 -row 1 -pady 2p -padx 2p -sticky w
+    grid [ttk::combobox $f2a.cbox0 -textvariable csmpls(activeVersion) -values $process(versionList) -state readonly -width 35] -column 1 -columnspan 2 -row 0 -pady 2p -padx 2p -sticky ew
+    grid [ttk::checkbutton $f2a.ckbtn0 -text [mc "Assign to all versions"] -variable csmpls(assignAllVersions) -command [list ea::code::samples::setVersState $f2a.cbox0]] -column 3 -row 0 -pady 2p -padx 2p -sticky w
     
     # Quantity and control button
     grid [ttk::label $f2a.txt1 -text [mc "Quantity"]] -column 0 -row 2 -pady 2p -padx 2p -sticky e
-    grid [ttk::entry $f2a.addEntry -textvariable entryTxt] -column 1 -row 2 -pady 2p -padx 2p -sticky ew
-	grid [ttk::button $f2a.btn -text [mc "Add"] -command {}] -column 2 -row 2 -pady 2p -padx 2p
-	#
-	# Frame, Table
-	#
+    grid [ttk::entry $f2a.addEntry] -column 1 -row 2 -pady 2p -padx 2p -sticky ew
+	grid [ttk::button $f2a.btn -text [mc "Add"] -command [list ea::code::samples::quickAddSmpls $f3.tbl $f2a.addEntry]] -column 2 -row 2 -pady 2p -padx 2p
 	
-	set f3 [ttk::frame $f0.f3 -padding 10]
-	grid $f3 -column 0 -columnspan 2 -row 2 -sticky news -pady 2p -padx 2p
+    #
+	# Frame, Table
 	
 	set scrolly $f3.scrolly
 	set scrollx $f3.scrollx
 	grid [tablelist::tablelist $f3.tbl -columns {
 												0   "..." center
-												0	"Version"
+												35	"Version"
 												0	"Ticket"
 												0	"CSR"
 												0	"Sample Room"
@@ -149,14 +149,14 @@ proc ea::gui::samples::SampleGUI {} {
 								-fullseparators yes \
 								-movablecolumns no \
 								-movablerows no \
-								-editselectedonly 1 \
+								-editselectedonly 0 \
                                 -selectmode extended \
                                 -selecttype row \
                                 -height 5 \
-								-editstartcommand {eAssistHelper::editStartSmpl} \
-								-editendcommand {eAssistHelper::editEndSmpl} \
 								-yscrollcommand [list $scrolly set] \
 								-xscrollcommand [list $scrollx set]] -column 0 -row 0 -sticky news
+    							#-editstartcommand {eAssistHelper::editStartSmpl}
+								#-editendcommand {eAssistHelper::editEndSmpl}
 
 	bind [$f3.tbl editwintag] <Return> "[bind TablelistEdit <Down>]; break"
 	
@@ -170,17 +170,17 @@ proc ea::gui::samples::SampleGUI {} {
 										-labelalign center
 	
 	$f3.tbl columnconfigure 2 -name "Ticket" \
-										-editable yes \
+										-editable no \
 										-editwindow ttk::entry \
 										-labelalign center
 	
 	$f3.tbl columnconfigure 3 -name "CSR" \
-										-editable yes \
+										-editable no \
 										-editwindow ttk::entry \
 										-labelalign center
 	
 	$f3.tbl columnconfigure 4 -name "SampleRoom" \
-										-editable yes \
+										-editable no \
 										-editwindow ttk::entry \
 										-labelalign center
 	
@@ -216,7 +216,7 @@ proc ea::gui::samples::SampleGUI {} {
 	set btnBar [ttk::frame .csmpls.btnbar]
 	pack $btnBar -side bottom -pady 13p -padx 5p -anchor se -pady 8p -padx 5p
 
-	ttk::button $btnBar.btn1 -text [mc "OK"] -command {}
+	ttk::button $btnBar.btn1 -text [mc "OK"] -command [list ea::code::samples::writeToDB $f3.tbl]
 	ttk::button $btnBar.btn2 -text [mc "Cancel"] -command {destroy .csmpls}
 	
 	grid $btnBar.btn1 -column 0 -row 0 -sticky nse -padx 8p

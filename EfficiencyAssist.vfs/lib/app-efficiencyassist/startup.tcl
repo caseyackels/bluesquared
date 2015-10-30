@@ -367,7 +367,9 @@ proc 'eAssist_initVariables {} {
 					  Ticket 0 \
 					  CSR 0 \
 					  SampleRoom 0 \
-					  Sales 0]
+					  Sales 0 \
+                      assignAllVersions 0 \
+                      activeVersion ""]
 	
 	array set job [list CustName "" \
 				   CustID "" \
