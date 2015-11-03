@@ -868,6 +868,7 @@ proc job::db::readNotes {cbox_wid job_wid log_wid} {
     global log job hist
     
     set id [$cbox_wid get]
+    if {$id eq ""} {return}
     if {[info exists hist]} {unset hist}
 
     # Read the Job notes ...

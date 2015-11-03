@@ -164,8 +164,8 @@ proc importFiles::setJobArray {} {
         
 } ;# importFiles::setJobArray
 
-proc importFiles::setShipOrderArray {} {
-    #****if* setShipOrderArray/importFiles
+proc eAssistHelper::initShipOrderArray {} {
+    #****if* initShipOrderArray/eAssistHelper
     # CREATION DATE
     #   10/30/2015 (Friday Oct 30)
     #
@@ -202,4 +202,4 @@ proc importFiles::setShipOrderArray {} {
                                 Versions "" \
                                 Zip ""]
 
-} ;# importFiles::setShipOrderArray
+} ;# eAssistHelper::initShipOrderArray

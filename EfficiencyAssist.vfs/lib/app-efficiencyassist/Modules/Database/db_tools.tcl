@@ -138,7 +138,13 @@ proc ea::db::writeSingleAddressToDB {{hidden 0}} {
 	#${log}::debug Starting Loop
 	foreach hdr_ [array name shipOrder] {
 		#${log}::debug Checking which table the data should go into.... consignee
-		if {[lsearch $headerParent(headerList,consignee) $hdr_ ] != -1} {
+		if {[lsearch $headerParent(headerList,consignee) $hdr_ ] != -1} {			
+			# Table: Addresses
+			lappend newRow_consignee '$shipOrder($hdr_)'
+			lappend header_order_consignee $hdr_
+				
+		} elseif {[lsearch $headerParent(headerList,shippingorder) $hdr_ ] != -1} {
+			#${log}::debug Checking which table the data should go into.... ShippingOrder
 				# Process the Versions column/data. Insert data and retrieve Version ID.
 				if {[string match -nocase *vers* $hdr_]} {
 					if {$shipOrder($hdr_) == ""} {
@@ -160,13 +166,6 @@ proc ea::db::writeSingleAddressToDB {{hidden 0}} {
 					set shipOrder($hdr_) $data
 					${log}::debug shipOrder($hdr_) $shipOrder($hdr_)
 				}
-			
-			# Table: Addresses
-			lappend newRow_consignee '$shipOrder($hdr_)'
-			lappend header_order_consignee $hdr_
-				
-		} elseif {[lsearch $headerParent(headerList,shippingorder) $hdr_ ] != -1} {
-			#${log}::debug Checking which table the data should go into.... ShippingOrder
 				# Table: Shipping Orders
 				lappend newRow_shiporder '$shipOrder($hdr_)'
 				lappend header_order_shiporder $hdr_

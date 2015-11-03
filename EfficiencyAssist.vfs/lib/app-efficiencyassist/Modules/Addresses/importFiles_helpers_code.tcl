@@ -817,10 +817,10 @@ proc eAssistHelper::checkProjSetup {} {
 } ;# eAssistHelper::checkProjSetup
 
 
-proc eAssistHelper::initShipOrderArray {} {
-    #****f* initShipOrderArray/eAssistHelper
+proc ea::code::bm::writeShipment {{mode normal}} {
+    #****f* writeShipment/ea::code::bm
     # CREATION DATE
-    #   03/01/2015 (Sunday Mar 01)
+    #   11/02/2015 (Monday Nov 02)
     #
     # AUTHOR
     #	Casey Ackels
@@ -829,31 +829,74 @@ proc eAssistHelper::initShipOrderArray {} {
     #	(c) 2015 Casey Ackels
     #   
     #
-    # SYNOPSIS
-    #   eAssistHelper::initShipOrderArray  
+    # USAGE
+    #   ea::code::bm::writeShipment <hidden|normal>
     #
     # FUNCTION
-    #	Initializes shipOrder array; initially, or to clear it out
+    #	<normal> (default) Writes new entries, or updates existing into the db tables: Addresses, Shipping Orders
+    #   <hidden> Samee as <normal> except passes the Hidden flag so it doesn't show up in the main list.
     #   
     #   
-    # CHILDREN
-    #	N/A
-    #   
-    # PARENTS
-    #   
-    #   
+    # EXAMPLE
+    #   ea::code::bm::writeShipment normal
+    #
     # NOTES
-    #   
-    #   
-    # SEE ALSO
-    #   
+    #   This uses the shipOrder() array, so before using this command make sure that the array contains the data that you want.
     #   
     #***
-    global log headerParent shipOrder
+    global log shipOrder job title
+	
+	switch -- $mode {
+		normal	{ set hidden 0}
+		hidden	{ set hidden 1}
+		default	{${log}::debug [info level 0] Invalid parameter: $mode, should be: normal or hidden}
+	}
 
-    foreach name $headerParent(headerList) {
-        set shipOrder($name) ""
+#    set title(shipOrder_id) [$job(db,Name) eval "SELECT SysAddresses_ID FROM Addresses
+#													INNER JOIN ShippingOrders on ShippingOrders.AddressID = Addresses.SysAddresses_ID
+#													WHERE Company LIKE '%$shipOrder(Company)%'
+#													AND ShippingOrders.Versions = $shipOrder(Versions)"]
+	set title(shipOrder_id) [$job(db,Name) eval "SELECT SysAddresses_ID FROM Addresses
+													WHERE Company LIKE '%$shipOrder(Company)%'"]
+	
+	set versExistsOnJob [$job(db,Name) eval "SELECT SysAddresses_ID FROM Addresses
+												INNER JOIN ShippingOrders on ShippingOrders.Versions = Addresses.SysAddresses_ID
+													WHERE Company LIKE '%$shipOrder(Company)%'
+													AND ShippingOrders.Versions = $shipOrder(Versions)"]			
+
+    if {$title(shipOrder_id) ne ""} {
+        # Entry was in the database, check to see if it exists as a shippingorder on the current job.
+        set existsOnJob [$job(db,Name) eval "SELECT AddressID FROM ShippingOrders WHERE JobInformationID = '$job(Number)' AND AddressID = '$title(shipOrder_id)'"]
+        ${log}::debug Entry Exists, listed in ShippingOrders? $existsOnJob
+        
+		
+        if {$existsOnJob eq ""} {
+            # Insert record into the shipping table
+			${log}::debug Entry doesn't exist on the job, adding....
+            $job(db,Name) eval "INSERT INTO ShippingOrders (AddressID, JobInformationID, Hidden, Versions, Quantity, ShipVia)
+									VALUES ('$title(shipOrder_id)', '$job(Number)', $hidden, $shipOrder(Versions), $shipOrder(Quantity), '$shipOrder(ShipVia)')"
+        
+		} elseif {$versExistsOnJob eq ""} {
+			${log}::debug Entry exists on the job, but not for the version.
+			# New Version, insert record into the shipping table
+            $job(db,Name) eval "INSERT INTO ShippingOrders (AddressID, JobInformationID, Hidden, Versions, Quantity, ShipVia)
+									VALUES ('$title(shipOrder_id)', '$job(Number)', $hidden, $shipOrder(Versions), $shipOrder(Quantity), '$shipOrder(ShipVia)')"
+		
+		} else {
+			# Exists on the Job, and Version exists ...
+            # Address Entry already exists; update.
+            ${log}::debug Address for $shipOrder(Company) exists, updating...
+            ea::db::updateSingleAddressToDB
+        }
+
+    } else {
+        # Doesn't exist; insert.
+        ${log}::debug Address for $shipOrder(Company) doesn't exist, adding.
+		
+		# Convert to Name
+		set shipOrder(Versions) [lindex [job::db::getVersion -id $shipOrder(Versions) -active 1] 1]
+		${log}::debug Version Name: $shipOrder(Versions)
+        ea::db::writeSingleAddressToDB
     }
-   
-} ;# eAssistHelper::initShipOrderArray
 
+} ;# ea::code::bm::writeShipment

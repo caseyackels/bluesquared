@@ -88,7 +88,8 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries mime]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries base64]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries smtp]
-	lappend ::auto_path [file join [file dirname [info script]] Libraries Cawt_1.0.7]
+	#lappend ::auto_path [file join [file dirname [info script]] Libraries Cawt_1.0.7]
+    lappend ::auto_path [file join [file dirname [info script]] Libraries Cawt-2.1.0-User]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries struct]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries report]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries cmdline]
@@ -138,6 +139,11 @@ proc 'eAssist_sourceReqdFiles {} {
     namespace eval ea::code::samples {}
     namespace eval ea::gui::samples {}
     namespace eval ea::db::samples {}
+    
+    # Reports
+    namespace eval ea::code::reports {}
+    namespace eval ea::gui::reports {}
+    namespace eval ea::db::reports {}
 	
 	
 	## Start the Package Require
@@ -148,7 +154,7 @@ proc 'eAssist_sourceReqdFiles {} {
 
 	## 3rd Party modules
 	#package require tkdnd
-	package require Tablelist_tile 5.11
+	package require Tablelist_tile
 	#package require tcom
 	package require tooltip
 	package require autoscroll

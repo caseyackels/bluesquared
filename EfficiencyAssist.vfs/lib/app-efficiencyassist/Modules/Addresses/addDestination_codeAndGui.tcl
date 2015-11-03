@@ -826,31 +826,7 @@ proc ea::code::bm::writeHiddenShipment {disttype} {
         
         # This is the Version ID
         ${log}::debug Version id: $shipOrder(Versions)
-    
-    set title(shipOrder_id) [$job(db,Name) eval "SELECT SysAddresses_ID FROM Addresses WHERE Company LIKE '%$shipOrder(Company)%' AND Versions=$shipOrder(Versions)"]
-    
-        # Convert to Name
-        set shipOrder(Versions) [lindex [job::db::getVersion -id $shipOrder(Versions) -active 1] 1]
-        ${log}::debug Version Name: $shipOrder(Versions)
-
-    if {$title(shipOrder_id) ne ""} {
-        # Entry was in the database, check to see if it exists as a shippingorder on the current job.
-        set existsOnJob [$job(db,Name) eval "SELECT AddressID FROM ShippingOrders WHERE JobInformationID = '$job(Number)' AND AddressID = '$title(shipOrder_id)'"]
-        ${log}::debug Entry Exists, listed in ShippingOrders? $existsOnJob
         
-        if {$existsOnJob eq ""} {
-            # Insert record into the shipping table
-            $job(db,Name) eval "INSERT INTO ShippingOrders (AddressID, JobInformationID, Hidden) VALUES ('$title(shipOrder_id)', '$job(Number)', 1)"
-        } else {
-            # Address Entry already exists; update.
-            ${log}::debug Address for $shipOrder(Company) exists, updating...
-            ea::db::updateSingleAddressToDB
-        }
+        ea::code::bm::writeShipment hidden
 
-    } else {
-        # Doesn't exist; insert.
-        ${log}::debug Address for $shipOrder(Company) doesn't exist, adding.
-        ea::db::writeSingleAddressToDB 1
-    }
-    
 } ;# ea::code::bm::writeHiddenShipment "07. UPS Import"

@@ -535,3 +535,307 @@ proc job::reports::initReportTables {} {
         tcaption $n
     }
 } ;# job::reports::initReportTables
+
+proc ea::code::reports::writeExcel {args} {
+    #****if* writeExcel/ea::code::reports
+    # CREATION DATE
+    #   11/02/2015 (Monday Nov 02)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   
+    #   
+    #***
+    global log job
+
+    # Setup workbook/worksheet
+    set excel_id [Excel::Open]
+    set workbook_id [Excel::AddWorkbook $excel_id]
+    set worksheet_id [Excel::GetWorksheetIdByIndex $workbook_id 1]
+    
+    set dist_blacklist [ea::db::getDistSetup]
+    set col [list {Company DistributionType PackageType ShipVia Notes Quantity ShipDate}]
+    
+    if {[info exists cols]} {unset cols}
+    foreach item [join $col] {
+        lappend cols "$$item"
+    }
+    
+    # --- HEADER
+    # JOB DESCRIPTION / NUMBER
+    # Format: Job Description
+    set id [Excel::SelectCellByIndex $worksheet_id 1 1]
+        Excel::SetRangeHorizontalAlignment $id xlHAlignRight
+    set id [Excel::SelectCellByIndex $worksheet_id 1 2]
+        Excel::SetRangeFontBold $id
+        Excel::SetRangeFontSize $id 14
+        
+    # INSERT: Job Description and data
+    Excel::SetMatrixValues $worksheet_id [subst [list {"Job Title/Name" "$job(Title) $job(Name)"}]] 1 1
+    
+    # Format: Job Number
+    set id [Excel::SelectCellByIndex $worksheet_id 1 4]
+        Excel::SetRangeHorizontalAlignment $id xlHAlignRight
+    set id [Excel::SelectCellByIndex $worksheet_id 1 5]
+        #Excel::SetRangeHorizontalAlignment $id xlHAlignRight
+        Excel::SetRangeFontBold $id
+        Excel::SetRangeFontSize $id 14
+        
+    # INSERT: Job Number (data)
+    Excel::SetMatrixValues $worksheet_id [subst [list {"Job Number" "$job(Number)"}]] 1 4
+    
+    # DATE
+    set getDate [job::db::getShipDate -min ShipDate]
+    if {[join $getDate] ne ""} {
+        set shipDate [ea::date::formatDate -db -std $getDate]
+        # Format: Ship Date (txt)
+        set id [Excel::SelectCellByIndex $worksheet_id 1 7]
+            Excel::SetRangeHorizontalAlignment $id xlHAlignRight
+        # Format: Ship Date (data)
+        set id [Excel::SelectCellByIndex $worksheet_id 1 8]
+            Excel::SetRangeFontBold $id
+            Excel::SetRangeFontSize $id 14
+        
+        # INSERT: Ship Date (txt) and (data)
+        Excel::SetMatrixValues $worksheet_id [subst [list {"1st Ship Date" "$shipDate"}]] 1 7
+    }
+
+    # JOB NOTES
+    set jobNotes [job::db::getNotes -noteType Job -includeOnReports 1 -noteTypeActive 1 -notesActive 1]
+        if {$jobNotes ne ""} {
+            # Format: Job Notes (txt)
+            set id [Excel::SelectCellByIndex $worksheet_id 2 1]
+                Excel::SetRangeHorizontalAlignment $id xlHAlignRight
+            # Format: Job Notes (data)
+            set id [Excel::SelectRangeByIndex $worksheet_id 2 2 2 8]
+                Excel::SetRangeMergeCells $id
+                Excel::SetRangeHorizontalAlignment $id xlHAlignLeft
+                Excel::SetRangeFontBold $id
+                Excel::SetRangeFontSize $id 14
+            # INSERT: Job Notes txt and data
+           Excel::SetMatrixValues $worksheet_id [subst [list {"Job Notes" "$jobNotes"}]] 2 1
+    }
+    
+    # TOTALS
+    Excel::SetMatrixValues $worksheet_id [subst [list {"Totals"}]] 3 1
+        set id [Excel::SelectRangeByIndex $worksheet_id 3 1 3 8]
+        Excel::SetRangeMergeCells $id
+        Excel::SetRangeHorizontalAlignment $id xlHAlignCenter
+        Excel::SetRangeFontBold $id
+        Excel::SetRangeFillColor $id 255 255 0
+        Excel::SetRangeBorders $id
+        
+    ## Total Copies
+    # Format: Copies (txt)
+    set id [Excel::SelectCellByIndex $worksheet_id 4 1]
+        Excel::SetRangeHorizontalAlignment $id xlHAlignRight
+        Excel::SetRangeFontSize $id 14
+    # Format: Copies (data)
+    set id [Excel::SelectCellByIndex $worksheet_id 4 2]
+        Excel::SetRangeHorizontalAlignment $id xlHAlignLeft
+        Excel::SetRangeFontSize $id 14
+        Excel::SetRangeFontBold $id
+    # Insert: Copies txt and data
+    Excel::SetMatrixValues $worksheet_id [subst [list {"Copies (Does not include overs)" "$job(TotalCopies)"}]] 4 1
+        
+    
+    ## Total Versions
+    set versionNames [job::db::getUsedVersions -active 1 -job $job(Number)]
+    set numOfVersions [llength $versionNames]
+    # Format: Versions (txt)
+    set id [Excel::SelectCellByIndex $worksheet_id 4 4]
+        Excel::SetRangeHorizontalAlignment $id xlHAlignRight
+        Excel::SetRangeFontSize $id 14
+    # Format: Versions (data)
+    set id [Excel::SelectCellByIndex $worksheet_id 4 5]
+        Excel::SetRangeHorizontalAlignment $id xlHAlignLeft
+        Excel::SetRangeFontSize $id 14
+        Excel::SetRangeFontBold $id
+    # Insert: Versions txt and data
+    Excel::SetMatrixValues $worksheet_id [subst [list {"Versions" "$numOfVersions"}]] 4 4
+
+    
+    ## Total Shipments
+    set numOfShipments [$job(db,Name) eval "SELECT count(JobInformationID) FROM ShippingOrders WHERE JobInformationID = '$job(Number)'"]
+    # Format: Shipments (txt)
+    set id [Excel::SelectCellByIndex $worksheet_id 4 7]
+        Excel::SetRangeHorizontalAlignment $id xlHAlignRight
+        Excel::SetRangeFontSize $id 14
+    # Format: Shipments (data)
+    set id [Excel::SelectCellByIndex $worksheet_id 4 8]
+        Excel::SetRangeHorizontalAlignment $id xlHAlignRight
+        Excel::SetRangeFontSize $id 14
+    # Insert: Shipments txt and data
+    Excel::SetMatrixValues $worksheet_id [subst [list {"Shipments" "$numOfShipments"}]] 4 7
+
+        
+    # --- END HEADER
+    set row 6
+    foreach vers $versionNames {
+        # HEADER for Versions
+        set versNumOfShipments [job::db::getVersionCount -type NumOfVersions -job $job(Number) -version $vers -versActive 1 -addrActive 1]
+        set versQuantity [job::db::getVersionCount -type CountQty -job $job(Number) -version $vers -versActive 1 -addrActive 1]
+        # Get unique distribution types, for current version
+        set DistTypes [job::db::getUsedDistributionTypes -version $vers -unique yes]
+        
+        # Format: Version
+        set id [Excel::SelectCellByIndex $worksheet_id $row 1]
+            Excel::SetRangeHorizontalAlignment $id xlHAlignRight
+        # Format: Version data (name)
+        set id [Excel::SelectCellByIndex $worksheet_id $row 2]  
+            Excel::SetRangeFontBold $id
+            Excel::SetRangeHorizontalAlignment $id xlHAlignLeft
+            Excel::SetRangeFontSize $id 14
+        # INSERT: Version, and Version Name
+            Excel::SetMatrixValues $worksheet_id [subst [list {"Version" "$vers"}]] $row 1
+        
+        # Format: Shipments
+        set id [Excel::SelectCellByIndex $worksheet_id $row 4]
+            Excel::SetRangeHorizontalAlignment $id xlHAlignRight
+        # Format: Shipment data
+        set id [Excel::SelectCellByIndex $worksheet_id $row 5]
+            Excel::SetRangeFontBold $id
+            Excel::SetRangeHorizontalAlignment $id xlHAlignLeft
+            Excel::SetRangeFontSize $id 14
+        # INSERT: Shipments and Shipment data
+            Excel::SetMatrixValues $worksheet_id [subst [list {"Shipments" "$versNumOfShipments"}]] $row 4    
+        
+        # Format: Quantity
+        set id [Excel::SelectCellByIndex $worksheet_id $row 7]
+            Excel::SetRangeHorizontalAlignment $id xlHAlignRight
+        # Format: Quantity data
+        set id [Excel::SelectCellByIndex $worksheet_id $row 8]
+            Excel::SetRangeFontBold $id
+            Excel::SetRangeHorizontalAlignment $id xlHAlignLeft
+            Excel::SetRangeFontSize $id 14
+        # INSERT: Quantity and Quantity data
+            Excel::SetMatrixValues $worksheet_id [subst [list {"Quantity" "$versQuantity"}]] $row 7    
+        
+        # Range: Entire row settings
+        set id [Excel::SelectRangeByIndex $worksheet_id $row 1 $row 8]
+            Excel::SetRangeFillColor $id 255 255 0
+            Excel::SetRangeBorders $id
+        
+        incr row
+        # Format: Header row
+        set xlID [Excel::SelectRangeByIndex $worksheet_id $row 1 $row 8]
+            Excel::SetRangeFontBold $xlID
+            Excel::SetRangeHorizontalAlignment $xlID xlHAlignLeft
+        # Insert: Header data
+        Excel::SetMatrixValues $worksheet_id $col $row 1
+        
+        incr row
+        foreach dist $DistTypes {
+            #${log}::debug cycling through dist: $dist
+            # If the distribution type matches, UPS IMPORT, lets provide a grouped breakdown instead of the individual shipment
+            # Handling the dist types that 'roll up' destinations into shipments.
+            set clean_dist_blacklist [string map {' \"} $dist_blacklist]
+            set clean_dist_blacklist [string map {"\"" ""} $clean_dist_blacklist]
+            #${log}::debug clean blacklist: $clean_dist_blacklist
+            if {[lsearch $clean_dist_blacklist $dist] != -1} {
+                    # DistType associated with current version
+                    # Output Summary for Distribution Type
+                    # Output Carrier, Company and Quantity
+                    # Get total count for current distribution type
+                    #${log}::debug blacklist: Cycling through dist: $dist
+                    set distTypeNumOfShipments [job::db::getDistTypeCounts -type numOfShipments -dist $dist -job $job(Number)]
+                    set distTypeQty [job::db::getDistTypeCounts -type qtyInDistType -dist $dist -job $job(Number)]
+                    set id [join [split $dist " "] ""]
+                    
+                    if {[info exists comboDistTypes($id,qty)]} {unset comboDistTypes($id,qty)}
+                    lappend comboDistTypes(names) $dist
+
+                    $job(db,Name) eval "SELECT Quantity FROM ShippingOrders
+                            INNER JOIN Addresses ON Addresses.SysAddresses_ID = ShippingOrders.AddressID
+                            INNER JOIN Versions ON ShippingOrders.Versions = Versions.Version_ID
+                                WHERE ShippingOrders.JobInformationID = '$job(Number)'
+                                    AND ShippingOrders.Hidden = 0
+                                    AND Versions.VersionName = '$vers'
+                                    AND DistributionType = '$dist'
+                                    AND Addresses.SysActive = 1" {
+                                lappend comboDistTypes($id,qty) $Quantity
+                                set comboDistTypes($id,distTypeNumofShipments) $distTypeNumOfShipments
+                                set comboDistTypes($id,distTypeQty) $distTypeQty
+                            }
+                
+                } else {
+                    #${log}::debug dist: $dist - creating single shipments
+                        # Output detailed shipment information
+                        #${log}::debug col: [join [join [join $col]] ,]
+                        #${log}::debug cols: $cols
+                        $job(db,Name) eval "SELECT [join [join [join $col]] ,] FROM ShippingOrders
+                                                INNER JOIN Addresses on Addresses.SysAddresses_ID = ShippingOrders.AddressID
+                                                INNER JOIN Versions on Versions.Version_ID = ShippingOrders.Versions
+                                                    WHERE ShippingOrders.JobInformationID = '$job(Number)'
+                                                        AND Versions.VersionName = '$vers'
+                                                        AND DistributionType = '$dist'
+                                                        AND Addresses.SysActive = 1
+                                                        AND Versions.VersionActive = 1
+                                                ORDER BY Addresses.DistributionType, ShippingOrders.Quantity" {
+                                                    #${log}::debug Entering individual shipments...
+                                                    # Error capturing: Set a default value if nothing was put into the db
+                                                    if {$ShipVia eq ""} {set ShipVia [mc "CARRIER NOT ASSIGNED"]}
+                                                    if {$Company eq ""} {set Company [mc "COMPANY NOT ASSIGNED"]}
+                                                    if {$Quantity eq ""} {set Quantity [mc "QUANTITY NOT ASSIGNED"]}
+                                                    
+                                                    set ShipType [join [db eval "SELECT ShipmentType from ShipVia WHERE ShipViaName='[join $ShipVia]'"]]
+                                                    set cols [string map {$ShipVia $ShipType} $cols]
+                                                    
+                                                    if {$Company eq "JG Mail"} {set ShipType "JG Mail"}
+                                                    if {$Company eq "JG Inventory"} {set ShipType "JG Inventory"}
+                                                    if {$Company eq "JG Bindery"} {set ShipType "JG Bindery"}
+
+                                                    # Insert: Data
+                                                    Excel::SetMatrixValues $worksheet_id [subst [list $cols]] $row 1
+                                                    incr row
+
+                                                }
+                }
+        } ;# end of distribution type
+        
+        if {[info exists comboDistTypes]} {
+            foreach distType $comboDistTypes(names) {
+                set id [join [split $distType " "] ""]
+                set xlID [Excel::SelectRangeByIndex $worksheet_id $row 1 $row 8]
+                    Excel::SetRangeMergeCells $xlID
+                    Excel::SetRangeHorizontalAlignment $xlID xlHAlignCenter
+                    Excel::SetRangeFontBold $xlID
+                    Excel::SetCellValue $worksheet_id $row 1 "<$distType> Shipments: $comboDistTypes($id,distTypeNumofShipments), Quantity: $comboDistTypes($id,distTypeQty)"
+
+                incr row
+                
+                foreach single [lindex [Shipping_Code::extractFromList $comboDistTypes($id,qty)] 0] {
+                    set xlID [Excel::SelectRangeByIndex $worksheet_id $row 2 $row 2]
+                        Excel::SetRangeHorizontalAlignment $xlID xlHAlignRight
+                        Excel::SetCellValue $worksheet_id $row 2 "1 Shipment of  "
+                    
+                    set xlID [Excel::SelectRangeByIndex $worksheet_id $row 3 $row 3]
+                        Excel::SetRangeHorizontalAlignment $xlID xlHAlignLeft
+                        Excel::SetMatrixValues $worksheet_id "  $single"]] $row 3
+                    incr row
+                }
+                
+                foreach groups [lrange [Shipping_Code::extractFromList $comboDistTypes($id,qty)] 1 end] {
+                    set grp [llength $groups]
+                    set idx_grp [lindex $groups 0]
+                    set xlID [Excel::SelectRangeByIndex $worksheet_id $row 2 $row 2]
+                        Excel::SetRangeHorizontalAlignment $xlID xlHAlignRight
+                        Excel::SetCellValue $worksheet_id $row 2 "$grp Shipments of  "
+                        
+                    set xlID [Excel::SelectRangeByIndex $worksheet_id $row 3 $row 3]
+                        Excel::SetRangeHorizontalAlignment $xlID xlHAlignLeft
+                        Excel::SetMatrixValues $worksheet_id [list "  $idx_grp"] $row 3
+
+                    incr row
+                }
+            }
+            unset comboDistTypes
+        }
+        incr row
+    }
+} ;# ea::code::reports::writeExcel

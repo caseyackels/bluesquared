@@ -127,10 +127,10 @@ proc ea::code::samples::writeToDB {widTbl} {
     #   
     #   
     #***
-    global log shipOrder csmpls job
+    global log shipOrder csmpls job title
     
     # Reset the shipOrder array
-    importFiles::setShipOrderArray
+    eAssistHelper::initShipOrderArray
     
     # Check to see if an address was entered for this distribution type
     set disttype_addr [ea::db::getDistTypeConfig -method Report -action Single -disttype "$csmpls(distributionType)"]
@@ -155,15 +155,51 @@ proc ea::code::samples::writeToDB {widTbl} {
     # write out the records per version
     foreach record [$widTbl get 0 end] {
         set qtys [join [join [lrange $record 2 end]] +]
+        set qty [lrange $record 2 end]
+        
+        set vers [join [lindex $record 1]]
+        set shipOrder(Versions) [job::db::getVersionCount -type id -job $job(Number) -version "$vers" -versActive 1 -addrActive 1]
+        
+        # Figure out what column contains what quantity. We create a 'note entry' on this data.
+        set y 0
+        for {set x 2} {$x < 6} {incr x} {
+            
+            set colName [$widTbl columncget $x -name]
+            ${log}::debug Column: $colName
+            
+            set colQty [lindex $qty $y]
+            ${log}::debug Quantity: $colQty
+            
+            if {$colQty != ""} {
+                lappend notes "$colName $colQty"
+            }
+            incr y
+        }
+        ${log}::debug Notes: $notes
+        set shipOrder(Notes) [join [list "$vers : [join $notes "  ,"]"]]
+        
         if {$qtys ne ""} {
-            ${log}::debug Set the Quantity to: [expr $qtys]
+            set shipOrder(Quantity) [expr $qtys]
+            #${log}::debug Set the Quantity to: $shipOrder(Quantity)
         }
         #${log}::debug catch var: $err
-        set vers [join [lindex $record 1]]
-        ${log}::debug Set the Version to: $vers - [job::db::getVersionCount -type id -job $job(Number) -version "$vers" -versActive 1 -addrActive 1]
-        ${log}::debug Inserting shipOrder() into tbl:Addresses and tbl:ShippingOrders
+
+        #${log}::debug Set the Version to: $vers - $shipOrder(Versions)
+        
+        #${log}::debug Inserting shipOrder() into tbl:Addresses and tbl:ShippingOrders
+        # Write record to db
+        ea::code::bm::writeShipment
+        
         ${log}::debug Insert Sample data into tbl:InternalSamples
+        # Get ShippingOrder ID for this shipment
+        
+        # Insert data into tbl:Samples
+        ${log}::debug Last inserted id: $title(shipOrder_id) / $title(db_address,lastid)
         ${log}::debug [join "ShippingOrders_ID [lrange $record 2 end]" ,]
+        
+
+        # Populate table
+        ea::db::populateTablelist -record new
     }
     
 } ;# ea::db::samples::writeToDB
