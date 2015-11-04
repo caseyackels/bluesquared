@@ -243,10 +243,9 @@ proc job::db::createDB {args} {
             InternalSamples_ID INTEGER PRIMARY KEY AUTOINCREMENT,
             ShippingOrderID    INTEGER REFERENCES ShippingOrders (ShippingOrder_ID) ON DELETE CASCADE
                                                                                     ON UPDATE CASCADE,
-            Ticket             INTEGER,
-            CSR                INTEGER,
-            SampleRoom         INTEGER,
-            Sales              INTEGER
+            Location           TEXT,
+            Quantity           INTEGER,
+            Notes              TEXT
         );
         
         PRAGMA foreign_keys = on
