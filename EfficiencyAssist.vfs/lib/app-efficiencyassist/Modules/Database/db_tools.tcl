@@ -202,7 +202,7 @@ proc ea::db::writeSingleAddressToDB {{hidden 0}} {
 	
 } ;# ea::db::writeSingleAddressToDB
 
-proc ea::db::updateSingleAddressToDB {} {
+proc ea::db::updateSingleAddressToDB {args} {
 	#****if* updateSingleAddressToDB/ea::db
 	# CREATION DATE
 	#   08/28/2015 (Friday Aug 28)
@@ -218,6 +218,8 @@ proc ea::db::updateSingleAddressToDB {} {
 	#   
 	#***
 	global log job shipOrder headerParent title
+	
+	if {$args ne ""} {set hidden $args} else {set hidden 0}
 
 	## Versions require special handling since, it is in another db table. We display the name to the user, but use the ID internally.
 	## Update/Insert versions first
@@ -239,20 +241,27 @@ proc ea::db::updateSingleAddressToDB {} {
 		lappend address_update "$val='$shipOrder($val)'"
 	}
 	
-	# loop through the values that are for the ShippingOrders table, then issue an update statement
-	foreach val $headerParent(headerList,shippingorder) {
-		lappend shiporder_update "$val='$shipOrder($val)'"
-	}
+
 	
 	# Update Addresses Table
 	#${log}::debug $job(db,Name) eval UPDATE Addresses SET [join $address_update ,] WHERE SysAddresses_ID = '$shipOrder(id)'
-	#$job(db,Name) tran
 	$job(db,Name) eval "UPDATE Addresses SET [join $address_update ,] WHERE SysAddresses_ID = '$title(shipOrder_id)'"
 	
 	
-	# Update ShippingOrders table
-	#${log}::debug $job(db,Name) eval UPDATE ShippingOrders SET [join $shiporder_update ,] WHERE AddressID = '$shipOrder(id)' AND JobInformationID = '$job(Number)'
-	$job(db,Name) eval "UPDATE ShippingOrders SET [join $shiporder_update ,] WHERE AddressID = '$title(shipOrder_id)' AND JobInformationID = '$job(Number)'"
+	# Delete entries in the ShipOrder table, and re-add them.
+	#${log}::debug $job(db,Name) eval DELETE FROM ShippingOrders WHERE AddressID = '$title(shipOrder_id)' AND Version = $shipOrder(Versions) AND JobInformationID = '$job(Number)'
+	$job(db,Name) eval "DELETE FROM ShippingOrders WHERE AddressID = '$title(shipOrder_id)' AND Versions = $shipOrder(Versions) AND JobInformationID = '$job(Number)'"
+	
+	# Add ShippingOrder back
+	# loop through the values that are for the ShippingOrders table, then issue an update statement
+	foreach val $headerParent(headerList,shippingorder) {
+		#lappend shiporder_update "$val='$shipOrder($val)'"
+		lappend shiporder_update "'$shipOrder($val)'"
+	}
+	
+	$job(db,Name) eval "INSERT INTO ShippingOrders (AddressID, JobInformationID, Hidden, [join $headerParent(headerList,shippingorder) ,])
+							VALUES ('$title(shipOrder_id)', '$job(Number)', $hidden, [join $shiporder_update ,])"
+	#$job(db,Name) eval "UPDATE ShippingOrders SET [join $shiporder_update ,] WHERE AddressID = '$title(shipOrder_id)' AND JobInformationID = '$job(Number)'"
 	
 
 	# clean up
@@ -353,7 +362,7 @@ proc ea::db::populateShipOrder {db_id} {
 		lappend hdr_list $hdrs
 	}
 	
-	${log}::debug hdr_list: $hdr_list
+	#${log}::debug hdr_list: $hdr_list
 	
 	$job(db,Name) eval "SELECT [join $hdr_list ,] FROM ShippingOrders
                             INNER JOIN Addresses
@@ -367,6 +376,11 @@ proc ea::db::populateShipOrder {db_id} {
 								}
 							}
 	set title(shipOrder_id) $db_id
+	
+	# Convert date into friendly form
+	set shipOrder(ShipDate) [ea::date::formatDate -db -std $shipOrder(ShipDate)]
+	set shipOrder(ArriveDate) [ea::date::formatDate -db -std $shipOrder(ArriveDate)]
+	
 	unset hdr_list
 	
 } ;# ea::db::populateShipOrder [ea::db::getRecord [$files(tab3f2).tbl curselection]]

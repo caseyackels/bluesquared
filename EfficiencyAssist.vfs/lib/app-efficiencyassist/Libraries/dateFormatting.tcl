@@ -69,6 +69,8 @@ proc ea::date::formatDate {indate outdate str} {
         default {set dateFormat_outdate "$value"}
     }
 
+    # If str isn't populated lets quietly exit
+    if {$str eq ""} {${log}::notice [info level 0] A date wasn't supplied, exiting.; return}
     # Guard against the user, using slashes (/), instead of hyphens (-)
     set str [string map {/ -} $str]
     

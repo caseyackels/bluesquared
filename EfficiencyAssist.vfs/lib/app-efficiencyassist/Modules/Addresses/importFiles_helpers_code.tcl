@@ -817,7 +817,7 @@ proc eAssistHelper::checkProjSetup {} {
 } ;# eAssistHelper::checkProjSetup
 
 
-proc ea::code::bm::writeShipment {{mode normal}} {
+proc ea::code::bm::writeShipment {{mode normal} args} {
     #****f* writeShipment/ea::code::bm
     # CREATION DATE
     #   11/02/2015 (Monday Nov 02)
@@ -834,7 +834,7 @@ proc ea::code::bm::writeShipment {{mode normal}} {
     #
     # FUNCTION
     #	<normal> (default) Writes new entries, or updates existing into the db tables: Addresses, Shipping Orders
-    #   <hidden> Samee as <normal> except passes the Hidden flag so it doesn't show up in the main list.
+    #   <hidden> Same as <normal> except passes the Hidden flag so it doesn't show up in the main list.
     #   
     #   
     # EXAMPLE
@@ -844,7 +844,7 @@ proc ea::code::bm::writeShipment {{mode normal}} {
     #   This uses the shipOrder() array, so before using this command make sure that the array contains the data that you want.
     #   
     #***
-    global log shipOrder job title
+    global log shipOrder job title program
 	
 	switch -- $mode {
 		normal	{ set hidden 0}
@@ -859,10 +859,11 @@ proc ea::code::bm::writeShipment {{mode normal}} {
 	set title(shipOrder_id) [$job(db,Name) eval "SELECT SysAddresses_ID FROM Addresses
 													WHERE Company LIKE '%$shipOrder(Company)%'"]
 	
-	set versExistsOnJob [$job(db,Name) eval "SELECT SysAddresses_ID FROM Addresses
-												INNER JOIN ShippingOrders on ShippingOrders.Versions = Addresses.SysAddresses_ID
+	set versExistsOnJob [$job(db,Name) eval "SELECT DISTINCT SysAddresses_ID FROM Addresses
+												INNER JOIN ShippingOrders on ShippingOrders.AddressID = Addresses.SysAddresses_ID
+												INNER JOIN Versions on Versions.Version_ID = ShippingOrders.Versions
 													WHERE Company LIKE '%$shipOrder(Company)%'
-													AND ShippingOrders.Versions = $shipOrder(Versions)"]			
+													AND ShippingOrders.Versions = $program(id,Versions)"]			
 
     if {$title(shipOrder_id) ne ""} {
         # Entry was in the database, check to see if it exists as a shippingorder on the current job.
@@ -874,19 +875,19 @@ proc ea::code::bm::writeShipment {{mode normal}} {
             # Insert record into the shipping table
 			${log}::debug Entry doesn't exist on the job, adding....
             $job(db,Name) eval "INSERT INTO ShippingOrders (AddressID, JobInformationID, Hidden, Versions, Quantity, ShipVia)
-									VALUES ('$title(shipOrder_id)', '$job(Number)', $hidden, $shipOrder(Versions), $shipOrder(Quantity), '$shipOrder(ShipVia)')"
+									VALUES ('$title(shipOrder_id)', '$job(Number)', $hidden, $program(id,Versions), $shipOrder(Quantity), '$shipOrder(ShipVia)')"
         
 		} elseif {$versExistsOnJob eq ""} {
 			${log}::debug Entry exists on the job, but not for the version.
 			# New Version, insert record into the shipping table
             $job(db,Name) eval "INSERT INTO ShippingOrders (AddressID, JobInformationID, Hidden, Versions, Quantity, ShipVia)
-									VALUES ('$title(shipOrder_id)', '$job(Number)', $hidden, $shipOrder(Versions), $shipOrder(Quantity), '$shipOrder(ShipVia)')"
+									VALUES ('$title(shipOrder_id)', '$job(Number)', $hidden, $program(id,Versions), $shipOrder(Quantity), '$shipOrder(ShipVia)')"
 		
 		} else {
 			# Exists on the Job, and Version exists ...
             # Address Entry already exists; update.
             ${log}::debug Address for $shipOrder(Company) exists, updating...
-            ea::db::updateSingleAddressToDB
+            ea::db::updateSingleAddressToDB $hidden
         }
 
     } else {
@@ -896,7 +897,7 @@ proc ea::code::bm::writeShipment {{mode normal}} {
 		# Convert to Name
 		set shipOrder(Versions) [lindex [job::db::getVersion -id $shipOrder(Versions) -active 1] 1]
 		${log}::debug Version Name: $shipOrder(Versions)
-        ea::db::writeSingleAddressToDB
+        ea::db::writeSingleAddressToDB $hidden
     }
 
 } ;# ea::code::bm::writeShipment

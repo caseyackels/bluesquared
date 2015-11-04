@@ -507,7 +507,8 @@ proc importFiles::insertIntoGUI {wid args} {
                                 ON ShippingOrders.Versions = Versions.Version_ID
                             WHERE ShippingOrders.JobInformationID in ('$job(Number)')
                             AND Addresses.SysActive = 1
-                            AND ShippingOrders.Hidden = 0" {
+                            AND ShippingOrders.Hidden = 0
+                            ORDER BY Versions.VersionName, ShipDate, Addresses.DistributionType, Quantity" {
                                 #$wid insert end [subst $hdr_data]
                                 #${log}::debug hdr_list: $hdr_list
                                 #${log}::debug data: [subst $hdr_data]

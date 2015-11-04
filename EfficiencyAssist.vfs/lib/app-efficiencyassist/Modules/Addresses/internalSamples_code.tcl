@@ -127,7 +127,7 @@ proc ea::code::samples::writeToDB {widTbl} {
     #   
     #   
     #***
-    global log shipOrder csmpls job title
+    global log shipOrder csmpls job title program
     
     # Reset the shipOrder array
     eAssistHelper::initShipOrderArray
@@ -151,6 +151,8 @@ proc ea::code::samples::writeToDB {widTbl} {
     
     # Variables that don't exist in the disttype_addr var
     set shipOrder(DistributionType) "$csmpls(distributionType)"
+    if {![info exists csmpls(packageType)]} {${log}::critical [info level 0] Please select a package type and try again.; return}
+    set shipOrder(PackageType) "$csmpls(packageType)"
     
     # write out the records per version
     foreach record [$widTbl get 0 end] {
@@ -158,48 +160,101 @@ proc ea::code::samples::writeToDB {widTbl} {
         set qty [lrange $record 2 end]
         
         set vers [join [lindex $record 1]]
-        set shipOrder(Versions) [job::db::getVersionCount -type id -job $job(Number) -version "$vers" -versActive 1 -addrActive 1]
+        # Returns the version id
+        set program(id,Versions) [job::db::getVersionCount -type id -job $job(Number) -version "$vers" -versActive 1 -addrActive 1]
+        # Populate with the name
+        set shipOrder(Versions) $vers
+               
+        if {$qtys ne ""} {
+            set shipOrder(Quantity) [expr $qtys]
+        }
+
+        
+        ea::code::bm::writeShipment hidden
+  
+        # Insert data into tbl:InternalSamples
+        if {[info exists title(shipOrder_id)] && $title(shipOrder_id) ne ""} {
+            foreach entry $record {
+                #${log}::debug  "ShippingOrders_ID $title(shipOrder_id) [lrange $entry $x $x] $notes"
+                set id $title(shipOrder_id)
+            }
+        } elseif {[info exists title(db_address,lastid)] && $title(db_address,lastid) ne ""} {
+            foreach entry $record {
+                #${log}::debug  "ShippingOrders_ID $title(db_address,lastid) [lrange $entry $x $x] $notes"
+                set id $title(db_address,lastid)
+            }
+        } else {
+            # Neither variable was populated; lets look for the id
+            set id [$job(db,Name) eval "SELECT SysAddresses_ID FROM Addresses WHERE Company LIKE '%JG Samples%'"]
+        }
+        
+        ${log}::debug Sample ID: $id
+        set shipOrderID [lindex [$job(db,Name) eval "SELECT DISTINCT ShippingOrder_ID, AddressID FROM ShippingOrders
+                                                WHERE JobInformationID = '$job(Number)'
+                                                AND AddressID = '$id'"] 0]
+        
+        # First delete entries if they exist
+        $job(db,Name) eval "DELETE FROM InternalSamples WHERE ShippingOrderID = $shipOrderID"
         
         # Figure out what column contains what quantity. We create a 'note entry' on this data.
         set y 0
         for {set x 2} {$x < 6} {incr x} {
-            
             set colName [$widTbl columncget $x -name]
-            ${log}::debug Column: $colName
+            #${log}::debug Column: $colName
             
             set colQty [lindex $qty $y]
-            ${log}::debug Quantity: $colQty
+            #${log}::debug Quantity: $colQty
             
             if {$colQty != ""} {
-                lappend notes "$colName $colQty"
+                set notes "$colName $colQty"
+                lappend smplNotes "$colName $colQty"
             }
+
+            # Enter into DB
+            #${log}::debug $shipOrderID $colName $colQty INSPECT
+            $job(db,Name) eval "INSERT INTO InternalSamples (ShippingOrderID, Location, Quantity, Notes) VALUES ($shipOrderID, '$colName', '$colQty', 'INSPECT')"
             incr y
+            
         }
-        ${log}::debug Notes: $notes
-        set shipOrder(Notes) [join [list "$vers : [join $notes "  ,"]"]]
         
-        if {$qtys ne ""} {
-            set shipOrder(Quantity) [expr $qtys]
-            #${log}::debug Set the Quantity to: $shipOrder(Quantity)
-        }
-        #${log}::debug catch var: $err
-
-        #${log}::debug Set the Version to: $vers - $shipOrder(Versions)
-        
-        #${log}::debug Inserting shipOrder() into tbl:Addresses and tbl:ShippingOrders
-        # Write record to db
-        ea::code::bm::writeShipment
-        
-        ${log}::debug Insert Sample data into tbl:InternalSamples
-        # Get ShippingOrder ID for this shipment
-        
-        # Insert data into tbl:Samples
-        ${log}::debug Last inserted id: $title(shipOrder_id) / $title(db_address,lastid)
-        ${log}::debug [join "ShippingOrders_ID [lrange $record 2 end]" ,]
-        
-
+        set shipOrder(Notes) "INSPECT [join $smplNotes ", "]"
+        $job(db,Name) eval "UPDATE Addresses SET Notes='$shipOrder(Notes)'
+                                WHERE SysAddresses_ID = '$id'"
         # Populate table
-        ea::db::populateTablelist -record new
+        #ea::db::populateTablelist -record new
     }
     
 } ;# ea::db::samples::writeToDB
+
+proc ea::db::samples::getSamples {args} {
+    #****if* getSamples/ea::db::samples
+    # CREATION DATE
+    #   11/03/2015 (Tuesday Nov 03)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   
+    #   
+    #***
+    global log job
+
+    $job(db,Name) eval "SELECT JobInformationID, Versions.VersionName as name, InternalSamples.Location as loc, InternalSamples.Quantity as qty
+                            FROM ShippingOrders
+                            INNER JOIN InternalSamples on InternalSamples.ShippingOrderID = ShippingOrders.ShippingOrder_ID
+                            INNER JOIN Versions on Versions.Version_ID = ShippingOrders.Versions
+                            WHERE JobInformationID = '307180'
+                            AND Versions.VersionName = '[join $args]'" {
+                                lappend toEnter "$qty"
+                            }
+                            
+    if {[info exists toEnter]} {
+        ${log}::debug getSamples: $toEnter
+        return $toEnter
+    }
+    
+} ;# ea::db::samples::getSamples

@@ -203,9 +203,11 @@ proc ea::gui::samples::SampleGUI {} {
 	foreach version $process(versionList) {
 		if {$version != ""} {
 			# Guard against a blank entry
-			$f3.tbl insert end "{} [list $version]"
+            set qtys [ea::db::samples::getSamples $version]
+			$f3.tbl insert end "{} [list $version] $qtys"
 		}
 	}
+#ea::db::samples::getSamples $process(versionList)
 	
 
 	#----- GRID
