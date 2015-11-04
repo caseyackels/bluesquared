@@ -582,7 +582,7 @@ proc ea::code::reports::writeExcel {args} {
     set id [Excel::SelectCellByIndex $worksheet_id 1 4]
         Excel::SetRangeHorizontalAlignment $id xlHAlignRight
     set id [Excel::SelectCellByIndex $worksheet_id 1 5]
-        #Excel::SetRangeHorizontalAlignment $id xlHAlignRight
+        Excel::SetRangeHorizontalAlignment $id xlHAlignLeft
         Excel::SetRangeFontBold $id
         Excel::SetRangeFontSize $id 14
         
@@ -600,6 +600,7 @@ proc ea::code::reports::writeExcel {args} {
         set id [Excel::SelectCellByIndex $worksheet_id 1 8]
             Excel::SetRangeFontBold $id
             Excel::SetRangeFontSize $id 14
+            Excel::SetRangeHorizontalAlignment $id xlHAlignLeft
         
         # INSERT: Ship Date (txt) and (data)
         Excel::SetMatrixValues $worksheet_id [subst [list {"1st Ship Date" "$shipDate"}]] 1 7
@@ -668,8 +669,9 @@ proc ea::code::reports::writeExcel {args} {
         Excel::SetRangeFontSize $id 14
     # Format: Shipments (data)
     set id [Excel::SelectCellByIndex $worksheet_id 4 8]
-        Excel::SetRangeHorizontalAlignment $id xlHAlignRight
+        Excel::SetRangeHorizontalAlignment $id xlHAlignLeft
         Excel::SetRangeFontSize $id 14
+        Excel::SetRangeFontBold $id
     # Insert: Shipments txt and data
     Excel::SetMatrixValues $worksheet_id [subst [list {"Shipments" "$numOfShipments"}]] 4 7
 
@@ -801,11 +803,11 @@ proc ea::code::reports::writeExcel {args} {
         if {[info exists comboDistTypes]} {
             foreach distType $comboDistTypes(names) {
                 set id [join [split $distType " "] ""]
-                set xlID [Excel::SelectRangeByIndex $worksheet_id $row 1 $row 8]
+                set xlID [Excel::SelectRangeByIndex $worksheet_id $row 2 $row 3]
                     Excel::SetRangeMergeCells $xlID
                     Excel::SetRangeHorizontalAlignment $xlID xlHAlignCenter
                     Excel::SetRangeFontBold $xlID
-                    Excel::SetCellValue $worksheet_id $row 1 "<$distType> Shipments: $comboDistTypes($id,distTypeNumofShipments), Quantity: $comboDistTypes($id,distTypeQty)"
+                    Excel::SetCellValue $worksheet_id $row 2 "<$distType> Shipments: $comboDistTypes($id,distTypeNumofShipments), Quantity: $comboDistTypes($id,distTypeQty)"
 
                 incr row
                 
@@ -816,7 +818,7 @@ proc ea::code::reports::writeExcel {args} {
                     
                     set xlID [Excel::SelectRangeByIndex $worksheet_id $row 3 $row 3]
                         Excel::SetRangeHorizontalAlignment $xlID xlHAlignLeft
-                        Excel::SetMatrixValues $worksheet_id "  $single"]] $row 3
+                        Excel::SetMatrixValues $worksheet_id "  $single" $row 3
                     incr row
                 }
                 
@@ -833,8 +835,10 @@ proc ea::code::reports::writeExcel {args} {
 
                     incr row
                 }
+                incr row
             }
             unset comboDistTypes
+            #incr row
         }
         incr row
     }
