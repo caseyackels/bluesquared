@@ -159,6 +159,8 @@ proc ea::code::samples::writeToDB {widTbl} {
                                                     WHERE JobInformationID = '$job(Number)'
                                                     AND Hidden != 1"]
     set shipOrder(ArriveDate) $shipOrder(ShipDate)
+    # This should come directly from the db; setup on dist type?
+    set shipOrder(ShippingClass) "Finished Product"
     
     # write out the records per version
     foreach record [$widTbl get 0 end] {
