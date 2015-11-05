@@ -296,7 +296,8 @@ proc importFiles::initMenu {} {
     $mb.file add separator
     menu $mb.file.reports
     $mb.file add cascade -label [mc "Reports"] -menu $mb.file.reports
-    $mb.file.reports add command -label [mc "General"] -command {job::reports::Viewer}
+    $mb.file.reports add command -label [mc "Text"] -command {job::reports::Viewer}
+    $mb.file.reports add command -label [mc "Excel"] -command {ea::code::reports::writeExcel}
     
     #$mb.file add command -label [mc "Export File"] -command {export::newDataToExport}
     

@@ -692,26 +692,27 @@ proc ea::tools::populateListbox {modify entryWid lBoxWid dbTable dbCol} {
     #
     #***
     global log
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
-    ${log}::debug Adding $dbTable, $entryWid, $lboxWid
+    #${log}::debug Adding $dbTable, $entryWid, $lBoxWid
     
     switch -- $modify {
         add     {if {[$entryWid get] == ""} {return} else {set entryValue [$entryWid get]}; $entryWid delete 0 end
                 # Insert into DB; must use quotes instead of curly braces to allow variable substituition
                 db eval "insert into ${dbTable}($dbCol) values('$entryValue')"
             }
-        delete  {if {[$lboxWid curselection] == ""} {return}
+        delete  {if {[$lBoxWid curselection] == ""} {return}
                 # Delete the entry, then set the var to all values remaining values.
-                eAssist_db::delete $dbTable $dbCol [$lboxWid get [$lboxWid curselection]]
+                eAssist_db::delete $dbTable $dbCol [$lBoxWid get [$lBoxWid curselection]]
             }
         default {${log}::debug Unknown switch option: $modify}
     }
     
     # Update the widgets with the new data ...
-    eAssist_db::initContainers $dbTable $listBox
+    #eAssist_db::initContainers $dbTable $lBoxWid
+    eAssist_db::initContainers $dbCol $lBoxWid
 
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# ea::tools::populateListbox
 
 

@@ -528,17 +528,36 @@ proc ea::db::setShipOrderValues {dist_type} {
 			lappend shipViaValues $ShipViaName
 		}
 		
-		## No Carriers were assigned to the distribution type; filter out small package, or freight ship via's
-		if {![info exists shipViaValues]} {
-			#set shipViaValues ""
-			db eval "SELECT ShipViaName from ShipVia WHERE ShipmentType = (
-						SELECT ShipmentType from ShipmentTypes
-							INNER JOIN DistributionTypes on ShipmentType_ID = DistType_ShipTypeID
-						WHERE DistributionTypes.DistTypeName = '$dist_type')" {
-							lappend shipViaValues $ShipViaName
+			## No Carriers were assigned to the distribution type; filter out small package, or freight ship via's
+			if {![info exists shipViaValues]} {
+				#set shipViaValues ""
+				db eval "SELECT ShipViaName from ShipVia WHERE ShipmentType = (
+							SELECT ShipmentType from ShipmentTypes
+								INNER JOIN DistributionTypes on ShipmentType_ID = DistType_ShipTypeID
+							WHERE DistributionTypes.DistTypeName = '$dist_type')" {
+								lappend shipViaValues $ShipViaName
+				}
 			}
+	}
+	
+	# Grab all Ship Via's assigned to customer
+	if {![info exists shipViaValues]} {
+		db eval "SELECT ShipViaName from CustomerShipVia
+			INNER JOIN ShipVia on ShipVia.ShipVia_ID = CustomerShipVia.ShipViaID
+			WHERE CustomerShipVia.CustID = '$job(CustID)'" {
+				lappend shipViaValues $ShipViaName
+			}
+			
+		# If there isn't any ship via's setup; lets pull in all ship via's.
+		if {![info exists shipViaValues]} {
+			db eval "SELECT ShipViaName FROM ShipVia
+									ORDER BY ShipmentType DESC, ShipViaName" {
+									 lappend shipViaValues $ShipViaName
+									}
 		}
 	}
+	
+
 
 	#${log}::debug Ship Via Values: $shipViaValues
 	

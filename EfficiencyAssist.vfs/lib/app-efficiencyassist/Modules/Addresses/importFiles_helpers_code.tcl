@@ -894,10 +894,12 @@ proc ea::code::bm::writeShipment {{mode normal} args} {
         # Doesn't exist; insert.
         ${log}::debug Address for $shipOrder(Company) doesn't exist, adding.
 		
+		${log}::debug Version ID: $shipOrder(Versions)
 		# Convert to Name
-		set shipOrder(Versions) [lindex [job::db::getVersion -id $shipOrder(Versions) -active 1] 1]
-		${log}::debug Version Name: $shipOrder(Versions)
-        ea::db::writeSingleAddressToDB $hidden
+		#set shipOrder(Versions) [lindex [job::db::getVersion -id "$shipOrder(Versions)" -active 1] 1]
+		#${log}::debug Version Name: $shipOrder(Versions)
+        
+		ea::db::writeSingleAddressToDB $hidden
     }
 
 } ;# ea::code::bm::writeShipment

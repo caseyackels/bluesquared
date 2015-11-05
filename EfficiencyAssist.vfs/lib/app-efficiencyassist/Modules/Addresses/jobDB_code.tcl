@@ -234,9 +234,7 @@ proc job::db::createDB {args} {
             NotesID          TEXT    REFERENCES Notes (Notes_ID) ON UPDATE CASCADE,
             JobInformationID TEXT    REFERENCES JobInformation (JobInformation_ID) ON UPDATE CASCADE
                                      NOT NULL ON CONFLICT ROLLBACK,
-            PublishedRev     INTEGER NOT NULL ON CONFLICT ROLLBACK,
-            HistoryID        TEXT    REFERENCES History (History_ID) ON UPDATE CASCADE
-                                        NOT NULL ON CONFLICT ROLLBACK
+            PublishedRev     INTEGER NOT NULL ON CONFLICT ROLLBACK
         );
         
         CREATE TABLE InternalSamples (
@@ -793,7 +791,7 @@ proc job::db::insertNotes {job_wid log_wid args} {
     #   
     #   
     # NOTES
-    #   
+    #   This proc is specific to the Notes on the Job (Deprecated)
     #   
     # SEE ALSO
     #   
@@ -1046,7 +1044,7 @@ proc job::db::insertDefaultData {} {
     $job(db,Name) eval "INSERT INTO Versions (VersionName) VALUES ('Version 1')"
     
     $job(db,Name) eval "INSERT INTO NoteTypes (NoteType)
-                            VALUES ('Title'),('Job'),('Version'),('Distribution Type'),('Shipping Order')"
+                            VALUES ('Title'),('Job'),('Version'),('Distribution Type'),('Shipping Order'),('Publish')"
     
 } ;# job::db::insertDefaultData
 
@@ -1511,3 +1509,65 @@ proc job::db::getShipDate {args} {
                             AND Hidden = 0"
     
 } ;# job::db::getShipDate
+
+proc job::db::SetNotes {args} {
+    #****f* SetNotes/job::db
+    # CREATION DATE
+    #   11/04/2015 (Wednesday Nov 04)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    #
+    # USAGE
+    #   job::db::SetNotes histNote NoteType Note
+    #
+    # FUNCTION
+    #	Inserts into the Notes table
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # EXAMPLE
+    #   job::db::SetNotes -HistNote val, -NoteType val, -Note val
+    #
+    # NOTES
+    #   Inserts passed Note into the Note Table, after making an entry in the History Table
+    #   Returns the Notes_ID
+    #  
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log job
+    
+    foreach {key value} $args {
+        switch -- $key {
+            -HistNote   {set histNote $value}
+            -NoteType   {set noteType $value}
+            -Note       {set note $value}
+            default     {${log}::debug [info level 0] Invalid parameter $key, must be: -HistNote, -NoteType, -Note}
+        }
+    }
+    
+    foreach {var value} {histNote -HistNote noteType -NoteType note -Note} {
+        if {![info exists $var]} {${log}::debug [info level 0] Parameter Required: $value}
+    }
+
+    set histID [job::db::insertHistory $histNote]
+    
+    # Get NoteTypeID
+    set noteTypeID [$job(db,Name) eval "SELECT NoteType_ID FROM NoteTypes WHERE NoteType = '$noteType'"]
+
+    $job(db,Name) eval "INSERT INTO Notes (HistoryID, NoteTypeID, NotesText) VALUES ('$histID', $noteTypeID,'$note')"
+    
+    return [$job(db,Name) eval "SELECT MAX(Notes_ID) FROM Notes"]
+    
+} ;# job::db::SetNotes

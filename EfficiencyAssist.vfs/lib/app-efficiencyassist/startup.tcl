@@ -144,6 +144,11 @@ proc 'eAssist_sourceReqdFiles {} {
     namespace eval ea::code::reports {}
     namespace eval ea::gui::reports {}
     namespace eval ea::db::reports {}
+    
+    # Publish
+    namespace eval ea::code::publish {}
+    namespace eval ea::gui::publish {}
+    namespace eval ea::db::publish {}
 	
 	
 	## Start the Package Require

@@ -154,6 +154,12 @@ proc ea::code::samples::writeToDB {widTbl} {
     if {![info exists csmpls(packageType)]} {${log}::critical [info level 0] Please select a package type and try again.; return}
     set shipOrder(PackageType) "$csmpls(packageType)"
     
+    # set ship and arrive dates based on the min(ShipDate) in ShippingOrders
+    set shipOrder(ShipDate) [$job(db,Name) eval "SELECT MIN(ShipDate) FROM ShippingOrders
+                                                    WHERE JobInformationID = '$job(Number)'
+                                                    AND Hidden != 1"]
+    set shipOrder(ArriveDate) $shipOrder(ShipDate)
+    
     # write out the records per version
     foreach record [$widTbl get 0 end] {
         set qtys [join [join [lrange $record 2 end]] +]

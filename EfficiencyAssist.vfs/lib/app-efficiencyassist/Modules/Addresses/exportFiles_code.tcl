@@ -299,7 +299,7 @@ proc ea::code::export::toPlanner {args} {
     $job(db,Name) eval "SELECT [join $cols ,]
                         FROM ShippingOrders
                             INNER JOIN Addresses ON Addresses.SysAddresses_ID = ShippingOrders.AddressID
-                            INNER JOIN Versions ON Addresses.Versions = Versions.Version_ID
+                            INNER JOIN Versions ON ShippingOrders.Versions = Versions.Version_ID
                             INNER JOIN db1.ShipVia ON ShippingOrders.ShipVia = ShipVia.ShipViaName
                         WHERE ShippingOrders.JobInformationID = $job(Number)
                             AND ShippingOrders.AddressID NOT IN ([join $blacklist ,])" {
@@ -384,11 +384,49 @@ proc ea::code::export::toProcessShipper {args} {
     catch {$job(db,Name) eval "ATTACH 'EA_setup.edb' as db1"}
 
     foreach disttype $dist_blacklist {
+        # Check to make sure we have records using the disttype
+        set countDistType [$job(db,Name) eval "SELECT COUNT(DistributionType) FROM Addresses
+                                INNER JOIN ShippingOrders on ShippingOrders.AddressID = Addresses.SysAddresses_ID
+                                WHERE JobInformationID = '$job(Number)'
+                                AND DistributionType = $disttype"]
+        
+        if {$countDistType == 0} {break}
+        
         # Assemble the file names, and issue any warnings
-        ${log}::debug disttype: $disttype
-        set hasData [$job(db,Name) eval "SELECT COUNT(Address1) FROM Addresses WHERE DistributionType = $disttype"]
-        if {1 <= $hasData} {
-            set fName [ea::tools::formatFileName]-[join $disttype ""]
+        #${log}::debug disttype: $disttype
+        #set hasData [$job(db,Name) eval "SELECT COUNT(Address1) FROM Addresses WHERE DistributionType = $disttype"]
+        set hasData [$job(db,Name) eval "SELECT distinct(ShipDate) FROM ShippingOrders
+                                            INNER JOIN Addresses on ShippingOrders.AddressID = Addresses.SysAddresses_ID
+                                            WHERE JobInformationID = '$job(Number)'
+                                            AND Addresses.DistributionType = $disttype"]
+        
+        #set shipdates [$job(db,Name) eval "SELECT distinct(ShipDate) FROM ShippingOrders WHERE JobInformationID = '$job(Number)'"]
+        ${log}::debug hasData: $hasData
+        if {2 <= [llength $hasData]} {
+            ${log}::debug Multiple ship dates! values: $hasData
+            foreach date $hasData {
+                set fName [ea::tools::formatFileName]-[join $disttype ""]-$date
+                set fd [open [file join $job(JobSaveFileLocation) $fName.csv] w]
+                # Write the headers
+                chan puts $fd [::csv::join "$hdr OrderType"]
+                
+                $job(db,Name) eval "SELECT [join $cols ,]
+                                    FROM ShippingOrders
+                                        INNER JOIN Addresses ON Addresses.SysAddresses_ID = ShippingOrders.AddressID
+                                        INNER JOIN Versions ON ShippingOrders.Versions = Versions.Version_ID
+                                        INNER JOIN db1.ShipVia ON ShippingOrders.ShipVia = ShipVia.ShipViaName
+                                    WHERE ShippingOrders.JobInformationID = $job(Number)
+                                        AND ShippingOrders.Hidden = 0
+                                        AND ShipDate = '$date'
+                                        AND Addresses.DistributionType IN ($disttype)" {
+                                            set record "[subst $vals] Version"
+                                            chan puts $fd [::csv::join $record]
+                                        }
+                chan close $fd
+            }
+        } else {
+            # This is for single import files per distribution type (read: one date only)
+            set fName [ea::tools::formatFileName]-[join $disttype ""]-$hasData
             set fd [open [file join $job(JobSaveFileLocation) $fName.csv] w]
             # Write the headers
             chan puts $fd [::csv::join "$hdr OrderType"]
@@ -406,7 +444,29 @@ proc ea::code::export::toProcessShipper {args} {
                                         chan puts $fd [::csv::join $record]
                                     }
             chan close $fd
+            }
         }
-    }
-    catch {$job(db,Name) eval "DETACH 'db1'"}
+        catch {$job(db,Name) eval "DETACH 'db1'"}
+        #if {1 <= $hasData} {
+        #    set fName [ea::tools::formatFileName]-[join $disttype ""]
+        #    set fd [open [file join $job(JobSaveFileLocation) $fName.csv] w]
+        #    # Write the headers
+        #    chan puts $fd [::csv::join "$hdr OrderType"]
+        #    
+        #    $job(db,Name) eval "SELECT [join $cols ,]
+        #                        FROM ShippingOrders
+        #                            INNER JOIN Addresses ON Addresses.SysAddresses_ID = ShippingOrders.AddressID
+        #                            INNER JOIN Versions ON ShippingOrders.Versions = Versions.Version_ID
+        #                            INNER JOIN db1.ShipVia ON ShippingOrders.ShipVia = ShipVia.ShipViaName
+        #                        WHERE ShippingOrders.JobInformationID = $job(Number)
+        #                            AND ShippingOrders.Hidden = 0
+        #                            AND Addresses.DistributionType IN ($disttype)" {
+        #                                set record "[subst $vals] Version"
+        #                                #${log}::debug [::csv::join $record]
+        #                                chan puts $fd [::csv::join $record]
+        #                            }
+        #    chan close $fd
+        #}
+    #{}
+    #catch {$job(db,Name) eval "DETACH 'db1'"}
 } ;# ea::code::export::toProcessShipper

@@ -94,14 +94,14 @@ proc eAssist_db::initContainers {type wid} {
     #
     #***
     global log packagingSetup
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
-    switch -- $type {
+    switch -nocase $type {
         packages    {set items [eAssist_db::dbSelectQuery -columnNames Package -table Packages]}
         containers  {set items [eAssist_db::dbSelectQuery -columnNames Container -table Containers]}
+		default 	{${log}::debug [info level 0] Invalid type: $type, Must be one of: packages, containers; return}
     }
 
-    
     # get rid of all data before inserting new data ...
     $wid delete 0 end
     
@@ -112,7 +112,7 @@ proc eAssist_db::initContainers {type wid} {
     }
     
     
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# eAssist_db::initContainers
 
 
