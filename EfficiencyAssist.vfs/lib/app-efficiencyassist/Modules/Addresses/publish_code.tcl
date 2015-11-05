@@ -15,10 +15,9 @@ proc ea::code::publish::Publish {args} {
     # NOTES
     #   Master proc for publishing
     #   1. Populates the Published table
-    #   2. Exports Planner and Process Shipper Files into Job's Folder
+    #   2. Exports Planner and Process Shipper Files into Job's Folder and Smartlink UPS Files folder
     #   3. Creates Excel Report into Job's Folder
-    #   4. Copies Process Shipper files into </Smartlinc UPS> Files folder (Based on setup values)
-    #   5. Issues any email events
+    #   4. Issues any email events
     #***
     global log
     
@@ -34,15 +33,11 @@ proc ea::code::publish::Publish {args} {
     # 3. Create Excel Report
     ea::code::reports::writeExcel $rev
     
-    # 4. Copy 'import' files into network shared folder
-    
-    # 5. email events
-    
+    # 4. email events
 
-    
 } ;# ea::code::publish::Publish
 
-proc ea::db::publish::addToPublishedTbl {{PublishNote ""} {
+proc ea::db::publish::addToPublishedTbl {{PublishNote ""}} {
     #****if* addToPublishedTbl/ea::code::publish
     # CREATION DATE
     #   11/04/2015 (Wednesday Nov 04)
@@ -64,7 +59,7 @@ proc ea::db::publish::addToPublishedTbl {{PublishNote ""} {
     
     # Get max published id; if blank we start at 1, if not we increment by 1
     set publish_id [join [$job(db,Name) eval "SELECT max(PublishedRev) from Published
-                        WHERE JobInformationID = '$job(Number)'"]]
+                                                WHERE JobInformationID = '$job(Number)'"]]
     
     if {$publish_id ne ""} {
         incr publish_id
@@ -73,8 +68,8 @@ proc ea::db::publish::addToPublishedTbl {{PublishNote ""} {
     }
     
     # Insert into Published table
-    $job(db,Name) eval "INSERT INTO Published (Notes_ID, JobInformationID, PublishedRev)
-                            VALUES ($id, '$job(Number)', $publish_id"
+    $job(db,Name) eval "INSERT INTO Published (NotesID, JobInformationID, PublishedRev)
+                            VALUES ($id, '$job(Number)', $publish_id)"
     
 
     return $publish_id

@@ -292,7 +292,8 @@ proc importFiles::initMenu {} {
         $mb.file.job add command -label [mc "Publish"] -command {${log}::debug Publishing ...}
     $mb.file add separator
     $mb.file add command -label [mc "Import File"] -command {importFiles::fileImportGUI}
-    $mb.file add command -label [mc "Export File"] -command {export::DataToExport} ;#-state disabled
+    $mb.file add command -label [mc "Publish"] -command {ea::code::publish::Publish}
+    #$mb.file add command -label [mc "Export File"] -command {export::DataToExport} ;#-state disabled
     $mb.file add separator
     menu $mb.file.reports
     $mb.file add cascade -label [mc "Reports"] -menu $mb.file.reports
