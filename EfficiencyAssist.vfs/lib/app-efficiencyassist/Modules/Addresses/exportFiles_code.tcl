@@ -401,14 +401,16 @@ proc ea::code::export::toProcessShipper {args} {
                                             AND Addresses.DistributionType = $disttype"]
         
         #set shipdates [$job(db,Name) eval "SELECT distinct(ShipDate) FROM ShippingOrders WHERE JobInformationID = '$job(Number)'"]
-        ${log}::debug hasData: $hasData
+        #${log}::debug hasData: $hasData
         if {2 <= [llength $hasData]} {
             ${log}::debug Multiple ship dates! values: $hasData
             foreach date $hasData {
                 set fName [ea::tools::formatFileName]-[join $disttype ""]-$date
                 set fd [open [file join $job(JobSaveFileLocation) $fName.csv] w]
+                set fd1 [open "\\\\fileprint/Mailing/Distribution/SMARTLINK UPS FILES/$fName.csv" w] 
                 # Write the headers
                 chan puts $fd [::csv::join "$hdr OrderType"]
+                chan puts $fd1 [::csv::join "$hdr OrderType"]
                 
                 $job(db,Name) eval "SELECT [join $cols ,]
                                     FROM ShippingOrders
@@ -421,15 +423,19 @@ proc ea::code::export::toProcessShipper {args} {
                                         AND Addresses.DistributionType IN ($disttype)" {
                                             set record "[subst $vals] Version"
                                             chan puts $fd [::csv::join $record]
+                                            chan puts $fd1 [::csv::join $record]
                                         }
                 chan close $fd
-            }
+                chan close $fd1
+            }           
         } else {
             # This is for single import files per distribution type (read: one date only)
             set fName [ea::tools::formatFileName]-[join $disttype ""]-$hasData
             set fd [open [file join $job(JobSaveFileLocation) $fName.csv] w]
+            set fd1 [open "\\\\fileprint/Mailing/Distribution/SMARTLINK UPS FILES/$fName.csv" w] 
             # Write the headers
             chan puts $fd [::csv::join "$hdr OrderType"]
+            chan puts $fd1 [::csv::join "$hdr OrderType"]
             
             $job(db,Name) eval "SELECT [join $cols ,]
                                 FROM ShippingOrders
@@ -442,8 +448,10 @@ proc ea::code::export::toProcessShipper {args} {
                                         set record "[subst $vals] Version"
                                         #${log}::debug [::csv::join $record]
                                         chan puts $fd [::csv::join $record]
+                                        chan puts $fd1 [::csv::join $record]
                                     }
             chan close $fd
+            chan close $fd1
             }
         }
         catch {$job(db,Name) eval "DETACH 'db1'"}
