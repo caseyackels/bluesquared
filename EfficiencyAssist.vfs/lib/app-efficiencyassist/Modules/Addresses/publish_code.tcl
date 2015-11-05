@@ -23,7 +23,7 @@ proc ea::code::publish::Publish {args} {
     global log
     
     # 1.0 Populate Published table in the title database
-    ea::db::publish::addToPublishedTbl
+    set rev [ea::db::publish::addToPublishedTbl]
     
     # 2.0 Export Planner file
     ea::code::export::toPlanner
@@ -32,7 +32,7 @@ proc ea::code::publish::Publish {args} {
     ea::code::export::toProcessShipper
     
     # 3. Create Excel Report
-    ea::code::reports::writeExcel
+    ea::code::reports::writeExcel $rev
     
     # 4. Copy 'import' files into network shared folder
     
@@ -55,6 +55,7 @@ proc ea::db::publish::addToPublishedTbl {{PublishNote ""} {
     #   
     # NOTES
     #   ea::db::publish::addToPublishedTbl ?<notes>?
+    #   Returns the Publish ID
     #   
     #***
     global log job
@@ -76,5 +77,6 @@ proc ea::db::publish::addToPublishedTbl {{PublishNote ""} {
                             VALUES ($id, '$job(Number)', $publish_id"
     
 
+    return $publish_id
     
 } ;# ea::code::publish::addToPublishedTbl

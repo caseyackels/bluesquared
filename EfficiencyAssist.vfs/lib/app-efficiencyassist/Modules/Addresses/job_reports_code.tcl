@@ -548,7 +548,7 @@ proc ea::code::reports::writeExcel {args} {
     #	(c) 2015 Casey Ackels
     #   
     # NOTES
-    #   
+    #   args - revision number
     #   
     #***
     global log job
@@ -559,6 +559,7 @@ proc ea::code::reports::writeExcel {args} {
     set worksheet_id [Excel::GetWorksheetIdByIndex $workbook_id 1]
     
     set dist_blacklist [ea::db::getDistSetup]
+    # These are the Columns of data that we want to put on the report
     set col [list {Company DistributionType PackageType ShipVia Notes Quantity ShipDate}]
     
     if {[info exists cols]} {unset cols}
