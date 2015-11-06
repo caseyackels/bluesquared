@@ -450,7 +450,7 @@ proc eAssistHelper::insValuesToTableCells {type tbl txtVar cells} {
 			# Create list that only has row numbers, then pass it to job::db::write once. Within job::db::write, we have a db statement using 'IN'.
 			set row [lindex [split $val ,] 0]
 			lappend rowList $row
-			lappend idList '[ea::db::getRecord $row]'
+			lappend idList '[ea::db::getRecord -addressID $row]'
 			
 		}
 		
@@ -856,7 +856,7 @@ proc ea::code::bm::writeShipment {{mode normal} args} {
 #													INNER JOIN ShippingOrders on ShippingOrders.AddressID = Addresses.SysAddresses_ID
 #													WHERE Company LIKE '%$shipOrder(Company)%'
 #													AND ShippingOrders.Versions = $shipOrder(Versions)"]
-	set title(shipOrder_id) [$job(db,Name) eval "SELECT SysAddresses_ID FROM Addresses
+	set title(SysAddresses_ID) [$job(db,Name) eval "SELECT SysAddresses_ID FROM Addresses
 													WHERE Company LIKE '%$shipOrder(Company)%'"]
 	
 	set versExistsOnJob [$job(db,Name) eval "SELECT DISTINCT SysAddresses_ID FROM Addresses
@@ -865,9 +865,9 @@ proc ea::code::bm::writeShipment {{mode normal} args} {
 													WHERE Company LIKE '%$shipOrder(Company)%'
 													AND ShippingOrders.Versions = $program(id,Versions)"]			
 
-    if {$title(shipOrder_id) ne ""} {
+    if {$title(SysAddresses_ID) ne ""} {
         # Entry was in the database, check to see if it exists as a shippingorder on the current job.
-        set existsOnJob [$job(db,Name) eval "SELECT AddressID FROM ShippingOrders WHERE JobInformationID = '$job(Number)' AND AddressID = '$title(shipOrder_id)'"]
+        set existsOnJob [$job(db,Name) eval "SELECT AddressID FROM ShippingOrders WHERE JobInformationID = '$job(Number)' AND AddressID = '$title(SysAddresses_ID)'"]
         ${log}::debug Entry Exists, listed in ShippingOrders? $existsOnJob
         
 		
@@ -875,13 +875,13 @@ proc ea::code::bm::writeShipment {{mode normal} args} {
             # Insert record into the shipping table
 			${log}::debug Entry doesn't exist on the job, adding....
             $job(db,Name) eval "INSERT INTO ShippingOrders (AddressID, JobInformationID, Hidden, Versions, Quantity, ShipVia)
-									VALUES ('$title(shipOrder_id)', '$job(Number)', $hidden, $program(id,Versions), $shipOrder(Quantity), '$shipOrder(ShipVia)')"
+									VALUES ('$title(SysAddresses_ID)', '$job(Number)', $hidden, $program(id,Versions), $shipOrder(Quantity), '$shipOrder(ShipVia)')"
         
 		} elseif {$versExistsOnJob eq ""} {
 			${log}::debug Entry exists on the job, but not for the version.
 			# New Version, insert record into the shipping table
             $job(db,Name) eval "INSERT INTO ShippingOrders (AddressID, JobInformationID, Hidden, Versions, Quantity, ShipVia)
-									VALUES ('$title(shipOrder_id)', '$job(Number)', $hidden, $program(id,Versions), $shipOrder(Quantity), '$shipOrder(ShipVia)')"
+									VALUES ('$title(SysAddresses_ID', '$job(Number)', $hidden, $program(id,Versions), $shipOrder(Quantity), '$shipOrder(ShipVia)')"
 		
 		} else {
 			# Exists on the Job, and Version exists ...

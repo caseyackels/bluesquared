@@ -181,10 +181,10 @@ proc ea::code::samples::writeToDB {widTbl} {
         ea::code::bm::writeShipment hidden
   
         # Insert data into tbl:InternalSamples
-        if {[info exists title(shipOrder_id)] && $title(shipOrder_id) ne ""} {
+        if {[info exists title(SysAddresses_ID)] && $title(SysAddresses_ID) ne ""} {
             foreach entry $record {
                 #${log}::debug  "ShippingOrders_ID $title(shipOrder_id) [lrange $entry $x $x] $notes"
-                set id $title(shipOrder_id)
+                set id $title(SysAddresses_ID)
             }
         } elseif {[info exists title(db_address,lastid)] && $title(db_address,lastid) ne ""} {
             foreach entry $record {

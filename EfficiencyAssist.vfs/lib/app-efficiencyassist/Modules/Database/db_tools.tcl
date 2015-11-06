@@ -103,7 +103,7 @@ proc ea::db::populateTablelist {args} {
                             LEFT OUTER JOIN Versions
                                 ON ShippingOrders.Versions = Versions.Version_ID
                             WHERE ShippingOrders.JobInformationID in ('$job(Number)')
-							AND ShippingOrders.AddressID = '$db_id'
+							AND ShippingOrders.ShippingOrder_ID = '$db_id'
                             AND Addresses.SysActive = 1
 							AND ShippingOrders.Hidden = 0" {
                                 # Removal of the old row happens if we're editing (this occurs in the if-else statement above)
@@ -226,51 +226,61 @@ proc ea::db::updateSingleAddressToDB {args} {
 	# Does the version exist in the db?
 	set versionExists [$job(db,Name) eval "SELECT VersionName FROM Versions WHERE VersionName = '$shipOrder(Versions)'"]
 	
-	if {$versionExists == ""} {
-		# We have a new entry, insert and retrieve the id
+	# We have a new entry, insert and retrieve the id
+	if {$versionExists == ""} {	
 		$job(db,Name) eval "INSERT INTO Versions (VersionName) VALUES ('$shipOrder(Versions)')"
 		set shipOrder(Versions) [$job(db,Name) eval "SELECT max(Version_ID) from Versions"]
 	} else {
+		# Convert to ID instead of name
 		set shipOrder(Versions) [$job(db,Name) eval "SELECT Version_ID FROM Versions WHERE VersionName = '$shipOrder(Versions)'"]
 	}
 	
 
 	# loop through the values that are for the Addresses table, then issue an update statement
-	#unset address_update
 	foreach val $headerParent(headerList,consignee) {
 		lappend address_update "$val='$shipOrder($val)'"
 	}
 	
-
-	
 	# Update Addresses Table
 	#${log}::debug $job(db,Name) eval UPDATE Addresses SET [join $address_update ,] WHERE SysAddresses_ID = '$shipOrder(id)'
-	$job(db,Name) eval "UPDATE Addresses SET [join $address_update ,] WHERE SysAddresses_ID = '$title(shipOrder_id)'"
+	$job(db,Name) eval "UPDATE Addresses SET [join $address_update ,] WHERE SysAddresses_ID = 'title(SysAddresses_ID)'"
 	
 	
 	# Delete entries in the ShipOrder table, and re-add them.
 	#${log}::debug $job(db,Name) eval DELETE FROM ShippingOrders WHERE AddressID = '$title(shipOrder_id)' AND Version = $shipOrder(Versions) AND JobInformationID = '$job(Number)'
-	$job(db,Name) eval "DELETE FROM ShippingOrders WHERE AddressID = '$title(shipOrder_id)' AND Versions = $shipOrder(Versions) AND JobInformationID = '$job(Number)'"
+	#${log}::debug Deleting $title(shipOrder_id)
+	$job(db,Name) eval "DELETE FROM ShippingOrders WHERE ShippingOrder_ID = $title(shipOrder_id) AND JobInformationID = '$job(Number)'"
 	
 	# Add ShippingOrder back
 	# loop through the values that are for the ShippingOrders table, then issue an update statement
 	foreach val $headerParent(headerList,shippingorder) {
 		#lappend shiporder_update "$val='$shipOrder($val)'"
 		lappend shiporder_update "'$shipOrder($val)'"
+		
+		# Versions is an ID; don't include single quotes
+		if {$val eq "Versions"} {
+			lappend shiporder_getid "$val = $shipOrder($val)"
+		} else {
+			lappend shiporder_getid "$val = '$shipOrder($val)'"
+		}
+		
 	}
 	
+	#${log}::debug Reinserting the old $title(shipOrder_id)
 	$job(db,Name) eval "INSERT INTO ShippingOrders (AddressID, JobInformationID, Hidden, [join $headerParent(headerList,shippingorder) ,])
-							VALUES ('$title(shipOrder_id)', '$job(Number)', $hidden, [join $shiporder_update ,])"
-	#$job(db,Name) eval "UPDATE ShippingOrders SET [join $shiporder_update ,] WHERE AddressID = '$title(shipOrder_id)' AND JobInformationID = '$job(Number)'"
+							VALUES ('$title(SysAddresses_ID)', '$job(Number)', $hidden, [join $shiporder_update ,])"
 	
-
+	# Set the title(shipOrder_id) var again, after we re-enter the record
+	set title(shipOrder_id) [$job(db,Name) eval "SELECT ShippingOrder_ID FROM ShippingOrders
+								WHERE [join $shiporder_getid " AND "]"]
+	#${log}::debug New id: $title(shipOrder_id)
 	# clean up
 	unset address_update
 	unset shiporder_update
 	
 } ;# ea::db::updateSingleAddressToDB
 
-proc ea::db::getRecord {row_id} {
+proc ea::db::getRecord {method row_id} {
 	#****if* getRecord/ea::db
 	# CREATION DATE
 	#   08/27/2015 (Thursday Aug 27)
@@ -282,12 +292,19 @@ proc ea::db::getRecord {row_id} {
 	#	(c) 2015 Casey Ackels
 	#   
 	# NOTES
-	#   Returns the SysAddresses_ID based on row_id (tablelist)
+	#   Returns the SysAddresses_ID, or ShippingOrder_ID based on row_id (tablelist)
 	#   
 	#***
 	global log files headerParent job
 	# testing
 	#set row_id [$files(tab3f2).tbl curselection]
+	
+	if {$row_id eq ""} {${log}::debug [info level 0] Row_ID was not passed, aborting.; return}
+	switch -- $method {
+		-addressID			{set cols Addresses.SysAddresses_ID}
+		-shippingOrderID	{set cols ShippingOrders.ShippingOrder_ID}
+		default				{${log}::debug [info level 0] Parameter $method is unknown, aborting.\nMust be one of: -addressId or -shippingOrderID; return}
+	}
 	
 	# Get list of available headers; this could change based on data in the db. So we must figure out what is active, and compare that to the headerParent array
 	set colCount [$files(tab3f2).tbl columncount]
@@ -306,26 +323,41 @@ proc ea::db::getRecord {row_id} {
 	}
 	
 	# Compare above results against columns in the address table (headerParent() array)
-	# Ignore the Versions column
 	foreach hdr $hdr_list {
-		if {[lsearch $headerParent(headerList,consignee) $hdr] != -1 && [string match -nocase *vers* $hdr] == 0} {
+		#if {[lsearch $headerParent(headerList,consignee) $hdr] != -1 && [string match -nocase *vers* $hdr] == 0} {}
+		if {[lsearch $headerParent(headerList,consignee) $hdr] != -1} {
 			lappend hdr_list_final $hdr
 		}
 	}
 	
+	# append the Versions column
+	lappend hdr_list_final Versions
+	
 	# Now we can grab the data from the tablelist. Guard against nulls.
 	foreach hdr $hdr_list_final {
-			lappend data_ "ifnull($hdr,'')='[$files(tab3f2).tbl getcells $row_id,$hdr]'"
+			if {[string match -nocase versions $hdr]} {
+				set vers_id [lindex [job::db::getVersion -name "[$files(tab3f2).tbl getcells $row_id,$hdr]" -active 1] 0]
+				#${log}::debug Version ID: $vers_id
+				set hdr "ShippingOrders.Versions"
+				lappend data_ "ifnull($hdr,'')=$vers_id"
+			} else {
+				lappend data_ "ifnull($hdr,'')='[$files(tab3f2).tbl getcells $row_id,$hdr]'"
+			}
 	}
 	
 	#${log}::debug [info level 0] data: $data_
 	unset hdr_list
 	unset hdr_gui
 	unset hdr_list_final
+	
+	return [$job(db,Name) eval "SELECT $cols
+							FROM Addresses
+							INNER JOIN ShippingOrders on ShippingOrders.AddressID = Addresses.SysAddresses_ID
+							WHERE [join $data_ " AND "]"]
 		
-	return [$job(db,Name) eval "SELECT SysAddresses_ID FROM Addresses WHERE [join $data_ " AND "]"]
+	#return [$job(db,Name) eval "SELECT SysAddresses_ID FROM Addresses WHERE [join $data_ " AND "]"]
 
-} ;# ea::db::getRecord [$files(tab3f2).tbl curselection]
+} ;# ea::db::getRecord -addressID [$files(tab3f2).tbl curselection]
 
 
 proc ea::db::populateShipOrder {db_id} {
@@ -364,18 +396,31 @@ proc ea::db::populateShipOrder {db_id} {
 	
 	#${log}::debug hdr_list: $hdr_list
 	
+#	$job(db,Name) eval "SELECT [join $hdr_list ,] FROM ShippingOrders
+#                            INNER JOIN Addresses
+#                                ON ShippingOrders.AddressID = Addresses.SysAddresses_ID
+#                            LEFT OUTER JOIN Versions
+#                                ON ShippingOrders.Versions = Versions.Version_ID
+#                            WHERE ShippingOrders.JobInformationID in ('$job(Number)')
+#                            AND Addresses.SysAddresses_ID = '$db_id'" {
+#								foreach item [array names shipOrder] {
+#									set shipOrder($item) [subst $$item]
+#								}
+#							}
 	$job(db,Name) eval "SELECT [join $hdr_list ,] FROM ShippingOrders
                             INNER JOIN Addresses
                                 ON ShippingOrders.AddressID = Addresses.SysAddresses_ID
                             LEFT OUTER JOIN Versions
                                 ON ShippingOrders.Versions = Versions.Version_ID
                             WHERE ShippingOrders.JobInformationID in ('$job(Number)')
-                            AND Addresses.SysAddresses_ID = '$db_id'" {
+                            AND ShippingOrder_ID = '$db_id'" {
 								foreach item [array names shipOrder] {
 									set shipOrder($item) [subst $$item]
 								}
 							}
+							
 	set title(shipOrder_id) $db_id
+	set title(SysAddresses_ID) [$job(db,Name) eval "SELECT AddressID FROM ShippingOrders WHERE ShippingOrder_ID = $title(shipOrder_id)"]
 	
 	# Convert date into friendly form
 	set shipOrder(ShipDate) [ea::date::formatDate -db -std $shipOrder(ShipDate)]
@@ -405,8 +450,8 @@ proc ea::db::populateShipOrderCombining {widTbl} {
 	global log shipOrder title job
 
 	foreach row [lsort [$widTbl curselection]] {
-				${log}::debug Record Num: [ea::db::getRecord $row]
-				lappend id '[ea::db::getRecord $row]'
+				${log}::debug Record Num: [ea::db::getRecord -addressID $row]
+				lappend id '[ea::db::getRecord -addressID $row]'
 			}
 			
 	# Retrieve the total quantity

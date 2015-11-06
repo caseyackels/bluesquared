@@ -287,6 +287,7 @@ proc eAssistHelper::saveDest {modifier widRow tblPath} {
         }
         -edit       {
             		## -- We are updating a record
+                    ## # Delete ShippingOrder record first; then re-add it.
                     ea::db::updateSingleAddressToDB
                     
                     # Guard against the user selecting multiple rows when editing...
@@ -480,7 +481,8 @@ proc eAssistHelper::shippingOrder {widTbl modifier} {
             
         }
         -edit       {
-            ea::db::populateShipOrder [ea::db::getRecord [$widTbl curselection]]
+            #ea::db::populateShipOrder [ea::db::getRecord -addressID [$widTbl curselection]]
+            ea::db::populateShipOrder [ea::db::getRecord -shippingOrderID [$widTbl curselection]]
             $f3.ok configure -command "eAssistHelper::saveDest -edit [$widTbl curselection] $widTbl; destroy .dest"
         }
         -combine    {
