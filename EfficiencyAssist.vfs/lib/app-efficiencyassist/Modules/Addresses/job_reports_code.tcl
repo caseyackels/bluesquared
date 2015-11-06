@@ -861,22 +861,21 @@ proc ea::code::reports::writeExcel {args} {
 
     # Update the spreadsheet
     Excel::ScreenUpdate $excel_id on
-    # Set Page setup
-    # Orient: Landscape
+    ## ** Page Setup
     Excel::SetWorksheetOrientation $worksheet_id xlLandscape
-    # Enable grid lines
     ea::code::reports::SetGridLines $worksheet_id true
 
     # Autosize columns
     Excel::SetColumnsWidth $worksheet_id 1 8
     
     ea::code::reports::SetPaperSize $worksheet_id xlPaperLegal
+    # These settings are what Excel considers 'Narrow' margins
     ea::code::reports::SetMargins $worksheet_id .25 .25 .75 .75 .3 .3
     
-    # Done editing, setting preferences. Save the file
+    ## ** Preferences
     Excel::SaveAs $workbook_id [file join $job(JobSaveFileLocation) [ea::tools::formatFileName]-rev_$args]
-    #Excel::SetWorksheetFitToPages $worksheet_id 1 ""
-    #ea::code::reports::SetWorksheetFitToPages_width $worksheet_id
+    Excel::SetWorksheetFitToPages $worksheet_id 1 0
+
 } ;# ea::code::reports::writeExcel
 
 proc ea::code::reports::SetGridLines {worksheetId bool} {
@@ -902,11 +901,40 @@ proc ea::code::reports::SetGridLines {worksheetId bool} {
 } ;# ea::code::reports::SetGridLines
 
 proc ea::code::reports::SetPaperSize { worksheetId paperSize} {
+    #****if* SetPaperSize/ea::code::reports
+    # CREATION DATE
+    #   11/05/2015 (Thursday Nov 05)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   
+    #   
+    #***
     set pageSetup [$worksheetId PageSetup]
     $pageSetup PaperSize [Excel GetEnum $paperSize]
-}
+    
+} ;# ea::code::reports::SetPaperSize 
 
 proc ea::code::reports::SetMargins {worksheetId lmargin rmargin tmargin bmargin hmargin fmargin} {
+    #****if* SetMargins/ea::code::reports
+    # CREATION DATE
+    #   11/05/2015 (Thursday Nov 05)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   
+    #   
+    #***
     set pageSetup [$worksheetId PageSetup]
     $pageSetup LeftMargin [Cawt::InchesToPoints $lmargin]
     $pageSetup RightMargin [Cawt::InchesToPoints $rmargin]
@@ -914,14 +942,7 @@ proc ea::code::reports::SetMargins {worksheetId lmargin rmargin tmargin bmargin 
     $pageSetup BottomMargin [Cawt::InchesToPoints $bmargin]
     $pageSetup FooterMargin [Cawt::InchesToPoints $fmargin]
     
-}
-
-proc ea::code::reports::SetWorksheetFitToPages_width {worksheetId} {
-    set pageSetup [$worksheetId PageSetup]
-    $pageSetup FitToPagesWide 1
-    #$pageSetup FitToPagesTall 0
-    
-}
+} ;# ea::code::reports::SetMargins 
 
     #With ActiveSheet.PageSetup
     #    .LeftHeader = ""

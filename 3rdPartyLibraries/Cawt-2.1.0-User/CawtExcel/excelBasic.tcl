@@ -1809,10 +1809,30 @@ namespace eval Excel {
         #
         # See also: AddWorksheet
 
+        #set pageSetup [$worksheetId PageSetup]
+        #$pageSetup Zoom [Cawt TclBool false]
+        #$pageSetup FitToPagesWide $wide
+        #$pageSetup FitToPagesTall $tall
+        #Cawt Destroy $pageSetup
+        
+        if { $wide < 0 || $tall < 0 } {
+            error "SetWorksheetFitToPages: Number of pages must be greater or equal to 0."
+        }
+        if { $wide == 0 } {
+            set wideVar [Cawt TclBool false]
+            } else {
+                set wideVar [expr int($wide)]
+        }
+        if { $tall == 0 } {
+            set tallVar [Cawt TclBool false]
+            } else {
+                set tallVar [expr int($tall)]
+        }
+        
         set pageSetup [$worksheetId PageSetup]
         $pageSetup Zoom [Cawt TclBool false]
-        $pageSetup FitToPagesWide $wide
-        $pageSetup FitToPagesTall $tall
+        $pageSetup FitToPagesWide $wideVar
+        $pageSetup FitToPagesTall $tallVar
         Cawt Destroy $pageSetup
     }
 
