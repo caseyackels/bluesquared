@@ -162,6 +162,64 @@ proc AutoComplete::AutoCompleteComboBox {path key} {
     
 } ;# AutoComplete::AutoCompleteComboBox
 
+proc AutoComplete::AutoCompleteComboBox_test {path key} {
+    #****f* AutoCompleteComboBox/AutoComplete
+    # CREATION DATE
+    #   11/07/2014 (Friday Nov 07)
+    #
+    # AUTHOR
+    #	Torsten Berg
+    #
+    # COPYRIGHT
+    #	(c) Torsten Berg
+    #   
+    #
+    # SYNOPSIS
+    #   Autocomplete for the ttk::combobox
+    #   AutoComplete::AutoCompleteComboBox path key 
+    #
+    # FUNCTION
+    #   Inserts matched values into the combobox. If you keep typing, it will replace the current value with the next one that matches.
+    #
+    #   
+    #   
+    # CHILDREN
+    #	N/A
+    #   
+    # PARENTS
+    #   
+    #   
+    # NOTES
+    #   From http://wiki.tcl.tk/15780
+    #   
+    # SEE ALSO
+    #   
+    #   
+    #***
+    global log
+    #if {[string length $key] > 1 && [string tolower $key] != $key} {
+    #        return
+    #    }
+    puts "starting autocomplete ... $key"
+    
+    set text [string map [list {[} {\[} {]} {\]}] [$path get]]
+    #puts "ac: $text"
+    if {[string equal $text ""]} {return}
+    
+    set values [$path cget -values]
+    
+    #puts "ac: values: $values"
+    set x [lsearch -nocase $values $key*]
+    if {$x < 0} {
+        return
+    } else {
+        #set index [$path index insert]
+        puts "carrier: [lindex $values $x]"
+        $path set [lindex $values $x]
+    }
+   
+} ;# AutoComplete::AutoCompleteComboBox
+
 
 ###
 ### -- This is useful if we want to search on ShipViaCode, and return the name of the carrier.

@@ -423,12 +423,13 @@ proc eAssistHelper::shippingOrder {widTbl modifier} {
                                                     # Versions info
                                                     if {[lindex $tbl 0] ne "Versions"} {
                                                         set values [db eval "SELECT [lindex $tbl 1] FROM [lindex $tbl 0]"]
-                                                        set cmd [list -textvariable shipOrder($dbColName) -width $widMaxWidth -values $values]
+                                                        set cmd [list -textvariable shipOrder($dbColName) -width $widMaxWidth -values $values -state readonly]
 
                                                     } else {
                                                         set values [$job(db,Name) eval "SELECT VersionName FROM VERSIONS WHERE VersionActive = 1"]
-                                                        set cmd [list -textvariable shipOrder($dbColName) -width $widMaxWidth -values $values]
+                                                        set cmd [list -textvariable shipOrder($dbColName) -width $widMaxWidth -values $values -state readonly]
                                                     }
+                                                    
                                                     
                                                 }
                                             default         {
@@ -437,6 +438,8 @@ proc eAssistHelper::shippingOrder {widTbl modifier} {
                                     }
                                     set widgetPath($dbColName) $widPath.data$row
                                     
+                                    
+                                    
                                     grid [$widWidget $widPath.data$row {*}$cmd] -column $dataCol -row $row -sticky ew
                                     grid columnconfigure $widPath $dataCol -weight 2
                                                     
@@ -444,6 +447,8 @@ proc eAssistHelper::shippingOrder {widTbl modifier} {
                                 }
                                 incr textCol
                                 incr dataCol
+                                
+                                
     }
 
     # Check to see if we're using all of the created frames, if not unpack it.
@@ -456,6 +461,8 @@ proc eAssistHelper::shippingOrder {widTbl modifier} {
     # Create intelligence in the Company widget
     set companyList [db eval "SELECT MasterAddr_Company FROM MasterAddresses WHERE MasterAddr_Internal = 1"]
     $widgetPath(Company) configure -validate all -validatecommand [list AutoComplete::AutoComplete %W %d %v %P $companyList]
+    #$widgetPath(ShipVia) configure -validate all -validatecommand [list AutoComplete::AutoComplete %W %d %v %P [$widgetPath(ShipVia) cget -values]]
+    typeahead $widgetPath(ShipVia)
     
     tooltip::tooltip $widgetPath(ShipDate) [mc "Must use m/d/yyyy format"]
     tooltip::tooltip $widgetPath(ArriveDate) [mc "Must use m/d/yyyy format"]

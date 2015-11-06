@@ -16,6 +16,286 @@
 ## - Overview
 # Overview
 
+proc typeahead {win} {
+	global log
+		#bind .di <Key> {puts "You pressed the key called \"%K\""}
+	bind $win <Key> {
+		switch -- %k {
+			8	{
+				# Backspace - BackSpace
+				${log}::debug backspace: $word [string range $word 0 end-1]
+				set word [string range $word 0 end-1]
+			}
+			9	{
+				# Tab - Tab
+			}
+			13	{
+				# Enter - Return (keypad)
+			}
+			16	{
+				# Left Shift - Shift_L
+			}
+			17	{
+				# Left Control - Control_L
+				# Right Control - Control_R
+			}
+			18	{
+				# Left Alt - Alt_L
+				# Right Alt - Alt_R
+			}
+			20	{
+				# Caps Lock - Caps_Lock
+			}
+			27	{
+				# Esc - Escape
+			}
+			32	{
+				# Space
+				append word " "
+			}
+			33	{
+				# Page Up - Prior
+			}
+			34	{
+				# Page Down - Next
+			}
+			35	{
+				# End
+			}
+			36	{
+				# Home
+			}
+			37	{
+				# Left Arrow - Left
+			}
+			38	{
+				# Up Arrow - Up
+			}
+			39	{
+				# Right Arrow - Right
+			}
+			40	{
+				# Down Arrow - Down
+			}
+			45	{
+				# Insert
+			}
+			46	{
+				# Delete
+			}
+			49	{
+				# Exclamation - exclam
+				# Number 1 - 1
+				if {%K == 1} {set x 1} else {set x !}
+				append word $x
+			}
+			50	{
+				# @ - at
+				# Number 2 - 2
+				if {%K == 2} {set x 2} else {set x @}
+				append word $x
+			}
+			51	{
+				# # - numbersign
+				# Number 3 - 3
+				append word $x
+			}
+			52	{
+				# $ - dollar
+				# Number 4 - 4
+				if {%K == 4} {set x 4} else {set x $}
+				append word $x
+			}
+			53	{
+				# % - percent
+				# Number 5 - 5
+				if {%K == 5} {set x 5} else {set x \%}
+				append word $x
+			}
+			54	{
+				# (shift+6) - asciicircum
+				# Number 6 - 6
+				if {%K == 6} {set x 6} else {set x \^}
+				append word $x
+			}
+			55	{
+				# & - ampersand
+				# Number 7 - 7
+				if {%K == 7} {set x 7} else {set x &}
+				append word $x
+			}
+			56	{
+				# * - asterisk
+				# Number 8 - 8
+				if {%K == 8} {set x 8} else {set x *}
+				append word $x
+			}
+			57	{
+				#  parenleft
+				# Number 9 - 9
+				#if {%K == 9} {set x 9} else {set x }
+				append word $x
+			}
+			58 {
+				#  parenright
+				# Number 0 - 0
+				#if {%K == 0} {set x 0} else {set x }
+				append word $x
+			}
+			96	{
+				# (keypad) 0
+				append word 0
+			}
+			97	{
+				# (keypad) 1
+				append word 1
+			}
+			98	{
+				# (keypad) 2
+				append word 2
+			}
+			99	{
+				# (keypad) 3
+				append word 3
+			}
+			100	{
+				# (keypad) 4
+				append word 4
+			}
+			101	{
+				# (keypad 5)
+				append word 5
+			}
+			102	{
+				# (keypad 6)
+				append word 6
+			}
+			103	{
+				# (keypad) 7
+				append word 7
+			}
+			104	{
+				# (keypad) 8
+				append word 8
+			}
+			105	{
+				# (keypad) 9
+				append word 9
+			}
+			106	{
+				# * - asterisk (keypad)
+			}
+			107	{
+				# + - plus (keypad)
+			}
+			109	{
+				# - - minus (keypad)
+			}
+			110	{
+				# . - period (keypad)
+				append word .
+			}
+			111	{
+				# / - slash (keypad)
+			}
+			187	{
+				# + - plus
+				# = - equal
+			}
+			189	{
+				# _ - underscore
+				# (-) - minus
+				if {"%K eq "minus"} {set x -} else {set x _}
+				append word $x
+			}
+			112	{
+				# F1
+			}
+			113 {
+				# F2
+			}
+			114 {
+				# F3
+			}
+			115 {
+				# F4
+			}
+			116	{
+				# F5
+			}
+			117	{
+				# F6
+			}
+			118	{
+				# F7
+			}
+			119	{
+				# F8
+			}
+			120	{
+				# F9
+			}
+			121	{
+				# F10
+			}
+			122	{
+				# F11
+			}
+			123	{
+				# F12
+			}
+			145	{
+				# Scroll Lock - Scroll_Lock
+			}
+			186	{
+				# : - colon
+				# - semicolon
+			}
+			188	{
+				# , - comma
+				# < - less
+				if {"%K" eq "comma"} {set x ,} else {set x <}
+				append word $x
+			}
+			190	{
+				# . - period
+				# > - greater
+				if {"%K" eq "period"} {set x .} else {set x >}
+				append word $x
+			}
+			191	{
+				# ? - question
+				#  - slash
+			}
+			192	{
+				# Quote Left  - quoteleft
+				# ~ - asciitilde
+			}
+			219	{
+				#   - braceleft
+				#  - bracketleft
+			}
+			220	{
+				# | - bar
+				# 
+			}
+			221	{
+				#  - braceright
+				#  - bracketright
+			}
+			222	{
+				# Double Quote - quotedbl
+				# Single Quote - quoteright
+			}
+			default {
+				append word %K
+			}
+		}
+		#puts $word
+		AutoComplete::AutoCompleteComboBox_test %W $word
+	}
+}
+
 namespace eval ea::filter {}
 
 proc ea::filter::runFilters {widTbl} {
