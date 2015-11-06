@@ -108,7 +108,6 @@ proc eAssistHelper::insertItems {tbl} {
 	#### END GUI
 	
 	# Guard against multiple cells being selected ...
-	# Var to use to get versions: $process(versionList)
 	
 	if {[llength $curCol] == 1} {
 		foreach header $curCol {
@@ -179,6 +178,19 @@ proc eAssistHelper::insertItems {tbl} {
 						
 						grid $f2.txt$i -column 0 -row $x -sticky news -pady 5p -padx 5p
 						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
+					}
+					versions		{
+						set values [job::db::getVersion -name -all -active 1]
+                        #set cmd [list -textvariable shipOrder($dbColName) -width $widMaxWidth -values $values]
+						ttk::label $f2.txt$i -text [mc "$header"]
+						$wid $f2.$x$header -values $values -textvariable txtVariable -width 35
+						
+						$f2.$x$header delete 0 end
+						$f2.$x$header configure -state readonly
+						grid $f2.txt$i -column 0 -row $x -sticky news -pady 5p -padx 5p
+						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
+						
+						#$btnBar.ok configure -command "[list eAssistHelper::insValuesToTableCells -window $tbl "" $origCells]; destroy .di"
 					}
 					default			{
 						${log}::notice Item not setup to use the ComboBox, displaying a generic text widget

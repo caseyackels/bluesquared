@@ -434,6 +434,7 @@ proc eAssistHelper::insValuesToTableCells {type tbl txtVar cells} {
     global log files txtVariable w copy job
 	# 'Inserting {{Brent Olsen} {Janet Esfeld} {Noni Wiggin}} into .container.frame0.nbk.f3.nb.f1.f2.tbl - 0,0'
 	
+	set colName [$tbl columncget [lindex [join [split $cells ,]] 1] -name]
 	
 	if {$txtVar == ""} {
 		if {[info exists txtVariable]} {
@@ -450,16 +451,21 @@ proc eAssistHelper::insValuesToTableCells {type tbl txtVar cells} {
 			# Create list that only has row numbers, then pass it to job::db::write once. Within job::db::write, we have a db statement using 'IN'.
 			set row [lindex [split $val ,] 0]
 			lappend rowList $row
-			lappend idList '[ea::db::getRecord -addressID $row]'
+			if {[string match -nocase *vers* $colName]} {
+				lappend idList [ea::db::getRecord -shippingOrderID $row]
+			} else {
+				lappend idList '[ea::db::getRecord -addressID $row]'
+				#lappend idList [ea::db::getRecord -shippingOrderID $row]
+			}
 			
 		}
 		
-		${log}::debug $tbl cellconfigure $cells -text $txtVar
+		#${log}::debug $tbl cellconfigure $cells -text $txtVar
 		foreach cell $cells {
 			$tbl cellconfigure $cell -text $txtVar
 		}
 		
-		set colName [$tbl columncget [lindex [join [split $cells ,]] 1] -name]
+		
 		job::db::write $job(db,Name) {} $txtVar $tbl $cells $rowList $idList $colName
 		
 		# Clean up

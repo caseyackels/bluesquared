@@ -478,7 +478,8 @@ proc job::db::write {db dbTbl dbTxt wid widCells widRows idList {dbCol ""}} {
         set addressID SysAddresses_ID
     } elseif {[lsearch $headerParent(headerList,shippingorder) $dbCol] != -1} {
         set dbTbl ShippingOrders
-        set addressID AddressID
+        #set addressID AddressID
+        set addressID ShippingOrder_ID
     }
     
     # Need to encapsulate in single quotes; Note: if inserting a Version we overwrite this var.
@@ -490,25 +491,20 @@ proc job::db::write {db dbTbl dbTxt wid widCells widRows idList {dbCol ""}} {
         # table:Addresses contain a Versions column for the VersionID from table:Version.
         # We must first look at the version table to see if there is an existing version; if there isn't we must add it.
         #${log}::debug $job(db,Name) eval "SELECT VersionName from Versions WHERE VersionName='$dbTxt'"
-        set versionName [$job(db,Name) eval "SELECT VersionName from Versions WHERE VersionName='$dbTxt'"]
+        set versionName [$job(db,Name) eval "SELECT VersionName from Versions WHERE VersionName=$dbTxt"]
+        set dbTbl ShippingOrders
 
         if {$versionName eq ""} {
                     # Value doesn't exist in db, lets add it.
-                    $job(db,Name) eval "INSERT INTO Versions (VersionName) VALUES ('$dbTxt')"
-                    ${log}::debug Value doesn't exist in db, adding $dbTxt
+                    $job(db,Name) eval "INSERT INTO Versions (VersionName) VALUES ($dbTxt)"
+                    #${log}::debug Value doesn't exist in db, adding $dbTxt
                     
                     set dbTxt [$job(db,Name) eval "SELECT max(Version_ID) FROM Versions"]
-                    ${log}::debug Versions ID: $dbTxt
+                    #${log}::debug Versions ID: $dbTxt
             } else {
                 # We matched a version name, so we aren't adding a new one. get the id of the new version
-                set versID [$job(db,Name) eval "SELECT Version_ID FROM Versions WHERE VersionName='$dbTxt'"]
-                ${log}::debug $dbTxt exists in db - ID: $versID
-                
-                set dbTxt $versID
+                set dbTxt [$job(db,Name) eval "SELECT Version_ID FROM Versions WHERE VersionName=$dbTxt"]
             }
-
-        set dbTbl Addresses
-        #set addressesID AddressID
     }
   
     
@@ -1276,23 +1272,43 @@ proc job::db::getVersion {args} {
     # NOTES
     #   Returns {id VersionName}
     #   Only one of -name OR -id can be issued, if both are passed last match wins
+    #   if -name -all, or -id -all is used all records are returned (that match the active status)
     #***
     global log job
 
     set active ""
-
     foreach {key value} $args {
         switch -- $key {
-            -name   {set where "VersionName='${value}'"}
-            -id     {set where "Version_ID=$value"}
-            -active {set active $value}
-            default {}
+            -name       {
+                if {$value ne "-all"} {
+                    #set sql "SELECT Version_ID, VersionName FROM Versions WHERE VersionActive=$active AND VersionName='${value}'"
+                    set cols "Version_ID, VersionName"
+                    set and "AND VersionName='${value}'"
+                } else {
+                    set cols "VersionName"
+                    set and "AND VersionName <> '_INVALID_VERSION_'"
+                    #set sql "SELECT VersionName FROM Versions WHERE VersionActive=$active AND VersionName <> '_INVALID_VERSION_'"
+                }
+            }
+            -id         {
+                if {$value ne "-all"} {
+                    set cols "Version_ID, VersionName"
+                    set and "AND Version_ID=$value"
+                    #set sql "SELECT Version_ID, VersionName FROM Versions WHERE VersionActive=$active AND Version_ID=$value"
+                } else {
+                    set cols "Version_ID"
+                    set and "AND Version_ID <> 0"
+                    #set sql "SELECT Version_ID FROM Versions WHERE VersionActive=$active AND Version_ID <> 0"
+                }
+            }
+            -active     {set active $value}
+            default     {}
         }
     }
     
     if {$active == ""} {${log}::debug Must pass the -active parameter, aborting.; return} 
 
-    return [$job(db,Name) eval "SELECT Version_ID, VersionName FROM Versions WHERE VersionActive=$active AND $where"]
+    return [$job(db,Name) eval "SELECT $cols FROM Versions WHERE VersionActive=$active $and"]
 } ;# job::db::getVersion
 
 proc job::db::getUsedVersions {args} {
