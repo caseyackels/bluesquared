@@ -420,12 +420,13 @@ proc eAssistHelper::shippingOrder {widTbl modifier} {
                                                 # Get the values
                                                 set tbl [db eval "SELECT TableName, DisplayColValues from UserDefinedValues where Description = '$widValues'"]
                                                 
-                                                    # Versions info
+                                                    # All comboboxes except Versions
                                                     if {[lindex $tbl 0] ne "Versions"} {
                                                         set values [db eval "SELECT [lindex $tbl 1] FROM [lindex $tbl 0]"]
                                                         set cmd [list -textvariable shipOrder($dbColName) -width $widMaxWidth -values $values -state readonly]
 
                                                     } else {
+                                                        # Versions info
                                                         set values [$job(db,Name) eval "SELECT VersionName FROM VERSIONS WHERE VersionActive = 1"]
                                                         set cmd [list -textvariable shipOrder($dbColName) -width $widMaxWidth -values $values -state readonly]
                                                     }
@@ -461,8 +462,12 @@ proc eAssistHelper::shippingOrder {widTbl modifier} {
     # Create intelligence in the Company widget
     set companyList [db eval "SELECT MasterAddr_Company FROM MasterAddresses WHERE MasterAddr_Internal = 1"]
     $widgetPath(Company) configure -validate all -validatecommand [list AutoComplete::AutoComplete %W %d %v %P $companyList]
-    #$widgetPath(ShipVia) configure -validate all -validatecommand [list AutoComplete::AutoComplete %W %d %v %P [$widgetPath(ShipVia) cget -values]]
     AutoComplete::typeahead $widgetPath(ShipVia)
+    AutoComplete::typeahead $widgetPath(DistributionType)
+    AutoComplete::typeahead $widgetPath(Versions)
+    AutoComplete::typeahead $widgetPath(ShippingClass)
+    AutoComplete::typeahead $widgetPath(ContainerType)
+    AutoComplete::typeahead $widgetPath(PackageType)
     
     tooltip::tooltip $widgetPath(ShipDate) [mc "Must use m/d/yyyy format"]
     tooltip::tooltip $widgetPath(ArriveDate) [mc "Must use m/d/yyyy format"]
@@ -474,7 +479,7 @@ proc eAssistHelper::shippingOrder {widTbl modifier} {
         ea::db::setConsigneeAutoComplete [%W get]
     }
     
-    bind $widgetPath(DistributionType)  <FocusOut> {
+    bind $widgetPath(DistributionType) <<ComboboxSelected>> {
         ea::db::setShipOrderValues [%W get]
     }
 

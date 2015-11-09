@@ -70,6 +70,8 @@ proc eAssistHelper::insertItems {tbl} {
     set locY [expr {[winfo height . ] / 3 + [winfo y .]}]
     wm geometry $w(di) +${locX}+${locY}
 	
+	set txtVariable ""
+	
 	set f1 [ttk::frame $w(di).f1]
 	pack $f1 -expand yes -fill both -pady 5p -padx 5p
 	

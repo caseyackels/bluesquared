@@ -607,6 +607,7 @@ proc ea::db::setShipOrderValues {dist_type} {
 	#${log}::debug Ship Via Values: $shipViaValues
 	
 	# Configure Ship Via Widget
+	$widgetPath(ShipVia) set ""
 	$widgetPath(ShipVia) configure -values $shipViaValues
 	
 	# If we only have one value, lets insert it into the field. If we have multiple clear out the widget so the user must select a value. If we don't and the user has to select

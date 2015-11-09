@@ -162,7 +162,7 @@ proc AutoComplete::AutoCompleteComboBox {path key} {
     
 } ;# AutoComplete::AutoCompleteComboBox
 
-proc AutoComplete::AutoCompleteComboBox_test {path} {
+proc AutoComplete::AutoCompleteComboBox_test {path key} {
     #****f* AutoCompleteComboBox/AutoComplete
     # CREATION DATE
     #   11/07/2014 (Friday Nov 07)
@@ -201,9 +201,8 @@ proc AutoComplete::AutoCompleteComboBox_test {path} {
     #        return
     #    }
     
-    set key $tmp(typeahead)
-    after 5000 unset tmp(typeahead)
-    puts "starting autocomplete ... $tmp(typeahead)"
+    #set key $tmp(typeahead)
+    puts "starting autocomplete ... $key"
     
     #set text [string map [list {[} {\[} {]} {\]}] [$path get]]
     #puts "ac: $text"
@@ -224,6 +223,20 @@ proc AutoComplete::AutoCompleteComboBox_test {path} {
 } ;# AutoComplete::AutoCompleteComboBox
 
 proc AutoComplete::typeahead {win} {
+    #****if* typehead/AutoComplete
+    # CREATION DATE
+    #   11/09/2015 (Monday Nov 09)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   This is used for read-only comboboxes, use AutoComplete::AutoComplete for entry boxes, and AutoComplete::AutoCompleteComboBox for editable
+    #   
+    #***
 	global log tmp
 		#bind .di <Key> {puts "You pressed the key called \"%K\""}
 	bind $win <Key> {
@@ -497,10 +510,24 @@ proc AutoComplete::typeahead {win} {
 				append word %K
 			}
 		}
-		puts $word
+		#puts $word
+        if {[info exists word]} {
+            set tmp(typeahead) $word
+        } else {
+            return
+        }
         set tmp(typeahead) $word
-		AutoComplete::AutoCompleteComboBox_test %W
+        #after 3000 ${log}::debug unsetting -nocomplain tmp(typeahead)
+        after 3000 unset -nocomplain tmp(typeahead)
+        after 3000 unset -nocomplain word
+		AutoComplete::AutoCompleteComboBox_test %W $tmp(typeahead)
 	}
+    
+    bind $win <FocusOut> {
+        #${log}::debug Unsetting by FocusOut
+        unset -nocomplain tmp(typeahead)
+        unset -nocomplain word
+    }
 }
 ###
 ### -- This is useful if we want to search on ShipViaCode, and return the name of the carrier.
