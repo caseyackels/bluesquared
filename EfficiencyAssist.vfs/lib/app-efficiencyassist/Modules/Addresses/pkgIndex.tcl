@@ -18,5 +18,6 @@ package ifneeded eAssist_ModImportFiles 1.0 "[list source [file join $dir import
                                             [list source [file join $dir job_reports_code.tcl]]
                                             [list source [file join $dir integrityChecks_code.tcl]]
                                             [list source [file join $dir jobDB_TestFunctions.tcl]]
-                                            [list source [file join $dir publish_code.tcl]]"
+                                            [list source [file join $dir publish_code.tcl]]
+                                            [list source [file join $dir notes_gui.tcl]]"
 

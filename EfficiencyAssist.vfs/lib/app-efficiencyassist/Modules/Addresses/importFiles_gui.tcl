@@ -312,7 +312,7 @@ proc importFiles::initMenu {} {
     
     #$mb.modMenu add separator
     
-    $mb.modMenu add command -label [mc "Notes"] -command {eAssistHelper::editNotes}
+    $mb.modMenu add command -label [mc "Notes"] -command {ea::gui::notes::editNotes}
     $mb.modMenu add command -label [mc "Samples"] -command {ea::gui::samples::SampleGUI}
     $mb.modMenu add command -label [mc "Add Destination"] -command {eAssistHelper::shippingOrder $files(tab3f2).tbl -add}
     $mb.modMenu add command -label [mc "Filters..."] -command {eAssist_tools::FilterEditor}

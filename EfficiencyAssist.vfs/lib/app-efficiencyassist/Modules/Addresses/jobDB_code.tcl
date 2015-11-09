@@ -761,7 +761,7 @@ proc job::db::tableExists {dbTbl} {
     
 } ;# job::db::tableExists
 
-proc job::db::insertNotes {job_wid log_wid args} {
+proc job::db::insertNotes {wid_nbk} {
     #****f* insertNotes/job::db
     # CREATION DATE
     #   03/11/2015 (Wednesday Mar 11)
@@ -787,7 +787,7 @@ proc job::db::insertNotes {job_wid log_wid args} {
     #   
     #   
     # NOTES
-    #   This proc is specific to the Notes on the Job (Deprecated)
+    #   Add notes to the title db
     #   
     # SEE ALSO
     #   
@@ -795,38 +795,29 @@ proc job::db::insertNotes {job_wid log_wid args} {
     #***
     global log job user
 	
-    set historyGUID [ea::tools::getGUID]
-    #set notesGUID [ea::tools::getGUID]
-    
-    # Clean up notes first
-    set jobNotes [join [string trim [string map {' ''} [$job_wid get 0.0 end]]]]
-    #set jobNotes [join [string trim [string map {' ''} [.notes.f1.txt get 0.0 end]]]]
-    ${log}::debug jobNotes: $job_wid $jobNotes
-    
-    
-    set logNotes [string map {' ''} [$log_wid get 0.0 end]]
-    
-    # Get Note Type (Levels): Title, Job, Version, DistributionType, ShippingOrder(?)
-    switch -- $args {
-        -title      {set noteTypeID Title}
-        -job        {set noteTypeID Job}
-        -version    {set noteTypeID Version}
-        -distributiontype   {set noteTypeID DistributionType}
-        -shippingorder  {set noteTypeID ShippingOrder}
+    foreach wid_txt [winfo children $wid_nbk] {
+
+        # Only insert new records if we detect modifications
+        if {[$wid_txt.f1.txt edit modified]} {
+            ${log}::notice $wid_txt.f1.txt was modified, entering data into the database.
+            
+            set noteTypeName [string totitle [lindex [split $wid_txt .] end]]
+            set historyGUID [ea::tools::getGUID]
+            
+            set notes [string trim [string map {' ''} [$wid_txt.f1.txt get 0.0 end]]]
+            set logNotes [string trim [string map {' ''} [$wid_txt.f2.bottom.txt get 0.0 end]]]
+                                
+            set noteTypeID [$job(db,Name) eval "SELECT NoteType_ID FROM NoteTypes WHERE NoteType='$noteTypeName' AND Active=1"]
+            
+            # Insert into History table, then into Notes table
+            $job(db,Name) eval "INSERT INTO History (History_ID, HistUser, HistDate, HistTime, HistSyslog) VALUES ('$historyGUID', '$user(id)', '[ea::date::getTodaysDate -db]', '[ea::date::currentTime]', '$logNotes')"
+            $job(db,Name) eval "INSERT INTO Notes (HistoryID, NoteTypeID, NotesText) VALUES ('$historyGUID', $noteTypeID, '$notes')"
+        }
     }
-    
-    set noteType [$job(db,Name) eval "SELECT NoteType_ID FROM NoteTypes WHERE NoteType='$noteTypeID' AND Active=1"]
-    #${log}::debug noteType: $noteType
-    #${log}::debug noteType-sql: SELECT NoteType_ID FROM NoteTypes WHERE NoteType='$noteTypeID' AND Active=1
-    
-	# Insert into History table, then into Notes table
-    $job(db,Name) eval "INSERT INTO History (History_ID, HistUser, HistDate, HistTime, HistSyslog) VALUES ('$historyGUID', '$user(id)', '[ea::date::getTodaysDate -db]', '[ea::date::currentTime]', '$logNotes')"
-	
-	$job(db,Name) eval "INSERT INTO Notes (HistoryID, NoteTypeID, NotesText) VALUES ('$historyGUID', $noteType,'$jobNotes')"
 
 } ;# job::db::insertNotes
 
-proc job::db::readNotes {cbox_wid job_wid log_wid} {
+proc job::db::readNotes {title cbox_wid job_wid log_wid} {
     #****f* readNotes/job::db
     # CREATION DATE
     #   03/11/2015 (Wednesday Mar 11)
@@ -865,7 +856,8 @@ proc job::db::readNotes {cbox_wid job_wid log_wid} {
     if {[info exists hist]} {unset hist}
 
     # Read the Job notes ...
-    set jobNotes [join [$job(db,Name) eval "SELECT NotesText FROM Notes WHERE Notes_ID = $id"]]
+    set jobNotes [join [$job(db,Name) eval "SELECT NotesText FROM Notes WHERE Notes_ID = $id
+                                                AND NoteTypeID = (SELECT NoteType_ID FROM NoteTypes WHERE NoteType = '[string totitle $title]')"]]
     
     # Read the log notes ...
     set historyItems [join [$job(db,Name) eval "SELECT HistUser, HistDate, HistTime, HistSysLog FROM History
