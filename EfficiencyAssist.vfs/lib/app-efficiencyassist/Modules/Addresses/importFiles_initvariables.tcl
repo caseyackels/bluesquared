@@ -203,3 +203,26 @@ proc eAssistHelper::initShipOrderArray {} {
                                 Zip ""]
 
 } ;# eAssistHelper::initShipOrderArray
+
+proc ea::code::init::titleArray {} {
+    #****if* titleArray/ea::code::init
+    # CREATION DATE
+    #   11/09/2015 (Monday Nov 09)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   
+    #   
+    #***
+    global log title
+
+    array set shipOrder [list SysAddresses_ID "" \
+                         db_address,lastid "" \
+                         shipOrder_id ""]
+
+} ;# ea::code::init::titleArray

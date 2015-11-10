@@ -154,6 +154,10 @@ proc 'eAssist_sourceReqdFiles {} {
     namespace eval ea::code::notes {}
     namespace eval ea::gui::notes {}
     namespace eval ea::db::notes {}
+    
+    # Init Vars
+    namespace eval ea::code::init {}
+    namespace eval ea::db::init {}
 	
 	
 	## Start the Package Require

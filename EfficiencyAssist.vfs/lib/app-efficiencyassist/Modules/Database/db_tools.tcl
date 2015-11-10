@@ -193,6 +193,7 @@ proc ea::db::writeSingleAddressToDB {{hidden 0}} {
 	$job(db,Name) eval "INSERT INTO ShippingOrders ([join $header_order_shiporder ,]) VALUES ([join $newRow_shiporder ,])"
 	
 	set title(db_address,lastid) $sysGUID
+	set title(shipOrder_id) [$job(db,Name) eval "SELECT max(ShippingOrder_ID) FROM ShippingOrders"]
 	
 	# Clear variables
 	unset header_order_consignee
@@ -227,11 +228,13 @@ proc ea::db::updateSingleAddressToDB {args} {
 	set versionExists [$job(db,Name) eval "SELECT VersionName FROM Versions WHERE VersionName = '$shipOrder(Versions)'"]
 	
 	# We have a new entry, insert and retrieve the id
-	if {$versionExists == ""} {	
+	if {$versionExists == ""} {
+		${log}::debug Version does not exist, inserting...
 		$job(db,Name) eval "INSERT INTO Versions (VersionName) VALUES ('$shipOrder(Versions)')"
 		set shipOrder(Versions) [$job(db,Name) eval "SELECT max(Version_ID) from Versions"]
 	} else {
 		# Convert to ID instead of name
+		${log}::debug Version $versionExists exists, retrieving the id
 		set shipOrder(Versions) [$job(db,Name) eval "SELECT Version_ID FROM Versions WHERE VersionName = '$shipOrder(Versions)'"]
 	}
 	
@@ -240,15 +243,17 @@ proc ea::db::updateSingleAddressToDB {args} {
 	foreach val $headerParent(headerList,consignee) {
 		lappend address_update "$val='$shipOrder($val)'"
 	}
+	set address_update [join [join $address_update ,]]
+	${log}::debug address_update: $address_update
 	
 	# Update Addresses Table
-	#${log}::debug $job(db,Name) eval UPDATE Addresses SET [join $address_update ,] WHERE SysAddresses_ID = '$shipOrder(id)'
-	$job(db,Name) eval "UPDATE Addresses SET [join $address_update ,] WHERE SysAddresses_ID = 'title(SysAddresses_ID)'"
+	${log}::debug UPDATE Addresses SET [join $address_update] WHERE SysAddresses_ID = '$title(SysAddresses_ID)'
+	$job(db,Name) eval "UPDATE Addresses SET [join $address_update] WHERE SysAddresses_ID = '$title(SysAddresses_ID)'"
 	
 	
 	# Delete entries in the ShipOrder table, and re-add them.
 	#${log}::debug $job(db,Name) eval DELETE FROM ShippingOrders WHERE AddressID = '$title(shipOrder_id)' AND Version = $shipOrder(Versions) AND JobInformationID = '$job(Number)'
-	#${log}::debug Deleting $title(shipOrder_id)
+	${log}::debug Deleting $title(shipOrder_id)
 	$job(db,Name) eval "DELETE FROM ShippingOrders WHERE ShippingOrder_ID = $title(shipOrder_id) AND JobInformationID = '$job(Number)'"
 	
 	# Add ShippingOrder back
@@ -262,18 +267,23 @@ proc ea::db::updateSingleAddressToDB {args} {
 			lappend shiporder_getid "$val = $shipOrder($val)"
 		} else {
 			lappend shiporder_getid "$val = '$shipOrder($val)'"
-		}
-		
+		}	
 	}
+	lappend shiporder_getid "AddressID='$title(SysAddresses_ID)'"
+	
+	${log}::debug shiporder_update: $shiporder_update
+	${log}::debug shiporder_getid: $shiporder_getid
 	
 	#${log}::debug Reinserting the old $title(shipOrder_id)
+	${log}::debug INSERT INTO ShippingOrders (AddressID, JobInformationID, Hidden, [join $headerParent(headerList,shippingorder) ,])
+	${log}::debug VALUES ('$title(SysAddresses_ID)', '$job(Number)', $hidden, [join $shiporder_update ,])
 	$job(db,Name) eval "INSERT INTO ShippingOrders (AddressID, JobInformationID, Hidden, [join $headerParent(headerList,shippingorder) ,])
 							VALUES ('$title(SysAddresses_ID)', '$job(Number)', $hidden, [join $shiporder_update ,])"
 	
 	# Set the title(shipOrder_id) var again, after we re-enter the record
 	set title(shipOrder_id) [$job(db,Name) eval "SELECT ShippingOrder_ID FROM ShippingOrders
 								WHERE [join $shiporder_getid " AND "]"]
-	#${log}::debug New id: $title(shipOrder_id)
+	${log}::debug New shipOrder_id: $title(shipOrder_id)
 	# clean up
 	unset address_update
 	unset shiporder_update

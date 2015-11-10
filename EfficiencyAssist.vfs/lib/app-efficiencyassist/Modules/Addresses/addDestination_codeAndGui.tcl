@@ -277,7 +277,8 @@ proc eAssistHelper::saveDest {modifier widRow tblPath} {
     switch -- $modifier {
         -add        {
                     # Add new record to db
-                    ea::db::writeSingleAddressToDB
+                    #ea::db::writeSingleAddressToDB
+                    ea::code::bm::writeShipment normal
                     
                     # Populate table
                     ea::db::populateTablelist -record new -widRow $widRow
@@ -288,7 +289,8 @@ proc eAssistHelper::saveDest {modifier widRow tblPath} {
         -edit       {
             		## -- We are updating a record
                     ## # Delete ShippingOrder record first; then re-add it.
-                    ea::db::updateSingleAddressToDB
+                    #ea::db::updateSingleAddressToDB
+                    ea::code::bm::writeShipment normal
                     
                     # Guard against the user selecting multiple rows when editing...
                     set widRow [lindex $widRow 0]
