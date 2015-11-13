@@ -62,6 +62,7 @@ proc ea::db::populateTablelist {args} {
 	
 	# New Record
 	if {$record eq "new"} {
+		${log}::debug New
 		set db_id $title(db_address,lastid)
 		set widPosition end
 	}
@@ -69,10 +70,14 @@ proc ea::db::populateTablelist {args} {
 	# Existing Record
 	if {$record eq "existing" && $db_id eq ""} {
 		return {[info level 0] need an database id}
-	} else {
+	} elseif {$record eq "existing" && $db_id ne ""} {
+		${log}::debug Existing
 		set widPosition $widRow
 		# Remove existing row of data
 		$files(tab3f2).tbl delete $widPosition
+	} elseif {$record eq "combine"} {
+		${log}::debug Combining
+		set widPosition $widRow
 	}
 	
 
@@ -103,11 +108,12 @@ proc ea::db::populateTablelist {args} {
                             LEFT OUTER JOIN Versions
                                 ON ShippingOrders.Versions = Versions.Version_ID
                             WHERE ShippingOrders.JobInformationID in ('$job(Number)')
-							AND ShippingOrders.ShippingOrder_ID = '$db_id'
+							AND ShippingOrders.ShippingOrder_ID = $db_id
                             AND Addresses.SysActive = 1
 							AND ShippingOrders.Hidden = 0" {
                                 # Removal of the old row happens if we're editing (this occurs in the if-else statement above)
                                 $files(tab3f2).tbl insert $widPosition [subst $hdr_data]
+								${log}::debug insert $widPosition [subst $hdr_data]
                             }
 							
 	# Clean up
