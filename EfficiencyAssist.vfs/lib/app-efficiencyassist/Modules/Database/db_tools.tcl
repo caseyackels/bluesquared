@@ -317,7 +317,7 @@ proc ea::db::getRecord {method row_id} {
 	# testing
 	#set row_id [$files(tab3f2).tbl curselection]
 	
-	if {$row_id eq ""} {${log}::debug [info level 0] Row_ID was not passed, aborting.; return}
+	if {$row_id eq "" || [llength $row_id] > 1} {${log}::debug [info level 0] _$row_id_ Row_ID was not passed or two many values were returned, aborting.; return}
 	switch -- $method {
 		-addressID			{set cols Addresses.SysAddresses_ID}
 		-shippingOrderID	{set cols ShippingOrders.ShippingOrder_ID}

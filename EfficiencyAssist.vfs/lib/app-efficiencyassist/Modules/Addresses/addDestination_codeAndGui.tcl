@@ -485,6 +485,9 @@ proc eAssistHelper::shippingOrder {widTbl modifier} {
         ${log}::debug Setting ShipVia Values for: [%W get]
         ea::db::setShipOrderValues [%W get]
     }
+    
+    ea::tools::bindings $widgetPath(ContainerType) {BackSpace Delete} {%W set ""}
+
 
     ##
     ## CONFIGURATION based on modifier
