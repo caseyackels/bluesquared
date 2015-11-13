@@ -62,7 +62,7 @@ proc ea::db::populateTablelist {args} {
 	
 	# New Record
 	if {$record eq "new"} {
-		${log}::debug New
+		#${log}::debug New
 		set db_id $title(db_address,lastid)
 		set widPosition end
 	}
@@ -70,13 +70,15 @@ proc ea::db::populateTablelist {args} {
 	# Existing Record
 	if {$record eq "existing" && $db_id eq ""} {
 		return {[info level 0] need an database id}
+	
 	} elseif {$record eq "existing" && $db_id ne ""} {
-		${log}::debug Existing
+		#${log}::debug Existing
 		set widPosition $widRow
 		# Remove existing row of data
 		$files(tab3f2).tbl delete $widPosition
+	
 	} elseif {$record eq "combine"} {
-		${log}::debug Combining
+		#${log}::debug Combining
 		set widPosition $widRow
 	}
 	
@@ -355,7 +357,11 @@ proc ea::db::getRecord {method row_id} {
 				set vers_id [lindex [job::db::getVersion -name "[$files(tab3f2).tbl getcells $row_id,$hdr]" -active 1] 0]
 				#${log}::debug Version ID: $vers_id
 				set hdr "ShippingOrders.Versions"
-				lappend data_ "ifnull($hdr,'')=$vers_id"
+				if {$vers_id eq ""} {
+					lappend data_ "ifnull($hdr,'')=''"
+				} else {
+					lappend data_ "ifnull($hdr,'')=$vers_id"
+				}
 			} else {
 				lappend data_ "ifnull($hdr,'')='[$files(tab3f2).tbl getcells $row_id,$hdr]'"
 			}
@@ -365,6 +371,7 @@ proc ea::db::getRecord {method row_id} {
 	unset hdr_list
 	unset hdr_gui
 	unset hdr_list_final
+	${log}::debug SELECT $cols FROM Addresses INNER JOIN ShippingOrders on ShippingOrders.AddressID = Addresses.SysAddresses_ID WHERE [join $data_ " AND "]
 	
 	return [$job(db,Name) eval "SELECT $cols
 							FROM Addresses

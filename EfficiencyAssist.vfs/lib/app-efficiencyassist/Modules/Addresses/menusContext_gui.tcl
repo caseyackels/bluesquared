@@ -113,11 +113,12 @@ proc IFMenus::tblPopup {tbl mode mName} {
             #$mName add command -label [mc "Paste"] -command {eAssistHelper::insValuesToTableCells -hotkey $files(tab3f2).tbl [clipboard get] [$files(tab3f2).tbl curcellselection]}
             #$mName add command -label [mc "Clear"] -command {IFMenus::clearItems $files(tab3f2).tbl}
             $mName add separator
-            $mName add command -label [mc "Clone"] -command {IFMenus::copyRow $files(tab3f2).tbl}
+            $mName add command -label [mc "Clone"] -command {IFMenus::cloneRecord $files(tab3f2).tbl}
             #$mName add command -label [mc "Paste Row"] -command {IFMenus::pasteRow $files(tab3f2).tbl}
             #$mName add command -label [mc "Clear Row Contents"] -command {IFMenus::clearRowContents $files(tab3f2).tbl}
             #$mName add command -label [mc "Insert Row"] -command {catch [$files(tab3f2).tbl insert [$files(tab3f2).tbl curselection] ""] err}
-            $mName add command -label [mc "Delete"] -command {IFMenus::deleteRow $files(tab3f2).tbl OrderNumber Addresses}
+            $mName add command -label [mc "Remove Shipment"] -command {IFMenus::deleteRow -shippingOrder $files(tab3f2).tbl ShippingOrder_ID ShippingOrders}
+			$mName add command -label [mc "Delete Address"] -command {IFMenus::deleteRow -address $files(tab3f2).tbl ShippingOrder_ID ShippingOrders}
         } else {
             # Browse mode
             #$mName add command -label [mc "Copy Row"] -command {}
@@ -132,7 +133,41 @@ proc IFMenus::tblPopup {tbl mode mName} {
     #${log}::debug --END-- [info level 1]
 } ;# IFMenus::tblPopup
 
+proc IFMenus::cloneRecord {tbl} {
+	#****if* cloneRecord/IFMenus
+	# CREATION DATE
+	#   11/13/2015 (Friday Nov 13)
+	#
+	# AUTHOR
+	#	Casey Ackels
+	#
+	# COPYRIGHT
+	#	(c) 2015 Casey Ackels
+	#   
+	# NOTES
+	#   
+	#   
+	#***
+	global log job title
 
+	if {[$tbl curselection] != ""} {
+		foreach row [lsort -integer -decreasing [$tbl curselection]] {
+				#set shipOrderID [ea::db::getRecord -shippingOrderID $row]
+				set shipOrderID [ea::db::getRecord -shippingOrderID $row]
+				
+				$job(db,Name) eval "INSERT INTO ShippingOrders
+										(JobInformationID, AddressID, Hidden, ShipDate, Quantity, ShippingClass)
+									SELECT JobInformationID, AddressID, Hidden,
+										ShipDate, Quantity, ShippingClass
+									FROM ShippingOrders
+										WHERE ShippingOrder_ID = $shipOrderID"
+				
+				set title(db_address,lastid) [$job(db,Name) eval "SELECT max(ShippingOrder_ID) FROM ShippingOrders WHERE JobInformationID = '$job(Number)'"]
+				# Populate the widget
+				ea::db::populateTablelist -record new 
+		}
+	}
+} ;# IFMenus::cloneRecord
 
 proc IFMenus::clearRowContents {tbl} {
     #****f* clearRowContents/IFMenus
@@ -233,7 +268,7 @@ proc IFMenus::pasteRow {tbl} {
 } ;# IFMenus::pasteRow
 
 
-proc IFMenus::deleteRow {tbl dbCol dbTbl} {
+proc IFMenus::deleteRow {{method -shippingOrder} tbl dbCol dbTbl} {
     #****f* deleteRow/IFMenus
     # CREATION DATE
     #   02/19/2015 (Thursday Feb 19)
@@ -250,6 +285,7 @@ proc IFMenus::deleteRow {tbl dbCol dbTbl} {
     #
     # FUNCTION
     #	Deletes the row in the widget and database
+	#	method defaults to -shipOrder, but -address can be used when removing addresses (we don't actually delete)
     #   
     #   
     # CHILDREN
@@ -266,20 +302,27 @@ proc IFMenus::deleteRow {tbl dbCol dbTbl} {
     #   
     #***
     global log job
-
+	
     if {[$tbl curselection] != ""} {
         # Remove the last entries first, or else the positions will change on us.
-        foreach line [lsort -integer -decreasing [$tbl curselection]] {
-                # $line = Line within the widget (numbering starts at 0)
-                # [$tbl getcells $line,0] = DB index number.
-                #${log}::debug DELETING Line: $line / [$tbl getcells $line,0]
-                $job(db,Name) eval "DELETE from $dbTbl where $dbCol='[$tbl getcells $line,0]'"
-                $tbl delete $line
+        foreach row [lsort -integer -decreasing [$tbl curselection]] {
+				set shipOrderID [ea::db::getRecord -shippingOrderID $row]
+				set addressID '[ea::db::getRecord -addressID $row]'
+				#${log}::debug DELETE from $dbTbl where $dbCol=$shipOrderID
+				#${log}::debug DELETE from Widget: $tbl delete $row
+				
+				$job(db,Name) eval "DELETE FROM $dbTbl WHERE $dbCol=$shipOrderID"
+				$tbl delete $row
+				
+				# if deleting the address, we need to do additional processing
+				if {$method eq "-address"} {
+					#${log}::debug DELETE AddressID from Addresses: UPDATE Addresses SET SysActive=0 WHERE SysAddresses_ID = $addressID
+					$job(db,Name) eval "UPDATE Addresses SET SysActive=0 WHERE SysAddresses_ID = $addressID"
+				}
         }
     }
     
     # Update total copies
-    #set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
 	job::db::getTotalCopies
 
 } ;# IFMenus::deleteRow
