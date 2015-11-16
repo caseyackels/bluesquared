@@ -302,7 +302,8 @@ proc ea::code::export::toPlanner {args} {
                             INNER JOIN Versions ON ShippingOrders.Versions = Versions.Version_ID
                             INNER JOIN db1.ShipVia ON ShippingOrders.ShipVia = ShipVia.ShipViaName
                         WHERE ShippingOrders.JobInformationID = $job(Number)
-                            AND ShippingOrders.AddressID NOT IN ([join $blacklist ,])" {
+                            AND ShippingOrders.AddressID NOT IN ([join $blacklist ,])
+                            ORDER BY Addresses.DistributionType" {
                                 #${log}::debug Record - [subst $vals] Version
                                 set record "[subst $vals] Version [incr i]"
                                 #${log}::debug [::csv::join $record]
@@ -317,7 +318,8 @@ proc ea::code::export::toPlanner {args} {
                             INNER JOIN db1.ShipVia ON ShippingOrders.ShipVia = ShipVia.ShipViaName
                         WHERE ShippingOrders.JobInformationID = $job(Number)
                             AND ShippingOrders.Hidden = 1
-                            AND Addresses.DistributionType IN ([join $dist_blacklist ,])" {
+                            AND Addresses.DistributionType IN ([join $dist_blacklist ,])
+                            ORDER BY Addresses.DistributionType" {
                                 set record "[subst $vals] Version [incr i]"
                                 #${log}::debug [::csv::join $record]
                                 chan puts $fd [::csv::join $record]
