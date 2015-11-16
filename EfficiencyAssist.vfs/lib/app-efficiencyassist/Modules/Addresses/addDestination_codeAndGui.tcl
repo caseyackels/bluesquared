@@ -333,7 +333,7 @@ proc eAssistHelper::saveDest {modifier widRow tblPath} {
     job::db::getTotalCopies
     
     # Check to see if we just added a distribution type that uses a specific address in the exported batch files
-    ea::code::bm::writeHiddenShipment $shipOrder(DistributionType)
+    #ea::code::bm::writeHiddenShipment $shipOrder(DistributionType)
 } ;# eAssistHelper::saveDest
 
 
@@ -486,6 +486,7 @@ proc eAssistHelper::shippingOrder {widTbl modifier} {
         ea::db::setShipOrderValues [%W get]
     }
     
+
     ea::tools::bindings $widgetPath(ContainerType) {BackSpace Delete} {%W set ""}
 
 
@@ -513,7 +514,7 @@ proc eAssistHelper::shippingOrder {widTbl modifier} {
     
 } ;# eAssistHelper::shippingOrder
 
-proc ea::code::bm::writeHiddenShipment {disttype} {
+proc ea::code::bm::writeHiddenShipment {distributionType} {
     #****if* writeHiddenShipment/ea::code::bm
     # CREATION DATE
     #   09/28/2015 (Monday Sep 28)
@@ -530,34 +531,76 @@ proc ea::code::bm::writeHiddenShipment {disttype} {
     #***
     global log job shipOrder title program
 
+    # Reset the shipOrder array
+    eAssistHelper::initShipOrderArray
+    if {[info exists title]} {unset title}
+    
     # Retrieve the address and shipvia name
-    set disttype_addr [ea::db::getDistTypeConfig -method Export -action Single -disttype "$disttype"]
+    #set distributionType "07. UPS Import"
+    set distributionType [join $distributionType]
+    set disttype_addr [ea::db::getDistTypeConfig -method Export -action Single -disttype "$distributionType"]
     if {$disttype_addr eq ""} {${log}::debug [info level 0] No address was setup, we don't need a hidden record.; return}
-        set shipOrder(Company) [lindex $disttype_addr 0]
-        set shipOrder(Attention) [lindex $disttype_addr 1]
-        set shipOrder(Address1) [lindex $disttype_addr 2]
-        set shipOrder(Address2) [lindex $disttype_addr 3]
-        set shipOrder(Address3) [lindex $disttype_addr 4]
-        set shipOrder(City) [lindex $disttype_addr 5]
-        set shipOrder(State) [lindex $disttype_addr 6]
-        set shipOrder(Zip) [lindex $disttype_addr 7]
-        set shipOrder(Country) [lindex $disttype_addr 8]
-        set shipOrder(Phone) [lindex $disttype_addr 9]
-        set shipOrder(ShipVia) [lindex $disttype_addr 10]
-        set shipOrder(Notes) ""
-        #set shipOrder(PackageType)
-        #set shipOrder(ContainerType)
-        #set shipOrder(DistributionType)
-        set shipOrder(Quantity) [ea::db::countQuantity -db $job(db,Name) -job $job(Number) -and "AND Addresses.DistributionType = '$disttype' AND ShippingOrders.Hidden = 0 AND Versions.Version_ID=$shipOrder(Versions)"]
-        #set shipOrder(ShipDate)
-        #set shipOrder(ShippingClass)
-        
-        # This is the Version ID
-        ${log}::debug Version id: $shipOrder(Versions)
-        # Transform to Name
-        set program(id,Versions) $shipOrder(Versions)
-        set shipOrder(Versions) [lindex [job::db::getVersion -id $program(id,Versions) -active 1] 1]
-        
-        ea::code::bm::writeShipment hidden
+    
+    set shipOrder(Company) [lindex $disttype_addr 0]
+    set shipOrder(Attention) [lindex $disttype_addr 1]
+    set shipOrder(Address1) [lindex $disttype_addr 2]
+    set shipOrder(Address2) [lindex $disttype_addr 3]
+    set shipOrder(Address3) [lindex $disttype_addr 4]
+    set shipOrder(City) [lindex $disttype_addr 5]
+    set shipOrder(State) [lindex $disttype_addr 6]
+    set shipOrder(Zip) [lindex $disttype_addr 7]
+    set shipOrder(Country) [lindex $disttype_addr 8]
+    set shipOrder(Phone) [lindex $disttype_addr 9]
+    set shipOrder(ShipVia) [lindex $disttype_addr 10]
+    set shipOrder(Notes) ""
+    #set shipOrder(PackageType)
+    #set shipOrder(ContainerType)
+    set shipOrder(DistributionType) "$distributionType"
+    
+    $job(db,Name) eval "SELECT Versions.VersionName as VersionName, sum(Quantity) as Quantity, ShippingOrders.ShipDate as ShipDate FROM ShippingOrders
+                            INNER JOIN Addresses on Addresses.SysAddresses_ID = ShippingOrders.AddressID
+                            LEFT JOIN Versions on Versions.Version_ID = ShippingOrders.Versions
+                                WHERE Addresses.DistributionType = '$distributionType'
+                            AND Addresses.SysActive = 1
+                            AND ShippingOrders.Hidden = 0
+                                GROUP BY Versions.VersionName, ShippingOrders.ShipDate" {
+                                    #${log}::debug Version Name: $VersionName
+                                    set shipOrder(Versions) $VersionName
+                                    
+                                    ${log}::debug Distribution Type: $distributionType
+                                    set shipOrder(Quantity) $Quantity
+                                    set shipOrder(ShipDate) $ShipDate
+
+                                    ${log}::debug Version Name: $shipOrder(Versions)
+                                    #${log}::debug Version ID: $program(id,Versions)
+                                    ${log}::debug ShipDate: $shipOrder(ShipDate)
+                                    ${log}::debug Quantity: $Quantity
+                                    
+                                    ea::code::bm::writeShipment hidden
+                                }
 
 } ;# ea::code::bm::writeHiddenShipment "07. UPS Import"
+
+proc ea::code::bm::checkVersionAssignment {args} {
+    #****if* checkVersionAssignment/ea::code::bm
+    # CREATION DATE
+    #   11/13/2015 (Friday Nov 13)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   
+    #   
+    #***
+    global log job shipOrder title
+    
+    
+
+    
+
+    
+} ;# ea::code::bm::checkVersionAssignment

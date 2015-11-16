@@ -46,6 +46,7 @@ proc ea::db::populateTablelist {args} {
 	foreach {key value} $args {
 		switch -- $key {
 				-record		{
+					# Possible values: new, existing, combine, edit
 					set record $value
 				}
 				-id			{
@@ -80,8 +81,13 @@ proc ea::db::populateTablelist {args} {
 	} elseif {$record eq "combine"} {
 		#${log}::debug Combining
 		set widPosition $widRow
+		
+	} elseif {$record eq "edit"} {
+		set widPosition $widRow
+		$files(tab3f2).tbl delete $widPosition
 	}
 	
+	if {![info exists widPosition]} {${log}::debug widPosition doesn't exist, aborting...; return}
 
 	
 	# Get number of columns
@@ -115,7 +121,10 @@ proc ea::db::populateTablelist {args} {
 							AND ShippingOrders.Hidden = 0" {
                                 # Removal of the old row happens if we're editing (this occurs in the if-else statement above)
                                 $files(tab3f2).tbl insert $widPosition [subst $hdr_data]
-								${log}::debug insert $widPosition [subst $hdr_data]
+								$files(tab3f2).tbl selection clear 0 end
+								$files(tab3f2).tbl selection set $widPosition
+								$files(tab3f2).tbl activate $widPosition
+								#${log}::debug insert $widPosition [subst $hdr_data]
                             }
 							
 	# Clean up
@@ -142,6 +151,21 @@ proc ea::db::writeSingleAddressToDB {{hidden 0}} {
 	#***
 	global log headerParent job shipOrder title
 
+	# Find out if the entry already exists...
+	# If the entry exists, set the SysAddresses_ID var, and exit the proc.
+	${log}::debug [info level 0] Checking to see if address is already in the db...
+	set id [$job(db,Name) eval "SELECT SysAddresses_ID FROM Addresses
+									WHERE Company LIKE '%$shipOrder(Company)%'
+									AND Attention LIKE '%$shipOrder(Attention)%'
+									AND Zip LIKE '%$shipOrder(Zip)'"]
+	
+	if {$id != ""} {
+		${log}::debug Address was found, we don't need to insert. Inserting into ShippingOrders....
+		set title(SysAddresses_ID) $id
+		ea::db::writeSingleShippingOrder $hidden
+		return
+	}
+	
 	# Figure out what table to put the data into.
 	#${log}::debug Starting Loop
 	foreach hdr_ [array name shipOrder] {
@@ -229,6 +253,19 @@ proc ea::db::updateSingleAddressToDB {args} {
 	global log job shipOrder headerParent title
 	
 	if {$args ne ""} {set hidden $args} else {set hidden 0}
+	
+	${log}::debug [info level 0] Checking to see if address is already in the db...
+	set id [$job(db,Name) eval "SELECT SysAddresses_ID FROM Addresses
+									WHERE Company LIKE '%$shipOrder(Company)%'
+									AND Attention LIKE '%$shipOrder(Attention)%'
+									AND Zip LIKE '%$shipOrder(Zip)'"]
+	
+	if {$id != ""} {
+		${log}::debug Address id was found, updating...
+		set title(SysAddresses_ID) $id
+		${log}::debug Retrieving ShippingOrder_ID...
+		set title(shipOrder_id) [ea::db::getShipOrderID 1]
+	}
 
 	## Versions require special handling since, it is in another db table. We display the name to the user, but use the ID internally.
 	## Update/Insert versions first
@@ -255,14 +292,19 @@ proc ea::db::updateSingleAddressToDB {args} {
 	${log}::debug address_update: $address_update
 	
 	# Update Addresses Table
-	${log}::debug UPDATE Addresses SET [join $address_update] WHERE SysAddresses_ID = '$title(SysAddresses_ID)'
+	#${log}::debug UPDATE Addresses SET [join $address_update] WHERE SysAddresses_ID = '$title(SysAddresses_ID)'
 	$job(db,Name) eval "UPDATE Addresses SET [join $address_update] WHERE SysAddresses_ID = '$title(SysAddresses_ID)'"
 	
 	
 	# Delete entries in the ShipOrder table, and re-add them.
 	#${log}::debug $job(db,Name) eval DELETE FROM ShippingOrders WHERE AddressID = '$title(shipOrder_id)' AND Version = $shipOrder(Versions) AND JobInformationID = '$job(Number)'
-	${log}::debug Deleting $title(shipOrder_id)
-	$job(db,Name) eval "DELETE FROM ShippingOrders WHERE ShippingOrder_ID = $title(shipOrder_id) AND JobInformationID = '$job(Number)'"
+	
+	if {[info exists title(shipOrder_id)]} {
+		if {$title(shipOrder_id) ne ""} {
+			${log}::debug Deleting ShipOrderID: $title(shipOrder_id)
+			$job(db,Name) eval "DELETE FROM ShippingOrders WHERE ShippingOrder_ID = $title(shipOrder_id)"
+		}
+	}
 	
 	# Add ShippingOrder back
 	# loop through the values that are for the ShippingOrders table, then issue an update statement
@@ -371,7 +413,7 @@ proc ea::db::getRecord {method row_id} {
 	unset hdr_list
 	unset hdr_gui
 	unset hdr_list_final
-	${log}::debug SELECT $cols FROM Addresses INNER JOIN ShippingOrders on ShippingOrders.AddressID = Addresses.SysAddresses_ID WHERE [join $data_ " AND "]
+	#${log}::debug SELECT $cols FROM Addresses INNER JOIN ShippingOrders on ShippingOrders.AddressID = Addresses.SysAddresses_ID WHERE [join $data_ " AND "]
 	
 	return [$job(db,Name) eval "SELECT $cols
 							FROM Addresses
@@ -645,3 +687,64 @@ proc ea::db::setShipOrderValues {dist_type} {
 
 } ;# ea::db::setShipOrderValues
 
+proc ea::db::writeSingleShippingOrder {{hidden 0}} {
+	#****if* writeSingleShippingOrder/ea::db
+	# CREATION DATE
+	#   11/16/2015 (Monday Nov 16)
+	#
+	# AUTHOR
+	#	Casey Ackels
+	#
+	# COPYRIGHT
+	#	(c) 2015 Casey Ackels
+	#   
+	# NOTES
+	#   title(SysAddresses_ID), Job(Number, Program(id,Versions) shipOrder(Quantity), shipOrder(ShipVia) are required
+	#   
+	#***
+	global log title job program shipOrder
+	
+	set shipOrderID [ea::db::getShipOrderID 1]
+	if {$shipOrderID ne ""} {
+		${log}::debug Shipping Order ID exists, deleting $shipOrderID
+		$job(db,Name) eval "DELETE FROM ShippingOrders WHERE ShippingOrder_ID = $shipOrderID"
+	}
+
+	$job(db,Name) eval "INSERT INTO ShippingOrders (AddressID, JobInformationID, Hidden, Versions, Quantity, ShipVia, ShipDate, ArriveDate, ContainerType, PackageType, ShippingClass)
+										VALUES ('$title(SysAddresses_ID)', '$job(Number)',
+												$hidden, $program(id,Versions),
+												$shipOrder(Quantity), '$shipOrder(ShipVia)',
+												'$shipOrder(ShipDate)', '$shipOrder(ArriveDate)',
+												'$shipOrder(ContainerType)', '$shipOrder(PackageType)',
+												'$shipOrder(ShippingClass)')"
+
+} ;# ea::db::writeSingleShippingOrder
+proc ea::db::getShipOrderID {{hidden 0}} {
+	#****if* getShipOrderID/ea::db
+	# CREATION DATE
+	#   11/16/2015 (Monday Nov 16)
+	#
+	# AUTHOR
+	#	Casey Ackels
+	#
+	# COPYRIGHT
+	#	(c) 2015 Casey Ackels
+	#   
+	# NOTES
+	#   
+	#   
+	#***
+	global log job shipOrder program
+
+	return [$job(db,Name) eval "SELECT ShippingOrder_ID FROM ShippingOrders
+						INNER JOIN Addresses on Addresses.SysAddresses_ID = ShippingOrders.AddressID
+						INNER JOIN Versions on Versions.Version_ID = ShippingOrders.Versions
+						WHERE Addresses.SysActive = 1
+							AND ShippingOrders.Hidden = $hidden
+							AND Addresses.DistributionType = '$shipOrder(DistributionType)'
+							AND Versions = $program(id,Versions)
+							AND ShipDate = '$shipOrder(ShipDate)'
+							AND JobInformationID = '$job(Number)'"]
+
+	
+} ;# ea::db::getShipOrderID

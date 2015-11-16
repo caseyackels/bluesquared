@@ -19,8 +19,11 @@ proc ea::code::publish::Publish {args} {
     #   3. Creates Excel Report into Job's Folder
     #   4. Issues any email events
     #***
-    global log
+    global log job
     
+    # 0.0 Insert the hidden 'rolled up' entries (this is set on the Distribution Type Setup page)
+    ea::code::publish::addHiddenShipments
+
     # 1.0 Populate Published table in the title database
     set rev [ea::db::publish::addToPublishedTbl]
     
@@ -75,3 +78,36 @@ proc ea::db::publish::addToPublishedTbl {{PublishNote ""}} {
     return $publish_id
     
 } ;# ea::code::publish::addToPublishedTbl
+
+proc ea::code::publish::addHiddenShipments {} {
+    #****if* addHiddenShipments/ea::code::publish
+    # CREATION DATE
+    #   11/16/2015 (Monday Nov 16)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   
+    #   
+    #***
+    global log job
+    
+    # Retrieve all used distribution types
+    set distTypes [$job(db,Name) eval "SELECT DISTINCT Addresses.DistributionType FROM ShippingOrders
+                                            INNER JOIN Addresses on Addresses.SysAddresses_ID = ShippingOrders.AddressID
+                                            WHERE Addresses.SysActive = 1
+                                            AND ShippingOrders.Hidden = 0"]
+
+    if {$distTypes ne ""} {
+        foreach item $distTypes {
+            ${log}::debug Writing to $item
+            ea::code::bm::writeHiddenShipment $item
+        }
+    }
+
+    
+} ;# ea::code::publish::addHiddenShipments

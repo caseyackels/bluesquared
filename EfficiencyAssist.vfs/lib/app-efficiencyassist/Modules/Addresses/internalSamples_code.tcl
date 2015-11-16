@@ -180,7 +180,7 @@ proc ea::code::samples::writeToDB {widTbl} {
         
         ea::code::bm::writeShipment hidden
   
-        # Insert data into tbl:InternalSamples
+        ## Insert data into tbl:InternalSamples
         if {[info exists title(SysAddresses_ID)] && $title(SysAddresses_ID) ne ""} {
             foreach entry $record {
                 #${log}::debug  "ShippingOrders_ID $title(shipOrder_id) [lrange $entry $x $x] $notes"
@@ -195,6 +195,8 @@ proc ea::code::samples::writeToDB {widTbl} {
             # Neither variable was populated; lets look for the id
             set id [$job(db,Name) eval "SELECT SysAddresses_ID FROM Addresses WHERE Company LIKE '%JG Samples%'"]
         }
+        
+        #set id [join [$job(db,Name) eval "SELECT SysAddresses_ID FROM Addresses WHERE Company LIKE '%JG Samples%'"]]
         
         ${log}::debug Sample ID: $id
         set shipOrderID [lindex [$job(db,Name) eval "SELECT DISTINCT ShippingOrder_ID, AddressID FROM ShippingOrders
