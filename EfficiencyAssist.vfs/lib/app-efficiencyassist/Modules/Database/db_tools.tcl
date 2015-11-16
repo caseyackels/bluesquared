@@ -255,17 +255,18 @@ proc ea::db::updateSingleAddressToDB {args} {
 	if {$args ne ""} {set hidden $args} else {set hidden 0}
 	
 	${log}::debug [info level 0] Checking to see if address is already in the db...
-	set id [$job(db,Name) eval "SELECT SysAddresses_ID FROM Addresses
-									WHERE Company LIKE '%$shipOrder(Company)%'
-									AND Attention LIKE '%$shipOrder(Attention)%'
-									AND Zip LIKE '%$shipOrder(Zip)'"]
-	
-	if {$id != ""} {
-		${log}::debug Address id was found, updating...
-		set title(SysAddresses_ID) $id
-		${log}::debug Retrieving ShippingOrder_ID...
-		set title(shipOrder_id) [ea::db::getShipOrderID 1]
-	}
+	#set id [$job(db,Name) eval "SELECT SysAddresses_ID FROM Addresses
+	#								WHERE Company = '$shipOrder(Company)'
+	#								AND Attention = '$shipOrder(Attention)'
+	#								AND Zip = '$shipOrder(Zip)'"]
+	#
+	#if {$id == ""} {
+	#	${log}::debug Address id was found, updating...
+	#	set title(SysAddresses_ID) $id
+	#	
+	#	set title(shipOrder_id) [ea::db::getShipOrderID 1]
+	#	${log}::debug Retrieving ShippingOrder_ID... $title(shipOrder_id)
+	#}
 
 	## Versions require special handling since, it is in another db table. We display the name to the user, but use the ID internally.
 	## Update/Insert versions first
@@ -289,7 +290,7 @@ proc ea::db::updateSingleAddressToDB {args} {
 		lappend address_update "$val='$shipOrder($val)'"
 	}
 	set address_update [join [join $address_update ,]]
-	${log}::debug address_update: $address_update
+	#${log}::debug address_update: $address_update
 	
 	# Update Addresses Table
 	#${log}::debug UPDATE Addresses SET [join $address_update] WHERE SysAddresses_ID = '$title(SysAddresses_ID)'
@@ -300,10 +301,15 @@ proc ea::db::updateSingleAddressToDB {args} {
 	#${log}::debug $job(db,Name) eval DELETE FROM ShippingOrders WHERE AddressID = '$title(shipOrder_id)' AND Version = $shipOrder(Versions) AND JobInformationID = '$job(Number)'
 	
 	if {[info exists title(shipOrder_id)]} {
+		${log}::debug shipOrder_id: $title(shipOrder_id)
 		if {$title(shipOrder_id) ne ""} {
 			${log}::debug Deleting ShipOrderID: $title(shipOrder_id)
 			$job(db,Name) eval "DELETE FROM ShippingOrders WHERE ShippingOrder_ID = $title(shipOrder_id)"
+		} else {
+			${log}::debug ShipOrder is empty!?
 		}
+	} else {
+		${log}::debug ShipOrder doesn't exist!?
 	}
 	
 	# Add ShippingOrder back
@@ -325,8 +331,8 @@ proc ea::db::updateSingleAddressToDB {args} {
 	${log}::debug shiporder_getid: $shiporder_getid
 	
 	#${log}::debug Reinserting the old $title(shipOrder_id)
-	${log}::debug INSERT INTO ShippingOrders (AddressID, JobInformationID, Hidden, [join $headerParent(headerList,shippingorder) ,])
-	${log}::debug VALUES ('$title(SysAddresses_ID)', '$job(Number)', $hidden, [join $shiporder_update ,])
+	#${log}::debug INSERT INTO ShippingOrders (AddressID, JobInformationID, Hidden, [join $headerParent(headerList,shippingorder) ,])
+	#${log}::debug VALUES ('$title(SysAddresses_ID)', '$job(Number)', $hidden, [join $shiporder_update ,])
 	$job(db,Name) eval "INSERT INTO ShippingOrders (AddressID, JobInformationID, Hidden, [join $headerParent(headerList,shippingorder) ,])
 							VALUES ('$title(SysAddresses_ID)', '$job(Number)', $hidden, [join $shiporder_update ,])"
 	
@@ -734,17 +740,18 @@ proc ea::db::getShipOrderID {{hidden 0}} {
 	#   
 	#   
 	#***
-	global log job shipOrder program
+	global log job shipOrder program title
 
+	# AND ShippingOrders.Hidden = $hidden
 	return [$job(db,Name) eval "SELECT ShippingOrder_ID FROM ShippingOrders
 						INNER JOIN Addresses on Addresses.SysAddresses_ID = ShippingOrders.AddressID
 						INNER JOIN Versions on Versions.Version_ID = ShippingOrders.Versions
 						WHERE Addresses.SysActive = 1
-							AND ShippingOrders.Hidden = $hidden
 							AND Addresses.DistributionType = '$shipOrder(DistributionType)'
 							AND Versions = $program(id,Versions)
 							AND ShipDate = '$shipOrder(ShipDate)'
-							AND JobInformationID = '$job(Number)'"]
+							AND JobInformationID = '$job(Number)'
+							AND AddressID = '$title(SysAddresses_ID)'"]
 
 	
 } ;# ea::db::getShipOrderID

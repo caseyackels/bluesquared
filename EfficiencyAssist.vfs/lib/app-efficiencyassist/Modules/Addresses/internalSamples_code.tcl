@@ -181,30 +181,31 @@ proc ea::code::samples::writeToDB {widTbl} {
         ea::code::bm::writeShipment hidden
   
         ## Insert data into tbl:InternalSamples
-        if {[info exists title(SysAddresses_ID)] && $title(SysAddresses_ID) ne ""} {
-            foreach entry $record {
-                #${log}::debug  "ShippingOrders_ID $title(shipOrder_id) [lrange $entry $x $x] $notes"
-                set id $title(SysAddresses_ID)
-            }
-        } elseif {[info exists title(db_address,lastid)] && $title(db_address,lastid) ne ""} {
-            foreach entry $record {
-                #${log}::debug  "ShippingOrders_ID $title(db_address,lastid) [lrange $entry $x $x] $notes"
-                set id $title(db_address,lastid)
-            }
-        } else {
-            # Neither variable was populated; lets look for the id
-            set id [$job(db,Name) eval "SELECT SysAddresses_ID FROM Addresses WHERE Company LIKE '%JG Samples%'"]
-        }
+        #if {[info exists title(SysAddresses_ID)] && $title(SysAddresses_ID) ne ""} {
+        #    foreach entry $record {
+        #        #${log}::debug  "ShippingOrders_ID $title(shipOrder_id) [lrange $entry $x $x] $notes"
+        #        set id $title(SysAddresses_ID)
+        #    }
+        #} elseif {[info exists title(db_address,lastid)] && $title(db_address,lastid) ne ""} {
+        #    foreach entry $record {
+        #        #${log}::debug  "ShippingOrders_ID $title(db_address,lastid) [lrange $entry $x $x] $notes"
+        #        set id $title(db_address,lastid)
+        #    }
+        #} else {
+        #    # Neither variable was populated; lets look for the id
+        #    set id [$job(db,Name) eval "SELECT SysAddresses_ID FROM Addresses WHERE Company LIKE '%JG Samples%'"]
+        #}
         
         #set id [join [$job(db,Name) eval "SELECT SysAddresses_ID FROM Addresses WHERE Company LIKE '%JG Samples%'"]]
         
-        ${log}::debug Sample ID: $id
+        ${log}::debug Sample ID: $title(SysAddresses_ID)
         set shipOrderID [lindex [$job(db,Name) eval "SELECT DISTINCT ShippingOrder_ID, AddressID FROM ShippingOrders
                                                 WHERE JobInformationID = '$job(Number)'
-                                                AND AddressID = '$id'"] 0]
+                                                AND AddressID = '$title(SysAddresses_ID)'"] 0]
         
         # First delete entries if they exist
-        $job(db,Name) eval "DELETE FROM InternalSamples WHERE ShippingOrderID = $shipOrderID"
+        # # Shouldn't need this, database will take care of this because of CASCADE on DELETE
+        #$job(db,Name) eval "DELETE FROM InternalSamples WHERE ShippingOrderID = $shipOrderID"
         
         # Figure out what column contains what quantity. We create a 'note entry' on this data.
         set y 0
@@ -229,7 +230,7 @@ proc ea::code::samples::writeToDB {widTbl} {
         
         set shipOrder(Notes) "INSPECT [join $smplNotes ", "]"
         $job(db,Name) eval "UPDATE Addresses SET Notes='$shipOrder(Notes)'
-                                WHERE SysAddresses_ID = '$id'"
+                                WHERE SysAddresses_ID = '$title(SysAddresses_ID)'"
         # Populate table
         #ea::db::populateTablelist -record new
     }
