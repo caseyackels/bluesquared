@@ -133,10 +133,7 @@ proc job::db::createDB {args} {
     }
     
     set job(db,Name) [join "$tCustCode [join [split $tName " "] ""]" _]
-    
-    # Update tab title, see [job::db::insertJobInfo]
-    #ea::helper::updateTabText "$jNumber: $tName $jName"
-    
+
     # Check to see if the db already exists; if it does launch the updateTitleDb proc
     #set dbExists [file exists [file join $tSaveLocation $job(db,Name).db]]
     

@@ -157,3 +157,36 @@ proc ea::validate::checkProvinceAgainstZip {} {
 
     
 } ;# ea::validate::checkProvinceAgainstZip
+
+proc ea::validate::checkVersionAssignment {} {
+    #****if* checkVersionAssignment/ea::validate
+    # CREATION DATE
+    #   11/17/2015 (Tuesday Nov 17)
+    #
+    # AUTHOR
+    #	Casey Ackels
+    #
+    # COPYRIGHT
+    #	(c) 2015 Casey Ackels
+    #   
+    # NOTES
+    #   Checks the Version assignment of the current entry {shipOrder()} against what is in the db already. If an assignment already exists, issue a warning.
+    #   
+    #***
+    global log title job shipOrder
+
+    set versAssignment [$job(db,Name) eval "SELECT count(*) FROM ShippingOrders
+                                                INNER JOIN Addresses on Addresses.SysAddresses_ID = ShippingOrders.AddressID
+                                                INNER JOIN Versions on Versions.Version_ID = ShippingOrders.Versions
+                                                    WHERE JobInformationID IN ('$job(Number)')
+                                                AND ShippingOrders.AddressID = '$title(SysAddresses_ID)'
+                                                AND Versions.VersionName = '$shipOrder(Versions)'"]
+                                                
+    if {$versAssignment >= 1 || $versAssignment eq ""} {
+        # We have 2 or more entries, issue warning
+        set test [Error_Message::errorMsg BM003]
+        if {$test eq "ok"} {puts yay}
+    }
+
+    
+} ;# ea::validate::checkVersionAssignment
