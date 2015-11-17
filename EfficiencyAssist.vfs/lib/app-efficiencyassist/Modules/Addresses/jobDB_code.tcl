@@ -400,15 +400,19 @@ proc job::db::open {args} {
     set job(CustName) [join [db eval "SELECT CustName From Customer where Cust_ID='$job(CustID)'"]]
     
     # Set last job number, so we have a place to start
-    $job(db,Name) eval "SELECT JobInformation_ID, JobName, JobSaveLocation, JobFirstShipDate, JobBalanceShipDate, max(History.HistDate), max(History.HistTime) FROM JobInformation
-                                                INNER JOIN History
-                                            ON JobInformation.HistoryID = History.History_ID" {
-                                                set job(Number) $JobInformation_ID
-                                                set job(Name) $JobName
-                                                set job(JobBalanceShipDate) $JobBalanceShipDate
-                                                set job(JobFirstShipDate) $JobFirstShipDate
-                                                set job(JobSaveFileLocation) $JobSaveLocation
-                                            }
+    $job(db,Name) eval "SELECT JobInformation_ID, JobName, JobSaveLocation, JobFirstShipDate, JobBalanceShipDate,max(History.HistDate) as maxdate, max(History.HistTime) as maxtime
+                        FROM JobInformation
+                            INNER JOIN History
+                        ON JobInformation.HistoryID = History.History_ID
+                            GROUP BY JobInformation_ID
+                            ORDER BY maxdate desc, maxtime desc
+                        LIMIT 1" {
+                            set job(Number) $JobInformation_ID
+                            set job(Name) $JobName
+                            set job(JobBalanceShipDate) $JobBalanceShipDate
+                            set job(JobFirstShipDate) $JobFirstShipDate
+                            set job(JobSaveFileLocation) $JobSaveLocation
+                        }
                                             
     ea::helper::updateTabText "$job(Number): $job(Title) $job(Name)"
 
@@ -428,7 +432,7 @@ proc job::db::open {args} {
     ## Initialize popup menus
     IFMenus::createToggleMenu $files(tab3f2).tbl
     
-    # Allow the user to select the job menu
+    # Enable the job menu
     $args entryconfigure 1 -state normal
 } ;# job::db::open
 

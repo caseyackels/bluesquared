@@ -100,7 +100,8 @@ proc ea::code::publish::addHiddenShipments {} {
     set distTypes [$job(db,Name) eval "SELECT DISTINCT Addresses.DistributionType FROM ShippingOrders
                                             INNER JOIN Addresses on Addresses.SysAddresses_ID = ShippingOrders.AddressID
                                             WHERE Addresses.SysActive = 1
-                                            AND ShippingOrders.Hidden = 0"]
+                                            AND ShippingOrders.Hidden = 0
+                                            AND JobInformationID IN ('$job(Number)')"]
 
     if {$distTypes ne ""} {
         foreach item $distTypes {

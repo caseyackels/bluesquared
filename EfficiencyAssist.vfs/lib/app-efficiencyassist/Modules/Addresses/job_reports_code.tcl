@@ -614,9 +614,9 @@ proc ea::code::reports::writeExcel {args} {
         Excel::SetMatrixValues $worksheet_id [subst [list {"1st Ship Date" "$shipDate"}]] 1 7
     }
 
-    # JOB NOTES
-    set jobNotes [job::db::getNotes -noteType Job -includeOnReports 1 -noteTypeActive 1 -notesActive 1]
-        if {$jobNotes ne ""} {
+    # Title/Job NOTES
+    set titleNotes [job::db::getNotes -noteType Title -includeOnReports 1 -noteTypeActive 1 -notesActive 1]
+        if {$titleNotes ne ""} {
             # Format: Job Notes (txt)
             set id [Excel::SelectCellByIndex $worksheet_id 2 1]
                 Excel::SetRangeHorizontalAlignment $id xlHAlignRight
@@ -627,7 +627,7 @@ proc ea::code::reports::writeExcel {args} {
                 Excel::SetRangeFontBold $id
                 Excel::SetRangeFontSize $id 14
             # INSERT: Job Notes txt and data
-           Excel::SetMatrixValues $worksheet_id [subst [list {"Job Notes" "$jobNotes"}]] 2 1
+           Excel::SetMatrixValues $worksheet_id [subst [list {"Title Notes" "$titleNotes"}]] 2 1
     }
     
     # TOTALS

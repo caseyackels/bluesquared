@@ -163,6 +163,7 @@ proc ea::db::writeSingleAddressToDB {{hidden 0}} {
 		${log}::debug Address was found, we don't need to insert. Inserting into ShippingOrders....
 		set title(SysAddresses_ID) $id
 		ea::db::writeSingleShippingOrder $hidden
+		ea::db::populateShipOrder [ea::db::getShipOrderID]
 		return
 	}
 	
@@ -415,6 +416,8 @@ proc ea::db::getRecord {method row_id} {
 			}
 	}
 	
+	lappend data_ "JobInformationID IN ('$job(Number)')"
+	
 	#${log}::debug [info level 0] data: $data_
 	unset hdr_list
 	unset hdr_gui
@@ -428,7 +431,7 @@ proc ea::db::getRecord {method row_id} {
 		
 	#return [$job(db,Name) eval "SELECT SysAddresses_ID FROM Addresses WHERE [join $data_ " AND "]"]
 
-} ;# ea::db::getRecord -addressID [$files(tab3f2).tbl curselection]
+} ;# ea::db::getRecord -shippingOrderID [$files(tab3f2).tbl curselection]
 
 
 proc ea::db::populateShipOrder {db_id} {
@@ -715,6 +718,10 @@ proc ea::db::writeSingleShippingOrder {{hidden 0}} {
 		${log}::debug Shipping Order ID exists, deleting $shipOrderID
 		$job(db,Name) eval "DELETE FROM ShippingOrders WHERE ShippingOrder_ID = $shipOrderID"
 	}
+	
+	if {![info exists program(id,Versions)]} {
+		set program(id,Versions) [lindex [job::db::getVersion -name "$shipOrder(Versions)" -active 1] 0]
+	}
 
 	$job(db,Name) eval "INSERT INTO ShippingOrders (AddressID, JobInformationID, Hidden, Versions, Quantity, ShipVia, ShipDate, ArriveDate, ContainerType, PackageType, ShippingClass)
 										VALUES ('$title(SysAddresses_ID)', '$job(Number)',
@@ -723,8 +730,8 @@ proc ea::db::writeSingleShippingOrder {{hidden 0}} {
 												'$shipOrder(ShipDate)', '$shipOrder(ArriveDate)',
 												'$shipOrder(ContainerType)', '$shipOrder(PackageType)',
 												'$shipOrder(ShippingClass)')"
-
 } ;# ea::db::writeSingleShippingOrder
+
 proc ea::db::getShipOrderID {{hidden 0}} {
 	#****if* getShipOrderID/ea::db
 	# CREATION DATE

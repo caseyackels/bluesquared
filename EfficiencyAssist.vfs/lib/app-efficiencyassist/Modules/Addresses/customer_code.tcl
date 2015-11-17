@@ -716,8 +716,8 @@ proc customer::getFileSaveLocation {type} {
     global log job mySettings
     
     switch -nocase $type {
-        title   {set fileLocation $job(TitleSaveFileLocation)}
-        job     {set fileLocation $job(JobSaveFileLocation)}
+        title   {set fileLocation $mySettings(sourceFiles) }
+        job     {set fileLocation $job(TitleSaveFileLocation)}
         default {return -code error "Must pass a valid parameter - Title or Job"}
     }
 

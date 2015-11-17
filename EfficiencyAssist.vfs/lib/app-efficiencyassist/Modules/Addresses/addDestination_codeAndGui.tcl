@@ -563,6 +563,7 @@ proc ea::code::bm::writeHiddenShipment {distributionType} {
                                 WHERE Addresses.DistributionType = '$distributionType'
                             AND Addresses.SysActive = 1
                             AND ShippingOrders.Hidden = 0
+                            AND JobInformationID IN ('$job(Number)')
                                 GROUP BY Versions.VersionName, ShippingOrders.ShipDate" {
                                     #${log}::debug Version Name: $VersionName
                                     set shipOrder(Versions) $VersionName

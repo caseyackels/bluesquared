@@ -139,7 +139,7 @@ proc eAssistHelper::insertItems {tbl} {
 						
 						grid $f2.txt$i -column 0 -row $x -sticky news -pady 5p -padx 5p
 						grid $f2.$x$header -column 1 -row $x -sticky news -pady 5p -padx 5p
-						$btnBar.ok configure -command "[list eAssistHelper::insValuesToTableCells -window $tbl "" $origCells]; ea::code::bm::writeHiddenShipment $txtVariable; destroy .di"
+						$btnBar.ok configure -command "[list eAssistHelper::insValuesToTableCells -window $tbl "" $origCells]; destroy .di"
 						AutoComplete::typeahead $f2.$x$header
 					}
 					shipvia		{
