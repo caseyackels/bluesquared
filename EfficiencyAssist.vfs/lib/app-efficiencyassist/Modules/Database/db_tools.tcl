@@ -748,6 +748,8 @@ proc ea::db::getShipOrderID {{hidden 0}} {
 	#   
 	#***
 	global log job shipOrder program title
+	
+	if {![info exists program(id,Versions)]} {set program(id,Versions) [lindex [job::db::getVersion -name "$shipOrder(Versions)" -active 1] 0]}
 
 	# AND ShippingOrders.Hidden = $hidden
 	return [$job(db,Name) eval "SELECT ShippingOrder_ID FROM ShippingOrders
