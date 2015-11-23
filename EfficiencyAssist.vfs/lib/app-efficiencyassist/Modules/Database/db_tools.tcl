@@ -518,7 +518,7 @@ proc ea::db::populateShipOrderCombining {widTbl} {
 	#   
 	# NOTES
 	#   Compare values from the selected rows, if they are the same display them in the form. If they are different, display empty values.
-	#	Sum the quantity column.
+	#	Sum the combined quantity
 	#   
 	#***
 	global log shipOrder title job
@@ -540,7 +540,6 @@ proc ea::db::populateShipOrderCombining {widTbl} {
 	}
 
 	set title(db_id,mult) $id
-	unset id
 
 } ;# ea::db::populateShipOrderCombining $files(tab3f2).tbl
 

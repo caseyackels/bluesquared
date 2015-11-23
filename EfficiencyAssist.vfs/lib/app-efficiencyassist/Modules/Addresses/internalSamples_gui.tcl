@@ -218,7 +218,7 @@ proc ea::gui::samples::SampleGUI {} {
 	set btnBar [ttk::frame .csmpls.btnbar]
 	pack $btnBar -side bottom -pady 13p -padx 5p -anchor se -pady 8p -padx 5p
 
-	ttk::button $btnBar.btn1 -text [mc "OK"] -command [list ea::code::samples::writeToDB $f3.tbl]
+	ttk::button $btnBar.btn1 -text [mc "OK"] -command "[list ea::code::samples::writeToDB $f3.tbl]; destroy .csmpls"
 	ttk::button $btnBar.btn2 -text [mc "Cancel"] -command {destroy .csmpls}
 	
 	grid $btnBar.btn1 -column 0 -row 0 -sticky nse -padx 8p

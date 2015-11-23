@@ -319,7 +319,7 @@ proc eAssistHelper::saveDest {modifier widRow tblPath} {
                     ea::db::writeSingleAddressToDB
                     
                     # Populate table, inserting new record into the first selection of the combined rows.
-                    ${log}::debug Inserting into row [lindex $widRow 0] id $title(shipOrder_id)
+                    ${log}::debug Inserting into widget on row [lindex $widRow 0] id $title(shipOrder_id)
                     ea::db::populateTablelist -record combine -widRow [lindex $widRow 0] -id $title(shipOrder_id)
 
         }
