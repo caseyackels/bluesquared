@@ -193,7 +193,7 @@ proc eAssist_Global::widgetState {state win} {
     #
     #***
     global log
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
     foreach w [winfo children $win] {
 		if {$state eq "disabled"} {
@@ -213,7 +213,7 @@ proc eAssist_Global::widgetState {state win} {
         {*}$newCommand $newState
     }
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# eAssist_Global::widgetState
 
 proc eAssist_Global::OpenFile {title initDir type args} {
@@ -416,7 +416,7 @@ proc eAssist_Global::at {time args} {
     #
     #***
     global log
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
 	if {[llength $args] == 1} {set args [lindex $args 0]}
     
@@ -424,7 +424,7 @@ proc eAssist_Global::at {time args} {
     
 	after $dt $args
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# eAssist_Global::at
 
 

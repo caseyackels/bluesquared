@@ -54,7 +54,7 @@ proc eAssist_db::loadDB {} {
     #
     #***
     global log program
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
     set myDB [file join $program(Home) EA_setup.edb]
     
@@ -64,7 +64,7 @@ proc eAssist_db::loadDB {} {
     eAssist_db::getEmailSetup
     
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# eAssist_db::loadDB
 
 
@@ -275,7 +275,7 @@ proc eAssist_db::delete {table col args} {
     #
     #***
     global log
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
     set args [join $args]
     
@@ -288,7 +288,7 @@ proc eAssist_db::delete {table col args} {
         db eval "DELETE from $table WHERE rowid=$args"
     }
 
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# eAssist_db::delete
 
 

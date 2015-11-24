@@ -146,7 +146,7 @@ proc msg::initMessages {} {
     #
     #***
     global log msgs
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
     # Initialize
     set msgs [dict create]
@@ -154,5 +154,5 @@ proc msg::initMessages {} {
     dict set $msgs 
     
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# msg::initMessages

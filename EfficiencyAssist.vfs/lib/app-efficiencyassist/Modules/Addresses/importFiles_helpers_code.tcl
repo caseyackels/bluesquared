@@ -165,7 +165,7 @@ proc eAssistHelper::mapHeader {} {
     #
     #***
     global log files position w
-	${log}::debug --START-- [info level 1]
+	#${log}::debug --START-- [info level 1]
 	
 	# setup the variables
 	set lboxOrig $w(wi).lbox1.listbox
@@ -197,7 +197,7 @@ proc eAssistHelper::mapHeader {} {
 	# Delete "available column" entry
 	$lboxAvail itemconfigure [$lboxAvail curselection] -foreground lightgrey -selectforeground grey
 	
-	${log}::debug --END-- [info level 1]
+	#${log}::debug --END-- [info level 1]
 } ;# eAssistHelper::mapHeader
 
 
@@ -227,7 +227,7 @@ proc eAssistHelper::unMapHeader {} {
     #
     #***
     global log files position
-	${log}::debug --START-- [info level 1]
+	#${log}::debug --START-- [info level 1]
 	
 	# setup the variables
 	set lboxOrig $w(wi).lbox1.listbox
@@ -246,7 +246,7 @@ proc eAssistHelper::unMapHeader {} {
 	
 	#parray position
 	
-	${log}::debug --END-- [info level 1]
+	#${log}::debug --END-- [info level 1]
 } ;# ::unMapHeader
 
 

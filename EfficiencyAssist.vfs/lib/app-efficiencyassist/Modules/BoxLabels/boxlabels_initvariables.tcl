@@ -101,7 +101,7 @@ proc Shipping_Gui::initVariables {} {
     #
     #***
     global log mySettings
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
     
     
@@ -134,5 +134,5 @@ proc Shipping_Gui::initVariables {} {
     
     
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# Shipping_Gui::initVariables

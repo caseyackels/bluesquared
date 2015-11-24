@@ -473,7 +473,7 @@ proc IFMenus::clearItems {tbl} {
     #
     #***
     global log files
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
     set cells [$tbl curcellselection]
     
@@ -481,7 +481,7 @@ proc IFMenus::clearItems {tbl} {
         $tbl cellconfigure $cell -text ""
     }
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# IFMenus::clearItems
 
 
@@ -511,7 +511,7 @@ proc IFMenus::createToggleMenu {tbl} {
     #
     #***
     global log
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
     if {[winfo exists .tblToggleColumns]} {
 		destroy .tblToggleColumns
@@ -533,7 +533,7 @@ proc IFMenus::createToggleMenu {tbl} {
     # Create context menu items
     IFMenus::columnMenus $tbl .tblToggleColumns.showCols .tblToggleColumns.hideCols
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# IFMenus::createToggleMenu
 
 
@@ -563,7 +563,7 @@ proc IFMenus::columnMenus {tbl showPath hidePath} {
     #
     #***
     global log files
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
 	# columncount starts at 1, not 0. 
     set colCount [expr [$tbl columncount] -1]
@@ -578,7 +578,7 @@ proc IFMenus::columnMenus {tbl showPath hidePath} {
             #${log}::debug VISIBLE COLUMNS: [$files(tab3f2).tbl columncget $x -name]
         }
     }
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# IFMenus::columnMenus
 
 

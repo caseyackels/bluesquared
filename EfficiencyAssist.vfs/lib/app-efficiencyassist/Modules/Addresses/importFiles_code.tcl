@@ -442,7 +442,7 @@ proc importFiles::insertIntoGUI {wid args} {
             
 
             if {$widUIGroup eq "Consignee"} {set tbl Addresses} else {set tbl ShippingOrders}
-                ${log}::debug Table/Columns: $tbl.$dbColName
+                #${log}::debug Table/Columns: $tbl.$dbColName
                 lappend hdrs_show "$tbl.$dbColName"
 
             

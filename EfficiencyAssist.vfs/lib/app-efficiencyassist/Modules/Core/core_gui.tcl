@@ -323,7 +323,7 @@ proc eAssist::addButtons {text command btn1 column padX args} {
     #
     #***
     global log btn settings
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
     
     if {[lrange $settings(currentModule) 0 0] eq "Setup"} {
         
@@ -342,7 +342,7 @@ proc eAssist::addButtons {text command btn1 column padX args} {
     {*}$btn(Bar).$btn1 configure -text $text -command $command -state $state
     grid $btn(Bar).$btn1 -column $column -row 3 -sticky nse -padx $padX
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# eAssist::addButtons
 
 
@@ -372,7 +372,7 @@ proc eAssist::remButtons {path} {
     #   eAssist::addButtons
     #***
     global log
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
 
     if {[grid slaves $path] != ""} { 
         foreach value [grid slaves $path] {
@@ -380,7 +380,7 @@ proc eAssist::remButtons {path} {
         }
     }
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# eAssist::remButtons
 
 proc eAssist::stateButtons {} {
@@ -409,7 +409,7 @@ proc eAssist::stateButtons {} {
     #
     #***
     global log mySettings program
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
  
     if {[eAssist_Global::fileAccessibility $program(Home) $mySettings(ConfigFile)] != 3} {
         return disable
@@ -417,7 +417,7 @@ proc eAssist::stateButtons {} {
         return normal
     }
 	
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# eAssist::stateButtons
 
 
@@ -447,7 +447,7 @@ proc eAssist::statusBar {args} {
     #
     #***
     global log btn job
-    ${log}::debug --START-- [info level 1]
+    #${log}::debug --START-- [info level 1]
 
     # reconfigure btn(bar)
     pack configure $btn(Bar) -side left -fill x -pady 5p
@@ -464,7 +464,7 @@ proc eAssist::statusBar {args} {
     
 
     
-    ${log}::debug --END-- [info level 1]
+    #${log}::debug --END-- [info level 1]
 } ;# eAssist::statusBar
 
 
