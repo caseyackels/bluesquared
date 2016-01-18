@@ -497,8 +497,8 @@ proc importFiles::insertIntoGUI {wid args} {
             lappend hdr_data $[lindex [split $hdr .] 1]
         }
     }
-    ${log}::debug hdr_list: $hdr_list
-    ${log}::debug hdr_data: $hdr_data
+    #${log}::debug hdr_list: $hdr_list
+    #${log}::debug hdr_data: $hdr_data
 
     $job(db,Name) eval "SELECT [join $hdr_list ,] FROM ShippingOrders
                             INNER JOIN Addresses
