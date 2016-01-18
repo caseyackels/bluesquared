@@ -223,7 +223,7 @@ proc ea::code::samples::writeToDB {widTbl} {
 
             # Enter into DB
             #${log}::debug $shipOrderID $colName $colQty INSPECT
-            $job(db,Name) eval "INSERT INTO InternalSamples (ShippingOrderID, Location, Quantity, Notes) VALUES ($shipOrderID, '$colName', '$colQty', 'INSPECT')"
+            $job(db,Name) eval "INSERT INTO InternalSamples (ShippingOrderID, Location, Quantity, Notes) VALUES ($shipOrderID, '$colName', $colQty, 'INSPECT')"
             incr y
             
         }
@@ -258,7 +258,7 @@ proc ea::db::samples::getSamples {args} {
                             FROM ShippingOrders
                             INNER JOIN InternalSamples on InternalSamples.ShippingOrderID = ShippingOrders.ShippingOrder_ID
                             INNER JOIN Versions on Versions.Version_ID = ShippingOrders.Versions
-                            WHERE JobInformationID = '307180'
+                            WHERE JobInformationID = '$job(Number)'
                             AND Versions.VersionName = '[join $args]'" {
                                 lappend toEnter "$qty"
                             }
