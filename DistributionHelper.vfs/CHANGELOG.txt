@@ -1,3 +1,9 @@
+= Version 3.0.2 (January 2016)
+== Notes
+* Added FlateRateEnvelope as a package type, tied to the 216 ship via code.
+
+--
+
 = Version 3.0.1 (November 2012)
 == Notes
 * Fixed issue with canadian zip codes that have a space in them. All zips are now 'cleansed', of hyphens and spaces.

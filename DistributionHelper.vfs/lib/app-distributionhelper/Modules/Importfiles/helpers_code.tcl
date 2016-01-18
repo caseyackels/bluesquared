@@ -617,6 +617,7 @@ proc Disthelper_Helper::shipVia {l_line name} {
         208     {set packtype Parcel}
         213     {set packtype Letter}
         215     {set packtype Parcel}
+        216     {set packtype FlatRateEnvelope}
         default {set packtype ""}
     }
     
