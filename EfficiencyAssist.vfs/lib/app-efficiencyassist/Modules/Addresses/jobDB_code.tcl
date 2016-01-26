@@ -249,18 +249,19 @@ proc job::db::createDB {args} {
     # This table should be auto-generated, depending on what header is assigned to what group.
     # Shipping Orders should contain groups: Shipping Order, Packaging
     # Basic setup
-    # *** Table: ShippingOrders ***
+    # *** Table: ShippingOrders *** 
     set sTable [list \
-        {ShippingOrder_ID   INTEGER PRIMARY KEY AUTOINCREMENT} \
-        {JobInformationID   TEXT  NOT NULL ON CONFLICT ROLLBACK
+        {ShippingOrder_ID       INTEGER PRIMARY KEY AUTOINCREMENT} \
+        {JobInformationID       TEXT  NOT NULL ON CONFLICT ROLLBACK
                                     REFERENCES JobInformation (JobInformation_ID) ON DELETE NO ACTION
                                                                                     ON UPDATE CASCADE} \
-        {AddressID          TEXT  NOT NULL ON CONFLICT ROLLBACK
+        {AddressID              TEXT  NOT NULL ON CONFLICT ROLLBACK
                                     REFERENCES Addresses (SysAddresses_ID) ON DELETE CASCADE
                                                                             ON UPDATE CASCADE} \
-        {Hidden             BOOLEAN DEFAULT (0) NOT NULL ON CONFLICT ROLLBACK}  \
-        {Versions          INTEGER REFERENCES Versions (Version_ID) ON UPDATE CASCADE
-                                                                    ON DELETE NO ACTION}]
+        {Hidden                 BOOLEAN DEFAULT (0) NOT NULL ON CONFLICT ROLLBACK}  \
+        {Versions               INTEGER REFERENCES Versions (Version_ID) ON UPDATE CASCADE
+                                                                    ON DELETE NO ACTION} \
+        {DistributionTypeActual TEXT}]
 
     # Create the ShippingOrder table (Consignee group)
     db eval {SELECT dbColName, dbDataType FROM HeadersConfig
