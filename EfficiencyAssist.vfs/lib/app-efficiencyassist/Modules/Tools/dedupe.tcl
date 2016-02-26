@@ -129,6 +129,9 @@ proc ea::dedupe::exactMatch {args} {
     #${log}::debug Deleting record: DELETE FROM Addresses WHERE SysAddresses_ID IN ([join $new_remove_SysAddresses ,])
     $job(db,Name) eval "DELETE FROM Addresses WHERE SysAddresses_ID IN ([join $new_remove_SysAddresses ,])"
     
+    # Copy default fields ...
+    # Create 'default column names' and place in HeaderParent array
+    
     unset remove_SysAddresses
     unset new_remove_SysAddresses
     unset keep_SysAddresses

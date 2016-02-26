@@ -66,6 +66,9 @@ proc importFiles::initVars {args} {
                                                         WHERE widUIGroup <> 'Consignee'
                                                         ORDER BY widUIPositionWeight ASC, dbColName ASC"]
     
+    set headerParent(headerList,CopyColumn) [db eval "SELECT dbColName FROM HeadersConfig
+                                                        WHERE CopyColumn = 1"]      
+    
     set headerParent(whiteList) [eAssist_db::dbWhereQuery -columnNames dbColName -table HeadersConfig -where widDisplayType='Always']
     #set headerParent(blackList) [list Status] ;# This is only for the columns that exist in the main table (addresses) that we never want to display
     set headerParent(ColumnCount) [llength $headerParent(headerList)]
