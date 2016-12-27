@@ -365,11 +365,27 @@ proc Disthelper_Code::writeOutPut {} {
         # escape if we have 'blank' lines
         # It will show up as a string of ,,,,,,,,, in a csv file
         if {[string is punc $line] == 1} {continue}
+            
+        ## Ensure we have good data; if we don't, lets try to fix it.
+        ## This typically occurs when there is a hard return in the data. Excel does not fix it when the file is exported to .csv format
+        if {[csv::iscomplete $line] == 0} {
+                lappend badString $line
+                #${log}::notice Bad Record - Found on line [lsearch $process(dataList) $record] - $record
+                # Stop looping and go to the next record
+                continue
+        } else {
+            if {[info exists badString]} {
+                set l_line [csv::split [join $badString]]
+                unset badString
+            } else {
+                set l_line [csv::split $line]
+            }
+        }
 
-        set l_line [csv::split $line]
+        #set l_line [csv::split $line]
         set l_line [join [split $l_line ,] ""] ;# remove all comma's
         
-        #'debug Line: $l_line
+        'debug Line: $l_line
 
         # Map data to variable
         # Name = individual name of array
@@ -630,7 +646,11 @@ proc Disthelper_Code::writeOutPut {} {
         # e.g qty5 MANAGER
         # We will also truncate the name if it exceeds the 35 char limit
         if {[lsearch $settings(shipviaUSPS) $01_shipVia] != -1} {
-            set 03_Attention [Disthelper_Code::processAddresses Attention "QTY[lindex $val 1] $03_Attention"]
+            set txtVal [lindex $val 1]
+            
+            if {$txtVal == 0} {set txtVal $18_fullbox}
+            #set 03_Attention [Disthelper_Code::processAddresses Attention "QTY[lindex $val 1] $03_Attention"]
+            set 03_Attention [Disthelper_Code::processAddresses Attention "QTY$txtVal $03_Attention"]
         }
         
         

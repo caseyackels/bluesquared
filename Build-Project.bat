@@ -45,7 +45,7 @@ GOTO BUILDPROJECT
 set programName=NextGenRM
 set programEXE=NextGenRM.vfs
 
-set thirdparty=about autoscroll debug tablelist5.4 autoscroll tooltip img
+set thirdparty=about autoscroll debug tablelist5.13 tooltip img log md5 sqlite3_3801
 
 GOTO BUILDPROJECT
 
@@ -54,7 +54,7 @@ GOTO BUILDPROJECT
 set programName=EfficiencyAssist
 set programEXE=EfficiencyAssist.vfs
 
-set thirdparty=about autoscroll csv debug IconThemes img log md5 md5crypt sqlite3_3801 tablelist5.13 tcom3.9 tkdnd2.2 tooltip twapi_4.1-dev mime smtpd base64 Cawt-2.1.0-User cmdline struct report soundex
+set thirdparty=about autoscroll csv debug IconThemes img log md5 md5crypt sqlite3_3801 tablelist5.13 tcom3.9 tkdnd2.2 tooltip twapi_4.1-dev tdbc mime smtpd base64 Cawt-2.1.0-User cmdline struct report soundex
 
 GOTO BUILDPROJECT
 

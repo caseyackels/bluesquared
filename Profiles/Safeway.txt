@@ -1,0 +1,2 @@
+profile(table) {Safeway Center Medium Single {}}
+profile(Store) Safeway

@@ -1,0 +1,6 @@
+Company,Attention,Address1,Address2,City,State,zip,Latin,L Pc #,Europe,E Pc #,version,pieceweight,quantity,Ship via
+Protravel Inc.,Linda Thompson,10209 Woodford Bridge St.,,Tampa,FL,33626,0,0.5677,1,0.79788,L0:E1,0.798,1,216
+AAA Missouri,Manager,900 East County Line Road,Suite 105,Ridgeland,MS,39157,0,0.5677,10,0.79788,L0:E10,0.798,10,201
+AAA Auto Club South,Manager,5401 Airport Pulling Road Nort,,Naples,FL,34109,0,0.5677,10,0.79788,L0:E10,0.798,10,201
+AAA Travel Agency,Bob Stevenson,7334 West Sand Lake Road,Suite 424,Orlando,FL,32819,10,0.5677,10,0.79788,L10:E10,0.683,20,201
+Travelmore/Travel Leaders,Manager,212 West Colfax Avenue,,South Bend,IN,46601,10,0.5677,10,0.79788,L10:E10,0.683,20,201

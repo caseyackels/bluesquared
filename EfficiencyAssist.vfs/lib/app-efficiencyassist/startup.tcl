@@ -94,6 +94,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries report]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries cmdline]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries soundex]
+    lappend ::auto_path [file join [file dirname [info script]] Libraries tdbc]
 
 
 	##
@@ -107,6 +108,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Modules vUpdate]
 	lappend ::auto_path [file join [file dirname [info script]] Modules Email]
 	lappend ::auto_path [file join [file dirname [info script]] Modules Preferences]
+    lappend ::auto_path [file join [file dirname [info script]] Modules Scheduler]
 	
 	## Init namespaces
 	namespace eval ea::sec {} ;# do not use
@@ -158,8 +160,13 @@ proc 'eAssist_sourceReqdFiles {} {
     # Init Vars
     namespace eval ea::code::init {}
     namespace eval ea::db::init {}
-	
-	
+    
+    # Batch formatter
+    namespace eval ea::code::bf {}
+    namespace eval ea::gui::bf {}
+    namespace eval ea::db::bf {}
+	  
+    
 	## Start the Package Require
 	# System Packages
 	package require msgcat
@@ -183,6 +190,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	package require struct
 	package require report
 	package require soundex
+    package require tdbc
 	
 	
 	# Logger; MD5 are [package require]'d below.
@@ -194,6 +202,8 @@ proc 'eAssist_sourceReqdFiles {} {
 	package require eAssist_ModBoxLabels
 	package require aboutwindow
 	package require eAssist_Preferences
+    package require eAssist_ModBatchFormatter
+    package require eAssist_ModScheduler
 	
 	# non-gui elements
 	package require eAssist_tools
@@ -638,9 +648,9 @@ proc 'eAssist_loadSettings {} {
                 if {$line == ""} {continue}
                 set l_line [split $line " "]
                 set [lindex $l_line 0] [join [lrange $l_line 1 end] " "]
-				${log}::notice "Loaded variables ($myFile): $l_line"
+				${log}::notice "Loaded variables ($mySettings(File)): $l_line"
         }
-		${log}::notice "Loaded variables ($myFile): Complete!"
+		${log}::notice "Loaded variables ($mySettings(File)): Complete!"
     }
 	
     # Initialize default values

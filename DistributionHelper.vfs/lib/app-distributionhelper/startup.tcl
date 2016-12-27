@@ -437,7 +437,7 @@ proc 'distHelper_loadSettings {} {
 
     
     set program(Version) 3
-    set program(PatchLevel) 2
+    set program(PatchLevel) 3
     set program(beta) ""
     set program(Name) "Efficiency Assist"
     set program(FullName) "$program(Name) - $program(Version).$program(PatchLevel) $program(beta)"

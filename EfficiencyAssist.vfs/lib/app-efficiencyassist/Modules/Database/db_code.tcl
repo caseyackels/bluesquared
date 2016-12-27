@@ -296,7 +296,7 @@ proc eAssist_db::delete {table col args} {
 ## Insert data in tables if needed
 ##
 
-proc eAssist_db::checkModuleName {moduleName} {
+proc eAssist_db::checkModuleName {moduleName args} {
     #****f* checkModuleName/eAssist_db
     # CREATION DATE
     #   09/10/2014 (Wednesday Sep 10)
@@ -329,7 +329,7 @@ proc eAssist_db::checkModuleName {moduleName} {
     #   
     #***
     global log emailSetup
-
+    
     ${log}::debug Looking for $moduleName in the database ...
     if {[info exists ModNames]} {unset ModNames}
         
@@ -1326,7 +1326,6 @@ proc ea::db::getDistSetup {args} {
     #   
     #***
     global log
-
         # Get the distribution types that are blacklisted
     set method Export
     set action "Single Entry"

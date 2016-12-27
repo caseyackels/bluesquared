@@ -1,0 +1,1 @@
+package ifneeded eAssist_ModBatchFormatter 1.0 "[list source [file join $dir bf_gui.tcl]]"

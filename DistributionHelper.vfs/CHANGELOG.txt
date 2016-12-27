@@ -1,3 +1,9 @@
+= Version 3.0.3 (December 2016)
+== Notes
+* Correct how USPS quantities are put on the label in the Attention line.
+
+--
+
 = Version 3.0.2 (January 2016)
 == Notes
 * Added FlateRateEnvelope as a package type, tied to the 216 ship via code.

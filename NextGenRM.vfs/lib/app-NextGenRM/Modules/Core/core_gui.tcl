@@ -58,8 +58,7 @@ proc nextgenrm::parentGUI {} {
     menu $mb.file -tearoff 0 -relief raised -bd 2
 
     $mb add cascade -label [mc "File"] -menu $mb.file
-    $mb.file add command -label [mc "Store Profile..."] -command {nextgenrm_GUI::profile}
-    $mb.file add command -label [mc "Purchased Lists..."] -command {nextgenrm_GUI::pclWindow}
+    $mb.file add command -label [mc "Setup..."] -command {rmGUI::prefGUI}
     $mb.file add command -label [mc "Exit"] -command {exit}
 
 
@@ -68,14 +67,6 @@ proc nextgenrm::parentGUI {} {
     $mb add cascade -label [mc "Help"] -menu $mb.help
 
     $mb.help add command -label [mc "About..."] -command { BlueSquared_About::aboutWindow }
-
-
-    # Create Separator Frame
-    #set frame0 [ttk::frame .frame0]
-    #ttk::separator $frame0.separator -orient horizontal
-
-    #grid $frame0.separator - -sticky ew -ipadx 4i
-    #pack $frame0 -anchor n -fill x -expand yes -pady 3p
 
     # Create the container frame
     ttk::frame .container
@@ -91,17 +82,9 @@ proc nextgenrm::parentGUI {} {
     ##
 
     set btnBar [ttk::frame .btnBar]
-
-    ttk::button $btnBar.print -text [mc "Exit"] -command { 'debug [array names profile] }
-
-    grid $btnBar.print -column 0 -row 3 -sticky nse -padx 8p
     pack $btnBar -side bottom -anchor e -pady 13p -padx 5p
     
-    ##
-    ## Global Bindings
-    ##
-    ttk::style map TCombobox -fieldbackground [list focus yellow]
-    ttk::style map TEntry -fieldbackground [list focus yellow]
-
+    grid [ttk::button $btnBar.print -text [mc "Exit"] -command {destroy .}] -column 0 -row 0 -sticky se
+   
 
 } ;# End of parentGUI

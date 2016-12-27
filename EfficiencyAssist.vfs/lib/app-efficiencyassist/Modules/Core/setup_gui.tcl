@@ -79,7 +79,7 @@ proc eAssistSetup::eAssistSetup {} {
     # Create groups and children
     # 
     # *** Add your new options to: eAssistSetup::selectionChanged in setup_code.tcl
-    set tree(groups) {BoxLabels BatchMaker Packaging DistTypes CSR Company Logging EmailSetup Admin}
+    set tree(groups) {BoxLabels BatchMaker Packaging DistTypes CSR Company Logging EmailSetup Scheduler Admin}
     #set tree(groups) [list BoxLabels BatchMaker Packaging DistTypes CSR Company Logging "Email Setup"]
     
     set tree(BoxLabelsChildren) [list Paths Labels Delimiters BoxHeaders ShipMethod Misc.] ;# when changing these, also change them in eAssistSetup::selectionChanged

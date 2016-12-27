@@ -91,7 +91,7 @@ proc eAssistSetup::selectionChanged {tbl} {
     #
     #***
     global G_currentSetupFrame log GS
-    ${log}::debug --START-- selectionChanged
+    #${log}::debug --START-- selectionChanged
     
      set rowList [$tbl curselection] 
      if {[llength $rowList] == 0} { 
@@ -118,10 +118,11 @@ proc eAssistSetup::selectionChanged {tbl} {
         Company         {eAssistSetup::company_GUI ; set GS(gui,lastFrame) company_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
         Logging         {eAssistSetup::logging_GUI ; set GS(gui,lastFrame) logging_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
         EmailSetup      {eAssistSetup::emailSetup_GUI ; set GS(gui,lastFrame) emailSetup_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
+        Scheduler       {eAssistSetup::scheduler_GUI ; set GS(gui,lastFrame) scheduler_GUI ; ${log}::debug Current Frame: $G_currentSetupFrame}
         default         {${log}::notice $G_currentSetupFrame does not match any configured frames.}
      }
     
-    ${log}::debug --END-- selectionChanged
+    #${log}::debug --END-- selectionChanged
 } ;# eAssistSetup::selectionChanged
 
 

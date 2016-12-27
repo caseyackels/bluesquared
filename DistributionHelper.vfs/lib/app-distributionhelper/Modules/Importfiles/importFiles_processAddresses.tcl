@@ -102,7 +102,6 @@ proc Disthelper_Code::processAddresses {name args} {
     return $returnItem
 } ;# End Disthelper_Code::processAddresses
 
-
 proc Disthelper_Code::CleansePhone {args} {
     #****f* CleansePhone/Disthelper_Code
     # AUTHOR

@@ -1,25 +1,9 @@
 # Creator: Casey Ackels
-# Initial Date: March 25, 2012]
+# Initial Date: June 2016]
 # Dependencies: See Below
 #-------------------------------------------------------------------------------
-#
-# Subversion
-#
-# $Revision: 241 $
-# $LastChangedBy: casey.ackels $
-# $LastChangedDate: 2012-03-01 21:26:50 -0800 (Thu, 01 Mar 2012) $
-#
-########################################################################################
 
-##
-## - Overview
-# This file holds the code pertaining to the ESC/P printer codes
-
-## Coding Conventions
-# - Namespaces: 
-
-# - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
-#   will be uppercase. I.E sourceFiles, sourceFileExample
+# Designed for Epson TM-T90 printer
 
 namespace eval nextgenrm_EscP {}
 

@@ -476,6 +476,8 @@ proc ea::sec::modLauncher {args} {
         switch -nocase $args {
             "Box Labels"    {eAssist::buttonBarGUI $args}
             "Batch Maker"   {eAssist::buttonBarGUI $args}
+            "Batch Formatter" {eAssist::buttonBarGUI $args}
+            "Scheduler"     {eAssist::buttonBarGUI $args}
             Setup           {eAssist::buttonBarGUI $args}
             default         {}
         }

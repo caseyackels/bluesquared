@@ -72,11 +72,6 @@ proc eAssist::parentGUI {} {
         set settings(currentModule) {Batch Maker}
         set settings(currentModule_machine) [join $settings(currentModule) _]
     }
-    # Backwards compatability. This var used to hold two values.
-    if {[llength $settings(currentModule)] > 1} {
-            set settings(currentModule) {Batch Maker}
-            set settings(currentModule_machine) [join $settings(currentModule) _]
-        }
     
     wm protocol . WM_DELETE_WINDOW {eAssistSetup::SaveGlobalSettings; destroy .}
     wm protocol . WM_SAVE_YOURSELF {eAssistSetup::SaveGlobalSettings}
@@ -110,10 +105,12 @@ proc eAssist::parentGUI {} {
         # Add in the sub-menus
         foreach mod [lsort $user($user(id),modules)] {
             switch -- $mod {
-                "Batch Maker"   {$mb.module add command -label [mc "Batch Maker"] -command "ea::sec::modLauncher $mod"}
-                "Box Labels"    {$mb.module add command -label [mc "Box Labels"] -command "ea::sec::modLauncher $mod"}
-                Setup           {$mb.module add command -label [mc "Setup"] -command "ea::sec::modLauncher $mod"}
-                default         {${log}::critical "$mod: doesn't have a menu configuration setup."}
+                "Batch Maker"       {$mb.module add command -label [mc "Batch Maker"] -command "ea::sec::modLauncher $mod"}
+                "Batch Formatter"   {$mb.module add command -label [mc "Batch Formatter"] -command "ea::sec::modLauncher $mod"}
+                "Box Labels"        {$mb.module add command -label [mc "Box Labels"] -command "ea::sec::modLauncher $mod"}
+                Scheduler           {$mb.module add command -label [mc "Scheduler"] -command "ea::sec::modLauncher $mod"}
+                Setup               {$mb.module add command -label [mc "Setup"] -command "ea::sec::modLauncher $mod"}
+                default             {${log}::critical "$mod: doesn't have a menu configuration setup."}
             }
         }
     } else {
@@ -230,6 +227,26 @@ proc eAssist::buttonBarGUI {Module} {
             #eAssistSetup::SaveGlobalSettings
             lib::savePreferences
         }
+        "Batch Formatter"   {
+            ${log}::debug Entering $module mode
+            # .. remember what module we are in ..
+
+            set settings(currentModule) $module
+            set settings(currentModule_machine) [join $module _]
+            
+            # .. setup the buttons and status bar
+            eAssist::remButtons $btn(Bar)
+            
+            # .. launch the module
+            ea::gui::bf::LaunchGUI
+            
+            # .. Setup the geometry
+            eAssist_Global::getGeom $settings(currentModule_machine) 900x610+240+124
+            
+            # .. save the settings
+            #eAssistSetup::SaveGlobalSettings
+            lib::savePreferences
+        }
         "Batch Maker"   {
             ${log}::debug Entering $module mode
             # .. remember what module we are in ..
@@ -253,6 +270,30 @@ proc eAssist::buttonBarGUI {Module} {
             
             # .. save the settings
             #eAssistSetup::SaveGlobalSettings
+            lib::savePreferences
+        }
+        "Scheduler"     {
+            ${log}::debug Entering $module mode
+                        # .. remember what module we are in ..
+            #set settings(currentModule) [list $module 1]
+            set settings(currentModule) $module
+            set settings(currentModule_machine) [join $module _]
+
+
+            # .. setup the buttons and status bar
+            eAssist::remButtons $btn(Bar)
+            #eAssist::statusBar
+            
+            # .. Initialize menu options
+            # ::initMenu
+            
+            # .. launch the mode
+            ea::sched::gui::schedGUI
+            
+            # .. Setup the geometry
+            eAssist_Global::getGeom $settings(currentModule_machine) 900x610+240+124
+            
+            # .. save the settings
             lib::savePreferences
         }
         Setup       {

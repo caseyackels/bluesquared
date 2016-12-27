@@ -1,31 +1,9 @@
-# Creator: Casey Ackels
 # Initial Date: January 1, 2012]
-# Dependencies: See Below
-#-------------------------------------------------------------------------------
-#
-# Subversion
-#
-# $Revision: 241 $
-# $LastChangedBy: casey.ackels $
-# $LastChangedDate: 2012-03-01 21:26:50 -0800 (Thu, 01 Mar 2012) $
-#
-########################################################################################
-
-##
-## - Overview
-# This file holds procedures for creating icons
-
 
 namespace eval nextgenrm_Icons {}
 
 proc nextgenrm_Icons::InitializeIcons {args} {
 	#****f* InitilizeIcons/nextgenrm_Icons
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2012 - Casey Ackels
-    #
     # FUNCTION
     #	
     #

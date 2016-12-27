@@ -27,4 +27,5 @@ package ifneeded eAssist_core 1.0 "[list source [file join $dir core_gui.tcl]]
                                     [list source [file join $dir security_code.tcl]]
                                     [list source [file join $dir security_gui.tcl]]
                                     [list source [file join $dir setup_company_gui.tcl]]
-                                    [list source [file join $dir setup_company_code.tcl]]"
+                                    [list source [file join $dir setup_company_code.tcl]]
+                                    [list source [file join $dir setup_scheduler_gui.tcl]]"
