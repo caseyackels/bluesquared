@@ -12,20 +12,26 @@ package provide eAssist_ModScheduler 1.0
 # Register with the DB
 ea::sched::db::regWithDB
 
-set sched(avoid_weekend) 0
-set sched(avoid_holiday) 0
-set sched(avoid_USPSHoliday) 0
+proc ea::sched::code::initvars_sched {} {
+    global sched
+    if {[array exists sched]} {
+        unset sched
+    }
+    
+    # This is the order that they exist in the database (Table: sched_DateType)
+    array set sched [list avoid_weekend 0 \
+                    avoid_plantHoliday 0 \
+                    avoid_freightHoliday 0 \
+                    avoid_USPSHoliday 0]
+}
+
+ea::sched::code::initvars_sched
 
 proc ea::sched::gui::schedGUI {} {
-
-# Clear the frames before continuing
-eAssist_Global::resetFrames parent
-
-# Setup the Filter array
-# eAssist_Global::launchFilters
-
-# Set the vars
-#importFiles::initVars
+    global log
+    
+    # Clear the frames before continuing
+    eAssist_Global::resetFrames parent
 
 ##
 ## Job Info
@@ -68,31 +74,21 @@ eAssist_Global::resetFrames parent
     set f2 [ttk::labelframe .container.frame2 -text [mc "Dates"] -padding 10]
     pack $f2 -expand yes -fill both -pady 5p -padx 5p
     
-    set dateTypes [list "Print Order" \
-                   "Files In" \
-                   "Distribution" \
-                   "Mail List" \
-                   "Files Out to Vendor" \
-                   "Proof Out" \
-                   "Final Portal Approval" \
-                   "Proof at Customer" \
-                   "Customer Sends Back" \
-                   "Proof Back" \
-                   "OK To Plate" \
-                   "Postage Due" \
-                   "Ship"]
+    set dateTypes [ea::sched::db::getAllGroupNames -n]
     
     for {set x 0} {$x < 9} {incr x} {
         
         set col 0
         grid [ttk::combobox $f2.cbox$x -values $dateTypes] -column $col -row $x
+        
         incr col
-        grid [ttk::entry $f2.ent$x] -column $col -row $x
+        grid [ttk::button $f2.btn$x -text "Cal" -width 3 -command "ea::sched::code::showDateChooser . $f2.ent$x"] -column $col -row $x
+        
         incr col
-        grid [ttk::button $f2.btn$x -text "btn" -width 3] -column $col -row $x
+        grid [ttk::entry $f2.ent$x -width 10 -state readonly] -column $col -row $x
+        
         incr col
         grid [ttk::checkbutton $f2.ckbtn$x] -column $col -row $x
-    
         }
         
 ##
@@ -102,4 +98,38 @@ eAssist_Global::resetFrames parent
     pack $f3 -expand yes -fill x -pady 5p -padx 5p
     
     grid [ttk::button $f3.gen -text [mc "Generate"]] -column 0 -row 0 -pady 5p -padx 5p
+}
+
+
+##
+## - Code
+##
+##
+proc ea::sched::code::showDateChooser {w wid_entry} {
+    global log
+
+    set date [date::choose $w]
+    
+    # Set widget to editable
+    $wid_entry configure -state normal
+    $wid_entry insert end $date
+    ${log}::debug Inserting into widget: $date
+    
+    #set widget to non-editable
+    $wid_entry configure -state readonly
+    
+    #insert into db
+    set day [lindex [split $date /] 0]
+    if {[string length $day] == 1} {
+        set day 0$day
+    }
+    
+    set month [lindex [split $date /] 1]
+    if {[string length $month] == 1} {
+        set month 0$month
+    }
+    
+    set year [lindex [split $date /] 2]
+    
+    ${log}::debug Inserting into DB: $year-$day-$month
 }
