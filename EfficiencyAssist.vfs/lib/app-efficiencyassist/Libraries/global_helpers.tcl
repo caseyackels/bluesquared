@@ -56,7 +56,7 @@ proc eAssist_Global::resetFrames {args} {
     # SEE ALSO
     #
     #***
-    global log
+    global log gui
     
     switch -- $args {
         parent  {foreach child [winfo children .container] {destroy $child} }
@@ -142,9 +142,10 @@ proc eAssist_Global::checkVars {win {var ""}} {
 	} else {
 		return $var
 	}
-	
+
+    # pref	{set launchWin "eAssistPref::launchPreferences"}
 	switch -- $win {
-		pref	{set launchWin "eAssistPref::launchPreferences"}
+		pref	{set launchWin "ea::gui::pref::startPref"}
 		setup	{set launchWin "eAssist::buttonBarGUI Setup 2"}
 		default	{${log}::notice No window was set, aborting.
 				return}
@@ -230,7 +231,8 @@ proc eAssist_Global::OpenFile {title initDir type args} {
     #
     # SYNOPSIS
     #	eAssist_Global::OpenFile <title> <initDir> <file|dir> ?fileExtension? ?File Type?
-	#	eAssist_Global::OpenFile [mc "Select Directory"] $mySettings(Home) dir 
+	#	eAssist_Global::OpenFile [mc "Select Directory"] $mySettings(Home) dir
+    #   eAssist_Global::OpenFile [mc "Bartender Path"] [pwd] -filetype .exe
     #
     # CHILDREN
     #	
@@ -239,7 +241,7 @@ proc eAssist_Global::OpenFile {title initDir type args} {
     #	
     #
     # NOTES
-    #
+    #   
     # SEE ALSO
     #
     #
@@ -247,10 +249,11 @@ proc eAssist_Global::OpenFile {title initDir type args} {
 	global log
 	
 	# Set the defaults first, if the programmer specified values, the defaults will be overwritten
+    set filename ""
 	set ext .db
 	set ftype {
-		{Efficiency Assist Project} {.db}
-	}
+        { {Efficiency Assist Project} {.db} }
+    }
 	
 	foreach {item value} $args {
 		switch -- $item {

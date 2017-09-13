@@ -466,7 +466,7 @@ proc printLabels {} {
 	    return
 	}
 	
-	if {([info exists mySettings(path,bartender)] != 0)} {
+	if {[info exists mySettings(path,bartender)] != 0} {
 		if { $mySettings(path,bartender) == ""} {
 			${log}::debug path,bartender is empty: $mySettings(path,bartender)
 			return

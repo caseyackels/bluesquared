@@ -109,6 +109,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Modules Email]
 	lappend ::auto_path [file join [file dirname [info script]] Modules Preferences]
     lappend ::auto_path [file join [file dirname [info script]] Modules Scheduler]
+    lappend ::auto_path [file join [file dirname [info script]] Modules LabelDesigner]
 	
 	## Init namespaces
 	namespace eval ea::sec {} ;# do not use
@@ -165,6 +166,11 @@ proc 'eAssist_sourceReqdFiles {} {
     namespace eval ea::code::bf {}
     namespace eval ea::gui::bf {}
     namespace eval ea::db::bf {}
+    
+    # Label Designer; LD, ld
+    namespace eval ea::code::lb {}
+    namespace eval ea::gui::lb {}
+    namespace eval ea::db::lb {}
 	  
     
 	## Start the Package Require
@@ -204,6 +210,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	package require eAssist_Preferences
     package require eAssist_ModBatchFormatter
     package require eAssist_ModScheduler
+    package require eAssist_ModLabelDesigner
 	
 	# non-gui elements
 	package require eAssist_tools

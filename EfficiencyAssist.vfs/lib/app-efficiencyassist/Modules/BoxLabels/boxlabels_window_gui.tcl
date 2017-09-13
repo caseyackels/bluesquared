@@ -414,7 +414,9 @@ proc printbreakDown {args} {
     # If it doesn't exist, lets launch it, then immediately hide it.
     if {![winfo exists .breakdown]} {
         breakDown
+        focus .breakdown
         wm withdraw .breakdown
+        focus .
     }
         
     set myBreakDownText [.breakdown.frame1.txt get 0.0 end]
@@ -562,7 +564,7 @@ proc breakDown {} {
             # Display the window
             wm deiconify .breakdown
             
-            ${log}::debug Breakdown window - all ready mapped ...
+            ${log}::debug Breakdown window - already mapped ...
         }
         
         # Refreshing
@@ -692,7 +694,7 @@ proc Shipping_Gui::initMenu {} {
     #	(c) 2011-2013 Casey Ackels
     #
     # FUNCTION
-    #	Initialize menus for the Addresses module
+    #	Initialize menus for the box labels module
     #
     # SYNOPSIS
     #
@@ -720,25 +722,9 @@ proc Shipping_Gui::initMenu {} {
 
     $mb.modMenu delete 0 end
     
-    ## Change menu name
-    ##$mb entryconfigure Edit -label Distribution
-    ## Add cascade
-    #menu $mb.modMenu.quick
-    #$mb.modMenu add cascade -label [mc "Quick Add"] -menu $mb.modMenu.quick 
-    ##$mb.modMenu.quick add command -label [mc "JG Mail"]
-    ##$mb.modMenu.quick add command -label [mc "JG Inventory"]
-    #
-    #$mb.modMenu add separator
-    
     $mb.modMenu add command -label [mc "Clear List"] -command {Shipping_Code::clearList}
     $mb.modMenu add command -label [mc "Show Breakdown"] -command {Shipping_Gui::breakDown}
-    #$mb.modMenu add command -label [mc "Filters..."] -command {eAssist_tools::FilterEditor} -state disable
-    #$mb.modMenu add command -label [mc "Internal Samples"] -command {eAssistHelper::addCompanySamples} -state disable
-    ##$mb.modMenu add command -label [mc "Split"] -command {eAssistHelper::splitVersions}
-    #
-    #$mb.modMenu add separator
-    
-    $mb.modMenu add command -label [mc "Preferences"] -command {eAssistPref::launchPreferences}
+    $mb.modMenu add command -label [mc "Preferences"] -command {ea::gui::pref::startPref} 
 	
     ${log}::debug --END -- [info level 1]
 } ;# Shipping_Gui::initMenu

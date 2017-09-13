@@ -130,8 +130,9 @@ proc ea::gui::pref::display {nav} {
         bl_filepaths    {ea::gui::pref::bl_filepaths $modAccess}
         bm_filepaths    {ea::gui::pref::bm_filepaths $modAccess}
         bm_reports      {${log}::debug Launching Reports; ea::gui::pref::bm_reports $modAccess}
-        bm_exports      {${log}::debug Launching Exports}
-        bm_misc         {${log}::debug Launching Misc}
+        bm_exports      {${log}::debug Launching bm:Exports}
+        bm_misc         {${log}::debug Launching bm:Misc}
+        bf_misc         {${log}::debug Launching bf:misc}
         default         {}
     }
 

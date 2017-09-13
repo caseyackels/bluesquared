@@ -296,6 +296,13 @@ proc eAssist_db::delete {table col args} {
 ## Insert data in tables if needed
 ##
 
+proc eAssist_db::checkDBwritable {} {
+    global program
+    
+    set mydb [file join $program(Home) EA_setup.edb]
+    return [file writable $mydb]
+}
+
 proc eAssist_db::checkModuleName {moduleName args} {
     #****f* checkModuleName/eAssist_db
     # CREATION DATE
@@ -331,6 +338,7 @@ proc eAssist_db::checkModuleName {moduleName args} {
     global log emailSetup
     
     ${log}::debug Looking for $moduleName in the database ...
+       
     if {[info exists ModNames]} {unset ModNames}
         
     db eval {SELECT ModuleName from Modules} {
@@ -339,13 +347,22 @@ proc eAssist_db::checkModuleName {moduleName args} {
     }
 
     if {[lsearch -nocase $ModNames $moduleName] == -1} {
-            ${log}::debug Couldn't find $moduleName, inserting ...
-                #db eval {INSERT or ABORT INTO Modules (ModuleName EnableModNotification)
-                #    VALUES ($moduleName $emailSetup(mod,Notification))}
-                db eval {INSERT or ABORT INTO Modules (ModuleName) VALUES ($moduleName)}
+        # Check permissions before inserting, if we can't insert abort.
+        if {![eAssist_db::checkDBwritable]} {
+            ${log}::notice Database isn't writable, aborting ($moduleName)
+            return
+        } else {
+            ${log}::debug Database *IS* writable. Writing $moduleName ...
+        }
+            
+        ${log}::debug Couldn't find $moduleName, inserting ...
+        #db eval {INSERT or ABORT INTO Modules (ModuleName EnableModNotification)
+        #    VALUES ($moduleName $emailSetup(mod,Notification))}
+        db eval {INSERT or ABORT INTO Modules (ModuleName) VALUES ($moduleName)}
     } else {
             ${log}::debug Found $moduleName!
     }
+    
     ${log}::debug $moduleName Event Notifications: [db eval {SELECT ModuleName FROM Modules WHERE ModuleName = $moduleName}]
     #unset ModNames
 } ;# eAssist_db::checkModuleName

@@ -474,12 +474,13 @@ proc ea::sec::modLauncher {args} {
         if {$args == ""} {${log}::debug No args Provided; eAssist::buttonBarGUI [join [lindex $user($user(id),modules) 0]]}
         
         switch -nocase $args {
-            "Box Labels"    {eAssist::buttonBarGUI $args}
-            "Batch Maker"   {eAssist::buttonBarGUI $args}
-            "Batch Formatter" {eAssist::buttonBarGUI $args}
-            "Scheduler"     {eAssist::buttonBarGUI $args}
-            Setup           {eAssist::buttonBarGUI $args}
-            default         {}
+            "Box Labels"        {eAssist::buttonBarGUI $args}
+            "Batch Maker"       {eAssist::buttonBarGUI $args}
+            "Batch Formatter"   {eAssist::buttonBarGUI $args}
+            "Scheduler"         {eAssist::buttonBarGUI $args}
+            "Label Designer"    {eAssist::buttonBarGUI $args}
+            Setup               {eAssist::buttonBarGUI $args}
+            default             {}
         }
     }
 

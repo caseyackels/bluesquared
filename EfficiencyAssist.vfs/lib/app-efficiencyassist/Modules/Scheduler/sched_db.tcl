@@ -14,8 +14,14 @@
 
 proc ea::sched::db::regWithDB {} {
     global log
-    db eval {INSERT or IGNORE INTO Modules (ModuleName, EnableModNotification, ModuleCode) VALUES ('Scheduler',1,'SC')}
-       
+    if {![eAssist_db::checkDBwritable]} {
+            ${log}::notice Database isn't writable, aborting
+            return
+        } else {
+            ${log}::debug Database *IS* writable. Writing to DB, inserting Scheduler,1,SC into Table:Modules...
+            db eval {INSERT or IGNORE INTO Modules (ModuleName, EnableModNotification, ModuleCode) VALUES ('Scheduler',1,'SC')}
+        }
+        
     set modID [db eval "SELECT Mod_ID FROM Modules WHERE ModuleName = 'Scheduler'"]
     set groupNameID [db eval "SELECT SecGroupName_ID FROM SecGroupNames WHERE SecGroupName = 'Admin'"]
     

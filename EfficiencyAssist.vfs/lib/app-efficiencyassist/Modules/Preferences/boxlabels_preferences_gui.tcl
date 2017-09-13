@@ -38,7 +38,7 @@ proc ea::gui::pref::bl_filepaths {args} {
     
     grid [ttk::label $f1.txt0 -text [mc "BarTender Path"]] -column 0 -row 0 -padx 2p -pady 2p -sticky e
     grid [ttk::entry $f1.entry0 -textvariable mySettings(path,bartender) -width 50] -column 1 -row 0 -sticky ew
-    grid [ttk::button $f1.btn0 -text [mc "..."] -command {set mySettings(path,bartender) [eAssist_Global::OpenFile [eAssist_Global::OpenFile [mc "Bartender Path"] [pwd] file .exe]}] -column 2 -row 0
+    grid [ttk::button $f1.btn0 -text [mc "..."] -command {set mySettings(path,bartender) [eAssist_Global::OpenFile [mc "Bartender Path"] [pwd] file -ext .exe -filetype { {Executable} {.exe} }]}] -column 2 -row 0
     
     grid [ttk::label $f1.txt1 -text [mc "Label Directory"]] -column 0 -row 1 -padx 2p -pady 2p -sticky e
     grid [ttk::entry $f1.entry1 -textvariable mySettings(path,labelDir)] -column 1 -row 1 -sticky ew
@@ -46,7 +46,7 @@ proc ea::gui::pref::bl_filepaths {args} {
     
     grid [ttk::label $f1.txt2 -text [mc "Wordpad"]] -column 0 -row 2 -padx 2p -pady 2p -sticky e
     grid [ttk::entry $f1.entry2 -textvariable mySettings(path,wordpad)] -column 1 -row 2 -sticky ew
-    grid [ttk::button $f1.btn2 -text [mc "..."] -command {set mySettings(path,wordpad) [eAssist_Global::OpenFile [mc "Wordpad Path"] [pwd] file .exe]}] -column 2 -row 1
+    grid [ttk::button $f1.btn2 -text [mc "..."] -command {set mySettings(path,wordpad) [eAssist_Global::OpenFile [mc "Wordpad Path"] [pwd] file -ext .exe -filetype { {Executable} {.exe} }]}] -column 2 -row 2
     
     grid [ttk::label $f1.txt3 -text [mc "Printer Path"]] -column 0 -row 3 -padx 2p -pady 2p -sticky e
     grid [ttk::entry $f1.entry3 -textvariable mySettings(path,printer)] -column 1 -row 3 -sticky ew
