@@ -109,6 +109,7 @@ proc eAssist::parentGUI {} {
                 "Batch Formatter"   {$mb.module add command -label [mc "Batch Formatter"] -command "ea::sec::modLauncher $mod"}
                 "Box Labels"        {$mb.module add command -label [mc "Box Labels"] -command "ea::sec::modLauncher $mod"}
                 "Label Designer"    {$mb.module add command -label [mc "Label Designer"] -command "ea::sec::modLauncher $mod"}
+                "Load Flags"        {$mb.module add command -label [mc "Load Flags"] -command "ea::sec::modLauncher $mod"}
                 Scheduler           {$mb.module add command -label [mc "Scheduler"] -command "ea::sec::modLauncher $mod"}
                 Setup               {$mb.module add command -label [mc "Setup"] -command "ea::sec::modLauncher $mod"}
                 default             {${log}::critical "$mod: doesn't have a menu configuration setup."}
@@ -314,6 +315,29 @@ proc eAssist::buttonBarGUI {Module} {
             
             # .. launch the mode
             ea::gui::designerGUI
+            
+            # .. Setup the geometry
+            eAssist_Global::getGeom $settings(currentModule_machine) 900x610+240+124
+            
+            # .. save the settings
+            lib::savePreferences
+        }
+        "Load Flags"     {
+            ${log}::debug Entering $module mode
+            # .. remember what module we are in ..
+            #set settings(currentModule) [list $module 1]
+            set settings(currentModule) $module
+            set settings(currentModule_machine) [join $module _]
+
+
+            # .. setup the buttons and status bar
+            eAssist::remButtons $btn(Bar)
+            
+            # .. Initialize menu options
+            # ::initMenu
+            
+            # .. launch the mode
+            ea::gui::lf::loadFlagGUI
             
             # .. Setup the geometry
             eAssist_Global::getGeom $settings(currentModule_machine) 900x610+240+124

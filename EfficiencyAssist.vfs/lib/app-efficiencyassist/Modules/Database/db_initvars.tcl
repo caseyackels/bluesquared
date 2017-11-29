@@ -36,7 +36,7 @@ proc ea::db::init_vars {} {
     #   
     #   
     #***
-    global log program sec
+    global log program sec intlSetup
     
     ${log}::debug Initilizing list of modules
     set program(moduleNames) [eAssist_db::getDBModules]
@@ -50,6 +50,9 @@ proc ea::db::init_vars {} {
     ${log}::debug Initilizing Array: sec()
     ea::db::init_secArray
     
+    ${log}::debug Initilizing Array: intlSetup()
+    ea::db::reset_intlSetup
+    
     # Populate individual vars
     ${log}::debug Initilizing list of security groups
     set sec(groupNames) [ea::db::getGroupNames]
@@ -61,6 +64,8 @@ proc ea::db::init_vars {} {
     set program(BF,groups) ""
     set program(SC,groups) ""
     set program(LD,groups) ""
+    
+    
     
     
 } ;# ea::db::init_vars
@@ -186,6 +191,19 @@ proc ea::db::reset_disttype {} {
                  id "" \
                  status 1]
 }
+
+proc ea::db::reset_intlSetup {} {
+    global intlSetup
+    
+    if {[info exists intlSetup]} {unset intlSetup}
+        
+    set intlSetup(UOMList) [db eval "SELECT UOM FROM UOM"]
+    set intlSetup(TERMSList) [db eval "SELECT TermsAbbr FROM IntlShipTerms"]
+    set intlSetup(PAYERList) ""
+    set intlSetup(LICENSEList) [db eval "SELECT LicenseAbbr FROM IntlLicense"]
+}
+
+
 proc ea::db::init_secArray {} {
     #****if* init_secArray/ea::db
     # CREATION DATE
@@ -208,3 +226,12 @@ proc ea::db::init_secArray {} {
 
     
 } ;# ea::db::init_secArray
+
+proc ea::db::init_intlSetupArray {} {
+    global log intlSetup
+    
+    #set intlSetup(UOMList) [db eval "SELECT UOM from UOM"]
+    #set intlSetup(TERMSList) [db eval "SELECT "]
+    #set intlSetup(PAYERList)
+    #set intlSetup(LICENSEList)
+}

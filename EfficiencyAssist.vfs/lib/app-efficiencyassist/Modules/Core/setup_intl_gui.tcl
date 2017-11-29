@@ -38,7 +38,9 @@ proc eAssistSetup::international_GUI {} {
     #	N/A
     #
     # CHILDREN
-    #	
+    #	eAssistSetup::addToIntlListbox
+    #   ea::db::reset_intlSetup
+    #   eAssistSetup::removeFromIntlListbox
     #
     # PARENTS
     #	
@@ -46,7 +48,8 @@ proc eAssistSetup::international_GUI {} {
     # NOTES
     #
     # SEE ALSO
-    #
+    # db_initvars.tcl (ea::db::reset_intlSetup): This initilizes the array with settings from the DB.
+    # The array is populated at startup, and updated each time an item is added or removed. See: eAssistSetup::addToIntlListbox, 
     #
     #***
     global G_setupFrame log intlSetup

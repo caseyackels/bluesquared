@@ -479,6 +479,7 @@ proc ea::sec::modLauncher {args} {
             "Batch Formatter"   {eAssist::buttonBarGUI $args}
             "Scheduler"         {eAssist::buttonBarGUI $args}
             "Label Designer"    {eAssist::buttonBarGUI $args}
+            "Load Flags"        {eAssist::buttonBarGUI $args}
             Setup               {eAssist::buttonBarGUI $args}
             default             {}
         }

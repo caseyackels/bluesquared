@@ -548,3 +548,50 @@ proc eAssistSetup::clearShipVia {wid} {
 
     
 } ;# eAssistSetup::clearShipVia
+
+proc eAssist::addCarrierPkg {carrierListWid packageDescWid tblWid} {
+    global log
+    
+    set carrierName [$carrierListWid get]
+    set carrierID [db eval "SELECT Carrier_ID FROM Carriers WHERE Name = '$carrierName'"]
+    
+    set packageDesc [$packageDescWid get]
+    
+    
+    #${log}::debug UPDATE Carriers SET PackageType = '$packageDesc' WHERE Name = '$carrier'
+    ${log}::debug Update record with PackageType
+    db eval "UPDATE CarrierPkg SET CarrierPkgDesc = '$packageDesc' WHERE Name = '$carrier'"
+    
+    ${log}::debug re-populate widget
+    eAssist::populateCarrierPkg $carrierListWid $tblWid
+}
+
+proc eAssist::populateCarrierPkg {carrierListWid tblWid} {
+    global log
+    
+    #db eval "SELECT Name, PackageType FROM Carriers ORDER BY Name ASC" {
+    #    lappend values "{} [list $Name] [list $PackageType]"
+    #}
+    #
+    #foreach item $values {
+    #    lappend newVals $item
+    #}
+    #
+    #set newVals [list {"" Advantage ""} {"" "Atam Trucking" ""}]
+    
+    # Populate the dropdown
+    #$carrierListWid configure -values [list [db eval "SELECT Name FROM Carriers"]]
+    set carrierName [$carrierListWid get]
+    
+    set carrierID [db eval "SELECT Carrier_ID FROM Carriers WHERE Name = '$carrierName'"]
+    set values [db eval "SELECT CarrierPkgDesc FROM CarrierPkg WHERE CarrierID = $carrierID"]
+    
+    if {$values ne ""} {
+        $carrierListWid delete 0 end
+        $carrierListWid insert end $values
+    } else {
+        ${log}::notice $carrierName currently does not have any packages associated with it
+    }
+    
+    
+}

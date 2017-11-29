@@ -83,6 +83,11 @@ proc eAssistSetup::addToIntlListbox {Type lbox entryField} {
         
         
         set intlSetup($varType) [$lbox get 0 end]
+        
+        # Add to DB
+        ${log}::debug add intlSetup($varType) values to DB: $intlSetup($varType)
+        ea::db::reset_intlSetup
+        
         ${log}::debug $Type _ADD: [$lbox get 0 end]
 	
 } ;# eAssistSetup::addToIntlListbox
@@ -122,5 +127,9 @@ proc eAssistSetup::removeFromIntlListbox {Typelist win} {
     
     set intlSetup($Typelist) [$win get 0 end]
     ${log}::notice $Typelist _REMOVE: [$win get 0 end]
+    
+    # Remove from DB
+    #${log}::debug remove intlSetup($Typelist) values to DB: $intlSetup($Typelist)
+    #ea::db::reset_intlSetup
 	
 } ;# eAssistSetup::removeFromIntlListbox

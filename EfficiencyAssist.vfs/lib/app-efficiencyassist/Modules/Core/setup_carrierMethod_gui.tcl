@@ -251,6 +251,38 @@ proc eAssistSetup::carrierMethod_GUI {} {
     # Populate the listbox if we have existing data
     eAssistSetup::controlCarrierSetup query $f5.entry $f5.lbox -columnNames ShippingClass -table ShippingClasses
     
+    ## Carrier Packages
+    set f6 [ttk::labelframe $w(carrier).ctbl.f6 -text [mc "Carrier Packages"] -padding 10]
+    grid $f6 -column 2 -row 1 -pady 5p -padx 5p -sticky news
+    
+    grid [ttk::label $f6.carrierListTxt -text [mc Carriers]] -column 0 -row 0 -sticky e
+    grid [ttk::combobox $f6.carrierList -postcommand "$f6.carrierList configure -values [list [db eval "SELECT Name FROM Carriers"]]" -state readonly -width 45 -textvariable carrierPkg] -column 1 -row 0 -sticky ew
+    
+    grid [ttk::label $f6.packageListTxt -text [mc "Package Desc."]] -column 0 -row 1 -sticky e
+    grid [ttk::entry $f6.packageListEntry -textvariable carrierPkgDesc] -column 1 -row 1 -sticky ew
+    
+
+    grid [ttk::button $f6.addPackage -text [mc "Add"] -command [list eAssist::addCarrierPkg $f6.carrierList $f6.packageListEntry $f6.tbl]] -column 2 -row 0 -pady 2p
+    grid [ttk::button $f6.delPackage -text [mc "Delete"] -command {}] -column 2 -row 1
+    
+    
+    listbox $f6.tbl -yscrollcommand [list $f6.scrolly set] \
+                                -xscrollcommand [list $f6.scrollx set]
+
+    bind . <<ComboboxSelected>> [list eAssist::populateCarrierPkg $f6.carrierList $f6.tbl]
+    
+    ttk::scrollbar $f6.scrolly -orient v -command [list $f6.tbl yview]
+    ttk::scrollbar $f6.scrollx -orient h -command [list $f6.tbl xview]
+	
+    grid $f6.tbl -column 1 -row 2 -sticky news
+    grid columnconfigure $f6 $f6.tbl -weight 1
+    grid rowconfigure $f6 $f6.tbl -weight 1
+    
+    grid $f6.scrolly -column 2 -row 2 -sticky nse
+    grid $f6.scrollx -column 1 -row 3 -sticky ews
+    
+    ::autoscroll::autoscroll $f6.scrolly ;# Enable the 'autoscrollbar'
+    ::autoscroll::autoscroll $f6.scrollx
     
     ##
     ## Tab 2 (Ship Via)
