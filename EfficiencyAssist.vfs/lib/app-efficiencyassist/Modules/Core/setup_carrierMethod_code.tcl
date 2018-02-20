@@ -560,38 +560,71 @@ proc eAssist::addCarrierPkg {carrierListWid packageDescWid tblWid} {
     
     #${log}::debug UPDATE Carriers SET PackageType = '$packageDesc' WHERE Name = '$carrier'
     ${log}::debug Update record with PackageType
-    db eval "UPDATE CarrierPkg SET CarrierPkgDesc = '$packageDesc' WHERE Name = '$carrier'"
+    db eval "INSERT INTO CarrierPkg (CarrierID, CarrierPkgDesc) VALUES ($carrierID, '$packageDesc')"
     
     ${log}::debug re-populate widget
     eAssist::populateCarrierPkg $carrierListWid $tblWid
 }
 
 proc eAssist::populateCarrierPkg {carrierListWid tblWid} {
-    global log
-    
-    #db eval "SELECT Name, PackageType FROM Carriers ORDER BY Name ASC" {
-    #    lappend values "{} [list $Name] [list $PackageType]"
-    #}
-    #
-    #foreach item $values {
-    #    lappend newVals $item
-    #}
-    #
-    #set newVals [list {"" Advantage ""} {"" "Atam Trucking" ""}]
-    
-    # Populate the dropdown
-    #$carrierListWid configure -values [list [db eval "SELECT Name FROM Carriers"]]
-    set carrierName [$carrierListWid get]
+    global log 
+
+    set carrierName "[$carrierListWid get]"
+    ${log}::debug Carrier Name: $carrierName
     
     set carrierID [db eval "SELECT Carrier_ID FROM Carriers WHERE Name = '$carrierName'"]
+    ${log}::debug Carrier ID: $carrierID
+    
     set values [db eval "SELECT CarrierPkgDesc FROM CarrierPkg WHERE CarrierID = $carrierID"]
+    ${log}::debug Values: $values
     
     if {$values ne ""} {
-        $carrierListWid delete 0 end
-        $carrierListWid insert end $values
+        $tblWid delete 0 end
+        foreach item $values {
+            $tblWid insert end $item
+        }
+        
     } else {
+        $tblWid delete 0 end
         ${log}::notice $carrierName currently does not have any packages associated with it
     }
     
+}
+
+proc eAssist::deleteCarrierPkg {tblWid carrierListWid} {
+    global log
     
+    set item [$tblWid get [$tblWid curselection]]
+    ${log}::debug Selected item: $item
+    
+    set carrierName "[$carrierListWid get]"
+    ${log}::debug Carrier Name: $carrierName
+    
+    set carrierID [db eval "SELECT Carrier_ID FROM Carriers WHERE Name = '$carrierName'"]
+    ${log}::debug Carrier ID: $carrierID
+    
+    ${log}::debug DELETE FROM CarrierPkg where CarrierID = $carrierID AND CarrierPkgDesc = '$item'
+    db eval "DELETE FROM CarrierPkg where CarrierID = $carrierID AND CarrierPkgDesc = '$item'"
+    
+    ${log}::debug re-populate widget
+    eAssist::populateCarrierPkg $carrierListWid $tblWid
+}
+
+proc eAssist::populateCarrierPkg {carrierWid carrierPkgWid} {
+    global log
+    
+    set getCarrier [$carrierWid get]
+    if {$getCarrier == ""} {return}
+    
+    set getCarrierID [db eval "SELECT Carrier_ID from Carriers WHERE Name = '$getCarrier'"]
+    ${log}::debug Carrier is $getCarrier / $getCarrierID
+    
+    set pkgList [db eval "SELECT CarrierPkgDesc FROM CarrierPkg WHERE CarrierID = $getCarrierID"]
+    ${log}::debug pkgList: $pkgList
+    
+    $carrierPkgWid delete 0 end
+    #$carrierPkgWid insert end [list $pkgList]
+    db eval "SELECT CarrierPkgDesc FROM CarrierPkg WHERE CarrierID = $getCarrierID" {
+        $carrierPkgWid insert end $CarrierPkgDesc
+    }
 }

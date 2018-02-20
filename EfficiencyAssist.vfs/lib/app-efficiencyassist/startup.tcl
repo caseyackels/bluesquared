@@ -312,7 +312,7 @@ proc 'eAssist_initVariables {} {
 	#	file: db_initvars.tcl
     #
     #***
-    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter auth options emailSetup emailEvent job user setupJobDB widSec
+    global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter auth options emailSetup emailEvent job user setupJobDB widSec tplLabel
 
 	# Init namespaces
 #    namespace eval ea {}
@@ -425,7 +425,20 @@ proc 'eAssist_initVariables {} {
 				   TitleSaveFileLocation "" \
 				   JobFirstShipDate "" \
 				   JobBalanceShipDate "" \
-                   ForestCert ""]
+                   ForestCert "" \
+                   NewCustomer ""]
+    
+    array set tplLabel [list ID "" \
+                        Name "" \
+                        LabelPath "" \
+                        Width "" \
+                        Height "" \
+                        NotePriv "" \
+                        NotePub "" \
+                        NumRows "" \
+                        FixedBoxQty "" \
+                        FixedLabelInfo "" \
+                        tmpValues ""]
 	
 	# Filters
 	array set filter [list run,stripASCII_CC 0 \

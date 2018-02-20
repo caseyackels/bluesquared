@@ -256,14 +256,14 @@ proc eAssistSetup::carrierMethod_GUI {} {
     grid $f6 -column 2 -row 1 -pady 5p -padx 5p -sticky news
     
     grid [ttk::label $f6.carrierListTxt -text [mc Carriers]] -column 0 -row 0 -sticky e
-    grid [ttk::combobox $f6.carrierList -postcommand "$f6.carrierList configure -values [list [db eval "SELECT Name FROM Carriers"]]" -state readonly -width 45 -textvariable carrierPkg] -column 1 -row 0 -sticky ew
+    grid [ttk::combobox $f6.carrierList -postcommand "$f6.carrierList configure -values [list [db eval "SELECT Name FROM Carriers"]]" -state readonly -width 30] -column 1 -row 0 -sticky ew
     
     grid [ttk::label $f6.packageListTxt -text [mc "Package Desc."]] -column 0 -row 1 -sticky e
     grid [ttk::entry $f6.packageListEntry -textvariable carrierPkgDesc] -column 1 -row 1 -sticky ew
     
 
     grid [ttk::button $f6.addPackage -text [mc "Add"] -command [list eAssist::addCarrierPkg $f6.carrierList $f6.packageListEntry $f6.tbl]] -column 2 -row 0 -pady 2p
-    grid [ttk::button $f6.delPackage -text [mc "Delete"] -command {}] -column 2 -row 1
+    grid [ttk::button $f6.delPackage -text [mc "Delete"] -command [list eAssist::deleteCarrierPkg $f6.tbl $f6.carrierList]] -column 2 -row 1
     
     
     listbox $f6.tbl -yscrollcommand [list $f6.scrolly set] \
@@ -320,6 +320,11 @@ proc eAssistSetup::carrierMethod_GUI {} {
     
     ttk::label $f1S.txt2 -text [mc "Ship Via Name"]
     ttk::entry $f1S.04entry2
+    
+    grid [ttk::label $f1S.txt6 -text [mc "Package Type"]] -column 3 -row 1
+    #grid [ttk::combobox $f1S.05cbox4 -postcommand "$f1S.05cbox3 configure -values [list [eAssist_db::dbSelectQuery -columnNames ShipmentType -table ShipmentTypes]]"] -column 4 -row 1
+    grid [ttk::combobox $f1S.05cbox4 -postcommand [list eAssist::populateCarrierPkg $f1S.01cbox1 $f1S.05cbox4]] -column 4 -row 1
+        #bind $f1S.05cbox4 <FocusIn> [list eAssist::populateCarrierPkg $f1S.01cbox1 $f1S.05cbox4]
 
     
     grid $f1S.txt1 -column 0 -row 0 -pady 2p -padx 2p -sticky nse
@@ -358,7 +363,8 @@ proc eAssistSetup::carrierMethod_GUI {} {
                                                 30  "Ship Via Name"
                                                 25  "Carrier"
                                                 0   "Payment Type" center
-                                                0   "Shipment Type" center} \
+                                                0   "Shipment Type" center
+                                                0   "Package Type" center} \
                                         -showlabels yes \
                                         -height 10 \
                                         -selectbackground yellow \
@@ -415,19 +421,16 @@ proc eAssistSetup::carrierMethod_GUI {} {
         ea::tools::modifyButton $f1aS.btn3 -state enabled
     "
     
-    #bind [$f2S.tbl bodytag] <ButtonRelease-1> "eAssistSetup::controlShipVia clear -wid $f1S -tbl $f2S.tbl -dbtbl Carriers -btn $f1aS"
-    
     # Refresh tbl and reread from db
     $f2S.tbl delete 0 end
-    db eval "SELECT ShipViaCode, ShipViaName, Carriers.Name AS CarrierName, FreightPayerType, ShipmentType FROM ShipVia INNER JOIN Carriers WHERE ShipVia.CarrierID = Carriers.Carrier_ID ORDER BY ShipViaName" {
-        #puts "$ShipViaCode $ShipViaName $CarrierName $FreightPayerType $ShipmentType"
-        $f2S.tbl insert end "{} [list $ShipViaCode] [list $ShipViaName] [list $CarrierName] [list $FreightPayerType] [list $ShipmentType]"
+    db eval "SELECT ShipViaCode, ShipViaName, Carriers.Name AS CarrierName, FreightPayerType, ShipmentType
+                FROM ShipVia
+                INNER JOIN Carriers
+                WHERE ShipVia.CarrierID = Carriers.Carrier_ID
+                ORDER BY ShipViaName" {
+                    $f2S.tbl insert end "{} [list $ShipViaCode] [list $ShipViaName] [list $CarrierName] [list $FreightPayerType] [list $ShipmentType]"
     }
-    #set recordList [eAssist_db::dbSelectQuery -columnNames "ShipViaCode ShipViaName CarrierName FreightPayerType ShipmentType" -table ShipVia]
-    ##$tbl insert end "{} $valueList"
-    #foreach record $recordList {
-    #    $f2S.tbl insert end "{} $record"
-    #}
+
     
     ##
     ## Tab 3 (Advanced)
