@@ -127,20 +127,6 @@ proc ea::gui::designerGUI {} {
                 if {[db eval "SELECT CustName from Customer WHERE CustName = '$custName'"] eq ""} {
                     ${log}::debug Reset global vars
                     ea::code::lb::resetWidgets
-                    #set job(CSRName) ""
-                    #set job(Title) ""
-                    #set tplLabel(FixedBoxQty) ""
-                    #set tplLabel(FixedLabelInfo) ""
-                    #set tplLabel(Height) ""
-                    #set tplLabel(Width) ""
-                    #set tplLabel(LabelPath) ""
-                    #set tplLabel(Name) ""
-                    #set tplLabel(NotePriv) ""
-                    #set tplLabel(NotePub) ""
-                    #set tplLabel(NumRows) ""
-                    #set tplLabel(tmpValues) ""
-                    #
-                    #set job(NewCustomer) 1
                 }
             }
         }

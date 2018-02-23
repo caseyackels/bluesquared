@@ -3,19 +3,22 @@
 proc ea::code::lb::getOpenFile {wid} {
     global log
     
-    set filePathName [tk_getOpenFile -initialdir {//fileprint/Labels}-filetypes {{Bartender {.btw}}}]
+    # filePathName should really be set in Setup/Labels
+    set filePathName [tk_getOpenFile -initialdir {//fileprint/Labels/Templates} -filetypes {{Bartender {.btw}}}]
     
     if {$filePathName eq ""} {return}
     
-    set myDrive [string trim [lindex [file split $filePathName] 0] {// :}]
-    set newMyDrive [registry get HKEY_CURRENT_USER\\NETWORK\\$myDrive RemotePath]
+    ${log}::debug filePathName: $filePathName
     
-    set newFilePathName [file join $newMyDrive {*}[lrange [file split $filePathName] 1 end]]
+    #set myDrive [string trim [lindex [file split $filePathName] 0] {// :}]
+    #set newMyDrive [registry get HKEY_CURRENT_USER\\NETWORK\\$myDrive RemotePath]
+    #
+    #set newFilePathName [file join $newMyDrive {*}[lrange [file split $filePathName] 1 end]]
 
-    ${log}::debug Returned file path: $newFilePathName
+    #${log}::debug Returned file path: $newFilePathName
     
     $wid delete 0 end ;# make sure we're inserting into an empty widget
-    $wid insert end $newFilePathName
+    $wid insert end $filePathName
 }
 
 proc ea::code::lb::resetWidgets {} {
@@ -74,22 +77,25 @@ proc ea::code::lb::getRowData {tplID widPath} {
     
     for {set x 1} {$tplLabel(NumRows) >= $x} {incr x} {
         set rowData ""
-        set rowData [list \"[$widPath.labelData$x get]\"]
+        set rowData [list '[$widPath.labelData$x get]']
         
         if {[$widPath.userEditable$x state] eq "selected"} {
             lappend rowData 1
+        } else {
+            lappend rowData 0
         }
         
         if {[join $rowData] ne "\"\""} {
             set rowInfo $tplID,$x
             lappend rowInfo [join $rowData ,]
             
-            puts ([join $rowInfo ,])
+            #puts ([join $rowInfo ,])
             lappend finalRowInfo ([join $rowInfo ,])
         }
     }
-    puts "[join $finalRowInfo ,];"
-    unset finalRowInfo
+    #puts "[join $finalRowInfo ,];"
+    return [join $finalRowInfo ,]
+    #unset finalRowInfo
 }
 
 proc ea::code::lb::writeToDb {} {
@@ -108,7 +114,7 @@ proc ea::code::lb::writeToDb {} {
     
     # Does TitleName exist?
     #set title_id [db eval "SELECT TitleName FROM PubTitle WHERE TitleName = '$job(Title)'"]
-    set title_id [db eval "SELECT Title_ID FROM PubTitle WHERE TitleName = '$job(Title)'"]
+    set title_id [db eval "SELECT Title_ID FROM PubTitle WHERE TitleName = '$job(Title)' AND CustID = '$job(CustID)'"]
     if {$title_id eq ""} {
         db eval "INSERT INTO PubTitle (TitleName, CustID, CSRID, Status) VALUES ('$job(Title)', '$job(CustID)', '$csr_id', 1)"
         set pubtitle_id [db eval "SELECT MAX(Title_ID) FROM PubTitle"]
@@ -133,22 +139,22 @@ proc ea::code::lb::writeToDb {} {
         if {$tpl_id eq ""} {
             ${log}::debug Template does not exist, adding to database...
             db eval "INSERT INTO LabelTPL (PubTitleID, tplLabelName, tplLabelPath, tplLabelWidth, tplLabelHeight, tplNotePriv, tplNotePub, tplRows, tplFixedBoxQty, tplFixedLabelInfo)
-                VALUES ($pubtitle_id, '$tplLabel(Name)', '$tplLabel(LabelPath)', '$tplLabel(Width)', '$tplLabel(Height)', '$tplLabel(NotePriv)', '$tplLabel(NotePub)', $tplLabel(NumRows), $tplLabel(FixedBoxQty), $tplLabel(FixedLabelInfo)"
+                VALUES ($pubtitle_id, '$tplLabel(Name)', '$tplLabel(LabelPath)', '$tplLabel(Width)', '$tplLabel(Height)', '$tplLabel(NotePriv)', '$tplLabel(NotePub)', '$tplLabel(NumRows)', '$tplLabel(FixedBoxQty)', '$tplLabel(FixedLabelInfo)')"
                 
             set tpl_id [db eval "SELECT MAX(tplID) FROM LabelTPL"]
         
         } else {
             ${log}::debug Template exists, updating...
-        db eval "UPDATE LabelTPL
-                    SET tplLabelName = '$tplLabel(Name)',
-                        tplLabelPath = '$tplLabel(LabelPath)',
-                        tplLabelWidth = '$tplLabel(Width)',
-                        tplLabelHeight = '$tplLabel(Height)',
-                        tplNotePriv = '$tplLabel(NotePriv)',
-                        tplNotePub = '$tplLabel(NotePub)',
-                        tplFixedBoxQty = '$tplLabel(FixedBoxQty)',
-                        tplFixedLabelInfo = '$tplLabel(FixedLabelInfo)'
-                    WHERE tplID = $tpl_id"
+            db eval "UPDATE LabelTPL
+                        SET tplLabelName = '$tplLabel(Name)',
+                            tplLabelPath = '$tplLabel(LabelPath)',
+                            tplLabelWidth = '$tplLabel(Width)',
+                            tplLabelHeight = '$tplLabel(Height)',
+                            tplNotePriv = '$tplLabel(NotePriv)',
+                            tplNotePub = '$tplLabel(NotePub)',
+                            tplFixedBoxQty = '$tplLabel(FixedBoxQty)',
+                            tplFixedLabelInfo = '$tplLabel(FixedLabelInfo)'
+                        WHERE tplID = $tpl_id"
         }
     }
     
@@ -160,15 +166,21 @@ proc ea::code::lb::writeToDb {} {
         set labelData_id [db eval "SELECT labelData_ID FROM LabelData WHERE tplID = $tpl_id"]
         
         if {$labelData_id eq ""} {
-            # Data doesn't exist, insert
+            ${log}::debug Data doesn't exist, inserting ...
             # Get Row Data
-            set data [ea::code::lb::getRowData $tpl_id .container.frame2]
-            db eval "INSERT INTO LabelData (tplID, labelRowNum, labelRowData) VALUES $data"
+            set data [join [ea::code::lb::getRowData $tpl_id .container.frame2]]
+            ${log}::debug Inserting: $data
+            db eval "INSERT INTO LabelData (tplID, labelRowNum, labelRowData, userEditable) VALUES $data"
         } else {
-            # Deleting exist records!
-            {$log}::warning Deleting existing records in Table: LabelData,ID $tpl_id
+            # Deleting existing records!
+            ${log}::notice Deleting existing records in Table: LabelData,ID $tpl_id
             
-            #db eval "DELETE FROM LabelData WHERE tplID = $tpl_id"
+            db eval "DELETE FROM LabelData WHERE tplID = $tpl_id"
+            
+            # Inserting new data
+            set data [join [ea::code::lb::getRowData $tpl_id .container.frame2]]
+            ${log}::debug Inserting: $data
+            db eval "INSERT INTO LabelData (tplID, labelRowNum, labelRowData, userEditable) VALUES $data"
         }
     } else {
         ${log}::notice Label data is not required/dynamic! Will not try to save data to db...

@@ -40,4 +40,16 @@ proc ea::db::lb::getLabelSpecs {cbox} {
         set tplLabel(FixedBoxQty) $tplFixedBoxQty
         set tplLabel(FixedLabelInfo) $tplFixedLabelInfo
     }
+    
+    # Check for label row data
+    # Get number of rows and populate $tplLabel(NumRows)
+    set tplLabel(NumRows) [db eval "SELECT COUNT(labelRowNum) FROM LabelData WHERE tplID = $tplLabel(ID)"]
+    
+    # Generate the fields
+    ea::code::lb::genLines
+    
+    # Populate the fields
+    set data [db eval "SELECT labelRowNum, labelRowData, userEditable FROM LabelData WHERE tplID = $tplLabel(ID)"]
+    ${log}::debug row data: $data
+
 }
