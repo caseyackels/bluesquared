@@ -99,43 +99,47 @@ proc controlFile {args} {
     #	N/A
     #
     #***
-    global files mySettings
+    global files mySettings tmp
 
+    if {![info exists tmp(databaseFilePath)]} {
+        set tmp(databaseFilePath) $mySettings(path,labelDBfile)
+    }
 
     switch -- [lindex $args 0] {
-	destination {
-            if {[lindex $args 1] eq "fileopen"} {
-                set files(destination) [open [file join $mySettings(path,labelDBfile) $mySettings(name,labelDBfile).csv] w]
-                # Insert Header row
-                chan puts $files(destination) [::csv::join "Labels Quantity Line1 Line2 Line3 Line4 Line5"]
-                #return $files(destination)
-
-            } elseif {[lindex $args 1] eq "fileclose"} {
-                #flush $files(history)
-                chan close $files(destination)
-			}
-        }
-
+        destination {
+                        if {[lindex $args 1] eq "fileopen"} {
+                            #set files(destination) [open [file join $mySettings(path,labelDBfile) $mySettings(name,labelDBfile).csv] w]
+                            
+                            set files(destination) [open [file join $tmp(databaseFilePath) $mySettings(name,labelDBfile).csv] w]
+                            
+                            # Insert Header row
+                            chan puts $files(destination) [::csv::join "Labels Quantity Line1 Line2 Line3 Line4 Line5"]
+            
+                        } elseif {[lindex $args 1] eq "fileclose"} {
+                            chan close $files(destination)
+                        }
+                    }
+    
         history {
-            if {[file exists [file join $mySettings(Home) history.csv]] ne 1} {
-                set files(history) [open [file join $mySettings(Home) history.csv] w]
+                    if {[file exists [file join $mySettings(Home) history.csv]] ne 1} {
+                        set files(history) [open [file join $mySettings(Home) history.csv] w]
+                    }
+        
+                    if {[lindex $args 1] eq "filewrite"} {
+                        #set files(history_tmp) [open history_tmp.csv w+]
+                        set files(history) [open [file join $mySettings(Home) history.csv] w]
+        
+                    } elseif {[lindex $args 1] eq "fileappend"} {
+                        set files(history) [open [file join $mySettings(Home) history.csv] a+]
+        
+                    } elseif { [lindex $args 1] eq "fileread"} {
+                        set files(history) [open [file join $mySettings(Home) history.csv] r+]
+        
+                    } elseif {[lindex $args 1] eq "fileclose"} {
+                        flush $files(history)
+                        chan close $files(history)
+                    }
             }
-
-            if {[lindex $args 1] eq "filewrite"} {
-                #set files(history_tmp) [open history_tmp.csv w+]
-                set files(history) [open [file join $mySettings(Home) history.csv] w]
-
-            } elseif {[lindex $args 1] eq "fileappend"} {
-                set files(history) [open [file join $mySettings(Home) history.csv] a+]
-
-            } elseif { [lindex $args 1] eq "fileread"} {
-                set files(history) [open [file join $mySettings(Home) history.csv] r+]
-
-            } elseif {[lindex $args 1] eq "fileclose"} {
-                flush $files(history)
-                chan close $files(history)
-            }
-        }
     }
 
 } ;# End of controlFile
@@ -255,17 +259,18 @@ proc addListboxNums {{reset 0}} {
  
 
 proc createList {} {
-    global frame2b GS_textVar
+    global log frame2b GS_textVar
 
-    puts "Start Createlist"
+    ${log}::debug Start Createlist
+    
     if {[info exists GS_textVar(maxBoxQty)] == 0} {Error_Message::errorMsg createList1; return}
     if {$GS_textVar(maxBoxQty) == ""} {Error_Message::errorMsg createList1; return}
 
     set L_rawEntries [split [join [$frame2b.listbox getcells 0,1 end,1]]]
     set L_rawShipVia [split [join [$frame2b.listbox getcells 0,2 end,2]]]
 
-    puts "L_rawEntries1: $L_rawEntries"
-    puts "L_rawEntries2: [$frame2b.listbox getcells 0,1 end,1]"
+    ${log}::debug L_rawEntries1: $L_rawEntries
+    ${log}::debug L_rawEntries2: [$frame2b.listbox getcells 0,1 end,1]
 
     # Make sure the variables are cleared out; we don't want any data to lag behind.
     set FullBoxes ""
@@ -273,50 +278,48 @@ proc createList {} {
 
     # L_rawEntries holds each qty (i.e. 200 204 317)
     foreach entry $L_rawEntries {
-	set result [doMath $entry $GS_textVar(maxBoxQty)]
-
-        if {[lrange $result 0 0 ]!= 0} {
-            puts "Result: [lrange $result 0 0] Label @ $GS_textVar(maxBoxQty)"
-        }
-
-        if {[lrange $result 1 end] != 0} {
-            puts "Result: 1 Label @ [lrange $result 1 end]"
-        }
-
-	# Make sure the variables are cleared out; we don't want any data to lag behind.
-	set FullBoxes_text ""
-	set PartialQty_text ""
-
-	if {[lrange $result 0 0] != 0} {lappend FullBoxes [lrange $result 0 0]; set FullBoxes_text [lrange $result 0 0]}
-	if {[lrange $result 1 1] != 0} {lappend PartialQty [lsort -decreasing [lrange $result 1 1]]; set PartialQty_text [lrange $result 1 1]}
+        set result [doMath $entry $GS_textVar(maxBoxQty)]
+    
+            if {[lrange $result 0 0 ]!= 0} {
+                ${log}::debug Result: [lrange $result 0 0] Label @ $GS_textVar(maxBoxQty)
+            }
+    
+            if {[lrange $result 1 end] != 0} {
+                ${log}::debug Result: 1 Label @ [lrange $result 1 end]
+            }
+    
+        # Make sure the variables are cleared out; we don't want any data to lag behind.
+        set FullBoxes_text ""
+        set PartialQty_text ""
+    
+        if {[lrange $result 0 0] != 0} {lappend FullBoxes [lrange $result 0 0]; set FullBoxes_text [lrange $result 0 0]}
+        if {[lrange $result 1 1] != 0} {lappend PartialQty [lsort -decreasing [lrange $result 1 1]]; set PartialQty_text [lrange $result 1 1]}
     }
 
 
     if {[info exists FullBoxes] == 1} {
-	if {![info exists PartialQty]} {set PartialQty ""}
-
-	#Shipping_Gui::displayList [expr [join $FullBoxes +]] $PartialQty
-	displayListHelper $FullBoxes $PartialQty
-        puts "DisplayListHelper_A: $FullBoxes $PartialQty"
+        if {![info exists PartialQty]} {set PartialQty ""}
+    
+        displayListHelper $FullBoxes $PartialQty
+            ${log}::debug DisplayListHelper_A: $FullBoxes $PartialQty
 
     } elseif {[info exists PartialQty] == 1} {
-	set FullBoxes ""
-	#Shipping_Gui::displayList $FullBoxes $PartialQty
-	displayListHelper $FullBoxes $PartialQty
-        puts "DisplayListHelper_B: $FullBoxes $PartialQty"
+        set FullBoxes ""
+    
+        displayListHelper $FullBoxes $PartialQty
+            ${log}::debug DisplayListHelper_B: $FullBoxes $PartialQty
 
     } else {
-	Error_Message::errorMsg createList2
+        Error_Message::errorMsg createList2
     }
 
     set GS_textVar(labelsFull) $FullBoxes
     set GS_textVar(labelsPartial) $PartialQty
 
-    puts "LabelsFull: $GS_textVar(labelsFull)"
-    #puts "LabelsPartial: $GS_textVar(labelsPartial)"
+    ${log}::debug LabelsFull: $GS_textVar(labelsFull)
 
     # Keep the breakdown window updated even if it is open
-    if {[winfo exists .breakdown] == 1} {puts "refreshing Break Down"; Shipping_Gui::breakDown}
+    if {[winfo exists .breakdown] == 1} {${log}::debug Refreshing Break Down; Shipping_Gui::breakDown}
 
 } ;# createList
 
@@ -376,10 +379,11 @@ proc extractFromList {list} {
 
 proc displayListHelper {fullboxes partialboxes {reset 0}} {
     # Insert values into final listbox/text widgets
-    global GS_textVar GI_textVar frame2b
+    global log GS_textVar GI_textVar frame2b
 
-    puts "starting displayListHelper"
-    puts "reset: $reset"
+    ${log}::debug Starting displayListHelper
+    ${log}::debug reset: $reset
+    
     if {$reset ne 0} {
         ;# If we clear the entire list, we want to reset all counters.
         set GI_textVar(qty) 0
@@ -459,13 +463,9 @@ proc displayListHelper {fullboxes partialboxes {reset 0}} {
 
 
 proc printLabels {} {
-    global log GS_textVar programPath lineNumber mySettings
+    global log GS_textVar programPath lineNumber mySettings tplLabel tmp
 
-	if {[info exists GS_textVar(maxBoxQty)] == 0} {
-	    Error_Message::errorMsg printLabels1
-	    return
-	}
-	
+
 	if {[info exists mySettings(path,bartender)] != 0} {
 		if { $mySettings(path,bartender) == ""} {
 			${log}::debug path,bartender is empty: $mySettings(path,bartender)
@@ -478,70 +478,91 @@ proc printLabels {} {
 		return
 	}
 
-    #set lineNumber "" ;# Make sure we're cleared
+    if {$tplLabel(ID) eq ""} {
+        if {![info exists GS_textVar(maxBoxQty)]} {
+            Error_Message::errorMsg printLabels1
+            return
+        }
+        
+        Shipping_Code::createList
+        Shipping_Code::writeHistory $GS_textVar(maxBoxQty)
+        Shipping_Code::openHistory
+    
+        Shipping_Gui::printbreakDown email ; # Send an email of the breakdown
+    }
 
-	Shipping_Code::createList
-	Shipping_Code::writeHistory $GS_textVar(maxBoxQty)
-    Shipping_Code::openHistory
 
-	Shipping_Gui::printbreakDown email ; # Send an email of the breakdown
+    if {$tplLabel(ID) != ""} {
+        ${log}::debug Printing from template: $tplLabel(ID) $tplLabel(Name)
+        #set tmp(databaseFilePath) $tplLabel(labelDBfile)
+        
+        set labelDir [file dirname $tplLabel(LabelPath)]
+        set filename [file tail $tplLabel(LabelPath)]
 
-
-	# Fix the file paths so that bartender doesn't choke
-	set labelDir [join [split $mySettings(path,labelDir) /] \\]
-	
-	if {$GS_textVar(line5) != ""} {
-	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
-                    #set lineNumber 5
-                    # Redirect for special print options
-                    Shipping_Gui::chooseLabel 6
-                    puts "5 Line Label"
-
-		} else {
-		    exec $mySettings(path,bartender) /AF=$labelDir\\6LINEDB.btw /P /CLOSE /X
-			${log}::debug $mySettings(path,bartender) /AF=$labelDir\\6LINEDB.btw /P /CLOSE /X
-	    }
-
-	} elseif {$GS_textVar(line4) != ""} {
-	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
-                    #set lineNumber 4
-                    # Redirect for special print options
-                    Shipping_Gui::chooseLabel 5
-                    puts "5 Line Label"
-
-                } else {
-		    exec $mySettings(path,bartender) /AF=$labelDir\\5LINEDB.btw /P /CLOSE /X
-			${log}::debug $mySettings(path,bartender) /AF=$labelDir\\5LINEDB.btw /P /CLOSE /X
-	    }
-
-	} elseif {$GS_textVar(line3) != ""} {
-	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
-                    #set lineNumber 3
-                    # Redirect for special print options
-                    Shipping_Gui::chooseLabel 4
-                    puts "4 Line Label"
-
-                } else {
-		    exec $mySettings(path,bartender) /AF=$labelDir\\4LINEDB.btw /P /CLOSE /X
-			${log}::debug $mySettings(path,bartender) /AF=$labelDir\\4LINEDB.btw /P /CLOSE /X
-	    }
-
-	} elseif {$GS_textVar(line2) != ""} {
-	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
-                        Error_Message::errorMsg seattleMet2; return
-	    } else {
-		exec $mySettings(path,bartender) /AF=$labelDir\\3LINEDB.btw /P /CLOSE /X
-		${log}::debug $mySettings(path,bartender) /AF=$labelDir\\3LINEDB.btw /P /CLOSE /X
-	    }
-
-	} elseif {$GS_textVar(line1) != ""} {
-	    if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
-                        Error_Message::errorMsg seattleMet2; return
-	    } else {
-		exec $mySettings(path,bartender) /AF=$labelDir\\2LINEDB.btw /P /CLOSE /X
-		${log}::debug $mySettings(path,bartender) /AF=$labelDir\\2LINEDB.btw /P /CLOSE /X
-	    }
-	}
+        set labelDir [join [split $labelDir /] \\]
+        
+        ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\$filename /P /CLOSE /X
+        exec $mySettings(path,bartender) /AF=$labelDir\\$filename /P /CLOSE /X
+        
+    } else {
+        ${log}::debug Printing Generic Labels
+        
+        # Fix the file paths so that bartender doesn't choke
+        set labelDir [join [split $mySettings(path,labelDir) /] \\]
+        
+        if {$GS_textVar(line5) != ""} {
+            if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
+                        #set lineNumber 5
+                        # Redirect for special print options
+                        Shipping_Gui::chooseLabel 6
+                        puts "5 Line Label"
+    
+            } else {
+                exec $mySettings(path,bartender) /AF=$labelDir\\6LINEDB.btw /P /CLOSE /X
+                ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\6LINEDB.btw /P /CLOSE /X
+            }
+    
+        } elseif {$GS_textVar(line4) != ""} {
+            if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
+                        #set lineNumber 4
+                        # Redirect for special print options
+                        Shipping_Gui::chooseLabel 5
+                        puts "5 Line Label"
+    
+                    } else {
+                exec $mySettings(path,bartender) /AF=$labelDir\\5LINEDB.btw /P /CLOSE /X
+                ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\5LINEDB.btw /P /CLOSE /X
+            }
+    
+        } elseif {$GS_textVar(line3) != ""} {
+            if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
+                        #set lineNumber 3
+                        # Redirect for special print options
+                        Shipping_Gui::chooseLabel 4
+                        puts "4 Line Label"
+    
+                    } else {
+                exec $mySettings(path,bartender) /AF=$labelDir\\4LINEDB.btw /P /CLOSE /X
+                ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\4LINEDB.btw /P /CLOSE /X
+            }
+    
+        } elseif {$GS_textVar(line2) != ""} {
+            if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
+                            Error_Message::errorMsg seattleMet2; return
+            } else {
+            exec $mySettings(path,bartender) /AF=$labelDir\\3LINEDB.btw /P /CLOSE /X
+            ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\3LINEDB.btw /P /CLOSE /X
+            }
+    
+        } elseif {$GS_textVar(line1) != ""} {
+            if {[string match "seattle met" [string tolower $GS_textVar(line1)]] eq 1} {
+                            Error_Message::errorMsg seattleMet2; return
+            } else {
+            exec $mySettings(path,bartender) /AF=$labelDir\\2LINEDB.btw /P /CLOSE /X
+            ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\2LINEDB.btw /P /CLOSE /X
+            }
+        }
+    } ;# End generic labels
 	
 	
 
@@ -612,18 +633,16 @@ proc truncateHistory {} {
     #	N/A
     #
     #***
-    global files GS_textVar frame1
-    puts "start Truncate"
+    global files GS_textVar frame1 log
 
     controlFile history fileread
     set history_data [read $files(history)]
     controlFile history fileclose
     set lines [split $history_data \n]
 
-    #puts "truncateHistory_data: [llength $lines]"
-    ;# Keep the history file trimmed down
+    # Keep the history file trimmed down
     if {[llength $lines] >= 16} {
-        ;# llength starts at 1
+        # llength starts at 1
 
         controlFile history filewrite
         set GS_textVar(history) "" ;# clear out the variable
@@ -673,24 +692,25 @@ proc writeHistory {maxBoxQty} {
     #	N/A
     #
     #***
-    global GS_textVar files
+    global GS_textVar files log
 
     #puts "lsearch: [lsearch -glob -inline $GS_textVar(history) $GS_textVar(line1)]"
 
     if {[lsearch -glob -inline $GS_textVar(history) $GS_textVar(line1)] eq ""} {
-        ;# Save only an entry if it is unique. Otherwise, discard it.
-        ;# Use lappend so that if the text contains spaces ::csv::join will handle it correctly
+        # Save only an entry if it is unique. Otherwise, discard it.
+        # Use lappend so that if the text contains spaces ::csv::join will handle it correctly
         lappend textHistory "$GS_textVar(line1)" "$GS_textVar(line2)" "$GS_textVar(line3)" "$GS_textVar(line4)" "$GS_textVar(line5)" $maxBoxQty
 
-        ;# Insert the values
+        # Insert the values
         controlFile history fileappend
         chan puts $files(history) [::csv::join $textHistory]
         #puts "text: $textHistory"
         controlFile history fileclose
-        puts "saved $GS_textVar(line1)"
+        
+        ${log}::debug "WriteHistory: Saved $GS_textVar(line1)"
     }
 
-    #;# After we add the new labels, lets make sure we trim the file back down to the allotted amount.
+    # After we add the new labels, lets make sure we trim the file back down to the allotted amount.
     truncateHistory
 
 } ;# writeHistory
@@ -723,7 +743,7 @@ proc openHistory {} {
     #	Shipping_Code::writeHistory Shipping_Code::readHistory Shipping_Code::controlFile
     #
     #***
-    global GS_textVar files frame1
+    global GS_textVar files frame1 log
     puts "openHistory: Starting"
 
     controlFile history fileread
@@ -745,7 +765,8 @@ proc openHistory {} {
             lappend GS_textVar(history) [lindex [::csv::split $line] 0]
         }
     }
-    puts "historyData: $GS_textVar(history)"
+    
+    ${log}::debug "historyData: $GS_textVar(history)"
 
     #puts "openHistory: Ending"
 } ;#openHistory
@@ -1008,3 +1029,4 @@ proc Shipping_Code::onPrint_event {args} {
 	#${log}::debug New Body: $Body		
 	mail::mail $::boxLabelsVars::cModName $eventName -subject $Subj -body $Body
 } ;# Shipping_Code::emailBoxLabels
+

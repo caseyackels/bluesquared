@@ -26,6 +26,9 @@
 #package provide boxlabels 1.0
 package provide eAssist_ModBoxLabels 1.0
 
+# init the db
+eAssist_db::loadDB
+
 namespace eval Shipping_Gui {
 
 proc shippingGUI {} {
@@ -55,25 +58,47 @@ proc shippingGUI {} {
     #	TODO: List the other *GUI procs.
     #
     #***
-    global GI_textVar GS_textVar frame1 frame2b genResults GS_windows program
+    global GI_textVar GS_textVar frame1 frame2b genResults GS_windows program job tplLabel
     
     Shipping_Code::openHistory ;# Populate the variable so we don't get errors upon startup.
     
-    #wm geometry . 450x475
-    #set program(currentModule) BoxLabels
-    #set currentModule BoxLabels
-
     # Clear the frames before continuing
     eAssist_Global::resetFrames parent
 
-
+# Frame 0
+	set frame0 [ttk::labelframe .container.frame0 -text "Template"]
+	pack $frame0 -expand yes -fill both -padx 5p -pady 3p -ipady 2p
+	
+	set GS_textVar(Template) ""
+	grid [ttk::label $frame0.txt1 -text [mc "Template #"]] -column 0 -row 0 -padx 2p -pady 2p
+	grid [ttk::entry $frame0.entry -textvariable GS_textVar(Template)] -column 1 -row 0 -padx 2p -pady 2p -sticky w
+	grid [ttk::button $frame0.btn -text [mc "Get Data"] -command {ea::db::bl::getTplData $GS_textVar(Template)}] -column 2 -row 0 -padx 2p -pady 2p -sticky w
+	
+	grid [ttk::label $frame0.txt2a -text [mc "Customer"]] -column 0 -row 1 -padx 2p -pady 2p
+	grid [ttk::label $frame0.txt2b -textvariable job(CustName)] -column 1 -row 1 -padx 2p -pady 2p -sticky w
+	
+	grid [ttk::label $frame0.txt3a -text [mc "Job Title"]] -column 0 -row 2 -padx 2p -pady 2p
+	grid [ttk::label $frame0.txt3b -textvariable job(Title)] -column 1 -row 2 -padx 2p -pady 2p -sticky w
+	
+	grid [ttk::label $frame0.txt4a -text [mc "Label Path"]] -column 0 -row 3 -padx 2p -pady 2p
+	grid [ttk::label $frame0.txt4b -textvariable tplLabel(LabelPath)] -column 1 -row 3 -padx 2p -pady 2p -sticky w
+	
+	grid [ttk::label $frame0.txt5a -text [mc "Versions"]] -column 0 -row 4 -padx 2p -pady 2p
+	grid [ttk::combobox $frame0.cbox] -column 1 -row 4 -padx 2p -pady 2p -sticky w
+	
+		bind $frame0.cbox <<ComboboxSelected>> {
+				set tplLabel(LabelVersionDesc,current) [%W get]		
+				ea::db::bl::populateWidget
+		}
+	
+	 
 # Frame 1
     set frame1 [ttk::labelframe .container.frame1 -text "Label Information"]
     pack $frame1 -expand yes -fill both -padx 5p -pady 3p -ipady 2p
 
 
-    ttk::label $frame1.text1 -text "Line 1"
-    ;# NOTE: We populate the *(history) variable just under [openHistory]
+    ttk::label $frame1.text1 -text "Row 1"
+    # NOTE: We populate the *(history) variable just under [openHistory]
     ttk::combobox $frame1.entry1 -textvariable GS_textVar(line1) \
                                 -values $GS_textVar(history) \
                                 -validate key \
@@ -81,25 +106,25 @@ proc shippingGUI {} {
     ttk::label $frame1.data1 -textvariable lineText(data1) -width 2
     tooltip::tooltip $frame1.data1 "33 Chars Max."
 
-    ttk::label $frame1.text2 -text "Line 2"
+    ttk::label $frame1.text2 -text "Row 2"
     ttk::entry $frame1.entry2 -textvariable GS_textVar(line2) \
                             -validate key \
                             -validatecommand {Shipping_Code::filterKeys -textLength %S %W %P} ;#-width 33
     ttk::label $frame1.data2 -textvariable lineText(data2) -width 2
 
-    ttk::label $frame1.text3 -text "Line 3"
+    ttk::label $frame1.text3 -text "Row 3"
     ttk::entry $frame1.entry3 -textvariable GS_textVar(line3) \
                             -validate key \
                             -validatecommand {Shipping_Code::filterKeys -textLength %S %W %P} ;#-width 33
     ttk::label $frame1.data3 -textvariable lineText(data3) -width 2
 
-    ttk::label $frame1.text4 -text "Line 4"
+    ttk::label $frame1.text4 -text "Row 4"
     ttk::entry $frame1.entry4 -textvariable GS_textVar(line4) \
                             -validate key \
                             -validatecommand {Shipping_Code::filterKeys -textLength %S %W %P} ;#-width 33
     ttk::label $frame1.data4 -textvariable lineText(data4) -width 2
 
-    ttk::label $frame1.text5 -text "Line 5"
+    ttk::label $frame1.text5 -text "Row 5"
     ttk::entry $frame1.entry5 -textvariable GS_textVar(line5) \
                             -validate key \
                             -validatecommand {Shipping_Code::filterKeys -textLength %S %W %P}
@@ -265,7 +290,6 @@ bind $frame1.entry1 <KeyRelease> {
     }
 }
 
-#bind $frame1.entry1 <Control-KeyPress-M> {%W insert end "[string toupper [clock format [clock seconds] -format %%B]] "}
 
 bind $frame1.entry2 <KeyRelease> {
     if {[string length $GS_textVar(line2)] != 0} {
@@ -338,8 +362,6 @@ bind [$frame2b.listbox bodytag] <KeyPress-BackSpace> {
 
 
 bind [$frame2b.listbox bodytag] <Double-1> {
-    #puts "selection2: [$frame2b.listbox curselection]"
-
     $frame2b.listbox delete [$frame2b.listbox curselection]
 
     # Make sure we keep all the textvars updated when we delete something
@@ -347,15 +369,9 @@ bind [$frame2b.listbox bodytag] <Double-1> {
     # If we don't have the [catch] here, then we will get an error if we remove the last entry.
     # cell index "0,1" out of range
     catch {Shipping_Code::createList} err ;# Make sure our totals add up
-    #puts "binding-Double1: $err"
+
 }
 
-
-
-#bind all <<ComboboxSelected>> {
-#    Shipping_Code::readHistory [$frame1.entry1 current]
-#    $frame1.entry1 configure -values $GS_textVar(history) ;# Refresh the data in the comobobox
-#}
 
 bind $frame1.entry1 <<ComboboxSelected>> {
     Shipping_Code::readHistory [$frame1.entry1 current]

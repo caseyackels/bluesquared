@@ -26,50 +26,73 @@ proc ea::code::lb::resetWidgets {} {
     
     set job(CSRName) ""
     set job(NewCustomer) ""
-    set job(CustID) ""
-    set job(CustName) ""
+    #set job(CustID) ""
+    #set job(CustName) ""
     set job(Title) ""
     set tplLabel(FixedBoxQty) ""
     set tplLabel(FixedLabelInfo) ""
-    set tplLabel(Height) ""
-    set tplLabel(Width) ""
     set tplLabel(LabelPath) ""
+    set tplLabel(Size) ""
+    set tplLabel(SerializeLabel) ""
     set tplLabel(Name) ""
     set tplLabel(NotePriv) ""
     set tplLabel(NotePub) ""
     set tplLabel(NumRows) ""
     set tplLabel(tmpValues) ""
-    
-    
+    set tplLabel(LabelVersionID) ""
+    set tplLabel(LabelVersionID,current) ""
+    set tplLabel(LabelVersionDesc) ""
+    set tplLabel(LabelVersionDesc,current) ""
+    set tplLabel(LabelProfileID) ""
+    set tplLabel(LabelProfileDesc) ""
 }
 
 proc ea::code::lb::saveLabel {} {
     global log job tplLabel
     
-    ## Error Checks - Job
+    set gate 0
+    
+    ## WARNINGS - If these are triggered, nothing is written to the database
+    ## Error Checks - Job Info
     # Check for CustID/CustName
-    if {$job(CustID) eq ""} { ${log}::notice Customer ID is empty. Please insert ID. ; return}
-    if {$job(CustName) eq ""} { ${log}::notice Customer Name is empty. Please insert name. ; return}
+    if {$job(CustID) eq ""} { ${log}::critical [mc "Customer ID is empty. Please insert ID."] ; set gate 1}
+    if {$job(CustName) eq ""} { ${log}::critical [mc "Customer Name is empty. Please insert name."] ; set gate 1}
     
     # Check for CSR
-    if {$job(CSRName) eq ""} { ${log}::notice CSR name must not be empty. ; return}
+    if {$job(CSRName) eq ""} { ${log}::critical [mc "CSR name must not be empty."] ; set gate 1}
     
     # Check for title
-    if {$job(Title) eq ""} {${log}::notice Title name must not be empty. Please insert title name.; return}
+    if {$job(Title) eq ""} {${log}::critical [mc "Title name must not be empty. Please insert title name."]; set gate 1}
     
-    ## Error Checks - Label
+    ## Error Checks - Label Properties
     # Label Name
-    if {$tplLabel(Name) eq ""} {${log}::notice Label Name is empty. ; return}
+    if {$tplLabel(Name) eq ""} {${log}::critical [mc "Template Name is empty."] ; set gate 1}
     
     # Label File Path
-    if {$tplLabel(LabelPath) eq ""} {${log}::notice Label File is missing. ; return}
+    if {$tplLabel(LabelPath) eq ""} {${log}::critical [mc "Label File is missing."] ; set gate 1}
 
     # Check folder permissions
-    if {[eAssist_Global::folderAccessibility $tplLabel(LabelPath)] != 3} {${log}::notice Cannot write to $tplLabel(LabelPath). ; return}
+    if {[eAssist_Global::folderAccessibility $tplLabel(LabelPath)] != 3} {${log}::critical [mc "Cannot write to"] $tplLabel(LabelPath). ; set gate 1}
     
-    # Write to the database
-    ea::code::lb::writeToDb
-}
+    
+    # Check Label Size
+    if {$tplLabel(Size) eq ""} {${log}::critical [mc "Label Size is missing."] ; set gate 1}
+    
+    # NOTICES - Data is saved to the database, but notices are issued if fields are empty
+    #if {$tplLabel(LabelSize) eq ""} {${log}::alert [mc "Label size hasn't been selected"]} ;# Not using LabelSize
+    if {$tplLabel(LabelProfileDesc) eq ""} {${log}::alert [mc "Profile is missing. Setting the ID to 0 (Default)"]; set tplLabel(LabelProfileID) 0}
+    if {$tplLabel(FixedBoxQty) eq ""} {${log}::alert [mc "Fixed Box Qty is empty"]}
+    if {$tplLabel(FixedLabelInfo) eq ""} {${log}::alert [mc "Fixed Label Info is empty"]}
+    if {$tplLabel(SerializeLabel) eq ""} {${log}::alert [mc "Serialize Label is empty"]}
+    
+    if {$gate == 1} {
+        ${log}::critical Critical errors exist, not writing to the database.
+        return
+    } else {
+        # Write to the database
+        ea::code::lb::writeToDb
+    }
+} ;# ea::code::lb::saveLabel
 
 # ea::code::lb::getRowData 1 .container.frame2
 proc ea::code::lb::getRowData {tplID widPath} {
@@ -93,18 +116,20 @@ proc ea::code::lb::getRowData {tplID widPath} {
             lappend finalRowInfo ([join $rowInfo ,])
         }
     }
-    #puts "[join $finalRowInfo ,];"
     return [join $finalRowInfo ,]
-    #unset finalRowInfo
 }
 
 proc ea::code::lb::writeToDb {} {
+    # Parent: ea::code::lb::saveLabel
     global log job tplLabel
     
     if {$job(NewCustomer) eq 1} {
         # New customer, INSERT into DB
         # DB Table - Customer
+        ${log}::debug Customer ($job(CustName) is new, inserting into database.
         db eval "INSERT INTO Customer (Cust_ID, CustName) VALUES ('$job(CustID)', '$job(CustName)')"
+        
+        set job(NewCustomer) ""
     }
         
     # DB Table - PubTitle
@@ -116,44 +141,55 @@ proc ea::code::lb::writeToDb {} {
     #set title_id [db eval "SELECT TitleName FROM PubTitle WHERE TitleName = '$job(Title)'"]
     set title_id [db eval "SELECT Title_ID FROM PubTitle WHERE TitleName = '$job(Title)' AND CustID = '$job(CustID)'"]
     if {$title_id eq ""} {
+        ${log}::debug Title ($job(Title)) is new, inserting into database.
         db eval "INSERT INTO PubTitle (TitleName, CustID, CSRID, Status) VALUES ('$job(Title)', '$job(CustID)', '$csr_id', 1)"
         set pubtitle_id [db eval "SELECT MAX(Title_ID) FROM PubTitle"]
     } else {
-        ${log}::notice Title already exists in database... skipping.
+        ${log}::debug Title already exists in database... skipping.
         set pubtitle_id $title_id
     }
         
     # DB Table - LabelTPL
     if {$pubtitle_id eq ""} {
+        # Get LabelSizeID
+        set tplLabel(LabelSizeID) [db eval "SELECT labelSizeID FROM LabelSizes WHERE labelSizeDesc = 'tplLabel(Size)'"]
+        set tplLabel(LabelProfileID) [db eval "SElECT LabelProfileID FROM LabelProfiles WHERE LabelProfileDesc = 'tplLabel(LabelProfileDesc)'"]
+        
         ${log}::debug Title doesn't exist, so the template shouldn't either. Inserting data...
         # Title doesn't exist. Template shouldn't exist either.
-        db eval "INSERT INTO LabelTPL (PubTitleID, tplLabelName, tplLabelPath, tplLabelWidth, tplLabelHeight, tplNotePriv, tplNotePub, tplRows, tplFixedBoxQty, tplFixedLabelInfo)
-                VALUES ($pubtitle_id, '$tplLabel(Name)', '$tplLabel(LabelPath)', '$tplLabel(Width)', '$tplLabel(Height)', '$tplLabel(NotePriv)', '$tplLabel(NotePub)', $tplLabel(NumRows), $tplLabel(FixedBoxQty), $tplLabel(FixedLabelInfo)"
-                
+         db eval "INSERT INTO LabelTPL (PubTitleID, LabelProfileID, labelSizeID, tplLabelName, tplLabelPath, tplNotePriv, tplNotePub, tplFixedBoxQty, tplFixedLabelInfo, tplSerialize)
+                VALUES ($pubtitle_id, $tplLabel(LabelProfileID), $tplLabel(LabelSizeID), '$tplLabel(Name)', '$tplLabel(LabelPath)', '$tplLabel(NotePriv)', '$tplLabel(NotePub)', $tplLabel(FixedBoxQty), $tplLabel(FixedLabelInfo), $tplLabel(SerializeLabel), $tplLabel(SerializeLabel))"
+                        
         set tpl_id [db eval "SELECT MAX(tplID) FROM LabelTPL"]
     } else {
-        # Update Existing Template
+        # Insert or Update Existing Template
         ${log}::debug Title exists (ID: $pubtitle_id), checking to see if template exists.
         set tpl_id [db eval "SELECT tplID FROM LabelTPL WHERE tplLabelName = '$tplLabel(Name)' AND PubTitleID = $pubtitle_id"]
         
+
+        
         if {$tpl_id eq ""} {
             ${log}::debug Template does not exist, adding to database...
-            db eval "INSERT INTO LabelTPL (PubTitleID, tplLabelName, tplLabelPath, tplLabelWidth, tplLabelHeight, tplNotePriv, tplNotePub, tplRows, tplFixedBoxQty, tplFixedLabelInfo)
-                VALUES ($pubtitle_id, '$tplLabel(Name)', '$tplLabel(LabelPath)', '$tplLabel(Width)', '$tplLabel(Height)', '$tplLabel(NotePriv)', '$tplLabel(NotePub)', '$tplLabel(NumRows)', '$tplLabel(FixedBoxQty)', '$tplLabel(FixedLabelInfo)')"
+            #${log}::debug db eval "INSERT INTO LabelTPL (PubTitleID, LabelProfileID, labelSizeID, tplLabelName, tplLabelPath, tplNotePriv, tplNotePub, tplFixedBoxQty, tplFixedLabelInfo, tplSerialize)
+            #   VALUES ($pubtitle_id, $tplLabel(LabelProfileID), $tplLabel(LabelSizeID), '$tplLabel(Name)', '$tplLabel(LabelPath)', '$tplLabel(NotePriv)', '$tplLabel(NotePub)', '$tplLabel(FixedBoxQty)', '$tplLabel(FixedLabelInfo)', '$tplLabel(SerializeLabel)')"
+
+            db eval "INSERT INTO LabelTPL (PubTitleID, LabelProfileID, labelSizeID, tplLabelName, tplLabelPath, tplNotePriv, tplNotePub, tplFixedBoxQty, tplFixedLabelInfo, tplSerialize)
+                VALUES ($pubtitle_id, $tplLabel(LabelProfileID), $tplLabel(LabelSizeID), '$tplLabel(Name)', '$tplLabel(LabelPath)', '$tplLabel(NotePriv)', '$tplLabel(NotePub)', '$tplLabel(FixedBoxQty)', '$tplLabel(FixedLabelInfo)', '$tplLabel(SerializeLabel)')"
                 
             set tpl_id [db eval "SELECT MAX(tplID) FROM LabelTPL"]
-        
+            set tplLabel(ID) $tpl_id
         } else {
             ${log}::debug Template exists, updating...
             db eval "UPDATE LabelTPL
-                        SET tplLabelName = '$tplLabel(Name)',
+                        SET LabelProfileID = $tplLabel(LabelProfileID),
+                            labelSizeID = $tplLabel(LabelSizeID),
+                            tplLabelName = '$tplLabel(Name)',
                             tplLabelPath = '$tplLabel(LabelPath)',
-                            tplLabelWidth = '$tplLabel(Width)',
-                            tplLabelHeight = '$tplLabel(Height)',
                             tplNotePriv = '$tplLabel(NotePriv)',
                             tplNotePub = '$tplLabel(NotePub)',
                             tplFixedBoxQty = '$tplLabel(FixedBoxQty)',
-                            tplFixedLabelInfo = '$tplLabel(FixedLabelInfo)'
+                            tplFixedLabelInfo = '$tplLabel(FixedLabelInfo)',
+                            tplSerialize = '$tplLabel(SerializeLabel)'
                         WHERE tplID = $tpl_id"
         }
     }
@@ -185,4 +221,4 @@ proc ea::code::lb::writeToDb {} {
     } else {
         ${log}::notice Label data is not required/dynamic! Will not try to save data to db...
     }
-}
+} ;# ea::code::lb::writeToDb

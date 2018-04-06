@@ -1,27 +1,130 @@
 # Creator: Casey Ackels
 # Initial Date: March 12, 2011]
 # File Initial Date: 09 10,2014
-# Dependencies: 
-#-------------------------------------------------------------------------------
-#
-# Subversion
-#
-# $Revision: 169 $
-# $LastChangedBy: casey.ackels $
-# $LastChangedDate: 2014-09-14 21:48:00 -0700 (Sun, 14 Sep 2014) $
-#
-########################################################################################
+# Last revised: 2/27/18
 
-##
-## - Overview
-# Overview
+proc ea::db::bl::getTplData {tpl} {
+    global log GS_textVar tplLabel job
+    
+    # reset vars just in case we've already ran this once before
+    ea::code::lb::resetWidgets
+    foreach item [winfo children .container.frame1] {
+        $item configure -state normal
+    }
+    
+    ${log}::debug template id: $tpl
+    # Does id exist?
+    set idExist [db eval "SELECT tplID from LabelTPL WHERE tplID = $tpl"]
+    
+    # Retrieve the data and populate the tplLabel array
+    if {$idExist != ""} {
+        set tplLabel(ID) $tpl
+        # id exists, retrieving data
+        db eval "SELECT PubTitleID, LabelProfileID, labelSizeID, tplLabelName, tplLabelPath, tplNotePub, tplFixedBoxQty, tplFixedLabelInfo, tplSerialize FROM LabelTPL WHERE tplID = $tplLabel(ID)" {
+            set job(Title,id) $PubTitleID
+            set tplLabel(LabelProfileID) $LabelProfileID
+            set tplLabel(LabelSizeID) $labelSizeID
+            set tplLabel(Name) $tplLabelName
+            set tplLabel(LabelPath) $tplLabelPath
+            set tplLabel(NotePub) $tplNotePub
+            set tplLabel(FixedBoxQty) $tplFixedBoxQty
+            set tplLabel(FixedLabelInfo) $tplFixedLabelInfo
+            set tplLabel(SerializeLabel) $tplSerialize
+        }
+        
+        # Setup job vars
+        db eval "SELECT TitleName, CustID, CSRID FROM PubTitle WHERE Title_ID = $job(Title,id) AND Status = 1" {
+            set job(Title) $TitleName
+            set job(CustID) $CustID
+            set job(CustName) [join [db eval "SELECT CustName FROM Customer WHERE CUST_ID = '$job(CustID)' AND Status = 1"]]
+            set job(CSRName) [db eval "SELECT FirstName, LastName FROM CSRs WHERE CSR_ID = '$CSRID' AND Status = 1"]
+        }
+    } else {
+        # id doesn't exist
+        Error_Message::errorMsg BL001
+        ${log}::debug Id doesn't exist, try again.
+        return
+    }
 
-## Coding Conventions
-# - Namespaces: Firstword_Secondword
+    # Get Profile Info
+    if {$tplLabel(LabelProfileID) != 0} {
+        # If the value is 0, that means we do not have a set profile. The label file contains all data, we are just printing the labels.
+        set tplLabel(LabelProfileDesc) [db eval "SELECT LabelProfileDesc FROM LabelProfiles WHERE LabelProfileID = $tplLabel(LabelProfileID)"]
+        
+    } else {
+        set tplLabel(LabelProfileDesc) default
+    }
+    
+    # Get Label size info
+    set tplLabel(Size) [db eval "SELECT labelSizeDesc FROM LabelSizes WHERE labelSizeID = $tplLabel(LabelSizeID)"]
+    
+    if {$tplLabel(FixedBoxQty) != ""} {
+        set GS_textVar(maxBoxQty) $tplLabel(FixedBoxQty)
+    }
+    
+    # Populate the widgets with the label data
+    ea::db::bl::getLabelText
+    
+    # Check database runlist for last modified date, if longer than 3 weeks ago issue an alert
+}
 
-# - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
-#   will be uppercase. I.E sourceFiles, sourceFileExample
 
-namespace eval blDB {}
+proc ea::db::bl::getLabelText {} {
+    global log tplLabel GS_textVar
+    # Find out if we have label text, and if we do populate the text widgets with the data.
+    
+    if {$tplLabel(LabelProfileID) != 0} {
+        # No need to issue this query if the LabelProfileID is 0, since that is reserved for a no-user interaction label
+        # Retrieve the versions
+            db eval "SELECT labelVersionID, LabelVersionDesc FROM LabelVersions WHERE tplID = $tplLabel(ID)" {
+                lappend tplLabel(LabelVersionID) $labelVersionID
+                lappend tplLabel(LabelVersionDesc) $LabelVersionDesc
+            }
+            
+        # Do we need to retrieve label text?    
+        if {$tplLabel(FixedLabelInfo) != 0 && $tplLabel(LabelVersionID) != 0} {
+            
+            # Get first version
+            db eval "SELECT min(ROWID), labelVersionID, LabelVersionDesc FROM LabelVersions WHERE tplID = $tplLabel(ID)" {
+                set tplLabel(LabelVersionID,current) $labelVersionID
+                set tplLabel(LabelVersionDesc,current) $LabelVersionDesc
+            }
+            
+            #set the active version, and disable the widget
+            .container.frame0.cbox configure -values $tplLabel(LabelVersionDesc)
+            .container.frame0.cbox set $tplLabel(LabelVersionDesc,current)
+            .container.frame0.cbox state readonly
+        }
+    }
+    ea::db::bl::populateWidget
+}
 
+proc ea::db::bl::populateWidget {} {
+    global log tplLabel GS_textVar
+    
+    # Clear out the widgets
+    foreach item [array names GS_textVar line*] {
+        set GS_textVar($item) ""
+    }
+        
+    # Populate the widgets with the first version
+    db eval "SELECT labelRowNum, labelRowText, userEditable, LabelVersions.LabelVersionDesc FROM LabelData
+                INNER JOIN LabelVersions ON LabelVersions.labelVersionID = LabelData.labelVersionID
+                WHERE LabelVersions.LabelVersionDesc = '$tplLabel(LabelVersionDesc,current)' ORDER BY labelRowNum ASC" {
+        set GS_textVar(line$labelRowNum) $labelRowText
+        
+        if {$userEditable != 1} {
+            # Do not let the end user edit this field.
+            .container.frame1.entry$labelRowNum configure -state disable
+        } else {
+            # set the widget to edit
+            .container.frame1.entry$labelRowNum configure -state normal
+        }
+    }
+}
 
+proc ea::db::bl::reenableWidgets {fr} {
+    global log
+    
+    
+}

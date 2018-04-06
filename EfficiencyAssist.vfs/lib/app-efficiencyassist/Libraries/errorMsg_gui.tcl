@@ -104,6 +104,11 @@ proc Error_Message::errorMsg {code args} {
                             set title $dupeTitle
                             set icon warning
                         }
+        BL001           {set message [mc "Template ID is invalid. Try again."]
+                            set message2 [mc "Error Location: %s" $code]
+                            set title [mc "Warning"]
+                            set icon warning
+                        }
         default         {set message [mc "Unknown Error Message"]
                             set message2 ""
                             set title $defaultTitle

@@ -133,6 +133,7 @@ proc ea::gui::pref::display {nav} {
         bm_exports      {${log}::debug Launching bm:Exports}
         bm_misc         {${log}::debug Launching bm:Misc}
         bf_misc         {${log}::debug Launching bf:misc}
+        lf_filepaths    {${log}::debug Luanching LF:filepaths}
         default         {}
     }
 

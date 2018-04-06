@@ -177,6 +177,11 @@ proc 'eAssist_sourceReqdFiles {} {
     namespace eval ea::code::lf {}
     namespace eval ea::gui::lf {}
     namespace eval ea::db::lf {}
+	
+	# Box Labels (BL)
+	namespace eval ea::code::bl {}
+	namespace eval ea::gui::bl {}
+	namespace eval ea::db::bl {}
 	  
     
 	## Start the Package Require
@@ -430,14 +435,23 @@ proc 'eAssist_initVariables {} {
     
     array set tplLabel [list ID "" \
                         Name "" \
+						NumRows "" \
                         LabelPath "" \
-                        Width "" \
-                        Height "" \
+                        Size "" \
+						LabelSize "" \
+						LabelSizeID "" \
+						SerializeLabel "" \
                         NotePriv "" \
                         NotePub "" \
-                        NumRows "" \
                         FixedBoxQty "" \
                         FixedLabelInfo "" \
+						LabelVersionID "" \
+						LabelVersionID,current "" \
+						LabelVersionDesc "" \
+						LabelVersionDesc,current "" \
+						LabelProfileID "" \
+						LabelProfileDesc "" \
+						LabelProfileRowNum "" \
                         tmpValues ""]
 	
 	# Filters
