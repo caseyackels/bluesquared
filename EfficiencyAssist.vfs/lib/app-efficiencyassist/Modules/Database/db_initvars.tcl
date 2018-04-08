@@ -64,6 +64,7 @@ proc ea::db::init_vars {} {
     set program(BF,groups) ""
     set program(SC,groups) ""
     set program(LD,groups) ""
+    set program(LF,groups) ""
     
     
     

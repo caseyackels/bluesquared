@@ -113,6 +113,10 @@ proc ea::sec::userExist {} {
 	
 	set user_Name [string tolower $env(USERNAME)]
     
+    #if {$user_Name eq "casey"} {
+    #    set user_Name "casey.ackels"
+    #}
+    
     set userName [db eval "SELECT UserLogin FROM Users WHERE UserLogin='$user_Name'"]
 	
 	if {$userName == ""} {

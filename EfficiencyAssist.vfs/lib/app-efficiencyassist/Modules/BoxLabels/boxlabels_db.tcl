@@ -9,15 +9,39 @@ proc ea::db::bl::getTplData {tpl} {
     # reset vars just in case we've already ran this once before
     ea::code::lb::resetWidgets
     foreach item [winfo children .container.frame1] {
-        $item configure -state normal
+        if {[string match *entry* $item] == 1} {
+            $item configure -state normal
+        }
     }
     
-    ${log}::debug template id: $tpl
-    # Does id exist?
-    set idExist [db eval "SELECT tplID from LabelTPL WHERE tplID = $tpl"]
+    # Clear out the widgets
+    foreach item [array names GS_textVar line*] {
+        set GS_textVar($item) ""
+    }
     
+    # clear out the version dropdown
+    .container.frame0.cbox configure -values ""
+    .container.frame0.cbox set ""
+    
+    set job(CustID) ""
+    set job(CustName) ""
+    set job(Title) ""
+    set job(Title,id) ""
+    set job(CSRName) ""
+    
+    ${log}::debug template id: $tpl
+
     # Retrieve the data and populate the tplLabel array
-    if {$idExist != ""} {
+    if {$tpl != ""} {
+        # Make sure that the number entered, matches the database.
+        set idExist [db eval "SELECT tplID from LabelTPL WHERE tplID = $tpl"]
+        if {$idExist == ""} {
+            ${log}::debug $tpl doesn't match anything in the database. Clearing variables, and widgets...
+            Error_Message::errorMsg BL001
+            set GS_textVar(Template) ""
+            return
+        }
+        
         set tplLabel(ID) $tpl
         # id exists, retrieving data
         db eval "SELECT PubTitleID, LabelProfileID, labelSizeID, tplLabelName, tplLabelPath, tplNotePub, tplFixedBoxQty, tplFixedLabelInfo, tplSerialize FROM LabelTPL WHERE tplID = $tplLabel(ID)" {
@@ -40,9 +64,9 @@ proc ea::db::bl::getTplData {tpl} {
             set job(CSRName) [db eval "SELECT FirstName, LastName FROM CSRs WHERE CSR_ID = '$CSRID' AND Status = 1"]
         }
     } else {
-        # id doesn't exist
-        Error_Message::errorMsg BL001
-        ${log}::debug Id doesn't exist, try again.
+        ## id doesn't exist
+        #Error_Message::errorMsg BL001
+        #${log}::debug Id doesn't exist, try again.
         return
     }
 
@@ -65,7 +89,7 @@ proc ea::db::bl::getTplData {tpl} {
     # Populate the widgets with the label data
     ea::db::bl::getLabelText
     
-    # Check database runlist for last modified date, if longer than 3 weeks ago issue an alert
+    # Check runlist file for last modified date, if longer than 3 weeks ago issue an alert
 }
 
 
