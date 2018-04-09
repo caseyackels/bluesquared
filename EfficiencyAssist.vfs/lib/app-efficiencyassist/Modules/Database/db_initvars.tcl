@@ -59,11 +59,11 @@ proc ea::db::init_vars {} {
     set sec(UserLogins) [ea::db::getUserList -login]
     
     set program(BM,groups) [list Filepaths Reports Exports Misc]
-    set program(SU,groups) ""
+    set program(SU,groups) [list Filepaths]
     set program(BL,groups) [list Filepaths]
-    set program(BF,groups) ""
-    set program(SC,groups) ""
-    set program(LD,groups) ""
+    set program(BF,groups) [list Filepaths]
+    set program(SC,groups) [list Filepaths]
+    set program(LD,groups) [list Filepaths]
     
     
     
