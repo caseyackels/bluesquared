@@ -116,7 +116,7 @@ proc ea::gui::pref::display {nav} {
 
     #${log}::debug Selection: [$nav curselection] [$nav get [$nav curselection]] [$nav rowcget [$nav curselection] -name ]
 
-    set group [string tolower [$nav rowcget [$nav curselection] -name ]]
+    set group [catch {[string tolower [$nav rowcget [$nav curselection] -name ]]}]
     ${log}::debug Group: $group
     
     set mod [ea::db::getModInfo -name [lindex [split $group _] 0]]
@@ -133,7 +133,7 @@ proc ea::gui::pref::display {nav} {
         bm_exports      {${log}::debug Launching bm:Exports}
         bm_misc         {${log}::debug Launching bm:Misc}
         bf_misc         {${log}::debug Launching bf:misc}
-        lf_filepaths    {${log}::debug Luanching LF:filepaths}
+        lf_filepaths    {${log}::debug Launching LF:filepaths}
         default         {}
     }
 

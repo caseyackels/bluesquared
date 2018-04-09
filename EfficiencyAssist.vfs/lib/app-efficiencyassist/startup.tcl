@@ -278,12 +278,12 @@ proc 'eAssist_bootStrap {} {
 	
 	set debug(onOff) on ;# Old - Still exists so we don't receive errors, on the instances where it still exists
 	set logSettings(loglevel) notice ;# Default to notice, over ridden if the user selects a different option
-	set logSettings(displayConsole) 0 ;# disable by default, same as above. We read in the user settings file later; so if specific users want to see it, they will.
+	#set logSettings(displayConsole) 0 ;# disable by default, same as above. We read in the user settings file later; so if specific users want to see it, they will.
 
 	# initialize logging service
-	set log [logger::init log_svc]
+	set log [logger::init log]
 	logger::utils::applyAppender -appender colorConsole
-	${log}::notice "Initialized log_svc logging"
+	${log}::notice "Initialized logging"
 	
 	# load the DB
 	eAssist_db::loadDB
@@ -318,27 +318,18 @@ proc 'eAssist_initVariables {} {
     #
     #***
     global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter auth options emailSetup emailEvent job user setupJobDB widSec tplLabel
-
-	# Init namespaces
-#    namespace eval ea {}
-#	namespace eval ea::code {}
-#	namespace eval ea::gui {}
-#	namespace eval ea::db {}
-	
-	# Setup, Admin
-	#namespace eval ea::code::admin {}
-	#namespace eval ea::db::admin {}
-	#namespace eval ea::gui::admin {}
 	
 	#-------- CORE SETTINGS
-	#if {$logSettings(displayConsole) == 1} {console show}
 	if {[info exists logSettings(displayConsole)]} {
 		eAssistSetup::toggleConsole $logSettings(displayConsole)
+	} else {
+		# Default to show logging if variable doesn't exist. Helpful on new installations.
+		eAssistSetup::toggleConsole 1
 	}
 	
 	# admin7954
-	set auth(adminPword) {$1$6JV2D0G7$RHuHLMxJuuQ3HWWG3wOML1}
-	set auth(adminSalt) {6JV2D0G7iPZ.xfGbLxnx}
+	#set auth(adminPword) {$1$6JV2D0G7$RHuHLMxJuuQ3HWWG3wOML1}
+	#set auth(adminSalt) {6JV2D0G7iPZ.xfGbLxnx}
 	
 	# Insert Setup into the Modules
 	eAssist_db::checkModuleName Setup
@@ -479,6 +470,11 @@ proc 'eAssist_initVariables {} {
 	if {![info exists mySettings(job,fileName)]} {
 		# Default for the file name
 		set mySettings(job,fileName) "%number %title %name"
+	}
+	
+	if {![info exists mySettings(path,labelDBfile)]} {
+		# Default for the file name
+		set mySettings(path,labelDBfile) [file dirname $mySettings(Home)]
 	}
 
     if {![info exists settings(shipvia3P)]} {

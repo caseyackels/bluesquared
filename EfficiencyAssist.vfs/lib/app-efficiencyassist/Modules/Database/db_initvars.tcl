@@ -61,9 +61,16 @@ proc ea::db::init_vars {} {
     set program(BM,groups) [list Filepaths Reports Exports Misc]
     set program(SU,groups) [list Filepaths]
     set program(BL,groups) [list Filepaths]
+<<<<<<< HEAD
     set program(BF,groups) [list Filepaths]
     set program(SC,groups) [list Filepaths]
     set program(LD,groups) [list Filepaths]
+=======
+    set program(BF,groups) ""
+    set program(SC,groups) ""
+    set program(LD,groups) ""
+    set program(LF,groups) ""
+>>>>>>> 4bf7e3b892b26416b6f10b03050e3260771a53fa
     
     
     
