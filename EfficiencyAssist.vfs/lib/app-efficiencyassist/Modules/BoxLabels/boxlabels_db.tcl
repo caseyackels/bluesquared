@@ -15,7 +15,7 @@ proc ea::db::bl::getTplData {tpl} {
     }
     
     # Clear out the widgets
-    foreach item [array names GS_textVar line*] {
+    foreach item [array names GS_textVar Row*] {
         set GS_textVar($item) ""
     }
     
@@ -56,6 +56,12 @@ proc ea::db::bl::getTplData {tpl} {
             set tplLabel(SerializeLabel) $tplSerialize
         }
         
+        # We entered a correct template number, but a title was never assigned.
+        if {$job(Title,id) eq ""} {
+            ${log}::critical Template $tpl exists, but a Title was never assigned
+            set tplLabel(LabelPath) "" ;# Clear this out so the end-user doesn't keep going
+            return
+        }
         # Setup job vars
         db eval "SELECT TitleName, CustID, CSRID FROM PubTitle WHERE Title_ID = $job(Title,id) AND Status = 1" {
             set job(Title) $TitleName
@@ -119,6 +125,16 @@ proc ea::db::bl::getLabelText {} {
             .container.frame0.cbox set $tplLabel(LabelVersionDesc,current)
             .container.frame0.cbox state readonly
         }
+        
+        ## Are we serializing?
+        #if {$tplLabel(SerializeLabel) == 1} {
+        #    # Disable all of the widgets
+        #    foreach child [winfo children .container.frame1] {
+        #        if {[string match *entry* $child] == 1} {
+        #            $child configure -state disable
+        #        }
+        #    }
+        #}
     }
     ea::db::bl::populateWidget
 }
@@ -130,19 +146,30 @@ proc ea::db::bl::populateWidget {} {
     foreach item [array names GS_textVar line*] {
         set GS_textVar($item) ""
     }
-        
+       
     # Populate the widgets with the first version
     db eval "SELECT labelRowNum, labelRowText, userEditable, LabelVersions.LabelVersionDesc FROM LabelData
                 INNER JOIN LabelVersions ON LabelVersions.labelVersionID = LabelData.labelVersionID
                 WHERE LabelVersions.LabelVersionDesc = '$tplLabel(LabelVersionDesc,current)' ORDER BY labelRowNum ASC" {
-        set GS_textVar(line$labelRowNum) $labelRowText
+        set GS_textVar(Row$labelRowNum) $labelRowText
         
+        set labelRowNum_trimmed [string trim $labelRowNum 0]
         if {$userEditable != 1} {
             # Do not let the end user edit this field.
-            .container.frame1.entry$labelRowNum configure -state disable
+            .container.frame1.entry$labelRowNum_trimmed configure -state disable
         } else {
             # set the widget to edit
-            .container.frame1.entry$labelRowNum configure -state normal
+            .container.frame1.entry$labelRowNum_trimmed configure -state normal
+        }
+    }
+    
+    if {$tplLabel(SerializeLabel) == 1} {
+        # disable all of the widgets if we are serializing
+        ${log}::debug Disabling widgets in .container.frame1 (all row widgets)
+        foreach child [winfo children .container.frame1] {
+                if {[string match *entry* $child] == 1} {
+                    $child configure -state disable
+                }
         }
     }
 }

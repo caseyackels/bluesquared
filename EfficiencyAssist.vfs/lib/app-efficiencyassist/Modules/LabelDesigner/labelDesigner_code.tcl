@@ -151,11 +151,10 @@ proc ea::code::lb::writeToDb {} {
         
     # DB Table - LabelTPL
     if {$pubtitle_id eq ""} {
-        # Get LabelSizeID
-        set tplLabel(LabelSizeID) [db eval "SELECT labelSizeID FROM LabelSizes WHERE labelSizeDesc = 'tplLabel(Size)'"]
-        set tplLabel(LabelProfileID) [db eval "SElECT LabelProfileID FROM LabelProfiles WHERE LabelProfileDesc = 'tplLabel(LabelProfileDesc)'"]
-        
         ${log}::debug Title doesn't exist, so the template shouldn't either. Inserting data...
+        set tplLabel(LabelSizeID) [db eval "SELECT labelSizeID FROM LabelSizes WHERE labelSizeDesc = '$tplLabel(Size)'"]
+        set tplLabel(LabelProfileID) [db eval "SElECT LabelProfileID FROM LabelProfiles WHERE LabelProfileDesc = '$tplLabel(LabelProfileDesc)'"]
+        
         # Title doesn't exist. Template shouldn't exist either.
          db eval "INSERT INTO LabelTPL (PubTitleID, LabelProfileID, labelSizeID, tplLabelName, tplLabelPath, tplNotePriv, tplNotePub, tplFixedBoxQty, tplFixedLabelInfo, tplSerialize)
                 VALUES ($pubtitle_id, $tplLabel(LabelProfileID), $tplLabel(LabelSizeID), '$tplLabel(Name)', '$tplLabel(LabelPath)', '$tplLabel(NotePriv)', '$tplLabel(NotePub)', $tplLabel(FixedBoxQty), $tplLabel(FixedLabelInfo), $tplLabel(SerializeLabel), $tplLabel(SerializeLabel))"
@@ -164,14 +163,14 @@ proc ea::code::lb::writeToDb {} {
     } else {
         # Insert or Update Existing Template
         ${log}::debug Title exists (ID: $pubtitle_id), checking to see if template exists.
+        set tplLabel(LabelSizeID) [db eval "SELECT labelSizeID FROM LabelSizes WHERE labelSizeDesc = '$tplLabel(Size)'"]
+        set tplLabel(LabelProfileID) [db eval "SElECT LabelProfileID FROM LabelProfiles WHERE LabelProfileDesc = '$tplLabel(LabelProfileDesc)'"]
         set tpl_id [db eval "SELECT tplID FROM LabelTPL WHERE tplLabelName = '$tplLabel(Name)' AND PubTitleID = $pubtitle_id"]
-        
-
         
         if {$tpl_id eq ""} {
             ${log}::debug Template does not exist, adding to database...
-            #${log}::debug db eval "INSERT INTO LabelTPL (PubTitleID, LabelProfileID, labelSizeID, tplLabelName, tplLabelPath, tplNotePriv, tplNotePub, tplFixedBoxQty, tplFixedLabelInfo, tplSerialize)
-            #   VALUES ($pubtitle_id, $tplLabel(LabelProfileID), $tplLabel(LabelSizeID), '$tplLabel(Name)', '$tplLabel(LabelPath)', '$tplLabel(NotePriv)', '$tplLabel(NotePub)', '$tplLabel(FixedBoxQty)', '$tplLabel(FixedLabelInfo)', '$tplLabel(SerializeLabel)')"
+            ${log}::debug db eval "INSERT INTO LabelTPL (PubTitleID, LabelProfileID, labelSizeID, tplLabelName, tplLabelPath, tplNotePriv, tplNotePub, tplFixedBoxQty, tplFixedLabelInfo, tplSerialize)
+                VALUES ($pubtitle_id, $tplLabel(LabelProfileID), $tplLabel(LabelSizeID), '$tplLabel(Name)', '$tplLabel(LabelPath)', '$tplLabel(NotePriv)', '$tplLabel(NotePub)', '$tplLabel(FixedBoxQty)', '$tplLabel(FixedLabelInfo)', '$tplLabel(SerializeLabel)')"
 
             db eval "INSERT INTO LabelTPL (PubTitleID, LabelProfileID, labelSizeID, tplLabelName, tplLabelPath, tplNotePriv, tplNotePub, tplFixedBoxQty, tplFixedLabelInfo, tplSerialize)
                 VALUES ($pubtitle_id, $tplLabel(LabelProfileID), $tplLabel(LabelSizeID), '$tplLabel(Name)', '$tplLabel(LabelPath)', '$tplLabel(NotePriv)', '$tplLabel(NotePub)', '$tplLabel(FixedBoxQty)', '$tplLabel(FixedLabelInfo)', '$tplLabel(SerializeLabel)')"
@@ -222,3 +221,29 @@ proc ea::code::lb::writeToDb {} {
         ${log}::notice Label data is not required/dynamic! Will not try to save data to db...
     }
 } ;# ea::code::lb::writeToDb
+
+proc ea::code::lb::createDummyFile {} {
+    # Create a 'dummy' file that contains a sample database of the selected profile.
+    # Parent ea::gui::lb::
+    # Writes to: Directory where label file is located with name of <Profile Desc>
+    global log tplLabel
+    
+    # Actions ...
+    set f_name "$tplLabel(Name) - $tplLabel(LabelProfileDesc)"
+    ${log}::debug File Name: $f_name
+    ${log}::debug writing to path:  [file dirname $tplLabel(LabelPath)]
+    
+    set hdr_data [::csv::join [db eval "SELECT LabelHeaders.LabelHeaderDesc FROM LabelHeaderGrp
+                                            INNER JOIN LabelHeaders ON LabelHeaders.LabelHeaderID = LabelHeaderGrp.LabelHeaderID
+                                            WHERE LabelHeaderGrp.LabelProfileID = $tplLabel(LabelProfileID)"]]
+                    
+    ${log}::debug writing headers to file: $hdr_data
+    
+    # Opening file ...
+    set runlist_file [open [file join  [file dirname $tplLabel(LabelPath)] $f_name.csv] w]
+    
+    # Insert Header row
+    chan puts $runlist_file $hdr_data
+    
+    chan close $runlist_file
+}

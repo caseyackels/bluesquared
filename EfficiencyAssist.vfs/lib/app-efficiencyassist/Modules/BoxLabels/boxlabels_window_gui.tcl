@@ -99,7 +99,7 @@ proc shippingGUI {} {
 
     ttk::label $frame1.text1 -text "Row 1"
     # NOTE: We populate the *(history) variable just under [openHistory]
-    ttk::combobox $frame1.entry1 -textvariable GS_textVar(line1) \
+    ttk::combobox $frame1.entry1 -textvariable GS_textVar(Row01) \
                                 -values $GS_textVar(history) \
                                 -validate key \
                                 -validatecommand {Shipping_Code::filterKeys -textLength %S %W %P}
@@ -107,32 +107,32 @@ proc shippingGUI {} {
     tooltip::tooltip $frame1.data1 "33 Chars Max."
 
     ttk::label $frame1.text2 -text "Row 2"
-    ttk::entry $frame1.entry2 -textvariable GS_textVar(line2) \
+    ttk::entry $frame1.entry2 -textvariable GS_textVar(Row02) \
                             -validate key \
                             -validatecommand {Shipping_Code::filterKeys -textLength %S %W %P} ;#-width 33
     ttk::label $frame1.data2 -textvariable lineText(data2) -width 2
 
     ttk::label $frame1.text3 -text "Row 3"
-    ttk::entry $frame1.entry3 -textvariable GS_textVar(line3) \
+    ttk::entry $frame1.entry3 -textvariable GS_textVar(Row03) \
                             -validate key \
                             -validatecommand {Shipping_Code::filterKeys -textLength %S %W %P} ;#-width 33
     ttk::label $frame1.data3 -textvariable lineText(data3) -width 2
 
     ttk::label $frame1.text4 -text "Row 4"
-    ttk::entry $frame1.entry4 -textvariable GS_textVar(line4) \
+    ttk::entry $frame1.entry4 -textvariable GS_textVar(Row04) \
                             -validate key \
                             -validatecommand {Shipping_Code::filterKeys -textLength %S %W %P} ;#-width 33
     ttk::label $frame1.data4 -textvariable lineText(data4) -width 2
 
     ttk::label $frame1.text5 -text "Row 5"
-    ttk::entry $frame1.entry5 -textvariable GS_textVar(line5) \
+    ttk::entry $frame1.entry5 -textvariable GS_textVar(Row05) \
                             -validate key \
                             -validatecommand {Shipping_Code::filterKeys -textLength %S %W %P}
     ttk::label $frame1.data5 -textvariable lineText(data5) -width 2
 
     # With ttk widgets, we need to populate the variables or else we get an error. :(
-    foreach num {1 2 3 4 5} {
-        set GS_textVar(line$num) ""
+    foreach num {01 02 03 04 05} {
+        set GS_textVar(Row$num) ""
     }
 
 
@@ -283,8 +283,8 @@ foreach window "$frame2a.add $frame2a.entry1 $frame2a.entry2" {
 }
 
 bind $frame1.entry1 <KeyRelease> {
-    if {[string length $GS_textVar(line1)] != 0} {
-        set lineText(data1) [string length $GS_textVar(line1)]
+    if {[string length $GS_textVar(Row01)] != 0} {
+        set lineText(data1) [string length $GS_textVar(Row01)]
         } else {
             set lineText(data1) ""
     }
@@ -292,30 +292,30 @@ bind $frame1.entry1 <KeyRelease> {
 
 
 bind $frame1.entry2 <KeyRelease> {
-    if {[string length $GS_textVar(line2)] != 0} {
-        set lineText(data2) [string length $GS_textVar(line2)]
+    if {[string length $GS_textVar(Row02)] != 0} {
+        set lineText(data2) [string length $GS_textVar(Row02)]
         } else {
             set lineText(data2) ""
     }
 }
 
 bind $frame1.entry3 <KeyRelease> {
-    if {[string length $GS_textVar(line3)] != 0} {
-        set lineText(data3) [string length $GS_textVar(line3)]
+    if {[string length $GS_textVar(Row03)] != 0} {
+        set lineText(data3) [string length $GS_textVar(Row03)]
         } else {
             set lineText(data3) ""
     }
 }
 bind $frame1.entry4 <KeyRelease> {
-    if {[string length $GS_textVar(line4)] != 0} {
-        set lineText(data4) [string length $GS_textVar(line4)]
+    if {[string length $GS_textVar(Row04)] != 0} {
+        set lineText(data4) [string length $GS_textVar(Row04)]
         } else {
             set lineText(data4) ""
     }
 }
 bind $frame1.entry5 <KeyRelease> {
-    if {[string length $GS_textVar(line5)] != 0} {
-        set lineText(data5) [string length $GS_textVar(line5)]
+    if {[string length $GS_textVar(Row05)] != 0} {
+        set lineText(data5) [string length $GS_textVar(Row05)]
         } else {
             set lineText(data5) ""
     }
@@ -439,11 +439,11 @@ proc printbreakDown {args} {
     set file [open [file join $mySettings(Home) $mySettings(path,bdfile)] w]
 
     puts $file [clock format [clock scan now] -format "%A %B %d %r"]\n
-    puts $file $GS_textVar(line1)
-    puts $file $GS_textVar(line2)
-    puts $file $GS_textVar(line3)
-    puts $file $GS_textVar(line4)
-    puts $file $GS_textVar(line5)\n
+    puts $file $GS_textVar(Row01)
+    puts $file $GS_textVar(Row02)
+    puts $file $GS_textVar(Row03)
+    puts $file $GS_textVar(Row04)
+    puts $file $GS_textVar(Row05)\n
     puts $file $myBreakDownText
 
     chan close $file
@@ -455,11 +455,11 @@ proc printbreakDown {args} {
         ## Email
         ##
         #mail::mail boxlabels "$GS_textVar(line1)" "$GS_textVar(line1)\n$GS_textVar(line2)\n$GS_textVar(line3)\n$GS_textVar(line4)\n$GS_textVar(line5)\n\n$myBreakDownText"
-        Shipping_Code::onPrint_event -line1 $GS_textVar(line1) \
-                                        -line2 $GS_textVar(line2) \
-                                        -line3 $GS_textVar(line3) \
-                                        -line4 $GS_textVar(line4) \
-                                        -line5 $GS_textVar(line5) \
+        Shipping_Code::onPrint_event -line1 $GS_textVar(Row01) \
+                                        -line2 $GS_textVar(Row02) \
+                                        -line3 $GS_textVar(Row03) \
+                                        -line4 $GS_textVar(Row04) \
+                                        -line5 $GS_textVar(Row05) \
                                         -breakdown $myBreakDownText
         #${log}::debug [list $GS_textVar(line1) $GS_textVar(line2) $myBreakDownText]
     } else {
@@ -467,11 +467,11 @@ proc printbreakDown {args} {
         ## Email
         ##
         #mail::mail boxlabels "$GS_textVar(line1)" "$GS_textVar(line1)\n$GS_textVar(line2)\n$GS_textVar(line3)\n$GS_textVar(line4)\n$GS_textVar(line5)\n\n$myBreakDownText"
-        Shipping_Code::onPrint_event -line1 $GS_textVar(line1) \
-                                        -line2 $GS_textVar(line2) \
-                                        -line3 $GS_textVar(line3) \
-                                        -line4 $GS_textVar(line4) \
-                                        -line5 $GS_textVar(line5) \
+        Shipping_Code::onPrint_event -line1 $GS_textVar(Row01) \
+                                        -line2 $GS_textVar(Row02) \
+                                        -line3 $GS_textVar(Row03) \
+                                        -line4 $GS_textVar(Row04) \
+                                        -line5 $GS_textVar(Row05) \
                                         -breakdown $myBreakDownText
         #${log}::debug [list $GS_textVar(line1) $GS_textVar(line2) $myBreakDownText]
         

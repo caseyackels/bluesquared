@@ -76,55 +76,53 @@ boxLabelsVars::initDBTables
     
     
 proc Shipping_Gui::initVariables {} {
-    #****f* initVariables/Shipping_Gui
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2011-2014 Casey Ackels
-    #
-    # FUNCTION
-    #	Initialize, and set defaults for variables within the Box Label/Shipping module
-    #
-    # SYNOPSIS
-    #
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #	
-    #
-    # NOTES
-    #
-    # SEE ALSO
-    #
-    #***
-    global log mySettings
-    #${log}::debug --START-- [info level 1]
+   #****f* initVariables/Shipping_Gui
+   # AUTHOR
+   #	Casey Ackels
+   #
+   # COPYRIGHT
+   #	(c) 2011-2014 Casey Ackels
+   #
+   # FUNCTION
+   #	Initialize, and set defaults for variables within the Box Label/Shipping module
+   #
+   # SYNOPSIS
+   #
+   #
+   # CHILDREN
+   #	N/A
+   #
+   # PARENTS
+   #	
+   #
+   # NOTES
+   #
+   # SEE ALSO
+   #
+   #***
+   global log mySettings
+   #${log}::debug --START-- [info level 1]
+
+   set throwError 0
     
+   #set desc(ModBoxLabels) [mc "Box Labels"]
+   #set emailEvent(ModBoxLabels) [list Print "Print BreakDown"] 
     
-    
-    set throwError 0
-    
-    #set desc(ModBoxLabels) [mc "Box Labels"]
-    #set emailEvent(ModBoxLabels) [list Print "Print BreakDown"] 
-    
-    set myVars [list bartender labelDir wordpad printer labelDBfile]
+   set myVars [list bartender labelDir wordpad printer labelDBfile]
 	foreach item $myVars {
         if {![info exists mySettings(path,$item)]} {
            #eAssist_Global::checkVars pref
            set throwError 1
-           ${log}::critical Option not set: mySettings(name,labelDBfile)
+           ${log}::critical Option not set: mySettings(path,$item)
         }
     }
     
     
-    if {![info exists mySettings(name,labelDBfile)]} {
-		#eAssist_Global::checkVars pref
-        set throwError 1
-        ${log}::critical Option not set: mySettings(name,labelDBfile)
-	}
+#    if {![info exists mySettings(name,labelDBfile)]} {
+#		#eAssist_Global::checkVars pref
+#        set throwError 1
+#        ${log}::critical Option not set: mySettings(name,labelDBfile)
+#	}
    
    
    # launch the error window if any variables need attention
@@ -134,5 +132,5 @@ proc Shipping_Gui::initVariables {} {
     
     
 	
-    #${log}::debug --END-- [info level 1]
+   #${log}::debug --END-- [info level 1]
 } ;# Shipping_Gui::initVariables
