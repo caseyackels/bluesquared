@@ -174,7 +174,13 @@ proc writeText {labels quantity total_boxes} {
         set BoxQuantity $quantity
         set TotalBoxes $total_boxes
         
-        lappend textValues $labels $quantity $total_boxes
+        if {$tplLabel(SerializeLabel) eq ""} {
+            ${log}::debug We are not serializing.
+            lappend textValues $quantity $labels
+        } else {
+            ${log}::debug We are serializing, inserting total boxes for shipment
+            lappend textValues $quantity $labels $total_boxes
+        }
         
         # Get Profile Headers. These should only be the headers that contain text.
         foreach item [lsort [array names GS_textVar]] {
@@ -188,6 +194,7 @@ proc writeText {labels quantity total_boxes} {
         #lappend textValues $quantity $labels $total_boxes "$GS_textVar(Row01)" "$GS_textVar(Row02)" "$GS_textVar(Row03)" "$GS_textVar(Row04)" "$GS_textVar(Row05)"
     
     } else {
+        # This is for the Generic labels
         lappend textValues $labels $quantity "$GS_textVar(Row01)" "$GS_textVar(Row02)" "$GS_textVar(Row03)" "$GS_textVar(Row04)" "$GS_textVar(Row05)"
     }
     

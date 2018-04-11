@@ -95,10 +95,10 @@ proc ea::code::lb::saveLabel {} {
 } ;# ea::code::lb::saveLabel
 
 # ea::code::lb::getRowData 1 .container.frame2
-proc ea::code::lb::getRowData {tplID widPath} {
+proc ea::code::lb::getRowData {LabelVersionID widPath} {
     global tplLabel
-    
-    for {set x 1} {$tplLabel(NumRows) >= $x} {incr x} {
+   
+    for {set x 1} {$tplLabel(LabelProfileRowNum) >= $x} {incr x} {
         set rowData ""
         set rowData [list '[$widPath.labelData$x get]']
         
@@ -108,16 +108,22 @@ proc ea::code::lb::getRowData {tplID widPath} {
             lappend rowData 0
         }
         
+        if {[$widPath.isVersion$x state] eq "selected"} {
+            lappend rowData 1
+        } else {
+            lappend rowData 0
+        }
+        
         if {[join $rowData] ne "\"\""} {
-            set rowInfo $tplID,$x
+            set rowInfo $LabelVersionID,$x
             lappend rowInfo [join $rowData ,]
-            
-            #puts ([join $rowInfo ,])
+
             lappend finalRowInfo ([join $rowInfo ,])
         }
     }
+    
     return [join $finalRowInfo ,]
-}
+} ;# ea::code::lb::getRowData
 
 proc ea::code::lb::writeToDb {} {
     # Parent: ea::code::lb::saveLabel
@@ -153,7 +159,7 @@ proc ea::code::lb::writeToDb {} {
     if {$pubtitle_id eq ""} {
         ${log}::debug Title doesn't exist, so the template shouldn't either. Inserting data...
         set tplLabel(LabelSizeID) [db eval "SELECT labelSizeID FROM LabelSizes WHERE labelSizeDesc = '$tplLabel(Size)'"]
-        set tplLabel(LabelProfileID) [db eval "SElECT LabelProfileID FROM LabelProfiles WHERE LabelProfileDesc = '$tplLabel(LabelProfileDesc)'"]
+        set tplLabel(LabelProfileID) [db eval "SELECT LabelProfileID FROM LabelProfiles WHERE LabelProfileDesc = '$tplLabel(LabelProfileDesc)'"]
         
         # Title doesn't exist. Template shouldn't exist either.
          db eval "INSERT INTO LabelTPL (PubTitleID, LabelProfileID, labelSizeID, tplLabelName, tplLabelPath, tplNotePriv, tplNotePub, tplFixedBoxQty, tplFixedLabelInfo, tplSerialize)
@@ -193,33 +199,28 @@ proc ea::code::lb::writeToDb {} {
         }
     }
     
-
-    # DB Table - LabelData
-    # Does label data exist?
-    
-    if {$tplLabel(NumRows) ne ""} {
-        set labelData_id [db eval "SELECT labelData_ID FROM LabelData WHERE tplID = $tpl_id"]
+    # Check if labelVersionID exists
+    #  - Doesn't Exist; Insert labelVersionID, Insert Row Data
+    # - Exists; Delete Row Data, then Insert
+    if {$tplLabel(LabelVersionID,current) eq "" && $tplLabel(LabelVersionDesc,current) eq ""} {
+        # This is a new version, insert only. (Table: LabelVersions)
+        ${log}::notice LabelVersion ID doesn't exist, but Description does. Retrieving...
+        ${log}::notice LabelVersion Row: $tplLabel(tmpValues,rbtn) [.container.frame2.frame2a.labelData$tplLabel(tmpValues,rbtn) get]
+        ${log}::debug db eval "INSERT INTO LabelVersions (tplID, LabelVersionDesc) VALUES ($tpl_id, '[.container.frame2.frame2a.labelData$tplLabel(tmpValues,rbtn) get]')"
         
-        if {$labelData_id eq ""} {
-            ${log}::debug Data doesn't exist, inserting ...
-            # Get Row Data
-            set data [join [ea::code::lb::getRowData $tpl_id .container.frame2]]
-            ${log}::debug Inserting: $data
-            db eval "INSERT INTO LabelData (tplID, labelRowNum, labelRowData, userEditable) VALUES $data"
-        } else {
-            # Deleting existing records!
-            ${log}::notice Deleting existing records in Table: LabelData,ID $tpl_id
-            
-            db eval "DELETE FROM LabelData WHERE tplID = $tpl_id"
-            
-            # Inserting new data
-            set data [join [ea::code::lb::getRowData $tpl_id .container.frame2]]
-            ${log}::debug Inserting: $data
-            db eval "INSERT INTO LabelData (tplID, labelRowNum, labelRowData, userEditable) VALUES $data"
-        }
-    } else {
-        ${log}::notice Label data is not required/dynamic! Will not try to save data to db...
+        db eval "INSERT INTO LabelVersions (tplID, LabelVersionDesc) VALUES ($tpl_id, '[.container.frame2.frame2a.labelData$tplLabel(tmpValues,rbtn) get]')"
+        
+        # Get version id
+        set tplLabel(LabelVersionID,current) [db eval "SELECT max(labelVersionID) FROM LabelVersions WHERE tplID = $tpl_id"]
+        ${log}::notice Retrieving new version ID: $tplLabel(LabelVersionID,current)
+
+        # Insert label date (Table: LabelData)
+        set data [join [ea::code::lb::getRowData $tplLabel(LabelVersionID,current) .container.frame2.frame2a]]
+        ${log}::notice Inserting Row Data: $data
+        ${log}::debug db eval "INSERT INTO LabelData (labelVersionID, labelRowNum, labelRowText, userEditable, isVersion) VALUES $data"
+        db eval "INSERT INTO LabelData (labelVersionID, labelRowNum, labelRowText, userEditable, isVersion) VALUES $data"
     }
+
 } ;# ea::code::lb::writeToDb
 
 proc ea::code::lb::createDummyFile {} {
@@ -237,10 +238,10 @@ proc ea::code::lb::createDummyFile {} {
                                             INNER JOIN LabelHeaders ON LabelHeaders.LabelHeaderID = LabelHeaderGrp.LabelHeaderID
                                             WHERE LabelHeaderGrp.LabelProfileID = $tplLabel(LabelProfileID)"]]
                     
+    ${log}::debug Opening File: file join  [file dirname $tplLabel(LabelPath)] $f_name.csv
     ${log}::debug writing headers to file: $hdr_data
     
-    # Opening file ...
-    set runlist_file [open [file join  [file dirname $tplLabel(LabelPath)] $f_name.csv] w]
+    set runlist_file [open "[file join  [file dirname $tplLabel(LabelPath)] $f_name.csv]" w]
     
     # Insert Header row
     chan puts $runlist_file $hdr_data

@@ -142,6 +142,11 @@ proc ea::db::bl::populateWidget {} {
     db eval "SELECT labelRowNum, labelRowText, userEditable, LabelVersions.LabelVersionDesc FROM LabelData
                 INNER JOIN LabelVersions ON LabelVersions.labelVersionID = LabelData.labelVersionID
                 WHERE LabelVersions.LabelVersionDesc = '$tplLabel(LabelVersionDesc,current)' ORDER BY labelRowNum ASC" {
+        # Add a zero if needed (all digits under 9 will need it)
+        if {$labelRowNum <= 9} {
+            set labelRowNum 0$labelRowNum
+        }
+        
         set GS_textVar(Row$labelRowNum) $labelRowText
         
         set labelRowNum_trimmed [string trim $labelRowNum 0]

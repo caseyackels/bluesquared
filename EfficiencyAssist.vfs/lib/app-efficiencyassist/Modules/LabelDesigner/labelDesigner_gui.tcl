@@ -88,6 +88,7 @@ proc ea::gui::designerGUI {} {
     
     bind $f1.versionNameCbox <<ComboboxSelected>> {
         ea::db::lb::getLabelSpecs %W
+        .container.frame1.headerFileBtn configure -state normal
     }
     
     bind $f1.labelSizecBox <<ComboboxSelected>> {
@@ -95,11 +96,11 @@ proc ea::gui::designerGUI {} {
     }
     
     bind $f1.labelProfileCbox <<ComboboxSelected>> {
-        #ea::db::lb::setProfileVars
-        
+ 
         if {[%W get] ne ""} {
             ${log}::debug Profile loaded: [%W get] - Setting activating Dummy File Button
             .container.frame1.headerFileBtn configure -state normal
+            ea::db::lb::setProfileVars
         } else {
             .container.frame1.headerFileBtn configure -state disable
         }
@@ -192,7 +193,6 @@ proc ea::code::lb::genLines {} {
         $f2.versionDescCbox set $tplLabel(LabelVersionDesc,current)
         $f2.versionDescCbox state readonly
         
-    #grid [ttk::frame .container.frame2.frame2a] -column 0 -columnspan 2 -row 1    
     
     bind $f2.versionDescCbox <<ComboboxSelected>> {
         set tplLabel(LabelVersionID,current) [db eval "SELECT labelVersionID FROM LabelVersions WHERE tplID = '$tplLabel(ID)' AND LabelVersionDesc = '[%W get]'"]
@@ -206,12 +206,7 @@ proc ea::code::lb::genLines {} {
             ea::db::lb::getVersionLabel
         }
     }
-    
-    #if {$tplLabel(LabelVersionDesc,current) eq ""} {
-    #    # we don't have any versions or this is a new entry
-    #    ea::db::lb::getVersionLabel
-    #}
-    
+
     ea::db::lb::getVersionLabel
         
     grid [ttk::button $f2.saveBtn -text [mc "Save"]] -column 3 -row 2

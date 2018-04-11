@@ -60,6 +60,8 @@ proc ea::db::lb::getLabelSpecs {cbox} {
         lappend tplLabel(LabelVersionID) $labelVersionID
         lappend tplLabel(LabelVersionDesc) $LabelVersionDesc
     }
+    
+    if {$tplLabel(LabelVersionID) eq ""} {${log}::debug No Versions detected.}
 
     # Do we need to retrieve label text?    
     if {$tplLabel(FixedLabelInfo) != 0 && $tplLabel(LabelVersionID) != 0} {
@@ -69,7 +71,7 @@ proc ea::db::lb::getLabelSpecs {cbox} {
             set tplLabel(LabelVersionID,current) $labelVersionID
             set tplLabel(LabelVersionDesc,current) $LabelVersionDesc
         }
-        
+
         ea::db::lb::setProfileVars
         #ea::code::lb::genLines
         #ea::db::lb::getVersionLabel
@@ -94,22 +96,23 @@ proc ea::db::lb::getVersionLabel {} {
     
     if {$tplLabel(ID) eq ""} {
         ${log}::debug tplLabel(ID) is empty
-        for {set x 1} {$x < $tplLabel(LabelProfileRowNum)} {incr x} {
-            grid [ttk::label $f2a.description$rw -text [mc "Row $x"]] -column $col -row $rw -pady 2p -padx 2p -sticky e
+        for {set x 1} {$x <= $tplLabel(LabelProfileRowNum)} {incr x} {
+            grid [ttk::label $f2a.description$x -text [mc "Row $x"]] -column $col -row $rw -pady 2p -padx 2p -sticky e
             
             incr col
-            grid [ttk::entry $f2a.labelData$rw -width 35] -column $col -row $rw -pady 2p -padx 2p -sticky ew
-            $f2a.labelData$rw delete 0 end
+            grid [ttk::entry $f2a.labelData$x -width 35] -column $col -row $rw -pady 2p -padx 2p -sticky ew
+            $f2a.labelData$x delete 0 end
             
             # Label Option / Editable?
             incr col
-            set tplLabel(tmpValues,ckbtn,$rw) 0
-            grid [ttk::checkbutton $f2a.userEditable$rw -variable tplLabel(tmpValues,ckbtn,$rw)] -column $col -row $rw -pady 2p -padx 2p -ipadx 15 ;#-sticky ew
+            set tplLabel(tmpValues,ckbtn,$x) 0
+            grid [ttk::checkbutton $f2a.userEditable$x -variable tplLabel(tmpValues,ckbtn,$x)] -column $col -row $rw -pady 2p -padx 2p -ipadx 15 ;#-sticky ew
     
             # Label Option / Version?
             incr col
-            set tplLabel(tmpValues,rbtn,$rw) 0
-            grid [ttk::radiobutton $f2a.isVersion$rw -value 1 -variable tplLabel(tmpValues,rbtn,$rw)] -column $col -row $rw -pady 2p -padx 2p -ipadx 15 ;#-sticky ew
+            #set tplLabel(tmpValues,rbtn) 0
+            ${log}::debug ttk::radiobutton $f2a.isVersion$x -value $x -variable tplLabel(tmpValues,rbtn)
+            grid [ttk::radiobutton $f2a.isVersion$x -value $x -variable tplLabel(tmpValues,rbtn)] -column $col -row $rw -pady 2p -padx 2p -ipadx 15 ;#-sticky ew
             
             # reset counters
             incr rw
@@ -117,23 +120,23 @@ proc ea::db::lb::getVersionLabel {} {
         }
     
     } elseif {$tplLabel(LabelVersionID,current) eq ""} {
-        ${log}::debug LabelVersionID,current is empty
-        for {set x 1} {$x < $tplLabel(LabelProfileRowNum)} {incr x} {
-            grid [ttk::label $f2a.description$rw -text [mc "Row $x"]] -column $col -row $rw -pady 2p -padx 2p -sticky e
+        ${log}::debug LabelVersionID,current is empty. Creating widgets without data.
+        for {set x 1} {$x <= $tplLabel(LabelProfileRowNum)} {incr x} {
+            grid [ttk::label $f2a.description$x -text [mc "Row $x"]] -column $col -row $rw -pady 2p -padx 2p -sticky e
             
             incr col
-            grid [ttk::entry $f2a.labelData$rw -width 35] -column $col -row $rw -pady 2p -padx 2p -sticky ew
-            $f2a.labelData$rw delete 0 end
+            grid [ttk::entry $f2a.labelData$x -width 35] -column $col -row $rw -pady 2p -padx 2p -sticky ew
+            $f2a.labelData$x delete 0 end
             
             # Label Option / Editable?
             incr col
-            set tplLabel(tmpValues,ckbtn,$rw) 0
-            grid [ttk::checkbutton $f2a.userEditable$rw -variable tplLabel(tmpValues,ckbtn,$rw)] -column $col -row $rw -pady 2p -padx 2p -ipadx 15 ;#-sticky ew
+            set tplLabel(tmpValues,ckbtn,$x) 0
+            grid [ttk::checkbutton $f2a.userEditable$x -variable tplLabel(tmpValues,ckbtn,$x)] -column $col -row $rw -pady 2p -padx 2p -ipadx 15 ;#-sticky ew
     
             # Label Option / Version?
             incr col
-            set tplLabel(tmpValues,rbtn,$rw) 0
-            grid [ttk::radiobutton $f2a.isVersion$rw -value 1 -variable tplLabel(tmpValues,rbtn,$rw)] -column $col -row $rw -pady 2p -padx 2p -ipadx 15 ;#-sticky ew
+            set tplLabel(tmpValues,rbtn) 0
+            grid [ttk::radiobutton $f2a.isVersion$x -value $x -variable tplLabel(tmpValues,rbtn)] -column $col -row $rw -pady 2p -padx 2p -ipadx 15 ;#-sticky ew
             
             # reset counters
             incr rw
@@ -142,25 +145,25 @@ proc ea::db::lb::getVersionLabel {} {
     } else {
         ${log}::debug tpl(id) and labelVersionID,current exists ...
         db eval "SELECT labelRowNum, labelRowText, userEditable, isVersion FROM LabelData WHERE labelVersionID = '$tplLabel(LabelVersionID,current)'" {
-                ${log}::debug Row: $labelRowNum, $labelRowText, $userEditable
+                ${log}::debug Row: $labelRowNum, $labelRowText, $userEditable, $isVersion
                 # Row Labels
-                grid [ttk::label $f2a.description$rw -text [mc "Row $labelRowNum"]] -column $col -row $rw -pady 2p -padx 2p -sticky e
+                grid [ttk::label $f2a.description$x -text [mc "Row $labelRowNum"]] -column $col -row $rw -pady 2p -padx 2p -sticky e
                 
-                # Label Text
+                # Label Data
                 incr col
                 grid [ttk::entry $f2a.labelData$rw -width 35] -column $col -row $rw -pady 2p -padx 2p -sticky ew
-                $f2a.labelData$rw delete 0 end
-                $f2a.labelData$rw insert end $labelRowText
+                $f2a.labelData$x delete 0 end
+                $f2a.labelData$x insert end $labelRowText
                 
                 # Label Option / Editable?
                 incr col
-                set tplLabel(tmpValues,ckbtn,$rw) $userEditable
-                grid [ttk::checkbutton $f2a.userEditable$rw -variable tplLabel(tmpValues,ckbtn,$rw)] -column $col -row $rw -pady 2p -padx 2p -ipadx 15 ;#-sticky ew
+                set tplLabel(tmpValues,ckbtn,$x) $userEditable
+                grid [ttk::checkbutton $f2a.userEditable$x -variable tplLabel(tmpValues,ckbtn,$x)] -column $col -row $rw -pady 2p -padx 2p -ipadx 15 ;#-sticky ew
     
                 # Label Option / Version?
                 incr col
-                set tplLabel(tmpValues,rbtn,$rw) $isVersion
-                grid [ttk::radiobutton $f2a.isVersion$rw -value 1 -variable tplLabel(tmpValues,rbtn,$rw)] -column $col -row $rw -pady 2p -padx 2p -ipadx 15 ;#-sticky ew
+                grid [ttk::radiobutton $f2a.isVersion$x -value $x -variable tplLabel(tmpValues,rbtn)] -column $col -row $rw -pady 2p -padx 2p -ipadx 15 ;#-sticky ew
+                if {$isVersion == 1} {$f2a.isVersion$x invoke}
                 
                 # reset counters
                 incr rw
@@ -174,6 +177,7 @@ proc ea::db::lb::getProfile {cbox} {
     global log tplLabel
     
     $cbox configure -values [db eval "SELECT LabelProfileDesc FROM LabelProfiles"]
+    
 }
 
 proc ea::db::lb::getSizes {cbox} {
@@ -191,15 +195,32 @@ proc ea::db::lb::setProfileVars {} {
             set tplLabel(LabelProfileID) $LabelProfileID
         }
         
-        db eval "SELECT COUNT(LabelHeadergrp.LabelHeaderID) FROM LabelHeaderGrp
-                    INNER JOIN LabelProfiles ON LabelHeaderGrp.LabelProfileID = LabelProfiles.LabelProfileID
-                    INNER JOIN LabelHeaders ON LabelHeaders.LabelHeaderID = LabelHeaderGrp.LabelHeaderID
-                WHERE LabelProfiles.LabelProfileID = $tplLabel(LabelProfileID)
-                    AND LabelHeaders.LabelHeaderSystemOnly = 0" {
-                        set tplLabel(LabelProfileRowNum) $COUNT(LabelHeadergrp.LabelHeaderID)
-                    }
+        #db eval "SELECT COUNT(LabelHeadergrp.LabelHeaderID) FROM LabelHeaderGrp
+        #            INNER JOIN LabelProfiles ON LabelHeaderGrp.LabelProfileID = LabelProfiles.LabelProfileID
+        #            INNER JOIN LabelHeaders ON LabelHeaders.LabelHeaderID = LabelHeaderGrp.LabelHeaderID
+        #        WHERE LabelProfiles.LabelProfileID = $tplLabel(LabelProfileID)
+        #            AND LabelHeaders.LabelHeaderSystemOnly = 0" {
+        #                set tplLabel(LabelProfileRowNum) $COUNT(LabelHeadergrp.LabelHeaderID)
+        #            }
 
+    ${log}::debug LabelProfileID: $tplLabel(LabelProfileID)
+    ${log}::debug LabelProfileRowNum: $tplLabel(LabelProfileRowNum)
+    # Get number of rows so we can create widgets
+    ea::db::lb::getNumRows
+    
     # Create the widgets
     ea::code::lb::genLines
     
+}
+
+proc ea::db::lb::getNumRows {} {
+    global log tplLabel
+    
+    db eval "SELECT COUNT(LabelHeadergrp.LabelHeaderID) FROM LabelHeaderGrp
+            INNER JOIN LabelProfiles ON LabelHeaderGrp.LabelProfileID = LabelProfiles.LabelProfileID
+            INNER JOIN LabelHeaders ON LabelHeaders.LabelHeaderID = LabelHeaderGrp.LabelHeaderID
+        WHERE LabelProfiles.LabelProfileID = $tplLabel(LabelProfileID)
+            AND LabelHeaders.LabelHeaderSystemOnly = 0" {
+                set tplLabel(LabelProfileRowNum) $COUNT(LabelHeadergrp.LabelHeaderID)
+            }
 }
