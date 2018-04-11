@@ -344,7 +344,13 @@ proc createList {} {
             set PartialQty_text [lrange $result 1 1]
             ${log}::debug Result: 1 Label @ [lrange $result 1 end]
         }
-        set total_boxes [expr {$FullBoxes + [llength $PartialQty]}]
+        
+        # This controls the Total Boxes value that we need for serialized labels
+        set tmpFullBoxes $FullBoxes
+        set tmpPartialQty $PartialQty
+        if {$tmpFullBoxes eq ""} {set tmpFullBoxes 0}
+        if {$tmpPartialQty eq ""} {set tmpPartialQty ""}
+        set total_boxes [expr {$tmpFullBoxes + [llength $tmpPartialQty]}]
     }
 
 
@@ -933,11 +939,22 @@ proc addMaster {destQty batch shipvia} {
     #	N/A
     #
     #***
-    global GS_textVar
+    global log GS_textVar tplLabel
 
     # This shouldn't be needed, we have existing code in the [bind]ing, and in the button command
     #if {$GS_textVar(destQty) eq ""} {return}
-
+    
+    # Serialize Labels
+    if {$tplLabel(SerializeLabel) == 1} {
+        ${log}::debug We are serializng the label, disable the entry/button/dropdown widgets
+        
+        foreach child [winfo child .container.frame2.frame2a] {
+            if {![string match *text* $child]} {
+                $child configure -state disable
+            }
+        }
+    }
+    
     Shipping_Code::insertInListbox $destQty $batch $shipvia
 
     ;# Reset the variables

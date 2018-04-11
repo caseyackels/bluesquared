@@ -72,16 +72,16 @@ proc shippingGUI {} {
 	set GS_textVar(Template) ""
 	grid [ttk::label $frame0.txt1 -text [mc "Template #"]] -column 0 -row 0 -padx 2p -pady 2p
 	grid [ttk::entry $frame0.entry -textvariable GS_textVar(Template)] -column 1 -row 0 -padx 2p -pady 2p -sticky w
-	grid [ttk::button $frame0.btn -text [mc "Get Data"] -command {ea::db::bl::getTplData $GS_textVar(Template)}] -column 2 -row 0 -padx 2p -pady 2p -sticky w
+	grid [ttk::button $frame0.btn -text [mc "Get Data"] -command {ea::db::bl::getTplData $GS_textVar(Template)}] -column 2 -columnspan 3 -row 0 -padx 2p -pady 2p -sticky w
 	
 	grid [ttk::label $frame0.txt2a -text [mc "Customer"]] -column 0 -row 1 -padx 2p -pady 2p
-	grid [ttk::label $frame0.txt2b -textvariable job(CustName)] -column 1 -row 1 -padx 2p -pady 2p -sticky w
+	grid [ttk::label $frame0.txt2b -textvariable job(CustName)] -column 1 -columnspan 3 -row 1 -padx 2p -pady 2p -sticky w
 	
 	grid [ttk::label $frame0.txt3a -text [mc "Job Title"]] -column 0 -row 2 -padx 2p -pady 2p
-	grid [ttk::label $frame0.txt3b -textvariable job(Title)] -column 1 -row 2 -padx 2p -pady 2p -sticky w
+	grid [ttk::label $frame0.txt3b -textvariable job(Title)] -column 1 -columnspan 3 -row 2 -padx 2p -pady 2p -sticky w
 	
 	grid [ttk::label $frame0.txt4a -text [mc "Label Path"]] -column 0 -row 3 -padx 2p -pady 2p
-	grid [ttk::label $frame0.txt4b -textvariable tplLabel(LabelPath)] -column 1 -row 3 -padx 2p -pady 2p -sticky w
+	grid [ttk::label $frame0.txt4b -textvariable tplLabel(LabelPath)] -column 1 -columnspan 3 -row 3 -padx 2p -pady 2p -sticky w
 	
 	grid [ttk::label $frame0.txt5a -text [mc "Versions"]] -column 0 -row 4 -padx 2p -pady 2p
 	grid [ttk::combobox $frame0.cbox] -column 1 -row 4 -padx 2p -pady 2p -sticky w
@@ -279,6 +279,7 @@ foreach window "$frame2a.add $frame2a.entry1 $frame2a.entry2" {
         ;# Guard against the user inadvertantly hitting <Enter> or "Add" button without anything in the entry fields
         if {([info exists GS_textVar(destQty)] eq 0) || ($GS_textVar(destQty) eq "")} {return}
         Shipping_Code::addMaster $GS_textVar(destQty) $GS_textVar(batch) $GS_textVar(shipvia)
+		#${log}::debug bind-Return if serialize: Disable widgets
     }
 }
 
@@ -357,7 +358,18 @@ bind [$frame2b.listbox bodytag] <KeyPress-BackSpace> {
 
     ;# Make sure we keep all the textvars updated when we delete something
     Shipping_Code::addListboxNums ;# Add everything together for the running total
-    Shipping_Code::createList ;# Make sure our totals add up
+    catch {Shipping_Code::createList} err ;# Make sure our totals add up
+	
+    # Serialize Labels
+    if {$tplLabel(SerializeLabel) == 1} {
+        ${log}::debug <Bind-BackSpace> Serialize Label: Deleting entry, reenable the entry/button/dropdown widgets
+        
+        foreach child [winfo child .container.frame2.frame2a] {
+            if {![string match *text* $child]} {
+                $child configure -state normal
+            }
+        }
+    }
 }
 
 
@@ -369,6 +381,17 @@ bind [$frame2b.listbox bodytag] <Double-1> {
     # If we don't have the [catch] here, then we will get an error if we remove the last entry.
     # cell index "0,1" out of range
     catch {Shipping_Code::createList} err ;# Make sure our totals add up
+
+	# Serialize Labels
+    if {$tplLabel(SerializeLabel) == 1} {
+        ${log}::debug <Bind-Double-1> Serialize Label: Deleting entry, reenable the entry/button/dropdown widgets
+        
+        foreach child [winfo child .container.frame2.frame2a] {
+            if {![string match *text* $child]} {
+                $child configure -state normal
+            }
+        }
+    }
 
 }
 

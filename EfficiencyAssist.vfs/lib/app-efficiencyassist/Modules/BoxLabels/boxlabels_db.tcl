@@ -29,6 +29,7 @@ proc ea::db::bl::getTplData {tpl} {
     set job(Title,id) ""
     set job(CSRName) ""
     
+    set tpl [string trim $tpl]
     ${log}::debug template id: $tpl
 
     # Retrieve the data and populate the tplLabel array
@@ -125,16 +126,6 @@ proc ea::db::bl::getLabelText {} {
             .container.frame0.cbox set $tplLabel(LabelVersionDesc,current)
             .container.frame0.cbox state readonly
         }
-        
-        ## Are we serializing?
-        #if {$tplLabel(SerializeLabel) == 1} {
-        #    # Disable all of the widgets
-        #    foreach child [winfo children .container.frame1] {
-        #        if {[string match *entry* $child] == 1} {
-        #            $child configure -state disable
-        #        }
-        #    }
-        #}
     }
     ea::db::bl::populateWidget
 }
@@ -174,8 +165,3 @@ proc ea::db::bl::populateWidget {} {
     }
 }
 
-proc ea::db::bl::reenableWidgets {fr} {
-    global log
-    
-    
-}
