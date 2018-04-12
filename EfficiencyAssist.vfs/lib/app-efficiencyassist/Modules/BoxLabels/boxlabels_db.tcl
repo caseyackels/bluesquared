@@ -19,6 +19,12 @@ proc ea::db::bl::getTplData {tpl} {
         set GS_textVar($item) ""
     }
     
+    # Clear out the box qty
+    set GS_textVar(maxBoxQty) ""
+    
+    # Remove qty data
+    Shipping_Code::clearList
+    
     # clear out the version dropdown
     .container.frame0.cbox configure -values ""
     .container.frame0.cbox set ""
@@ -28,6 +34,7 @@ proc ea::db::bl::getTplData {tpl} {
     set job(Title) ""
     set job(Title,id) ""
     set job(CSRName) ""
+  
     
     set tpl [string trim $tpl]
     ${log}::debug template id: $tpl

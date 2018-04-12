@@ -355,9 +355,30 @@ proc createList {} {
         # This controls the Total Boxes value that we need for serialized labels
         set tmpFullBoxes $FullBoxes
         set tmpPartialQty $PartialQty
-        if {$tmpFullBoxes eq ""} {set tmpFullBoxes 0}
-        if {$tmpPartialQty eq ""} {set tmpPartialQty ""}
-        set total_boxes [expr {$tmpFullBoxes + [llength $tmpPartialQty]}]
+        ${log}::debug tmpFullBoxes (If empty this will default to blank): $FullBoxes
+        ${log}::debug tmpPartialQty: $tmpPartialQty
+        
+        if {$tmpFullBoxes ne ""} {
+            if {[llength $tmpFullBoxes] <= 2} {
+                ${log}::debug Two or more full boxes, we need to join them with +: $tmpFullBoxes
+                set tmpFullBoxes [join $tmpFullBoxes " + "]
+            }
+            ${log}::debug full boxes: $tmpFullBoxes
+        
+        } else {
+            ${log}::debug No fullboxes: $tmpFullBoxes (set to 0)
+            set tmpFullBoxes 0
+        }
+        
+        if {$tmpPartialQty eq ""} {
+            ${log}::debug tmpPartialQty is blank, using tmpFullBoxes: $tmpFullBoxes
+            set total_boxes $tmpFullBoxes
+        } else {
+            set tmpPartialQty [llength $tmpPartialQty]
+            ${log}::debug adding tmpFullboxes and tmpPartialQty together: $tmpFullBoxes, $tmpPartialQty
+            set total_boxes [expr "$tmpFullBoxes + $tmpPartialQty"]
+            ${log}::debug total_boxes: $total_boxes
+        }
     }
 
 
