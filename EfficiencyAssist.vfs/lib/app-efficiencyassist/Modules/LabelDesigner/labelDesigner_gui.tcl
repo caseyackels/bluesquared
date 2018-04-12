@@ -175,7 +175,7 @@ proc ea::code::lb::genLines {} {
     global log tplLabel
     
     #${log}::debug Generating $tplLabel(NumRows) for Labels!
-    ${log}::debug in widget .container.frame2
+    ${log}::debug Generating row widgets: .container.frame2
     
     if {[winfo exists .container.frame2]} {
         ${log}::debug Label Lines frame already exists, destroying...
@@ -209,6 +209,6 @@ proc ea::code::lb::genLines {} {
 
     ea::db::lb::getVersionLabel
         
-    grid [ttk::button $f2.saveBtn -text [mc "Save"]] -column 3 -row 2
-    grid [ttk::button $f2.delBtn -text [mc "Delete"]] -column 4 -row 2
+    #grid [ttk::button $f2.saveBtn -text [mc "Save"]] -column 3 -row 2
+    #grid [ttk::button $f2.delBtn -text [mc "Delete"]] -column 4 -row 2
 }

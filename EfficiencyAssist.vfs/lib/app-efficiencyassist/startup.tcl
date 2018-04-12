@@ -427,6 +427,7 @@ proc 'eAssist_initVariables {} {
     array set tplLabel [list ID "" \
                         Name "" \
 						NumRows "" \
+						LabelProfileRowNum "" \
                         LabelPath "" \
                         Size "" \
 						LabelSize "" \
@@ -443,6 +444,7 @@ proc 'eAssist_initVariables {} {
 						LabelProfileID "" \
 						LabelProfileDesc "" \
 						LabelProfileRowNum "" \
+						tmpValues,rbtn "" \
                         tmpValues ""]
 	
 	# Filters

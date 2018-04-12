@@ -199,26 +199,34 @@ proc ea::code::lb::writeToDb {} {
         }
     }
     
-    # Check if labelVersionID exists
-    #  - Doesn't Exist; Insert labelVersionID, Insert Row Data
-    # - Exists; Delete Row Data, then Insert
-    if {$tplLabel(LabelVersionID,current) eq "" && $tplLabel(LabelVersionDesc,current) eq ""} {
-        # This is a new version, insert only. (Table: LabelVersions)
-        ${log}::notice LabelVersion ID doesn't exist, but Description does. Retrieving...
-        ${log}::notice LabelVersion Row: $tplLabel(tmpValues,rbtn) [.container.frame2.frame2a.labelData$tplLabel(tmpValues,rbtn) get]
-        ${log}::debug db eval "INSERT INTO LabelVersions (tplID, LabelVersionDesc) VALUES ($tpl_id, '[.container.frame2.frame2a.labelData$tplLabel(tmpValues,rbtn) get]')"
-        
-        db eval "INSERT INTO LabelVersions (tplID, LabelVersionDesc) VALUES ($tpl_id, '[.container.frame2.frame2a.labelData$tplLabel(tmpValues,rbtn) get]')"
-        
-        # Get version id
-        set tplLabel(LabelVersionID,current) [db eval "SELECT max(labelVersionID) FROM LabelVersions WHERE tplID = $tpl_id"]
-        ${log}::notice Retrieving new version ID: $tplLabel(LabelVersionID,current)
-
-        # Insert label date (Table: LabelData)
-        set data [join [ea::code::lb::getRowData $tplLabel(LabelVersionID,current) .container.frame2.frame2a]]
-        ${log}::notice Inserting Row Data: $data
-        ${log}::debug db eval "INSERT INTO LabelData (labelVersionID, labelRowNum, labelRowText, userEditable, isVersion) VALUES $data"
-        db eval "INSERT INTO LabelData (labelVersionID, labelRowNum, labelRowText, userEditable, isVersion) VALUES $data"
+    # Check if the label profile allows text/etc
+    set haveData [db eval "SELECT LabelHeaders.LabelHeaderID FROM LabelHeaderGrp
+                            INNER JOIN LabelHeaders ON LabelHeaders.LabelHeaderID = LabelHeaderGrp.LabelHeaderID
+                            INNER JOIN LabelProfiles ON LabelProfiles.LabelProfileID = LabelHeaderGrp.LabelProfileID
+                                WHERE LabelHeaderGrp.LabelProfileID = $tplLabel(LabelProfileID)
+                                AND LabelHeaders.LabelHeaderSystemOnly = 0"]
+    if {$haveData ne ""} {
+        # Check if labelVersionID exists
+        #  - Doesn't Exist; Insert labelVersionID, Insert Row Data
+        # - Exists; Delete Row Data, then Insert
+        if {$tplLabel(LabelVersionID,current) eq "" && $tplLabel(LabelVersionDesc,current) eq ""} {
+            # This is a new version, insert only. (Table: LabelVersions)
+            ${log}::notice LabelVersion ID doesn't exist, but Description does. Retrieving...
+            ${log}::notice LabelVersion Row: $tplLabel(tmpValues,rbtn) [.container.frame2.frame2a.labelData$tplLabel(tmpValues,rbtn) get]
+            ${log}::debug db eval "INSERT INTO LabelVersions (tplID, LabelVersionDesc) VALUES ($tpl_id, '[.container.frame2.frame2a.labelData$tplLabel(tmpValues,rbtn) get]')"
+            
+            db eval "INSERT INTO LabelVersions (tplID, LabelVersionDesc) VALUES ($tpl_id, '[.container.frame2.frame2a.labelData$tplLabel(tmpValues,rbtn) get]')"
+            
+            # Get version id
+            set tplLabel(LabelVersionID,current) [db eval "SELECT max(labelVersionID) FROM LabelVersions WHERE tplID = $tpl_id"]
+            ${log}::notice Retrieving new version ID: $tplLabel(LabelVersionID,current)
+    
+            # Insert label date (Table: LabelData)
+            set data [join [ea::code::lb::getRowData $tplLabel(LabelVersionID,current) .container.frame2.frame2a]]
+            ${log}::notice Inserting Row Data: $data
+            ${log}::debug db eval "INSERT INTO LabelData (labelVersionID, labelRowNum, labelRowText, userEditable, isVersion) VALUES $data"
+            db eval "INSERT INTO LabelData (labelVersionID, labelRowNum, labelRowText, userEditable, isVersion) VALUES $data"
+        }
     }
 
 } ;# ea::code::lb::writeToDb

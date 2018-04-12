@@ -577,14 +577,11 @@ proc printLabels {} {
         
         # Set filepath to windows standard for BarTender
         set labelDir [join [split $labelDir /] \\]
-        
-        # Set tmp path to run list file that the label reads
-        #set tmp(databaseFilePath) $labelDir
-        
+               
         Shipping_Code::createList
         
         ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\$filename /P /CLOSE /X
-        #exec $mySettings(path,bartender) /AF=$labelDir\\$filename /P /CLOSE /X
+        exec $mySettings(path,bartender) /AF=$labelDir\\$filename /P /CLOSE /X
         
     } else {
         ${log}::debug Printing Generic Labels
