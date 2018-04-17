@@ -6,35 +6,62 @@
 proc ea::db::bl::getTplData {tpl} {
     global log GS_textVar tplLabel job
     
+    if {$tpl eq $tplLabel(ID)} {
+        # We already have the template loaded, if the user hits this button again with the same ID, lets assume that they want to clear out the widgets.
+        set tpl ""
+        set tplLabel(ID) ""
+        set GS_textVar(Template) ""
+        .container.frame0.entry configure -state normal
+    } else {
+        .container.frame0.entry configure -state disable
+    }
+    
     # reset vars just in case we've already ran this once before
     ea::code::lb::resetWidgets
+    
+    ${log}::debug Enabling widgets (none should be 'disabled')
+    # Make sure widgets are enabled
     foreach item [winfo children .container.frame1] {
         if {[string match *entry* $item] == 1} {
+            ${log}::debug Enable Widget: $item
             $item configure -state normal
         }
     }
     
+    foreach item [winfo children .container.frame2.frame2a] {
+        ${log}::debug Enable Widget: $item
+        $item configure -state normal
+    }
+    
     # Clear out the widgets
+    ${log}::debug Clearing out GS_textVar Row variables
     foreach item [array names GS_textVar Row*] {
         set GS_textVar($item) ""
     }
     
     # Clear out the box qty
+    ${log}::debug Clear out GS_textVar(maxBoxQty)
     set GS_textVar(maxBoxQty) ""
     
     # Remove qty data
+    ${log}::debug Clearing the quantity/shipment information
     Shipping_Code::clearList
     
     # clear out the version dropdown
+    ${log}::debug Clearing out the version dropdown
     .container.frame0.cbox configure -values ""
     .container.frame0.cbox set ""
     
+    ${log}::debug Reset some Job array variables
     set job(CustID) ""
     set job(CustName) ""
     set job(Title) ""
     set job(Title,id) ""
     set job(CSRName) ""
-  
+    
+    # Set button text to 'Clear Data'
+    .container.frame0.btn configure -text [mc "Clear Data"] 
+
     
     set tpl [string trim $tpl]
     ${log}::debug template id: $tpl
@@ -47,6 +74,9 @@ proc ea::db::bl::getTplData {tpl} {
             ${log}::debug $tpl doesn't match anything in the database. Clearing variables, and widgets...
             Error_Message::errorMsg BL001
             set GS_textVar(Template) ""
+            # Set button text to 'Get Data'
+            .container.frame0.btn configure -text [mc "Get Data"]
+            .container.frame0.entry configure -state normal
             return
         }
         
@@ -62,6 +92,10 @@ proc ea::db::bl::getTplData {tpl} {
             set tplLabel(FixedBoxQty) $tplFixedBoxQty
             set tplLabel(FixedLabelInfo) $tplFixedLabelInfo
             set tplLabel(SerializeLabel) $tplSerialize
+        }
+        
+        if {$tplLabel(LabelProfileID) == 0} {
+            ${log}::debug We're using a label that uses a run-list. Check modification date/time on runlist to see if it has been updated (less than a month)
         }
         
         # We entered a correct template number, but a title was never assigned.
@@ -80,7 +114,9 @@ proc ea::db::bl::getTplData {tpl} {
     } else {
         ## id doesn't exist
         #Error_Message::errorMsg BL001
-        #${log}::debug Id doesn't exist, try again.
+        ${log}::debug Id doesn't exist, resetting vars and button text
+        # Set button text to 'Get Data'
+        .container.frame0.btn configure -text [mc "Get Data"]
         return
     }
 
@@ -167,9 +203,25 @@ proc ea::db::bl::populateWidget {} {
     }
     
     if {$tplLabel(SerializeLabel) == 1} {
-        # disable all of the widgets if we are serializing
+        # disable all of the widgets if we are serializing or working off of a runlist with no user interaction
         ${log}::debug Disabling widgets in .container.frame1 (all row widgets)
         foreach child [winfo children .container.frame1] {
+                if {[string match *entry* $child] == 1} {
+                    $child configure -state disable
+                }
+        }
+    }
+    
+    if {$tplLabel(LabelProfileID) == 0} {
+        # Disable all of the row widgets, plus the shipment info widgets
+        ${log}::debug Disabliing widgets in .container.frame1 and .container.frame2.frame2a
+        foreach child [winfo children .container.frame1] {
+                if {[string match *entry* $child] == 1} {
+                    $child configure -state disable
+                }
+        }
+        
+        foreach child [winfo children .container.frame2.frame2a] {
                 if {[string match *entry* $child] == 1} {
                     $child configure -state disable
                 }

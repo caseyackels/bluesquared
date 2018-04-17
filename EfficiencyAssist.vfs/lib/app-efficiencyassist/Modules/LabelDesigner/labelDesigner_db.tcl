@@ -144,6 +144,7 @@ proc ea::db::lb::getVersionLabel {} {
         }
     } else {
         ${log}::debug tpl(id) and labelVersionID,current exists ...
+        set x 1
         db eval "SELECT labelRowNum, labelRowText, userEditable, isVersion FROM LabelData WHERE labelVersionID = '$tplLabel(LabelVersionID,current)'" {
                 ${log}::debug Row: $labelRowNum, $labelRowText, $userEditable, $isVersion
                 # Row Labels
@@ -151,7 +152,7 @@ proc ea::db::lb::getVersionLabel {} {
                 
                 # Label Data
                 incr col
-                grid [ttk::entry $f2a.labelData$rw -width 35] -column $col -row $rw -pady 2p -padx 2p -sticky ew
+                grid [ttk::entry $f2a.labelData$x -width 35] -column $col -row $rw -pady 2p -padx 2p -sticky ew
                 $f2a.labelData$x delete 0 end
                 $f2a.labelData$x insert end $labelRowText
                 
@@ -167,6 +168,7 @@ proc ea::db::lb::getVersionLabel {} {
                 
                 # reset counters
                 incr rw
+                incr x
                 set col 0
         }
     }

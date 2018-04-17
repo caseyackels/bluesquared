@@ -116,7 +116,10 @@ proc ea::gui::pref::display {nav} {
 
     #${log}::debug Selection: [$nav curselection] [$nav get [$nav curselection]] [$nav rowcget [$nav curselection] -name ]
 
-    set group [catch {[string tolower [$nav rowcget [$nav curselection] -name ]]}]
+    #set group [catch {[string tolower [$nav rowcget [$nav curselection] -name ]]}]
+    set group [string tolower [$nav rowcget [$nav curselection] -name ]]
+    ${log}::debug curselection: [$nav rowcget [$nav curselection] -name ]
+    
     ${log}::debug Group: $group
     
     set mod [ea::db::getModInfo -name [lindex [split $group _] 0]]

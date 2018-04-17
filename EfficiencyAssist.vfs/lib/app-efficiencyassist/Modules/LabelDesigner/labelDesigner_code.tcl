@@ -22,17 +22,20 @@ proc ea::code::lb::getOpenFile {wid} {
 }
 
 proc ea::code::lb::resetWidgets {} {
-    global lob tplLabel job
+    global log tplLabel job
+    ${log}::debug Resetting arrays: Job (partial) and tplLabel
     
     set job(CSRName) ""
     set job(NewCustomer) ""
     #set job(CustID) ""
     #set job(CustName) ""
     set job(Title) ""
+    set tplLabel(ID) ""
     set tplLabel(FixedBoxQty) ""
     set tplLabel(FixedLabelInfo) ""
     set tplLabel(LabelPath) ""
-    set tplLabel(Size) ""
+    set tplLabel(LabelSize)
+    set tplLabel(LabelSizeID)
     set tplLabel(SerializeLabel) ""
     set tplLabel(Name) ""
     set tplLabel(NotePriv) ""

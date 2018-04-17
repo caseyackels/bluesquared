@@ -72,18 +72,19 @@ proc shippingGUI {} {
 	set GS_textVar(Template) ""
 	grid [ttk::label $frame0.txt1 -text [mc "Template #"]] -column 0 -row 0 -padx 2p -pady 2p
 	grid [ttk::entry $frame0.entry -textvariable GS_textVar(Template)] -column 1 -row 0 -padx 2p -pady 2p -sticky w
-	grid [ttk::button $frame0.btn -text [mc "Get Data"] -command {ea::db::bl::getTplData $GS_textVar(Template)}] -column 2 -columnspan 3 -row 0 -padx 2p -pady 2p -sticky w
+	grid [ttk::button $frame0.btn -text [mc "Get Data"] -command {ea::db::bl::getTplData $GS_textVar(Template)}] -column 2 -row 0 -padx 2p -pady 2p -sticky w
 	
 	grid [ttk::label $frame0.txt2a -text [mc "Customer"]] -column 0 -row 1 -padx 2p -pady 2p
-	grid [ttk::label $frame0.txt2b -textvariable job(CustName)] -column 1 -columnspan 3 -row 1 -padx 2p -pady 2p -sticky w
+	grid [ttk::label $frame0.txt2b -textvariable job(CustName)] -column 1 -columnspan 4 -row 1 -padx 2p -pady 2p -sticky w
 	
 	grid [ttk::label $frame0.txt3a -text [mc "Job Title"]] -column 0 -row 2 -padx 2p -pady 2p
-	grid [ttk::label $frame0.txt3b -textvariable job(Title)] -column 1 -columnspan 3 -row 2 -padx 2p -pady 2p -sticky w
+	grid [ttk::label $frame0.txt3b -textvariable job(Title)] -column 1 -columnspan 4 -row 2 -padx 2p -pady 2p -sticky w
 	
 	grid [ttk::label $frame0.txt4a -text [mc "Label Path"]] -column 0 -row 3 -padx 2p -pady 2p
-	grid [ttk::label $frame0.txt4b -textvariable tplLabel(LabelPath)] -column 1 -columnspan 3 -row 3 -padx 2p -pady 2p -sticky w
+	grid [ttk::label $frame0.txt4b -textvariable tplLabel(LabelPath)] -column 1 -columnspan 4 -row 3 -padx 2p -pady 2p ;#-sticky w
+	#grid [ttk::entry $frame0.txt4b -textvariable tplLabel(LabelPath)] -column 1 -columnspan 4 -row 3 -padx 2p -pady 2p ;#-sticky w
 	
-	grid [ttk::label $frame0.txt5a -text [mc "Versions"]] -column 0 -row 4 -padx 2p -pady 2p
+	grid [ttk::label $frame0.txt5a -text [mc "Label Name"]] -column 0 -row 4 -padx 2p -pady 2p
 	grid [ttk::combobox $frame0.cbox] -column 1 -row 4 -padx 2p -pady 2p -sticky w
 	
 		bind $frame0.cbox <<ComboboxSelected>> {

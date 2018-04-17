@@ -68,7 +68,7 @@ proc ea::gui::designerGUI {} {
     grid [ttk::label $f1.labelProfile -text [mc "Header Profile"]] -column 0 -row 3 -pady 2p -padx 2p -sticky e
     grid [ttk::combobox $f1.labelProfileCbox -textvariable tplLabel(LabelProfileDesc) -postcommand "ea::db::lb::getProfile $f1.labelProfileCbox"] -column 1 -row 3 -pady 2p -padx 2p -sticky ew
     #grid [ttk::combobox $f1.labelProfileCbox -textvariable tplLabel(LabelProfileDesc) -postcommand "ea::db::lb::setProfileVars"] -column 1 -row 3 -pady 2p -padx 2p -sticky ew
-    grid [ttk::button $f1.labelProfileBtn -text [mc "Add Profile"] -state disabled] -column 2 -row 3 -pady 2p -padx 2p -sticky w
+    grid [ttk::button $f1.labelProfileBtn -text [mc "Add Profile"] -command {ea::gui::lb::profiles}] -column 2 -row 3 -pady 2p -padx 2p -sticky w
     grid [ttk::button $f1.headerFileBtn -text [mc "Create dummy file"] -state disabled -command {ea::code::lb::createDummyFile}] -column 3 -row 3 -pady 2p -padx 2p -sticky w
    
     # Label Dimensions (this is informational only)
@@ -208,7 +208,23 @@ proc ea::code::lb::genLines {} {
     }
 
     ea::db::lb::getVersionLabel
-        
-    #grid [ttk::button $f2.saveBtn -text [mc "Save"]] -column 3 -row 2
-    #grid [ttk::button $f2.delBtn -text [mc "Delete"]] -column 4 -row 2
+}
+
+proc ea::gui::lb::profiles {} {
+    global log tplLabel
+    
+    # Setup window
+    set w [toplevel .profile]
+    wm transient $w .
+    wm title $w [mc "Add/Modify Label Profiles"]
+
+    # Put the window in the center of the parent window
+    set locX [expr {[winfo width . ] / 3 + [winfo x .]}]
+    set locY [expr {[winfo height . ] / 3 + [winfo y .]}]
+    wm geometry $w 680x400+${locX}+${locY}
+
+    focus $w
+    
+    
+    
 }
