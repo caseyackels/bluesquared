@@ -30,7 +30,8 @@
 
 # We use the prefix ' because we are in the global namespace now, and we don't want to pollute it.
 
-package provide app-efficiencyassist 1.0
+# For version changes: Update here, pgkIndex.tcl, and detect_updates_code.tcl (vUpdate::saveCurrentVersion)
+package provide app-efficiencyassist 4.1.0
 
 proc 'eAssist_sourceReqdFiles {} {
     #****f* 'eAssist_sourceReqdFiles/global

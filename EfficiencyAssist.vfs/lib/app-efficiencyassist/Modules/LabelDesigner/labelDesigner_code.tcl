@@ -146,6 +146,8 @@ proc ea::code::lb::writeToDb {} {
     set csr_lname [lindex $job(CSRName) 1]
     set csr_id [db eval "SELECT CSR_ID FROM CSRs WHERE FirstName = '$csr_fname' AND LastName = '$csr_lname'"]
     
+    ${log}::debug TODO: Check to see if CSR assignment is an 'update'; if so update the PubTitle table.
+    
     # Does TitleName exist?
     #set title_id [db eval "SELECT TitleName FROM PubTitle WHERE TitleName = '$job(Title)'"]
     set title_id [db eval "SELECT Title_ID FROM PubTitle WHERE TitleName = '$job(Title)' AND CustID = '$job(CustID)'"]
@@ -163,6 +165,7 @@ proc ea::code::lb::writeToDb {} {
         ${log}::debug Title doesn't exist, so the template shouldn't either. Inserting data...
         set tplLabel(LabelSizeID) [db eval "SELECT labelSizeID FROM LabelSizes WHERE labelSizeDesc = '$tplLabel(Size)'"]
         set tplLabel(LabelProfileID) [db eval "SELECT LabelProfileID FROM LabelProfiles WHERE LabelProfileDesc = '$tplLabel(LabelProfileDesc)'"]
+            if {$tplLabel(LabelProfileID) eq ""} {set tplLabel(LabelProfileID) 0}
         
         # Title doesn't exist. Template shouldn't exist either.
          db eval "INSERT INTO LabelTPL (PubTitleID, LabelProfileID, labelSizeID, tplLabelName, tplLabelPath, tplNotePriv, tplNotePub, tplFixedBoxQty, tplFixedLabelInfo, tplSerialize)
@@ -174,6 +177,8 @@ proc ea::code::lb::writeToDb {} {
         ${log}::debug Title exists (ID: $pubtitle_id), checking to see if template exists.
         set tplLabel(LabelSizeID) [db eval "SELECT labelSizeID FROM LabelSizes WHERE labelSizeDesc = '$tplLabel(Size)'"]
         set tplLabel(LabelProfileID) [db eval "SElECT LabelProfileID FROM LabelProfiles WHERE LabelProfileDesc = '$tplLabel(LabelProfileDesc)'"]
+            if {$tplLabel(LabelProfileID) eq ""} {set tplLabel(LabelProfileID) 0}
+        
         set tpl_id [db eval "SELECT tplID FROM LabelTPL WHERE tplLabelName = '$tplLabel(Name)' AND PubTitleID = $pubtitle_id"]
         
         if {$tpl_id eq ""} {
@@ -258,4 +263,153 @@ proc ea::code::lb::createDummyFile {} {
     chan puts $runlist_file $hdr_data
     
     chan close $runlist_file
+}
+
+proc ea::code::lb::populateProfileCbox {wid} {
+    # See: ea::db::lb::getLabelHeaders
+    global log
+    
+    # delete all entries first
+    $wid delete 0 end
+    set items [join [ea::db::lb::getLabelHeaders]]
+    
+    foreach item $items {
+        $wid insert end $item
+    }
+}
+
+proc ea::code::lb::getAllHeaders {profile_id lbox1 lbox2} {
+    # Retrieve both available headers and assigned headers, then populate the listbox widgets with the data.
+    global log
+    
+    set avail [ea::db::lb::getLabelHeaders]
+    set current [ea::db::lb::getProfileHeaders $profile_id]
+    
+    set c_avail [ea::tools::listDiff $avail $current]
+    #${log}::debug c_avail: $c_avail
+    #${log}::debug current: $current
+    
+    # Delete data from both list boxes before populating
+    $lbox1 delete 0 end
+    $lbox2 delete 0 end
+    
+    foreach item $c_avail {
+        $lbox1 insert end $item
+    }
+    
+    foreach item $current {
+        $lbox2 insert end $item
+    }
+    
+}
+
+proc ea::code::lb::assignProfileHeaders {modify lbox1 lbox2} {
+    # Add selected header(s) to 'Assigned' listbox.
+    # We save everything in the DB when the user hits the 'save' button. Until then the changes are only within the widget
+    # Modify should equal add or del
+    global log
+    
+    switch -- $modify {
+        "add"   {set wid1 $lbox1; set wid2 $lbox2}
+        "del"   {set wid1 $lbox2; set wid2 $lbox1}
+        default {${log}::debug assignProfileHeaders: arg for modify ($modify) is not valid. Must be add or del.; return}
+    }
+    #${log}::debug modify: $modify
+    #${log}::debug wid1: $wid1
+    #${log}::debug wid2: $wid2
+        
+    # Current selection
+    set headers_id [$wid1 curselection]
+    ${log}::debug selected item id: $headers_id
+    
+    foreach hdr $headers_id {
+        lappend headers [$wid1 get $hdr]
+    }
+    ${log}::debug selected item desc: $headers
+
+    # Remove selected from Available listbox (lbox1)
+    # We sort it (10 8 7), since if we don't we change the positions of what we want to delete, after deleting the first one.
+    foreach item [lsort -decreasing $headers_id] {
+        $wid1 delete $item
+    }
+    
+    # Add selected to Assigned listbox (lbox2)
+    foreach item $headers {
+        $wid2 insert end $item
+    }
+    
+    # unset vars
+    unset headers
+}
+
+proc ea::code::lb::editProfile {mode addPro_btn edit_btn add_btn del_btn cbox lbox2} {
+    # This button has two modes: (1) Enable add/del btns; (2) Saves Data
+    # Mode: edit or save
+    global log profile_id
+    ${log}::debug editProfile mode: $mode
+    
+    if {$mode eq "edit"} {
+        ${log}::debug Enable - add/del, Enable cbox, change btn text
+        $add_btn configure -state normal
+        $del_btn configure -state normal
+        $cbox configure -state normal
+        $addPro_btn configure -state disable
+        $edit_btn configure -text [mc "Save"] -command "ea::code::lb::editProfile save $addPro_btn $edit_btn $add_btn $del_btn $cbox $lbox2"
+    } else {
+        # Saving
+        ${log}::debug Disable - add/del, readonly cbox, change btn text
+        ${log}::debug Reset Widgets (assigned lbox2), cbox, profile_id
+        
+        $add_btn configure -state disable
+        $del_btn configure -state disable
+        $addPro_btn configure -state normal
+
+        $edit_btn configure -text [mc "Edit"] -state disable -command "ea::code::lb::editProfile edit $addPro_btn $edit_btn $add_btn $del_btn $cbox $lbox2"
+
+            ${log}::debug Profile: [$cbox get]
+            ${log}::debug Entries to save to DB: [$lbox2 get 0 end]
+            ea::db::lb::writeProfile $cbox $lbox2
+
+        
+        # Final Cleanup
+        $lbox2 delete 0 end
+        $cbox delete 0 end
+        $cbox configure -state readonly
+        
+        # Clear profile_id, and description
+        set profile_id ""
+        set tplLabel(tmp,profile) ""
+    }
+}
+
+proc ea::code::lb::addProfile {mode addPro_btn edit_btn add_btn del_btn cbox lbox1 lbox2} {
+    # Add a new profile
+    global log tplLabel profile_id
+    
+    # Clear profile_id
+    set profile_id ""
+    
+    # Enable the cbox for editing
+    $cbox configure -state normal
+    
+    # Clear out cbox, put focus
+    $cbox delete 0 end
+    focus $cbox
+    
+    # Clear out lbox2
+    $lbox2 delete 0 end
+    
+    # Re-populate lbox1 (available headers)
+    ea::code::lb::populateProfileCbox $lbox1
+    
+    # Disable Add button
+    $addPro_btn configure -state disable
+    
+    # Enable Add/Del buttons (To/From headers)
+    $add_btn configure -state normal
+    $del_btn configure -state normal
+    
+    # Change edit button to 'Save'
+    $edit_btn configure -text [mc "Save"] -state normal -command "ea::code::lb::editProfile save $addPro_btn $edit_btn $add_btn $del_btn $cbox $lbox2"
+
 }

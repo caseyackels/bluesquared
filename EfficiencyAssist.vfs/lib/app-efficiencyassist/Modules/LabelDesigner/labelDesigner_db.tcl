@@ -10,7 +10,7 @@ proc ea::db::lb::getLabelNames {cbox} {
     set tmpPubTitleID [db eval "SELECT Title_ID FROM PubTitle WHERE TitleName = '$job(Title)' AND CustID = '$job(CustID)'"]
     
     if {$tmpPubTitleID ne ""} {
-        set labelNames [db eval "SELECT tplLabelName FROM LabelTPL WHERE PubTitleID = $tmpPubTitleID"]
+        set labelNames [db eval "SELECT tplLabelName FROM LabelTPL WHERE PubTitleID = $tmpPubTitleID AND Status = 1"]
         
         if {$labelNames ne ""} {
             $cbox configure -values $labelNames
@@ -176,10 +176,31 @@ proc ea::db::lb::getVersionLabel {} {
 }
 
 proc ea::db::lb::getProfile {cbox} {
-    global log tplLabel
+    global log
     
     $cbox configure -values [db eval "SELECT LabelProfileDesc FROM LabelProfiles"]
     
+}
+
+proc ea::db::lb::getProfileID {args} {
+    # Retrieves the profile id assocatiated to 'args' value, which should be the profile description.
+    global log
+    
+    return [db eval "SELECT LabelProfileID FROM LabelProfiles WHERE LabelProfileDesc = '[join $args]'"]
+}
+
+proc ea::db::lb::getLabelHeaders {} {
+    global log
+    
+    return [db eval "SELECT LabelHeaderDesc FROM LabelHeaders"]
+}
+
+proc ea::db::lb::getProfileHeaders {profile_id} {
+    # return the headers associated with profile_id
+    
+    return [db eval "SELECT LabelHeaderDesc FROM LabelHeaders
+                         INNER JOIN LabelHeaderGrp ON LabelHeaders.LabelHeaderID = LabelHeaderGrp.LabelHeaderID
+                         WHERE LabelHeaderGrp.LabelProfileID = $profile_id"]
 }
 
 proc ea::db::lb::getSizes {cbox} {
@@ -203,6 +224,12 @@ proc ea::db::lb::setProfileVars {} {
     # Get number of rows so we can create widgets
     ea::db::lb::getNumRows
     
+    if {[winfo exists .container.frame2]} {
+        # Destroy any widgets that have been created.
+        ${log}::debug Label Lines frame already exists, destroying...
+        destroy .container.frame2
+    }
+    
     if {$tplLabel(LabelProfileRowNum) ne 0} {
         # Create the widgets
         ea::code::lb::genLines
@@ -211,7 +238,7 @@ proc ea::db::lb::setProfileVars {} {
 }
 
 proc ea::db::lb::getNumRows {} {
-    global log tplLabel
+    global log tplLabel 
     
     db eval "SELECT COUNT(LabelHeadergrp.LabelHeaderID) FROM LabelHeaderGrp
             INNER JOIN LabelProfiles ON LabelHeaderGrp.LabelProfileID = LabelProfiles.LabelProfileID
@@ -222,4 +249,40 @@ proc ea::db::lb::getNumRows {} {
             }
     
         ${log}::debug LabelProfileRowNum: $tplLabel(LabelProfileRowNum)
+}
+
+proc ea::db::lb::writeProfile {cbox lbox2} {
+    # Write profile to DB. Can be new or existing.
+    global log tplLabel profile_id
+    
+    # Check to see if Profile name already exists, if it does warn user. Otherwise insert.
+    if {$profile_id eq ""} {
+        set profile_name [$cbox get]
+        db eval "INSERT OR ABORT INTO LabelProfiles (LabelProfileDesc) VALUES ('$profile_name')"
+        
+        set profile_id [db eval "SELECT MAX(LabelProfileID) FROM LabelProfiles"]
+
+    } else {
+        # We are updating existing values
+        # Update the ProfileDesc just in case we modified it.
+        db eval "UPDATE LabelProfiles SET LabelProfileDesc = '$tplLabel(tmp,profile)' WHERE LabelProfileID = $profile_id"
+        
+        # Delete any existing assigned headers before adding
+        db eval "DELETE FROM LabelHeaderGrp WHERE LabelProfileID = $profile_id"
+    }
+    
+    set getHeaderDesc [$lbox2 get 0 end]
+    foreach item $getHeaderDesc {
+        lappend myHdrDesc '$item'
+    }
+    
+    set getHeaderDesc [join $myHdrDesc ,]
+    
+    #${log}::debug hdr-id: db eval "SELECT LabelHeaderID FROM LabelHeaders WHERE LabelHeaderDesc IN ($getHeaderDesc)"
+    db eval "SELECT LabelHeaderID FROM LabelHeaders WHERE LabelHeaderDesc IN ($getHeaderDesc)" {
+        #${log}::debug INSERT INTO VALUES ($profile_id, $LabelHeaderID)
+        db eval "INSERT INTO LabelHeaderGrp (LabelProfileID, LabelHeaderID) VALUES ($profile_id, $LabelHeaderID)"
+    }
+    
+    unset myHdrDesc
 }

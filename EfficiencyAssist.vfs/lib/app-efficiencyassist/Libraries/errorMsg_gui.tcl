@@ -110,7 +110,7 @@ proc Error_Message::errorMsg {code args} {
                             set icon warning
                         }
         default         {set message [mc "Unknown Error Message"]
-                            set message2 ""
+                            set message2 [mc "Received Message: %s" $code]
                             set title $defaultTitle
                             set icon error}
     }

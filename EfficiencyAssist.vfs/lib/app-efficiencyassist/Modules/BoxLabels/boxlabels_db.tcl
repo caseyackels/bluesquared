@@ -214,7 +214,7 @@ proc ea::db::bl::populateWidget {} {
     
     if {$tplLabel(LabelProfileID) == 0} {
         # Disable all of the row widgets, plus the shipment info widgets
-        ${log}::debug Disabliing widgets in .container.frame1 and .container.frame2.frame2a
+        ${log}::debug Disabling widgets in .container.frame1 and .container.frame2.frame2a
         foreach child [winfo children .container.frame1] {
                 if {[string match *entry* $child] == 1} {
                     $child configure -state disable
@@ -222,7 +222,7 @@ proc ea::db::bl::populateWidget {} {
         }
         
         foreach child [winfo children .container.frame2.frame2a] {
-                if {[string match *entry* $child] == 1} {
+                if {[string match *entry* $child] == 1 || [string match *cbox* $child] == 1 || [string match *add* $child] == 1} {
                     $child configure -state disable
                 }
         }

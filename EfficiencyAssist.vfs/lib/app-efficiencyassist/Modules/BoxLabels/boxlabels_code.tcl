@@ -33,7 +33,7 @@ proc filterKeys {args} {
     #	Only allows numeric values to be inserted
     #
     # SYNOPSIS
-    #	filterKeys %S -textLength %W %d %i %P %s %v %V
+    #	filterKeys %S -textLength|-numeric %W %d %i %P %s %v %V
     #
     # CHILDREN
     #	N/A
@@ -43,7 +43,15 @@ proc filterKeys {args} {
     #
     # NOTES
     #	This should really be a library; as it is useful for different parts of the application, and not just the Shipping module
-    #   %P = current string; %i = current index
+    #	https://www.tcl.tk/man/tcl/TkCmd/ttk_entry.htm#M39
+    #   %d = Type of action: 1 for _insert_, 0 for _delete_ or _-1_ for revalidation
+    #   %i = Index of character string to be inserted/deleted, if any, otherwise -1
+    #   %P = current string
+    #   %s = The current value of entry prior to editing
+    #   %S = The text string being inserted/deleted, if any, {} otherwise.
+    #   %v = The current value of the -validate option
+    #   %V = The validation condition that triggered the callback (key, focusin, focusout, or forced)
+    #   %W = The name of the entry widget
     #
     # SEE ALSO
     #	N/A
@@ -305,9 +313,14 @@ proc addListboxNums {{reset 0}} {
  
 
 proc createList {} {
-    global log frame2b GS_textVar
+    global log frame2b GS_textVar tplLabel
 
     ${log}::debug Start Createlist
+    
+    if {$tplLabel(LabelProfileID) == 0} {
+        ${log}::debug No Profile ID, skipping createList
+        return
+    }
     
     if {[info exists GS_textVar(maxBoxQty)] == 0} {Error_Message::errorMsg createList1; return}
     if {$GS_textVar(maxBoxQty) == ""} {Error_Message::errorMsg createList1; return}
@@ -395,7 +408,8 @@ proc createList {} {
             ${log}::debug Partial Boxes: $FullBoxes $PartialQty
 
     } else {
-        Error_Message::errorMsg createList2
+        ${log}::debug Something happened and we aren't sure if we're healthy. (boxlabels_code.tcl / createList)
+        #Error_Message::errorMsg createList2
     }
 
     set GS_textVar(labelsFull) $FullBoxes
@@ -581,7 +595,7 @@ proc printLabels {} {
         Shipping_Code::createList
         
         ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\$filename /P /CLOSE /X
-        exec $mySettings(path,bartender) /AF=$labelDir\\$filename /P /CLOSE /X
+        #exec $mySettings(path,bartender) /AF=$labelDir\\$filename /P /CLOSE /X
         
     } else {
         ${log}::debug Printing Generic Labels
@@ -644,9 +658,9 @@ proc printLabels {} {
     } ;# End generic labels
 	
 	# Re-enable entry widgets
-    foreach child [winfo children .container.frame1] {
-        $child configure -state normal
-    }
+    #foreach child [winfo children .container.frame1] {
+    #    $child configure -state normal
+    #}
 
 } ;# printLabels
 

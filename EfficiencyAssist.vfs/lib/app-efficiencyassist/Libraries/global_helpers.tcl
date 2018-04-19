@@ -879,6 +879,16 @@ proc ea::tools::assembleHeaders {} {
     return [list $cols $hdr $vals]
 } ;# ea::tools::assembleHeaders
 
+proc ea::tools::listDiff {list1 list2} {
+    # Returns the difference between the two lists.
+    # List1 should always be the 'master' list
+    global log
+    ${log}::debug List1: $list1
+    ${log}::debug List2: $list2
+    
+    return [lmap elem $list1 { expr {$elem in $list2 ? [continue] : $elem} }]
+}
+
 proc eAssist_Global::launchFilters {} {
     #****f* launchFilters/eAssist_Global
     # AUTHOR

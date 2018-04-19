@@ -1,6 +1,17 @@
+= Version 4.1.0 (April 2018)
+== Box Labels
+* [NEW] Added template functionality
+
+== Label Designer
+Initial Release - This is a brand new module, to create label templates for the Box Label module. This is designed to be used by a front office user.
+
+--
+
 = Version 4.0.0 (March 2015)
 Please see all 4.0.0 Beta entries for updates/changes and fixes.
 Released March 16th, 2015
+
+--
 
 = Version 4.0.0 Beta 8 (March 2015)
 == Batch Maker
