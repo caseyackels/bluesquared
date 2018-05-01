@@ -225,3 +225,13 @@ pip-log.txt
 *.db
 DistributionHelper-1.exe
 Installer/eaSetup-.exe
+excel_sched-edited.csv
+excel_sched-short-formatted.csv
+excel_sched-short.csv
+excel_sched-short-formatted1.csv
+pfgrouped45days-short.csv
+pfgrouped45days.csv
+pfgrouped45days_shuts-2.csv
+pfgrouped45days_shuts.csv
+tclkit.exe
+tclkit_build.exe
