@@ -65,7 +65,8 @@ proc ea::sec::initUser {{newUser 0}} {
 											-- # get Group Name
 											INNER JOIN SecGroupNames ON SecGroupNames.SecGroupName_ID = SecurityAccess.SecGrpNameID
 											  WHERE SecGroupNames.SecGroupName = '$user($user(id),group)'
-												AND SecGroupNames.Status = 1"]
+												AND SecGroupNames.Status = 1
+                                                AND SecurityAccess.SecAccess_Read = 1"]
     
 	# Throw an error/information dialog, telling the user that they are not in a group
 	if {$user($user(id),modules) == ""} {
@@ -113,19 +114,16 @@ proc ea::sec::userExist {} {
 	
 	set user_Name [string tolower $env(USERNAME)]
     
-    #if {$user_Name eq "casey"} {
-    #    set user_Name "casey.ackels"
-    #}
-    
     set userName [db eval "SELECT UserLogin FROM Users WHERE UserLogin='$user_Name'"]
 	
 	if {$userName == ""} {
 		${log}::info $env(USERNAME) is not in the Database. Adding ...
 		# Default password is <space>
-		db eval "INSERT INTO Users (UserLogin, UserPwd) VALUES ('$userName', ' ')"
+		db eval "INSERT INTO Users (UserLogin, UserPwd) VALUES ('$user_Name', ' ')"
+        
 		set user_id [db eval "SELECT max(User_ID) FROM Users WHERE UserLogin = '$user_Name'"]
 		
-		db eval "INSERT INTO SecGroups (SecGroupNameID, UserID) ($defaultGroupID, $user_id)"
+		db eval "INSERT INTO SecGroups (SecGroupNameID, UserID) VALUES ($defaultGroupID, $user_id)"
 
 	} else {
 		${log}::info Found $userName in the database.
@@ -475,7 +473,7 @@ proc ea::sec::modLauncher {args} {
         eAssist::buttonBarGUI [join [lindex $user($user(id),modules) 0]]
         
     } else {
-        if {$args == ""} {${log}::debug No args Provided; eAssist::buttonBarGUI [join [lindex $user($user(id),modules) 0]]}
+        if {$args == ""} {${log}::debug No args provided; eAssist::buttonBarGUI [join [lindex $user($user(id),modules) 0]]}
         
         switch -nocase $args {
             "Box Labels"        {eAssist::buttonBarGUI $args}

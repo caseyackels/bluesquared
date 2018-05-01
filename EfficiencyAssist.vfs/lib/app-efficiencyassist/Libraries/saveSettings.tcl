@@ -137,8 +137,12 @@ proc lib::savePreferences {} {
         return
     }
     
-    # Update the geometry settings, just in case the user resized the window before saving.
-    set options(geom,$settings(currentModule_machine)) [wm geometry .]
+	if {[info exists settings(currentModule_machine)]} {
+		# Only set this variable if this _isn't_ the first time that we are launching EA.
+		# Update the geometry settings, just in case the user resized the window before saving.
+		set options(geom,$settings(currentModule_machine)) [wm geometry .]
+	}
+
     
     # Write out individual variables
     chan puts $fd "program(Version) $program(Version)"

@@ -8,6 +8,7 @@ proc ea::db::lb::getLabelNames {cbox} {
     #if {$tpllabel(ID) eq ""} {return}
     
     set tmpPubTitleID [db eval "SELECT Title_ID FROM PubTitle WHERE TitleName = '$job(Title)' AND CustID = '$job(CustID)'"]
+    ${log}::debug TemplateID exists? ($tmpPubTitleID)
     
     if {$tmpPubTitleID ne ""} {
         set labelNames [db eval "SELECT tplLabelName FROM LabelTPL WHERE PubTitleID = $tmpPubTitleID AND Status = 1"]
@@ -19,6 +20,9 @@ proc ea::db::lb::getLabelNames {cbox} {
         } else {
             ${log}::debug No labels exist
         }
+    } else {
+        ${log}::debug TemplateID doesn't exist, no value set
+        $cbox configure -values ""
     }
 } ;# ea::db::lb::getLabelNames
 
@@ -30,6 +34,8 @@ proc ea::db::lb::getLabelSpecs {cbox} {
 
     set tmpLabelName [$cbox get]
     set tmpPubTitleID [db eval "SELECT Title_ID FROM PubTitle WHERE TitleName = '$job(Title)' AND CustID = '$job(CustID)'"]
+    
+    if {$tmpPubTitleID eq ""} {$cbox configure -values ""; ${log}::debug Title_ID is empty, exiting...; return}
     
     ${log}::debug tmpLabelName: $tmpLabelName
     ${log}::debug tmpPubTitleID: $tmpPubTitleID
@@ -220,7 +226,6 @@ proc ea::db::lb::setProfileVars {} {
 
 
     ${log}::debug LabelProfileID: $tplLabel(LabelProfileID)
-
     # Get number of rows so we can create widgets
     ea::db::lb::getNumRows
     
@@ -234,7 +239,7 @@ proc ea::db::lb::setProfileVars {} {
         # Create the widgets
         ea::code::lb::genLines
     }
-    
+
 }
 
 proc ea::db::lb::getNumRows {} {
@@ -272,17 +277,21 @@ proc ea::db::lb::writeProfile {cbox lbox2} {
     }
     
     set getHeaderDesc [$lbox2 get 0 end]
-    foreach item $getHeaderDesc {
-        lappend myHdrDesc '$item'
+    if {$getHeaderDesc ne ""} {
+        foreach item $getHeaderDesc {
+            lappend myHdrDesc '$item'
+        }
+        
+        set getHeaderDesc [join $myHdrDesc ,]
+        
+        #${log}::debug hdr-id: db eval "SELECT LabelHeaderID FROM LabelHeaders WHERE LabelHeaderDesc IN ($getHeaderDesc)"
+        db eval "SELECT LabelHeaderID FROM LabelHeaders WHERE LabelHeaderDesc IN ($getHeaderDesc)" {
+            #${log}::debug INSERT INTO VALUES ($profile_id, $LabelHeaderID)
+            db eval "INSERT INTO LabelHeaderGrp (LabelProfileID, LabelHeaderID) VALUES ($profile_id, $LabelHeaderID)"
+        }
+        
+        unset myHdrDesc
+    } else {
+        ${log}::notice No headers were selected. Nothing saved to the database.
     }
-    
-    set getHeaderDesc [join $myHdrDesc ,]
-    
-    #${log}::debug hdr-id: db eval "SELECT LabelHeaderID FROM LabelHeaders WHERE LabelHeaderDesc IN ($getHeaderDesc)"
-    db eval "SELECT LabelHeaderID FROM LabelHeaders WHERE LabelHeaderDesc IN ($getHeaderDesc)" {
-        #${log}::debug INSERT INTO VALUES ($profile_id, $LabelHeaderID)
-        db eval "INSERT INTO LabelHeaderGrp (LabelProfileID, LabelHeaderID) VALUES ($profile_id, $LabelHeaderID)"
-    }
-    
-    unset myHdrDesc
 }

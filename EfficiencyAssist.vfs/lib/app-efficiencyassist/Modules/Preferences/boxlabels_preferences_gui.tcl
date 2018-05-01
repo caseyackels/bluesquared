@@ -22,7 +22,7 @@ proc ea::gui::pref::bl_filepaths {args} {
     #   
     #   
     #***
-    global log gui mySettings
+    global log gui mySettings logSettings
 
     # Clear out all child widgets ...
     eAssist_Global::resetFrames -pref
@@ -63,6 +63,6 @@ proc ea::gui::pref::bl_filepaths {args} {
     
     grid [ttk::label $f1.txt6 -text [mc "Breakdown File Name"]] -column 0 -row 6 -padx 2p -pady 2p -sticky e
     grid [ttk::entry $f1.entry6 -textvariable mySettings(path,bdfile)] -column 1 -row 6 -sticky ew
-        tooltip::tooltip $f1.entry6 [mc "Choose the name of your breakdown file. This file is used to send to the printer using WordPad."]
+        tooltip::tooltip $f1.entry6 [mc "Choose the name of your breakdown file. This file is sent to the printer using WordPad."]
     
 } ;# ea::gui::pref::bl_filepaths

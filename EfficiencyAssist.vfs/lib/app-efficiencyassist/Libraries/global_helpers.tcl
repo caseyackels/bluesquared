@@ -471,15 +471,21 @@ proc eAssist_Global::getGeom {module args} {
 		set dims [join $dims]
 		#${log}::notice [winfo screenwidth .] == [lindex $dims 0]
 		#${log}::notice [winfo screenheight . ] == [lindex $dims 1]
+        
+        # use default settings if screenwidth and screenheight = 1
+        if {[lindex $dims 0] == 1 && [lindex $dims 1] == 1} {
+            ${log}::notice Geometry Width and Height is 1, using default geoms
+            wm geometry . $args
+        }
 
 	
-		if {[winfo screenheight . ] == [lindex $dims 1]} {
-			#wm attributes . -zoomed 1
-			wm state . zoomed
-			} elseif {[winfo screenwidth .] == [lindex $dims 0]} {
-			   #wm attributes . -zoomed 1
-			   wm state . zoomed
-		}
+		#if {[winfo screenheight . ] == [lindex $dims 1]} {
+		#	#wm attributes . -zoomed 1
+		#	wm state . zoomed
+		#	} elseif {[winfo screenwidth .] == [lindex $dims 0]} {
+		#	   #wm attributes . -zoomed 1
+		#	   wm state . zoomed
+		#}
 	} else {
 		wm geometry . $args
 		${log}::notice Geometry does NOT exist for $module - Using $args

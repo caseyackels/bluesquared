@@ -1,6 +1,11 @@
 = Version 4.1.0 (April 2018)
 == Box Labels
 * [NEW] Added template functionality
+* [UPDATE] Shipment Type widget is now read-only. 
+* [BUG] Break Down window should not open on its own anymore.
+* [BUG] Opening Efficiency should now always be at the correct size when launching.
+* [BUG] Double-Clicking in the shipment screen should not cause a cell 0,1 out of bounds error anymore.
+* [BUG] You will no longer receive a stack trace error when clicking Add to List when Shipment Qty is empty.
 
 == Label Designer
 Initial Release - This is a brand new module, to create label templates for the Box Label module. This is designed to be used by a front office user.

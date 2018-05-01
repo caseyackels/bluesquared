@@ -91,6 +91,12 @@ proc shippingGUI {} {
 				set tplLabel(LabelVersionDesc,current) [%W get]		
 				ea::db::bl::populateWidget
 		}
+		
+		bind $frame0.entry <Return> {
+			if {$GS_textVar(Template) != ""} {
+				ea::db::bl::getTplData $GS_textVar(Template)
+			}
+		}
 	
 	 
 # Frame 1
@@ -188,11 +194,13 @@ proc shippingGUI {} {
                         -width 15 \
                         -validate key \
                         -validatecommand {Shipping_Code::filterKeys -numeric %S %W %P}
+		tooltip::tooltip $frame2a.entry2 "Add to List (Enter)"
 
     set GS_textVar(shipvia) Freight
     ttk::combobox $frame2a.cbox -textvar GS_textVar(shipvia) \
                                 -width 7 \
-                                -values [list "Freight" "Import"]
+                                -values [list "Freight" "Import"] \
+								-state readonly
                                 #-validate key \
                                 #-validatecommand {Shipping_Code::filterKeys -textLength %S %W %P}
 
@@ -216,7 +224,7 @@ proc shippingGUI {} {
     grid $frame2a.cbox -column 2 -row 2
 
     grid $frame2a.add -column 3 -row 2 -sticky nes -padx 5p
-    tooltip::tooltip $frame2a.add "Add to List (Enter)"
+    
 
 
 
@@ -266,23 +274,27 @@ proc shippingGUI {} {
 ;# The ttk way, to change the background
 ttk::style map TCombobox -fieldbackground [list focus yellow]
 ttk::style map TEntry -fieldbackground [list focus yellow]
+ 
 
 bind $frame2a.entry <KeyPress-Down> {tk::TabToWindow [tk_focusNext %W]}
 bind $frame2a.entry <KeyPress-Up> {tk::TabToWindow [tk_focusPrev %W]}
 
-foreach window "$frame2a.add $frame2a.entry1 $frame2a.entry2" {
+foreach window "$frame2a.add $frame2a.entry $frame2a.entry1" {
+	bind $window <Return> {tk::TabToWindow [tk_focusNext %W]}
+	bind $window <KeyPress-Down> {tk::TabToWindow [tk_focusNext %W]}
     bind $window <KeyPress-Right> {tk::TabToWindow [tk_focusNext %W]}
+	
     bind $window <KeyPress-Left> {tk::TabToWindow [tk_focusPrev %W]}
     bind $window <KeyPress-Up> {tk::TabToWindow [tk_focusPrev %W]}
-    bind $window <KeyPress-Down> {tk::TabToWindow [tk_focusPrev %W]}
+    
+}
 
-    bind $window <Return> {
+    bind $frame2a.entry2 <Return> {
         ;# Guard against the user inadvertantly hitting <Enter> or "Add" button without anything in the entry fields
         if {([info exists GS_textVar(destQty)] eq 0) || ($GS_textVar(destQty) eq "")} {return}
         Shipping_Code::addMaster $GS_textVar(destQty) $GS_textVar(batch) $GS_textVar(shipvia)
 		#${log}::debug bind-Return if serialize: Disable widgets
     }
-}
 
 bind $frame1.entry1 <KeyRelease> {
     if {[string length $GS_textVar(Row01)] != 0} {
@@ -341,13 +353,14 @@ foreach window [list 1 2 3 4 5] {
     }
 
     ;# Bind the Enter key to traverse through the entry fields like <Tab>
+	# Go backwards
+	bind $frame1.entry$window <Shift-Return> {tk::TabToWindow [tk_focusPrev %W]}
+	bind $frame1.entry$window <KeyPress-Up> {tk::TabToWindow [tk_focusPrev %W]}
+	
+	# Go forwards
     bind $frame1.entry$window <Return> {tk::TabToWindow [tk_focusNext %W]}
-
     bind $frame1.entry$window <KeyPress-Down> {tk::TabToWindow [tk_focusNext %W]}
-
-    bind $frame1.entry$window <Shift-Return> {tk::TabToWindow [tk_focusPrev %W]}
-    bind $frame1.entry$window <KeyPress-Up> {tk::TabToWindow [tk_focusNext %W]}
-
+    
     bind $frame1.entry$window <Control-KeyPress-D> {%W delete 0 end}
 
     bind $frame1.entry$window <ButtonPress-3> {tk_popup .editPopup %X %Y}
@@ -375,6 +388,7 @@ bind [$frame2b.listbox bodytag] <KeyPress-BackSpace> {
 
 
 bind [$frame2b.listbox bodytag] <Double-1> {
+	if {[$frame2b.listbox curselection] eq ""} {return}
     $frame2b.listbox delete [$frame2b.listbox curselection]
 
     # Make sure we keep all the textvars updated when we delete something
@@ -405,7 +419,7 @@ bind $frame1.entry1 <<ComboboxSelected>> {
 
 
 
-bind all <Escape> {exit}
+#bind all <Escape> {exit}
 bind all <F1> {console show}
 bind all <F2> {console hide}
 
@@ -434,7 +448,7 @@ proc printbreakDown {args} {
     #	N/A
     #
     # PARENTS
-    #	blueSquirrel::parentGUI, Shipping_Code::createList
+    #	parentGUI, Shipping_Code::createList
     #
     # NOTES
     #	None
@@ -475,7 +489,7 @@ proc printbreakDown {args} {
 
     
     if {$args eq "email"} {
-        ##
+        ## *** Send an email regardless if we print the breakdown or not.
         ## Email
         ##
         #mail::mail boxlabels "$GS_textVar(line1)" "$GS_textVar(line1)\n$GS_textVar(line2)\n$GS_textVar(line3)\n$GS_textVar(line4)\n$GS_textVar(line5)\n\n$myBreakDownText"
@@ -487,7 +501,7 @@ proc printbreakDown {args} {
                                         -breakdown $myBreakDownText
         #${log}::debug [list $GS_textVar(line1) $GS_textVar(line2) $myBreakDownText]
     } else {
-        ##
+        ## *** Send an email and print out the breakdown.
         ## Email
         ##
         #mail::mail boxlabels "$GS_textVar(line1)" "$GS_textVar(line1)\n$GS_textVar(line2)\n$GS_textVar(line3)\n$GS_textVar(line4)\n$GS_textVar(line5)\n\n$myBreakDownText"
@@ -522,7 +536,7 @@ proc printbreakDown {args} {
 } ;# End of printbreakDown
 
 
-proc breakDown {} {
+proc breakDown {{show_win 0}} {
     #****f* breakDown/Shipping_Gui
     # AUTHOR
     #	Casey Ackels
@@ -550,21 +564,24 @@ proc breakDown {} {
     #
     #***
     global GS_textVar GS_widget GS_winGeom log
+	
+	
     
     ${log}::debug Creating Breakdown window ...
 
     if {![winfo exists .breakdown]} {
         toplevel .breakdown
         wm title .breakdown "Break Down"
+		wm protocol .breakdown WM_DELETE_WINDOW {wm withdraw .breakdown; focus .; ${log}::debug Close window was selected. Hiding .breakdown}
 
-        puts "winfo geom: [winfo geometry .]"
+        ${log}::debug breakDown: winfo geom: [winfo geometry .]
         wm geometry .breakdown +854+214
 
         ${log}::debug Breadown window Created...
 
 
         set frame1 [ttk::frame .breakdown.frame1]
-        pack $frame1 -fill both -expand yes -pady 5p
+        pack $frame1 -fill both -expand yes
 
         set GS_widget(breakdown) $frame1.txt
         text $frame1.txt -width 30 \
@@ -575,8 +592,8 @@ proc breakDown {} {
         ttk::scrollbar $frame1.scrollx -orient h -command [list $frame1.txt xview]
         ttk::scrollbar $frame1.scrolly -orient v -command [list $frame1.txt yview]
        
-        grid $frame1.txt -column 0 -row 0 -sticky news -padx 5p
-       #grid columnconfigure $frame1 $frame1.txt -weight 1
+        grid $frame1.txt -column 0 -row 0 -sticky news -pady 3p -padx 3p
+        grid columnconfigure $frame1 $frame1.txt -weight 1
 
         grid $frame1.scrolly -column 1 -row 0 -sticky nse
         grid $frame1.scrollx -column 0 -row 1 -sticky ews
@@ -587,10 +604,10 @@ proc breakDown {} {
 
 
         set frame2 [ttk::frame .breakdown.frame2]
-        pack $frame2 -pady 10p -anchor se
+        pack $frame2 -pady 2p -anchor se
 
         ttk::button $frame2.print -text [mc "Print"] -command {Shipping_Gui::printbreakDown}
-        ttk::button $frame2.close -text [mc "Close"] -command {destroy .breakdown}
+        ttk::button $frame2.close -text [mc "Close"] -command {wm withdraw .breakdown ; focus .}
 
         grid $frame2.print -column 0 -row 0 -padx 3p
         grid $frame2.close -column 1 -row 0 -padx 5p
@@ -600,11 +617,11 @@ proc breakDown {} {
         ${log}::debug Breakdown window - 1st time ...
 
     } else {
-        if {![winfo ismapped .breakdown]} {
+        if {[winfo ismapped .breakdown] == 0 && $show_win != 0} {
             # Display the window
             wm deiconify .breakdown
             
-            ${log}::debug Breakdown window - already mapped ...
+            ${log}::debug Breakdown window is already mapped, deiconify(ing)
         }
         
         # Refreshing
@@ -617,12 +634,13 @@ proc breakDown {} {
     if {([info exists GS_textVar(labelsFull)] == 1) && ($GS_textVar(labelsFull) != "")} {
         # Make sure that it has 2 or more values
         if {[llength $GS_textVar(labelsFull)] >= 2} {
-            puts "LabelsFull <=: $GS_textVar(labelsFull)"
+            ${log}::debug breakDown: Multiple LabelsFull <=: $GS_textVar(labelsFull)
             $GS_widget(breakdown) insert end "Full Boxes:\n"
             $GS_widget(breakdown) insert end "-----------\n"
             $GS_widget(breakdown) insert end "[expr [join $GS_textVar(labelsFull) +]] @ $GS_textVar(maxBoxQty)\n"
         } else {
             # If we have less than 2 values, just insert what the full boxes are.
+			${log}::debug breakDown: Single LabelsFull <=: $GS_textVar(labelsFull)
             $GS_widget(breakdown) insert end "Full Box:\n"
             $GS_widget(breakdown) insert end "---------\n"
             $GS_widget(breakdown) insert end "$GS_textVar(labelsFull) @ $GS_textVar(maxBoxQty)\n"
@@ -652,75 +670,75 @@ proc breakDown {} {
 } ;# End of breakDown
 
 
-proc chooseLabel {lines} {
-    #****f* chooseLabel/Shipping_Gui
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2011 - Casey Ackels
-    #
-    # FUNCTION
-    #	If the text "Seattle Met" is detected, we launch this window so that use can choose what type of label they want to use.
-    #
-    # SYNOPSIS
-    #	chooseLabel $line (Where line is a value between 1 and 6; referring to how many lines the label is using)
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #
-    #
-    # NOTES
-    #	None
-    #
-    # SEE ALSO
-    #
-    #
-    #***
-    global log GS_textVar GS_widget
-
-    toplevel .chooseLabel
-    wm title .chooseLabel "Choose your Label"
-    wm transient .chooseLabel .
-    ${log}::debug Using lines: $lines
-
-    # x = horizontal
-    # y = vertical
-    # Put the window in the center of the parent window
-    set locX [expr {[winfo width . ] / 3 + [winfo x .]}]
-    set locY [expr {[winfo height . ] / 3 + [winfo y .]}]
-
-    wm geometry .chooseLabel +$locX+$locY
-
-    focus .chooseLabel
-
-    set frame0 [ttk::frame .chooseLabel.frame0]
-    grid $frame0 -padx 5p -pady 5p
-
-    set labels ""
-
-    ttk::radiobutton $frame0.white -text "White Label - Standard" -variable labels -value LINEDB.btw -command "set lines $lines"
-    ttk::radiobutton $frame0.green -text "Green Label - Special" -variable labels -value LINEDB_Seattle.btw -command "set lines $lines"
-    #$frame0.white invoke ;# set the default
-
-    grid $frame0.white -column 0 -row 0 -padx 5p -pady 5p -sticky w
-    grid $frame0.green -column 0 -row 1 -padx 5p -pady 5p -sticky w
-
-    set frame1 [ttk::frame .chooseLabel.frame1]
-    grid $frame1 -padx 5p -pady 5p
-    
-    ${log}::debug Number of lines to be printed: $lines
-   
-    ttk::button $frame1.print -text "Print" -command {Shipping_Code::printCustomLabels $lines $labels; destroy .chooseLabel}
-    ttk::button $frame1.close -text "Close" -command {destroy .chooseLabel}
-
-    grid $frame1.print -column 0 -row 0 -sticky ne
-    grid $frame1.close -column 1 -row 0 -sticky ne
-
-
-} ;# End of chooseLabel
+#proc chooseLabel {lines} {
+#    #****f* chooseLabel/Shipping_Gui
+#    # AUTHOR
+#    #	Casey Ackels
+#    #
+#    # COPYRIGHT
+#    #	(c) 2011 - Casey Ackels
+#    #
+#    # FUNCTION
+#    #	If the text "Seattle Met" is detected, we launch this window so that use can choose what type of label they want to use.
+#    #
+#    # SYNOPSIS
+#    #	chooseLabel $line (Where line is a value between 1 and 6; referring to how many lines the label is using)
+#    #
+#    # CHILDREN
+#    #	N/A
+#    #
+#    # PARENTS
+#    #
+#    #
+#    # NOTES
+#    #	4-23-18 Old functionality, should be removed.
+#    #
+#    # SEE ALSO
+#    #
+#    #
+#    #***
+#    global log GS_textVar GS_widget
+#
+#    toplevel .chooseLabel
+#    wm title .chooseLabel "Choose your Label"
+#    wm transient .chooseLabel .
+#    ${log}::debug Using lines: $lines
+#
+#    # x = horizontal
+#    # y = vertical
+#    # Put the window in the center of the parent window
+#    set locX [expr {[winfo width . ] / 3 + [winfo x .]}]
+#    set locY [expr {[winfo height . ] / 3 + [winfo y .]}]
+#
+#    wm geometry .chooseLabel +$locX+$locY
+#
+#    focus .chooseLabel
+#
+#    set frame0 [ttk::frame .chooseLabel.frame0]
+#    grid $frame0 -padx 5p -pady 5p
+#
+#    set labels ""
+#
+#    ttk::radiobutton $frame0.white -text "White Label - Standard" -variable labels -value LINEDB.btw -command "set lines $lines"
+#    ttk::radiobutton $frame0.green -text "Green Label - Special" -variable labels -value LINEDB_Seattle.btw -command "set lines $lines"
+#    #$frame0.white invoke ;# set the default
+#
+#    grid $frame0.white -column 0 -row 0 -padx 5p -pady 5p -sticky w
+#    grid $frame0.green -column 0 -row 1 -padx 5p -pady 5p -sticky w
+#
+#    set frame1 [ttk::frame .chooseLabel.frame1]
+#    grid $frame1 -padx 5p -pady 5p
+#    
+#    ${log}::debug Number of lines to be printed: $lines
+#   
+#    ttk::button $frame1.print -text "Print" -command {Shipping_Code::printCustomLabels $lines $labels; destroy .chooseLabel}
+#    ttk::button $frame1.close -text "Close" -command {destroy .chooseLabel}
+#
+#    grid $frame1.print -column 0 -row 0 -sticky ne
+#    grid $frame1.close -column 1 -row 0 -sticky ne
+#
+#
+#} ;# End of chooseLabel
 
 
 } ;# End of Shipping_Gui namespace
@@ -763,7 +781,7 @@ proc Shipping_Gui::initMenu {} {
     $mb.modMenu delete 0 end
     
     $mb.modMenu add command -label [mc "Clear List"] -command {Shipping_Code::clearList}
-    $mb.modMenu add command -label [mc "Show Breakdown"] -command {Shipping_Gui::breakDown}
+    $mb.modMenu add command -label [mc "Show Breakdown"] -command {Shipping_Gui::breakDown 1}
     $mb.modMenu add command -label [mc "Preferences"] -command {ea::gui::pref::startPref} 
 	
     ${log}::debug --END -- [info level 1]

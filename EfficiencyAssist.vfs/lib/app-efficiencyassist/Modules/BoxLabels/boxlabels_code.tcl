@@ -250,7 +250,6 @@ proc insertInListbox {args} {
 
 } ;# insertInListbox
 
-
 proc addListboxNums {{reset 0}} {
     #****f* addListboxNums/Shipping_Code
     # AUTHOR
@@ -329,7 +328,7 @@ proc createList {} {
     set L_rawShipVia [split [join [$frame2b.listbox getcells 0,2 end,2]]]
 
     ${log}::debug L_rawEntries1: $L_rawEntries
-    ${log}::debug L_rawEntries2: [$frame2b.listbox getcells 0,1 end,1]
+    ${log}::debug L_rawEntries2: [catch {[$frame2b.listbox getcells 0,1 end,1]} err0]
 
     # Make sure the variables are cleared out; we don't want any data to lag behind.
     set FullBoxes ""
@@ -386,9 +385,11 @@ proc createList {} {
         if {$tmpPartialQty eq ""} {
             ${log}::debug tmpPartialQty is blank, using tmpFullBoxes: $tmpFullBoxes
             set total_boxes $tmpFullBoxes
+            
         } else {
             set tmpPartialQty [llength $tmpPartialQty]
-            ${log}::debug adding tmpFullboxes and tmpPartialQty together: $tmpFullBoxes, $tmpPartialQty
+            set tmpFullBoxes [join $tmpFullBoxes " + "]
+            ${log}::debug adding tmpFullboxes and tmpPartialQty together: $tmpFullBoxes - $tmpPartialQty
             set total_boxes [expr "$tmpFullBoxes + $tmpPartialQty"]
             ${log}::debug total_boxes: $total_boxes
         }
@@ -421,7 +422,6 @@ proc createList {} {
     if {[winfo exists .breakdown] == 1} {${log}::debug Refreshing Break Down; Shipping_Gui::breakDown}
 
 } ;# createList
-
 
 proc doMath {totalQuantity maxPerBox} {
 # Do mathmatical equations, then double check to make sure it comes out to the value of totalQty
@@ -551,10 +551,9 @@ proc displayListHelper {fullboxes partialboxes total_boxes {reset 0}} {
     controlFile destination fileclose
 } ;# End of displayListHelper proc
 
-
 proc printLabels {} {
     global log GS_textVar programPath lineNumber mySettings tplLabel tmp
-
+    
     ${log}::debug Initiating printLabels
     
 	if {[info exists mySettings(path,bartender)] != 0} {
@@ -571,7 +570,7 @@ proc printLabels {} {
 
     if {$tplLabel(ID) eq ""} {
         if {![info exists GS_textVar(maxBoxQty)]} {
-            Error_Message::errorMsg printLabels1
+            Error_Message::errorMsg BL002
             return
         }
         
@@ -594,113 +593,74 @@ proc printLabels {} {
                
         Shipping_Code::createList
         
-        ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\$filename /P /CLOSE /X
-        #exec $mySettings(path,bartender) /AF=$labelDir\\$filename /P /CLOSE /X
+        ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\$filename /P /CLOSE /MIN=TASKBAR
+        exec $mySettings(path,bartender) /AF=$labelDir\\$filename /P /CLOSE /MIN=TASKBAR
         
     } else {
-        ${log}::debug Printing Generic Labels
+            ${log}::debug Printing Generic Labels
+            # Fix the file paths so that bartender doesn't choke
+            set labelDir [join [split $mySettings(path,labelDir) /] \\]
+            
+            if {$GS_textVar(Row05) != ""} {
+                exec $mySettings(path,bartender) /AF=$labelDir\\6LINEDB.btw /P /CLOSE /MIN=TASKBAR
+                ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\6LINEDB.btw /P /CLOSE /MIN=TASKBAR
+                    
+            } elseif {$GS_textVar(Row04) != ""} {
+                exec $mySettings(path,bartender) /AF=$labelDir\\5LINEDB.btw /P /CLOSE /MIN=TASKBAR
+                ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\5LINEDB.btw /P /CLOSE /MIN=TASKBAR
         
-        # Fix the file paths so that bartender doesn't choke
-        set labelDir [join [split $mySettings(path,labelDir) /] \\]
-        
-        if {$GS_textVar(line5) != ""} {
-            if {[string match "seattle met" [string tolower $GS_textVar(Row01)]] eq 1} {
-                        #set lineNumber 5
-                        # Redirect for special print options
-                        Shipping_Gui::chooseLabel 6
-                        puts "5 Line Label"
+            } elseif {$GS_textVar(Row03) != ""} {
+                exec $mySettings(path,bartender) /AF=$labelDir\\4LINEDB.btw /P /CLOSE /MIN=TASKBAR
+                ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\4LINEDB.btw /P /CLOSE /MIN=TASKBAR
     
-            } else {
-                exec $mySettings(path,bartender) /AF=$labelDir\\6LINEDB.btw /P /CLOSE /X
-                ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\6LINEDB.btw /P /CLOSE /X
+            } elseif {$GS_textVar(Row02) != ""} {
+                exec $mySettings(path,bartender) /AF=$labelDir\\3LINEDB.btw /P /CLOSE /MIN=TASKBAR
+                ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\3LINEDB.btw /P /CLOSE /MIN=TASKBAR
+       
+            } elseif {$GS_textVar(Row01) != ""} {
+                exec $mySettings(path,bartender) /AF=$labelDir\\2LINEDB.btw /P /CLOSE /MIN=TASKBAR
+                ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\2LINEDB.btw /P /CLOSE /MIN=TASKBAR
             }
-    
-        } elseif {$GS_textVar(line4) != ""} {
-            if {[string match "seattle met" [string tolower $GS_textVar(Row01)]] eq 1} {
-                        #set lineNumber 4
-                        # Redirect for special print options
-                        Shipping_Gui::chooseLabel 5
-                        puts "5 Line Label"
-    
-                    } else {
-                exec $mySettings(path,bartender) /AF=$labelDir\\5LINEDB.btw /P /CLOSE /X
-                ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\5LINEDB.btw /P /CLOSE /X
-            }
-    
-        } elseif {$GS_textVar(line3) != ""} {
-            if {[string match "seattle met" [string tolower $GS_textVar(Row01)]] eq 1} {
-                        #set lineNumber 3
-                        # Redirect for special print options
-                        Shipping_Gui::chooseLabel 4
-                        puts "4 Line Label"
-    
-                    } else {
-                exec $mySettings(path,bartender) /AF=$labelDir\\4LINEDB.btw /P /CLOSE /X
-                ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\4LINEDB.btw /P /CLOSE /X
-            }
-    
-        } elseif {$GS_textVar(line2) != ""} {
-            if {[string match "seattle met" [string tolower $GS_textVar(Row01)]] eq 1} {
-                            Error_Message::errorMsg seattleMet2; return
-            } else {
-            exec $mySettings(path,bartender) /AF=$labelDir\\3LINEDB.btw /P /CLOSE /X
-            ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\3LINEDB.btw /P /CLOSE /X
-            }
-    
-        } elseif {$GS_textVar(Row01) != ""} {
-            if {[string match "seattle met" [string tolower $GS_textVar(Row01)]] eq 1} {
-                            Error_Message::errorMsg seattleMet2; return
-            } else {
-            exec $mySettings(path,bartender) /AF=$labelDir\\2LINEDB.btw /P /CLOSE /X
-            ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\2LINEDB.btw /P /CLOSE /X
-            }
-        }
     } ;# End generic labels
-	
-	# Re-enable entry widgets
-    #foreach child [winfo children .container.frame1] {
-    #    $child configure -state normal
-    #}
-
 } ;# printLabels
 
-proc printCustomLabels {args} {
-    #****f* printCustomLabels/Shipping_Code
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2011 - Casey Ackels
-    #
-    # FUNCTION
-    #	Prints custom labels
-    #
-    # SYNOPSIS
-    #	printCustomLabels 3|4|5|6
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #	Shipping_Code::writeHistory
-    #
-    # NOTES
-    #	N/A
-    #
-    # SEE ALSO
-    #	N/A
-    #
-    #***
-    global mySettings log
-	
-	${log}::debug Printing custom labels: [join $args ""]
-	set args [join $args ""]
-	
-	
-	set labelDir [join [split $mySettings(path,labelDir) /] \\]
-    exec $mySettings(path,bartender) /AF=$labelDir\\$args /P /CLOSE /X
-    #${log}::debug programPath(Bartend) /AF=programPath(LabelPath)\\$args /P /CLOSE
-}
+#proc printCustomLabels {args} {
+#    #****f* printCustomLabels/Shipping_Code
+#    # AUTHOR
+#    #	Casey Ackels
+#    #
+#    # COPYRIGHT
+#    #	(c) 2011 - Casey Ackels
+#    #
+#    # FUNCTION
+#    #	Prints custom labels
+#    #
+#    # SYNOPSIS
+#    #	printCustomLabels 3|4|5|6
+#    #
+#    # CHILDREN
+#    #	N/A
+#    #
+#    # PARENTS
+#    #	Shipping_Code::writeHistory
+#    #
+#    # NOTES
+#    #	N/A
+#    #
+#    # SEE ALSO
+#    #	N/A
+#    #
+#    #***
+#    global mySettings log
+#	
+#	${log}::debug Printing custom labels: [join $args ""]
+#	set args [join $args ""]
+#	
+#	
+#	set labelDir [join [split $mySettings(path,labelDir) /] \\]
+#    exec $mySettings(path,bartender) /AF=$labelDir\\$args /P /CLOSE /X
+#    #${log}::debug programPath(Bartend) /AF=programPath(LabelPath)\\$args /P /CLOSE
+#}
 
 proc truncateHistory {} {
     #****f* truncateHistory/Shipping_Code
@@ -760,7 +720,6 @@ proc truncateHistory {} {
 
 } ;# truncateHistory
 
-
 proc writeHistory {maxBoxQty} {
     #****f* writeHistory/Shipping_Code
     # AUTHOR
@@ -811,7 +770,6 @@ proc writeHistory {maxBoxQty} {
 
 } ;# writeHistory
 
-
 proc openHistory {} {
     #****f* openHistory/Shipping_Code
     # AUTHOR
@@ -840,7 +798,7 @@ proc openHistory {} {
     #
     #***
     global GS_textVar files frame1 log
-    puts "openHistory: Starting"
+    ${log}::debug openHistory: Starting
 
     controlFile history fileread
     set history_data [read $files(history)]
@@ -896,26 +854,26 @@ proc readHistory {args} {
     #	N/A
     #
     #***
-    global GS_textVar files lineText
+    global GS_textVar files lineText log
 
     controlFile history fileread
     set history_data [read $files(history)]
     set lines [split $history_data \n]
-    puts "Read history lines: $lines"
+    ${log}::debug Read history lines: $lines
     controlFile history fileclose
 
 
     set text [lindex $lines $args]
-    puts "text: $text"
+    ${log}::debug text: $text
 
     set x 1
     foreach line [::csv::split $text] {
         #puts "retrieve: $line"
         if {$x <= 5} {
-            set GS_textVar(line$x) $line
+            set GS_textVar(Row0$x) $line
             #set lineText(data$x) [string length $GS_textVar(line$x)]
-            if {[string length $GS_textVar(line$x)] != 0} {
-                set lineText(data$x) [string length $GS_textVar(line$x)]
+            if {[string length $GS_textVar(Row0$x)] != 0} {
+                set lineText(data$x) [string length $GS_textVar(Row0$x)]
                     } else {
                 set lineText(data$x) ""
             }
@@ -927,27 +885,26 @@ proc readHistory {args} {
     # If text holds no data, clear all lines
       if {$text eq ""} {
         for {set x 1} {$x<6} {incr x} {
-            set GS_textVar(line$x) ""
+            set GS_textVar(Row0$x) ""
             #set lineText(data$x) [string length $GS_textVar(line$x)]
-            if {[string length $GS_textVar(line$x)] != 0} {
-                set lineText(data$x) [string length $GS_textVar(line$x)]
+            if {[string length $GS_textVar(Row0$x)] != 0} {
+                set lineText(data$x) [string length $GS_textVar(Row0$x)]
                     } else {
                 set lineText(data$x) ""
             }
         }
         set GS_textVar(maxBoxQty) ""
     }
-
     ;# clear the listbox
     Shipping_Code::clearList
 } ;# readHistory
 
-proc countLength {args} {
-    # arg1 = Line Number
-    # arg2 =
-    global lineLength
-    [string length $GS_textVar(Row01)]
-}
+#proc countLength {args} {
+#    # arg1 = Line Number
+#    # arg2 =
+#    global lineLength
+#    [string length $GS_textVar(Row01)]
+#}
 
 
 proc addMaster {destQty batch shipvia} {
@@ -1045,8 +1002,8 @@ proc clearList {} {
     Shipping_Code::addListboxNums 1 ;# Reset Counter
     Shipping_Code::displayListHelper "" "" "" 1 ;# Reset Counter
 }
-} ;# End of Shipping_Code namespace
 
+} ;# End of Shipping_Code namespace
 
 proc Shipping_Code::onPrint_event {args} {
     #****f* emailBoxLabels/Shipping_Code 

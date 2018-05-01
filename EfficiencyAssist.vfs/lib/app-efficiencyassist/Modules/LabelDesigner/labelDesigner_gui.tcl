@@ -31,6 +31,8 @@ proc ea::gui::designerGUI {} {
                             -validate all \
                             -validatecommand [list AutoComplete::AutoComplete %W %d %v %P [customer::validateCustomer name $f0]] ] -column 2 -row 0 -pady 2p -padx 2p
     
+    grid [ttk::button $f0.resetWidgets -text [mc "Reset"] -command {ea::code::lb::resetWidgets all}] -column 3 -row 0 -pady 2p -padx 2p -sticky w
+    
     # Job Title
     grid [ttk::label $f0.tplNameTxt -text [mc "Job Title"]] -column 0 -row 1 -pady 2p -padx 2p -sticky e
     grid [ttk::combobox $f0.tplNameCbox -textvariable job(Title)] -column 1 -columnspan 2 -row 1 -pady 2p -padx 2p -sticky ew
@@ -150,16 +152,27 @@ proc ea::gui::designerGUI {} {
                 }
             
             if {$job(CustID) == "" && $tmpCustID == ""} {
-                ${log}::notice No Data was found in the ID Field - Issuing warning notice.
-                ${log}::notice Warning, no data was found in the ID Field (Customer Name)
-            } else {
-                if {[db eval "SELECT CustName from Customer WHERE CustName = '$custName'"] eq ""} {
-                    ${log}::debug Customer not found in database, resetting global vars.
+                    ${log}::notice Warning, no data was found in the Customer ID field. Clearing widgets...
                     ea::code::lb::resetWidgets
                     set job(NewCustomer) 1
+                    #return
+                } else {
+                    if {[db eval "SELECT CustName from Customer WHERE CustName = '$custName'"] eq ""} {
+                        ${log}::debug Customer not found in database, resetting global vars.
+                        ea::code::lb::resetWidgets
+                        set job(NewCustomer) 1
+                        #return
+                    }
                 }
+                
+            if {$job(NewCustomer) == ""} {
+                ${log}::debug Populating Title Name dropdown
+                .container.frame0.tplNameCbox configure -values [db eval "SELECT TitleName FROM PubTitle WHERE CUSTID = '$job(CustID)'"]
+            } else {
+                .container.frame0.tplNameCbox configure -values ""
             }
         }
+        
     }
     
     # Get CSR name

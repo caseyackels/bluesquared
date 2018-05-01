@@ -96,6 +96,7 @@ proc ea::db::bl::getTplData {tpl} {
         
         if {$tplLabel(LabelProfileID) == 0} {
             ${log}::debug We're using a label that uses a run-list. Check modification date/time on runlist to see if it has been updated (less than a month)
+            ${log}::debug File was last updated: [clock format [file mtime config.txt] -format %m-%d-%y]
         }
         
         # We entered a correct template number, but a title was never assigned.

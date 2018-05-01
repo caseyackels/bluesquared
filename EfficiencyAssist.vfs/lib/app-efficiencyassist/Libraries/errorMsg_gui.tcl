@@ -95,7 +95,7 @@ proc Error_Message::errorMsg {code args} {
                             set title [mc Warning]
                             set icon warning
                         }
-        EA001           {set message [mc "You have not yet been set up in the system.\n$args"]
+        EA001           {set message [mc "You have not yet been set up in the system.\n$args\User: $user(id)"]
                             set message2 [mc "Error Location: %s" $code]
                             set title [mc $defaultTitle]
                             set icon warning}
@@ -105,6 +105,11 @@ proc Error_Message::errorMsg {code args} {
                             set icon warning
                         }
         BL001           {set message [mc "Template ID is invalid. Try again."]
+                            set message2 [mc "Error Location: %s" $code]
+                            set title [mc "Warning"]
+                            set icon warning
+                        }
+        BL002           {set message [mc "Please enter a quantity for Max. Qty per Box"]
                             set message2 [mc "Error Location: %s" $code]
                             set title [mc "Warning"]
                             set icon warning

@@ -21,21 +21,21 @@ proc ea::code::lb::getOpenFile {wid} {
     $wid insert end $filePathName
 }
 
-proc ea::code::lb::resetWidgets {} {
+proc ea::code::lb::resetWidgets {args} {
     global log tplLabel job
     ${log}::debug Resetting arrays: Job (partial) and tplLabel
     
+    # reset standard
     set job(CSRName) ""
     set job(NewCustomer) ""
-    #set job(CustID) ""
-    #set job(CustName) ""
     set job(Title) ""
     set tplLabel(ID) ""
     set tplLabel(FixedBoxQty) ""
     set tplLabel(FixedLabelInfo) ""
     set tplLabel(LabelPath) ""
-    set tplLabel(LabelSize)
-    set tplLabel(LabelSizeID)
+    set tplLabel(Size) ""
+    set tplLabel(LabelSize) ""
+    set tplLabel(LabelSizeID) ""
     set tplLabel(SerializeLabel) ""
     set tplLabel(Name) ""
     set tplLabel(NotePriv) ""
@@ -48,6 +48,19 @@ proc ea::code::lb::resetWidgets {} {
     set tplLabel(LabelVersionDesc,current) ""
     set tplLabel(LabelProfileID) ""
     set tplLabel(LabelProfileDesc) ""
+
+    .container.frame0.tplNameCbox configure -values ""
+    .container.frame1.versionNameCbox configure -values ""
+    
+    # Destroy entry widgets if they exist (created from selecting a Profile)
+    if {[winfo exists .container.frame2]} {destroy .container.frame2}
+            
+    if {$args eq "all"} {
+        # reset all widgets / variables
+        set job(CustID) ""
+        set job(CustName) ""
+    }
+
 }
 
 proc ea::code::lb::saveLabel {} {
@@ -146,18 +159,28 @@ proc ea::code::lb::writeToDb {} {
     set csr_lname [lindex $job(CSRName) 1]
     set csr_id [db eval "SELECT CSR_ID FROM CSRs WHERE FirstName = '$csr_fname' AND LastName = '$csr_lname'"]
     
-    ${log}::debug TODO: Check to see if CSR assignment is an 'update'; if so update the PubTitle table.
-    
+   
     # Does TitleName exist?
-    #set title_id [db eval "SELECT TitleName FROM PubTitle WHERE TitleName = '$job(Title)'"]
     set title_id [db eval "SELECT Title_ID FROM PubTitle WHERE TitleName = '$job(Title)' AND CustID = '$job(CustID)'"]
     if {$title_id eq ""} {
-        ${log}::debug Title ($job(Title)) is new, inserting into database.
+        ${log}::notice Title ($job(Title)) is new, inserting into database.
         db eval "INSERT INTO PubTitle (TitleName, CustID, CSRID, Status) VALUES ('$job(Title)', '$job(CustID)', '$csr_id', 1)"
         set pubtitle_id [db eval "SELECT MAX(Title_ID) FROM PubTitle"]
     } else {
-        ${log}::debug Title already exists in database... skipping.
+        ${log}::notice Title already exists in database...
         set pubtitle_id $title_id
+        set csr_id_db [db eval "SELECT CSRID FROM PubTitle WHERE Title_ID = $pubtitle_id"]
+        
+        ${log}::notice Checking to see if database has different CSR ($csr_id) name than user selected. If so, update database. 
+        ${log}::debug CSR ID in Interface: $csr_id
+        ${log}::debug CSR ID in DB: $csr_id_db
+        
+        if {$csr_id eq $csr_id_db} {
+            ${log}::notice CSR is the same, no changes needed
+            } else {
+                ${log}::notice CSR ($csr_id_db) isn't the same, updating database to $csr_id
+                db eval "UPDATE PubTitle SET CSRID = '$csr_id' WHERE Title_ID = $pubtitle_id"
+            }
     }
         
     # DB Table - LabelTPL

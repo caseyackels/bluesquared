@@ -289,6 +289,7 @@ proc 'eAssist_bootStrap {} {
 	# load the DB
 	eAssist_db::loadDB
 
+
 } ;#'eAssist_bootStrap
 
 
@@ -322,10 +323,8 @@ proc 'eAssist_initVariables {} {
 	
 	#-------- CORE SETTINGS
 	if {[info exists logSettings(displayConsole)]} {
-		eAssistSetup::toggleConsole $logSettings(displayConsole)
-	} else {
-		# Default to show logging if variable doesn't exist. Helpful on new installations.
-		eAssistSetup::toggleConsole 1
+		# Only display the console if variable exists. It can manually be launced in the Help menu.
+		eAssistSetup::toggleConsole $logSettings(displayConsole)	
 	}
 	
 	# admin7954
@@ -428,6 +427,7 @@ proc 'eAssist_initVariables {} {
     array set tplLabel [list ID "" \
                         Name "" \
 						NumRows "" \
+						NewCustomer "" \
 						LabelProfileRowNum "" \
                         LabelPath "" \
                         Size "" \

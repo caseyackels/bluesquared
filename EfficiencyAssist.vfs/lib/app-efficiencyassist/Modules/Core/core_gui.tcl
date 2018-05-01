@@ -69,7 +69,7 @@ proc eAssist::parentGUI {} {
     
     if {![info exists settings(currentModule)]} {
         ${log}::debug currentModule doesn't exist, creating...!
-        set settings(currentModule) {Batch Maker}
+        set settings(currentModule) "Box Labels"
         set settings(currentModule_machine) [join $settings(currentModule) _]
     }
     
@@ -130,6 +130,7 @@ proc eAssist::parentGUI {} {
 
     $mb.help add command -label [mc "About..."] -command { BlueSquared_About::aboutWindow 1}
     $mb.help add command -label [mc "Release Notes..."] -command { BlueSquared_About::aboutWindow 2}
+	$mb.help add command -label [mc "Show Console"] -command {console show}
 
 
     # Create the container frame
@@ -146,7 +147,7 @@ proc eAssist::parentGUI {} {
     ttk::button $btn(Bar).btn1
     ttk::button $btn(Bar).btn2
     
-    #${log}::debug CurrentModule: $settings(currentModule)
+    ${log}::debug CurrentModule: $settings(currentModule)
     eAssist::buttonBarGUI $settings(currentModule)
 
     
@@ -223,8 +224,9 @@ proc eAssist::buttonBarGUI {Module} {
             # .. launch the mode
             Shipping_Gui::shippingGUI
             
-            # .. Setup the Geometry
-            eAssist_Global::getGeom $settings(currentModule_machine) 450x475
+            # .. Setup the Geometry - The geometry that we are passing is the default for this module
+            #eAssist_Global::getGeom $settings(currentModule_machine) 450x475
+            eAssist_Global::getGeom $settings(currentModule_machine) 614x604
             # .. save the settings
             #eAssistSetup::SaveGlobalSettings
             lib::savePreferences
