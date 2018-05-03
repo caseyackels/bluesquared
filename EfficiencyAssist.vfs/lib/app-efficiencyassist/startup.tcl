@@ -1,37 +1,16 @@
 # Creator: Casey Ackels
-# Initial Date: February 13, 2011]
-# Heavily modified: August 28, 2013]
-# Dependencies: See Below
-#-------------------------------------------------------------------------------
-#
-# Subversion
-#
-# $Revision: 612 $
-# $LastChangedBy: casey.ackels $
-# $LastChangedDate: 2014-09-14 15:39:41 -0700 (Sun, 14 Sep 2014) $
-#
-########################################################################################
-
+# Initial Date: February 13, 2011
+# Heavily modified: August 28, 2013
 ##
 ## - Overview
 # This file holds the launch code for Efficiency Assist.
 
-# Definitions for prefixes of Variables
-# G = Global
-# S = String
-# L = List
-# I = Integer (Do not use this unless you are certain it is an Integer and not a plain string)
-
-## Coding Conventions
-# - Namespaces: These should have two parts, a _gui and a _code. Both words should be capitalized. i.e. Example_Code
-
-# - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
-#   will be uppercase. I.E sourceFiles, sourceFileExample
-
 # We use the prefix ' because we are in the global namespace now, and we don't want to pollute it.
 
-# For version changes: Update here, pgkIndex.tcl, and detect_updates_code.tcl (vUpdate::saveCurrentVersion)
-package provide app-efficiencyassist 4.1.0
+
+### NEW RELEASES !!
+### Update the version for package provide, and in file pgkIndex.tcl, and detect_updates_code.tcl (vUpdate::saveCurrentVersion)
+package provide app-efficiencyassist 4.1.1
 
 proc 'eAssist_sourceReqdFiles {} {
     #****f* 'eAssist_sourceReqdFiles/global

@@ -82,10 +82,10 @@ proc vUpdate::newVersion {txt expln} {
     ttk::label $wvers(f1).txt -text $txt
     
     ttk::label $wvers(f1).oldVersTxt -text [mc "Old Version:"]
-    ttk::label $wvers(f1).oldVersNum -text $cVersion(oldFullVersion)
+    ttk::label $wvers(f1).oldVersNum -text $cVersion(oldVersion)
     
     ttk::label $wvers(f1).newVersTxt -text [mc "New Version:"]
-    ttk::label $wvers(f1).newVersNum -text $program(fullVersion)
+    ttk::label $wvers(f1).newVersNum -text $program(Version)
     
     ttk::label $wvers(f1).expln -text $expln
     

@@ -146,7 +146,7 @@ proc lib::savePreferences {} {
     
     # Write out individual variables
     chan puts $fd "program(Version) $program(Version)"
-    chan puts $fd "program(PatchLevel) $program(PatchLevel)"
+    #chan puts $fd "program(PatchLevel) $program(PatchLevel)"
     chan puts $fd "program(beta) $program(beta)"
     chan puts $fd "program(updateFilePath) $program(updateFilePath)"
     chan puts $fd "program(updateFileName) $program(updateFileName)"

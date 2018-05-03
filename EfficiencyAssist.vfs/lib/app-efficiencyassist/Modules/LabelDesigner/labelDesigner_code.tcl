@@ -22,7 +22,7 @@ proc ea::code::lb::getOpenFile {wid} {
 }
 
 proc ea::code::lb::resetWidgets {args} {
-    global log tplLabel job
+    global log tplLabel job settings
     ${log}::debug Resetting arrays: Job (partial) and tplLabel
     
     # reset standard
@@ -49,16 +49,18 @@ proc ea::code::lb::resetWidgets {args} {
     set tplLabel(LabelProfileID) ""
     set tplLabel(LabelProfileDesc) ""
 
-    .container.frame0.tplNameCbox configure -values ""
-    .container.frame1.versionNameCbox configure -values ""
-    
-    # Destroy entry widgets if they exist (created from selecting a Profile)
-    if {[winfo exists .container.frame2]} {destroy .container.frame2}
-            
-    if {$args eq "all"} {
-        # reset all widgets / variables
-        set job(CustID) ""
-        set job(CustName) ""
+    if {$settings(currentModule_machine) eq "Label_Designer"} {
+        if {[winfo exists .container.frame0.tplNameCbox ]} {.container.frame0.tplNameCbox configure -values ""}
+        if {[winfo exists .container.frame1.versionNameCbox]} {.container.frame1.versionNameCbox configure -values ""}
+        
+        # Destroy entry widgets if they exist (created from selecting a Profile)
+        if {[winfo exists .container.frame2]} {destroy .container.frame2}
+                
+        if {$args eq "all"} {
+            # reset all widgets / variables
+            set job(CustID) ""
+            set job(CustName) ""
+        }
     }
 
 }

@@ -391,7 +391,7 @@ proc createList {} {
             set tmpFullBoxes [join $tmpFullBoxes " + "]
             ${log}::debug adding tmpFullboxes and tmpPartialQty together: $tmpFullBoxes - $tmpPartialQty
             set total_boxes [expr "$tmpFullBoxes + $tmpPartialQty"]
-            ${log}::debug total_boxes: $total_boxes
+            ${log}::debug Total Boxes: $total_boxes
         }
     }
 
@@ -590,11 +590,15 @@ proc printLabels {} {
         
         # Set filepath to windows standard for BarTender
         set labelDir [join [split $labelDir /] \\]
+        
+        # Set runlist file name, maybe this should be placed into the tplLabel array? tplLabel(RunListFile)
+        set runlist "$labelDir\\[join "$tplLabel(LabelVersionDesc) - $tplLabel(LabelProfileDesc)"].csv"
                
         Shipping_Code::createList
         
-        ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\$filename /P /CLOSE /MIN=TASKBAR
-        exec $mySettings(path,bartender) /AF=$labelDir\\$filename /P /CLOSE /MIN=TASKBAR
+        ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\$filename /D=$runlist /P /CLOSE /MIN=TASKBAR
+        #exec $mySettings(path,bartender) /AF=$labelDir\\$filename /D=$runlist
+        exec $mySettings(path,bartender) /AF=$labelDir\\$filename /D=$runlist /P /CLOSE /MIN=TASKBAR
         
     } else {
             ${log}::debug Printing Generic Labels

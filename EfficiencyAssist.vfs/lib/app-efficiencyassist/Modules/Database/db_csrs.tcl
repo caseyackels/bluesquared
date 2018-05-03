@@ -177,13 +177,9 @@ proc dbCSR::populateCSR {cbx args} {
                 -email {$value delete 0 end; $value insert end [join $Email]}
                 -status {set CSR(status) $Status}
             }
-            ${log}::debug KEY: $key, VALUE: $value, $FirstName $LastName $Email
-            #if {[winfo class $value] eq "TEntry"} {
-            #    $value configure -state readonly
-            #    } else {
-            #        $value configure -state disabled
-            #    }
+            
         }
+        ${log}::debug KEY: $key, VALUE: $value, $FirstName $LastName $Email
     }
 
     

@@ -269,7 +269,7 @@ proc eAssistSetup::carrierMethod_GUI {} {
     listbox $f6.tbl -yscrollcommand [list $f6.scrolly set] \
                                 -xscrollcommand [list $f6.scrollx set]
 
-    bind . <<ComboboxSelected>> [list eAssist::populateCarrierPkg $f6.carrierList $f6.tbl]
+    bind $f6.carrierList <<ComboboxSelected>> [list eAssist::populateCarrierPkg $f6.carrierList $f6.tbl]
     
     ttk::scrollbar $f6.scrolly -orient v -command [list $f6.tbl yview]
     ttk::scrollbar $f6.scrollx -orient h -command [list $f6.tbl xview]
