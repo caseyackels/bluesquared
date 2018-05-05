@@ -127,26 +127,28 @@ proc ea::db::lb::getVersionLabel {} {
     
     } elseif {$tplLabel(LabelVersionID,current) eq ""} {
         ${log}::debug LabelVersionID,current is empty. Creating widgets without data.
+        # This will occur if the user selects a Profile that contains label data, but exits EA before creating atleast one version
+        
         for {set x 1} {$x <= $tplLabel(LabelProfileRowNum)} {incr x} {
-            #grid [ttk::label $f2a.description$x -text [mc "Row $x"]] -column $col -row $rw -pady 2p -padx 2p -sticky e
-            #
-            #incr col
-            #grid [ttk::entry $f2a.labelData$x -width 35] -column $col -row $rw -pady 2p -padx 2p -sticky ew
-            #$f2a.labelData$x delete 0 end
-            #
-            ## Label Option / Editable?
-            #incr col
-            #set tplLabel(tmpValues,ckbtn,$x) 0
-            #grid [ttk::checkbutton $f2a.userEditable$x -variable tplLabel(tmpValues,ckbtn,$x)] -column $col -row $rw -pady 2p -padx 2p -ipadx 15 ;#-sticky ew
-            #
-            ## Label Option / Version?
-            #incr col
-            #set tplLabel(tmpValues,rbtn) 0
-            #grid [ttk::radiobutton $f2a.isVersion$x -value $x -variable tplLabel(tmpValues,rbtn)] -column $col -row $rw -pady 2p -padx 2p -ipadx 15 ;#-sticky ew
-            #
-            ## reset counters
-            #incr rw
-            #set col 0
+            grid [ttk::label $f2a.description$x -text [mc "Row $x"]] -column $col -row $rw -pady 2p -padx 2p -sticky e
+            
+            incr col
+            grid [ttk::entry $f2a.labelData$x -width 35] -column $col -row $rw -pady 2p -padx 2p -sticky ew
+            $f2a.labelData$x delete 0 end
+            
+            # Label Option / Editable?
+            incr col
+            set tplLabel(tmpValues,ckbtn,$x) 0
+            grid [ttk::checkbutton $f2a.userEditable$x -variable tplLabel(tmpValues,ckbtn,$x)] -column $col -row $rw -pady 2p -padx 2p -ipadx 15 ;#-sticky ew
+            
+            # Label Option / Version?
+            incr col
+            set tplLabel(tmpValues,rbtn) 0
+            grid [ttk::radiobutton $f2a.isVersion$x -value $x -variable tplLabel(tmpValues,rbtn)] -column $col -row $rw -pady 2p -padx 2p -ipadx 15 ;#-sticky ew
+            
+            # reset counters
+            incr rw
+            set col 0
         }
     } else {
         ${log}::debug tpl(id) and labelVersionID,current exists ...

@@ -48,6 +48,7 @@ proc ea::code::lb::resetWidgets {args} {
     set tplLabel(LabelVersionDesc,current) ""
     set tplLabel(LabelProfileID) ""
     set tplLabel(LabelProfileDesc) ""
+    set tplLabel(Status) ""
 
     if {$settings(currentModule_machine) eq "Label_Designer"} {
         if {[winfo exists .container.frame0.tplNameCbox ]} {.container.frame0.tplNameCbox configure -values ""}
@@ -242,6 +243,10 @@ proc ea::code::lb::writeToDb {} {
         # Check if labelVersionID exists
         #  - Doesn't Exist; Insert labelVersionID, Insert Row Data
         # - Exists; Delete Row Data, then Insert
+        
+        # Check to see if a new 'version' has been entered (typically happens on multi-version jobs)
+        set newVersion [.container.frame2.frame2a.labelData$tplLabel(tmpValues,rbtn) get]
+               
         if {$tplLabel(LabelVersionID,current) eq "" && $tplLabel(LabelVersionDesc,current) eq ""} {
             # This is a new version, insert only. (Table: LabelVersions)
             ${log}::notice LabelVersion ID doesn't exist, but Description does. Retrieving...
@@ -259,7 +264,38 @@ proc ea::code::lb::writeToDb {} {
             ${log}::notice Inserting Row Data: $data
             ${log}::debug db eval "INSERT INTO LabelData (labelVersionID, labelRowNum, labelRowText, userEditable, isVersion) VALUES $data"
             db eval "INSERT INTO LabelData (labelVersionID, labelRowNum, labelRowText, userEditable, isVersion) VALUES $data"
+        
+        } elseif {[string equal $tplLabel(LabelVersionDesc,current) $newVersion] == 0} {
+            # Check to see if a new 'version' has been entered (typically happens on multi-version jobs)
+            ${log}::notice New Label Version detected
+            
+            # Inserting Version info
+            db eval "INSERT INTO LabelVersions (tplID, LabelVersionDesc) VALUES ($tpl_id, '[.container.frame2.frame2a.labelData$tplLabel(tmpValues,rbtn) get]')"
+            set tplLabel(LabelVersionID,current) [db eval "SELECT max(labelVersionID) FROM LabelVersions WHERE tplID = $tpl_id"]
+            ${log}::notice Retrieving new version ID: $tplLabel(LabelVersionID,current)
+            
+            set data [join [ea::code::lb::getRowData $tplLabel(LabelVersionID,current) .container.frame2.frame2a]]
+            ${log}::notice Inserting Row Data: $data
+            
+            ${log}::debug db eval "INSERT INTO LabelData (labelVersionID, labelRowNum, labelRowText, userEditable, isVersion) VALUES $data"
+            db eval "INSERT INTO LabelData (labelVersionID, labelRowNum, labelRowText, userEditable, isVersion) VALUES $data"
+
+        } else {
+            # Remove existing data, and repopulate using existing LabelVersionID,current
+            ${log}::debug LabelVersionID,current: $tplLabel(LabelVersionID,current)
+            ${log}::notice Delete existing data for $tplLabel(LabelVersionDesc,current)
+            ${log}::debug db eval "DELETE FROM LabelData WHERE labelVersionID = $tplLabel(LabelVersionID,current)"
+            db eval "DELETE FROM LabelData WHERE labelVersionID = $tplLabel(LabelVersionID,current)"
+            
+            ${log}::notice Entering new data for $tplLabel(LabelVersionDesc,current)
+            set data [join [ea::code::lb::getRowData $tplLabel(LabelVersionID,current) .container.frame2.frame2a]]
+            ${log}::debug db eval "INSERT INTO LabelData (labelVersionID, labelRowNum, labelRowText, userEditable, isVersion) VALUES $data"
+            db eval "INSERT INTO LabelData (labelVersionID, labelRowNum, labelRowText, userEditable, isVersion) VALUES $data"
         }
+            
+            
+        # Update drop down values
+        .container.frame2.versionDescCbox configure -values [db eval "SELECT LabelVersionDesc FROM LabelVersions WHERE tplID = $tplLabel(ID)"]
     }
 
 } ;# ea::code::lb::writeToDb

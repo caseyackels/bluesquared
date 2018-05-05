@@ -383,7 +383,7 @@ proc eAssist::buttonBarGUI {Module} {
     $mb.file add command -label [mc "Exit"] -command {eAssistSetup::SaveGlobalSettings ; exit}
     
     # Check the versions
-    vUpdate::whatVersion
+    #vUpdate::whatVersion
     
 } ;# buttonBarGUI
 

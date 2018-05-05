@@ -43,6 +43,9 @@ proc ea::gui::designerGUI {} {
                                         -textvariable job(CSRName) -validate all \
                                         -validatecommand {AutoComplete::AutoComplete %W %d %v %P [dbCSR::getCSRID "" {FirstName LastName}]}] -column 1 -columnspan 2 -row 2 -pady 2p -padx 2p -sticky ew
     grid [ttk::button $f0.csrRequestBtn -text [mc "Request to Add CSR"] -state disable] -column 3 -row 2 -pady 2p -padx 2p -sticky w
+    
+    # Status / active/inactive
+    grid [ttk::checkbutton $f0.status -text [mc "Active"] -variable tplLabel(Status)] -column 1 -row 3 -pady 2p -padx 2p -sticky w
 
 
 ##

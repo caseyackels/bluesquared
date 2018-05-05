@@ -425,7 +425,8 @@ proc 'eAssist_initVariables {} {
 						LabelProfileDesc "" \
 						LabelProfileRowNum "" \
 						tmpValues,rbtn "" \
-                        tmpValues ""]
+                        tmpValues "" \
+						Status ""]
 	
 	# Filters
 	array set filter [list run,stripASCII_CC 0 \

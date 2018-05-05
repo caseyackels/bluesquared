@@ -945,15 +945,15 @@ proc addMaster {destQty batch shipvia} {
     #if {$GS_textVar(destQty) eq ""} {return}
     
     # Serialize Labels
-    if {$tplLabel(SerializeLabel) == 1} {
-        ${log}::debug We are serializng the label, disable the entry/button/dropdown widgets
-        
-        foreach child [winfo child .container.frame2.frame2a] {
-            if {![string match *text* $child]} {
-                $child configure -state disable
-            }
-        }
-    }
+    #if {$tplLabel(SerializeLabel) == 1} {
+    #    ${log}::debug We are serializng the label, disable the entry/button/dropdown widgets
+    #    
+    #    foreach child [winfo child .container.frame2.frame2a] {
+    #        if {[string match *entry* $child]} {
+    #            $child configure -state disable
+    #        }
+    #    }
+    #}
     
     Shipping_Code::insertInListbox $destQty $batch $shipvia
 

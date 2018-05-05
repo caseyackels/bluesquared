@@ -205,9 +205,9 @@ proc ea::db::bl::populateWidget {} {
     
     if {$tplLabel(SerializeLabel) == 1} {
         # disable all of the widgets if we are serializing or working off of a runlist with no user interaction
-        ${log}::debug Disabling widgets in .container.frame1 (all row widgets)
-        foreach child [winfo children .container.frame1] {
-                if {[string match *entry* $child] == 1} {
+        ${log}::debug Disabling widgets in .container.frame2.frame2a (all row widgets)
+        foreach child [winfo children .container.frame2.frame2a] {
+                if {[string match *entry1 $child] == 1 || [string match *cbox* $child] == 1} {
                     $child configure -state disable
                 }
         }
