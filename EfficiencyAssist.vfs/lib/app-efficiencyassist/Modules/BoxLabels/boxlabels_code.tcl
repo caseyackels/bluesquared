@@ -135,6 +135,10 @@ proc controlFile {args} {
                     if {[lindex $args 1] eq "fileopen"} {
                         #set files(destination) [open [file join $mySettings(path,labelDBfile) $mySettings(name,labelDBfile).csv] w]
                         
+                        # Check to see if we can write to the path. If we can't, fail gracefully.
+                        # todo this should happen when we know we're using a template.
+                        #set writable [eAssist_Global::fileAccessibility [file join $f_path] [join $f_name].csv]
+
                         set files(destination) [open [file join $f_path [join $f_name].csv] w]
                         
                         # Insert Header row
@@ -324,6 +328,12 @@ proc createList {} {
     if {[info exists GS_textVar(maxBoxQty)] == 0} {Error_Message::errorMsg createList1; return}
     if {$GS_textVar(maxBoxQty) == ""} {Error_Message::errorMsg createList1; return}
 
+    #if {[$frame2b.listbox get 0 end] ne ""} {
+    #    ${log}::debug Error, no quantities were entered
+    #    ${log}::debug Retrieving column data (0): [$frame2b.listbox getcolumn 0 0]
+    #    ${log}::debug Retrieving column data (1): [$frame2b.listgox getcolumn 1 1]
+    #    return
+    #}
     set L_rawEntries [split [join [$frame2b.listbox getcells 0,1 end,1]]]
     set L_rawShipVia [split [join [$frame2b.listbox getcells 0,2 end,2]]]
 
@@ -556,6 +566,7 @@ proc printLabels {} {
     
     ${log}::debug Initiating printLabels
     
+    # These apply to all labels
 	if {[info exists mySettings(path,bartender)] != 0} {
 		if { $mySettings(path,bartender) == ""} {
 			${log}::critical path,bartender is empty: $mySettings(path,bartender)
@@ -567,19 +578,33 @@ proc printLabels {} {
 		${log}::critical path,labelDir is empty: $mySettings(path,labelDir)
 		return
 	}
+    
+    if {![info exists GS_textVar(maxBoxQty)]} {
+        Error_Message::errorMsg BL002
+        return
+    }
 
-    if {$tplLabel(ID) eq ""} {
-        if {![info exists GS_textVar(maxBoxQty)]} {
-            Error_Message::errorMsg BL002
-            return
-        }
-        
-        Shipping_Code::createList
+    if {$GS_textVar(destQty) ne ""} {
+        ${log}::debug DestQty should not be empty: $GS_textVar(destQty)
+        Error_Message::errorMsg BL003
+        return
+    }
+    
+    catch {Shipping_Code::createList} err ;# Make sure our totals add up
+    if {[info exists err]} {
+        ${log}::debug Clicked Print Labels and received an error: $err
+        return
+    }
+    
+    if {$tplLabel(ID) eq ""} {    
+        #Shipping_Code::createList
+           
         Shipping_Code::writeHistory $GS_textVar(maxBoxQty)
         Shipping_Code::openHistory
     
         Shipping_Gui::printbreakDown email ; # Send an email of the breakdown
     }
+    
 
 
     if {$tplLabel(ID) != ""} {
@@ -594,7 +619,7 @@ proc printLabels {} {
         # Set runlist file name, maybe this should be placed into the tplLabel array? tplLabel(RunListFile)
         set runlist "$labelDir\\[join "$tplLabel(LabelVersionDesc) - $tplLabel(LabelProfileDesc)"].csv"
                
-        Shipping_Code::createList
+       #Shipping_Code::createList
         
         ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\$filename /D=$runlist /P /CLOSE /MIN=TASKBAR
         #exec $mySettings(path,bartender) /AF=$labelDir\\$filename /D=$runlist
@@ -945,15 +970,17 @@ proc addMaster {destQty batch shipvia} {
     #if {$GS_textVar(destQty) eq ""} {return}
     
     # Serialize Labels
-    #if {$tplLabel(SerializeLabel) == 1} {
-    #    ${log}::debug We are serializng the label, disable the entry/button/dropdown widgets
-    #    
-    #    foreach child [winfo child .container.frame2.frame2a] {
-    #        if {[string match *entry* $child]} {
-    #            $child configure -state disable
-    #        }
-    #    }
-    #}
+    # After we enter one shipment, disable widgets so that the end-user cannot add more. This is a restriction because of how we create the runlist file.
+    # These widgets should be re-enabled if the shipment is removed.
+    if {$tplLabel(SerializeLabel) == 1} {
+        ${log}::debug We are serializng the label, disable the entry/button/dropdown widgets
+        
+        foreach child [winfo child .container.frame2.frame2a] {
+            if {[string match *entry* $child]} {
+                $child configure -state disable
+            }
+        }
+    }
     
     Shipping_Code::insertInListbox $destQty $batch $shipvia
 

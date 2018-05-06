@@ -397,14 +397,16 @@ bind [$frame2b.listbox bodytag] <Double-1> {
     # cell index "0,1" out of range
     catch {Shipping_Code::createList} err ;# Make sure our totals add up
 
+	if {[info exists err]} {${log}::debug Double-clicked and received an error: $err}
 	# Serialize Labels
     if {$tplLabel(SerializeLabel) == 1} {
-        ${log}::debug <Bind-Double-1> Serialize Label: Deleting entry, reenable the entry/button/dropdown widgets
-        
-        foreach child [winfo child .container.frame2.frame2a] {
-            if {![string match *text* $child]} {
-                $child configure -state normal
-            }
+        # disable all of the widgets if we are serializing or working off of a runlist with no user interaction
+		# Entry, Entry2, Add
+        ${log}::debug Re-enable widgets in .container.frame2.frame2a. Max Box, Qty and Add to List
+        foreach child [winfo children .container.frame2.frame2a] {
+			if {[string match *entry1 $child] != 1 || [string match *cbox* $child] == 1 || [string match *add* $child] == 1} {
+				$child configure -state normal
+			}
         }
     }
 

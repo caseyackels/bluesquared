@@ -94,7 +94,8 @@ proc eAssist_Global::fileAccessibility {folder file} {
     #	(c) 2011-2014 Casey Ackels
     #
     # FUNCTION
-    #	Find out if we can read or write to the specified file. Returns 0 if we can't do anything; 1 if we can read, 2 if we can write, 3 if we can do both.
+    #	Find out if we can read or write to the specified file.
+	#	Returns -1 if the files doesn't exist, 0 if we can't read or write; 1 if we can read, 2 if we can write, 3 if we can do both.
     #
     # SYNOPSIS
     #   eAssist_Global::fileAccessibility <PathToFolder> <FileName>
