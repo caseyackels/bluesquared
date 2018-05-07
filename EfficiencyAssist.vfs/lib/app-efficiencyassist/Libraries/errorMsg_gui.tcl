@@ -119,6 +119,11 @@ proc Error_Message::errorMsg {code args} {
                             set title [mc "Warning"]
                             set icon warning
                         }
+        BL003           {set message [mc "You still have a quantity in the Quantity field."]
+                            set message2 [mc "Error Location: %s" $code]
+                            set title [mc "Warning"]
+                            set icon warning
+                        }
         default         {set message [mc "Unknown Error Message"]
                             set message2 [mc "Received Message: %s" $code]
                             set title $defaultTitle
