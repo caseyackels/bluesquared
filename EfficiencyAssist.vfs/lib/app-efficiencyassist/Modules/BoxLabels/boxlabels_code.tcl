@@ -592,8 +592,10 @@ proc printLabels {} {
     
     catch {Shipping_Code::createList} err ;# Make sure our totals add up
     if {[info exists err]} {
-        ${log}::debug Clicked Print Labels and received an error: $err
-        return
+        if {$err ne ""} {
+            ${log}::debug Clicked Print Labels and received an error: $err
+            return
+        }
     }
     
     if {$tplLabel(ID) eq ""} {    
