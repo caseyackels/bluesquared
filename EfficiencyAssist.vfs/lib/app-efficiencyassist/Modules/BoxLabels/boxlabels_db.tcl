@@ -230,3 +230,69 @@ proc ea::db::bl::populateWidget {} {
     }
 }
 
+###
+### Ship to labels
+###
+
+proc ea::db::bl::getShipToData {wid_text} {
+    global log job 
+    
+    ${log}::debug $job(Number) - $job(ShipOrderID)
+    
+    set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+    #### BOX LABELS
+    #set stmt [$monarch_db prepare {SELECT TITLENAME
+    #                                ,ISSUENAME
+    #                                ,ALIASNAME
+    #                                ,SHIPCOUNT
+    #                                ,DISTRIBNAME
+    #                                ,PACKAGENAME
+    #                            FROM EA.dbo.Planner_Shipping_View
+    #                            WHERE JOBNAME='315778'
+    #                            AND PACKAGENAME LIKE '%Ctn%'}]
+    #
+    #### Ship To
+    set stmt [$monarch_db prepare "SELECT DESTINNAME, ADDRESS1, ADDRESS2, ADDRESS3, CITY, STATE, ZIP, COUNTRY FROM EA.dbo.Planner_Shipping_View
+                                WHERE JOBNAME = '$job(Number)'
+                                AND ORDERID = '$job(ShipOrderID)'"]
+    
+    set res [$stmt execute]   
+    # Clear the widget
+    $wid_text delete 0.0 end
+    
+    ##Print the results
+    while {[$res nextlist val]} {
+        # Insert data into the widget
+        set job(ShipToDestination) ""
+        
+        ${log}::debug length [llength $val]
+        ${log}::debug Ship to: $val
+        set val_length [llength $val]
+        
+        $wid_text insert end [lindex $val 0]\n
+        lappend job(ShipToDestination) [lindex $val 0]
+        
+        $wid_text insert end [lindex $val 1]\n
+        lappend job(ShipToDestination) [lindex $val 1]
+        
+        if {[lindex $val 2] ne ""} {
+            $wid_text insert end [lindex $val 2]\n
+            lappend job(ShipToDestination) [lindex $val 2]
+        }
+        
+        if {[lindex $val 3] ne ""} {
+            $wid_text insert end [lindex $val 3]\n
+            lappend job(ShipToDestination) [lindex $val 3]
+        }
+        $wid_text insert end "[lindex $val 4] [lindex $val 5] [lindex $val 6] \n"
+        lappend job(ShipToDestination) "[lindex $val 4] [lindex $val 5] [lindex $val 6]"
+        
+        $wid_text insert end [lindex $val 7]
+        lappend job(ShipToDestination) [lindex $val 7]
+    }
+    
+    set job(ShipToDestination) [join $job(ShipToDestination) " _n_ "]
+    set job(ShipToDestination) [list $job(ShipToDestination)]
+    $stmt close
+    db2 close
+}

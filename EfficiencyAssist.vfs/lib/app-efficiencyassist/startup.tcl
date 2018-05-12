@@ -74,7 +74,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries report]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries cmdline]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries soundex]
-    lappend ::auto_path [file join [file dirname [info script]] Libraries tdbc]
+    
 
 
 	##
@@ -187,7 +187,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	package require struct
 	package require report
 	package require soundex
-    package require tdbc
+
 	
 	
 	# Logger; MD5 are [package require]'d below.
@@ -241,6 +241,7 @@ proc 'eAssist_bootStrap {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries md5]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries md5crypt]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries sqlite3_3801]
+	lappend ::auto_path [file join [file dirname [info script]] Libraries tdbc]
 	
 	package require md5
 	package require md5crypt
@@ -249,6 +250,8 @@ proc 'eAssist_bootStrap {} {
 	package require logger::appender
 	package require logger::utils
 	package require sqlite3
+	package require tdbc
+    package require tdbc::odbc
 	
 	# Project built packages
 	lappend ::auto_path [file join [file dirname [info script]] Modules Update]
@@ -401,7 +404,9 @@ proc 'eAssist_initVariables {} {
 				   JobFirstShipDate "" \
 				   JobBalanceShipDate "" \
                    ForestCert "" \
-                   NewCustomer ""]
+                   NewCustomer "" \
+				   ShipOrderID "" \
+				   ShipToDestination ""]
     
     array set tplLabel [list ID "" \
                         Name "" \

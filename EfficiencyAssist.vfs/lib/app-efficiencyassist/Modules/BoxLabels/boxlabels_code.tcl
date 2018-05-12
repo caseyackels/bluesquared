@@ -140,7 +140,7 @@ proc controlFile {args} {
                         #set writable [eAssist_Global::fileAccessibility [file join $f_path] [join $f_name].csv]
 
                         set files(destination) [open [file join $f_path [join $f_name].csv] w]
-                        
+
                         # Insert Header row
                         #chan puts $files(destination) [::csv::join "Labels Quantity Line1 Line2 Line3 Line4 Line5"]
                         chan puts $files(destination) $headers
@@ -1127,3 +1127,15 @@ proc Shipping_Code::onPrint_event {args} {
 	mail::mail $::boxLabelsVars::cModName $eventName -subject $Subj -body $Body
 } ;# Shipping_Code::emailBoxLabels
 
+proc Shipping_Code::writeShipTo {wid_entry3} {
+    global log files job
+    
+    if {[$wid_entry3 get] eq "" } {
+        ${log}::critical Nothing entered for the number of pallets (Box Labels). Aborting.
+        return
+    }
+    
+    set files(ShipTo) [open [file join {\\\\fileprint\\Labels\\Templates\\Blank Ship To\\shipto.csv}] w]
+    chan puts $files(ShipTo) [::csv::join "[string toupper $job(ShipToDestination)] [$wid_entry3 get]"]
+    chan close $files(ShipTo)
+}

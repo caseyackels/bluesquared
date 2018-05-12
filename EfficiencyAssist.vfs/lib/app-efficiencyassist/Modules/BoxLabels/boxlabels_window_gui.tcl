@@ -64,9 +64,23 @@ proc shippingGUI {} {
     
     # Clear the frames before continuing
     eAssist_Global::resetFrames parent
+	
+    set nbk [ttk::notebook .container.frame0 -padding 5]
+    pack $nbk -expand yes -fill both
+    
+    ttk::notebook::enableTraversal $nbk
+    
+    #
+    # Setup the notebook
+    #
+    $nbk add [ttk::frame $nbk.boxlabels] -text [mc "Box Labels"]
+    $nbk add [ttk::frame $nbk.shipto] -text [mc "Ship To"]
 
+###
+### - Box Labels
+### 
 # Frame 0
-	set frame0 [ttk::labelframe .container.frame0 -text "Template"]
+	set frame0 [ttk::labelframe $nbk.boxlabels.frame0 -text "Template"]
 	pack $frame0 -expand yes -fill both -padx 5p -pady 3p -ipady 2p
 	
 	set GS_textVar(Template) ""
@@ -100,7 +114,7 @@ proc shippingGUI {} {
 	
 	 
 # Frame 1
-    set frame1 [ttk::labelframe .container.frame1 -text "Label Information"]
+    set frame1 [ttk::labelframe $nbk.boxlabels.frame1 -text "Label Information"]
     pack $frame1 -expand yes -fill both -padx 5p -pady 3p -ipady 2p
 
 
@@ -167,7 +181,7 @@ proc shippingGUI {} {
     focus $frame1.entry1
 
 # Frame 2 (This is a container for two frames)
-    set frame2 [ttk::labelframe .container.frame2 -text "Shipment Information"]
+    set frame2 [ttk::labelframe $nbk.boxlabels.frame2 -text "Shipment Information"]
     pack $frame2 -expand yes -fill both -padx 5p -pady 1p -ipady 2p
 
     # Frame for Entry fields
@@ -419,12 +433,35 @@ bind $frame1.entry1 <<ComboboxSelected>> {
 }
 
 
-
-
-#bind all <Escape> {exit}
-bind all <F1> {console show}
-bind all <F2> {console hide}
-
+ 
+###
+### - Ship To
+### 
+	set tab2f1 [ttk::labelframe $nbk.shipto.frame0 -text "Job Information" -padding 10]
+	pack $tab2f1 -fill x -padx 5p -pady 3p -ipady 2p
+	
+	grid [ttk::label $tab2f1.txt1 -text [mc "Job # / Order ID"]] -column 0 -row 0 -padx 2p -pady 2p -sticky e
+	grid [ttk::entry $tab2f1.entry1 -width 10 -textvariable job(Number)] -column 1 -row 0 -padx 2p -pady 2p -sticky w
+	grid [ttk::entry $tab2f1.entry2 -width 5 -textvariable job(ShipOrderID)] -column 2 -row 0 -padx 2p -pady 2p -sticky w
+	grid [ttk::button $tab2f1.btn1 -text [mc "Get Data"] -command "ea::db::bl::getShipToData $nbk.shipto.frame1.txt"] -column 3 -row 0 -padx 2p -pady 2p -sticky w
+	grid [ttk::button $tab2f1.bnt2 -text [mc "Print Labels"] -command "Shipping_Code::writeShipTo $nbk.shipto.frame0.entry3"] -column 4 -row 0 -padx 2p -pady 2p -sticky w
+	
+	grid [ttk::label $tab2f1.txt2 -text [mc "Num. Pallets"]] -column 0 -row 2 -padx 2p -pady 2p -sticky e
+	grid [ttk::entry $tab2f1.entry3 -width 4] -column 1 -row 2 -padx 2p -pady 2p -sticky w
+	
+	set tab2f2 [ttk::labelframe $nbk.shipto.frame1 -text "Ship To Destination" -padding 10]
+	pack $tab2f2 -expand yes -fill both -padx 5p -pady 3p -ipady 2p
+	
+	# Create text widget to throw the ship to info into
+	grid [text $tab2f2.txt -width 30 \
+			-xscrollcommand [list $tab2f2.scrollx set] \
+			-yscrollcommand [list $tab2f2.scrolly set]] -column 0 -row 0 -sticky news -pady 3p -padx 3p
+	grid columnconfigure $tab2f2 $tab2f2.txt -weight 1
+	
+	# setup the autoscroll bars
+	ttk::scrollbar $tab2f2.scrollx -orient h -command [list $tab2f2.txt xview]
+	ttk::scrollbar $tab2f2.scrolly -orient v -command [list $tab2f2.txt yview]
+   
 
 Shipping_Gui::initMenu
 Shipping_Gui::initVariables
