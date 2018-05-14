@@ -406,7 +406,8 @@ proc 'eAssist_initVariables {} {
                    ForestCert "" \
                    NewCustomer "" \
 				   ShipOrderID "" \
-				   ShipToDestination ""]
+				   ShipToDestination "" \
+				   ShipOrderNumPallets ""]
     
     array set tplLabel [list ID "" \
                         Name "" \

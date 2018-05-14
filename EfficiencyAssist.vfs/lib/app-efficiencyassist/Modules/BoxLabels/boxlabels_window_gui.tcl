@@ -75,14 +75,14 @@ proc shippingGUI {} {
     #
     $nbk add [ttk::frame $nbk.boxlabels] -text [mc "Box Labels"]
     $nbk add [ttk::frame $nbk.shipto] -text [mc "Ship To"]
-
+	
 ###
 ### - Box Labels
 ### 
 # Frame 0
 	set frame0 [ttk::labelframe $nbk.boxlabels.frame0 -text "Template"]
 	pack $frame0 -expand yes -fill both -padx 5p -pady 3p -ipady 2p
-	
+		
 	set GS_textVar(Template) ""
 	grid [ttk::label $frame0.txt1 -text [mc "Template #"]] -column 0 -row 0 -padx 2p -pady 2p
 	grid [ttk::entry $frame0.entry -textvariable GS_textVar(Template)] -column 1 -row 0 -padx 2p -pady 2p -sticky w
@@ -444,10 +444,10 @@ bind $frame1.entry1 <<ComboboxSelected>> {
 	grid [ttk::entry $tab2f1.entry1 -width 10 -textvariable job(Number)] -column 1 -row 0 -padx 2p -pady 2p -sticky w
 	grid [ttk::entry $tab2f1.entry2 -width 5 -textvariable job(ShipOrderID)] -column 2 -row 0 -padx 2p -pady 2p -sticky w
 	grid [ttk::button $tab2f1.btn1 -text [mc "Get Data"] -command "ea::db::bl::getShipToData $nbk.shipto.frame1.txt"] -column 3 -row 0 -padx 2p -pady 2p -sticky w
-	grid [ttk::button $tab2f1.bnt2 -text [mc "Print Labels"] -command "Shipping_Code::writeShipTo $nbk.shipto.frame0.entry3"] -column 4 -row 0 -padx 2p -pady 2p -sticky w
+	#grid [ttk::button $tab2f1.bnt2 -text [mc "Print Labels"] -command "Shipping_Code::writeShipTo $nbk.shipto.frame0.entry3 $nbk.shipto.frame1.txt"] -column 4 -row 0 -padx 2p -pady 2p -sticky w
 	
 	grid [ttk::label $tab2f1.txt2 -text [mc "Num. Pallets"]] -column 0 -row 2 -padx 2p -pady 2p -sticky e
-	grid [ttk::entry $tab2f1.entry3 -width 4] -column 1 -row 2 -padx 2p -pady 2p -sticky w
+	grid [ttk::entry $tab2f1.entry3 -textvariable job(ShipOrderNumPallets) -width 4] -column 1 -row 2 -padx 2p -pady 2p -sticky w
 	
 	set tab2f2 [ttk::labelframe $nbk.shipto.frame1 -text "Ship To Destination" -padding 10]
 	pack $tab2f2 -expand yes -fill both -padx 5p -pady 3p -ipady 2p
@@ -462,7 +462,19 @@ bind $frame1.entry1 <<ComboboxSelected>> {
 	ttk::scrollbar $tab2f2.scrollx -orient h -command [list $tab2f2.txt xview]
 	ttk::scrollbar $tab2f2.scrolly -orient v -command [list $tab2f2.txt yview]
    
-
+   # NOTEBOOK BINDINGS
+	bind $nbk <<NotebookTabChanged>> {
+		${log}::debug Notebook tab changed to: [%W select]
+		if {[%W select] eq ".container.frame0.boxlabels"} {
+			eAssist::remButtons $btn(Bar)
+            eAssist::addButtons [mc "Print Labels"] Shipping_Code::printLabels btn1 0 8p
+            eAssist::addButtons [mc "Print Breakdown"] Shipping_Gui::printbreakDown btn2 1 0p
+		} else {
+			eAssist::remButtons $btn(Bar)
+            eAssist::addButtons [mc "Print Labels"] "Shipping_Code::writeShipTo %W.shipto.frame0.entry3 %W.shipto.frame1.txt" btn1 0 0p
+		}
+	}
+	
 Shipping_Gui::initMenu
 Shipping_Gui::initVariables
 

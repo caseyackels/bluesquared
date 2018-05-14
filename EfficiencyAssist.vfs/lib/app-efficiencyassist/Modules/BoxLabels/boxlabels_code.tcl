@@ -1127,15 +1127,32 @@ proc Shipping_Code::onPrint_event {args} {
 	mail::mail $::boxLabelsVars::cModName $eventName -subject $Subj -body $Body
 } ;# Shipping_Code::emailBoxLabels
 
-proc Shipping_Code::writeShipTo {wid_entry3} {
-    global log files job
+proc Shipping_Code::writeShipTo {wid_entry3 wid_txt} {
+    global log files job mySettings
+    
+    set job(ShipToDestination) ""
     
     if {[$wid_entry3 get] eq "" } {
         ${log}::critical Nothing entered for the number of pallets (Box Labels). Aborting.
         return
     }
+
+    for {set x 1} {[$wid_txt count -lines 1.0 end] >= $x} {incr x} {
+        ${log}::debug Line: [$wid_txt get $x.0 $x.end]
+        lappend job(ShipToDestination) [string trim [$wid_txt get $x.0 $x.end]]
+    }
     
+    set job(ShipToDestination) [list [join $job(ShipToDestination) " _N_ "]]
     set files(ShipTo) [open [file join {\\\\fileprint\\Labels\\Templates\\Blank Ship To\\shipto.csv}] w]
+        
+        
     chan puts $files(ShipTo) [::csv::join "[string toupper $job(ShipToDestination)] [$wid_entry3 get]"]
+    ${log}::debug Output:  [::csv::join "[string toupper $job(ShipToDestination)] [$wid_entry3 get]"]
+    
+    flush $files(ShipTo)
     chan close $files(ShipTo)
+    
+    exec $mySettings(path,bartender) "/AF=\\\\fileprint\\Labels\\Templates\\Blank Ship To\\BLANK SHIP TO 3x5.btw" /P /CLOSE /MIN=TASKBAR
+    ${log}::debug $mySettings(path,bartender) "/AF=\\\\fileprint\\Labels\\Templates\\Blank Ship To\\BLANK SHIP TO 3x5.btw" /P /CLOSE /MIN=TASKBAR
+
 }

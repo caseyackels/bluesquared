@@ -252,7 +252,7 @@ proc ea::db::bl::getShipToData {wid_text} {
     #                            AND PACKAGENAME LIKE '%Ctn%'}]
     #
     #### Ship To
-    set stmt [$monarch_db prepare "SELECT DESTINNAME, ADDRESS1, ADDRESS2, ADDRESS3, CITY, STATE, ZIP, COUNTRY FROM EA.dbo.Planner_Shipping_View
+    set stmt [$monarch_db prepare "SELECT DISTINCT DESTINNAME, ADDRESS1, ADDRESS2, ADDRESS3, CITY, STATE, ZIP, COUNTRY, NUMCONTAINERS FROM EA.dbo.Planner_Shipping_View
                                 WHERE JOBNAME = '$job(Number)'
                                 AND ORDERID = '$job(ShipOrderID)'"]
     
@@ -289,8 +289,10 @@ proc ea::db::bl::getShipToData {wid_text} {
         
         $wid_text insert end [lindex $val 7]
         lappend job(ShipToDestination) [lindex $val 7]
+        
+        set job(ShipOrderNumPallets) [lindex $val 8]
     }
-    
+    set job(ShipOrderNumPallets) [lindex $val 8]
     set job(ShipToDestination) [join $job(ShipToDestination) " _n_ "]
     set job(ShipToDestination) [list $job(ShipToDestination)]
     $stmt close
