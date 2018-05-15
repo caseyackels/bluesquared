@@ -79,7 +79,7 @@ proc shippingGUI {} {
 ###
 ### - Box Labels
 ### 
-# Frame 0
+# Frame 0 - .container.frame0.boxlabels.frame0
 	set frame0 [ttk::labelframe $nbk.boxlabels.frame0 -text "Template"]
 	pack $frame0 -expand yes -fill both -padx 5p -pady 3p -ipady 2p
 		

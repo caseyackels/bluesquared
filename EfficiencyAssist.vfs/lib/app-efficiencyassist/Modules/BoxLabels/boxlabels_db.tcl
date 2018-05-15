@@ -11,9 +11,9 @@ proc ea::db::bl::getTplData {tpl} {
         set tpl ""
         set tplLabel(ID) ""
         set GS_textVar(Template) ""
-        .container.frame0.entry configure -state normal
+        .container.frame0.boxlabels.frame0.entry configure -state normal
     } else {
-        .container.frame0.entry configure -state disable
+        .container.frame0.boxlabels.frame0.entry configure -state disable
     }
     
     # reset vars just in case we've already ran this once before
@@ -21,14 +21,14 @@ proc ea::db::bl::getTplData {tpl} {
     
     ${log}::debug Enabling widgets (none should be 'disabled')
     # Make sure widgets are enabled
-    foreach item [winfo children .container.frame1] {
+    foreach item [winfo children .container.frame0.boxlabels.frame1] {
         if {[string match *entry* $item] == 1} {
             ${log}::debug Enable Widget: $item
             $item configure -state normal
         }
     }
     
-    foreach item [winfo children .container.frame2.frame2a] {
+    foreach item [winfo children .container.frame0.boxlabels.frame2.frame2a] {
         ${log}::debug Enable Widget: $item
         $item configure -state normal
     }
@@ -49,8 +49,8 @@ proc ea::db::bl::getTplData {tpl} {
     
     # clear out the version dropdown
     ${log}::debug Clearing out the version dropdown
-    .container.frame0.cbox configure -values ""
-    .container.frame0.cbox set ""
+    .container.frame0.boxlabels.frame0.cbox configure -values ""
+    .container.frame0.boxlabels.frame0.cbox set ""
     
     ${log}::debug Reset some Job array variables
     set job(CustID) ""
@@ -60,7 +60,7 @@ proc ea::db::bl::getTplData {tpl} {
     set job(CSRName) ""
     
     # Set button text to 'Clear Data'
-    .container.frame0.btn configure -text [mc "Clear Data"] 
+    .container.frame0.boxlabels.frame0.btn configure -text [mc "Clear Data"] 
 
     
     set tpl [string trim $tpl]
@@ -75,8 +75,8 @@ proc ea::db::bl::getTplData {tpl} {
             Error_Message::errorMsg BL001
             set GS_textVar(Template) ""
             # Set button text to 'Get Data'
-            .container.frame0.btn configure -text [mc "Get Data"]
-            .container.frame0.entry configure -state normal
+            .container.frame0.boxlabels.frame0.btn configure -text [mc "Get Data"]
+            .container.frame0.boxlabels.frame0.entry configure -state normal
             return
         }
         
@@ -117,7 +117,7 @@ proc ea::db::bl::getTplData {tpl} {
         #Error_Message::errorMsg BL001
         ${log}::debug Id doesn't exist, resetting vars and button text
         # Set button text to 'Get Data'
-        .container.frame0.btn configure -text [mc "Get Data"]
+        .container.frame0.boxlabels.frame0.btn configure -text [mc "Get Data"]
         return
     }
 
@@ -166,9 +166,9 @@ proc ea::db::bl::getLabelText {} {
             }
             
             #set the active version, and disable the widget
-            .container.frame0.cbox configure -values $tplLabel(LabelVersionDesc)
-            .container.frame0.cbox set $tplLabel(LabelVersionDesc,current)
-            .container.frame0.cbox state readonly
+            .container.frame0.boxlabels.frame0.cbox configure -values $tplLabel(LabelVersionDesc)
+            .container.frame0.boxlabels.frame0.cbox set $tplLabel(LabelVersionDesc,current)
+            .container.frame0.boxlabels.frame0.cbox state readonly
         }
     }
     ea::db::bl::populateWidget
@@ -196,17 +196,17 @@ proc ea::db::bl::populateWidget {} {
         set labelRowNum_trimmed [string trim $labelRowNum 0]
         if {$userEditable != 1} {
             # Do not let the end user edit this field.
-            .container.frame1.entry$labelRowNum_trimmed configure -state disable
+            .container.frame0.boxlabels.frame1.entry$labelRowNum_trimmed configure -state disable
         } else {
             # set the widget to edit
-            .container.frame1.entry$labelRowNum_trimmed configure -state normal
+            .container.frame0.boxlabels.frame1.entry$labelRowNum_trimmed configure -state normal
         }
     }
     
     if {$tplLabel(SerializeLabel) == 1} {
         # disable all of the widgets if we are serializing or working off of a runlist with no user interaction
-        ${log}::debug Disabling widgets in .container.frame2.frame2a (all row widgets)
-        foreach child [winfo children .container.frame2.frame2a] {
+        ${log}::debug Disabling widgets in .container.frame0.boxlabels.frame2.frame2a (all row widgets)
+        foreach child [winfo children .container.frame0.boxlabels.frame2.frame2a] {
                 if {[string match *entry1 $child] == 1 || [string match *cbox* $child] == 1} {
                     $child configure -state disable
                 }
@@ -215,14 +215,14 @@ proc ea::db::bl::populateWidget {} {
     
     if {$tplLabel(LabelProfileID) == 0} {
         # Disable all of the row widgets, plus the shipment info widgets
-        ${log}::debug Disabling widgets in .container.frame1 and .container.frame2.frame2a
-        foreach child [winfo children .container.frame1] {
+        ${log}::debug Disabling widgets in .container.frame0.boxlabels.frame1 and .container.frame0.boxlabels.frame2.frame2a
+        foreach child [winfo children .container.frame0.boxlabels.frame1] {
                 if {[string match *entry* $child] == 1} {
                     $child configure -state disable
                 }
         }
         
-        foreach child [winfo children .container.frame2.frame2a] {
+        foreach child [winfo children .container.frame0.boxlabels.frame2.frame2a] {
                 if {[string match *entry* $child] == 1 || [string match *cbox* $child] == 1 || [string match *add* $child] == 1} {
                     $child configure -state disable
                 }
@@ -267,6 +267,9 @@ proc ea::db::bl::getShipToData {btn wid_text} {
     while {[$res nextlist val]} {
         # Insert data into the widget
         set job(ShipToDestination) ""
+        
+        # set address to all upper case
+        set val [string toupper $val]
         
         ${log}::debug length [llength $val]
         ${log}::debug Ship to: $val
