@@ -1156,3 +1156,17 @@ proc Shipping_Code::writeShipTo {wid_entry3 wid_txt} {
     ${log}::debug $mySettings(path,bartender) "/AF=\\\\fileprint\\Labels\\Templates\\Blank Ship To\\BLANK SHIP TO 3x5.btw" /P /CLOSE /MIN=TASKBAR
 
 }
+
+proc Shipping_Code::resetShipTo {btn wid_text} {
+    # Once we select "get data" we re-configure the button so that we can 'reset' the variables/widgets
+    
+    global log job
+    
+    set job(Number) ""
+    set job(ShipOrderID) ""
+    set job(ShipOrderNumPallets) ""
+    
+    $wid_text delete 0.0 end
+    
+    $btn configure -text [mc "Get Data"] -command "ea::db::bl::getShipToData $btn $wid_text"
+}

@@ -690,6 +690,9 @@ proc 'eAssist_loadSettings {} {
 	# Get excel version
 	# Office 2003 = 11
 	# Office 2007 = 12
+	
+	# user(id)
+	
 }
 # Load required packages and DB
 'eAssist_bootStrap

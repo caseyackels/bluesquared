@@ -234,8 +234,11 @@ proc ea::db::bl::populateWidget {} {
 ### Ship to labels
 ###
 
-proc ea::db::bl::getShipToData {wid_text} {
+proc ea::db::bl::getShipToData {btn wid_text} {
     global log job 
+    
+    if {$job(Number) eq ""} {return}
+    if {$job(ShipOrderID) eq ""} {return}
     
     ${log}::debug $job(Number) - $job(ShipOrderID)
     
@@ -297,4 +300,6 @@ proc ea::db::bl::getShipToData {wid_text} {
     set job(ShipToDestination) [list $job(ShipToDestination)]
     $stmt close
     db2 close
+    
+    $btn configure -text [mc "Reset"] -command "Shipping_Code::resetShipTo $btn $wid_text"
 }
