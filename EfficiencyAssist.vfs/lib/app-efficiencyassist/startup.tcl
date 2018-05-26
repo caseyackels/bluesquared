@@ -398,7 +398,12 @@ proc 'eAssist_initVariables {} {
 				   CSRName "" \
 				   Title "" \
 				   Name "" \
+				   Description "" \
 				   Number "" \
+				   Version "" \
+				   Versions "" \
+				   Template "" \
+				   TotalVersions "" \
 				   JobSaveFileLocation "" \
 				   TitleSaveFileLocation "" \
 				   JobFirstShipDate "" \
@@ -406,6 +411,7 @@ proc 'eAssist_initVariables {} {
                    ForestCert "" \
                    NewCustomer "" \
 				   ShipOrderID "" \
+				   ShipToOrderIDs "" \
 				   ShipToDestination "" \
 				   ShipOrderNumPallets ""]
     

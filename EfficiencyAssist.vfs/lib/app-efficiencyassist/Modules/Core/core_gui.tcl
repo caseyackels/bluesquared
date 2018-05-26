@@ -222,11 +222,12 @@ proc eAssist::buttonBarGUI {Module} {
             eAssist::addButtons [mc "Print Breakdown"] Shipping_Gui::printbreakDown btn2 1 0p
 
             # .. launch the mode
-            Shipping_Gui::shippingGUI
+			ea::gui::bl::Main
+            #Shipping_Gui::shippingGUI
             
             # .. Setup the Geometry - The geometry that we are passing is the default for this module
             #eAssist_Global::getGeom $settings(currentModule_machine) 450x475
-            eAssist_Global::getGeom $settings(currentModule_machine) 614x604
+            eAssist_Global::getGeom $settings(currentModule_machine) 532x716
             # .. save the settings
             #eAssistSetup::SaveGlobalSettings
             lib::savePreferences

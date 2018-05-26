@@ -3,66 +3,9 @@
 # File Initial Date: 09 10,2014
 # Last revised: 2/27/18
 
-proc ea::db::bl::getTplData {tpl} {
-    global log GS_textVar tplLabel job
-    
-    if {$tpl eq $tplLabel(ID)} {
-        # We already have the template loaded, if the user hits this button again with the same ID, lets assume that they want to clear out the widgets.
-        set tpl ""
-        set tplLabel(ID) ""
-        set GS_textVar(Template) ""
-        .container.frame0.boxlabels.frame0.entry configure -state normal
-    } else {
-        .container.frame0.boxlabels.frame0.entry configure -state disable
-    }
-    
-    # reset vars just in case we've already ran this once before
-    ea::code::lb::resetWidgets
-    
-    ${log}::debug Enabling widgets (none should be 'disabled')
-    # Make sure widgets are enabled
-    foreach item [winfo children .container.frame0.boxlabels.frame1] {
-        if {[string match *entry* $item] == 1} {
-            ${log}::debug Enable Widget: $item
-            $item configure -state normal
-        }
-    }
-    
-    foreach item [winfo children .container.frame0.boxlabels.frame2.frame2a] {
-        ${log}::debug Enable Widget: $item
-        $item configure -state normal
-    }
-    
-    # Clear out the widgets
-    ${log}::debug Clearing out GS_textVar Row variables
-    foreach item [array names GS_textVar Row*] {
-        set GS_textVar($item) ""
-    }
-    
-    # Clear out the box qty
-    ${log}::debug Clear out GS_textVar(maxBoxQty)
-    set GS_textVar(maxBoxQty) ""
-    
-    # Remove qty data
-    ${log}::debug Clearing the quantity/shipment information
-    Shipping_Code::clearList
-    
-    # clear out the version dropdown
-    ${log}::debug Clearing out the version dropdown
-    .container.frame0.boxlabels.frame0.cbox configure -values ""
-    .container.frame0.boxlabels.frame0.cbox set ""
-    
-    ${log}::debug Reset some Job array variables
-    set job(CustID) ""
-    set job(CustName) ""
-    set job(Title) ""
-    set job(Title,id) ""
-    set job(CSRName) ""
-    
-    # Set button text to 'Clear Data'
-    .container.frame0.boxlabels.frame0.btn configure -text [mc "Clear Data"] 
+proc ea::db::bl::getTplData {tpl btn1 shipToWid shipListWid} {
+    global log GS_textVar tplLabel job blWid labelText
 
-    
     set tpl [string trim $tpl]
     ${log}::debug template id: $tpl
 
@@ -71,12 +14,11 @@ proc ea::db::bl::getTplData {tpl} {
         # Make sure that the number entered, matches the database.
         set idExist [db eval "SELECT tplID from LabelTPL WHERE tplID = $tpl"]
         if {$idExist == ""} {
-            ${log}::debug $tpl doesn't match anything in the database. Clearing variables, and widgets...
+            ${log}::notice Template: $tpl, doesn't match anything in the database. Clearing variables, and widgets...
             Error_Message::errorMsg BL001
-            set GS_textVar(Template) ""
-            # Set button text to 'Get Data'
-            .container.frame0.boxlabels.frame0.btn configure -text [mc "Get Data"]
-            .container.frame0.boxlabels.frame0.entry configure -state normal
+            
+            ea::code::bl::resetBoxLabels $btn1 $shipToWid $shipListWid
+
             return
         }
         
@@ -96,7 +38,22 @@ proc ea::db::bl::getTplData {tpl} {
         
         if {$tplLabel(LabelProfileID) == 0} {
             ${log}::debug We're using a label that uses a run-list. Check modification date/time on runlist to see if it has been updated (less than a month)
-            ${log}::debug File was last updated: [clock format [file mtime config.txt] -format %m-%d-%y]
+            
+            # Disable all widgets
+            foreach item [winfo children $blWid(f0BL)] {
+                if {[string match *entry* $item] || [string match *cbox* $item] == 1} {
+                    ${log}::debug Disable Widget: $item
+                    $item configure -state disabled
+                }
+            }
+    
+            foreach item [winfo children $blWid(f1BL)] {
+                if {[string match *txt* $item] != 1} {
+                    ${log}::debug Disable Widget: $item
+                    $item configure -state disabled
+                }
+            }
+
         }
         
         # We entered a correct template number, but a title was never assigned.
@@ -105,20 +62,6 @@ proc ea::db::bl::getTplData {tpl} {
             set tplLabel(LabelPath) "" ;# Clear this out so the end-user doesn't keep going
             return
         }
-        # Setup job vars
-        db eval "SELECT TitleName, CustID, CSRID FROM PubTitle WHERE Title_ID = $job(Title,id) AND Status = 1" {
-            set job(Title) $TitleName
-            set job(CustID) $CustID
-            set job(CustName) [join [db eval "SELECT CustName FROM Customer WHERE CUST_ID = '$job(CustID)' AND Status = 1"]]
-            set job(CSRName) [db eval "SELECT FirstName, LastName FROM CSRs WHERE CSR_ID = '$CSRID' AND Status = 1"]
-        }
-    } else {
-        ## id doesn't exist
-        #Error_Message::errorMsg BL001
-        ${log}::debug Id doesn't exist, resetting vars and button text
-        # Set button text to 'Get Data'
-        .container.frame0.boxlabels.frame0.btn configure -text [mc "Get Data"]
-        return
     }
 
     # Get Profile Info
@@ -139,13 +82,12 @@ proc ea::db::bl::getTplData {tpl} {
     
     # Populate the widgets with the label data
     ea::db::bl::getLabelText
-    
-    # Check runlist file for last modified date, if longer than 3 weeks ago issue an alert
+
 }
 
 
 proc ea::db::bl::getLabelText {} {
-    global log tplLabel GS_textVar
+    global log tplLabel GS_textVar blWid
     # Find out if we have label text, and if we do populate the text widgets with the data.
     
     if {$tplLabel(LabelProfileID) != 0} {
@@ -166,20 +108,23 @@ proc ea::db::bl::getLabelText {} {
             }
             
             #set the active version, and disable the widget
-            .container.frame0.boxlabels.frame0.cbox configure -values $tplLabel(LabelVersionDesc)
-            .container.frame0.boxlabels.frame0.cbox set $tplLabel(LabelVersionDesc,current)
-            .container.frame0.boxlabels.frame0.cbox state readonly
+            $blWid(f0BL).cbox1 configure -values $tplLabel(LabelVersionDesc)
+            $blWid(f0BL).cbox1 set $tplLabel(LabelVersionDesc,current)
+            #$blWid(f0BL).cbox1 state readonly
         }
+        ea::db::bl::populateWidget
+    } else {
+        # if the profile is empty, we want to issue a notice to the user that no data will populate the screen
+        Error_Message::errorMsg BL007
     }
-    ea::db::bl::populateWidget
 }
 
 proc ea::db::bl::populateWidget {} {
-    global log tplLabel GS_textVar
+    global log tplLabel GS_textVar labelText blWid
     
     # Clear out the widgets
-    foreach item [array names GS_textVar line*] {
-        set GS_textVar($item) ""
+    foreach item [array names labelText] {
+        set labelText($item) ""
     }
        
     # Populate the widgets with the first version
@@ -191,43 +136,43 @@ proc ea::db::bl::populateWidget {} {
             set labelRowNum 0$labelRowNum
         }
         
-        set GS_textVar(Row$labelRowNum) $labelRowText
+        set labelText(Row$labelRowNum) $labelRowText
         
         set labelRowNum_trimmed [string trim $labelRowNum 0]
         if {$userEditable != 1} {
             # Do not let the end user edit this field.
-            .container.frame0.boxlabels.frame1.entry$labelRowNum_trimmed configure -state disable
+            $blWid(f0BL).entry$labelRowNum_trimmed configure -state disable
         } else {
             # set the widget to edit
-            .container.frame0.boxlabels.frame1.entry$labelRowNum_trimmed configure -state normal
+            $blWid(f0BL).entry$labelRowNum_trimmed configure -state normal
         }
     }
     
-    if {$tplLabel(SerializeLabel) == 1} {
-        # disable all of the widgets if we are serializing or working off of a runlist with no user interaction
-        ${log}::debug Disabling widgets in .container.frame0.boxlabels.frame2.frame2a (all row widgets)
-        foreach child [winfo children .container.frame0.boxlabels.frame2.frame2a] {
-                if {[string match *entry1 $child] == 1 || [string match *cbox* $child] == 1} {
-                    $child configure -state disable
-                }
-        }
-    }
-    
-    if {$tplLabel(LabelProfileID) == 0} {
-        # Disable all of the row widgets, plus the shipment info widgets
-        ${log}::debug Disabling widgets in .container.frame0.boxlabels.frame1 and .container.frame0.boxlabels.frame2.frame2a
-        foreach child [winfo children .container.frame0.boxlabels.frame1] {
-                if {[string match *entry* $child] == 1} {
-                    $child configure -state disable
-                }
-        }
-        
-        foreach child [winfo children .container.frame0.boxlabels.frame2.frame2a] {
-                if {[string match *entry* $child] == 1 || [string match *cbox* $child] == 1 || [string match *add* $child] == 1} {
-                    $child configure -state disable
-                }
-        }
-    }
+    #if {$tplLabel(SerializeLabel) == 1} {
+    #    # disable all of the widgets if we are serializing or working off of a runlist with no user interaction
+    #    ${log}::debug Disabling widgets in .container.frame0.boxlabels.frame2.frame2a (all row widgets)
+    #    foreach child [winfo children .container.frame0.boxlabels.frame2.frame2a] {
+    #            if {[string match *entry1 $child] == 1 || [string match *cbox* $child] == 1} {
+    #                $child configure -state disable
+    #            }
+    #    }
+    #}
+    #
+    #if {$tplLabel(LabelProfileID) == 0} {
+    #    # Disable all of the row widgets, plus the shipment info widgets
+    #    ${log}::debug Disabling widgets in .container.frame0.boxlabels.frame1 and .container.frame0.boxlabels.frame2.frame2a
+    #    foreach child [winfo children .container.frame0.boxlabels.frame1] {
+    #            if {[string match *entry* $child] == 1} {
+    #                $child configure -state disable
+    #            }
+    #    }
+    #    
+    #    foreach child [winfo children .container.frame0.boxlabels.frame2.frame2a] {
+    #            if {[string match *entry* $child] == 1 || [string match *cbox* $child] == 1 || [string match *add* $child] == 1} {
+    #                $child configure -state disable
+    #            }
+    #    }
+    #}
 }
 
 ###
@@ -237,8 +182,8 @@ proc ea::db::bl::populateWidget {} {
 proc ea::db::bl::getShipToData {btn wid_text} {
     global log job 
     
-    if {$job(Number) eq ""} {return}
-    if {$job(ShipOrderID) eq ""} {return}
+    if {$job(Number) eq ""} {${log}::debug getShipToData: Exiting, $job(Number) (Job Number) is empty; return}
+    if {$job(ShipOrderID) eq ""} {${log}::debug getShipToData: Exiting, $job(ShipOrderID) (Ship Order ID) is empty ; return}
     
     ${log}::debug $job(Number) - $job(ShipOrderID)
     
@@ -304,5 +249,190 @@ proc ea::db::bl::getShipToData {btn wid_text} {
     $stmt close
     db2 close
     
-    $btn configure -text [mc "Reset"] -command "Shipping_Code::resetShipTo $btn $wid_text"
+    #$btn configure -text [mc "Reset"] -command "Shipping_Code::resetShipTo $btn $wid_text"
+}
+
+proc ea::db::bl::getJobData {btn1 wid shipToWid shipListWid} {
+    global log job labelText blWid
+    # First version
+    # Populate customer info, label info, ship counts and Ship Order IDs.
+    if {$job(Number) eq "" && $job(Template) eq ""} {return}
+    if {$job(Number) eq "" && $job(Template) ne ""} {
+        ${log}::notice We are looking for template: $job(Template) but a job number does not exist.
+        Error_Message::errorMsg BL005
+        return
+    }
+    
+    if {[string length $job(Number)] < 6} {
+        ${log}::notice The job number is less than 5 numbers. Aborting.
+        Error_Message::errorMesg BL006
+        return
+    }
+    
+    ${log}::debug btn1: $btn1 - shipToWid: $shipToWid - shipListWid: $shipListWid
+    
+    $btn1 configure -text [mc "Reset"] -command "ea::code::bl::resetBoxLabels $btn1 $shipToWid $shipListWid"
+    
+    # Disable entry widgets
+    $blWid(f).entry1 state disabled
+    $blWid(f).entry2 state disabled
+    
+    set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+    
+    
+    # Job Data
+    set stmt [$monarch_db prepare "SELECT TOP 1 CUSTOMERNAME, TITLENAME, ISSUENAME
+                                        FROM EA.dbo.Planner_Shipping_View
+                                        WHERE JOBNAME='$job(Number)'"]
+    
+    set res [$stmt execute]
+    
+    while {[$res nextlist val]} {
+        set job(CustName) [lindex $val 0]
+        set job(Title) [lindex $val 1]
+        set job(Name) [lindex $val 2]
+    }
+    
+    $stmt close
+    
+   
+    # Retrieve ship order id's
+    # Reset ShipToOrderIDs so we aren't just adding to the list
+    set job(ShipToOrderIDs) ""
+    set stmt [$monarch_db prepare "SELECT DISTINCT ORDERID
+                                        FROM EA.dbo.Planner_Shipping_View
+                                        WHERE JOBNAME='$job(Number)'
+                                        AND DESTINNAME NOT LIKE 'JG%'
+                                        ORDER BY ORDERID"]
+    set res [$stmt execute]
+    while {[$res nextlist val]} {
+        lappend job(ShipToOrderIDs) $val
+    }
+    $blWid(tab2f1).cbox1 configure -values $job(ShipToOrderIDs)
+    
+    set job(ShipOrderID) [lindex $job(ShipToOrderIDs) 0]
+    $blWid(tab2f1).cbox1 set $job(ShipOrderID)
+    
+    $stmt close
+    db2 close
+    
+    ea::db::bl::getShipToData {} $blWid(tab2f2).txt
+    
+    # Check for Templates
+    set job(Description) "$job(Title) | $job(Name)"
+    if {$job(Template) ne "" } {
+        ${log}::debug We have a template: $job(Template)
+        ea::db::bl::getTplData $job(Template) $btn1 $shipToWid $shipListWid
+        
+    } else {
+        ea::db::bl::getAllVersions $wid 1
+        ea::db::bl::getShipCounts
+        
+        set labelText(Row01) [string toupper $job(Title)]
+        set labelText(Row02) [string toupper $job(Name)]
+    }
+}
+
+proc ea::db::bl::getAllVersions {wid args} {
+    global log job labelText
+    # Get list of versions
+    
+    # Exit out if no job number
+    if {$job(Number) eq ""} {return}
+    # Ensure var is empty
+    set job(Versions) ""
+    
+       
+    set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+    set stmt [$monarch_db prepare "SELECT DISTINCT ALIASNAME
+                                        FROM EA.dbo.Planner_Shipping_View
+                                        WHERE JOBNAME='$job(Number)'
+                                        AND (DISTRIBNAME LIKE '%customer%' OR DISTRIBNAME LIKE '%freight%' OR DISTRIBNAME LIKE '%package%')
+                                        AND PACKAGENAME LIKE '%ctn%'
+                                        ORDER BY ALIASNAME"]
+    set res [$stmt execute]
+    
+    while {[$res nextlist val]} {
+        ${log}::debug Versions with boxes: $val
+        lappend job(Versions) [join [string toupper $val]]
+    }
+    
+    $stmt close
+    
+    # See if we have one or multiple versions on the job. IF we only have one version, do not populate Row03
+    set stmt [$monarch_db prepare "SELECT DISTINCT ALIASNAME
+                                        FROM EA.dbo.Planner_Shipping_View
+                                        WHERE JOBNAME='$job(Number)'"]
+        
+    set res [$stmt execute]
+    
+    set job(TotalVersions) ""
+    while {[$res nextlist val]} {
+        ${log}::debug Total Versions: $val
+        lappend job(TotalVersions) [join $val]
+    }
+    
+    db2 close
+    
+    ${log}::debug List of versions: $job(TotalVersions)
+
+    # Populating the dropdown with the versions, and setting the selection to the first result.
+    set job(Version) [lindex $job(TotalVersions) 0]
+    $wid configure -values $job(TotalVersions)
+    $wid set $job(Version)
+    
+    # If we only have one version, don't populate the label text
+    if {[llength $job(TotalVersions)] > 1} {
+        set labelText(Row03) $job(Version)
+    }
+
+    #if {$args eq 1} {
+    #    # First time running for this job
+    #    set job(Version) [lindex $job(Versions) 0]
+    #    $wid configure -values $job(Versions)
+    #    $wid set $job(Version)
+    #    
+    #    # If we only have one version, don't populate the label text
+    #    if {[llength $job(TotalVersions)] > 1} {
+    #        set labelText(Row03) $job(Version)
+    #    }
+    #}
+
+    
+    #if {$wid ne ""} {
+    #    $wid configure -values [join $job(Versions)]
+    #    $wid set $labelText(Row3)
+    #}
+}
+
+proc ea::db::bl::getShipCounts {} {
+    global log job blWid
+    
+    # Make sure we start with an empty widget
+    $blWid(f2BL).listbox delete 0 end
+    ${log}::debug getShipCounts: Deleting data from the tablelist
+    ${log}::debug getShipCounts: Retrieving data for version: $job(Version)
+    
+    # Ensure var is empty
+    set job(ShipCount) ""
+    set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+    set stmt [$monarch_db prepare "SELECT ORDERID, SHIPCOUNT, DISTRIBNAME
+                                        FROM EA.dbo.Planner_Shipping_View
+                                        WHERE JOBNAME = '$job(Number)'
+                                        AND ALIASNAME = '$job(Version)'
+                                        AND (DISTRIBNAME LIKE '%customer%' OR DISTRIBNAME LIKE '%freight%' OR DISTRIBNAME LIKE '%package%')
+                                        AND PACKAGENAME LIKE '%ctn%'
+                                        ORDER BY ORDERID"]
+    set res [$stmt execute]
+    
+    while {[$res nextlist val]} {
+        #lappend job(ShipCount) [lindex $val 0]
+        ${log}::debug Insert into Table: $val
+        $blWid(f2BL).listbox insert end "{} $val"
+    }
+    
+    $stmt close
+    db2 close
+    
+    ea::code::bl::trackTotalQuantities
 }

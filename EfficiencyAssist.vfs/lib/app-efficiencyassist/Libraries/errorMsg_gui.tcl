@@ -124,6 +124,26 @@ proc Error_Message::errorMsg {code args} {
                             set title [mc "Warning"]
                             set icon warning
                         }
+        BL004           {set message [mc "You have not entered a Max Qty Per Box."]
+                            set message2 [mc "Error Location: %s" $code]
+                            set title [mc "Warning"]
+                            set icon warning
+                        }
+        BL005           {set message [mc "You must enter a job number."]
+                            set message2 [mc "Error Location: %s" $code]
+                            set title [mc "Warning"]
+                            set icon warning
+                        }
+        BL006           {set message [mc "The job number is less than 6 numbers."]
+                            set message2 [mc "Error Location: %s" $code]
+                            set title [mc "Warning"]
+                            set icon warning
+                        }
+        BL007           {set message [mc "Your label is using a separate file for the information.\nClick OK, then click Print Labels."]
+                            set message2 [mc "Location: %s" $code]
+                            set title [mc "Information"]
+                            set icon info
+                        }
         default         {set message [mc "Unknown Error Message"]
                             set message2 [mc "Received Message: %s" $code]
                             set title $defaultTitle
