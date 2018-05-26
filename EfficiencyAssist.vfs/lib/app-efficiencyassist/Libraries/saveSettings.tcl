@@ -51,12 +51,10 @@ proc eAssistSetup::SaveGlobalSettings {} {
     #
     #***
     global log GS_filePaths GS_filePathSetup program company boxLabelInfo intlSetup headerParams headerParent headerAddress headerBoxes setup GS
-    global dist w carrierSetup CSR packagingSetup mySettings settings
+    global dist w carrierSetup CSR packagingSetup mySettings settings user
 
-    
-    #${log}::debug Folder: [eAssist_Global::folderAccessibility $program(Home)]
-    #${log}::debug File: [eAssist_Global::fileAccessibility $program(Home) $mySettings(ConfigFile)]
-    # Make sure we set the current modules' geometry before saving
+	# Clean up lock file
+	${log}::debug user - $user(id)
     
     lib::savePreferences
 
@@ -126,7 +124,7 @@ proc lib::savePreferences {} {
     # SEE ALSO
     #
     #***
-    global log pref settings program mySettings GS options logSettings
+    global log pref settings program mySettings GS options logSettings user
     #${log}::debug --START-- saveConfig
     #global settings header internal customer3P mySettings env international company shipVia3P
     

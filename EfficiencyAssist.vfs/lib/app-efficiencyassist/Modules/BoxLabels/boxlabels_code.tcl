@@ -140,7 +140,7 @@ proc controlFile {args} {
                         #set writable [eAssist_Global::fileAccessibility [file join $f_path] [join $f_name].csv]
 
                         set files(destination) [open [file join $f_path [join $f_name].csv] w]
-                        
+
                         # Insert Header row
                         #chan puts $files(destination) [::csv::join "Labels Quantity Line1 Line2 Line3 Line4 Line5"]
                         chan puts $files(destination) $headers
@@ -177,7 +177,7 @@ proc controlFile {args} {
 
 proc writeText {labels quantity total_boxes} {
     ## ATTENTION: The Open/Close commands are in proc [controlFile]
-    global log files GS_textVar tplLabel tmp
+    global log files GS_textVar tplLabel tmp labelText
     ${log}::debug Initiating writeText
 
     # Use lappend so that if the text contains spaces ::csv::join will handle it correctly
@@ -195,19 +195,28 @@ proc writeText {labels quantity total_boxes} {
         }
         
         # Get Profile Headers. These should only be the headers that contain text.
-        foreach item [lsort [array names GS_textVar]] {
-            if {[string match Row* $item]} {
-                if {$GS_textVar($item) != ""} {
-                    lappend textValues "$GS_textVar($item)"
-                }
-            }
-        }
-        
-        #lappend textValues $quantity $labels $total_boxes "$GS_textVar(Row01)" "$GS_textVar(Row02)" "$GS_textVar(Row03)" "$GS_textVar(Row04)" "$GS_textVar(Row05)"
+        #foreach item [lsort [array names labelText]] {
+        #    if {[string match Row* $item]} {
+        #        if {$GS_textVar($item) != ""} {
+        #            lappend textValues "$labelText($item)"
+        #        }
+        #    }
+        #}
     
     } else {
         # This is for the Generic labels
-        lappend textValues $labels $quantity "$GS_textVar(Row01)" "$GS_textVar(Row02)" "$GS_textVar(Row03)" "$GS_textVar(Row04)" "$GS_textVar(Row05)"
+        #lappend textValues $labels $quantity "$GS_textVar(Row01)" "$GS_textVar(Row02)" "$GS_textVar(Row03)" "$GS_textVar(Row04)" "$GS_textVar(Row05)"
+        lappend textValues $labels $quantity
+        
+    }
+    
+    # Get Profile Headers. These should only be the headers that contain text.
+    foreach item [lsort [array names labelText]] {
+        if {[string match Row* $item]} {
+            if {$labelText($item) != ""} {
+                lappend textValues "$labelText($item)"
+            }
+        }
     }
     
     # Insert the values
@@ -220,7 +229,7 @@ proc writeText {labels quantity total_boxes} {
 
 proc insertInListbox {args} {
     # Insert the numbers into the listbox
-    global frame2b
+    global blWid
 
     #puts "insertInListbox: $args"
     set qty [lindex $args 0] ;# qty = piece qty
@@ -232,25 +241,25 @@ proc insertInListbox {args} {
     if {[string is integer $qty] == 1} {
 	if {$qty == 0} {return}
         if {($batch == 0) || ($batch == "")} {
-            $frame2b.listbox insert end [list "" "$qty" "$shipvia"]
+            $blWid(f2BL).listbox insert end [list "" "" "$qty" "$shipvia"]
 
         } else {
             for {set x 0} {$x<$batch} {incr x} {
-                $frame2b.listbox insert end [list "" "$qty" "$shipvia"]
+                $blWid(f2BL).listbox insert end [list "" "" "$qty" "$shipvia"]
                 #puts "insertInListbox - BATCH: $qty"
                 }
         }
 
     } else {
-	Error_Message::errorMsg insertInListBox1 ""; return
+        Error_Message::errorMsg insertInListBox1 ""
+        
+        return
     }
     # This way we can see incoming values
-    $frame2b.listbox see end
+    $blWid(f2BL).listbox see end
 
-    ;# Add everything together for the running total
+    # Add everything together for the running total
     addListboxNums
-
-
 
 } ;# insertInListbox
 
@@ -281,7 +290,7 @@ proc addListboxNums {{reset 0}} {
     #	N/A
     #
     #***
-    global frame2b GI_textVar GS_textVar
+    global log blWid GI_textVar GS_textVar
 
     ;# If we clear the entire list, we want to reset all counters.
     if {$reset ne 0} {
@@ -293,52 +302,48 @@ proc addListboxNums {{reset 0}} {
     }
 
     # row,column
-    catch {set S_rawNum [$frame2b.listbox getcells 0,1 end,1]} err
+    catch {set S_rawNum [$blWid(f2BL).listbox getcells 0,2 end,2]} err
     #puts "addListboxNums - catchErr: $err"
 
     if {[info exist err] eq 1} {
-	if {[string is integer [lindex $err 0]] eq 1} {
-            set GI_textVar(qty) [expr [join $err +]]
-        } else {
-            set GI_textVar(qty) 0
-            # Keep the breakdown window updated even if it is open
-            set GS_textVar(labelsFull) ""
-            set GS_textVar(labelsPartialLike) ""
-            set GS_textVar(labelsPartialUnique) ""
-
-            if {[winfo exists .breakdown]} {
-				# Find out if the window exists before finding out if we can see it or not.
-				if {[winfo ismapped .breakdown] == 1} {puts "addlistbox::Refreshing Break Down"; Shipping_Gui::breakDown}
-			}
-        }
+        ${log}::debug addListboxNums: err - $err [lindex $err 0]
+        if {[string is integer [lindex $err 0]] eq 1} {
+                set GI_textVar(qty) [expr [join $err +]]
+            } else {
+                set GI_textVar(qty) 0
+                # Keep the breakdown window updated even if it is open
+                set GS_textVar(labelsFull) ""
+                set GS_textVar(labelsPartialLike) ""
+                set GS_textVar(labelsPartialUnique) ""
+    
+                if {[winfo exists .breakdown]} {
+                    # Find out if the window exists before finding out if we can see it or not.
+                    if {[winfo ismapped .breakdown] == 1} {${log}::debug "addlistbox Refreshing Break Down"; Shipping_Gui::breakDown}
+                }
+            }
     }
 } ;# addListboxNums
  
 
-proc createList {} {
-    global log frame2b GS_textVar tplLabel
+proc createList {args} {
+    global log GS_textVar tplLabel blWid job
 
     ${log}::debug Start Createlist
+    ea::code::bl::trackTotalQuantities
     
     if {$tplLabel(LabelProfileID) == 0} {
         ${log}::debug No Profile ID, skipping createList
         return
     }
     
-    if {[info exists GS_textVar(maxBoxQty)] == 0} {Error_Message::errorMsg createList1; return}
-    if {$GS_textVar(maxBoxQty) == ""} {Error_Message::errorMsg createList1; return}
+    if {[info exists GS_textVar(maxBoxQty)] == 0} {Error_Message::errorMsg BL004; return}
+    if {$GS_textVar(maxBoxQty) == ""} {Error_Message::errorMsg BL004; return}
 
-    #if {[$frame2b.listbox get 0 end] ne ""} {
-    #    ${log}::debug Error, no quantities were entered
-    #    ${log}::debug Retrieving column data (0): [$frame2b.listbox getcolumn 0 0]
-    #    ${log}::debug Retrieving column data (1): [$frame2b.listgox getcolumn 1 1]
-    #    return
-    #}
-    set L_rawEntries [split [join [$frame2b.listbox getcells 0,1 end,1]]]
-    set L_rawShipVia [split [join [$frame2b.listbox getcells 0,2 end,2]]]
+    set L_rawEntries [split [join [$blWid(f2BL).listbox getcells 0,2 end,2]]]
+    set L_rawShipVia [split [join [$blWid(f2BL).listbox getcells 0,3 end,3]]]
 
     ${log}::debug L_rawEntries1: $L_rawEntries
-    ${log}::debug L_rawEntries2: [catch {[$frame2b.listbox getcells 0,1 end,1]} err0]
+    ${log}::debug L_rawEntries2: [catch {[$blWid(f2BL).listbox getcells 0,2 end,2]} err0]
 
     # Make sure the variables are cleared out; we don't want any data to lag behind.
     set FullBoxes ""
@@ -434,12 +439,19 @@ proc createList {} {
 } ;# createList
 
 proc doMath {totalQuantity maxPerBox} {
+    global log
 # Do mathmatical equations, then double check to make sure it comes out to the value of totalQty
 
-    if {($totalQuantity == "") || ($totalQuantity == 0) || $totalQuantity == {}} {return}
+    if {($totalQuantity == "") || ($totalQuantity == 0) || $totalQuantity == {}} {
+        ${log}::debug doMath: totalQuantity should have a value, exiting: $totalQuantity
+        return
+    }
+    
+    ${log}::debug totalQuantity: $totalQuantity
+    ${log}::debug maxPerBox: $maxPerBox
 
     if {$totalQuantity < $maxPerBox} {
-	lappend partialBoxQTY
+        lappend partialBoxQTY
     }
 
 
@@ -562,7 +574,7 @@ proc displayListHelper {fullboxes partialboxes total_boxes {reset 0}} {
 } ;# End of displayListHelper proc
 
 proc printLabels {} {
-    global log GS_textVar programPath lineNumber mySettings tplLabel tmp
+    global log GS_textVar programPath lineNumber mySettings tplLabel tmp labelText
     
     ${log}::debug Initiating printLabels
     
@@ -592,15 +604,17 @@ proc printLabels {} {
     
     catch {Shipping_Code::createList} err ;# Make sure our totals add up
     if {[info exists err]} {
-        ${log}::debug Clicked Print Labels and received an error: $err
-        return
+        if {$err ne ""} {
+            ${log}::debug Clicked Print Labels and received an error: $err
+            return
+        }
     }
     
-    if {$tplLabel(ID) eq ""} {    
+    if {$tplLabel(ID) eq ""} {   
         #Shipping_Code::createList
            
-        Shipping_Code::writeHistory $GS_textVar(maxBoxQty)
-        Shipping_Code::openHistory
+        #Shipping_Code::writeHistory $GS_textVar(maxBoxQty)
+        #Shipping_Code::openHistory
     
         Shipping_Gui::printbreakDown email ; # Send an email of the breakdown
     }
@@ -618,8 +632,7 @@ proc printLabels {} {
         
         # Set runlist file name, maybe this should be placed into the tplLabel array? tplLabel(RunListFile)
         set runlist "$labelDir\\[join "$tplLabel(LabelVersionDesc) - $tplLabel(LabelProfileDesc)"].csv"
-               
-       #Shipping_Code::createList
+
         
         ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\$filename /D=$runlist /P /CLOSE /MIN=TASKBAR
         #exec $mySettings(path,bartender) /AF=$labelDir\\$filename /D=$runlist
@@ -630,66 +643,28 @@ proc printLabels {} {
             # Fix the file paths so that bartender doesn't choke
             set labelDir [join [split $mySettings(path,labelDir) /] \\]
             
-            if {$GS_textVar(Row05) != ""} {
+            if {$labelText(Row05) != ""} {
                 exec $mySettings(path,bartender) /AF=$labelDir\\6LINEDB.btw /P /CLOSE /MIN=TASKBAR
                 ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\6LINEDB.btw /P /CLOSE /MIN=TASKBAR
                     
-            } elseif {$GS_textVar(Row04) != ""} {
+            } elseif {$labelText(Row04) != ""} {
                 exec $mySettings(path,bartender) /AF=$labelDir\\5LINEDB.btw /P /CLOSE /MIN=TASKBAR
                 ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\5LINEDB.btw /P /CLOSE /MIN=TASKBAR
         
-            } elseif {$GS_textVar(Row03) != ""} {
+            } elseif {$labelText(Row03) != ""} {
                 exec $mySettings(path,bartender) /AF=$labelDir\\4LINEDB.btw /P /CLOSE /MIN=TASKBAR
                 ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\4LINEDB.btw /P /CLOSE /MIN=TASKBAR
     
-            } elseif {$GS_textVar(Row02) != ""} {
+            } elseif {$labelText(Row02) != ""} {
                 exec $mySettings(path,bartender) /AF=$labelDir\\3LINEDB.btw /P /CLOSE /MIN=TASKBAR
                 ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\3LINEDB.btw /P /CLOSE /MIN=TASKBAR
        
-            } elseif {$GS_textVar(Row01) != ""} {
+            } elseif {$labelText(Row01) != ""} {
                 exec $mySettings(path,bartender) /AF=$labelDir\\2LINEDB.btw /P /CLOSE /MIN=TASKBAR
                 ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\2LINEDB.btw /P /CLOSE /MIN=TASKBAR
             }
     } ;# End generic labels
 } ;# printLabels
-
-#proc printCustomLabels {args} {
-#    #****f* printCustomLabels/Shipping_Code
-#    # AUTHOR
-#    #	Casey Ackels
-#    #
-#    # COPYRIGHT
-#    #	(c) 2011 - Casey Ackels
-#    #
-#    # FUNCTION
-#    #	Prints custom labels
-#    #
-#    # SYNOPSIS
-#    #	printCustomLabels 3|4|5|6
-#    #
-#    # CHILDREN
-#    #	N/A
-#    #
-#    # PARENTS
-#    #	Shipping_Code::writeHistory
-#    #
-#    # NOTES
-#    #	N/A
-#    #
-#    # SEE ALSO
-#    #	N/A
-#    #
-#    #***
-#    global mySettings log
-#	
-#	${log}::debug Printing custom labels: [join $args ""]
-#	set args [join $args ""]
-#	
-#	
-#	set labelDir [join [split $mySettings(path,labelDir) /] \\]
-#    exec $mySettings(path,bartender) /AF=$labelDir\\$args /P /CLOSE /X
-#    #${log}::debug programPath(Bartend) /AF=programPath(LabelPath)\\$args /P /CLOSE
-#}
 
 proc truncateHistory {} {
     #****f* truncateHistory/Shipping_Code
@@ -795,7 +770,7 @@ proc writeHistory {maxBoxQty} {
     }
 
     # After we add the new labels, lets make sure we trim the file back down to the allotted amount.
-    truncateHistory
+    #truncateHistory
 
 } ;# writeHistory
 
@@ -927,14 +902,6 @@ proc readHistory {args} {
     ;# clear the listbox
     Shipping_Code::clearList
 } ;# readHistory
-
-#proc countLength {args} {
-#    # arg1 = Line Number
-#    # arg2 =
-#    global lineLength
-#    [string length $GS_textVar(Row01)]
-#}
-
 
 proc addMaster {destQty batch shipvia} {
     #****f* addmaster/Shipping_Code
@@ -1125,3 +1092,131 @@ proc Shipping_Code::onPrint_event {args} {
 	mail::mail $::boxLabelsVars::cModName $eventName -subject $Subj -body $Body
 } ;# Shipping_Code::emailBoxLabels
 
+proc Shipping_Code::writeShipTo {wid_entry3 wid_txt} {
+    global log files job mySettings
+    
+    # wid_entry3 is old and should be removed
+    
+    set job(ShipToDestination) ""
+    
+    #if {[$wid_entry3 get] eq "" } {}
+    if {$job(ShipOrderNumPallets) eq ""} {   
+        ${log}::critical Nothing entered for the number of pallets (Box Labels). Aborting.
+        return
+    }
+
+    for {set x 1} {[$wid_txt count -lines 1.0 end] >= $x} {incr x} {
+        ${log}::debug Line: [$wid_txt get $x.0 $x.end]
+        lappend job(ShipToDestination) [string trim [$wid_txt get $x.0 $x.end]]
+    }
+    
+    set job(ShipToDestination) [list [join $job(ShipToDestination) " _N_ "]]
+    set files(ShipTo) [open [file join {\\\\fileprint\\Labels\\Templates\\Blank Ship To\\shipto.csv}] w]
+        
+        
+    chan puts $files(ShipTo) [::csv::join "[string toupper $job(ShipToDestination)] $job(ShipOrderNumPallets)"]
+    ${log}::debug Output:  [::csv::join "[string toupper $job(ShipToDestination)] $job(ShipOrderNumPallets)"]
+    
+    flush $files(ShipTo)
+    chan close $files(ShipTo)
+    
+    exec $mySettings(path,bartender) "/AF=\\\\fileprint\\Labels\\Templates\\Blank Ship To\\BLANK SHIP TO 3x5.btw" /P /CLOSE /MIN=TASKBAR
+    ${log}::debug $mySettings(path,bartender) "/AF=\\\\fileprint\\Labels\\Templates\\Blank Ship To\\BLANK SHIP TO 3x5.btw" /P /CLOSE /MIN=TASKBAR
+
+}
+
+#proc Shipping_Code::resetShipTo {btn wid_text} {
+#    # Once we select "get data" we re-configure the button so that we can 'reset' the variables/widgets
+#    
+#    global log job
+#    
+#    set job(Number) ""
+#    set job(ShipOrderID) ""
+#    set job(ShipOrderNumPallets) ""
+#    
+#    $wid_text delete 0.0 end
+#    
+#    #$btn configure -text [mc "Get Data"] -command "ea::db::bl::getShipToData $btn $wid_text"
+#}
+
+proc ea::code::bl::resetLabelText {} {
+    global log labelText
+    
+    foreach item [array names labelText] {
+        set labelText($item) ""
+    }   
+}
+
+proc ea::code::bl::resetBoxLabels {btn shipToWid shipListWid} {
+    # reset all widgets and box variables
+    global log job blWid GS_textVar
+    
+    ${log}::debug Reset Job Array
+    foreach item [array names job] {
+        set job($item) ""
+    }
+    
+    ${log}::debug Box Labels: Reset GS_textVar array
+    set GS_textVar(maxBoxQty) ""
+    set GS_textVar(destQty) ""
+    set GS_textVar(batch) ""
+    set GS_textVar(shipvia) ""
+    
+    ${log}::debug Box Labels: Reset Version dropdown
+    $blWid(f0BL).cbox1 configure -values ""
+    $blWid(f0BL).cbox1 set ""
+    
+    ${log}::debug Box Labels: Reset Row Data
+    ea::code::bl::resetLabelText
+    
+    ${log}::debug Box Labels: Clear Shipment List Widget
+    $shipListWid delete 0 end
+    
+    ${log}::debug Box Labels: Enable Widgets
+    # Make sure widgets are enabled
+    foreach item [winfo children $blWid(f0BL)] {
+        #if {[string match *entry* $item] == 1} {}
+            ${log}::debug Enable Widget: $item
+            $item configure -state normal
+    }
+    
+    foreach item [winfo children $blWid(f1BL)] {
+        ${log}::debug Enable Widget: $item
+        $item configure -state normal
+    }
+    
+    # Enable entry widgets
+    $blWid(f).entry1 configure -state normal
+        focus $blWid(f).entry1
+    $blWid(f).entry2 configure -state normal
+    
+    ${log}::debug ShipTo: Clear ShipOrder ID dropdown
+    $blWid(tab2f1).cbox1 configure -values ""
+    $blWid(tab2f1).cbox1 set ""
+    
+    ${log}::debug ShipTo: Clear ShipTo Widget
+    $shipToWid delete 0.0 end
+    
+
+    
+    ${log}::debug Change Button back to Original State
+    $btn configure -text [mc "Search"] -command {ea::db::bl::getJobData .container.f0.btn1 $blWid(f0BL).cbox1 $blWid(tab2f2).txt $blWid(f2BL).listbox}
+}
+
+proc ea::code::bl::trackTotalQuantities {} {
+    global log job blWid
+    
+    # Retrieve the list of Shipments (column Shipments (2))
+    set shipqty [$blWid(f2BL).listbox getcolumn 2]
+    
+    set job(bl,TotalShipments) [llength $shipqty]
+    
+    if {$job(bl,TotalShipments) > 1} {
+        ${log}::debug Ship Qty: [expr [join $shipqty +]]
+        set job(bl,TotalQuantity) [expr [join $shipqty +]]
+    } else {
+        # We only have one quantity
+        ${log}::debug Ship Qty: $shipqty
+        set job(bl,TotalQuantity) $shipqty
+    }
+}

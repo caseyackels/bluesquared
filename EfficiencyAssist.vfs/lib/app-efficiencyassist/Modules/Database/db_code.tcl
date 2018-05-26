@@ -26,7 +26,11 @@ package provide eAssist_db 1.0
 namespace eval eAssist_db {} ;# Old do not use
 namespace eval ea::db {}
 
+proc ea::db::loadMonarch {} {
+    global log monach_db
 
+    set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+}
 
 proc eAssist_db::loadDB {} {
     #****f* openDB/eAssist_db
@@ -58,7 +62,11 @@ proc eAssist_db::loadDB {} {
     
     set myDB [file join $program(Home) EA_setup.edb]
     
+    # Loading sqlite - EA's local db.
     sqlite3 db $myDB
+    
+    # Load Monarch database
+    #ea::db::loadMonarch
     
     #eAssist_db::initContainers
     eAssist_db::getEmailSetup

@@ -1,3 +1,7 @@
+= Version 4.1.1 (May 2018)
+== Box Labels
+* [NEW] You can now print Ship To labels. Enter a job number and ship order id (found next to the shipping orders on the ticket).
+
 = Version 4.1.0 (April 2018)
 == Box Labels
 * [NEW] Added template functionality
