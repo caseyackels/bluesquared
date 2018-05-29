@@ -31,27 +31,27 @@ package provide eAssist_ModBoxLabels 1.0
 
 proc ea::gui::bl::Main {} {
 	global log labelText job GS_textVar tplLabel blWid
-	
+
 	# Clear the frames before continuing
     eAssist_Global::resetFrames parent
-	
+
 	Shipping_Gui::initMenu
 	Shipping_Gui::initVariables
-	
+
 	# Init global vars
 	set GS_textVar(destQty) ""
 	set GS_textVar(batch) ""
 	set GS_textVar(shipvia) ""
-	
+
 	set blWid(f) [ttk::labelframe .container.f0 -text [mc "Job Information"]]
 	pack $blWid(f) -fill x -padx 5p -pady 3p -ipady 2p
-	
+
 	grid [ttk::label $blWid(f).text1a -text [mc "Customer:"]] -column 0 -row 0 -padx 2p -pady 2p -sticky e
 	grid [ttk::label $blWid(f).text1b -textvariable job(CustName)] -column 1 -columnspan 4 -row 0 -padx 2p -pady 2p -sticky w
-	
+
 	grid [ttk::label $blWid(f).text2a -text [mc "Job Title / Name:"]] -column 0 -row 1 -padx 2p -pady 2p -sticky e
 	grid [ttk::label $blWid(f).text2b -textvariable job(Description) ] -column 1 -columnspan 4 -row 1 -padx 2p -pady 2p -sticky w
-	
+
 	grid [ttk::label $blWid(f).text3a -text [mc "Job # / Template #:"]] -column 0 -row 2 -padx 2p -pady 2p -sticky e
 	grid [ttk::entry $blWid(f).entry1 -textvariable job(Number) -width 20 \
 								-validate key \
@@ -62,9 +62,9 @@ proc ea::gui::bl::Main {} {
 				ea::db::bl::getJobData ".container.f0.btn1" $blWid(f0BL).cbox1 $blWid(tab2f2).txt $blWid(f2BL).listbox
 			}
 		}
-		
 
-		
+
+
 	grid [ttk::entry $blWid(f).entry2 -textvariable job(Template) -width 5 \
 								-validate key \
 								-validatecommand {Shipping_Code::filterKeys -numeric %S %W %P}] -column 2 -row 2 -padx 2p -pady 2p -sticky ew
@@ -78,79 +78,79 @@ proc ea::gui::bl::Main {} {
 				ea::db::bl::getJobData ".container.f0.btn1" $blWid(f0BL).cbox1 $blWid(tab2f2).txt $blWid(f2BL).listbox
 			}
 		}
-		
-	#grid [ttk::button $f0.btn1 -text [mc "Search"] -command {ea::db::bl::getJobData .container.f1.boxlabels.f0.cbox1; ${log}::debug Searching for $job(Number)}] -column 3 -padx 2p -pady 2p -row 2 -sticky w
+
 	grid [ttk::button $blWid(f).btn1 -text [mc "Search"] -command {ea::db::bl::getJobData ".container.f0.btn1" $blWid(f0BL).cbox1 $blWid(tab2f2).txt $blWid(f2BL).listbox ; ${log}::debug Searching for $job(Number)}] -column 3 -padx 2p -pady 2p -row 2 -sticky w
-	
+
 	##
 	## Setup the Notebook
 	##
     set nbk [ttk::notebook .container.f1 -padding 10]
     pack $nbk -fill both
-    
+
     ttk::notebook::enableTraversal $nbk
-    
+
     # Create the tabs
     #
     $nbk add [ttk::frame $nbk.boxlabels] -text [mc "Box Labels"]
     $nbk add [ttk::frame $nbk.shipto] -text [mc "Ship To"]
-	
-	
+
+
 	# Label Information
 	set blWid(f0BL) [ttk::labelframe $nbk.boxlabels.f0 -text [mc "Label Information"] -padding 5]
 	pack $blWid(f0BL) -fill x -pady 3p -padx 5p
 	#grid columnconfigure $f0BL 1 -weight 2
-	
+
 	grid [ttk::label $blWid(f0BL).cboxText -text [mc "Versions"]] -column 0 -row 0 -pady 15p -padx 5p -sticky ne
 	grid [ttk::combobox $blWid(f0BL).cbox1 -state readonly -postcommand {ea::db::bl::getAllVersions $blWid(f0BL).cbox1}] -column 1 -row 0 -pady 15p -padx 4p -sticky new
-		
+
 		bind $blWid(f0BL).cbox1 <<ComboboxSelected>> {
-			set job(Version) [%W get]
-			if {[llength $job(TotalVersions)] > 1} {
-				set labelText(Row03) $job(Version)
-				${log}::debug Change Version to $job(Version)
+			if {$job(Template) eq "" || $job(Template) == 0} {
+				set job(Version) [%W get]
+				if {[llength $job(TotalVersions)] > 1} {
+					set labelText(Row03) $job(Version)
+					${log}::debug Change Version to $job(Version)
+				}
+
+				ea::db::bl::getShipCounts
+				${log}::debug Change Counts
+			} else {
+				${log}::debug GUI: We are using a template. Not displaying Versions from Monarch.
+				ea::db::bl::getTplVersions
 			}
-			
-			ea::db::bl::getShipCounts
-			${log}::debug Change Counts
 		}
-		#bind $frame0.cbox <<ComboboxSelected>> {
-		#		set tplLabel(LabelVersionDesc,current) [%W get]		
-		#		ea::db::bl::populateWidget
-		#}
-	
+
 	set col 0
 	for {set row 1} {5 >= $row} {incr row} {
 		set labelText(Row0$row) ""
-		
+
 		grid [ttk::label $blWid(f0BL).text$row -text [mc "Row $row"]] -column $col -row $row -padx 5p -pady 2p -sticky e
-		
+
 		incr col
 		grid [ttk::entry $blWid(f0BL).entry$row -textvariable labelText(Row0$row) -width 60 \
 											-validate key \
 											-validatecommand {Shipping_Code::filterKeys -textLength %S %W %P}] -column $col -row $row -padx 4p -pady 2p -sticky ew
-		
+
 		set col 0
 	}
-	
+
 	# Shipment Information
 	set blWid(f1BL) [ttk::labelframe $nbk.boxlabels.f1 -text [mc "Shipment Information"] -padding 5]
 	pack $blWid(f1BL) -fill x -pady 3p -padx 5p
 	#grid columnconfigure $f1BL 1 -weight 2
 	${log}::debug shipment info frame: $blWid(f1BL)
-	
+
 	# Max per box
 	grid [ttk::label $blWid(f1BL).txt1 -text [mc "Max. Per Box"]] -column 0 -row 0 -padx 5p -pady 2p -sticky e
 	grid [ttk::entry $blWid(f1BL).entry1 -textvariable GS_textVar(maxBoxQty) -width 10 \
 									-validate key \
 									-validatecommand {Shipping_Code::filterKeys -numeric %S %W %P}] -column 1 -row 0 -padx 5p -pady 2p -sticky w
-	
+
 	# Num shipments
 	grid [ttk::label $blWid(f1BL).txt2 -text [mc "Num. Shipments"]] -column 0 -row 1 -padx 5p -pady 2p -sticky e
 	grid [ttk::entry $blWid(f1BL).entry2 -textvariable GS_textVar(batch) -width 10 \
 									-validate key \
 									-validatecommand {Shipping_Code::filterKeys -numeric %S %W %P}] -column 1 -row 1 -padx 5p -pady 2p -sticky w
-	
+
 	# Ship Qty
 	grid [ttk::label $blWid(f1BL).txt3 -text [mc "Ship Qty"]] -column 0 -row 2 -padx 5p -pady 2p -sticky e
 	grid [ttk::entry $blWid(f1BL).entry3 -textvariable GS_textVar(destQty) -width 15 \
@@ -162,24 +162,24 @@ proc ea::gui::bl::Main {} {
 				Shipping_Code::addMaster $GS_textVar(destQty) $GS_textVar(batch) $GS_textVar(shipvia)
 				#${log}::debug bind-Return if serialize: Disable widgets
 			}
-	
+
 	grid [ttk::combobox $blWid(f1BL).cbox3 -state readonly] -column 2 -row 2 -padx 0p -pady 0p -sticky ew
 	grid [ttk::button $blWid(f1BL).btn3 -text [mc "Add to list"] -command {
 							;# Guard against the user inadvertantly hitting <Enter> or "Add" button without anything in the entry fields
 							if {([info exists GS_textVar(destQty)] eq 0) || ($GS_textVar(destQty) eq "")} {return}
-				
+
 							Shipping_Code::addMaster $GS_textVar(destQty) $GS_textVar(batch) $GS_textVar(shipvia)
 					}] -column 3 -row 2 -padx 5p -pady 2p -sticky w
-	
+
 	# Table
 	set blWid(f2BL) [ttk::frame $nbk.boxlabels.f2 -padding 5]
 	pack $blWid(f2BL) -fill both -pady 3p -padx 5p
-	
+
 	tablelist::tablelist $blWid(f2BL).listbox -columns {
                                                     3 "..." center
 													0 "Order ID"
-                                                    0 "Ship Qty" 
-													25 "Distribution Type" 
+                                                    0 "Ship Qty"
+													25 "Distribution Type"
                                                     } \
                                         -showlabels yes \
                                         -height 5 \
@@ -204,56 +204,35 @@ proc ea::gui::bl::Main {} {
     grid $blWid(f2BL).scrolly -column 1 -row 0 -sticky nse
 
     ::autoscroll::autoscroll $blWid(f2BL).scrolly ;# Enable the 'autoscrollbar'
-	
+
 	# Status
 	set blWid(f3BL) [ttk::frame $nbk.boxlabels.f3 -padding 2]
 	pack $blWid(f3BL) -fill both -pady 3p -padx 5p
-	
+
 	#set job(bl,TotalShipments) 999
 	grid [ttk::label $blWid(f3BL).text1 -text [mc "Shipments:"]] -column 0 -row 0 -pady 2p -padx 2p -sticky e
 	grid [ttk::label $blWid(f3BL).text2 -textvariable job(bl,TotalShipments)] -column 1 -row 0 -pady 2p -padx 2p -sticky w
-	
+
 	#set job(bl,TotalQuantity) 9,999,999
 	grid [ttk::label $blWid(f3BL).text3 -text [mc "Quantity:"]] -column 2 -row 0 -pady 2p -padx 2p -sticky e
 	grid [ttk::label $blWid(f3BL).text4 -textvariable job(bl,TotalQuantity)] -column 3 -row 0 -pady 2p -padx 2p -sticky w
-	
-	
-	
-	#bind [$blWid(f2BL).listbox bodytag] <KeyPress-BackSpace> {
-	#	$blWid(f2BL).listbox delete [$blWid(f2BL).listbox curselection]
-	#
-	#	;# Make sure we keep all the textvars updated when we delete something
-	#	Shipping_Code::addListboxNums ;# Add everything together for the running total
-	#	catch {Shipping_Code::createList} err ;# Make sure our totals add up
-	#	
-	#	# Serialize Labels
-	#	if {$tplLabel(SerializeLabel) == 1} {
-	#		${log}::debug <Bind-BackSpace> Serialize Label: Deleting entry, reenable the entry/button/dropdown widgets
-	#		
-	#		foreach child [winfo child $blWid(f1BL)] {
-	#			if {![string match *txt* $child]} {
-	#				$child configure -state normal
-	#			}
-	#		}
-	#	}
-	#}
-	
-	
+
+
 	bind [$blWid(f2BL).listbox bodytag] <Double-1> {
 		# Error Trapping
 		if {[$blWid(f2BL).listbox curselection] eq ""} {return}
 		if {[info exists GS_textVar(maxBoxQty)] == 0} {Error_Message::errorMsg BL004; return}
 		if {$GS_textVar(maxBoxQty) == ""} {Error_Message::errorMsg BL004; return}
-		
+
 		${log}::debug Deleting [$blWid(f2BL).listbox curselection]
 		$blWid(f2BL).listbox delete [$blWid(f2BL).listbox curselection]
-	
+
 		# Make sure we keep all the textvars updated when we delete something
 		Shipping_Code::addListboxNums ;# Add everything together for the running total
 		# If we don't have the [catch] here, then we will get an error if we remove the last entry.
 		# cell index "0,1" out of range
 		catch {Shipping_Code::createList} err ;# Make sure our totals add up
-	
+
 		if {[info exists err]} {${log}::debug Double-clicked and received an error: $err}
 		# Serialize Labels
 		if {$tplLabel(SerializeLabel) == 1} {
@@ -261,48 +240,49 @@ proc ea::gui::bl::Main {} {
 			# Entry, Entry2, Add
 			${log}::debug Re-enable widgets in $blWid(f1BL) Max Box, Qty and Add to List
 			foreach child [winfo children $blWid(f1BL)] {
-				if {[string match *entry1 $child] != 1 || [string match *cbox* $child] == 1 || [string match *add* $child] == 1} {
-					$child configure -state normal
-				}
+				#if {[string match *entry1 $child] != 1 || [string match *cbox* $child] == 1 || [string match *add* $child] == 1} {
+				#	$child configure -state normal
+				#}
+				$child configure -state normal
 			}
 		}
 	}
-	
+
 	##
 	## Ship To
 	##
 
 	set blWid(tab2f1) [ttk::labelframe $nbk.shipto.f1 -text [mc "Ship Orders"] -padding 10]
 	pack $blWid(tab2f1) -fill x -padx 5p -pady 3p -ipady 2p
-	
+
 	grid [ttk::label $blWid(tab2f1).txt1 -text [mc "Order ID"]] -column 0 -row 0 -padx 2p -pady 2p -sticky e
 	grid [ttk::combobox $blWid(tab2f1).cbox1 -width 10 -state readonly -textvariable job(ShipOrderID)] -column 1 -row 0 -padx 2p -pady 2p -sticky w
 	#grid [ttk::button $tab2f1.btn1 -text [mc "Get Data"] -command "ea::db::bl::getShipToData $tab2f1.btn1 $nbk.shipto.frame1.txt"] -column 3 -row 0 -padx 2p -pady 2p -sticky w
-	
+
 	grid [ttk::label $blWid(tab2f1).txt2 -text [mc "Num. Pallets"]] -column 0 -row 2 -padx 2p -pady 2p -sticky e
 	grid [ttk::entry $blWid(tab2f1).entry2 -textvariable job(ShipOrderNumPallets) -width 4] -column 1 -row 2 -padx 2p -pady 2p -sticky w
-	
-	
+
+
 	set blWid(tab2f2) [ttk::labelframe $nbk.shipto.f2 -text "Ship To Destination" -padding 10]
 	pack $blWid(tab2f2) -expand yes -fill both -padx 5p -pady 3p -ipady 2p
-	
+
 	# Create text widget to throw the ship to info into
 	grid [text $blWid(tab2f2).txt -width 30 \
 			-height 10 \
 			-xscrollcommand [list $blWid(tab2f2).scrollx set] \
 			-yscrollcommand [list $blWid(tab2f2).scrolly set]] -column 0 -row 0 -sticky news -pady 3p -padx 3p
 	grid columnconfigure $blWid(tab2f2) $blWid(tab2f2).txt -weight 1
-	
+
 	# setup the autoscroll bars
 	ttk::scrollbar $blWid(tab2f2).scrollx -orient h -command [list $blWid(tab2f2).txt xview]
 	ttk::scrollbar $blWid(tab2f2).scrolly -orient v -command [list $blWid(tab2f2).txt yview]
-	
+
 	# Ship To Bindings
 	bind $blWid(tab2f1).cbox1 <<ComboboxSelected>> {
 		${log}::debug Display Ship To for Order $job(ShipOrderID)
 		ea::db::bl::getShipToData {} $blWid(tab2f2).txt
 	}
-   
+
    # NOTEBOOK BINDINGS
 	bind $nbk <<NotebookTabChanged>> {
 		${log}::debug Notebook tab changed to: [%W select] / $blWid(f1BL)
@@ -348,60 +328,60 @@ proc shippingGUI {} {
     #
     #***
     global GI_textVar GS_textVar frame1 frame2b genResults GS_windows program job tplLabel
-    
+
     Shipping_Code::openHistory ;# Populate the variable so we don't get errors upon startup.
-    
+
     # Clear the frames before continuing
     eAssist_Global::resetFrames parent
-	
+
     set nbk [ttk::notebook .container.frame0 -padding 5]
     pack $nbk -expand yes -fill both
-    
+
     ttk::notebook::enableTraversal $nbk
-    
+
     #
     # Setup the notebook
     #
     $nbk add [ttk::frame $nbk.boxlabels] -text [mc "Box Labels"]
     $nbk add [ttk::frame $nbk.shipto] -text [mc "Ship To"]
-	
+
 ###
 ### - Box Labels
-### 
+###
 # Frame 0 - .container.frame0.boxlabels.frame0
 	set frame0 [ttk::labelframe $nbk.boxlabels.frame0 -text "Template"]
 	pack $frame0 -expand yes -fill both -padx 5p -pady 3p -ipady 2p
-		
+
 	set GS_textVar(Template) ""
 	grid [ttk::label $frame0.txt1 -text [mc "Template #"]] -column 0 -row 0 -padx 2p -pady 2p
 	grid [ttk::entry $frame0.entry -textvariable GS_textVar(Template)] -column 1 -row 0 -padx 2p -pady 2p -sticky w
 	grid [ttk::button $frame0.btn -text [mc "Get Data"] -command {ea::db::bl::getTplData $GS_textVar(Template)}] -column 2 -row 0 -padx 2p -pady 2p -sticky w
-	
+
 	grid [ttk::label $frame0.txt2a -text [mc "Customer"]] -column 0 -row 1 -padx 2p -pady 2p
 	grid [ttk::label $frame0.txt2b -textvariable job(CustName)] -column 1 -columnspan 4 -row 1 -padx 2p -pady 2p -sticky w
-	
+
 	grid [ttk::label $frame0.txt3a -text [mc "Job Title"]] -column 0 -row 2 -padx 2p -pady 2p
 	grid [ttk::label $frame0.txt3b -textvariable job(Title)] -column 1 -columnspan 4 -row 2 -padx 2p -pady 2p -sticky w
-	
+
 	grid [ttk::label $frame0.txt4a -text [mc "Label Path"]] -column 0 -row 3 -padx 2p -pady 2p
 	grid [ttk::label $frame0.txt4b -textvariable tplLabel(LabelPath)] -column 1 -columnspan 4 -row 3 -padx 2p -pady 2p ;#-sticky w
 	#grid [ttk::entry $frame0.txt4b -textvariable tplLabel(LabelPath)] -column 1 -columnspan 4 -row 3 -padx 2p -pady 2p ;#-sticky w
-	
+
 	grid [ttk::label $frame0.txt5a -text [mc "Label Name"]] -column 0 -row 4 -padx 2p -pady 2p
 	grid [ttk::combobox $frame0.cbox] -column 1 -row 4 -padx 2p -pady 2p -sticky w
-	
+
 		bind $frame0.cbox <<ComboboxSelected>> {
-				set tplLabel(LabelVersionDesc,current) [%W get]		
+				set tplLabel(LabelVersionDesc,current) [%W get]
 				ea::db::bl::populateWidget
 		}
-		
+
 		bind $frame0.entry <Return> {
 			if {$GS_textVar(Template) != ""} {
 				ea::db::bl::getTplData $GS_textVar(Template)
 			}
 		}
-	
-	 
+
+
 # Frame 1
     set frame1 [ttk::labelframe $nbk.boxlabels.frame1 -text "Label Information"]
     pack $frame1 -expand yes -fill both -padx 5p -pady 3p -ipady 2p
@@ -527,7 +507,7 @@ proc shippingGUI {} {
     grid $frame2a.cbox -column 2 -row 2
 
     grid $frame2a.add -column 3 -row 2 -sticky nes -padx 5p
-    
+
 
 
 
@@ -577,7 +557,7 @@ proc shippingGUI {} {
 ;# The ttk way, to change the background
 ttk::style map TCombobox -fieldbackground [list focus yellow]
 ttk::style map TEntry -fieldbackground [list focus yellow]
- 
+
 
 bind $frame2a.entry <KeyPress-Down> {tk::TabToWindow [tk_focusNext %W]}
 bind $frame2a.entry <KeyPress-Up> {tk::TabToWindow [tk_focusPrev %W]}
@@ -586,10 +566,10 @@ foreach window "$frame2a.add $frame2a.entry $frame2a.entry1" {
 	bind $window <Return> {tk::TabToWindow [tk_focusNext %W]}
 	bind $window <KeyPress-Down> {tk::TabToWindow [tk_focusNext %W]}
     bind $window <KeyPress-Right> {tk::TabToWindow [tk_focusNext %W]}
-	
+
     bind $window <KeyPress-Left> {tk::TabToWindow [tk_focusPrev %W]}
     bind $window <KeyPress-Up> {tk::TabToWindow [tk_focusPrev %W]}
-    
+
 }
 
     bind $frame2a.entry2 <Return> {
@@ -659,11 +639,11 @@ foreach window [list 1 2 3 4 5] {
 	# Go backwards
 	bind $frame1.entry$window <Shift-Return> {tk::TabToWindow [tk_focusPrev %W]}
 	bind $frame1.entry$window <KeyPress-Up> {tk::TabToWindow [tk_focusPrev %W]}
-	
+
 	# Go forwards
     bind $frame1.entry$window <Return> {tk::TabToWindow [tk_focusNext %W]}
     bind $frame1.entry$window <KeyPress-Down> {tk::TabToWindow [tk_focusNext %W]}
-    
+
     bind $frame1.entry$window <Control-KeyPress-D> {%W delete 0 end}
 
     bind $frame1.entry$window <ButtonPress-3> {tk_popup .editPopup %X %Y}
@@ -676,11 +656,11 @@ bind [$frame2b.listbox bodytag] <KeyPress-BackSpace> {
     ;# Make sure we keep all the textvars updated when we delete something
     Shipping_Code::addListboxNums ;# Add everything together for the running total
     catch {Shipping_Code::createList} err ;# Make sure our totals add up
-	
+
     # Serialize Labels
     if {$tplLabel(SerializeLabel) == 1} {
         ${log}::debug <Bind-BackSpace> Serialize Label: Deleting entry, reenable the entry/button/dropdown widgets
-        
+
         foreach child [winfo child .container.frame2.frame2a] {
             if {![string match *text* $child]} {
                 $child configure -state normal
@@ -722,35 +702,35 @@ bind [$frame2b.listbox bodytag] <Double-1> {
 #}
 
 
- 
+
 ###
 ### - Ship To
-### 
+###
 	set tab2f1 [ttk::labelframe $nbk.shipto.frame0 -text "Job Information" -padding 10]
 	pack $tab2f1 -fill x -padx 5p -pady 3p -ipady 2p
-	
+
 	grid [ttk::label $tab2f1.txt1 -text [mc "Job # / Order ID"]] -column 0 -row 0 -padx 2p -pady 2p -sticky e
 	grid [ttk::entry $tab2f1.entry1 -width 10 -textvariable job(Number)] -column 1 -row 0 -padx 2p -pady 2p -sticky w
 	grid [ttk::entry $tab2f1.entry2 -width 5 -textvariable job(ShipOrderID)] -column 2 -row 0 -padx 2p -pady 2p -sticky w
 	grid [ttk::button $tab2f1.btn1 -text [mc "Get Data"] -command "ea::db::bl::getShipToData $tab2f1.btn1 $nbk.shipto.frame1.txt"] -column 3 -row 0 -padx 2p -pady 2p -sticky w
 	#grid [ttk::button $tab2f1.bnt2 -text [mc "Print Labels"] -command "Shipping_Code::writeShipTo $nbk.shipto.frame0.entry3 $nbk.shipto.frame1.txt"] -column 4 -row 0 -padx 2p -pady 2p -sticky w
-	
+
 	grid [ttk::label $tab2f1.txt2 -text [mc "Num. Pallets"]] -column 0 -row 2 -padx 2p -pady 2p -sticky e
 	grid [ttk::entry $tab2f1.entry3 -textvariable job(ShipOrderNumPallets) -width 4] -column 1 -row 2 -padx 2p -pady 2p -sticky w
-	
+
 	set tab2f2 [ttk::labelframe $nbk.shipto.frame1 -text "Ship To Destination" -padding 10]
 	pack $tab2f2 -expand yes -fill both -padx 5p -pady 3p -ipady 2p
-	
+
 	# Create text widget to throw the ship to info into
 	grid [text $tab2f2.txt -width 30 \
 			-xscrollcommand [list $tab2f2.scrollx set] \
 			-yscrollcommand [list $tab2f2.scrolly set]] -column 0 -row 0 -sticky news -pady 3p -padx 3p
 	grid columnconfigure $tab2f2 $tab2f2.txt -weight 1
-	
+
 	# setup the autoscroll bars
 	ttk::scrollbar $tab2f2.scrollx -orient h -command [list $tab2f2.txt xview]
 	ttk::scrollbar $tab2f2.scrolly -orient v -command [list $tab2f2.txt yview]
-   
+
    # NOTEBOOK BINDINGS
 	bind $nbk <<NotebookTabChanged>> {
 		${log}::debug Notebook tab changed to: [%W select]
@@ -763,11 +743,11 @@ bind [$frame2b.listbox bodytag] <Double-1> {
             eAssist::addButtons [mc "Print Labels"] "Shipping_Code::writeShipTo %W.shipto.frame0.entry3 %W.shipto.frame1.txt" btn1 0 0p
 		}
 	}
-	
+
 Shipping_Gui::initMenu
 Shipping_Gui::initVariables
 
-   
+
 } ;# End of shippingGUI
 
 proc printbreakDown {args} {
@@ -798,12 +778,12 @@ proc printbreakDown {args} {
     #
     #***
     global GS_textVar mySettings log labelText
-    
+
     if {![info exists mySettings(path,bdfile)]} {
         ${log}::debug Path to the BreakDown file does not exist. Exiting...
         return
     }
-    
+
     # Guard against the possiblity that the breakdown window has never been launched.
     # If it doesn't exist, lets launch it, then immediately hide it.
     if {![winfo exists .breakdown]} {
@@ -812,7 +792,7 @@ proc printbreakDown {args} {
         wm withdraw .breakdown
         focus .
     }
-        
+
     set myBreakDownText [.breakdown.frame1.txt get 0.0 end]
     set file [open [file join $mySettings(Home) $mySettings(path,bdfile)] w]
 
@@ -827,7 +807,7 @@ proc printbreakDown {args} {
     chan close $file
 
 
-    
+
     if {$args eq "email"} {
         ## *** Send an email regardless if we print the breakdown or not.
         ## Email
@@ -852,7 +832,7 @@ proc printbreakDown {args} {
                                         -line5 $labelText(Row05) \
                                         -breakdown $myBreakDownText
         #${log}::debug [list $GS_textVar(line1) $GS_textVar(line2) $myBreakDownText]
-        
+
         # Check for required settings, exit if we don't have them
         if {![info exists mySettings(path,printer)]} {
             ${log}::debug Path to printer does not exist. Exiting...
@@ -862,17 +842,17 @@ proc printbreakDown {args} {
             ${log}::debug Path to WordPad does not exist. Exiting...
             return
         }
-        
+
         ##
         ## Print the breakdown
-        ## 
+        ##
         #catch {exec [file join C:\\ "Program Files" "Windows NT" Accessories wordpad.exe] /pt breakdown.txt {\\vm-printserver\Shipping-Time}}
         ${log}::debug [file join $mySettings(path,wordpad)] /pt [file join $mySettings(Home) $mySettings(path,bdfile)] "$mySettings(path,printer)"
-        catch {exec [file join $mySettings(path,wordpad)] /pt [file join $mySettings(Home) $mySettings(path,bdfile)] "$mySettings(path,printer)"} 
+        catch {exec [file join $mySettings(path,wordpad)] /pt [file join $mySettings(Home) $mySettings(path,bdfile)] "$mySettings(path,printer)"}
     }
-    
 
-    
+
+
 } ;# End of printbreakDown
 
 
@@ -904,9 +884,9 @@ proc breakDown {{show_win 0}} {
     #
     #***
     global GS_textVar GS_widget GS_winGeom log
-	
-	
-    
+
+
+
     ${log}::debug Creating Breakdown window ...
 
     if {![winfo exists .breakdown]} {
@@ -927,11 +907,11 @@ proc breakDown {{show_win 0}} {
         text $frame1.txt -width 30 \
                 -xscrollcommand [list $frame1.scrollx set] \
                 -yscrollcommand [list $frame1.scrolly set]
-        
+
         # setup the autoscroll bars
         ttk::scrollbar $frame1.scrollx -orient h -command [list $frame1.txt xview]
         ttk::scrollbar $frame1.scrolly -orient v -command [list $frame1.txt yview]
-       
+
         grid $frame1.txt -column 0 -row 0 -sticky news -pady 3p -padx 3p
         grid columnconfigure $frame1 $frame1.txt -weight 1
 
@@ -960,10 +940,10 @@ proc breakDown {{show_win 0}} {
         if {[winfo ismapped .breakdown] == 0 && $show_win != 0} {
             # Display the window
             wm deiconify .breakdown
-            
+
             ${log}::debug Breakdown window is already mapped, deiconify(ing)
         }
-        
+
         # Refreshing
         .breakdown.frame1.txt delete 0.0 end
     }
@@ -1068,9 +1048,9 @@ proc breakDown {{show_win 0}} {
 #
 #    set frame1 [ttk::frame .chooseLabel.frame1]
 #    grid $frame1 -padx 5p -pady 5p
-#    
+#
 #    ${log}::debug Number of lines to be printed: $lines
-#   
+#
 #    ttk::button $frame1.print -text "Print" -command {Shipping_Code::printCustomLabels $lines $labels; destroy .chooseLabel}
 #    ttk::button $frame1.close -text "Close" -command {destroy .chooseLabel}
 #
@@ -1101,7 +1081,7 @@ proc Shipping_Gui::initMenu {} {
     #	N/A
     #
     # PARENTS
-    #	
+    #
     #
     # NOTES
     #
@@ -1110,19 +1090,19 @@ proc Shipping_Gui::initMenu {} {
     #***
     global log mb
     ${log}::debug --START -- [info level 1]
-    
+
     if {[winfo exists $mb.modMenu.quick]} {
         destroy $mb.modMenu.quick
     }
-    
+
     # Disable menu items
     $mb.file entryconfigure 0 -state disable
 
     $mb.modMenu delete 0 end
-    
+
     $mb.modMenu add command -label [mc "Clear List"] -command {Shipping_Code::clearList}
     $mb.modMenu add command -label [mc "Show Breakdown"] -command {Shipping_Gui::breakDown 1}
-    $mb.modMenu add command -label [mc "Preferences"] -command {ea::gui::pref::startPref} 
-	
+    $mb.modMenu add command -label [mc "Preferences"] -command {ea::gui::pref::startPref}
+
     ${log}::debug --END -- [info level 1]
 } ;# Shipping_Gui::initMenu

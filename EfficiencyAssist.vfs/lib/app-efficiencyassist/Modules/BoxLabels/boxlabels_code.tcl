@@ -118,23 +118,23 @@ proc controlFile {args} {
                                                 INNER JOIN LabelHeaders ON LabelHeaders.LabelHeaderID = LabelHeaderGrp.LabelHeaderID
                                                 WHERE LabelHeaderGrp.LabelProfileID = $tplLabel(LabelProfileID)
                                                 ORDER BY LabelHeaders.LabelHeaderSystemOnly DESC"]
-                        
+
                         set headers [::csv::join $tmp(hdr_names)]
                         set f_name [list $tplLabel(Name) - [join $tplLabel(LabelProfileDesc)]]
                         set f_path [file dirname $tplLabel(LabelPath)]
                         ${log}::debug file name: [file join $f_path $f_name.csv]
-                            
+
                     } else {
                         # Set Default headers - These are used in all Generic labels (Generic1 through Generic5)
                         ${log}::debug controlFile - Using default settings
-                        set f_path $mySettings(path,labelDBfile) 
+                        set f_path $mySettings(path,labelDBfile)
                         set f_name $mySettings(name,labelDBfile)
                         set headers [::csv::join "Labels Quantity Line1 Line2 Line3 Line4 Line5"]
                     }
-                    
+
                     if {[lindex $args 1] eq "fileopen"} {
                         #set files(destination) [open [file join $mySettings(path,labelDBfile) $mySettings(name,labelDBfile).csv] w]
-                        
+
                         # Check to see if we can write to the path. If we can't, fail gracefully.
                         # todo this should happen when we know we're using a template.
                         #set writable [eAssist_Global::fileAccessibility [file join $f_path] [join $f_name].csv]
@@ -144,34 +144,33 @@ proc controlFile {args} {
                         # Insert Header row
                         #chan puts $files(destination) [::csv::join "Labels Quantity Line1 Line2 Line3 Line4 Line5"]
                         chan puts $files(destination) $headers
-            
+
                     } elseif {[lindex $args 1] eq "fileclose"} {
                         chan close $files(destination)
                         }
                     }
-    
+
         history {
                     if {[file exists [file join $mySettings(Home) history.csv]] ne 1} {
                         set files(history) [open [file join $mySettings(Home) history.csv] w]
                     }
-        
+
                     if {[lindex $args 1] eq "filewrite"} {
                         #set files(history_tmp) [open history_tmp.csv w+]
                         set files(history) [open [file join $mySettings(Home) history.csv] w]
-        
+
                     } elseif {[lindex $args 1] eq "fileappend"} {
                         set files(history) [open [file join $mySettings(Home) history.csv] a+]
-        
+
                     } elseif { [lindex $args 1] eq "fileread"} {
                         set files(history) [open [file join $mySettings(Home) history.csv] r+]
-        
+
                     } elseif {[lindex $args 1] eq "fileclose"} {
                         flush $files(history)
                         chan close $files(history)
                     }
             }
     }
-
 } ;# End of controlFile
 
 
@@ -185,7 +184,7 @@ proc writeText {labels quantity total_boxes} {
         set NumLabels $labels
         set BoxQuantity $quantity
         set TotalBoxes $total_boxes
-        
+
         if {$tplLabel(SerializeLabel) eq ""} {
             ${log}::debug We are not serializing.
             lappend textValues $quantity $labels
@@ -193,7 +192,7 @@ proc writeText {labels quantity total_boxes} {
             ${log}::debug We are serializing, inserting total boxes for shipment
             lappend textValues $quantity $labels $total_boxes
         }
-        
+
         # Get Profile Headers. These should only be the headers that contain text.
         #foreach item [lsort [array names labelText]] {
         #    if {[string match Row* $item]} {
@@ -202,14 +201,14 @@ proc writeText {labels quantity total_boxes} {
         #        }
         #    }
         #}
-    
+
     } else {
         # This is for the Generic labels
         #lappend textValues $labels $quantity "$GS_textVar(Row01)" "$GS_textVar(Row02)" "$GS_textVar(Row03)" "$GS_textVar(Row04)" "$GS_textVar(Row05)"
         lappend textValues $labels $quantity
-        
+
     }
-    
+
     # Get Profile Headers. These should only be the headers that contain text.
     foreach item [lsort [array names labelText]] {
         if {[string match Row* $item]} {
@@ -218,12 +217,11 @@ proc writeText {labels quantity total_boxes} {
             }
         }
     }
-    
+
     # Insert the values
     chan puts $files(destination) [::csv::join $textValues]
-	
-	${log}::debug writeText: textValues: $textValues
 
+	${log}::debug writeText: textValues: $textValues
 } ;# End of writeText
 
 
@@ -252,7 +250,7 @@ proc insertInListbox {args} {
 
     } else {
         Error_Message::errorMsg insertInListBox1 ""
-        
+
         return
     }
     # This way we can see incoming values
@@ -260,7 +258,6 @@ proc insertInListbox {args} {
 
     # Add everything together for the running total
     addListboxNums
-
 } ;# insertInListbox
 
 proc addListboxNums {{reset 0}} {
@@ -315,7 +312,7 @@ proc addListboxNums {{reset 0}} {
                 set GS_textVar(labelsFull) ""
                 set GS_textVar(labelsPartialLike) ""
                 set GS_textVar(labelsPartialUnique) ""
-    
+
                 if {[winfo exists .breakdown]} {
                     # Find out if the window exists before finding out if we can see it or not.
                     if {[winfo ismapped .breakdown] == 1} {${log}::debug "addlistbox Refreshing Break Down"; Shipping_Gui::breakDown}
@@ -323,19 +320,19 @@ proc addListboxNums {{reset 0}} {
             }
     }
 } ;# addListboxNums
- 
+
 
 proc createList {args} {
     global log GS_textVar tplLabel blWid job
 
     ${log}::debug Start Createlist
     ea::code::bl::trackTotalQuantities
-    
+
     if {$tplLabel(LabelProfileID) == 0} {
         ${log}::debug No Profile ID, skipping createList
         return
     }
-    
+
     if {[info exists GS_textVar(maxBoxQty)] == 0} {Error_Message::errorMsg BL004; return}
     if {$GS_textVar(maxBoxQty) == ""} {Error_Message::errorMsg BL004; return}
 
@@ -352,7 +349,7 @@ proc createList {args} {
     # L_rawEntries holds each qty (i.e. 200 204 317)
     foreach entry $L_rawEntries {
         set result [doMath $entry $GS_textVar(maxBoxQty)]
-    
+
             #if {[lrange $result 0 0 ]!= 0} {
             #    ${log}::debug Result: [lrange $result 0 0] Label @ $GS_textVar(maxBoxQty)
             #}
@@ -360,47 +357,47 @@ proc createList {args} {
             #if {[lrange $result 1 end] != 0} {
             #    ${log}::debug Result: 1 Label @ [lrange $result 1 end]
             #}
-    
+
         # Make sure the variables are cleared out; we don't want any data to lag behind.
         set FullBoxes_text ""
         set PartialQty_text ""
-        
+
         # FullBoxes
         if {[lrange $result 0 0] != 0} {
             lappend FullBoxes [lrange $result 0 0]
             set FullBoxes_text [lrange $result 0 0]
-            ${log}::debug Fullbox Result ($GS_textVar(maxBoxQty)): [lrange $result 0 0] 
+            ${log}::debug Fullbox Result ($GS_textVar(maxBoxQty)): [lrange $result 0 0]
         }
-        
+
         # Partials
         if {[lrange $result 1 1] != 0} {
             lappend PartialQty [lsort -decreasing [lrange $result 1 1]]
             set PartialQty_text [lrange $result 1 1]
             ${log}::debug Result: 1 Label @ [lrange $result 1 end]
         }
-        
+
         # This controls the Total Boxes value that we need for serialized labels
         set tmpFullBoxes $FullBoxes
         set tmpPartialQty $PartialQty
         ${log}::debug tmpFullBoxes (If empty this will default to blank): $FullBoxes
         ${log}::debug tmpPartialQty: $tmpPartialQty
-        
+
         if {$tmpFullBoxes ne ""} {
             if {[llength $tmpFullBoxes] <= 2} {
                 ${log}::debug Two or more full boxes, we need to join them with +: $tmpFullBoxes
                 set tmpFullBoxes [join $tmpFullBoxes " + "]
             }
             ${log}::debug full boxes: $tmpFullBoxes
-        
+
         } else {
             ${log}::debug No fullboxes: $tmpFullBoxes (set to 0)
             set tmpFullBoxes 0
         }
-        
+
         if {$tmpPartialQty eq ""} {
             ${log}::debug tmpPartialQty is blank, using tmpFullBoxes: $tmpFullBoxes
             set total_boxes $tmpFullBoxes
-            
+
         } else {
             set tmpPartialQty [llength $tmpPartialQty]
             set tmpFullBoxes [join $tmpFullBoxes " + "]
@@ -413,13 +410,13 @@ proc createList {args} {
 
     if {[info exists FullBoxes] == 1} {
         if {![info exists PartialQty]} {set PartialQty ""}
-    
+
         displayListHelper $FullBoxes $PartialQty $total_boxes
             ${log}::debug Full Boxes: $FullBoxes $PartialQty
 
     } elseif {[info exists PartialQty] == 1} {
         set FullBoxes ""
-    
+
         displayListHelper $FullBoxes $PartialQty $total_boxes
             ${log}::debug Partial Boxes: $FullBoxes $PartialQty
 
@@ -435,18 +432,16 @@ proc createList {args} {
 
     # Keep the breakdown window updated even if it is open
     if {[winfo exists .breakdown] == 1} {${log}::debug Refreshing Break Down; Shipping_Gui::breakDown}
-
 } ;# createList
 
 proc doMath {totalQuantity maxPerBox} {
     global log
 # Do mathmatical equations, then double check to make sure it comes out to the value of totalQty
-
     if {($totalQuantity == "") || ($totalQuantity == 0) || $totalQuantity == {}} {
         ${log}::debug doMath: totalQuantity should have a value, exiting: $totalQuantity
         return
     }
-    
+
     ${log}::debug totalQuantity: $totalQuantity
     ${log}::debug maxPerBox: $maxPerBox
 
@@ -468,7 +463,6 @@ proc doMath {totalQuantity maxPerBox} {
     }
 
     return "$totalFullBoxs $partialBoxQTY"
-
 } ;# doMath
 
 
@@ -492,7 +486,6 @@ proc extractFromList {list} {
 	}
     }
     linsert $GI_groups 0 $GI_uniques
-
 } ;# extractFromList
 
 
@@ -502,7 +495,7 @@ proc displayListHelper {fullboxes partialboxes total_boxes {reset 0}} {
 
     ${log}::debug Initiating displayListHelper
     ${log}::debug reset: $reset
-    
+
     if {$reset ne 0} {
         ;# If we clear the entire list, we want to reset all counters.
         set GI_textVar(qty) 0
@@ -564,7 +557,7 @@ proc displayListHelper {fullboxes partialboxes total_boxes {reset 0}} {
     set GS_textVar(labelsPartialUnique) $valueLists ;# get clean list with no other text
      foreach value $valueLists {
         set GI_textVar(labelsPartial2) "1 Box @ $valueLists"
-    
+
         writeText 1 $value $total_boxes
     }
 
@@ -575,9 +568,9 @@ proc displayListHelper {fullboxes partialboxes total_boxes {reset 0}} {
 
 proc printLabels {} {
     global log GS_textVar programPath lineNumber mySettings tplLabel tmp labelText
-    
+
     ${log}::debug Initiating printLabels
-    
+
     # These apply to all labels
 	if {[info exists mySettings(path,bartender)] != 0} {
 		if { $mySettings(path,bartender) == ""} {
@@ -585,12 +578,12 @@ proc printLabels {} {
 			return
 		}
 	}
-	
+
 	if {$mySettings(path,labelDir) == ""} {
 		${log}::critical path,labelDir is empty: $mySettings(path,labelDir)
 		return
 	}
-    
+
     if {![info exists GS_textVar(maxBoxQty)]} {
         Error_Message::errorMsg BL002
         return
@@ -601,7 +594,7 @@ proc printLabels {} {
         Error_Message::errorMsg BL003
         return
     }
-    
+
     catch {Shipping_Code::createList} err ;# Make sure our totals add up
     if {[info exists err]} {
         if {$err ne ""} {
@@ -609,56 +602,56 @@ proc printLabels {} {
             return
         }
     }
-    
-    if {$tplLabel(ID) eq ""} {   
+
+    if {$tplLabel(ID) eq ""} {
         #Shipping_Code::createList
-           
+
         #Shipping_Code::writeHistory $GS_textVar(maxBoxQty)
         #Shipping_Code::openHistory
-    
+
         Shipping_Gui::printbreakDown email ; # Send an email of the breakdown
     }
-    
+
 
 
     if {$tplLabel(ID) != ""} {
         ${log}::debug Printing from template: $tplLabel(ID) $tplLabel(Name)
-        
+
         set labelDir [file dirname $tplLabel(LabelPath)]
         set filename [file tail $tplLabel(LabelPath)]
-        
+
         # Set filepath to windows standard for BarTender
         set labelDir [join [split $labelDir /] \\]
-        
+
         # Set runlist file name, maybe this should be placed into the tplLabel array? tplLabel(RunListFile)
         set runlist "$labelDir\\[join "$tplLabel(LabelVersionDesc) - $tplLabel(LabelProfileDesc)"].csv"
 
-        
+
         ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\$filename /D=$runlist /P /CLOSE /MIN=TASKBAR
         #exec $mySettings(path,bartender) /AF=$labelDir\\$filename /D=$runlist
         exec $mySettings(path,bartender) /AF=$labelDir\\$filename /D=$runlist /P /CLOSE /MIN=TASKBAR
-        
+
     } else {
             ${log}::debug Printing Generic Labels
             # Fix the file paths so that bartender doesn't choke
             set labelDir [join [split $mySettings(path,labelDir) /] \\]
-            
+
             if {$labelText(Row05) != ""} {
                 exec $mySettings(path,bartender) /AF=$labelDir\\6LINEDB.btw /P /CLOSE /MIN=TASKBAR
                 ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\6LINEDB.btw /P /CLOSE /MIN=TASKBAR
-                    
+
             } elseif {$labelText(Row04) != ""} {
                 exec $mySettings(path,bartender) /AF=$labelDir\\5LINEDB.btw /P /CLOSE /MIN=TASKBAR
                 ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\5LINEDB.btw /P /CLOSE /MIN=TASKBAR
-        
+
             } elseif {$labelText(Row03) != ""} {
                 exec $mySettings(path,bartender) /AF=$labelDir\\4LINEDB.btw /P /CLOSE /MIN=TASKBAR
                 ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\4LINEDB.btw /P /CLOSE /MIN=TASKBAR
-    
+
             } elseif {$labelText(Row02) != ""} {
                 exec $mySettings(path,bartender) /AF=$labelDir\\3LINEDB.btw /P /CLOSE /MIN=TASKBAR
                 ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\3LINEDB.btw /P /CLOSE /MIN=TASKBAR
-       
+
             } elseif {$labelText(Row01) != ""} {
                 exec $mySettings(path,bartender) /AF=$labelDir\\2LINEDB.btw /P /CLOSE /MIN=TASKBAR
                 ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\2LINEDB.btw /P /CLOSE /MIN=TASKBAR
@@ -721,7 +714,6 @@ proc truncateHistory {} {
         puts "config textVar: $GS_textVar(history)"
         $frame1.entry1 configure -values $GS_textVar(history)
     }
-
 } ;# truncateHistory
 
 proc writeHistory {maxBoxQty} {
@@ -765,13 +757,12 @@ proc writeHistory {maxBoxQty} {
         chan puts $files(history) [::csv::join $textHistory]
         #puts "text: $textHistory"
         controlFile history fileclose
-        
+
         ${log}::debug "WriteHistory: Saved $GS_textVar(Row01)"
     }
 
     # After we add the new labels, lets make sure we trim the file back down to the allotted amount.
     #truncateHistory
-
 } ;# writeHistory
 
 proc openHistory {} {
@@ -823,7 +814,7 @@ proc openHistory {} {
             lappend GS_textVar(history) [lindex [::csv::split $line] 0]
         }
     }
-    
+
     ${log}::debug "historyData: $GS_textVar(history)"
 
     #puts "openHistory: Ending"
@@ -931,24 +922,24 @@ proc addMaster {destQty batch shipvia} {
     #	N/A
     #
     #***
-    global log GS_textVar tplLabel
+    global log GS_textVar tplLabel blWid
 
     # This shouldn't be needed, we have existing code in the [bind]ing, and in the button command
     #if {$GS_textVar(destQty) eq ""} {return}
-    
+
     # Serialize Labels
     # After we enter one shipment, disable widgets so that the end-user cannot add more. This is a restriction because of how we create the runlist file.
     # These widgets should be re-enabled if the shipment is removed.
     if {$tplLabel(SerializeLabel) == 1} {
         ${log}::debug We are serializng the label, disable the entry/button/dropdown widgets
-        
-        foreach child [winfo child .container.frame2.frame2a] {
+
+        foreach child [winfo child $blWid(f1BL)] {
             if {[string match *entry* $child]} {
                 $child configure -state disable
             }
         }
     }
-    
+
     Shipping_Code::insertInListbox $destQty $batch $shipvia
 
     ;# Reset the variables
@@ -1004,7 +995,7 @@ proc clearList {} {
 } ;# End of Shipping_Code namespace
 
 proc Shipping_Code::onPrint_event {args} {
-    #****f* emailBoxLabels/Shipping_Code 
+    #****f* emailBoxLabels/Shipping_Code
     # CREATION DATE
     #   09/17/2014 (Wednesday Sep 17)
     #
@@ -1013,46 +1004,46 @@ proc Shipping_Code::onPrint_event {args} {
     #
     # COPYRIGHT
     #	(c) 2014 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
-    #   Shipping_Code::email::boxlabels -line1 <arg> -line2 <arg> -line3 <arg> -line4 <arg> -line5 <arg> -breakdown <arg> 
+    #   Shipping_Code::email::boxlabels -line1 <arg> -line2 <arg> -line3 <arg> -line4 <arg> -line5 <arg> -breakdown <arg>
     #
     # FUNCTION
     #	Preprocesses data before sending it on to email::email
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     # SEE ALSO
     #   email::email
-    #   
+    #
     #***
 	global log
 	set wrongArgs [mc "wrong # args should be: Shipping_Code::onPrint_event -line1 <arg> -line2 <arg> -line3 <arg> -line4 <arg> -line5 <arg> -breakdown <arg>"]
-	
+
 	# Just in case no arguments are passed
 	if {(![info exists args]) || ($args eq "")} {
 		return -code 1 $wrongArgs
 	}
 
 	set eventName [lindex [split [lindex [split [lindex [info level 0] 0] ::] 2] _] 0]
-	
+
 	set Subj [join [maildb::getEmailText  $::boxLabelsVars::cModName $eventName -subject]]
 	set Body [join [maildb::getEmailText  $::boxLabelsVars::cModName $eventName -body]]
-	
+
 	# String Map
 	# set myText "Line 1 of the label"
 	# set emailBody "Body of the email: %b"
 	# string map "%b [list $myText]" $emailBody
-	foreach {key value} $args {		
+	foreach {key value} $args {
 			# List all eligible sections for the macro's.
 			# We keep the same Subj variable, because we are continually re[set]ing it, an want to keep the original data.
 			# Once we hit the body, we go through an iterative process.
@@ -1083,24 +1074,24 @@ proc Shipping_Code::onPrint_event {args} {
 							set Body [string map "%b [list $value]" $Body]
 							}
 				default		{return -code 1 $wrongArgs}
-				
+
 			}
 	}
 
     #${log}::debug New Subject: $Subj
-	#${log}::debug New Body: $Body		
+	#${log}::debug New Body: $Body
 	mail::mail $::boxLabelsVars::cModName $eventName -subject $Subj -body $Body
 } ;# Shipping_Code::emailBoxLabels
 
 proc Shipping_Code::writeShipTo {wid_entry3 wid_txt} {
     global log files job mySettings
-    
+
     # wid_entry3 is old and should be removed
-    
+
     set job(ShipToDestination) ""
-    
+
     #if {[$wid_entry3 get] eq "" } {}
-    if {$job(ShipOrderNumPallets) eq ""} {   
+    if {$job(ShipOrderNumPallets) eq ""} {
         ${log}::critical Nothing entered for the number of pallets (Box Labels). Aborting.
         return
     }
@@ -1109,17 +1100,17 @@ proc Shipping_Code::writeShipTo {wid_entry3 wid_txt} {
         ${log}::debug Line: [$wid_txt get $x.0 $x.end]
         lappend job(ShipToDestination) [string trim [$wid_txt get $x.0 $x.end]]
     }
-    
+
     set job(ShipToDestination) [list [join $job(ShipToDestination) " _N_ "]]
     set files(ShipTo) [open [file join {\\\\fileprint\\Labels\\Templates\\Blank Ship To\\shipto.csv}] w]
-        
-        
+
+
     chan puts $files(ShipTo) [::csv::join "[string toupper $job(ShipToDestination)] $job(ShipOrderNumPallets)"]
     ${log}::debug Output:  [::csv::join "[string toupper $job(ShipToDestination)] $job(ShipOrderNumPallets)"]
-    
+
     flush $files(ShipTo)
     chan close $files(ShipTo)
-    
+
     exec $mySettings(path,bartender) "/AF=\\\\fileprint\\Labels\\Templates\\Blank Ship To\\BLANK SHIP TO 3x5.btw" /P /CLOSE /MIN=TASKBAR
     ${log}::debug $mySettings(path,bartender) "/AF=\\\\fileprint\\Labels\\Templates\\Blank Ship To\\BLANK SHIP TO 3x5.btw" /P /CLOSE /MIN=TASKBAR
 
@@ -1127,90 +1118,94 @@ proc Shipping_Code::writeShipTo {wid_entry3 wid_txt} {
 
 #proc Shipping_Code::resetShipTo {btn wid_text} {
 #    # Once we select "get data" we re-configure the button so that we can 'reset' the variables/widgets
-#    
+#
 #    global log job
-#    
+#
 #    set job(Number) ""
 #    set job(ShipOrderID) ""
 #    set job(ShipOrderNumPallets) ""
-#    
+#
 #    $wid_text delete 0.0 end
-#    
+#
 #    #$btn configure -text [mc "Get Data"] -command "ea::db::bl::getShipToData $btn $wid_text"
 #}
 
 proc ea::code::bl::resetLabelText {} {
     global log labelText
-    
+
     foreach item [array names labelText] {
         set labelText($item) ""
-    }   
+    }
 }
 
 proc ea::code::bl::resetBoxLabels {btn shipToWid shipListWid} {
     # reset all widgets and box variables
-    global log job blWid GS_textVar
-    
+    global log job blWid GS_textVar tplLabel
+
     ${log}::debug Reset Job Array
     foreach item [array names job] {
         set job($item) ""
     }
-    
+
+    ${log}::debug Reset tplLabel array
+    foreach item [array names tplLabel] {
+        set tplLabel($item) ""
+    }
+
     ${log}::debug Box Labels: Reset GS_textVar array
     set GS_textVar(maxBoxQty) ""
     set GS_textVar(destQty) ""
     set GS_textVar(batch) ""
     set GS_textVar(shipvia) ""
-    
+
     ${log}::debug Box Labels: Reset Version dropdown
     $blWid(f0BL).cbox1 configure -values ""
     $blWid(f0BL).cbox1 set ""
-    
+
     ${log}::debug Box Labels: Reset Row Data
     ea::code::bl::resetLabelText
-    
+
     ${log}::debug Box Labels: Clear Shipment List Widget
     $shipListWid delete 0 end
-    
+
     ${log}::debug Box Labels: Enable Widgets
     # Make sure widgets are enabled
     foreach item [winfo children $blWid(f0BL)] {
-        #if {[string match *entry* $item] == 1} {}
-            ${log}::debug Enable Widget: $item
-            $item configure -state normal
+        ${log}::debug Enable Widget: $item
+        $item configure -state normal
     }
-    
+
     foreach item [winfo children $blWid(f1BL)] {
         ${log}::debug Enable Widget: $item
         $item configure -state normal
     }
-    
+
     # Enable entry widgets
     $blWid(f).entry1 configure -state normal
         focus $blWid(f).entry1
     $blWid(f).entry2 configure -state normal
-    
+
     ${log}::debug ShipTo: Clear ShipOrder ID dropdown
     $blWid(tab2f1).cbox1 configure -values ""
     $blWid(tab2f1).cbox1 set ""
-    
+
     ${log}::debug ShipTo: Clear ShipTo Widget
     $shipToWid delete 0.0 end
-    
 
-    
+
+
     ${log}::debug Change Button back to Original State
     $btn configure -text [mc "Search"] -command {ea::db::bl::getJobData .container.f0.btn1 $blWid(f0BL).cbox1 $blWid(tab2f2).txt $blWid(f2BL).listbox}
 }
 
 proc ea::code::bl::trackTotalQuantities {} {
     global log job blWid
-    
+
     # Retrieve the list of Shipments (column Shipments (2))
     set shipqty [$blWid(f2BL).listbox getcolumn 2]
-    
+
     set job(bl,TotalShipments) [llength $shipqty]
-    
+
     if {$job(bl,TotalShipments) > 1} {
         ${log}::debug Ship Qty: [expr [join $shipqty +]]
         set job(bl,TotalQuantity) [expr [join $shipqty +]]
