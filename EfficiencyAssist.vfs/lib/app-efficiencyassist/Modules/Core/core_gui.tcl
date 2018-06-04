@@ -66,17 +66,17 @@ proc eAssist::parentGUI {} {
     set locX [expr {[winfo screenwidth . ] / 4 + [winfo x .]}]
     set locY [expr {[winfo screenheight . ] / 5 + [winfo y .]}]
     wm geometry . 640x610+${locX}+${locY}
-    
+
     if {![info exists settings(currentModule)]} {
         ${log}::debug currentModule doesn't exist, creating...!
         set settings(currentModule) "Box Labels"
         set settings(currentModule_machine) [join $settings(currentModule) _]
     }
-    
+
     wm protocol . WM_DELETE_WINDOW {eAssistSetup::SaveGlobalSettings; destroy .}
     wm protocol . WM_SAVE_YOURSELF {eAssistSetup::SaveGlobalSettings}
 
-    
+
     wm title . $program(FullName)
     focus -force .
 
@@ -95,7 +95,7 @@ proc eAssist::parentGUI {} {
     $mb add cascade -label [mc "Edit"] -menu $mb.modMenu
 
     # Start the gui
-    # All frames that make up the GUI are children to .container  
+    # All frames that make up the GUI are children to .container
 
     ## Modules
     # Create the main menu item
@@ -137,20 +137,20 @@ proc eAssist::parentGUI {} {
     ttk::frame .container
     pack .container -expand yes -fill both
 
- 
+
     ##
     ## Control Buttons
     ##
     set btn(Bar) [ttk::frame .btnBar]
     pack $btn(Bar) -side bottom -anchor e -pady 13p -padx 5p
-    
+
     ttk::button $btn(Bar).btn1
     ttk::button $btn(Bar).btn2
-    
+
     ${log}::debug CurrentModule: $settings(currentModule)
     eAssist::buttonBarGUI $settings(currentModule)
 
-    
+
     eAssist_GUI::editPopup
 
 } ;# End of eAssist::parentGUI
@@ -171,7 +171,7 @@ proc eAssist::buttonBarGUI {Module} {
     #	N/A
     #
     # CHILDREN
-    #	
+    #
     #
     # PARENTS
     #	None
@@ -186,12 +186,12 @@ proc eAssist::buttonBarGUI {Module} {
     global log btn program settings mb options user
     #${log}::debug Entering buttonBarGUI
     set module [join $Module]
-    
+
     # Update "BatchMaker" to "Batch Maker"
     if {$module eq "BatchMaker"} {set module {Batch Maker}}
-    
+
     set menuCount [$mb.module index end]
-    
+
     # Enable/Disable the menu items depending on which one is active.
     # Cycle through the items in the menu, if they match the active module, disable it. If the module doesn't match their list of permissible modules, disable it.
     ${log}::debug User Modules: $user($user(id),modules)
@@ -206,7 +206,7 @@ proc eAssist::buttonBarGUI {Module} {
             $mb.module entryconfigure $x -state normal
         }
     }
-    
+
     $mb.modMenu delete 0 end
     $mb.file delete 0 end
     switch -- $module {
@@ -215,7 +215,7 @@ proc eAssist::buttonBarGUI {Module} {
             # .. remember what module we are in ..
             set settings(currentModule) $module
             set settings(currentModule_machine) [join $module _]
-            
+
             # .. setup the buttons on the button bar
             eAssist::remButtons $btn(Bar)
             eAssist::addButtons [mc "Print Labels"] Shipping_Code::printLabels btn1 0 8p
@@ -224,7 +224,7 @@ proc eAssist::buttonBarGUI {Module} {
             # .. launch the mode
 			ea::gui::bl::Main
             #Shipping_Gui::shippingGUI
-            
+
             # .. Setup the Geometry - The geometry that we are passing is the default for this module
             #eAssist_Global::getGeom $settings(currentModule_machine) 450x475
             eAssist_Global::getGeom $settings(currentModule_machine) 532x716
@@ -238,16 +238,16 @@ proc eAssist::buttonBarGUI {Module} {
 
             set settings(currentModule) $module
             set settings(currentModule_machine) [join $module _]
-            
+
             # .. setup the buttons and status bar
             eAssist::remButtons $btn(Bar)
-            
+
             # .. launch the module
             ea::gui::bf::LaunchGUI
-            
+
             # .. Setup the geometry
             eAssist_Global::getGeom $settings(currentModule_machine) 900x610+240+124
-            
+
             # .. save the settings
             #eAssistSetup::SaveGlobalSettings
             lib::savePreferences
@@ -263,16 +263,16 @@ proc eAssist::buttonBarGUI {Module} {
             # .. setup the buttons and status bar
             eAssist::remButtons $btn(Bar)
             eAssist::statusBar
-            
+
             # .. Initialize menu options
             importFiles::initMenu
-            
+
             # .. launch the mode
             importFiles::eAssistGUI
-            
+
             # .. Setup the geometry
             eAssist_Global::getGeom $settings(currentModule_machine) 900x610+240+124
-            
+
             # .. save the settings
             #eAssistSetup::SaveGlobalSettings
             lib::savePreferences
@@ -288,16 +288,16 @@ proc eAssist::buttonBarGUI {Module} {
             # .. setup the buttons and status bar
             eAssist::remButtons $btn(Bar)
             #eAssist::statusBar
-            
+
             # .. Initialize menu options
             # ::initMenu
-            
+
             # .. launch the mode
             ea::sched::gui::schedGUI
-            
+
             # .. Setup the geometry
             eAssist_Global::getGeom $settings(currentModule_machine) 900x610+240+124
-            
+
             # .. save the settings
             lib::savePreferences
         }
@@ -312,16 +312,17 @@ proc eAssist::buttonBarGUI {Module} {
             # .. setup the buttons and status bar
             eAssist::remButtons $btn(Bar)
             #eAssist::statusBar
-            
+
             # .. Initialize menu options
             # ::initMenu
-            
+
             # .. launch the mode
-            ea::gui::designerGUI
-            
+            ea::gui::ld::designerUI
+            #ea::gui::designerGUI
+
             # .. Setup the geometry
             eAssist_Global::getGeom $settings(currentModule_machine) 900x610+240+124
-            
+
             # .. save the settings
             lib::savePreferences
         }
@@ -335,16 +336,16 @@ proc eAssist::buttonBarGUI {Module} {
 
             # .. setup the buttons and status bar
             eAssist::remButtons $btn(Bar)
-            
+
             # .. Initialize menu options
             # ::initMenu
-            
+
             # .. launch the mode
             ea::gui::lf::loadFlagGUI
-            
+
             # .. Setup the geometry
             eAssist_Global::getGeom $settings(currentModule_machine) 900x610+240+124
-            
+
             # .. save the settings
             lib::savePreferences
         }
@@ -371,7 +372,7 @@ proc eAssist::buttonBarGUI {Module} {
         }
         default     {${log}::debug Hit the default: $module}
     }
-    
+
     # If we do not have anything else in this menu; we don't need the separator bar. So lets skip it.
     set fileMenuCount [$mb.file index end]
     if {$fileMenuCount ne "none"} {
@@ -382,10 +383,10 @@ proc eAssist::buttonBarGUI {Module} {
     $mb.file add command -label [mc "Preferences"] -command {ea::gui::pref::startPref}
     $mb.file add command -label [mc "Change User"] -command {lib::showPwordWindow}
     $mb.file add command -label [mc "Exit"] -command {eAssistSetup::SaveGlobalSettings ; exit}
-    
+
     # Check the versions
     #vUpdate::whatVersion
-    
+
 } ;# buttonBarGUI
 
 
@@ -407,7 +408,7 @@ proc eAssist::addButtons {text command btn1 column padX args} {
     #	N/A
     #
     # PARENTS
-    #	
+    #
     #
     # NOTES
     #
@@ -417,9 +418,9 @@ proc eAssist::addButtons {text command btn1 column padX args} {
     #***
     global log btn settings
     #${log}::debug --START-- [info level 1]
-    
+
     if {[lrange $settings(currentModule) 0 0] eq "Setup"} {
-        
+
         if {$text eq [mc "Save"]} {
             set state [eAssist::stateButtons]
         } else {
@@ -428,13 +429,13 @@ proc eAssist::addButtons {text command btn1 column padX args} {
     } else {
         set state normal
     }
-    
+
     # reconfigure btn(bar)
     pack configure $btn(Bar) -side right -fill x -pady 5p
-    
+
     {*}$btn(Bar).$btn1 configure -text $text -command $command -state $state
     grid $btn(Bar).$btn1 -column $column -row 3 -sticky nse -padx $padX
-	
+
     #${log}::debug --END-- [info level 1]
 } ;# eAssist::addButtons
 
@@ -457,7 +458,7 @@ proc eAssist::remButtons {path} {
     #	N/A
     #
     # PARENTS
-    #	
+    #
     #
     # NOTES
     #
@@ -467,12 +468,12 @@ proc eAssist::remButtons {path} {
     global log
     #${log}::debug --START-- [info level 1]
 
-    if {[grid slaves $path] != ""} { 
+    if {[grid slaves $path] != ""} {
         foreach value [grid slaves $path] {
             grid forget $value
         }
     }
-	
+
     #${log}::debug --END-- [info level 1]
 } ;# eAssist::remButtons
 
@@ -494,7 +495,7 @@ proc eAssist::stateButtons {} {
     #	N/A
     #
     # PARENTS
-    #	
+    #
     #
     # NOTES
     #
@@ -503,13 +504,13 @@ proc eAssist::stateButtons {} {
     #***
     global log mySettings program
     #${log}::debug --START-- [info level 1]
- 
+
     if {[eAssist_Global::fileAccessibility $program(Home) $mySettings(ConfigFile)] != 3} {
         return disable
     } else {
         return normal
     }
-	
+
     #${log}::debug --END-- [info level 1]
 } ;# eAssist::stateButtons
 
@@ -532,7 +533,7 @@ proc eAssist::statusBar {args} {
     #	N/A
     #
     # PARENTS
-    #	
+    #
     #
     # NOTES
     #
@@ -544,19 +545,19 @@ proc eAssist::statusBar {args} {
 
     # reconfigure btn(bar)
     pack configure $btn(Bar) -side left -fill x -pady 5p
-    
+
     if {[winfo exists $btn(Bar).f1]} {destroy $btn(Bar).f1}
     set f1 [ttk::frame $btn(Bar).f1 -padding 2 -borderwidth 2]
     grid $f1 -column 0 -row 0 -sticky nse
-    
+
     ttk::label $f1.txt1 -text [mc "Total Copies:"]
     ttk::entry $f1.txt2 -textvariable job(TotalCopies) -width 15 -state disabled -justify center
-    
+
     grid $f1.txt1 -column 0 -row 0 -sticky nse
     grid $f1.txt2 -column 1 -row 0 -sticky nsw -padx 5p
-    
 
-    
+
+
     #${log}::debug --END-- [info level 1]
 } ;# eAssist::statusBar
 
@@ -571,27 +572,27 @@ proc eAssist::detectHeightWidth {} {
     #
     # COPYRIGHT
     #	(c) 2014 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
-    #   eAssist::detectHeightWidth args 
+    #   eAssist::detectHeightWidth args
     #
     # FUNCTION
     #	Figure out if we were maximized the last time we were closed
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log
 

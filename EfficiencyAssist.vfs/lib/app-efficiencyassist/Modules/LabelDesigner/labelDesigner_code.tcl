@@ -1,6 +1,6 @@
 # Creator: Casey Ackels (C) 2017
 
-proc ea::code::lb::getOpenFile {wid} {
+proc ea::code::ld::getOpenFile {wid} {
     global log
 
     # filePathName should really be set in Setup/Labels
@@ -20,9 +20,9 @@ proc ea::code::lb::getOpenFile {wid} {
     $wid delete 0 end
 
     $wid insert end $filePathName
-} ;#ea::code::lb::getOpenFile
+} ;#ea::code::ld::getOpenFile
 
-proc ea::code::lb::resetWidgets {args} {
+proc ea::code::ld::resetWidgets {args} {
     global log tplLabel job settings
     ${log}::debug Resetting arrays: Job (partial) and tplLabel
 
@@ -64,9 +64,9 @@ proc ea::code::lb::resetWidgets {args} {
             set job(CustName) ""
         }
     }
-} ;# ea::code::lb::resetWidgets
+} ;# ea::code::ld::resetWidgets
 
-proc ea::code::lb::saveLabel {} {
+proc ea::code::ld::saveLabel {} {
     global log job tplLabel
 
     set gate 0
@@ -109,12 +109,12 @@ proc ea::code::lb::saveLabel {} {
         return
     } else {
         # Write to the database
-        ea::code::lb::writeToDb
+        ea::code::ld::writeToDb
     }
-} ;# ea::code::lb::saveLabel
+} ;# ea::code::ld::saveLabel
 
-# ea::code::lb::getRowData 1 .container.frame2
-proc ea::code::lb::getRowData {LabelVersionID widPath} {
+# ea::code::ld::getRowData 1 .container.frame2
+proc ea::code::ld::getRowData {LabelVersionID widPath} {
     global tplLabel
 
     for {set x 1} {$tplLabel(LabelProfileRowNum) >= $x} {incr x} {
@@ -142,10 +142,10 @@ proc ea::code::lb::getRowData {LabelVersionID widPath} {
     }
 
     return [join $finalRowInfo ,]
-} ;# ea::code::lb::getRowData
+} ;# ea::code::ld::getRowData
 
-proc ea::code::lb::writeToDb {} {
-    # Parent: ea::code::lb::saveLabel
+proc ea::code::ld::writeToDb {} {
+    # Parent: ea::code::ld::saveLabel
     global log job tplLabel
 
     if {$job(NewCustomer) eq 1} {
@@ -260,7 +260,7 @@ proc ea::code::lb::writeToDb {} {
             ${log}::notice Retrieving new version ID: $tplLabel(LabelVersionID,current)
 
             # Insert label date (Table: LabelData)
-            set data [join [ea::code::lb::getRowData $tplLabel(LabelVersionID,current) .container.frame2.frame2a]]
+            set data [join [ea::code::ld::getRowData $tplLabel(LabelVersionID,current) .container.frame2.frame2a]]
             ${log}::notice Inserting Row Data: $data
             ${log}::debug db eval "INSERT INTO LabelData (labelVersionID, labelRowNum, labelRowText, userEditable, isVersion) VALUES $data"
             db eval "INSERT INTO LabelData (labelVersionID, labelRowNum, labelRowText, userEditable, isVersion) VALUES $data"
@@ -274,7 +274,7 @@ proc ea::code::lb::writeToDb {} {
             set tplLabel(LabelVersionID,current) [db eval "SELECT max(labelVersionID) FROM LabelVersions WHERE tplID = $tpl_id"]
             ${log}::notice Retrieving new version ID: $tplLabel(LabelVersionID,current)
 
-            set data [join [ea::code::lb::getRowData $tplLabel(LabelVersionID,current) .container.frame2.frame2a]]
+            set data [join [ea::code::ld::getRowData $tplLabel(LabelVersionID,current) .container.frame2.frame2a]]
             ${log}::notice Inserting Row Data: $data
 
             ${log}::debug db eval "INSERT INTO LabelData (labelVersionID, labelRowNum, labelRowText, userEditable, isVersion) VALUES $data"
@@ -288,7 +288,7 @@ proc ea::code::lb::writeToDb {} {
             db eval "DELETE FROM LabelData WHERE labelVersionID = $tplLabel(LabelVersionID,current)"
 
             ${log}::notice Entering new data for $tplLabel(LabelVersionDesc,current)
-            set data [join [ea::code::lb::getRowData $tplLabel(LabelVersionID,current) .container.frame2.frame2a]]
+            set data [join [ea::code::ld::getRowData $tplLabel(LabelVersionID,current) .container.frame2.frame2a]]
             ${log}::debug db eval "INSERT INTO LabelData (labelVersionID, labelRowNum, labelRowText, userEditable, isVersion) VALUES $data"
             db eval "INSERT INTO LabelData (labelVersionID, labelRowNum, labelRowText, userEditable, isVersion) VALUES $data"
         }
@@ -297,11 +297,11 @@ proc ea::code::lb::writeToDb {} {
         # Update drop down values
         .container.frame2.versionDescCbox configure -values [db eval "SELECT LabelVersionDesc FROM LabelVersions WHERE tplID = $tplLabel(ID)"]
     }
-} ;# ea::code::lb::writeToDb
+} ;# ea::code::ld::writeToDb
 
-proc ea::code::lb::createDummyFile {} {
+proc ea::code::ld::createDummyFile {} {
     # Create a 'dummy' file that contains a sample database of the selected profile.
-    # Parent ea::gui::lb::
+    # Parent ea::gui::ld::
     # Writes to: Directory where label file is located with name of <Profile Desc>
     global log tplLabel
 
@@ -323,27 +323,27 @@ proc ea::code::lb::createDummyFile {} {
     chan puts $runlist_file $hdr_data
 
     chan close $runlist_file
-} ;#ea::code::lb::createDummyFile
+} ;#ea::code::ld::createDummyFile
 
-proc ea::code::lb::populateProfileCbox {wid} {
-    # See: ea::db::lb::getLabelHeaders
+proc ea::code::ld::populateProfileCbox {wid} {
+    # See: ea::db::ld::getLabelHeaders
     global log
 
     # delete all entries first
     $wid delete 0 end
-    set items [join [ea::db::lb::getLabelHeaders]]
+    set items [join [ea::db::ld::getLabelHeaders]]
 
     foreach item $items {
         $wid insert end $item
     }
-} ;#ea::code::lb::populateProfileCbox
+} ;#ea::code::ld::populateProfileCbox
 
-proc ea::code::lb::getAllHeaders {profile_id lbox1 lbox2} {
+proc ea::code::ld::getAllHeaders {profile_id lbox1 lbox2} {
     # Retrieve both available headers and assigned headers, then populate the listbox widgets with the data.
     global log
 
-    set avail [ea::db::lb::getLabelHeaders]
-    set current [ea::db::lb::getProfileHeaders $profile_id]
+    set avail [ea::db::ld::getLabelHeaders]
+    set current [ea::db::ld::getProfileHeaders $profile_id]
 
     set c_avail [ea::tools::listDiff $avail $current]
     #${log}::debug c_avail: $c_avail
@@ -360,9 +360,9 @@ proc ea::code::lb::getAllHeaders {profile_id lbox1 lbox2} {
     foreach item $current {
         $lbox2 insert end $item
     }
-} ;#ea::code::lb::getAllHeaders
+} ;#ea::code::ld::getAllHeaders
 
-proc ea::code::lb::assignProfileHeaders {modify lbox1 lbox2} {
+proc ea::code::ld::assignProfileHeaders {modify lbox1 lbox2} {
     # Add selected header(s) to 'Assigned' listbox.
     # We save everything in the DB when the user hits the 'save' button. Until then the changes are only within the widget
     # Modify should equal add or del
@@ -399,9 +399,9 @@ proc ea::code::lb::assignProfileHeaders {modify lbox1 lbox2} {
 
     # unset vars
     unset headers
-} ;#ea::code::lb::assignProfileHeaders
+} ;#ea::code::ld::assignProfileHeaders
 
-proc ea::code::lb::editProfile {mode addPro_btn edit_btn add_btn del_btn cbox lbox2} {
+proc ea::code::ld::editProfile {mode addPro_btn edit_btn add_btn del_btn cbox lbox2} {
     # This button has two modes: (1) Enable add/del btns; (2) Saves Data
     # Mode: edit or save
     global log profile_id
@@ -413,7 +413,7 @@ proc ea::code::lb::editProfile {mode addPro_btn edit_btn add_btn del_btn cbox lb
         $del_btn configure -state normal
         $cbox configure -state normal
         $addPro_btn configure -state disable
-        $edit_btn configure -text [mc "Save"] -command "ea::code::lb::editProfile save $addPro_btn $edit_btn $add_btn $del_btn $cbox $lbox2"
+        $edit_btn configure -text [mc "Save"] -command "ea::code::ld::editProfile save $addPro_btn $edit_btn $add_btn $del_btn $cbox $lbox2"
     } else {
         # Saving
         ${log}::debug Disable - add/del, readonly cbox, change btn text
@@ -423,11 +423,11 @@ proc ea::code::lb::editProfile {mode addPro_btn edit_btn add_btn del_btn cbox lb
         $del_btn configure -state disable
         $addPro_btn configure -state normal
 
-        $edit_btn configure -text [mc "Edit"] -state disable -command "ea::code::lb::editProfile edit $addPro_btn $edit_btn $add_btn $del_btn $cbox $lbox2"
+        $edit_btn configure -text [mc "Edit"] -state disable -command "ea::code::ld::editProfile edit $addPro_btn $edit_btn $add_btn $del_btn $cbox $lbox2"
 
             ${log}::debug Profile: [$cbox get]
             ${log}::debug Entries to save to DB: [$lbox2 get 0 end]
-            ea::db::lb::writeProfile $cbox $lbox2
+            ea::db::ld::writeProfile $cbox $lbox2
 
 
         # Final Cleanup
@@ -439,9 +439,9 @@ proc ea::code::lb::editProfile {mode addPro_btn edit_btn add_btn del_btn cbox lb
         set profile_id ""
         set tplLabel(tmp,profile) ""
     }
-} ;#ea::code::lb::editProfile
+} ;#ea::code::ld::editProfile
 
-proc ea::code::lb::addProfile {mode addPro_btn edit_btn add_btn del_btn cbox lbox1 lbox2} {
+proc ea::code::ld::addProfile {mode addPro_btn edit_btn add_btn del_btn cbox lbox1 lbox2} {
     # Add a new profile
     global log tplLabel profile_id
 
@@ -459,7 +459,7 @@ proc ea::code::lb::addProfile {mode addPro_btn edit_btn add_btn del_btn cbox lbo
     $lbox2 delete 0 end
 
     # Re-populate lbox1 (available headers)
-    ea::code::lb::populateProfileCbox $lbox1
+    ea::code::ld::populateProfileCbox $lbox1
 
     # Disable Add button
     $addPro_btn configure -state disable
@@ -469,5 +469,5 @@ proc ea::code::lb::addProfile {mode addPro_btn edit_btn add_btn del_btn cbox lbo
     $del_btn configure -state normal
 
     # Change edit button to 'Save'
-    $edit_btn configure -text [mc "Save"] -state normal -command "ea::code::lb::editProfile save $addPro_btn $edit_btn $add_btn $del_btn $cbox $lbox2"
-} ;#ea::code::lb::addProfile
+    $edit_btn configure -text [mc "Save"] -state normal -command "ea::code::ld::editProfile save $addPro_btn $edit_btn $add_btn $del_btn $cbox $lbox2"
+} ;#ea::code::ld::addProfile

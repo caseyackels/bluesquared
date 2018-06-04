@@ -74,7 +74,7 @@ proc 'eAssist_sourceReqdFiles {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries report]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries cmdline]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries soundex]
-    
+
 
 
 	##
@@ -91,79 +91,79 @@ proc 'eAssist_sourceReqdFiles {} {
     lappend ::auto_path [file join [file dirname [info script]] Modules Scheduler]
     lappend ::auto_path [file join [file dirname [info script]] Modules LabelDesigner]
     lappend ::auto_path [file join [file dirname [info script]] Modules LoadFlags]
-	
+
 	## Init namespaces
 	namespace eval ea::sec {} ;# do not use
 	namespace eval ea::code::sec {}
-	
+
 	# Setup, Admin
 	namespace eval ea::code::admin {}
 	namespace eval ea::db::admin {}
 	namespace eval ea::gui::admin {}
-	
+
 	# Preferences
 	namespace eval ea::code::pref {}
 	namespace eval ea::db::pref {}
 	namespace eval ea::gui::pref {}
-	
+
 	# Batch Maker
 	namespace eval ea::code::bm {}
 	namespace eval ea::db::bm {}
 	namespace eval ea::gui::bm	{}
-	
+
 	# Reports (not really a module)
 	namespace eval ea::code::export {}
-    
+
     # Customer GUI/Info
     namespace eval ea::code::customer {}
     namespace eval ea::gui::customer {}
     namespace eval ea::db::customer {}
-    
+
     # Adding samples
     namespace eval ea::code::samples {}
     namespace eval ea::gui::samples {}
     namespace eval ea::db::samples {}
-    
+
     # Reports
     namespace eval ea::code::reports {}
     namespace eval ea::gui::reports {}
     namespace eval ea::db::reports {}
-    
+
     # Publish
     namespace eval ea::code::publish {}
     namespace eval ea::gui::publish {}
     namespace eval ea::db::publish {}
-    
+
     # Notes
     namespace eval ea::code::notes {}
     namespace eval ea::gui::notes {}
     namespace eval ea::db::notes {}
-    
+
     # Init Vars
     namespace eval ea::code::init {}
     namespace eval ea::db::init {}
-    
+
     # Batch formatter
     namespace eval ea::code::bf {}
     namespace eval ea::gui::bf {}
     namespace eval ea::db::bf {}
-    
+
     # Label Designer; LD, ld
-    namespace eval ea::code::lb {}
-    namespace eval ea::gui::lb {}
-    namespace eval ea::db::lb {}
-    
+    namespace eval ea::code::ld {}
+    namespace eval ea::gui::ld {}
+    namespace eval ea::db::ld {}
+
     # Load Flags (LF)
     namespace eval ea::code::lf {}
     namespace eval ea::gui::lf {}
     namespace eval ea::db::lf {}
-	
+
 	# Box Labels (BL)
 	namespace eval ea::code::bl {}
 	namespace eval ea::gui::bl {}
 	namespace eval ea::db::bl {}
-	  
-    
+
+
 	## Start the Package Require
 	# System Packages
 	package require msgcat
@@ -188,10 +188,10 @@ proc 'eAssist_sourceReqdFiles {} {
 	package require report
 	package require soundex
 
-	
-	
+
+
 	# Logger; MD5 are [package require]'d below.
-	
+
 
 	## Efficiency Assist modules
 	package require eAssist_core ;# Includes Preferences, and Setup mode
@@ -203,7 +203,7 @@ proc 'eAssist_sourceReqdFiles {} {
     package require eAssist_ModScheduler
     package require eAssist_ModLabelDesigner
     package require eAssist_ModLoadFlags
-	
+
 	# non-gui elements
 	package require eAssist_tools
 	package require vUpdate
@@ -220,9 +220,9 @@ proc 'eAssist_sourceReqdFiles {} {
 	source [file join [file dirname [info script]] Libraries password_util.tcl]
 	source [file join [file dirname [info script]] Libraries AutoComplete.tcl]
 	source [file join [file dirname [info script]] Libraries dateFormatting.tcl]
-    
+
 	loadSuffix ;# Initialize variables from StreetSuffixState.tcl
-    
+
 	#load [file join [file dirname [info script]] Libraries twapi twapi_base.dll]
 	#load [file join [file dirname [info script]] Libraries sqlite3_3801 sqlite3801.dll] Sqlite3
 	#source [file join [file dirname [info script]] Libraries debug.tcl]
@@ -232,9 +232,9 @@ proc 'eAssist_sourceReqdFiles {} {
 
 proc 'eAssist_bootStrap {} {
 	global program log env
-	
+
 	set program(Home) [pwd]
-	
+
 	# enable packages that are required before the rest of the packages need to be loaded
 	# Third Party packages
 	lappend ::auto_path [file join [file dirname [info script]] Libraries log]
@@ -242,7 +242,7 @@ proc 'eAssist_bootStrap {} {
 	lappend ::auto_path [file join [file dirname [info script]] Libraries md5crypt]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries sqlite3_3801]
 	lappend ::auto_path [file join [file dirname [info script]] Libraries tdbc]
-	
+
 	package require md5
 	package require md5crypt
 	package require log
@@ -252,13 +252,13 @@ proc 'eAssist_bootStrap {} {
 	package require sqlite3
 	package require tdbc
     package require tdbc::odbc
-	
+
 	# Project built packages
 	lappend ::auto_path [file join [file dirname [info script]] Modules Update]
 	lappend ::auto_path [file join [file dirname [info script]] Modules Database]
-	
+
 	package require eAssist_db
-	
+
 	set debug(onOff) on ;# Old - Still exists so we don't receive errors, on the instances where it still exists
 	set logSettings(loglevel) notice ;# Default to notice, over ridden if the user selects a different option
 	#set logSettings(displayConsole) 0 ;# disable by default, same as above. We read in the user settings file later; so if specific users want to see it, they will.
@@ -267,7 +267,7 @@ proc 'eAssist_bootStrap {} {
 	set log [logger::init log]
 	logger::utils::applyAppender -appender colorConsole
 	${log}::notice "Initialized logging"
-	
+
 	# load the DB
 	eAssist_db::loadDB
 
@@ -302,34 +302,34 @@ proc 'eAssist_initVariables {} {
     #
     #***
     global settings header mySettings env intl ship program boxLabelInfo log logSettings intlSetup csmpls filter auth options emailSetup emailEvent job user setupJobDB widSec tplLabel
-	
+
 	#-------- CORE SETTINGS
 	if {[info exists logSettings(displayConsole)]} {
 		# Only display the console if variable exists. It can manually be launced in the Help menu.
-		eAssistSetup::toggleConsole $logSettings(displayConsole)	
+		eAssistSetup::toggleConsole $logSettings(displayConsole)
 	}
-	
+
 	# admin7954
 	#set auth(adminPword) {$1$6JV2D0G7$RHuHLMxJuuQ3HWWG3wOML1}
 	#set auth(adminSalt) {6JV2D0G7iPZ.xfGbLxnx}
-	
+
 	# Insert Setup into the Modules
 	eAssist_db::checkModuleName Setup
-	
+
 	# init the user array - This is reset on Change User!
 	ea::sec::initUser
-	
+
 	# init variables (arrays usually)
 	ea::db::init_vars
 
-		
+
 	## Defaults
 	# Just in case we can't figure out where we last stopped
 	if {![info exists program(lastFrame)]} {
 		# Set default last frame for Setup
 		set program(lastFrame) company_GUI
 	}
-	
+
 	if {![info exists program(checkUpdateTime)]} {
 		set program(checkUpdateTime) 15:02
 	}
@@ -343,36 +343,36 @@ proc 'eAssist_initVariables {} {
 		# Path to the MANIFEST file (located on a shared drive)
 		set program(updateFilePath) ""
 	}
-	
+
 	if {![info exists program(updateFileName)]} {
 		# Update file name - defualts to MANIFEST
 		set program(updateFileName) MANIFEST
 	}
-	
+
 	if {![info exists emailSetup(boxlabels,Notification)]} {
 		set emailSetup(boxlabels,Notification) 0
 	}
 
-	
+
 	##
 	## Quick preferences - these are options that aren't in the Preference window, but sprinkled throughout the main program
 	##
-	
+
     if {![info exists options(AutoAssignHeader)]} {
 		# Auto-Assign headers in BatchMaker
 		set options(AutoAssignHeader) 1
 	}
-	
+
 	if {![info exists options(ClearExistingData)]} {
 		# Clears data from BatchMaker if it exists; this is useful if you want to overwrite what is already there.
 		# 3/11/15 - Defaults to 0, we now have 'projects', and save data to a database. If a new project is started, the GUI is cleared out, and a new database is created.
 		set options(ClearExistingData) 0
 	}
-    
+
 
 	#-------- Initialize variables
-	
-	
+
+
 	# Address Module
 	# All are used in the Internal Samples window
 	# Totals, are of course Totals
@@ -392,8 +392,10 @@ proc 'eAssist_initVariables {} {
 					  Sales 0 \
                       assignAllVersions 0 \
                       activeVersion ""]
-	
+
 	array set job [list CustName "" \
+					CustomerList "" \
+					CustomerTitles "" \
 				   CustID "" \
 				   CSRName "" \
 				   Title "" \
@@ -414,7 +416,7 @@ proc 'eAssist_initVariables {} {
 				   ShipToOrderIDs "" \
 				   ShipToDestination "" \
 				   ShipOrderNumPallets ""]
-    
+
     array set tplLabel [list ID "" \
                         Name "" \
 						NumRows "" \
@@ -439,14 +441,14 @@ proc 'eAssist_initVariables {} {
 						tmpValues,rbtn "" \
                         tmpValues "" \
 						Status ""]
-	
+
 	# Filters
 	array set filter [list run,stripASCII_CC 0 \
 					  run,stripExtraSpaces 0 \
 					  run,stripUDL 0 \
 					  run,abbrvAddrState 0]
 
-	
+
     if {![info exists mySettings(outFilePath)]} {
         # Location for saving the file
         set mySettings(outFilePath) [file dirname $mySettings(Home)]
@@ -456,17 +458,17 @@ proc 'eAssist_initVariables {} {
         # Location for saving a copy of the file (this should just be up one directory)
         set mySettings(outFilePathCopy) [file dirname $mySettings(Home)]
     }
-   
+
     if {![info exists mySettings(sourceFiles)]} {
         # Default for finding the source import files
         set mySettings(sourceFiles) [file dirname $mySettings(Home)]
     }
-	
+
 	if {![info exists mySettings(job,fileName)]} {
 		# Default for the file name
 		set mySettings(job,fileName) "%number %title %name"
 	}
-	
+
 	if {![info exists mySettings(path,labelDBfile)]} {
 		# Default for the file name
 		set mySettings(path,labelDBfile) [file dirname $mySettings(Home)]
@@ -486,7 +488,7 @@ proc 'eAssist_initVariables {} {
         # Box Tare Weight
         set settings(BoxTareWeight) .566
     }
-	
+
 	array set widSec [list group,Name "" \
 					  group,Active 0 \
 					  users,User_ID "" \
@@ -500,17 +502,17 @@ proc 'eAssist_initVariables {} {
 
 	# Schedule a time to check for updates
 	#eAssist_Global::at $program(checkUpdateTime) vUpdate::checkForUpdates
-	
+
 	# Adding the available data to the UserDefinedValues table, which will show up in a dropdown on the Header Config page, in Setup.
 	ea::db::initUserDefinedValues -desc Packages -table Packages -pk Pkg_ID -displayColumn Package
 	ea::db::initUserDefinedValues -desc Container -table Containers -pk Container_ID -displayColumn Container
 	ea::db::initUserDefinedValues -desc "Ship Via" -table ShipVia -pk ShipVia_ID -displayColumn ShipViaName
 	ea::db::initUserDefinedValues -desc "Distribution Type" -table DistributionTypes -pk DistributionType_ID -displayColumn DistTypeName
 	ea::db::initUserDefinedValues -desc "Shipping Class" -table ShippingClasses -pk ShippingClass_ID -displayColumn ShippingClass
-	
+
 	# This is dynamically populated, based on what is in the imported file and what the user types in. Default entry is "Version 1".
 	ea::db::initUserDefinedValues -desc Versions -table Versions -pk Version_ID -displayColumn VersionName
-	
+
 
 } ;# 'eAssist_initVariables
 
@@ -533,7 +535,7 @@ proc 'eAssist_checkPrefFile {} {
     #	N/A
     #
     # PARENTS
-    #	
+    #
     #
     # NOTES
     #
@@ -542,53 +544,53 @@ proc 'eAssist_checkPrefFile {} {
     #***
     global log mySettings program env
     #${log}::debug --START-- [info level 1]
-    
+
 	set folderAccess ""
-	
+
 	# Set file names
 	set mySettings(File) mySettings.txt
 	set mySettings(ConfigFile) config.txt
 	set mySettings(Folder) eAssistSettings
-	
+
 	if {![info exists program(Name)]} {set program(Name) "EfficiencyAssist"}
 
-	
+
 	## FOLDER
 	# Create or check personal settings folder %appdata%, to ensure that we can read/write to it
 	if {![file isdirectory [file join $env(APPDATA) $mySettings(Folder)]]} {
 			set folderAppDataAccess [eAssist_Global::folderAccessibility $env(APPDATA)]
 			${log}::notice -WARNING- [file join $env(APPDATA) $mySettings(Folder)] does not exist, checking to see if we can create it...
-			
+
 			if {$folderAppDataAccess == 3} {
 				file mkdir [file join $env(APPDATA) $mySettings(Folder)]
 				set mySettings(Home) [file join $env(APPDATA) $mySettings(Folder)]
 				${log}::notice -PASS- Creating $mySettings(Home) ...
-			
+
 			} else {
 				${log}::critical -FAIL- Folder Access Code: $folderAppDataAccess
 				${log}::critical -FAIL- Cannot create folder in $env(APPDATA), named $mySettings(Folder)
 				set state d0
 				return $state
 			}
-	
+
 	} else {
 		set folderAccess [eAssist_Global::folderAccessibility [file join $env(APPDATA) $mySettings(Folder)]]
-		
+
 		if {$folderAccess != 3} {
 			${log}::critical -FAIL- Folder Access Code: $folderAccess
 			${log}::critical -FAIL- Can't read/write to [file join $env(APPDATA) $mySettings(Folder)], this must be resolved to run $program(Name)
 			set state d0
 			return $state
 		}
-		
+
 		if {$folderAccess == 3} {
 			set mySettings(Home) [file join $env(APPDATA) $mySettings(Folder)]
 			${log}::notice -PASS- $mySettings(Home) exists and has correct permissions ...
 		}
 	}
-	
 
-	
+
+
 	## FILE
 	# Create personal settings file mySettings.txt
 	if {![file exists [file join $mySettings(Home) $mySettings(File)]]} {
@@ -606,7 +608,7 @@ proc 'eAssist_checkPrefFile {} {
 			set state f0
 			return $state
 		}
-		
+
 		# File seems to be ok
 		${log}::notice -PASS- $mySettings(File) exists and has correct permissions ...
 		set state f1
@@ -653,10 +655,10 @@ proc 'eAssist_loadSettings {} {
 	# Initialize setup variables
 	foreach myFile [list $mySettings(ConfigFile)] {
 		set fd [open [file join $program(Home) $myFile] r]
-		
+
 		set configFile [split [read $fd] \n]
 		catch {chan close $fd}
-	
+
 		foreach line $configFile {
 			if {$line == ""} {continue}
 			set l_line [split $line " "]
@@ -665,17 +667,17 @@ proc 'eAssist_loadSettings {} {
 		}
 		${log}::notice "Loaded variables ($myFile): Complete!"
 	}
-    
+
     set fd "" ;# Make sure we are cleared out before reusing.
     # Load Personalized settings
 	set settingsFile [file join $mySettings(Home) $mySettings(File)]
     if {[catch {open $settingsFile r} fd]} {
         ${log}::notice "File doesn't exist $mySettings(File); loading defaults"
-        
+
     } else {
         set settingsFile [split [read $fd] \n]
         catch {chan close $fd}
-        
+
         foreach line $settingsFile {
                 if {$line == ""} {continue}
                 set l_line [split $line " "]
@@ -684,21 +686,21 @@ proc 'eAssist_loadSettings {} {
         }
 		${log}::notice "Loaded variables ($mySettings(File)): Complete!"
     }
-	
+
     # Initialize default values
     'eAssist_initVariables
-	
-	
+
+
 	# Set options in the Options DB
 	option add *tearOff 0
-	
+
 	job::reports::initReportTables
 	# Get excel version
 	# Office 2003 = 11
 	# Office 2007 = 12
-	
+
 	# user(id)
-	
+
 }
 # Load required packages and DB
 'eAssist_bootStrap

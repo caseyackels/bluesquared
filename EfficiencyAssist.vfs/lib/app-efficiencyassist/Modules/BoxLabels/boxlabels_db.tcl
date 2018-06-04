@@ -173,7 +173,8 @@ proc ea::db::bl::getShipToData {btn wid_text} {
     #                            AND PACKAGENAME LIKE '%Ctn%'}]
     #
     #### Ship To
-    set stmt [$monarch_db prepare "SELECT DISTINCT DESTINNAME, ADDRESS1, ADDRESS2, ADDRESS3, CITY, STATE, ZIP, COUNTRY, NUMCONTAINERS FROM EA.dbo.Planner_Shipping_View
+    set stmt [$monarch_db prepare "SELECT DISTINCT DESTINNAME, ADDRESS1, ADDRESS2, ADDRESS3, CITY, STATE, ZIP, COUNTRY, NUMCONTAINERS
+                                FROM EA.dbo.Planner_Shipping_View
                                 WHERE JOBNAME = '$job(Number)'
                                 AND ORDERID = '$job(ShipOrderID)'"]
 
@@ -214,7 +215,7 @@ proc ea::db::bl::getShipToData {btn wid_text} {
         $wid_text insert end [lindex $val 7]
         lappend job(ShipToDestination) [lindex $val 7]
 
-        set job(ShipOrderNumPallets) [lindex $val 8]
+        #set job(ShipOrderNumPallets) [lindex $val 8]
     }
     set job(ShipOrderNumPallets) [lindex $val 8]
     set job(ShipToDestination) [join $job(ShipToDestination) " _n_ "]
@@ -275,7 +276,9 @@ proc ea::db::bl::getJobData {btn1 wid shipToWid shipListWid} {
     set stmt [$monarch_db prepare "SELECT DISTINCT ORDERID
                                         FROM EA.dbo.Planner_Shipping_View
                                         WHERE JOBNAME='$job(Number)'
+                                        AND CONTAINERNAME IS NOT NULL
                                         AND DESTINNAME NOT LIKE 'JG%'
+                                        AND (DISTRIBNAME NOT LIKE '06%' OR DISTRIBNAME NOT LIKE '%mail%')
                                         ORDER BY ORDERID"]
     set res [$stmt execute]
     while {[$res nextlist val]} {
