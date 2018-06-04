@@ -100,23 +100,38 @@ proc ea::gui::ld::addTemplate {} {
     pack $ldWid(addTpl,f1) -fill both -expand yes
 
     grid [ttk::label $ldWid(addTpl,f1).text1 -text [mc "Customer"]] -column 0 -row 0 -padx 2p -pady 2p -sticky e
-    grid [ttk::entry $ldWid(addTpl,f1).entry1 -textvariable job(CustName) -width 30 \
+    grid [ttk::entry $ldWid(addTpl,f1).entry1 -textvariable job(CustName) -width 33 \
                                                 -validate all \
                                                 -validatecommand {AutoComplete::AutoComplete %W %d %v %P $job(CustomerList)}] -column 1 -row 0 -padx 2p -pady 2p -sticky w
 
         bind $ldWid(addTpl,f1).entry1 <FocusOut> {
             if {[%W get] ne ""} {
-                ${log}::notice Set Customer Titles
-                ${log}::debug TODO: Get Customer Code
+                ${log}::notice Get Customer Titles
                 ea::db::ld::getCustomerTitles
-                $ldWid(addTpl,f1).entry2 configure -values $job(CustomerTitles)
+
+                ${log}::debug Get Customer Code
+                ea::db::ld::getCustomerCode
+
+                $ldWid(addTpl,f1).cbox0 configure -values $job(CustomerTitles)
             }
         }
 
 
     grid [ttk::label $ldWid(addTpl,f1).text2 -text [mc "Title"]] -column 0 -row 1 -padx 2p -pady 2p -sticky e
-    grid [ttk::combobox $ldWid(addTpl,f1).entry2 -textvariable job(Title) -width 30 \
+    grid [ttk::combobox $ldWid(addTpl,f1).cbox0 -textvariable job(Title) -width 30 \
                                                 -state readonly] -column 1 -row 1 -padx 2p -pady 2p -sticky w
+        bind $ldWid(addTpl,f1).cbox0 <FocusOut> {
+            ea::db::ld::getCustomerTitleID
+            #${log}::debug Retrieve Templates for ... $job(TitleID)
+            ea::db::ld::getTemplates
+        }
+
+    grid [ttk::label $ldWid(addTpl,f1).text2a -text [mc "Template"]] -column 0 -row 2 -padx 2p -pady 2p -sticky e
+    grid [ttk::combobox $ldWid(addTpl,f1).cbox0a -width 30 -textvariable tplLabel(Name)] -column 1 -row 2 -padx 2p -pady 2p -sticky w
+
+        bind $ldWid(addTpl,f1).cbox0a <<FocusOut>> {
+            ${log}::debug Retrieve Profile for template: [%w get]
+        }
 
     grid [ttk::label $ldWid(addTpl,f1).text3 -text [mc "Label Profile"]] -column 3 -row 0 -pady 2p -padx 2p -sticky e
     grid [ttk::combobox $ldWid(addTpl,f1).cbox1 -textvariable tplLabel(LabelProfileDesc) \
@@ -125,7 +140,7 @@ proc ea::gui::ld::addTemplate {} {
 
         bind $ldWid(addTpl,f1).cbox1 <<ComboboxSelected>> {
             ea::db::ld::getLabelProfileID [%W get]
-            ea::code::ld::genLines
+            ea::gui::ld::genLines
             ea::db::ld::getLabelProfile
             #ea::db::ld::getLabelSpecs %W
             #.container.frame1.headerFileBtn configure -state normal
@@ -142,7 +157,7 @@ proc ea::gui::ld::addTemplate {} {
     ## Body / Label Data
     ##
 
-    # This is automatically created based on the profile selected, and ea::code::ld::genLines
+    # This is automatically created based on the profile selected, and ea::gui::ld::genLines
 
     ##
     ## Save buttons
@@ -150,12 +165,12 @@ proc ea::gui::ld::addTemplate {} {
     set btnBar [ttk::frame $ldWid(addTpl).f3]
     pack $btnBar -pady 5p -padx 5p -anchor e
 
-    grid [ttk::button $btnBar.save -text [mc "Save"] -command {ea::code::ld::saveLabel; ea::code::ld::resetWidgets}] -column 0 -row 0 -pady 2p -padx 2p
+    grid [ttk::button $btnBar.save -text [mc "Save"] -command {ea::code::ld::saveLabel}] -column 0 -row 0 -pady 2p -padx 2p
     grid [ttk::button $btnBar.cncl -text [mc "Cancel"] -command {destroy $ldWid(addTpl); ea::code::ld::resetWidgets}] -column 1 -row 0 -pady 2p -padx 2p
 
 } ;# ea::gui::ld::addTemplate
 
-proc ea::code::ld::genLines {} {
+proc ea::gui::ld::genLines {} {
     global log tplLabel ldWid
     ${log}::debug Generating row widgets: $ldWid(addTpl).f2
 
@@ -167,13 +182,14 @@ proc ea::code::ld::genLines {} {
     ##
     ## Label Information
     ##
-    set ldWid(addTpl,f2) [ttk::labelframe $ldWid(addTpl).f2 -text [mc "Label Information"] -padding 10]
-    pack $ldWid(addTpl,f2) -fill both -expand yes -pady 5p -padx 5p ;#-anchor ne
+    set ldWid(addTpl,f2) [ttk::labelframe $ldWid(addTpl).f2 -text [mc "Label Information"] -padding 2]
+    pack $ldWid(addTpl,f2) -expand yes -fill both -pady 5p -padx 5p
 
     grid [ttk::label $ldWid(addTpl,f2).versionDesc -text [mc "Version"]] -column 0 -row 0 -padx 2p -pady 5p -sticky e
     grid [ttk::combobox $ldWid(addTpl,f2).versionDescCbox -values $tplLabel(LabelVersionDesc)] -column 1 -row 0 -padx 2p -pady 5p -sticky w
         $ldWid(addTpl,f2).versionDescCbox set $tplLabel(LabelVersionDesc,current)
         $ldWid(addTpl,f2).versionDescCbox state readonly
+    grid [ttk::button $ldWid(addTpl,f2).add -text [mc "Add Version"]] -column 2 -row 0 -padx 2p -pady 5p -sticky e
 
 
     #bind $ldWid(addTpl,f2).versionDescCbox <<ComboboxSelected>> {

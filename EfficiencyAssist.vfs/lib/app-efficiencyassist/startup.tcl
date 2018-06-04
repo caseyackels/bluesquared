@@ -398,7 +398,9 @@ proc 'eAssist_initVariables {} {
 					CustomerTitles "" \
 				   CustID "" \
 				   CSRName "" \
+				   CSRID "" \
 				   Title "" \
+				   TitleID "" \
 				   Name "" \
 				   Description "" \
 				   Number "" \
@@ -410,6 +412,7 @@ proc 'eAssist_initVariables {} {
 				   TitleSaveFileLocation "" \
 				   JobFirstShipDate "" \
 				   JobBalanceShipDate "" \
+				   JobID "" \
                    ForestCert "" \
                    NewCustomer "" \
 				   ShipOrderID "" \

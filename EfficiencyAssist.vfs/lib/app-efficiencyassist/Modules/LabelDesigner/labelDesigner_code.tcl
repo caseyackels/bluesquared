@@ -1,25 +1,40 @@
 # Creator: Casey Ackels (C) 2017
 
 proc ea::code::ld::getOpenFile {wid} {
-    global log
+    global log tplLabel job
 
     # filePathName should really be set in Setup/Labels
-    set filePathName [tk_getOpenFile -initialdir {//fileprint/Labels/Templates} -filetypes {{Bartender {.btw}}}]
+    set tplLabel(RootPath) "//fileprint/Labels/Templates"
 
-    if {$filePathName eq ""} {return}
+    # Check to see if Customer, and Title folders have been created already
+    set customerPath [file join $tplLabel(RootPath) "$job(CustID) $job(CustName)"]
+    set tplLabel(titlePath) [file join $customerPath "$job(TitleID) $job(Title)"]
 
-    ${log}::debug filePathName: $filePathName
+    if {[file isdirectory $customerPath] == 0} {
+        ${log}::notice $customerPath doesn't exist, creating ...
 
-    #set myDrive [string trim [lindex [file split $filePathName] 0] {// :}]
-    #set newMyDrive [registry get HKEY_CURRENT_USER\\NETWORK\\$myDrive RemotePath]
-    #
-    #set newFilePathName [file join $newMyDrive {*}[lrange [file split $filePathName] 1 end]]
+        file mkdir $customerPath
+    } else {
+        ${log}::notice $customerPath already exists, skipping ...
+    }
 
-    #${log}::debug Returned file path: $newFilePathName
-    # Make sure we're inserting into an empty widget
+    if {[file isdirectory $tplLabel(titlePath)] == 0} {
+        ${log}::notice $tplLabel(titlePath) doesn't exist, creating ...
+
+        file mkdir $tplLabel(titlePath)
+    } else {
+        ${log}::notice $tplLabel(titlePath) already exists, skipping ...
+    }
+
+    #set tplLabel(titlePath) [join [split $tplLabel(titlePath) /] \\]
+    set openFilePath [tk_getOpenFile -initialdir $tplLabel(RootPath) -filetypes {{Bartender {.btw}}}]
+
+    if {$openFilePath eq ""} {return}
+
+    ${log}::debug filePathName: $openFilePath
+
     $wid delete 0 end
-
-    $wid insert end $filePathName
+    $wid insert end $openFilePath
 } ;#ea::code::ld::getOpenFile
 
 proc ea::code::ld::resetWidgets {args} {
@@ -27,61 +42,29 @@ proc ea::code::ld::resetWidgets {args} {
     ${log}::debug Resetting arrays: Job (partial) and tplLabel
 
     # reset standard
+    set job(CustID) ""
+    set job(CustName) ""
     set job(CSRName) ""
     set job(NewCustomer) ""
     set job(Title) ""
-    set tplLabel(ID) ""
-    set tplLabel(FixedBoxQty) ""
-    set tplLabel(FixedLabelInfo) ""
-    set tplLabel(LabelPath) ""
-    set tplLabel(Size) ""
-    set tplLabel(LabelSize) ""
-    set tplLabel(LabelSizeID) ""
-    set tplLabel(SerializeLabel) ""
-    set tplLabel(Name) ""
-    set tplLabel(NotePriv) ""
-    set tplLabel(NotePub) ""
-    set tplLabel(NumRows) ""
-    set tplLabel(tmpValues) ""
-    set tplLabel(LabelVersionID) ""
-    set tplLabel(LabelVersionID,current) ""
-    set tplLabel(LabelVersionDesc) ""
-    set tplLabel(LabelVersionDesc,current) ""
-    set tplLabel(LabelProfileID) ""
-    set tplLabel(LabelProfileDesc) ""
-    set tplLabel(Status) ""
 
-    if {$settings(currentModule_machine) eq "Label_Designer"} {
-        if {[winfo exists .container.frame0.tplNameCbox ]} {.container.frame0.tplNameCbox configure -values ""}
-        if {[winfo exists .container.frame1.versionNameCbox]} {.container.frame1.versionNameCbox configure -values ""}
-
-        # Destroy entry widgets if they exist (created from selecting a Profile)
-        if {[winfo exists .container.frame2]} {destroy .container.frame2}
-
-        if {$args eq "all"} {
-            # reset all widgets / variables
-            set job(CustID) ""
-            set job(CustName) ""
-        }
+    foreach item [array names tplLabel] {
+        set tplLabel($item) ""
     }
 } ;# ea::code::ld::resetWidgets
 
 proc ea::code::ld::saveLabel {} {
+    # Check to make sure we have all required fields populated
+    # If checks pass, write data to database
     global log job tplLabel
 
     set gate 0
 
     ## WARNINGS - If these are triggered, nothing is written to the database
     ## Error Checks - Job Info
-    # Check for CustID/CustName
-    if {$job(CustID) eq ""} { ${log}::critical [mc "Customer ID is empty. Please insert ID."] ; set gate 1}
-    if {$job(CustName) eq ""} { ${log}::critical [mc "Customer Name is empty. Please insert name."] ; set gate 1}
-
-    # Check for CSR
-    if {$job(CSRName) eq ""} { ${log}::critical [mc "CSR name must not be empty."] ; set gate 1}
 
     # Check for title
-    if {$job(Title) eq ""} {${log}::critical [mc "Title name must not be empty. Please insert title name."]; set gate 1}
+    if {$job(TitleID) eq ""} {${log}::critical [mc "Title name must not be empty. Please insert title name."]; set gate 1}
 
     ## Error Checks - Label Properties
     # Label Name
@@ -93,12 +76,7 @@ proc ea::code::ld::saveLabel {} {
     # Check folder permissions
     if {[eAssist_Global::folderAccessibility $tplLabel(LabelPath)] != 3} {${log}::critical [mc "Cannot write to"] $tplLabel(LabelPath). ; set gate 1}
 
-
-    # Check Label Size
-    if {$tplLabel(Size) eq ""} {${log}::critical [mc "Label Size is missing."] ; set gate 1}
-
     # NOTICES - Data is saved to the database, but notices are issued if fields are empty
-    #if {$tplLabel(LabelSize) eq ""} {${log}::alert [mc "Label size hasn't been selected"]} ;# Not using LabelSize
     if {$tplLabel(LabelProfileDesc) eq ""} {${log}::alert [mc "Profile is missing. Setting the ID to 0 (Default)"]; set tplLabel(LabelProfileID) 0}
     if {$tplLabel(FixedBoxQty) eq ""} {${log}::alert [mc "Fixed Box Qty is empty"]}
     if {$tplLabel(FixedLabelInfo) eq ""} {${log}::alert [mc "Fixed Label Info is empty"]}
@@ -109,9 +87,11 @@ proc ea::code::ld::saveLabel {} {
         return
     } else {
         # Write to the database
-        ea::code::ld::writeToDb
+        ea::db::ld::writeTemplate
     }
 } ;# ea::code::ld::saveLabel
+
+## Original / Do Not Use
 
 # ea::code::ld::getRowData 1 .container.frame2
 proc ea::code::ld::getRowData {LabelVersionID widPath} {

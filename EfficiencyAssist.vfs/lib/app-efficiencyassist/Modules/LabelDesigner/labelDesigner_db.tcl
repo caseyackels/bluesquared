@@ -11,7 +11,7 @@ proc ea::db::ld::getLabelProfile {} {
 
     if {[winfo exists $f2a]} {destroy $f2a}
 
-    grid [ttk::frame $f2a] -column 0 -columnspan 2 -row 1
+    grid [ttk::frame $f2a] -column 0 -columnspan 4 -row 1
 
     grid [ttk::label $f2a.headerDesc -text [mc "Line Description"]] -column 1 -row 1 -pady 3p ;#-sticky e
     grid [ttk::label $f2a.headerUserEdit -text [mc "User Editable?"]] -column 2 -row 1 -pady 3p -ipadx 15 ;#-sticky e
@@ -42,7 +42,62 @@ proc ea::db::ld::getLabelProfile {} {
     }
 }
 
+proc ea::db::ld::writeTemplate {} {
+    # Save data as a template
+    global log tplLabel job
+
+    # Write Title ID
+    ${log}::debug Title ID: $job(TitleID)
+
+    # Profile ID
+    ${log}::debug Profile: ea::db::ld::getLabelProfileID $tplLabel(LabelProfileDesc)
+
+    # Template Name
+    ${log}::debug Template Name: $tplLabel(Name)
+
+    # Template Label Path (Document)
+    ${log}::debug Label Document: $tplLabel(LabelPath)
+
+    # Fixed Box Qty (Boolean)
+    ${log}::debug Fixed Box Qty: $tplLabel(FixedBoxQty)
+
+    # Fixed Label Info (boolean)
+    ${log}::debug Fixed Label Info: $tplLabel(FixedLabelInfo)
+
+    # Serialize (boolean)
+    ${log}::debug Serialize: $tplLabel(SerializeLabel)
+
+
+    if {$tplLabel(ID) eq ""} {
+        #db eval "INSERT INTO LabelTPL (PubTitleID, LabelProfileID, tplLabelName, tplLabelPath, tplNotePriv, tplNotePub, tplFixedBoxQty, tplFixedLabelInfo, tplSerialize)
+        #       VALUES ($job(TitleID), $tplLabel(LabelProfileID), '$tplLabel(Name)', '$tplLabel(LabelPath)', '$tplLabel(NotePriv)', '$tplLabel(NotePub)', $tplLabel(FixedBoxQty), $tplLabel(FixedLabelInfo), $tplLabel(SerializeLabel), $tplLabel(SerializeLabel))"
+
+        # Get Template ID - First time
+        db eval "SELECT MAX(tplID) FROM LabelTPL WHERE PubTitleID = '$job(TitleID)'"
+    } else {
+        # Update values
+    }
+}
 ## Helpers
+
+proc ea::db::ld::getTemplates {} {
+    # Check the LabelTPL table in DB: EA
+    # If Title doesn't exist, neither does a template. Add both.
+    global log tplLabel job ldWid
+
+    ${log}::debug CustID: $job(CustID)
+    ${log}::debug TitleID: $job(TitleID) / TitleName: $job(Title)
+    set templatesExists [db eval "SELECT tplLabelName FROM LabelTPL WHERE PubTitleID = '$job(TitleID)'"]
+
+    if {$templatesExists == ""} {
+        ${log}::notice No templates found for Title: $job(TitleID)
+        $ldWid(addTpl,f1).cbox0a configure -values [db eval "SELECT tplLabelName FROM LabelTPL WHERE PubTitleID = 11"]
+
+    } else {
+        ${log}::notice Templates found for Title: $job(TitleID)
+        $ldWid(addTpl,f1).cbox0a configure -values $job(TitleID)
+    }
+} ;# ea::db::ld::getProfileExists
 
 proc ea::db::ld::getCustomerList {} {
     global log tplLabel job
@@ -85,6 +140,59 @@ proc ea::db::ld::getCustomerTitles {} {
     ${log}::debug CustomerTitles retrieved
     set job(CustomerTitles) [join $job(CustomerTitles)]
 } ;# ea::db::ld::getCustomerTitles
+
+proc ea::db::ld::getCustomerTitleID {} {
+    # Retrieve the ID of the selected Title, and the CSR
+    # This will be used internally (ea db) and to prefix folders
+    global log job
+
+    set job(TitleID) ""
+    set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+    set stmt [$monarch_db prepare "SELECT TOP 1 JOBID, ACCOUNTMGR FROM EA.dbo.Customer_Jobs_Issues_CSR
+                                    WHERE TITLENAME = '$job(Title)'"]
+
+    set res [$stmt execute]
+
+    while {[$res nextlist val]} {
+        lappend job(TitleID) [lindex $val 0]
+        lappend job(CSRID) [lindex $val 1]
+        #puts $val
+    }
+
+    $stmt close
+    db2 close
+
+    set job(TitleID) [join $job(TitleID)]
+    set job(CSRID) [join $job(CSRID)]
+    ${log}::debug Monarch Title ID $job(TitleID) and CSR $job(CSRID) retrieved
+} ;# ea::db::ld::getCustomerTitleID
+
+proc ea::db::ld::getCustomerCode {} {
+    global log job
+    set job(CustID) ""
+    set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+    set stmt [$monarch_db prepare "SELECT DISTINCT HAGEN_ID FROM EA.dbo.Customer_Jobs_Issues_CSR
+                                    WHERE COMPANYNAME = '$job(CustName)'"]
+
+    set res [$stmt execute]
+
+    while {[$res nextlist val]} {
+        lappend job(CustID) $val
+        #puts $val
+    }
+
+    $stmt close
+    db2 close
+
+    ${log}::debug Customer Code retrieved
+    set job(CustID) [join $job(CustID)]
+} ;# ea::db::ld::getCustomerCode
+
+proc ea::db::ld::getProfile {cbox} {
+    global log
+
+    $cbox configure -values [db eval "SELECT LabelProfileDesc FROM LabelProfiles ORDER BY LabelProfileID"]
+} ;# ea::db::ld::getProfile
 
 proc ea::db::ld::getLabelProfileID {profile} {
     global log tplLabel
@@ -285,12 +393,6 @@ proc ea::db::ld::getVersionLabel {} {
         }
     }
 } ;# ea::db::ld::getVersionLabel
-
-proc ea::db::ld::getProfile {cbox} {
-    global log
-
-    $cbox configure -values [db eval "SELECT LabelProfileDesc FROM LabelProfiles"]
-} ;# ea::db::ld::getProfile
 
 proc ea::db::ld::getProfileID {args} {
     # Retrieves the profile id assocatiated to 'args' value, which should be the profile description.
