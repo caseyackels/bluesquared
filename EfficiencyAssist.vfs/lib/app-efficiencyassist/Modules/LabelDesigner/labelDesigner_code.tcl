@@ -53,7 +53,7 @@ proc ea::code::ld::resetWidgets {args} {
     }
 } ;# ea::code::ld::resetWidgets
 
-proc ea::code::ld::saveLabel {} {
+proc ea::code::ld::saveTemplateHeader {} {
     # Check to make sure we have all required fields populated
     # If checks pass, write data to database
     global log job tplLabel
@@ -87,9 +87,12 @@ proc ea::code::ld::saveLabel {} {
         return
     } else {
         # Write to the database
+
         ea::db::ld::writeTemplate
+        ea::db::ld::writeLabelData
     }
-} ;# ea::code::ld::saveLabel
+} ;# ea::code::ld::saveTemplateHeader
+
 
 ## Original / Do Not Use
 

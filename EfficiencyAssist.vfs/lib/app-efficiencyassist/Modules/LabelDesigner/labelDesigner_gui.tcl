@@ -86,24 +86,29 @@ proc ea::gui::ld::addTemplate {} {
     if {[winfo exists $ldWid(addTpl)]} {${log}::notice addTemplate window already exists, aborting.; return}
 
     toplevel $ldWid(addTpl)
+    wm transient $ldWid(addTpl) .
     wm title $ldWid(addTpl) [mc "Add/Edit Template"]
 
     ${log}::debug addTemplate: winfo geom: [winfo geometry $ldWid(addTpl)]
     wm geometry $ldWid(addTpl) +854+214
+
+    #wm iconify $ldWid(addTpl)
+
+    #focus -force $ldWid(addTpl)
 
     ${log}::debug addTemplate window Created...
 
     ##
     ## Header Info
     ##
-    set ldWid(addTpl,f1) [ttk::frame $ldWid(addTpl).f1 -padding 5]
-    pack $ldWid(addTpl,f1) -fill both -expand yes
+    set ldWid(addTpl,f1) [ttk::labelframe $ldWid(addTpl).f1 -text [mc "Template Info"] -padding 5]
+    pack $ldWid(addTpl,f1) -fill both -expand yes -pady 2p -padx 2p
 
     grid [ttk::label $ldWid(addTpl,f1).text1 -text [mc "Customer"]] -column 0 -row 0 -padx 2p -pady 2p -sticky e
     grid [ttk::entry $ldWid(addTpl,f1).entry1 -textvariable job(CustName) -width 33 \
                                                 -validate all \
                                                 -validatecommand {AutoComplete::AutoComplete %W %d %v %P $job(CustomerList)}] -column 1 -row 0 -padx 2p -pady 2p -sticky w
-
+        focus $ldWid(addTpl,f1).entry1
         bind $ldWid(addTpl,f1).entry1 <FocusOut> {
             if {[%W get] ne ""} {
                 ${log}::notice Get Customer Titles
@@ -140,10 +145,7 @@ proc ea::gui::ld::addTemplate {} {
 
         bind $ldWid(addTpl,f1).cbox1 <<ComboboxSelected>> {
             ea::db::ld::getLabelProfileID [%W get]
-            ea::gui::ld::genLines
             ea::db::ld::getLabelProfile
-            #ea::db::ld::getLabelSpecs %W
-            #.container.frame1.headerFileBtn configure -state normal
         }
 
     grid [ttk::label $ldWid(addTpl,f1).text4 -text [mc "Label Document"]] -column 3 -row 1 -pady 2p -padx 2p -sticky e
@@ -158,52 +160,43 @@ proc ea::gui::ld::addTemplate {} {
     ##
 
     # This is automatically created based on the profile selected, and ea::gui::ld::genLines
+    ea::gui::ld::genLines
 
     ##
     ## Save buttons
     ##
     set btnBar [ttk::frame $ldWid(addTpl).f3]
-    pack $btnBar -pady 5p -padx 5p -anchor e
+    pack $btnBar -pady 5p -padx 5p -anchor se
 
-    grid [ttk::button $btnBar.save -text [mc "Save"] -command {ea::code::ld::saveLabel}] -column 0 -row 0 -pady 2p -padx 2p
+    grid [ttk::button $btnBar.save -text [mc "Save"] -command {ea::code::ld::saveTemplateHeader}] -column 0 -row 0 -pady 2p -padx 2p
     grid [ttk::button $btnBar.cncl -text [mc "Cancel"] -command {destroy $ldWid(addTpl); ea::code::ld::resetWidgets}] -column 1 -row 0 -pady 2p -padx 2p
-
 } ;# ea::gui::ld::addTemplate
 
 proc ea::gui::ld::genLines {} {
     global log tplLabel ldWid
     ${log}::debug Generating row widgets: $ldWid(addTpl).f2
 
-    if {[winfo exists $ldWid(addTpl).f2]} {
-        ${log}::debug Label Lines frame already exists, destroying...
-        destroy $ldWid(addTpl).f2
-    }
-
-    ##
-    ## Label Information
-    ##
     set ldWid(addTpl,f2) [ttk::labelframe $ldWid(addTpl).f2 -text [mc "Label Information"] -padding 2]
     pack $ldWid(addTpl,f2) -expand yes -fill both -pady 5p -padx 5p
 
-    grid [ttk::label $ldWid(addTpl,f2).versionDesc -text [mc "Version"]] -column 0 -row 0 -padx 2p -pady 5p -sticky e
-    grid [ttk::combobox $ldWid(addTpl,f2).versionDescCbox -values $tplLabel(LabelVersionDesc)] -column 1 -row 0 -padx 2p -pady 5p -sticky w
+    grid [ttk::label $ldWid(addTpl,f2).versionDesc -text [mc "Version"]] -column 0 -row 0 -padx 2p -pady 5p -sticky ew
+    grid [ttk::combobox $ldWid(addTpl,f2).versionDescCbox -values $tplLabel(LabelVersionDesc)] -column 1 -row 0 -padx 2p -pady 5p -sticky ew
         $ldWid(addTpl,f2).versionDescCbox set $tplLabel(LabelVersionDesc,current)
         $ldWid(addTpl,f2).versionDescCbox state readonly
-    grid [ttk::button $ldWid(addTpl,f2).add -text [mc "Add Version"]] -column 2 -row 0 -padx 2p -pady 5p -sticky e
 
+    bind $ldWid(addTpl,f2).versionDescCbox <<ComboboxSelected>> {
+        set tplLabel(LabelVersionID,current) [db eval "SELECT labelVersionID FROM LabelVersions WHERE tplID = '$tplLabel(ID)' AND LabelVersionDesc = '[%W get]'"]
 
-    #bind $ldWid(addTpl,f2).versionDescCbox <<ComboboxSelected>> {
-    #    set tplLabel(LabelVersionID,current) [db eval "SELECT labelVersionID FROM LabelVersions WHERE tplID = '$tplLabel(ID)' AND LabelVersionDesc = '[%W get]'"]
-    #
-    #    if {$tplLabel(LabelVersionID,current) eq ""} {return}
-    #
-    #    if {[winfo exists $ldWid(addTpl,f2).f2a]} {
-    #        foreach item [winfo children $ldWid(addTpl,f2).f2a] {
-    #            destroy $item
-    #        }
-    #        #ea::db::ld::getVersionLabel
-    #    }
-    #}
+        if {$tplLabel(LabelVersionID,current) eq ""} {return}
+
+        if {[winfo exists $ldWid(addTpl,f2).f2a]} {
+            foreach item [winfo children $ldWid(addTpl,f2).f2a] {
+                destroy $item
+            }
+            #ea::db::ld::getVersionLabel
+            ea::db::ld::getLabelProfile
+        }
+    }
 
     #ea::db::ld::getLabelProfile
 } ;# ea::code::ld::genLines

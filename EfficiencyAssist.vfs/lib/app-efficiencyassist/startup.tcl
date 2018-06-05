@@ -443,7 +443,7 @@ proc 'eAssist_initVariables {} {
 						LabelProfileRowNum "" \
 						tmpValues,rbtn "" \
                         tmpValues "" \
-						Status ""]
+						Status 1]
 
 	# Filters
 	array set filter [list run,stripASCII_CC 0 \

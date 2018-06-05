@@ -11,46 +11,81 @@ proc ea::db::ld::getLabelProfile {} {
 
     if {[winfo exists $f2a]} {destroy $f2a}
 
-    grid [ttk::frame $f2a] -column 0 -columnspan 4 -row 1
+    if {$tplLabel(LabelProfileRowNum) != 0} {
+        grid [ttk::frame $f2a] -column 0 -columnspan 4 -row 1
 
-    grid [ttk::label $f2a.headerDesc -text [mc "Line Description"]] -column 1 -row 1 -pady 3p ;#-sticky e
-    grid [ttk::label $f2a.headerUserEdit -text [mc "User Editable?"]] -column 2 -row 1 -pady 3p -ipadx 15 ;#-sticky e
-    grid [ttk::label $f2a.headerVersionToggle -text [mc "Version?"]] -column 3 -row 1 -pady 3p -ipadx 15 ;#-sticky e
-
-    ${log}::debug tplLabel(ID) is empty, generating lines based off of selected profile $tplLabel(LabelProfileDesc)
-    for {set x 1} {$x <= $tplLabel(LabelProfileRowNum)} {incr x} {
-        grid [ttk::label $f2a.description$x -text [mc "Row $x"]] -column $col -row $rw -pady 2p -padx 2p -sticky e
-
-        incr col
-        grid [ttk::entry $f2a.labelData$x -width 35] -column $col -row $rw -pady 2p -padx 2p -sticky ew
-        $f2a.labelData$x delete 0 end
-
-        # Label Option / Editable?
-        incr col
-        set tplLabel(tmpValues,ckbtn,$x) 0
-        grid [ttk::checkbutton $f2a.userEditable$x -variable tplLabel(tmpValues,ckbtn,$x)] -column $col -row $rw -pady 2p -padx 2p -ipadx 15 ;#-sticky ew
-
-        # Label Option / Version?
-        incr col
-        #set tplLabel(tmpValues,rbtn) 0
-        ${log}::debug ttk::radiobutton $f2a.isVersion$x -value $x -variable tplLabel(tmpValues,rbtn)
-        grid [ttk::radiobutton $f2a.isVersion$x -value $x -variable tplLabel(tmpValues,rbtn)] -column $col -row $rw -pady 2p -padx 2p -ipadx 15 ;#-sticky ew
-
-        # reset counters
-        incr rw
-        set col 0
+        grid [ttk::label $f2a.headerDesc -text [mc "Line Description"]] -column 1 -row 1 -pady 3p ;#-sticky e
+        grid [ttk::label $f2a.headerUserEdit -text [mc "User Editable?"]] -column 2 -row 1 -pady 3p -ipadx 15 ;#-sticky e
+        grid [ttk::label $f2a.headerVersionToggle -text [mc "Version?"]] -column 3 -row 1 -pady 3p -ipadx 15 ;#-sticky e
     }
-}
+
+    if {$tplLabel(ID) eq ""} {
+        ${log}::debug tplLabel(ID) is empty, generating lines based off of selected profile $tplLabel(LabelProfileDesc)
+        for {set x 1} {$x <= $tplLabel(LabelProfileRowNum)} {incr x} {
+            grid [ttk::label $f2a.description$x -text [mc "Row $x"]] -column $col -row $rw -pady 2p -padx 2p -sticky e
+
+            incr col
+            grid [ttk::entry $f2a.labelData$x -width 35] -column $col -row $rw -pady 2p -padx 2p -sticky ew
+            $f2a.labelData$x delete 0 end
+
+            # Label Option / Editable?
+            incr col
+            set tplLabel(tmpValues,ckbtn,$x) 0
+            grid [ttk::checkbutton $f2a.userEditable$x -variable tplLabel(tmpValues,ckbtn,$x)] -column $col -row $rw -pady 2p -padx 2p -ipadx 15 ;#-sticky ew
+
+            # Label Option / Version?
+            incr col
+            #set tplLabel(tmpValues,rbtn) 0
+            ${log}::debug ttk::radiobutton $f2a.isVersion$x -value $x -variable tplLabel(tmpValues,rbtn)
+            grid [ttk::radiobutton $f2a.isVersion$x -value $x -variable tplLabel(tmpValues,rbtn)] -column $col -row $rw -pady 2p -padx 2p -ipadx 15 ;#-sticky ew
+
+            # reset counters
+            incr rw
+            set col 0
+        }
+    } else {
+        ${log}::debug labelTpl(ID) and labelVersionID,current exists ...
+        set x 1
+        db eval "SELECT labelRowNum, labelRowText, userEditable, isVersion FROM LabelData WHERE labelVersionID = '$tplLabel(LabelVersionID,current)'" {
+                ${log}::debug Row: $labelRowNum, $labelRowText, $userEditable, $isVersion
+                # Row Labels
+                grid [ttk::label $f2a.description$x -text [mc "Row $labelRowNum"]] -column $col -row $rw -pady 2p -padx 2p -sticky e
+
+                # Label Data
+                incr col
+                grid [ttk::entry $f2a.labelData$x -width 35] -column $col -row $rw -pady 2p -padx 2p -sticky ew
+                $f2a.labelData$x delete 0 end
+                $f2a.labelData$x insert end $labelRowText
+
+                # Label Option / Editable?
+                incr col
+                set tplLabel(tmpValues,ckbtn,$x) $userEditable
+                grid [ttk::checkbutton $f2a.userEditable$x -variable tplLabel(tmpValues,ckbtn,$x)] -column $col -row $rw -pady 2p -padx 2p -ipadx 15 ;#-sticky ew
+
+                # Label Option / Version?
+                incr col
+                grid [ttk::radiobutton $f2a.isVersion$x -value $x -variable tplLabel(tmpValues,rbtn)] -column $col -row $rw -pady 2p -padx 2p -ipadx 15 ;#-sticky ew
+                if {$isVersion == 1} {$f2a.isVersion$x invoke}
+
+                # reset counters
+                incr rw
+                incr x
+                set col 0
+        }
+    }
+} ;# ea::db::ld::getLabelProfile
 
 proc ea::db::ld::writeTemplate {} {
-    # Save data as a template
+    # Invoked from ea::code::ld::saveTemplateHeader
+    #
+    # Save data to EA DB
     global log tplLabel job
 
     # Write Title ID
     ${log}::debug Title ID: $job(TitleID)
 
     # Profile ID
-    ${log}::debug Profile: ea::db::ld::getLabelProfileID $tplLabel(LabelProfileDesc)
+    ${log}::debug Profile: [ea::db::ld::getLabelProfileID $tplLabel(LabelProfileDesc)]
 
     # Template Name
     ${log}::debug Template Name: $tplLabel(Name)
@@ -69,15 +104,108 @@ proc ea::db::ld::writeTemplate {} {
 
 
     if {$tplLabel(ID) eq ""} {
-        #db eval "INSERT INTO LabelTPL (PubTitleID, LabelProfileID, tplLabelName, tplLabelPath, tplNotePriv, tplNotePub, tplFixedBoxQty, tplFixedLabelInfo, tplSerialize)
-        #       VALUES ($job(TitleID), $tplLabel(LabelProfileID), '$tplLabel(Name)', '$tplLabel(LabelPath)', '$tplLabel(NotePriv)', '$tplLabel(NotePub)', $tplLabel(FixedBoxQty), $tplLabel(FixedLabelInfo), $tplLabel(SerializeLabel), $tplLabel(SerializeLabel))"
+        ${log}::notice Creating New Template for: $job(CustName)
+        db eval "INSERT INTO LabelTPL (PubTitleID, LabelProfileID, tplLabelName, tplLabelPath, tplNotePriv, tplNotePub, tplFixedBoxQty, tplFixedLabelInfo, tplSerialize)
+                VALUES ($job(TitleID), $tplLabel(LabelProfileID), '$tplLabel(Name)', '$tplLabel(LabelPath)', '$tplLabel(NotePriv)', '$tplLabel(NotePub)', '$tplLabel(FixedBoxQty)', '$tplLabel(FixedLabelInfo)', '$tplLabel(SerializeLabel)')"
 
         # Get Template ID - First time
-        db eval "SELECT MAX(tplID) FROM LabelTPL WHERE PubTitleID = '$job(TitleID)'"
+        set tplLabel(ID) [db eval "SELECT MAX(tplID) FROM LabelTPL WHERE PubTitleID = '$job(TitleID)'"]
+
     } else {
         # Update values
+        # NOT TESTED
+        ${log}::notice Updating existing template ($job(TitleID) / $job(CustName))
+        db eval "UPDATE LabelTPL
+                    SET LabelProfileID = $tplLabel(LabelProfileID),
+                        tplLabelName = '$tplLabel(Name)',
+                        tplLabelPath = '$tplLabel(LabelPath)',
+                        tplNotePriv = '$tplLabel(NotePriv)',
+                        tplNotePub = '$tplLabel(NotePub)',
+                        tplFixedBoxQty = '$tplLabel(FixedBoxQty)',
+                        tplFixedLabelInfo = '$tplLabel(FixedLabelInfo)',
+                        tplSerialize = '$tplLabel(SerializeLabel)',
+                        Status = 'tplLabel(Status)'
+                    WHERE tplID = $tplLabel(ID)"
+
     }
-}
+} ;# ea::db::ld::writeTemplate
+
+proc ea::db::ld::writeLabelData {} {
+    # Invoked from ea::code::ld::saveTemplateHeader
+    #
+    # Write the label data to the database (EA)
+    # We never 'update' the data, we just delete and re-add.
+    global log tplLabel job ldWid
+
+    # Ensure we are writing to an existing template.
+    #ea::code::ld::saveTemplateHeader
+
+    # Check if the label profile allows text/etc
+    set haveData [db eval "SELECT LabelHeaders.LabelHeaderID FROM LabelHeaderGrp
+                            INNER JOIN LabelHeaders ON LabelHeaders.LabelHeaderID = LabelHeaderGrp.LabelHeaderID
+                            INNER JOIN LabelProfiles ON LabelProfiles.LabelProfileID = LabelHeaderGrp.LabelProfileID
+                                WHERE LabelHeaderGrp.LabelProfileID = $tplLabel(LabelProfileID)
+                                AND LabelHeaders.LabelHeaderSystemOnly = 0"]
+    if {$haveData ne ""} {
+        # Check if labelVersionID exists
+        #  - Doesn't Exist; Insert labelVersionID, Insert Row Data
+        # - Exists; Delete Row Data, then Insert
+
+        # Check to see if a new 'version' has been entered (typically happens on multi-version jobs)
+        set newVersion [$ldWid(addTpl,f2).f2a.labelData$tplLabel(tmpValues,rbtn) get]
+
+        if {$tplLabel(LabelVersionID,current) eq "" && $tplLabel(LabelVersionDesc,current) eq ""} {
+            # This is a new version, insert only. (Table: LabelVersions)
+            ${log}::notice LabelVersion ID doesn't exist, but Description does. Retrieving...
+            ${log}::notice LabelVersion Row: $tplLabel(tmpValues,rbtn) [$ldWid(addTpl,f2).f2a.labelData$tplLabel(tmpValues,rbtn) get]
+            ${log}::debug db eval "INSERT INTO LabelVersions (tplID, LabelVersionDesc) VALUES ($tplLabel(ID), '[$ldWid(addTpl,f2).f2a.labelData$tplLabel(tmpValues,rbtn) get]')"
+
+            db eval "INSERT INTO LabelVersions (tplID, LabelVersionDesc) VALUES ($tplLabel(ID), '[$ldWid(addTpl,f2).f2a.labelData$tplLabel(tmpValues,rbtn) get]')"
+
+            # Get version id
+            set tplLabel(LabelVersionID,current) [db eval "SELECT max(labelVersionID) FROM LabelVersions WHERE tplID = $tplLabel(ID)"]
+            ${log}::notice Retrieving new version ID: $tplLabel(LabelVersionID,current)
+
+            # Insert label date (Table: LabelData)
+            set data [join [ea::code::ld::getRowData $tplLabel(LabelVersionID,current) $ldWid(addTpl,f2).f2a]]
+            ${log}::notice Inserting Row Data: $data
+            ${log}::debug db eval "INSERT INTO LabelData (labelVersionID, labelRowNum, labelRowText, userEditable, isVersion) VALUES $data"
+            db eval "INSERT INTO LabelData (labelVersionID, labelRowNum, labelRowText, userEditable, isVersion) VALUES $data"
+
+        } elseif {[string equal $tplLabel(LabelVersionDesc,current) $newVersion] == 0} {
+            # Check to see if a new 'version' has been entered (typically happens on multi-version jobs)
+            ${log}::notice New Label Version detected
+
+            # Inserting Version info
+            db eval "INSERT INTO LabelVersions (tplID, LabelVersionDesc) VALUES ($tplLabel(ID), '[$ldWid(addTpl,f2).f2a.labelData$tplLabel(tmpValues,rbtn) get]')"
+            set tplLabel(LabelVersionID,current) [db eval "SELECT max(labelVersionID) FROM LabelVersions WHERE tplID = $tplLabel(ID)"]
+            ${log}::notice Retrieving new version ID: $tplLabel(LabelVersionID,current)
+
+            set data [join [ea::code::ld::getRowData $tplLabel(LabelVersionID,current) $ldWid(addTpl,f2).f2a]]
+            ${log}::notice Inserting Row Data: $data
+
+            ${log}::debug db eval "INSERT INTO LabelData (labelVersionID, labelRowNum, labelRowText, userEditable, isVersion) VALUES $data"
+            db eval "INSERT INTO LabelData (labelVersionID, labelRowNum, labelRowText, userEditable, isVersion) VALUES $data"
+
+        } else {
+            # Remove existing data, and repopulate using existing LabelVersionID,current
+            ${log}::debug LabelVersionID,current: $tplLabel(LabelVersionID,current)
+            ${log}::notice Delete existing data for $tplLabel(LabelVersionDesc,current)
+            ${log}::debug db eval "DELETE FROM LabelData WHERE labelVersionID = $tplLabel(LabelVersionID,current)"
+            db eval "DELETE FROM LabelData WHERE labelVersionID = $tplLabel(LabelVersionID,current)"
+
+            ${log}::notice Entering new data for $tplLabel(LabelVersionDesc,current)
+            set data [join [ea::code::ld::getRowData $tplLabel(LabelVersionID,current) $ldWid(addTpl,f2).f2a]]
+            ${log}::debug db eval "INSERT INTO LabelData (labelVersionID, labelRowNum, labelRowText, userEditable, isVersion) VALUES $data"
+            db eval "INSERT INTO LabelData (labelVersionID, labelRowNum, labelRowText, userEditable, isVersion) VALUES $data"
+        }
+
+
+        # Update drop down values
+        $ldWid(addTpl,f2).versionDescCbox configure -values [db eval "SELECT LabelVersionDesc FROM LabelVersions WHERE tplID = $tplLabel(ID)"]
+    }
+} ;# ea::db::ld::writeLabelData
+
 ## Helpers
 
 proc ea::db::ld::getTemplates {} {
