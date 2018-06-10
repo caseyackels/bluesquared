@@ -1,0 +1,52 @@
+PRAGMA foreign_keys = 0;
+
+CREATE TABLE sqlitestudio_temp_table AS SELECT *
+                                          FROM LabelTPL;
+
+DROP TABLE LabelTPL;
+
+CREATE TABLE LabelTPL (
+    tplID             INTEGER PRIMARY KEY AUTOINCREMENT
+                              UNIQUE ON CONFLICT ROLLBACK
+                              NOT NULL ON CONFLICT ROLLBACK,
+    PubTitleID        INTEGER REFERENCES PubTitle (Title_ID),
+    LabelProfileID    INTEGER REFERENCES LabelProfiles (LabelProfileID),
+    tplLabelName      TEXT    NOT NULL ON CONFLICT ROLLBACK,
+    tplLabelPath      TEXT    NOT NULL ON CONFLICT ROLLBACK,
+    tplNotePriv       TEXT,
+    tplNotePub        TEXT,
+    tplFixedBoxQty    INTEGER,
+    tplFixedLabelInfo BOOLEAN,
+    tplSerialize      BOOLEAN,
+    Status            BOOLEAN DEFAULT (1)
+);
+
+INSERT INTO LabelTPL (
+                         tplID,
+                         PubTitleID,
+                         LabelProfileID,
+                         tplLabelName,
+                         tplLabelPath,
+                         tplNotePriv,
+                         tplNotePub,
+                         tplFixedBoxQty,
+                         tplFixedLabelInfo,
+                         tplSerialize,
+                         Status
+                     )
+                     SELECT tplID,
+                            PubTitleID,
+                            LabelProfileID,
+                            tplLabelName,
+                            tplLabelPath,
+                            tplNotePriv,
+                            tplNotePub,
+                            tplFixedBoxQty,
+                            tplFixedLabelInfo,
+                            tplSerialize,
+                            Status
+                       FROM sqlitestudio_temp_table;
+
+DROP TABLE sqlitestudio_temp_table;
+
+PRAGMA foreign_keys = 1;
