@@ -441,6 +441,7 @@ proc 'eAssist_initVariables {} {
 						LabelProfileID "" \
 						LabelProfileDesc "" \
 						LabelProfileRowNum "" \
+						LabelPrinter "" \
 						tmpValues,rbtn "" \
                         tmpValues "" \
 						Status 1]

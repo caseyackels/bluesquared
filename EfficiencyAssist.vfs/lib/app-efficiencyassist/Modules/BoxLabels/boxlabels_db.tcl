@@ -24,9 +24,11 @@ proc ea::db::bl::getTplData {tpl btn1 shipToWid shipListWid} {
 
         set tplLabel(ID) $tpl
         # id exists, retrieving data
-        db eval "SELECT PubTitleID, LabelProfileID, labelSizeID, tplLabelName, tplLabelPath, tplNotePub, tplFixedBoxQty, tplFixedLabelInfo, tplSerialize FROM LabelTPL WHERE tplID = $tplLabel(ID)" {
+        db eval "SELECT PubTitleID, LabelTpl.LabelProfileID as labelProfileID, tplLabelName, tplLabelPath, tplNotePub, tplFixedBoxQty, tplFixedLabelInfo, tplSerialize, LabelProfiles.labelSizeID as labelSizeID  FROM LabelTPL
+                    INNER JOIN LabelProfiles ON LabelProfiles.LabelProfileID = LabelTPL.LabelProfileID
+                    WHERE tplID = $tplLabel(ID)" {
             set job(Title,id) $PubTitleID
-            set tplLabel(LabelProfileID) $LabelProfileID
+            set tplLabel(LabelProfileID) $labelProfileID
             set tplLabel(LabelSizeID) $labelSizeID
             set tplLabel(Name) $tplLabelName
             set tplLabel(LabelPath) $tplLabelPath
@@ -36,8 +38,8 @@ proc ea::db::bl::getTplData {tpl btn1 shipToWid shipListWid} {
             set tplLabel(SerializeLabel) $tplSerialize
         }
 
-        if {$tplLabel(LabelProfileID) == 0} {
-            ${log}::debug We're using a label that uses a run-list. Check modification date/time on runlist to see if it has been updated (less than a month)
+        if {$tplLabel(LabelProfileID) == 0 || $tplLabel(LabelProfileID) == 16} {
+            ${log}::debug We're using a label that uses a run-list, or all text is on the label. Check modification date/time on runlist to see if it has been updated (less than a month)
 
             # Disable all widgets
             foreach item [winfo children $blWid(f0BL)] {
@@ -47,10 +49,13 @@ proc ea::db::bl::getTplData {tpl btn1 shipToWid shipListWid} {
                 }
             }
 
-            foreach item [winfo children $blWid(f1BL)] {
-                if {[string match *txt* $item] != 1} {
-                    ${log}::debug Disable Widget: $item
-                    $item configure -state disabled
+            if {$tplLabel(LabelProfileID) == 0} {
+                # only disable if we are using a run-list
+                foreach item [winfo children $blWid(f1BL)] {
+                    if {[string match *txt* $item] != 1} {
+                        ${log}::debug Disable Widget: $item
+                        $item configure -state disabled
+                    }
                 }
             }
 
@@ -74,7 +79,11 @@ proc ea::db::bl::getTplData {tpl btn1 shipToWid shipListWid} {
     }
 
     # Get Label size info
-    set tplLabel(Size) [db eval "SELECT labelSizeDesc FROM LabelSizes WHERE labelSizeID = $tplLabel(LabelSizeID)"]
+    db eval "SELECT labelSizeDesc, labelPrinter FROM LabelSizes WHERE labelSizeID = $tplLabel(LabelSizeID)" {
+        set tplLabel(Size) $labelSizeDesc
+        set tplLabel(LabelPrinter) $labelPrinter
+    }
+
 
     if {$tplLabel(FixedBoxQty) != ""} {
         set GS_textVar(maxBoxQty) $tplLabel(FixedBoxQty)
@@ -135,7 +144,7 @@ proc ea::db::bl::populateWidget {} {
                       set labelRowNum 0$labelRowNum
                     }
 
-                    set labelText(Row$labelRowNum) $labelRowText
+                    set labelText(Row$labelRowNum) [string toupper $labelRowText]
 
                     set labelRowNum_trimmed [string trim $labelRowNum 0]
                     if {$userEditable != 1} {
@@ -194,26 +203,26 @@ proc ea::db::bl::getShipToData {btn wid_text} {
         ${log}::debug Ship to: $val
         set val_length [llength $val]
 
-        $wid_text insert end [lindex $val 0]\n
-        lappend job(ShipToDestination) [lindex $val 0]
+        $wid_text insert end [string trim [lindex $val 0]]\n
+        lappend job(ShipToDestination) [string trim [lindex $val 0]]
 
-        $wid_text insert end [lindex $val 1]\n
-        lappend job(ShipToDestination) [lindex $val 1]
+        $wid_text insert end [string trim [lindex $val 1]]\n
+        lappend job(ShipToDestination) [string trim [lindex $val 1]]
 
         if {[lindex $val 2] ne ""} {
-            $wid_text insert end [lindex $val 2]\n
-            lappend job(ShipToDestination) [lindex $val 2]
+            $wid_text insert end [string trim [lindex $val 2]]\n
+            lappend job(ShipToDestination) [string trim [lindex $val 2]]
         }
 
         if {[lindex $val 3] ne ""} {
-            $wid_text insert end [lindex $val 3]\n
-            lappend job(ShipToDestination) [lindex $val 3]
+            $wid_text insert end [string trim [lindex $val 3]]\n
+            lappend job(ShipToDestination) [string trim [lindex $val 3]]
         }
-        $wid_text insert end "[lindex $val 4] [lindex $val 5] [lindex $val 6] \n"
-        lappend job(ShipToDestination) "[lindex $val 4] [lindex $val 5] [lindex $val 6]"
+        $wid_text insert end "[string trim [lindex $val 4]] [string trim [lindex $val 5]] [string trim [lindex $val 6]]\n"
+        lappend job(ShipToDestination) "[string trim [lindex $val 4]] [string trim [lindex $val 5]] [string trim [lindex $val 6]]"
 
-        $wid_text insert end [lindex $val 7]
-        lappend job(ShipToDestination) [lindex $val 7]
+        $wid_text insert end [string trim [lindex $val 7]]
+        lappend job(ShipToDestination) [string trim [lindex $val 7]]
 
         #set job(ShipOrderNumPallets) [lindex $val 8]
     }
@@ -317,7 +326,7 @@ proc ea::db::bl::getAllVersions {wid args} {
     if {$job(Number) eq ""} {return}
 
     # Handle versions differently if we're using a template
-    if {$job(Template) ne "" || $job(Template) != 0} {
+    if {$job(Template) ne ""} {
       ${log}::debug getAllVersions: We are using a template, not displaying Versions from Monarch
       ea::db::bl::getTplVersions
       return
@@ -325,9 +334,9 @@ proc ea::db::bl::getAllVersions {wid args} {
 
     # Ensure var is empty
     set job(Versions) ""
-
-
     set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+
+    # Retrieve versions that have boxes
     set stmt [$monarch_db prepare "SELECT DISTINCT ALIASNAME
                                         FROM EA.dbo.Planner_Shipping_View
                                         WHERE JOBNAME='$job(Number)'
@@ -353,40 +362,25 @@ proc ea::db::bl::getAllVersions {wid args} {
     set job(TotalVersions) ""
     while {[$res nextlist val]} {
         ${log}::debug Total Versions: $val
-        lappend job(TotalVersions) [join $val]
+        lappend job(TotalVersions) [string toupper [join $val]]
     }
 
     db2 close
 
     ${log}::debug List of versions: $job(TotalVersions)
 
-    # Populating the dropdown with the versions, and setting the selection to the first result.
-    set job(Version) [lindex $job(TotalVersions) 0]
-    $wid configure -values $job(TotalVersions)
-    $wid set $job(Version)
+    if {$args == 1} {
+        # Populating the dropdown with the versions, and setting the selection to the first result.
+        # This should only be done once.
+        set job(Version) [lindex $job(TotalVersions) 0]
+        $wid configure -values $job(TotalVersions)
+        $wid set $job(Version)
+    }
 
     # If we only have one version, don't populate the label text
     if {[llength $job(TotalVersions)] > 1} {
         set labelText(Row03) $job(Version)
     }
-
-    #if {$args eq 1} {
-    #    # First time running for this job
-    #    set job(Version) [lindex $job(Versions) 0]
-    #    $wid configure -values $job(Versions)
-    #    $wid set $job(Version)
-    #
-    #    # If we only have one version, don't populate the label text
-    #    if {[llength $job(TotalVersions)] > 1} {
-    #        set labelText(Row03) $job(Version)
-    #    }
-    #}
-
-
-    #if {$wid ne ""} {
-    #    $wid configure -values [join $job(Versions)]
-    #    $wid set $labelText(Row3)
-    #}
 } ;# ea::db::bl::getAllVersions
 
 proc ea::db::bl::getTplVersions {} {

@@ -104,7 +104,7 @@ proc ea::gui::bl::Main {} {
 	grid [ttk::combobox $blWid(f0BL).cbox1 -state readonly -postcommand {ea::db::bl::getAllVersions $blWid(f0BL).cbox1}] -column 1 -row 0 -pady 15p -padx 4p -sticky new
 
 		bind $blWid(f0BL).cbox1 <<ComboboxSelected>> {
-			if {$job(Template) eq "" || $job(Template) == 0} {
+			if {$job(Template) eq ""} {
 				set job(Version) [%W get]
 				if {[llength $job(TotalVersions)] > 1} {
 					set labelText(Row03) $job(Version)

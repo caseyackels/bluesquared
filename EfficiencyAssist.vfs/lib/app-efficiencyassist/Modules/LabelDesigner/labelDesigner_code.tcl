@@ -51,6 +51,9 @@ proc ea::code::ld::resetWidgets {args} {
     foreach item [array names tplLabel] {
         set tplLabel($item) ""
     }
+
+    # Populate table list
+    ea::db::ld::getTemplateData
 } ;# ea::code::ld::resetWidgets
 
 proc ea::code::ld::saveTemplateHeader {} {
@@ -86,13 +89,42 @@ proc ea::code::ld::saveTemplateHeader {} {
         ${log}::critical Critical errors exist, not writing to the database.
         return
     } else {
-        # Write to the database
+        # Write Template, Label data to database.
+        # Create a dummy file for linking the BarTender document to the run-list file.
 
         ea::db::ld::writeTemplate
         ea::db::ld::writeLabelData
+        ea::code::ld::createDummyFile
+        # Populate table list
+        ea::db::ld::getTemplateData
     }
 } ;# ea::code::ld::saveTemplateHeader
 
+proc ea::code::ld::createDummyFile {} {
+    # Create a 'dummy' file that contains a sample database of the selected profile.
+    # Invoked by ea::gui::ld::saveTemplateHeader
+    # Writes to: Directory where label file is located with name of <Profile Desc>
+    global log tplLabel
+
+    # Actions ...
+    set f_name "$tplLabel(Name) - $tplLabel(LabelProfileDesc)"
+    ${log}::debug File Name: $f_name
+    ${log}::debug writing to path:  [file dirname $tplLabel(LabelPath)]
+
+    set hdr_data [::csv::join [db eval "SELECT LabelHeaders.LabelHeaderDesc FROM LabelHeaderGrp
+                                            INNER JOIN LabelHeaders ON LabelHeaders.LabelHeaderID = LabelHeaderGrp.LabelHeaderID
+                                            WHERE LabelHeaderGrp.LabelProfileID = $tplLabel(LabelProfileID)"]]
+
+    ${log}::debug Opening File: file join  [file dirname $tplLabel(LabelPath)] $f_name.csv
+    ${log}::debug writing headers to file: $hdr_data
+
+    set runlist_file [open "[file join  [file dirname $tplLabel(LabelPath)] $f_name.csv]" w]
+
+    # Insert Header row
+    chan puts $runlist_file $hdr_data
+
+    chan close $runlist_file
+} ;#ea::code::ld::createDummyFile
 
 ## Original / Do Not Use
 
@@ -281,32 +313,6 @@ proc ea::code::ld::writeToDb {} {
         .container.frame2.versionDescCbox configure -values [db eval "SELECT LabelVersionDesc FROM LabelVersions WHERE tplID = $tplLabel(ID)"]
     }
 } ;# ea::code::ld::writeToDb
-
-proc ea::code::ld::createDummyFile {} {
-    # Create a 'dummy' file that contains a sample database of the selected profile.
-    # Parent ea::gui::ld::
-    # Writes to: Directory where label file is located with name of <Profile Desc>
-    global log tplLabel
-
-    # Actions ...
-    set f_name "$tplLabel(Name) - $tplLabel(LabelProfileDesc)"
-    ${log}::debug File Name: $f_name
-    ${log}::debug writing to path:  [file dirname $tplLabel(LabelPath)]
-
-    set hdr_data [::csv::join [db eval "SELECT LabelHeaders.LabelHeaderDesc FROM LabelHeaderGrp
-                                            INNER JOIN LabelHeaders ON LabelHeaders.LabelHeaderID = LabelHeaderGrp.LabelHeaderID
-                                            WHERE LabelHeaderGrp.LabelProfileID = $tplLabel(LabelProfileID)"]]
-
-    ${log}::debug Opening File: file join  [file dirname $tplLabel(LabelPath)] $f_name.csv
-    ${log}::debug writing headers to file: $hdr_data
-
-    set runlist_file [open "[file join  [file dirname $tplLabel(LabelPath)] $f_name.csv]" w]
-
-    # Insert Header row
-    chan puts $runlist_file $hdr_data
-
-    chan close $runlist_file
-} ;#ea::code::ld::createDummyFile
 
 proc ea::code::ld::populateProfileCbox {wid} {
     # See: ea::db::ld::getLabelHeaders

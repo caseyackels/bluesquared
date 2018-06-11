@@ -16,40 +16,39 @@ proc ea::gui::ld::designerUI {} {
     set ldWid(f0) [ttk::labelframe .container.f0 -text [mc "Search Info"] -padding 10]
     pack $ldWid(f0) -fill x -pady 5p -padx 5p -anchor n
 
-    grid [ttk::label $ldWid(f0).text1 -text [mc "Customer Name"]] -column 0 -row 0 -sticky e
-    grid [ttk::entry $ldWid(f0).entry1 -width 35] -column 1 -row 0 -sticky w
+    grid [ttk::label $ldWid(f0).text1 -text [mc "Customer Name"]] -column 0 -row 0 -pady 2p -padx 2p -sticky e
+    grid [ttk::entry $ldWid(f0).entry1 -width 35] -column 1 -row 0 -pady 2p -padx 2p -sticky w
 
-    grid [ttk::button $ldWid(f0).btn1 -text [mc "Search"]] -column 2 -row 0
+    grid [ttk::button $ldWid(f0).btn1 -text [mc "Search"]] -column 2 -row 0 -pady 2p -padx 2p
 
-    grid [ttk::label $ldWid(f0).text2 -text [mc "Job Title"]] -column 0 -row 1 -sticky e
-    grid [ttk::entry $ldWid(f0).entry2 -width 35] -column 1 -row 1 -sticky w
+    grid [ttk::label $ldWid(f0).text2 -text [mc "Job Title"]] -column 0 -row 1 -pady 2p -padx 2p  -sticky e
+    grid [ttk::entry $ldWid(f0).entry2 -width 35] -column 1 -row 1 -pady 2p -padx 2p  -sticky w
 
     ##
     ## Table
     ##
 	set ldWid(f1) [ttk::labelframe .container.f1 -text [mc "Templates"] -padding 5]
-	pack $ldWid(f1) -fill both -pady 3p -padx 5p
+	pack $ldWid(f1) -fill both -expand yes -pady 3p -padx 5p
 
     # Add / Modify Buttons
     set ldWid(f1a) [ttk::frame $ldWid(f1).f1]
     pack $ldWid(f1a) -fill both -pady 3p -padx 5p
 
-    grid [ttk::button $ldWid(f1a).btn1 -text [mc "Add"] -command {ea::gui::ld::addTemplate}] -column 0 -row 0 -sticky w
-    grid [ttk::button $ldWid(f1a).btn2 -text [mc "Modify"]] -column 1 -row 0 -sticky w
+    grid [ttk::button $ldWid(f1a).btn1 -text [mc "Add"] -command {ea::gui::ld::addTemplate}] -column 0 -row 0 -pady 2p -padx 2p -sticky w
+    grid [ttk::button $ldWid(f1a).btn2 -text [mc "Modify"]] -column 1 -row 0 -pady 2p -padx 2p -sticky w
 
     # Table widget
     set ldWid(f1b) [ttk::frame $ldWid(f1).f2]
-    pack $ldWid(f1b) -fill both -pady 3p -padx 5p
+    pack $ldWid(f1b) -fill both -expand yes -pady 3p -padx 5p
 
 	tablelist::tablelist $ldWid(f1b).listbox -columns {
                                                     3 "..." center
-                                                    0 "Template #"
+                                                    0 "Template #" center
 													0 "Customer Name" center
                                                     0 "Title Name" center
 													0 "Status" center
                                                     } \
                                         -showlabels yes \
-                                        -height 10 \
                                         -selectbackground yellow \
                                         -selectforeground black \
                                         -stripebackground lightblue \
@@ -68,10 +67,14 @@ proc ea::gui::ld::designerUI {} {
 
     grid $ldWid(f1b).listbox -column 0 -row 1 -sticky news
     grid columnconfigure $ldWid(f1b) $ldWid(f1b).listbox -weight 2
+    grid rowconfigure $ldWid(f1b) $ldWid(f1b).listbox -weight 2
 
     grid $ldWid(f1b).scrolly -column 1 -row 0 -sticky nse
 
     ::autoscroll::autoscroll $ldWid(f1b).scrolly ;# Enable the 'autoscrollbar'
+
+    # Populate table list
+    ea::db::ld::getTemplateData
 } ;# ea::gui::ld::designerUI
 
 proc ea::gui::ld::addTemplate {} {
@@ -201,6 +204,8 @@ proc ea::gui::ld::genLines {} {
     #ea::db::ld::getLabelProfile
 } ;# ea::code::ld::genLines
 
+
+#### OLD ####
 proc ea::gui::ld::designerGUI {} {
     global log tmplID numLines job tplLabel
 

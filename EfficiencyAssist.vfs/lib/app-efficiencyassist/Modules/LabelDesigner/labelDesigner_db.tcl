@@ -1,5 +1,6 @@
 # Creator: Casey Ackels (C) 2017
 
+# Retrieve Data
 proc ea::db::ld::getLabelProfile {} {
     global log tplLabel ldWid
 
@@ -75,6 +76,40 @@ proc ea::db::ld::getLabelProfile {} {
     }
 } ;# ea::db::ld::getLabelProfile
 
+proc ea::db::ld::getTemplateData {} {
+    global ldWid log
+    # This populates the main table listing the templates, customer, title and status
+    set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+
+    db eval "SELECT tplID, PubTitleID, Status FROM LabelTPL ORDER BY PubTitleID AND STATUS = 1" {
+        # Retrieve Monarch Data
+        ${log}::debug Retrieving data: $PubTitleID
+        $ldWid(f1b).listbox delete 0 end
+        set customers "{} $tplID"
+        set stmt [$monarch_db prepare "SELECT TOP 1 COMPANYNAME, TITLENAME FROM EA.dbo.Customer_Jobs_Issues_CSR WHERE JOBID = '$PubTitleID'"]
+        set res [$stmt execute]
+
+        while {[$res nextlist val]} {
+            #puts "val: $val"
+            #puts "Customer1: $customers"
+            lappend customers [lindex $val 0]
+            #puts "Customer2: $customers"
+            lappend customers [lindex $val 1]
+            #puts "Customer3: $customers"
+        }
+        lappend customers $Status
+        puts "Customer4: $customers"
+        #set customers [join $customers]
+        $stmt close
+        if {$customers ne ""} {
+            ${log}::debug ldWid(f1b).listbox insert end $customers
+            $ldWid(f1b).listbox insert end $customers
+        }
+    }
+    db2 close
+} ;# ea::db::ld::getTemplateData
+
+# Write Data
 proc ea::db::ld::writeTemplate {} {
     # Invoked from ea::code::ld::saveTemplateHeader
     #
@@ -105,8 +140,8 @@ proc ea::db::ld::writeTemplate {} {
 
     if {$tplLabel(ID) eq ""} {
         ${log}::notice Creating New Template for: $job(CustName)
-        db eval "INSERT INTO LabelTPL (PubTitleID, LabelProfileID, tplLabelName, tplLabelPath, tplNotePriv, tplNotePub, tplFixedBoxQty, tplFixedLabelInfo, tplSerialize)
-                VALUES ($job(TitleID), $tplLabel(LabelProfileID), '$tplLabel(Name)', '$tplLabel(LabelPath)', '$tplLabel(NotePriv)', '$tplLabel(NotePub)', '$tplLabel(FixedBoxQty)', '$tplLabel(FixedLabelInfo)', '$tplLabel(SerializeLabel)')"
+        db eval "INSERT INTO LabelTPL (PubTitleID, LabelProfileID, tplLabelName, tplLabelPath, tplNotePriv, tplNotePub, tplFixedBoxQty, tplFixedLabelInfo, tplSerialize, Status)
+                VALUES ($job(TitleID), $tplLabel(LabelProfileID), '$tplLabel(Name)', '$tplLabel(LabelPath)', '$tplLabel(NotePriv)', '$tplLabel(NotePub)', '$tplLabel(FixedBoxQty)', '$tplLabel(FixedLabelInfo)', '$tplLabel(SerializeLabel)', '$tplLabel(Status)')"
 
         # Get Template ID - First time
         set tplLabel(ID) [db eval "SELECT MAX(tplID) FROM LabelTPL WHERE PubTitleID = '$job(TitleID)'"]
@@ -124,7 +159,7 @@ proc ea::db::ld::writeTemplate {} {
                         tplFixedBoxQty = '$tplLabel(FixedBoxQty)',
                         tplFixedLabelInfo = '$tplLabel(FixedLabelInfo)',
                         tplSerialize = '$tplLabel(SerializeLabel)',
-                        Status = 'tplLabel(Status)'
+                        Status = '$tplLabel(Status)'
                     WHERE tplID = $tplLabel(ID)"
 
     }
@@ -219,7 +254,7 @@ proc ea::db::ld::getTemplates {} {
 
     if {$templatesExists == ""} {
         ${log}::notice No templates found for Title: $job(TitleID)
-        $ldWid(addTpl,f1).cbox0a configure -values [db eval "SELECT tplLabelName FROM LabelTPL WHERE PubTitleID = 11"]
+        #$ldWid(addTpl,f1).cbox0a configure -values [db eval "SELECT tplLabelName FROM LabelTPL WHERE PubTitleID = 11"]
 
     } else {
         ${log}::notice Templates found for Title: $job(TitleID)

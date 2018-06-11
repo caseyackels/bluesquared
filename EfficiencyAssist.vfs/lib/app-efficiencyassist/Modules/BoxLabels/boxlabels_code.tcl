@@ -4,20 +4,6 @@
 # Version: See shipping_launch_code.tcl
 # Dependencies: See shipping_launch_code.tcl
 #-------------------------------------------------------------------------------
-#
-# Subversion
-#
-# $Revision: 470 $
-# $LastChangedBy: casey.ackels@gmail.com $
-# $LastChangedDate: 2015-03-06 13:29:36 -0800 (Fri, 06 Mar 2015) $
-#
-########################################################################################
-
-# Definitions for prefixes of Variables
-# G = Global
-# S = String
-# L = List
-# I = Integer (Do not use this unless you are certain it is an Integer and not a plain string)
 
 namespace eval Shipping_Code {
 
@@ -436,7 +422,7 @@ proc createList {args} {
 
 proc doMath {totalQuantity maxPerBox} {
     global log
-# Do mathmatical equations, then double check to make sure it comes out to the value of totalQty
+    # Do mathmatical equations, then double check to make sure it comes out to the value of totalQty
     if {($totalQuantity == "") || ($totalQuantity == 0) || $totalQuantity == {}} {
         ${log}::debug doMath: totalQuantity should have a value, exiting: $totalQuantity
         return
@@ -626,10 +612,15 @@ proc printLabels {} {
         # Set runlist file name, maybe this should be placed into the tplLabel array? tplLabel(RunListFile)
         set runlist "$labelDir\\[join "$tplLabel(LabelVersionDesc) - $tplLabel(LabelProfileDesc)"].csv"
 
-
-        ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\$filename /D=$runlist /P /CLOSE /MIN=TASKBAR
-        #exec $mySettings(path,bartender) /AF=$labelDir\\$filename /D=$runlist
-        exec $mySettings(path,bartender) /AF=$labelDir\\$filename /D=$runlist /P /CLOSE /MIN=TASKBAR
+        # Using a specific printer: /PRN=<printer name>
+        if {$tplLabel(LabelPrinter) eq ""} {
+            ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\$filename /D=$runlist /P /CLOSE /MIN=TASKBAR
+            exec $mySettings(path,bartender) /AF=$labelDir\\$filename /D=$runlist /P /CLOSE /MIN=TASKBAR
+        } else {
+            ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\$filename /D=$runlist /PRN=$tplLabel(LabelPrinter) /P /CLOSE /MIN=TASKBAR
+            #exec $mySettings(path,bartender) /AF=$labelDir\\$filename /D=$runlist
+            exec $mySettings(path,bartender) /AF=$labelDir\\$filename /D=$runlist /PRN=$tplLabel(LabelPrinter) /P /CLOSE /MIN=TASKBAR
+        }
 
     } else {
             ${log}::debug Printing Generic Labels
@@ -1113,22 +1104,7 @@ proc Shipping_Code::writeShipTo {wid_entry3 wid_txt} {
 
     exec $mySettings(path,bartender) "/AF=\\\\fileprint\\Labels\\Templates\\Blank Ship To\\BLANK SHIP TO 3x5.btw" /P /CLOSE /MIN=TASKBAR
     ${log}::debug $mySettings(path,bartender) "/AF=\\\\fileprint\\Labels\\Templates\\Blank Ship To\\BLANK SHIP TO 3x5.btw" /P /CLOSE /MIN=TASKBAR
-
 }
-
-#proc Shipping_Code::resetShipTo {btn wid_text} {
-#    # Once we select "get data" we re-configure the button so that we can 'reset' the variables/widgets
-#
-#    global log job
-#
-#    set job(Number) ""
-#    set job(ShipOrderID) ""
-#    set job(ShipOrderNumPallets) ""
-#
-#    $wid_text delete 0.0 end
-#
-#    #$btn configure -text [mc "Get Data"] -command "ea::db::bl::getShipToData $btn $wid_text"
-#}
 
 proc ea::code::bl::resetLabelText {} {
     global log labelText
@@ -1136,7 +1112,7 @@ proc ea::code::bl::resetLabelText {} {
     foreach item [array names labelText] {
         set labelText($item) ""
     }
-}
+} ;# ea::code::bl::resetLabelText
 
 proc ea::code::bl::resetBoxLabels {btn shipToWid shipListWid} {
     # reset all widgets and box variables
