@@ -34,8 +34,8 @@ proc ea::gui::ld::designerUI {} {
     set ldWid(f1a) [ttk::frame $ldWid(f1).f1]
     pack $ldWid(f1a) -fill both -pady 3p -padx 5p
 
-    grid [ttk::button $ldWid(f1a).btn1 -text [mc "Add"] -command {ea::gui::ld::addTemplate}] -column 0 -row 0 -pady 2p -padx 2p -sticky w
-    grid [ttk::button $ldWid(f1a).btn2 -text [mc "Modify"] -command {ea::code::ld::modifyTemplate $ldWid(f1b).listbox}] -column 1 -row 0 -pady 2p -padx 2p -sticky w
+    grid [ttk::button $ldWid(f1a).btn1 -text [mc "Add"] -command {ea::gui::ld::addTemplate -add}] -column 0 -row 0 -pady 2p -padx 2p -sticky w
+    grid [ttk::button $ldWid(f1a).btn2 -text [mc "Modify"] -command {ea::gui::ld::addTemplate -modify}] -column 1 -row 0 -pady 2p -padx 2p -sticky w
 
     # Table widget
     set ldWid(f1b) [ttk::frame $ldWid(f1).f2]
@@ -77,7 +77,7 @@ proc ea::gui::ld::designerUI {} {
     ea::db::ld::getTemplateData
 } ;# ea::gui::ld::designerUI
 
-proc ea::gui::ld::addTemplate {} {
+proc ea::gui::ld::addTemplate {args} {
     global log ldWid job tplLabel
 
     # SETUP
@@ -134,7 +134,7 @@ proc ea::gui::ld::addTemplate {} {
             ea::db::ld::getTemplates
         }
 
-    grid [ttk::label $ldWid(addTpl,f1).text2a -text [mc "Template"]] -column 0 -row 2 -padx 2p -pady 2p -sticky e
+    grid [ttk::label $ldWid(addTpl,f1).text2a -text [mc "Template Name"]] -column 0 -row 2 -padx 2p -pady 2p -sticky e
     grid [ttk::combobox $ldWid(addTpl,f1).cbox0a -width 30 -textvariable tplLabel(Name)] -column 1 -row 2 -padx 2p -pady 2p -sticky w
 
         bind $ldWid(addTpl,f1).cbox0a <<FocusOut>> {
@@ -160,9 +160,8 @@ proc ea::gui::ld::addTemplate {} {
 
     ##
     ## Body / Label Data
-    ##
+    ## This is automatically created based on the profile selected, and ea::gui::ld::genLines
 
-    # This is automatically created based on the profile selected, and ea::gui::ld::genLines
     ea::gui::ld::genLines
 
     ##
@@ -173,6 +172,14 @@ proc ea::gui::ld::addTemplate {} {
 
     grid [ttk::button $btnBar.save -text [mc "Save"] -command {ea::code::ld::saveTemplateHeader}] -column 0 -row 0 -pady 2p -padx 2p
     grid [ttk::button $btnBar.cncl -text [mc "Cancel"] -command {destroy $ldWid(addTpl); ea::code::ld::resetWidgets}] -column 1 -row 0 -pady 2p -padx 2p
+
+    # If we are modifying then populate the widgets, and disable Customer and Title fields
+    if {$args eq "-modify"} {
+        ea::code::ld::modifyTemplate $ldWid(f1b).listbox
+        $ldWid(addTpl,f1).entry1 configure -state disabled
+        $ldWid(addTpl,f1).cbox0 configure -state disabled
+        #$ldWid(addTpl,f1).cbox0a configure -state disabled
+    }
 } ;# ea::gui::ld::addTemplate
 
 proc ea::gui::ld::genLines {} {

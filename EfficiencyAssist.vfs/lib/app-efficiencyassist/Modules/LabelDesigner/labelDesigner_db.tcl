@@ -258,7 +258,8 @@ proc ea::db::ld::getTemplates {} {
 
     } else {
         ${log}::notice Templates found for Title: $job(TitleID)
-        $ldWid(addTpl,f1).cbox0a configure -values $job(TitleID)
+        $ldWid(addTpl,f1).cbox0a configure -values $templatesExists
+        $ldWid(addTpl,f1).cbox0a set [lindex $templatesExists 0]
     }
 } ;# ea::db::ld::getTemplates
 
@@ -330,6 +331,25 @@ proc ea::db::ld::getCustomerTitleID {} {
     ${log}::debug Monarch Title ID $job(TitleID) and CSR $job(CSRID) retrieved
 } ;# ea::db::ld::getCustomerTitleID
 
+proc ea::db::ld::getCustomerTitleName {title_id} {
+    global log job
+
+    set job(Title) ""
+    set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+    set stmt [$monarch_db prepare "SELECT DISTINCT TITLENAME FROM EA.dbo.Customer_Jobs_Issues_CSR
+                                    WHERE JOBID = '$title_id'"]
+
+    set res [$stmt execute]
+
+    while {[$res nextlist val]} {
+        set job(Title) [join $val]
+        #puts $val
+    }
+
+    $stmt close
+    db2 close
+} ;# ea::db::ld::getCustomerTitleName
+
 proc ea::db::ld::getCustomerCode {} {
     global log job
     set job(CustID) ""
@@ -350,6 +370,25 @@ proc ea::db::ld::getCustomerCode {} {
     ${log}::debug Customer Code retrieved
     set job(CustID) [join $job(CustID)]
 } ;# ea::db::ld::getCustomerCode
+
+proc ea::db::ld::getCustomerName {title_id} {
+    global log job
+
+    set job(CustName) ""
+    set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+    set stmt [$monarch_db prepare "SELECT DISTINCT COMPANYNAME FROM EA.dbo.Customer_Jobs_Issues_CSR
+                                    WHERE JOBID = '$title_id'"]
+
+    set res [$stmt execute]
+
+    while {[$res nextlist val]} {
+        set job(CustName) [join $val]
+        #puts $val
+    }
+
+    $stmt close
+    db2 close
+} ;# ea::db::ld::getCustomerName
 
 proc ea::db::ld::getProfile {cbox} {
     global log

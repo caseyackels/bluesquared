@@ -157,7 +157,7 @@ proc ea::code::ld::getRowData {LabelVersionID widPath} {
 } ;# ea::code::ld::getRowData
 
 proc ea::code::ld::modifyTemplate {wid} {
-    global log tplLabel job
+    global log tplLabel job ldWid
 
     #${log}::debug [$wid findcolumnname templateNumber]
     set widTplNumber [$wid findcolumnname templateNumber]
@@ -165,7 +165,7 @@ proc ea::code::ld::modifyTemplate {wid} {
     set widTplTitle [$wid findcolumnname titleName]
 
     #${log}::debug [$wid curselection]
-    ${log}::debug [lindex [$wid get [$wid curselection]] $widTplNumber]
+    #${log}::debug [lindex [$wid get [$wid curselection]] $widTplNumber]
     set tplLabel(ID) [lindex [$wid get [$wid curselection]] $widTplNumber]
     set job(CustName) [lindex [$wid get [$wid curselection]] $widTplCustomer]
     set job(Title) [lindex [$wid get [$wid curselection]] $widTplTitle]
@@ -182,6 +182,18 @@ proc ea::code::ld::modifyTemplate {wid} {
                     set tplLabel(LabelPath) $tplLabelPath
                     set tplLabel(Status) $Status
                 }
+
+    # Retrieve customer name from Monarch
+    ea::db::ld::getCustomerName $job(TitleID)
+
+    # Retrieve Title Name from Monarch
+    ea::db::ld::getCustomerTitleName $job(TitleID)
+
+    # Populate title dropdown
+    $ldWid(addTpl,f1).cbox0 configure -state normal
+    $ldWid(addTpl,f1).cbox0 set $job(Title)
+
+    ea::db::ld::getTemplates
 
 } ;# ea::code::ld::modifyTemplate
 
