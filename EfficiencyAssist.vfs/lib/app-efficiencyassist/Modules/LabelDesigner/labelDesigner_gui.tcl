@@ -21,7 +21,7 @@ proc ea::gui::ld::designerUI {} {
 
     grid [ttk::button $ldWid(f0).btn1 -text [mc "Search"]] -column 2 -row 0 -pady 2p -padx 2p
 
-    grid [ttk::label $ldWid(f0).text2 -text [mc "Job Title"]] -column 0 -row 1 -pady 2p -padx 2p  -sticky e
+    grid [ttk::label $ldWid(f0).text2 -text [mc "Title Name"]] -column 0 -row 1 -pady 2p -padx 2p  -sticky e
     grid [ttk::entry $ldWid(f0).entry2 -width 35] -column 1 -row 1 -pady 2p -padx 2p  -sticky w
 
     ##
@@ -35,7 +35,7 @@ proc ea::gui::ld::designerUI {} {
     pack $ldWid(f1a) -fill both -pady 3p -padx 5p
 
     grid [ttk::button $ldWid(f1a).btn1 -text [mc "Add"] -command {ea::gui::ld::addTemplate}] -column 0 -row 0 -pady 2p -padx 2p -sticky w
-    grid [ttk::button $ldWid(f1a).btn2 -text [mc "Modify"]] -column 1 -row 0 -pady 2p -padx 2p -sticky w
+    grid [ttk::button $ldWid(f1a).btn2 -text [mc "Modify"] -command {ea::code::ld::modifyTemplate $ldWid(f1b).listbox}] -column 1 -row 0 -pady 2p -padx 2p -sticky w
 
     # Table widget
     set ldWid(f1b) [ttk::frame $ldWid(f1).f2]
@@ -44,8 +44,8 @@ proc ea::gui::ld::designerUI {} {
 	tablelist::tablelist $ldWid(f1b).listbox -columns {
                                                     3 "..." center
                                                     0 "Template #" center
-													0 "Customer Name" center
-                                                    0 "Title Name" center
+													0 "Customer Name"
+                                                    0 "Title Name"
 													0 "Status" center
                                                     } \
                                         -showlabels yes \

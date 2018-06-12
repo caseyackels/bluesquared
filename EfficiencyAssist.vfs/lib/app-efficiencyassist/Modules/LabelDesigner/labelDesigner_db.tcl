@@ -80,30 +80,30 @@ proc ea::db::ld::getTemplateData {} {
     global ldWid log
     # This populates the main table listing the templates, customer, title and status
     set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+    $ldWid(f1b).listbox delete 0 end
 
     db eval "SELECT tplID, PubTitleID, Status FROM LabelTPL ORDER BY PubTitleID AND STATUS = 1" {
         # Retrieve Monarch Data
         ${log}::debug Retrieving data: $PubTitleID
-        $ldWid(f1b).listbox delete 0 end
-        set customers "{} $tplID"
+
+        set company ""
         set stmt [$monarch_db prepare "SELECT TOP 1 COMPANYNAME, TITLENAME FROM EA.dbo.Customer_Jobs_Issues_CSR WHERE JOBID = '$PubTitleID'"]
         set res [$stmt execute]
 
         while {[$res nextlist val]} {
             #puts "val: $val"
             #puts "Customer1: $customers"
-            lappend customers [lindex $val 0]
+            set company [lindex $val 0]
             #puts "Customer2: $customers"
-            lappend customers [lindex $val 1]
+            set title [lindex $val 1]
             #puts "Customer3: $customers"
         }
-        lappend customers $Status
-        puts "Customer4: $customers"
-        #set customers [join $customers]
+        #lappend customers $Status
+        #puts "Customer4: $customers"
         $stmt close
-        if {$customers ne ""} {
-            ${log}::debug ldWid(f1b).listbox insert end $customers
-            $ldWid(f1b).listbox insert end $customers
+        if {$company ne ""} {
+            #${log}::debug $ldWid(f1b).listbox insert end [list "" "$tplID" "$company" "$title" "$Status"]
+            $ldWid(f1b).listbox insert end [list "" "$tplID" "$company" "$title" "$Status"]
         }
     }
     db2 close
@@ -260,7 +260,7 @@ proc ea::db::ld::getTemplates {} {
         ${log}::notice Templates found for Title: $job(TitleID)
         $ldWid(addTpl,f1).cbox0a configure -values $job(TitleID)
     }
-} ;# ea::db::ld::getProfileExists
+} ;# ea::db::ld::getTemplates
 
 proc ea::db::ld::getCustomerList {} {
     global log tplLabel job
