@@ -472,7 +472,7 @@ proc extractFromList {list} {
 	}
     }
     linsert $GI_groups 0 $GI_uniques
-} ;# extractFromList
+} ; #extractFromList
 
 
 proc displayListHelper {fullboxes partialboxes total_boxes {reset 0}} {
@@ -621,7 +621,7 @@ proc printLabels {} {
             #exec $mySettings(path,bartender) /AF=$labelDir\\$filename /D=$runlist
             exec $mySettings(path,bartender) /AF=$labelDir\\$filename /D=$runlist /PRN=$tplLabel(LabelPrinter) /P /CLOSE /MIN=TASKBAR
         }
-
+        update idletasks
     } else {
             ${log}::debug Printing Generic Labels
             # Fix the file paths so that bartender doesn't choke
@@ -647,6 +647,7 @@ proc printLabels {} {
                 exec $mySettings(path,bartender) /AF=$labelDir\\2LINEDB.btw /P /CLOSE /MIN=TASKBAR
                 ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\2LINEDB.btw /P /CLOSE /MIN=TASKBAR
             }
+            update idletasks
     } ;# End generic labels
 } ;# printLabels
 
