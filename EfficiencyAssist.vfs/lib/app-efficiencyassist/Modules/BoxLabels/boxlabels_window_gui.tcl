@@ -129,6 +129,8 @@ proc ea::gui::bl::Main {} {
 		grid [ttk::entry $blWid(f0BL).entry$row -textvariable labelText(Row0$row) -width 60 \
 											-validate key \
 											-validatecommand {Shipping_Code::filterKeys -textLength %S %W %P}] -column $col -row $row -padx 4p -pady 2p -sticky ew
+		incr col
+		grid [ttk::button $blWid(f0BL).btn$row -text [mc "C"] -command "ea::code::bl::clearEntryWidgets $blWid(f0BL).entry$row -single" -width 3] -column $col -row $row -padx 2p -sticky w
 
 		set col 0
 	}
@@ -233,7 +235,7 @@ proc ea::gui::bl::Main {} {
 		# cell index "0,1" out of range
 		catch {Shipping_Code::createList} err ;# Make sure our totals add up
 
-		if {[info exists err]} {${log}::debug Double-clicked and received an error: $err}
+		if {[info exists err]} {${log}::debug listbox BINDING > Double-clicked and received an error: $err}
 		# Serialize Labels
 		if {$tplLabel(SerializeLabel) == 1} {
 			# disable all of the widgets if we are serializing or working off of a runlist with no user interaction
@@ -988,79 +990,6 @@ proc breakDown {{show_win 0}} {
     }
 
 } ;# End of breakDown
-
-
-#proc chooseLabel {lines} {
-#    #****f* chooseLabel/Shipping_Gui
-#    # AUTHOR
-#    #	Casey Ackels
-#    #
-#    # COPYRIGHT
-#    #	(c) 2011 - Casey Ackels
-#    #
-#    # FUNCTION
-#    #	If the text "Seattle Met" is detected, we launch this window so that use can choose what type of label they want to use.
-#    #
-#    # SYNOPSIS
-#    #	chooseLabel $line (Where line is a value between 1 and 6; referring to how many lines the label is using)
-#    #
-#    # CHILDREN
-#    #	N/A
-#    #
-#    # PARENTS
-#    #
-#    #
-#    # NOTES
-#    #	4-23-18 Old functionality, should be removed.
-#    #
-#    # SEE ALSO
-#    #
-#    #
-#    #***
-#    global log GS_textVar GS_widget
-#
-#    toplevel .chooseLabel
-#    wm title .chooseLabel "Choose your Label"
-#    wm transient .chooseLabel .
-#    ${log}::debug Using lines: $lines
-#
-#    # x = horizontal
-#    # y = vertical
-#    # Put the window in the center of the parent window
-#    set locX [expr {[winfo width . ] / 3 + [winfo x .]}]
-#    set locY [expr {[winfo height . ] / 3 + [winfo y .]}]
-#
-#    wm geometry .chooseLabel +$locX+$locY
-#
-#    focus .chooseLabel
-#
-#    set frame0 [ttk::frame .chooseLabel.frame0]
-#    grid $frame0 -padx 5p -pady 5p
-#
-#    set labels ""
-#
-#    ttk::radiobutton $frame0.white -text "White Label - Standard" -variable labels -value LINEDB.btw -command "set lines $lines"
-#    ttk::radiobutton $frame0.green -text "Green Label - Special" -variable labels -value LINEDB_Seattle.btw -command "set lines $lines"
-#    #$frame0.white invoke ;# set the default
-#
-#    grid $frame0.white -column 0 -row 0 -padx 5p -pady 5p -sticky w
-#    grid $frame0.green -column 0 -row 1 -padx 5p -pady 5p -sticky w
-#
-#    set frame1 [ttk::frame .chooseLabel.frame1]
-#    grid $frame1 -padx 5p -pady 5p
-#
-#    ${log}::debug Number of lines to be printed: $lines
-#
-#    ttk::button $frame1.print -text "Print" -command {Shipping_Code::printCustomLabels $lines $labels; destroy .chooseLabel}
-#    ttk::button $frame1.close -text "Close" -command {destroy .chooseLabel}
-#
-#    grid $frame1.print -column 0 -row 0 -sticky ne
-#    grid $frame1.close -column 1 -row 0 -sticky ne
-#
-#
-#} ;# End of chooseLabel
-
-
 } ;# End of Shipping_Gui namespace
 
 proc Shipping_Gui::initMenu {} {
@@ -1101,6 +1030,7 @@ proc Shipping_Gui::initMenu {} {
     $mb.modMenu delete 0 end
 
     $mb.modMenu add command -label [mc "Clear List"] -command {Shipping_Code::clearList}
+	$mb.modMenu add command -label [mc "Clear all Rows"] -command {ea::code::bl::clearEntryWidgets "" -all}
     $mb.modMenu add command -label [mc "Show Breakdown"] -command {Shipping_Gui::breakDown 1}
     $mb.modMenu add command -label [mc "Preferences"] -command {ea::gui::pref::startPref}
 

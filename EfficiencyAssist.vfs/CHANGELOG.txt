@@ -1,4 +1,10 @@
-= Version 4.1.1 RC (May 2018)
+= Version 4.1.1 RC4 (June 2018)
+== Box Labels
+* [NEW] Buttons to clear individual entries
+* [NEW] New buttons clears data from entry.
+* [NEW] New menu item in "Edit" clears all data from entry fields
+* [BUG] Sometimes an access violation would occur if the Print Labels button was clicked more than once, and then shipment entries were all deleted, then one or more was re-added
+
 == Box Labels
 * [NEW] You can now print Ship To labels. Enter a job number and ship order id (found next to the shipping orders on the ticket).
 * [BUG] Remove extra spaces from Ship To Address.

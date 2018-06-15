@@ -133,6 +133,7 @@ proc controlFile {args} {
 
                     } elseif {[lindex $args 1] eq "fileclose"} {
                         chan close $files(destination)
+                        unset files(destination)
                         }
                     }
 
@@ -154,6 +155,7 @@ proc controlFile {args} {
                     } elseif {[lindex $args 1] eq "fileclose"} {
                         flush $files(history)
                         chan close $files(history)
+                        unset files(history)
                     }
             }
     }
@@ -277,6 +279,7 @@ proc addListboxNums {{reset 0}} {
 
     ;# If we clear the entire list, we want to reset all counters.
     if {$reset ne 0} {
+        ${log}::debug addListboxNums - Resetting vars GI_textVar qty,labels,labelsPartial1,labelsPartial2
         set GI_textVar(qty) 0
         set GI_textVar(labels) ""
         set GI_textVar(labelsPartial1) ""
@@ -484,6 +487,7 @@ proc displayListHelper {fullboxes partialboxes total_boxes {reset 0}} {
 
     if {$reset ne 0} {
         ;# If we clear the entire list, we want to reset all counters.
+        ${log}::debug displayListHelper - Resetting Vars, GI_textVar qty,labels,labelsPartial1,labelsPartial2
         set GI_textVar(qty) 0
         set GI_textVar(labels) ""
         set GI_textVar(labelsPartial1) ""
@@ -547,7 +551,7 @@ proc displayListHelper {fullboxes partialboxes total_boxes {reset 0}} {
         writeText 1 $value $total_boxes
     }
 
-    ${log}::debug Shipment Qty: $GI_textVar(qty)
+    #${log}::debug Shipment Qty: $GI_textVar(qty)
 
     controlFile destination fileclose
 } ;# End of displayListHelper proc
@@ -974,11 +978,11 @@ proc clearList {} {
     #	N/A
     #
     #***
-    global frame2b
+    global blWid
 
     #puts clearList
     #puts "clearList: [$frame2b.listbox delete 0 end]"
-    catch {$frame2b.listbox delete 0 end} ;# This always generates "0,0 cell not in range" error
+    catch {$blWid(f2BL).listbox delete 0 end} ;# This always generates "0,0 cell not in range" error
 
     Shipping_Code::addListboxNums 1 ;# Reset Counter
     Shipping_Code::displayListHelper "" "" "" 1 ;# Reset Counter
@@ -1102,6 +1106,7 @@ proc Shipping_Code::writeShipTo {wid_entry3 wid_txt} {
 
     flush $files(ShipTo)
     chan close $files(ShipTo)
+    unset files(ShipTo)
 
     exec $mySettings(path,bartender) "/AF=\\\\fileprint\\Labels\\Templates\\Blank Ship To\\BLANK SHIP TO 3x5.btw" /P /CLOSE /MIN=TASKBAR
     ${log}::debug $mySettings(path,bartender) "/AF=\\\\fileprint\\Labels\\Templates\\Blank Ship To\\BLANK SHIP TO 3x5.btw" /P /CLOSE /MIN=TASKBAR
@@ -1117,7 +1122,7 @@ proc ea::code::bl::resetLabelText {} {
 
 proc ea::code::bl::resetBoxLabels {btn shipToWid shipListWid} {
     # reset all widgets and box variables
-    global log job blWid GS_textVar tplLabel
+    global log job blWid GS_textVar tplLabel files
 
     ${log}::debug Reset Job Array
     foreach item [array names job] {
@@ -1173,6 +1178,18 @@ proc ea::code::bl::resetBoxLabels {btn shipToWid shipListWid} {
 
     ${log}::debug Change Button back to Original State
     $btn configure -text [mc "Search"] -command {ea::db::bl::getJobData .container.f0.btn1 $blWid(f0BL).cbox1 $blWid(tab2f2).txt $blWid(f2BL).listbox}
+
+    # Ensure that the files that we are writing to are closed (they may stay open if a bug is encountered after opening the file)
+    ${log}::debug Closing files ...
+    if {[info exists files(destination)] == 1} {
+        flush $files(destination)
+        chan close $files(destination)
+    }
+
+    if {[info exists files(ShipTo)] == 1} {
+        flush $files(ShipTo)
+        chan close $files(ShipTo)
+    }
 }
 
 proc ea::code::bl::trackTotalQuantities {} {
@@ -1190,5 +1207,21 @@ proc ea::code::bl::trackTotalQuantities {} {
         # We only have one quantity
         ${log}::debug Ship Qty: $shipqty
         set job(bl,TotalQuantity) $shipqty
+    }
+}
+
+proc ea::code::bl::clearEntryWidgets {wid lines} {
+    global log blWid
+
+    if {$lines eq "-single"} {
+        $wid delete 0 end
+        ${log}::debug Delete text $wid
+    } else {
+        ${log}::debug Deleting all text
+        foreach item [winfo child $blWid(f0BL)] {
+            if {[string match *entry* $item] == 1} {
+                $item delete 0 end
+            }
+        }
     }
 }
