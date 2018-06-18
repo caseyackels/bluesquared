@@ -852,9 +852,6 @@ proc printbreakDown {args} {
         ${log}::debug [file join $mySettings(path,wordpad)] /pt [file join $mySettings(Home) $mySettings(path,bdfile)] "$mySettings(path,printer)"
         catch {exec [file join $mySettings(path,wordpad)] /pt [file join $mySettings(Home) $mySettings(path,bdfile)] "$mySettings(path,printer)"}
     }
-
-
-
 } ;# End of printbreakDown
 
 

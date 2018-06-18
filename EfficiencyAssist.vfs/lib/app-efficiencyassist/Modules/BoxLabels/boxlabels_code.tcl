@@ -560,37 +560,56 @@ proc printLabels {} {
     global log GS_textVar programPath lineNumber mySettings tplLabel tmp labelText
 
     ${log}::debug Initiating printLabels
+    set gate 1
 
     # These apply to all labels
 	if {[info exists mySettings(path,bartender)] != 0} {
 		if { $mySettings(path,bartender) == ""} {
+            set gate 0
 			${log}::critical path,bartender is empty: $mySettings(path,bartender)
-			return
+			#return
 		}
 	}
 
 	if {$mySettings(path,labelDir) == ""} {
 		${log}::critical path,labelDir is empty: $mySettings(path,labelDir)
-		return
+        set gate 0
+		#return
 	}
 
     if {![info exists GS_textVar(maxBoxQty)]} {
-        Error_Message::errorMsg BL002
-        return
+        set gate 0
+        #Error_Message::errorMsg BL002
+        ${log}::debug maxBoxQty doesn't exist. Input a quantity.
+        #return
+    }
+    if {$GS_textVar(maxBoxQty) eq ""} {
+        set gate 0
+        #Error_Message::errorMsg BL002
+        ${log}::debug maxBoxQty exists, but is empty. Input a quantity.
+        #return
     }
 
     if {$GS_textVar(destQty) ne ""} {
         ${log}::debug DestQty should not be empty: $GS_textVar(destQty)
+        set gate 0
         Error_Message::errorMsg BL003
-        return
+        #return
     }
 
     catch {Shipping_Code::createList} err ;# Make sure our totals add up
     if {[info exists err]} {
         if {$err ne ""} {
+            set gate 0
             ${log}::debug Clicked Print Labels and received an error: $err
-            return
+            #return
         }
+    }
+
+    if {$gate == 0} {
+        # if we encounter an error and the user dismisses the dialog, EA will still print labels on it's own.
+        ${log}::debug We encountered an error, exiting PrintLabels.
+        return
     }
 
     if {$tplLabel(ID) eq ""} {

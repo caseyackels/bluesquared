@@ -1,3 +1,7 @@
+= Version 4.1.1 RC5 (June 2018)
+== Box Labels
+* [BUG] BUG #8 - Resolved issue where previous job would print if a certain sequence occurred.
+
 = Version 4.1.1 RC4 (June 2018)
 == Box Labels
 * [NEW] Buttons to clear individual entries
