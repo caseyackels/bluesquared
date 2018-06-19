@@ -65,7 +65,7 @@ proc vUpdate::saveCurrentVersion {} {
     set program(Version) [package versions app-efficiencyassist]
 
     #set program(PatchLevel) 0.1 ;# Leading decimal is not needed
-    set program(beta) "RC 5"
+    set program(beta) "RC 6"
 
     #set program(fullVersion) "$program(Version).$program(PatchLevel) $program(beta)"
 	set program(fullVersion) "$program(Version) $program(beta)"

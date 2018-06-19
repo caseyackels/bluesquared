@@ -412,7 +412,7 @@ proc ea::db::bl::getShipCounts {} {
     set stmt [$monarch_db prepare "SELECT ORDERID, SHIPCOUNT, DISTRIBNAME
                                         FROM EA.dbo.Planner_Shipping_View
                                         WHERE JOBNAME = '$job(Number)'
-                                        AND ALIASNAME = '$job(Version)'
+                                        AND ALIASNAME = '[string map {' ''} $job(Version)]'
                                         AND (DISTRIBNAME LIKE '%customer%' OR DISTRIBNAME LIKE '%freight%' OR DISTRIBNAME LIKE '%package%')
                                         AND PACKAGENAME LIKE '%ctn%'
                                         ORDER BY ORDERID"]
