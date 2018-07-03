@@ -1,0 +1,37 @@
+PRAGMA foreign_keys = 0;
+
+CREATE TABLE sqlitestudio_temp_table AS SELECT *
+                                          FROM LabelData;
+
+DROP TABLE LabelData;
+
+CREATE TABLE LabelData (
+    labelDataID    INTEGER PRIMARY KEY AUTOINCREMENT,
+    labelVersionID INTEGER REFERENCES LabelVersions (labelVersionID) ON DELETE CASCADE
+                                                                     ON UPDATE CASCADE
+                           NOT NULL ON CONFLICT ROLLBACK,
+    labelRowNum    VARCHAR NOT NULL ON CONFLICT FAIL,
+    labelRowText   TEXT    NOT NULL ON CONFLICT FAIL,
+    userEditable   BOOLEAN DEFAULT (0),
+    isVersion      BOOLEAN DEFAULT (0)
+);
+
+INSERT INTO LabelData (
+                          labelDataID,
+                          labelVersionID,
+                          labelRowNum,
+                          labelRowText,
+                          userEditable,
+                          isVersion
+                      )
+                      SELECT labelDataID,
+                             labelVersionID,
+                             labelRowNum,
+                             labelRowText,
+                             userEditable,
+                             isVersion
+                        FROM sqlitestudio_temp_table;
+
+DROP TABLE sqlitestudio_temp_table;
+
+PRAGMA foreign_keys = 1;

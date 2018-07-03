@@ -59,7 +59,7 @@ proc ea::code::ld::resetWidgets {args} {
 proc ea::code::ld::saveTemplateHeader {} {
     # Check to make sure we have all required fields populated
     # If checks pass, write data to database
-    global log job tplLabel
+    global log job tplLabel ldWid
 
     set gate 0
 
@@ -78,6 +78,10 @@ proc ea::code::ld::saveTemplateHeader {} {
 
     # Check folder permissions
     if {[eAssist_Global::folderAccessibility $tplLabel(LabelPath)] != 3} {${log}::critical [mc "Cannot write to"] $tplLabel(LabelPath). ; set gate 1}
+
+    # If Label Template contains lines, and the first entry does not contain data
+    #if {[string match *line [string tolower $tplLabel(LabelProfileDesc)]] == 1 && $tplLabel(tmpValues,rbtn) eq ""} {${log}::critical [mc Label Profile requires a version to be selected. None Selected.] ; set gate 1}
+    if {[string match *line [string tolower $tplLabel(LabelProfileDesc)]] == 1 && [$ldWid(addTpl,f2).versionDescCbox get] eq ""} {${log}::critical [mc Label Profile requires a version to be selected. None Selected.] ; set gate 1}
 
     # NOTICES - Data is saved to the database, but notices are issued if fields are empty
     if {$tplLabel(LabelProfileDesc) eq ""} {${log}::alert [mc "Profile is missing. Setting the ID to 0 (Default)"]; set tplLabel(LabelProfileID) 0}
@@ -127,55 +131,58 @@ proc ea::code::ld::createDummyFile {} {
 } ;#ea::code::ld::createDummyFile
 
 proc ea::code::ld::getRowData {LabelVersionID widPath} {
-    global tplLabel
+     global tplLabel
 
-    for {set x 1} {$tplLabel(LabelProfileRowNum) >= $x} {incr x} {
-        set rowData ""
-        set rowData [list '[$widPath.labelData$x get]']
+     for {set x 1} {$tplLabel(LabelProfileRowNum) >= $x} {incr x} {
+         set rowData ""
+         set rowData [list '[$widPath.labelData$x get]']
 
-        if {[$widPath.userEditable$x state] eq "selected"} {
-            lappend rowData 1
-        } else {
-            lappend rowData 0
-        }
+         if {[$widPath.userEditable$x state] eq "selected"} {
+             lappend rowData 1
+         } else {
+             lappend rowData 0
+         }
 
-        if {[$widPath.isVersion$x state] eq "selected"} {
-            lappend rowData 1
-        } else {
-            lappend rowData 0
-        }
+         if {[$widPath.isVersion$x state] eq "selected"} {
+             lappend rowData 1
+         } else {
+             lappend rowData 0
+         }
 
-        if {[join $rowData] ne "\"\""} {
-            set rowInfo $LabelVersionID,$x
-            lappend rowInfo [join $rowData ,]
+         if {[join $rowData] ne "\"\""} {
+             set rowInfo $LabelVersionID,$x
+             lappend rowInfo [join $rowData ,]
 
-            lappend finalRowInfo ([join $rowInfo ,])
-        }
-    }
+             lappend finalRowInfo ([join $rowInfo ,])
+         }
+     }
 
-    return [join $finalRowInfo ,]
+     return [join $finalRowInfo ,]
 } ;# ea::code::ld::getRowData
 
 proc ea::code::ld::modifyTemplate {wid} {
     global log tplLabel job ldWid
 
     #${log}::debug [$wid findcolumnname templateNumber]
-    set widTplNumber [$wid findcolumnname templateNumber]
+    #set widTplNumber [$wid findcolumnname templateNumber]
+
+
     set widTplCustomer [$wid findcolumnname customerName]
     set widTplTitle [$wid findcolumnname titleName]
 
     #${log}::debug [$wid curselection]
     #${log}::debug [lindex [$wid get [$wid curselection]] $widTplNumber]
-    set tplLabel(ID) [lindex [$wid get [$wid curselection]] $widTplNumber]
+    #set tplLabel(ID) [lindex [$wid get [$wid curselection]] $widTplNumber]
     set job(CustName) [lindex [$wid get [$wid curselection]] $widTplCustomer]
     set job(Title) [lindex [$wid get [$wid curselection]] $widTplTitle]
+    ea::db::ld::getCustomerTitleID
 
     # Retrieve data from ea DB
-    db eval "SELECT PubTitleID, LabelTPL.LabelProfileID as LabelProfileID, LabelProfiles.LabelProfileDesc as LabelProfileDesc, tplLabelName, tplLabelPath, Status FROM LabelTpl
+    db eval "SELECT PubTitleID, LabelTPL.LabelProfileID as LabelProfileID, LabelProfiles.LabelProfileDesc as LabelProfileDesc, tplLabelName, tplLabelPath, Status FROM LabelTPL
                 INNER JOIN LabelProfiles ON LabelTPL.LabelProfileID = LabelProfiles.LabelProfileID
-                WHERE tplID = $tplLabel(ID)" {
+                WHERE PubTitleID = $job(TitleID)" {
                     ${log}::debug $PubTitleID, $LabelProfileID, $LabelProfileDesc, $tplLabelName, $tplLabelPath
-                    set job(TitleID) $PubTitleID
+                    #set job(TitleID) $PubTitleID
                     set tplLabel(LabelProfileID) $LabelProfileID
                     set tplLabel(LabelProfileDesc) $LabelProfileDesc
                     set tplLabel(Name) $tplLabelName
@@ -190,11 +197,21 @@ proc ea::code::ld::modifyTemplate {wid} {
     ea::db::ld::getCustomerTitleName $job(TitleID)
 
     # Populate title dropdown
-    $ldWid(addTpl,f1).cbox0 configure -state normal
+    #$ldWid(addTpl,f1).cbox0 configure -state normal
     $ldWid(addTpl,f1).cbox0 set $job(Title)
 
+    # Retrieve the actual templates / Versions
     ea::db::ld::getTemplates
 
+    # Retrieve label versions
+    ea::db::ld::getLabelVersions [ea::db::ld::getTemplateID $job(TitleID)]
+
+    # Set Label Version dropdown
+    $ldWid(addTpl,f2).versionDescCbox configure -values $tplLabel(LabelVersionDesc)
+    $ldWid(addTpl,f2).versionDescCbox set $tplLabel(LabelVersionDesc,current)
+
+    # Retreive label data
+    ea::db::ld::getLabelProfile
 } ;# ea::code::ld::modifyTemplate
 
 # Add new profiles
