@@ -446,8 +446,8 @@ proc ea::db::ld::getLabelVersions {tpl_id} {
     set tplLabel(LabelVersionID) ""
     set tplLabel(LabelVersionDesc) ""
 
-    db eval "SELECT LabelVersionID, LabelVersionDesc FROM LabelVersions WHERE PubTitleID = $tpl_id" {
-        lappend tplLabel(LabelVersionID) $LabelVersionID
+    db eval "SELECT LabelVersionID as labelVersionID, LabelVersionDesc FROM LabelVersions WHERE tplID = $tpl_id" {
+        lappend tplLabel(LabelVersionID) $labelVersionID
         lappend tplLabel(LabelVersionDesc) $LabelVersionDesc
     }
 
