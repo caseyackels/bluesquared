@@ -362,6 +362,20 @@ proc ea::code::ld::addProfile {mode addPro_btn edit_btn add_btn del_btn cbox lbo
     $edit_btn configure -text [mc "Save"] -state normal -command "ea::code::ld::editProfile save $addPro_btn $edit_btn $add_btn $del_btn $cbox $lbox2"
 } ;#ea::code::ld::addProfile
 
+
+# Tablelist helper
+proc ea::code::ld::editStartCmd {tbl row col text} {
+    global log
+    set w [$tbl editwinpath]
+
+    switch [$tbl columncget $col -name] {
+        "row"       {$w configure -values {Row01 Row02 Row03 Row04 Row05 Row06 Row07} -state readonly}
+        "labelText" {$w configure -values {@TitleName @JobName @PONumber @VersionName}}
+        "editable"  {}
+        default     {}
+    }
+}
+
 ## Original / Do Not Use
 proc ea::code::ld::writeToDb {} {
     # Parent: ea::code::ld::saveLabel
