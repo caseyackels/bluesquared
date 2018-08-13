@@ -424,12 +424,13 @@ proc 'eAssist_initVariables {} {
                         Name "" \
 						NumRows "" \
 						NewCustomer "" \
+						MaxBoxQty "" \
 						LabelProfileRowNum "" \
                         LabelPath "" \
                         Size "" \
 						LabelSize "" \
 						LabelSizeID "" \
-						SerializeLabel "" \
+						SerializeLabel 0 \
                         NotePriv "" \
                         NotePub "" \
                         FixedBoxQty "" \
