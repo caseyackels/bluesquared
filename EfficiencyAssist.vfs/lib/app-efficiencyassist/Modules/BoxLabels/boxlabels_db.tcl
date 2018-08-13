@@ -409,7 +409,7 @@ proc ea::db::bl::getShipCounts {} {
     # Ensure var is empty
     set job(ShipCount) ""
     set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
-    set stmt [$monarch_db prepare "SELECT ORDERID, SHIPCOUNT, DISTRIBNAME
+    set stmt [$monarch_db prepare "SELECT DISTINCT(ORDERID), SHIPCOUNT, DISTRIBNAME
                                         FROM EA.dbo.Planner_Shipping_View
                                         WHERE JOBNAME = '$job(Number)'
                                         AND ALIASNAME = '[string map {' ''} $job(Version)]'
