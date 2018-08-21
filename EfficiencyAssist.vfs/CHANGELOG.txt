@@ -1,6 +1,14 @@
+= Version 4.1.1 RC6.1 (August 2018)
+== Box Labels
+* [BUG] Resolved issue where orders/shipment quantities could be doubled causing extra labels to be printed.
+
+--
+
 = Version 4.1.1 RC5 (June 2018)
 == Box Labels
 * [BUG] BUG #8 - Resolved issue where previous job would print if a certain sequence occurred.
+
+--
 
 = Version 4.1.1 RC4 (June 2018)
 == Box Labels

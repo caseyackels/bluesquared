@@ -144,7 +144,6 @@ proc ea::gui::ld::addTemplate {args} {
     ## Body / Label Data
     ## This is automatically created based on the profile selected, and ea::gui::ld::genLines
 
-    #ea::gui::ld::genLines
     set ldWid(addTpl,f2) [ttk::labelframe $ldWid(addTpl).f2 -text [mc "Label Information"] -padding 2]
     pack $ldWid(addTpl,f2) -expand no -fill x -side left -pady 5p -padx 5p
 
@@ -152,17 +151,14 @@ proc ea::gui::ld::addTemplate {args} {
     grid [ttk::combobox $ldWid(addTpl,f2).versionDescCbox -width 35 \
                                                             -textvariable tplLabel(LabelVersionDesc,current) \
                                                             -postcommand {ea::db::ld::getLabelVersionList $ldWid(addTpl,f2).versionDescCbox}] -column 1 -row 0 -padx 2p -pady 5p -sticky ew
-        #$ldWid(addTpl,f2).versionDescCbox set $tplLabel(LabelVersionDesc,current)
-        bind $ldWid(addTpl,f2).versionDescCbox <<ComboboxSelected>> {
-            ${log}::debug Version ($tplLabel(LabelVersionDesc,current)) is active. Populating all variables/widgets...
-            ea::db::ld::setLabelVersionVars
-            #ea::db::ld::populateLabelVersionWids
-        }
-        # bind $ldWid(addTpl,f2).versionDescCbox <FocusOut> {
-        #     ea::db::ld::setLabelVersionVars
-        #     ea::db::ld::populateLabelVersionWids
-        # }
 
+
+        bind $ldWid(addTpl,f2).versionDescCbox <FocusOut> {
+             ${log}::debug Is this an unknown version (new?) $tplLabel(LabelVersionDesc,current)
+
+             if {$tplLabel(LabelVersionDesc,current) eq ""} {return}
+             ea::db::ld::setLabelVersionVars
+        }
 
     grid [ttk::checkbutton $ldWid(addTpl,f2).ckbtnSerialize -text [mc "Serialize?"] -variable tplLabel(SerializeLabel)] -column 2 -row 0 -sticky w -padx 2p -pady 2p
 
@@ -177,8 +173,6 @@ proc ea::gui::ld::addTemplate {args} {
                                                 -postcommand {ea::db::ld::getSizes $ldWid(addTpl,f2).cbox1}] -column 1 -row 2 -pady 2p -padx 2p -sticky ew
 
         bind $ldWid(addTpl,f2).cbox1 <<ComboboxSelected>> {
-        #     ea::db::ld::getLabelProfileID [%W get]
-        #     ea::db::ld::getLabelProfil
             ea::db::ld::getLabelSizeID  %W
         }
     grid [ttk::button $ldWid(addTpl,f2).delBtn -text [mc "Delete"]] -column 2 -row 3 -padx 2p -pady 5p
@@ -228,13 +222,17 @@ proc ea::gui::ld::addTemplate {args} {
 
     grid [ttk::label $ldWid(addTpl,f2b).boxQtyTxt -text [mc "Max. Box Qty"]] -column 0 -row 0 -padx 2p -sticky e
         tooltip::tooltip $ldWid(addTpl,f2b).boxQtyTxt [mc "This is optional, leave blank if unknown"]
+
     grid [ttk::entry $ldWid(addTpl,f2b).boxQtyEntry -textvariable tplLabel(MaxBoxQty)] -column 1 -row 0
         tooltip::tooltip $ldWid(addTpl,f2b).boxQtyEntry [mc "This is optional, leave blank if unknown"]
+
     grid [ttk::label $ldWid(addTpl,f2b).shipQtyTxt -text [mc "Ship. Qty"]] -column 0 -row 1 -padx 2p -sticky e
+
     grid [ttk::entry $ldWid(addTpl,f2b).shipQtyEntry] -column 1 -row 1
         bind $ldWid(addTpl,f2b).shipQtyEntry <Return> {
             ea::code::ld::AddShipQty $ldWid(addTpl,f2b).shipQtyEntry $ldWid(addTpl,f2b).lbox
         }
+
     grid [ttk::button $ldWid(addTpl,f2b).addBtn -text [mc "Add"] -command {ea::code::ld::AddShipQty $ldWid(addTpl,f2b).shipQtyEntry $ldWid(addTpl,f2b).lbox}] -column 2 -row 1
 
     grid [listbox $ldWid(addTpl,f2b).lbox -selectmode extended] -column 1 -row 2 -pady 5p -sticky news
