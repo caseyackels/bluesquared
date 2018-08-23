@@ -136,6 +136,9 @@ proc ea::gui::ld::addTemplate {args} {
             ${log}::debug [db eval "SELECT tplID from LabelTPL WHERE PubTitleID = $job(TitleID) AND tplLabelName = '[%W get]'"]
         }
 
+    grid [ttk::label $ldWid(addTpl,f1).text2b -text [mc "Template ID"]] -column 0 -row 3 -padx 2p -pady 2p -sticky e
+    grid [ttk::label $ldWid(addTpl,f1).text2c -textvariable tplLabel(ID)] -column 1 -row 3 -padx 2p -pady 2p -sticky w
+
 
 
     grid [ttk::checkbutton $ldWid(addTpl,f1).bkbtn1 -text [mc "Active?"] -variable tplLabel(Status)] -column 4 -row 2 -pady 2p -padx 2p -sticky w
@@ -196,13 +199,14 @@ proc ea::gui::ld::addTemplate {args} {
                                         -exportselection yes \
                                         -showseparators yes \
                                         -fullseparators yes \
+                                        -forceeditendcommand yes \
                                         -yscrollcommand [list $ldWid(f2b).scrolly set] \
                                         -editstartcommand ea::code::ld::editStartCmd
 
         $ldWid(f2b).listbox columnconfigure 0 -showlinenumbers 1 -name count
         $ldWid(f2b).listbox columnconfigure 1 -name row -editable yes -editwindow ttk::combobox
         $ldWid(f2b).listbox columnconfigure 2 -name labelText -editable yes -editwindow ttk::combobox -labelalign center
-        $ldWid(f2b).listbox columnconfigure 3 -name editable -editable yes -editwindow ttk::checkbutton
+        $ldWid(f2b).listbox columnconfigure 3 -name editable -editable yes -editwindow ttk::combobox -labelalign center
 
     ttk::scrollbar $ldWid(f2b).scrolly -orient v -command [list $ldWid(f2b).listbox yview]
 

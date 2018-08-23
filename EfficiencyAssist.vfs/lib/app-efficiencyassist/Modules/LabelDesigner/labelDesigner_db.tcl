@@ -84,7 +84,6 @@ proc ea::db::ld::getLabelProfile {} {
     }
 } ;# ea::db::ld::getLabelProfile
 
-# NOT UPDATED
 proc ea::db::ld::getTemplateData {} {
     global ldWid log
     # This populates the main table listing the template id, template name, customer, title and status
@@ -92,6 +91,11 @@ proc ea::db::ld::getTemplateData {} {
     $ldWid(f1b).listbox delete 0 end
 
     db eval "SELECT DISTINCT(PubTitleID), Status FROM LabelTPL ORDER BY PubTitleID AND STATUS = 1" {
+        if {$Status == 1} {
+            set newStatus [mc Active]
+        } else {
+            set newStatus [mc Inactive]
+        }
         # Retrieve Monarch Data
         ${log}::debug Retrieving data: $PubTitleID
 
@@ -106,7 +110,7 @@ proc ea::db::ld::getTemplateData {} {
         $stmt close
         if {$company ne ""} {
             #${log}::debug $ldWid(f1b).listbox insert end [list "" "$tplID" "$company" "$title" "$Status"]
-            $ldWid(f1b).listbox insert end [list "" "$company" "$title" "$Status"]
+            $ldWid(f1b).listbox insert end [list "" "$company" "$title" "$newStatus"]
         }
     }
     db2 close
@@ -165,7 +169,8 @@ proc ea::db::ld::writeLabelVersions {} {
 
     if {$tplLabel(LabelVersionDesc,current) ne ""} {
         # Check to see if we've already added this version to the db, then remove if we have.
-        set verExists [db eval "SELECT labelVersionID FROM LabelVersions WHERE tplID = $tplLabel(ID) AND LabelVersionDesc = '$tplLabel(LabelVersionDesc,current)'"]
+        set verExists ""
+        set verExists [db eval "SELECT labelVersionID FROM LabelVersions WHERE tplID = $tplLabel(ID) AND LOWER(LabelVersionDesc) = LOWER('$tplLabel(LabelVersionDesc,current)')"]
         if {$verExists ne ""} {
             ${log}::debug Version ($tplLabel(LabelVersionDesc,current)) already exists... delete and re-insert?
 
@@ -276,8 +281,8 @@ proc ea::db::ld::getLabelVersionList {wid} {
         return
     }
 
-    ${log}::debug db eval "SELECT LabelVersionDesc FROM LabelVersions WHERE tplID = $tplLabel(ID)"
-    $wid configure -values [db eval "SELECT LabelVersionDesc FROM LabelVersions WHERE tplID = $tplLabel(ID)"]
+    ${log}::debug db eval "SELECT LabelVersionDesc FROM LabelVersions WHERE tplID = $tplLabel(ID) ORDER BY LOWER(LabelVersionDesc)"
+    $wid configure -values [db eval "SELECT LabelVersionDesc FROM LabelVersions WHERE tplID = $tplLabel(ID) ORDER BY LOWER(LabelVersionDesc)"]
     #set tplLabel(LabelVersionDesc,current)
 } ;# ea::db::ld::getLabelVersionList $wid
 
@@ -287,10 +292,11 @@ proc ea::db::ld::getLabelVersionID {} {
     global log tplLabel
     if {$tplLabel(ID) eq ""} {
         ${log}::debug (ea::db::ld::getLabelVersionID) Cannot continue tplLabel(ID) is empty
+        set tplLabel(LabelVersionID,current) 0
         return
     }
 
-    set tplLabel(LabelVersionID,current) [db eval "SELECT labelVersionID FROM LabelVersions WHERE tplID = $tplLabel(ID) AND LabelVersionDesc = '$tplLabel(LabelVersionDesc,current)'"]
+    set tplLabel(LabelVersionID,current) [db eval "SELECT labelVersionID FROM LabelVersions WHERE tplID = $tplLabel(ID) AND LOWER(LabelVersionDesc) = LOWER('$tplLabel(LabelVersionDesc,current)]')"]
     # If blank, the user is probably entering a new version
     if {$tplLabel(LabelVersionID,current) == ""} {set tplLabel(LabelVersionID,current) 0}
 } ;# ea::db::ld::getLabelVersionID
@@ -307,7 +313,7 @@ proc ea::db::ld::setLabelVersionVars {} {
     ea::db::ld::getLabelVersionID
 
     ${log}::debug Table: LabelVersions
-    if {$tplLabel(LabelVersionID,current) == 0} {
+    if {$tplLabel(LabelVersionID,current) == 0 || $tplLabel(LabelVersionID,current) == ""} {
         set tplLabel(LabelSizeID) ""
         set tplLabel(LabelPath) ""
         set tplLabel(SerializeLabel) 0
@@ -551,28 +557,3 @@ proc ea::db::ld::getLabelSizeID {cbox} {
     ${log}::debug Label Size Desc: [$cbox get]
     set tplLabel(LabelSizeID) [db eval "SELECT labelSizeID from LabelSizes where labelSizeDesc = '[$cbox get]'"]
 }
-
-##
-## OLD / Unused
-##
-
-# proc ea::db::ld::getLabelVersions {tpl_id} {
-#     # Retrieve the label versions associated with the templates
-#     global log tplLabel
-#
-#     # Make sure the vars are cleared out
-#     set tplLabel(LabelVersionID) ""
-#     set tplLabel(LabelVersionDesc) ""
-#
-#     db eval "SELECT LabelVersionID as labelVersionID, LabelVersionDesc FROM LabelVersions WHERE tplID = $tpl_id" {
-#         lappend tplLabel(LabelVersionID) $labelVersionID
-#         lappend tplLabel(LabelVersionDesc) $LabelVersionDesc
-#     }
-#
-#     ${log}::debug Retreived LabelVersionDesc and LabelVersionID
-#
-#     set tplLabel(LabelVersionID,current) [lindex $tplLabel(LabelVersionID) 0]
-#     set tplLabel(LabelVersionDesc,current) [lindex $tplLabel(LabelVersionDesc) 0]
-#
-#     ${log}::debug Selected Versions: $tplLabel(LabelVersionID,current) $tplLabel(LabelVersionDesc,current)
-# } ;# ea::db::ld::getLabelVersions

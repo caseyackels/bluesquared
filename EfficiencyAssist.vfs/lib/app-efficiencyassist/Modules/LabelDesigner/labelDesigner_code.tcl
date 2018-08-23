@@ -61,6 +61,7 @@ proc ea::code::ld::saveTemplateHeader {} {
     # If checks pass, write data to database
     global log job tplLabel ldWid
 
+    $ldWid(f2b).listbox finishediting
     set gate 0
 
     ## WARNINGS - If these are triggered, nothing is written to the database
@@ -170,6 +171,7 @@ proc ea::code::ld::modifyTemplate {wid} {
     set widTplCustomer [$wid findcolumnname customerName]
     set widTplTitle [$wid findcolumnname titleName]
     set widStatus [$wid findcolumnname status]
+    if {$widStatus eq [mc Active]} {set widStatus 1} else {set widStatus 0}
 
     set job(CustName) [lindex [$wid get [$wid curselection]] $widTplCustomer]
     set job(Title) [lindex [$wid get [$wid curselection]] $widTplTitle]
@@ -202,8 +204,8 @@ proc ea::code::ld::editStartCmd {tbl row col text} {
 
     switch [$tbl columncget $col -name] {
         "row"       {$w configure -values {Row01 Row02 Row03 Row04 Row05 Row06 Row07 ""} -state readonly}
-        "labelText" {$w configure -values {@TitleName @JobName @PONumber @VersionName}}
-        "editable"  {}
+        "labelText" {$w configure -values {@TitleName @JobName @PONumber @VersionName @NextMonth @CurrentMonth}}
+        "editable"  {$w configure -values {Yes No} -state readonly}
         default     {}
     }
 } ;# ea::code::ld::editStartCmd
