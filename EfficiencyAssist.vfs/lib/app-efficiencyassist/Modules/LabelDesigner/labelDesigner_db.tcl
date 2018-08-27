@@ -296,7 +296,7 @@ proc ea::db::ld::getLabelVersionID {} {
         return
     }
 
-    set tplLabel(LabelVersionID,current) [db eval "SELECT labelVersionID FROM LabelVersions WHERE tplID = $tplLabel(ID) AND LOWER(LabelVersionDesc) = LOWER('$tplLabel(LabelVersionDesc,current)]')"]
+    set tplLabel(LabelVersionID,current) [db eval "SELECT labelVersionID FROM LabelVersions WHERE tplID = $tplLabel(ID) AND LOWER(LabelVersionDesc) = LOWER('$tplLabel(LabelVersionDesc,current)')"]
     # If blank, the user is probably entering a new version
     if {$tplLabel(LabelVersionID,current) == ""} {set tplLabel(LabelVersionID,current) 0}
 } ;# ea::db::ld::getLabelVersionID

@@ -248,6 +248,10 @@ proc ea::gui::ld::addTemplate {args} {
             ea::code::ld::delShipQty %W
         }
 
+        bind $ldWid(addTpl,f2b).lbox <BackSpace> {
+            ea::code::ld::delShipQty %W
+        }
+
 
 
     # If we are modifying then populate the widgets, and disable Customer and Title fields
@@ -270,6 +274,13 @@ proc ea::gui::ld::addTemplate {args} {
 
     grid [ttk::button $btnBar.save -text [mc "Save"] -command {ea::code::ld::saveTemplateHeader}] -column 0 -row 0 -pady 2p -padx 2p
     grid [ttk::button $btnBar.cncl -text [mc "Close"] -command {destroy $ldWid(addTpl); ea::code::ld::resetWidgets}] -column 1 -row 0 -pady 2p -padx 2p
+
+    # Context Menu
+    if {[winfo exists .popupMenu]} {destroy .popupMenu}
+    set m [menu .popupMenu]
+    $m add command -label "Paste" -command {ea::gui::ld::menuPasteQty $ldWid(addTpl,f2b).lbox}
+    # Example - bind $bodyTag <<Button3>> +[list tk_popup $mName %X %Y]
+    bind $ldWid(addTpl,f2b).lbox <<Button3>> {tk_popup .popupMenu %X %Y}
 } ;# ea::gui::ld::addTemplate
 
 proc ea::gui::ld::genLines {} {
@@ -302,3 +313,13 @@ proc ea::gui::ld::genLines {} {
 
     #ea::db::ld::getLabelProfile
 } ;# ea::code::ld::genLines
+
+proc ea::gui::ld::menuPasteQty {widListbox} {
+    global log
+    foreach item [clipboard get] {
+        set item [string trim [regsub -all {[a-zA-Z,]} "$item" "" ]]
+        if {$item ne ""} {
+            $widListbox insert end $item
+        }
+    }
+} ;# ea::gui::ld::menuPasteQty

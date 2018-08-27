@@ -61,12 +61,12 @@ proc ea::db::bl::getTplData {tpl btn1 shipToWid shipListWid} {
 
         }
 
-        # We entered a correct template number, but a title was never assigned.
-        if {$job(Title,id) eq ""} {
-            ${log}::critical Template $tpl exists, but a Title was never assigned
-            set tplLabel(LabelPath) "" ;# Clear this out so the end-user doesn't keep going
-            return
-        }
+        # # We entered a correct template number, but a title was never assigned.
+        # if {$job(Title,id) eq ""} {
+        #     ${log}::critical Template $tpl exists, but a Title was never assigned
+        #     set tplLabel(LabelPath) "" ;# Clear this out so the end-user doesn't keep going
+        #     return
+        # }
     }
 
     # Get Profile Info
@@ -92,7 +92,6 @@ proc ea::db::bl::getTplData {tpl btn1 shipToWid shipListWid} {
     # Populate the widgets with the label data
     ea::db::bl::getLabelText
 } ;# ea::db::bl::getTplData
-
 
 proc ea::db::bl::getLabelText {} {
     global log tplLabel GS_textVar blWid
@@ -236,15 +235,15 @@ proc ea::db::bl::getShipToData {btn wid_text} {
 } ;# ea::db::bl::getShipToData
 
 proc ea::db::bl::getJobData {btn1 wid shipToWid shipListWid} {
-    global log job labelText blWid
+    global log job labelText blWid tplLabel
     # First version
     # Populate customer info, label info, ship counts and Ship Order IDs.
-    if {$job(Number) eq "" && $job(Template) eq ""} {return}
-    if {$job(Number) eq "" && $job(Template) ne ""} {
-        ${log}::notice We are looking for template: $job(Template) but a job number does not exist.
-        Error_Message::errorMsg BL005
-        return
-    }
+    # if {$job(Number) eq "" && $job(Template) eq ""} {return}
+    # if {$job(Number) eq "" && $job(Template) ne ""} {
+    #     ${log}::notice We are looking for template: $job(Template) but a job number does not exist.
+    #     Error_Message::errorMsg BL005
+    #     return
+    # }
 
     if {[string length $job(Number)] < 6} {
         ${log}::notice The job number is less than 5 numbers. Aborting.
@@ -258,7 +257,7 @@ proc ea::db::bl::getJobData {btn1 wid shipToWid shipListWid} {
 
     # Disable entry widgets
     $blWid(f).entry1 state disabled
-    $blWid(f).entry2 state disabled
+    #$blWid(f).entry2 state disabled
 
     set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
 
@@ -277,6 +276,8 @@ proc ea::db::bl::getJobData {btn1 wid shipToWid shipListWid} {
     }
 
     $stmt close
+
+
 
 
     # Retrieve ship order id's
@@ -303,11 +304,14 @@ proc ea::db::bl::getJobData {btn1 wid shipToWid shipListWid} {
 
     ea::db::bl::getShipToData {} $blWid(tab2f2).txt
 
-    # Check for Templates
     set job(Description) "$job(Title) | $job(Name)"
-    if {$job(Template) ne "" } {
-        ${log}::debug We have a template: $job(Template)
-        ea::db::bl::getTplData $job(Template) $btn1 $shipToWid $shipListWid
+
+    # Check for Templates
+    ea::db::bl::getAssociatedTemplates
+
+    if {$tplLabel(ID) ne "" } {
+        ${log}::debug Retrieving template information
+        #ea::db::bl::getTplData $job(Template) $btn1 $shipToWid $shipListWid
 
     } else {
         ea::db::bl::getAllVersions $wid 1
@@ -395,7 +399,6 @@ proc ea::db::bl::getTplVersions {} {
               ${log}::debug $labelRowNum, $labelRowText
               set labelText(Row$labelRowNum) $labelRowText
             }
-
 } ;# ea::db::bl::getTplVersions
 
 proc ea::db::bl::getShipCounts {} {
@@ -429,3 +432,28 @@ proc ea::db::bl::getShipCounts {} {
 
     ea::code::bl::trackTotalQuantities
 } ;# ea::db::bl::getShipCounts
+
+##
+## HELPERS
+##
+
+proc ea::db::bl::getAssociatedTemplates {} {
+    # Check to see if the customer has any templates in the EA db.
+    global log job tplLabel
+
+    # Retrieve title code, setting vars:
+    # set job(TitleID) (This is the Title ID from Monarch)
+    #set job(CSRID)
+    ea::db::ld::getCustomerTitleID
+
+    # Match title code to EA DB
+    set titleID [ea::db::ld::getTemplateID $job(TitleID)]
+
+    set titleID [db eval "SELECT tplID FROM LabelTPL WHERE PubTitleID = $job(TitleID)"]
+    if {$titleID ne ""} {
+        # we have a template, lets populate the widgets
+        set tplLabel(ID) $titleID
+        ${log}::debug We have a template: $tplLabel(ID)
+        return [db eval "SELECT LabelVersionDesc from LabelVersions WHERE tplID = $tplLabel(ID)"]
+    }
+} ;# ea::db::bl::getAssociatedTemplates
