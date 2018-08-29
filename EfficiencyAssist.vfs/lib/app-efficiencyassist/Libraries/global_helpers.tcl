@@ -57,7 +57,7 @@ proc eAssist_Global::resetFrames {args} {
     #
     #***
     global log gui
-    
+
     switch -- $args {
         parent  {foreach child [winfo children .container] {destroy $child} }
         -pref    {foreach child [winfo children .pref.frame] {destroy $child} }
@@ -92,15 +92,15 @@ proc eAssist_Global::resetSetupFrames {} {
     #
     #***
     global savePage
-    
+
     #foreach child [winfo children .container.setup] {
     #    puts $child
     #}
-    
+
     foreach child [winfo children .container.setup] {
         destroy $child
     }
-    
+
     #set savePage $args ;# Allows us to save what is on that page
 
 } ;# eAssist_Global::resetSetupFrames
@@ -126,7 +126,7 @@ proc eAssist_Global::checkVars {win {var ""}} {
     #	N/A
     #
     # PARENTS
-    #	
+    #
     #
     # NOTES
     #
@@ -135,8 +135,8 @@ proc eAssist_Global::checkVars {win {var ""}} {
     #***
     global log program
     #${log}::debug --START-- [info level 1]
-    
-	
+
+
 	if {($var == "") || (![info exists $var])} {
 		#${log}::debug Variable doesn't exist ... launching window.
 	} else {
@@ -150,20 +150,20 @@ proc eAssist_Global::checkVars {win {var ""}} {
 		default	{${log}::notice No window was set, aborting.
 				return}
 	}
-	
+
 	set answer [tk_messageBox -title [mc "Additonal configuration needed"] \
 					-type yesno \
 					-icon error \
 					-parent . \
 					-detail [mc "Additional options need to be configured, would you like to go there now?\n\n$program(Name) will not be able to function properly until these options are set."]]
-	
+
 	switch $answer {
 		yes		{$launchWin}
 		no		{${log}::debug We Selected NO}
 		default	{}
 	}
-					
-	
+
+
     #${log}::debug --END-- [info level 1]
 } ;# eAssist_Global::checkVars
 
@@ -186,7 +186,7 @@ proc eAssist_Global::widgetState {state win} {
     #	N/A
     #
     # PARENTS
-    #	
+    #
     #
     # NOTES
     #
@@ -195,25 +195,25 @@ proc eAssist_Global::widgetState {state win} {
     #***
     global log
     #${log}::debug --START-- [info level 1]
-    
+
     foreach w [winfo children $win] {
 		if {$state eq "disabled"} {
 			set newState disabled
 			set newCommand [list $w state]
-		
+
 		} elseif {$state eq "normal"} {
 			set newState normal
 			set newCommand [list $w configure -state]
-		
+
 		} else {
 			${log}::critical [info level 1] available arguments are: Disabled, or Normal
 			return
 		}
-	
+
 		${log}::debug STATE: $newState $w
         {*}$newCommand $newState
     }
-	
+
     #${log}::debug --END-- [info level 1]
 } ;# eAssist_Global::widgetState
 
@@ -235,26 +235,26 @@ proc eAssist_Global::OpenFile {title initDir type args} {
     #   eAssist_Global::OpenFile [mc "Bartender Path"] [pwd] -filetype .exe
     #
     # CHILDREN
-    #	
+    #
     #
     # PARENTS
-    #	
+    #
     #
     # NOTES
-    #   
+    #
     # SEE ALSO
     #
     #
     #***
 	global log
-	
+
 	# Set the defaults first, if the programmer specified values, the defaults will be overwritten
     set filename ""
 	set ext .db
 	set ftype {
         { {Efficiency Assist Project} {.db} }
     }
-	
+
 	foreach {item value} $args {
 		switch -- $item {
 			-ext		{set ext $value}
@@ -275,7 +275,7 @@ proc eAssist_Global::OpenFile {title initDir type args} {
                 -title $title \
                 -initialdir $initDir -title $title]
         }
-	
+
     # If we do not select a file name, and cancel out of the dialog, do not produce an error.
     if {$filename eq ""} {return}
 
@@ -303,7 +303,7 @@ proc eAssist_Global::SaveFile {fileName {initDir 0}} {
     #	N/A
     #
     # PARENTS
-    #	
+    #
     #
     # NOTES
     #
@@ -319,7 +319,7 @@ proc eAssist_Global::SaveFile {fileName {initDir 0}} {
 			set initDir $mySettings(outFilePath)
 		}
 	}
-	
+
 	set types {
 		{{Comma Separated Values}	{.csv}}
 	}
@@ -332,11 +332,11 @@ proc eAssist_Global::SaveFile {fileName {initDir 0}} {
 					-parent . \
 					-title [mc "Choose where to save your file"] \
 				  ]
-	
+
 
     # If we do not select a file name, and cancel out of the dialog, do not produce an error.
     if {$filename eq ""} {return}
-	
+
 	return $filename
     #${log}::debug --END-- [info level 1]
 } ;# eAssist_Global::SaveFile
@@ -359,7 +359,7 @@ proc eAssist_Global::detectWin {args} {
     #	N/A
     #
     # PARENTS
-    #	
+    #
     #
     # NOTES
     #
@@ -368,10 +368,10 @@ proc eAssist_Global::detectWin {args} {
     #***
     global log
     #${log}::debug --START-- [info level 1]
-    
+
     set vSwitch [lindex $args 0]
     set vWindow [lindex $args 1]
-    
+
     if {[winfo exists $vWindow] == 1} {
     # -s, serialize instead of destroying. Multiple instances are ok.
     # -k, destroy the window. We only want one instance active.
@@ -385,9 +385,9 @@ proc eAssist_Global::detectWin {args} {
             default { ${log}::notice Arg: $arg, not a valid argument use, -s (serialize), or -k (kill)}
         }
     }
-        
+
     return $vWindow
-	
+
     #${log}::debug --END-- [info level 1]
 } ;# eAssist_Global::detectWin
 
@@ -409,7 +409,7 @@ proc eAssist_Global::at {time args} {
     #	N/A
     #
     # PARENTS
-    #	
+    #
     #
     # NOTES
 	# 	Taken from http://wiki.tcl.tk/808
@@ -420,13 +420,13 @@ proc eAssist_Global::at {time args} {
     #***
     global log
     #${log}::debug --START-- [info level 1]
-    
+
 	if {[llength $args] == 1} {set args [lindex $args 0]}
-    
+
 	set dt [expr {([clock scan $time]-[clock seconds])*1000}]
-    
+
 	after $dt $args
-	
+
     #${log}::debug --END-- [info level 1]
 } ;# eAssist_Global::at
 
@@ -450,7 +450,7 @@ proc eAssist_Global::getGeom {module args} {
     #	N/A
     #
     # PARENTS
-    #	
+    #
     #
     # NOTES
     #
@@ -460,25 +460,25 @@ proc eAssist_Global::getGeom {module args} {
     global log options
     #${log}::debug --START-- [info level 1]
 	#${log}::debug CURRENT OPTIONS: $options(geom,$settings(currentModule))
-    
+
 	if {[info exists options(geom,$module)]} {
 		wm geometry . $options(geom,$module)
 		${log}::notice Geometry exists for $module - Using $options(geom,$module)
-		
+
 		set dims [split $options(geom,$module) x]
 		set dims [split $dims +]
-		
+
 		set dims [join $dims]
 		#${log}::notice [winfo screenwidth .] == [lindex $dims 0]
 		#${log}::notice [winfo screenheight . ] == [lindex $dims 1]
-        
+
         # use default settings if screenwidth and screenheight = 1
         if {[lindex $dims 0] == 1 && [lindex $dims 1] == 1} {
             ${log}::notice Geometry Width and Height is 1, using default geoms
             wm geometry . $args
         }
 
-	
+
 		#if {[winfo screenheight . ] == [lindex $dims 1]} {
 		#	#wm attributes . -zoomed 1
 		#	wm state . zoomed
@@ -490,9 +490,9 @@ proc eAssist_Global::getGeom {module args} {
 		wm geometry . $args
 		${log}::notice Geometry does NOT exist for $module - Using $args
 	}
-	
+
 	#lib::savePreferences
-	
+
     #${log}::debug --END-- [info level 1]
 } ;# eAssist_Global::getGeom
 
@@ -507,27 +507,27 @@ proc eAssist_Global::validate {val validation char args} {
     #
     # COPYRIGHT
     #	(c) 2014 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
-    #   eAssist_Global::validate %W %d %S args 
+    #   eAssist_Global::validate %W %d %S args
     #
     # FUNCTION
     #	Returns validated data
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log
 	if {$validation == 1} {
@@ -541,7 +541,7 @@ proc eAssist_Global::validate {val validation char args} {
 
 		set returnValue 1
 	} else { return 1}
-	
+
     foreach {key value} $args {
 		switch -- $key {
 			-length	{ ${log}::debug Length: [string length $val] - $val
@@ -549,11 +549,11 @@ proc eAssist_Global::validate {val validation char args} {
 				}
 			-alpha	{ ${log}::debug Alpha: [string is alpha $char] - $char
 					if {$value eq "no" & [string is alnum $char] == 1} {bell; set returnValue 0; ${log}::debug NaN, found one - breaking; break}
-					
+
 				}
 			-space	{ ${log}::debug Space: [string is space $char] - $char
 					if {$value eq "no" & [string is space $char] == 1} {bell; set returnValue 0; ${log}::debug No Spaces, found one - breaking; break}
-					
+
 				}
 			-punc	{ ${log}::debug Punc: [string is punc $char] - $char
 					if {$value eq "no" & [string is punc $char] == 1} {bell; set returnValue 0; ${log}::debug No Punctuation, found one - breaking; break}
@@ -564,9 +564,9 @@ proc eAssist_Global::validate {val validation char args} {
 			default	{${log}::debug -DEFAULT-}
 		}
     }
-	
+
 return $returnValue
-    
+
 } ;# eAssist_Global::validate
 
 
@@ -580,10 +580,10 @@ proc ea::tools::modifyButton {wid args} {
     #
     # COPYRIGHT
     #	(c) 2014 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
-    #   ea::tools::modifyButton args 
+    #   ea::tools::modifyButton args
     #
     # FUNCTION
     #	Modifies the button based on what was passed
@@ -591,20 +591,20 @@ proc ea::tools::modifyButton {wid args} {
     #	-text New name that the widget should have
     #	-state normal or disabled
     #	-command New command
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log
 
@@ -636,27 +636,27 @@ proc ea::tools::bindings {wid binding cmd} {
     #
     # COPYRIGHT
     #	(c) 2014 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
     #   ea::tools::bindings <wid> {binding1 .. bindingN} {cmd}
     #
     # FUNCTION
     #	Add bindings to widgets; this is useful if adding multiple bindings for the same command.
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log
 
@@ -692,19 +692,19 @@ proc ea::tools::populateListbox {modify entryWid lBoxWid dbTable dbCol} {
     #	N/A
     #
     # PARENTS
-    #	
+    #
     #
     # NOTES
-    #   
+    #
     #
     # SEE ALSO
     #
     #***
     global log
     #${log}::debug --START-- [info level 1]
-    
+
     #${log}::debug Adding $dbTable, $entryWid, $lBoxWid
-    
+
     switch -- $modify {
         add     {if {[$entryWid get] == ""} {return} else {set entryValue [$entryWid get]}; $entryWid delete 0 end
                 # Insert into DB; must use quotes instead of curly braces to allow variable substituition
@@ -716,7 +716,7 @@ proc ea::tools::populateListbox {modify entryWid lBoxWid dbTable dbCol} {
             }
         default {${log}::debug Unknown switch option: $modify}
     }
-    
+
     # Update the widgets with the new data ...
     #eAssist_db::initContainers $dbTable $lBoxWid
     eAssist_db::initContainers $dbCol $lBoxWid
@@ -735,27 +735,27 @@ proc ea::tools::formatFileName {} {
     #
     # COPYRIGHT
     #	(c) 2015 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
-    #   ea::tools::formatFileName  
+    #   ea::tools::formatFileName
     #
     # FUNCTION
     #	Returns the formatted file name
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log mySettings job
 
@@ -782,7 +782,7 @@ proc ea::tools::getGUID {args} {
     #
     # COPYRIGHT
     #	(c) 2015 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
     #   ea::tools::convertGUID -new|-convert
@@ -791,29 +791,29 @@ proc ea::tools::getGUID {args} {
     # FUNCTION
     #	Creates a GUID using the TWAPI package; and depending on the flag it will return a converted X'093090394039403094 number, or the typical
 	#	{E0EB36A4-CB17-4020-829C-56E6D243313C} format. Without braces.
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log
 
     set guid [twapi::new_guid]
-	
+
 	if {$args eq "-convert"} {
 		# clean the guid up, then append it to the default first two chars needed (For sqlite)
 		set guid [string map { \{ "" \} "" - ""} $guid]
-		
+
 		append formattedGUID X' $guid
 		return $formattedGUID
 	} else {
@@ -832,31 +832,31 @@ proc ea::tools::assembleHeaders {} {
     #
     # COPYRIGHT
     #	(c) 2015 Casey Ackels
-    #   
+    #
     #
     # USAGE
-    #   ea::tools::exportHeaders 
+    #   ea::tools::exportHeaders
     #
     # FUNCTION
     #	Assembles the common column names into header packages.
     #   -cols, Returns the database column names used in 'SELECT <column names>'; the calling proc will need to [join] it with commas
     #   -file_hdr, Returns the database columns names, without any prefixs or other formatting. This is inserted into the first line of the exported file.
     #   -vals, Used in conjunction with -cols, this is used to grab the data out of the database which is mapped to each column.
-    #   
-    #     
+    #
+    #
     # EXAMPLE
     #   set headers [ea::tools::assembleHeaders]
-    #   set cols [lindex $headers 0] 
+    #   set cols [lindex $headers 0]
     #
     # NOTES
-    #   
-    #  
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log headerParent
-       
+
     foreach cons $headerParent(headerList,consignee) {
         # Creating the list of columns to query
         lappend cols "Addresses.$cons as $cons"
@@ -869,7 +869,7 @@ proc ea::tools::assembleHeaders {} {
     foreach shiporder $headerParent(headerList,shippingorder) {
         lappend hdr $shiporder
         lappend cols "ShippingOrders.$shiporder as $shiporder"
-        
+
         if {[string tolower $shiporder] eq "shipvia"} {
             # ShipVia and ShipViaCode are both required in the columns sent to the db. But we only want one "ShipViaCode" in the values.
             set shiporder ShipViaCode
@@ -881,7 +881,7 @@ proc ea::tools::assembleHeaders {} {
     }
 
     set cols [string map -nocase {{ShippingOrders.Versions as Versions} {Versions.VersionName as Versions}} $cols]
-    
+
     return [list $cols $hdr $vals]
 } ;# ea::tools::assembleHeaders
 
@@ -891,7 +891,7 @@ proc ea::tools::listDiff {list1 list2} {
     global log
     ${log}::debug List1: $list1
     ${log}::debug List2: $list2
-    
+
     return [lmap elem $list1 { expr {$elem in $list2 ? [continue] : $elem} }]
 }
 
@@ -913,7 +913,7 @@ proc eAssist_Global::launchFilters {} {
     #	N/A
     #
     # PARENTS
-    #	
+    #
     #
     # NOTES
     #
@@ -933,7 +933,7 @@ proc eAssist_Global::launchFilters {} {
 								  southwest sw \
 								  ]
 
-	
+
 	set filter(secondaryUnits) [list apartment apt \
 							   basement bsmt \
 							   building bldg \
@@ -951,7 +951,7 @@ proc eAssist_Global::launchFilters {} {
 							   suite ste \
 							   trailer trlr \
 							   upper uppr]
-	
+
 	set filter(StateList) [list alabama al \
 					   alaska ak \
 					   arizona az \

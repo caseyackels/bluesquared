@@ -60,7 +60,6 @@ proc filterKeys {args} {
     return $returnValue
 } ;# filterKeys
 
-
 proc controlFile {args} {
     #****f* controlFile/Shipping_Code
     # AUTHOR
@@ -161,7 +160,6 @@ proc controlFile {args} {
     }
 } ;# End of controlFile
 
-
 proc writeText {labels quantity total_boxes} {
     ## ATTENTION: The Open/Close commands are in proc [controlFile]
     global log files GS_textVar tplLabel tmp labelText
@@ -211,7 +209,6 @@ proc writeText {labels quantity total_boxes} {
 
 	${log}::debug writeText: textValues: $textValues
 } ;# End of writeText
-
 
 proc insertInListbox {args} {
     # Insert the numbers into the listbox
@@ -309,7 +306,6 @@ proc addListboxNums {{reset 0}} {
             }
     }
 } ;# addListboxNums
-
 
 proc createList {args} {
     global log GS_textVar tplLabel blWid job
@@ -454,7 +450,6 @@ proc doMath {totalQuantity maxPerBox} {
     return "$totalFullBoxs $partialBoxQTY"
 } ;# doMath
 
-
 proc extractFromList {list} {
     # Cycle through the list and extract 'like' numbers. Put all non-'like' numbers in its own variable
     # Example: extractFromList {1 2 2 3 4 5 5 5 6 7 8 9 9 9}
@@ -476,7 +471,6 @@ proc extractFromList {list} {
     }
     linsert $GI_groups 0 $GI_uniques
 } ; #extractFromList
-
 
 proc displayListHelper {fullboxes partialboxes total_boxes {reset 0}} {
     # Insert values into final listbox/text widgets
@@ -835,7 +829,6 @@ proc openHistory {} {
     #puts "openHistory: Ending"
 } ;#openHistory
 
-
 proc readHistory {args} {
     #****f* openHistory/Shipping_Code
     # AUTHOR
@@ -966,9 +959,7 @@ proc addMaster {destQty batch shipvia} {
 
     ;# Display the updated amount of entries that we have
     Shipping_Code::createList
-
 } ;# addMaster
-
 
 proc clearList {} {
     #****f* clearList/Shipping_Code
@@ -1005,7 +996,7 @@ proc clearList {} {
 
     Shipping_Code::addListboxNums 1 ;# Reset Counter
     Shipping_Code::displayListHelper "" "" "" 1 ;# Reset Counter
-}
+} ;# clearList
 
 } ;# End of Shipping_Code namespace
 
@@ -1129,7 +1120,7 @@ proc Shipping_Code::writeShipTo {wid_entry3 wid_txt} {
 
     exec $mySettings(path,bartender) "/AF=\\\\fileprint\\Labels\\Templates\\Blank Ship To\\BLANK SHIP TO 3x5.btw" /P /CLOSE /MIN=TASKBAR
     ${log}::debug $mySettings(path,bartender) "/AF=\\\\fileprint\\Labels\\Templates\\Blank Ship To\\BLANK SHIP TO 3x5.btw" /P /CLOSE /MIN=TASKBAR
-}
+} ;# Shipping_Code::writeShipTo
 
 proc ea::code::bl::resetLabelText {} {
     global log labelText
@@ -1143,37 +1134,39 @@ proc ea::code::bl::resetBoxLabels {btn shipToWid shipListWid} {
     # reset all widgets and box variables
     global log job blWid GS_textVar tplLabel files
 
-    ${log}::debug Reset Job Array
+    ${log}::notice Reset Job Array
     foreach item [array names job] {
         set job($item) ""
     }
 
-    ${log}::debug Reset tplLabel array
+    ${log}::notice Reset tplLabel array
     foreach item [array names tplLabel] {
         set tplLabel($item) ""
     }
 
-    ${log}::debug Box Labels: Reset GS_textVar array
+    ${log}::notice Box Labels: Reset GS_textVar array
     set GS_textVar(maxBoxQty) ""
     set GS_textVar(destQty) ""
     set GS_textVar(batch) ""
     set GS_textVar(shipvia) ""
 
-    ${log}::debug Box Labels: Reset Version dropdown
+    ${log}::notice Box Labels: Reset Version dropdown
     $blWid(f0BL).cbox1 configure -values ""
     $blWid(f0BL).cbox1 set ""
 
-    ${log}::debug Box Labels: Reset Row Data
+    ${log}::notice Box Labels: Reset Row Data
     ea::code::bl::resetLabelText
 
-    ${log}::debug Box Labels: Clear Shipment List Widget
+    ${log}::notice Box Labels: Clear Shipment List Widget
     $shipListWid delete 0 end
 
-    ${log}::debug Box Labels: Enable Widgets
-    # Make sure widgets are enabled
+    ${log}::notice Box Labels: Enable Widgets, except version dropdown widget
+    # Make sure widgets are enabled, ignoring the version dropdown widget
     foreach item [winfo children $blWid(f0BL)] {
-        ${log}::debug Enable Widget: $item
-        $item configure -state normal
+        if {![string match *cbox* $item]} {
+            ${log}::debug Enable Widget: $item
+            $item configure -state normal
+        }
     }
 
     foreach item [winfo children $blWid(f1BL)] {
@@ -1184,7 +1177,7 @@ proc ea::code::bl::resetBoxLabels {btn shipToWid shipListWid} {
     # Enable entry widgets
     $blWid(f).entry1 configure -state normal
         focus $blWid(f).entry1
-    $blWid(f).entry2 configure -state normal
+    #$blWid(f).entry2 configure -state normal
 
     ${log}::debug ShipTo: Clear ShipOrder ID dropdown
     $blWid(tab2f1).cbox1 configure -values ""
@@ -1209,7 +1202,7 @@ proc ea::code::bl::resetBoxLabels {btn shipToWid shipListWid} {
         flush $files(ShipTo)
         chan close $files(ShipTo)
     }
-}
+} ;# ea::code::bl::resetBoxLabels
 
 proc ea::code::bl::trackTotalQuantities {} {
     global log job blWid
@@ -1227,7 +1220,7 @@ proc ea::code::bl::trackTotalQuantities {} {
         ${log}::debug Ship Qty: $shipqty
         set job(bl,TotalQuantity) $shipqty
     }
-}
+} ;# ea::code::bl::trackTotalQuantities
 
 proc ea::code::bl::clearEntryWidgets {wid lines} {
     global log blWid
@@ -1243,4 +1236,33 @@ proc ea::code::bl::clearEntryWidgets {wid lines} {
             }
         }
     }
-}
+} ;# ea::code::bl::clearEntryWidgets
+
+proc ea::code::bl::cleanVersionNames {versionName} {
+    global log
+
+    set idx [lsearch -exact $versionName .CUSTOM.]
+
+    if {$idx ne -1} {
+        set var [string trim [lreplace $versionName $idx $idx]]
+        } else {
+            set var [string trim $versionName]
+        }
+    return $var
+} ;# ea::code::bl::cleanVersionNames
+
+proc ea::code::bl::transformToVar {labelRowText} {
+    # See file: db_initvars.tcl / ea::db::init_mod
+    global log job date
+
+    # Currents
+    set date(CurrentMonth) [clock format [clock seconds] -format %B]
+    set date(CurrentYear) [clock format [clock seconds] -format %Y]
+
+    # Nexts
+    set date(NextMonth) [clock format [clock add [clock seconds] 1 month] -format %B]
+    set date(NextYear) [clock format [clock add [clock seconds] 1 year] -format %Y]
+
+    set varMapping {#JobName $job(Name) #TitleName $job(Title) #CustomerName $job(CustName) #CurrentMonth $date(CurrentMonth) #CurrentYear $date(CurrentYear) #NextMonth $date(NextMonth) #NextYear $date(NextYear)}
+    return [subst [string map $varMapping $labelRowText]]
+} ;# ea::code::bl::transformToVar

@@ -19,7 +19,7 @@ namespace eval msg {}
 
 proc Error_Message::detectError {windowPath} {
     global gui
-    
+
     switch -- $windowPath {
         $gui(S_brassFile) {
                         if {$gui(S_brassFile) eq "Please select a file"} { errorMsg brassGUI_1
@@ -32,10 +32,11 @@ proc Error_Message::detectError {windowPath} {
 
 
 proc Error_Message::errorMsg {code args} {
-    
+    global log job
+
     set defaultTitle [mc "Missing Information"]
     set dupeTitle [mc "Duplicate Information"]
-    
+
     switch -- $code {
         jobNumber1      {set message [mc "Please specify a job number."]
                             set message2 [mc "Error Location %s" $code]
@@ -144,19 +145,24 @@ proc Error_Message::errorMsg {code args} {
                             set title [mc "Information"]
                             set icon info
                         }
+        BL008           {set message [mc "This job has templates.\nUse the 'Versions' prefixed with CUSTOM.\nTotal Versions: %s" [llength $job(Versions)]]
+                            set message2 [mc "Location: %s" $code]
+                            set title [mc "Information"]
+                            set icon info
+                        }
         default         {set message [mc "Unknown Error Message"]
                             set message2 [mc "Received Message: %s" $code]
                             set title $defaultTitle
                             set icon error}
     }
-    
+
     tk_messageBox \
         -parent . \
         -default ok \
         -icon $icon \
         -title $title \
         -message "$message\n\n$message2"
-    
+
 } ;# end of errorMsg
 
 
@@ -178,7 +184,7 @@ proc msg::initMessages {} {
     #	N/A
     #
     # PARENTS
-    #	
+    #
     #
     # NOTES
     #
@@ -187,12 +193,12 @@ proc msg::initMessages {} {
     #***
     global log msgs
     #${log}::debug --START-- [info level 1]
-    
+
     # Initialize
     set msgs [dict create]
-    
-    dict set $msgs 
-    
-	
+
+    dict set $msgs
+
+
     #${log}::debug --END-- [info level 1]
 } ;# msg::initMessages

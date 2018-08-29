@@ -11,53 +11,56 @@ proc ea::db::init_vars {} {
     #
     # COPYRIGHT
     #	(c) 2015 Casey Ackels
-    #   
+    #
     #
     # USAGE
-    #   ea::db::init_vars  
+    #   ea::db::init_vars
     #
     # FUNCTION
     #	Initializes program wide variables on startup
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # EXAMPLE
-    #   ea::db::init_vars 
+    #   ea::db::init_vars
     #
     # NOTES
-    #   
-    #  
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log program sec intlSetup
-    
+
     ${log}::debug Initilizing list of modules
     set program(moduleNames) [eAssist_db::getDBModules]
-   
+
     ${log}::debug Initializing Array: masterAddr()
     ea::db::init_masterAddr
-    
+
     ${log}::debug Initilizing Array: disttype()
     ea::db::reset_disttype
-    
+
     ${log}::debug Initilizing Array: sec()
     ea::db::init_secArray
-    
+
     ${log}::debug Initilizing Array: intlSetup()
     ea::db::reset_intlSetup
-    
+
+    ${log}::debug Initilizing Array: mod()
+    ea::db::init_mod
+
     # Populate individual vars
     ${log}::debug Initilizing list of security groups
     set sec(groupNames) [ea::db::getGroupNames]
     set sec(UserLogins) [ea::db::getUserList -login]
-    
+
     set program(BM,groups) [list Filepaths Reports Exports Misc]
     set program(SU,groups) [list Filepaths]
     set program(BL,groups) [list Filepaths]
@@ -78,37 +81,37 @@ proc ea::db::init_masterAddr {} {
     #
     # COPYRIGHT
     #	(c) 2015 Casey Ackels
-    #   
+    #
     #
     # USAGE
-    #   ea::db::init_masterAddr  
+    #   ea::db::init_masterAddr
     #
     # FUNCTION
     #	Initializes the masterAddr array and sets the defaults. Will additionally populate the company() array.
     #	The company() array is currently used as the 'plant' address, the masterAddr() array serves as showing just the active record in Table: MasterAddresses
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
     #   'eAssist_initVariables file: startup.tcl
-    #   
+    #
     # EXAMPLE
-    #   ea::db::init_masterAddr 
+    #   ea::db::init_masterAddr
     #
     # NOTES
-    #   
-    #  
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log masterAddr company
 
     # Init the array
     ea::db::reset_masterAddr
-    
+
     # Query db to see if we have a plant setup. If we don't, the defaults that we set above will be used.
     db eval "SELECT MasterAddr_ID, MasterAddr_Company, MasterAddr_Phone, MasterAddr_Plant, MasterAddr_Attn, MasterAddr_Addr1, MasterAddr_Addr2, MasterAddr_Addr3, MasterAddr_City, MasterAddr_StateAbbr, MasterAddr_Zip, MasterAddr_CtryCode, MasterAddr_Active, MasterAddr_Internal
                 FROM MasterAddresses
@@ -130,10 +133,10 @@ proc ea::db::init_masterAddr {} {
                     set masterAddr(Active) $MasterAddr_Active
                     set masterAddr(Internal) $MasterAddr_Internal
                 }
-                
+
     # Remove old config file settings
     array unset company
-    
+
     # Init Array: company()
     ${log}::debug Initializing Array: company()
     set company(address1) $masterAddr(Addr1)
@@ -153,7 +156,7 @@ proc ea::db::reset_masterAddr {} {
     global masterAddr
     # Set the masterAddr to empty values
     if {[info exists masterAddr]} {unset masterAddr}
-        
+
     array set masterAddr {
 			ID          ""
 			Company     ""
@@ -174,9 +177,9 @@ proc ea::db::reset_masterAddr {} {
 
 proc ea::db::reset_disttype {} {
     global disttype
-    
+
     if {[info exists disttype]} {unset disttype}
-        
+
     array set disttype [list rpt,summarize 0 \
                  rpt,singleEntry 0 \
                  expt,singleEntry 0 \
@@ -192,9 +195,9 @@ proc ea::db::reset_disttype {} {
 
 proc ea::db::reset_intlSetup {} {
     global intlSetup
-    
+
     if {[info exists intlSetup]} {unset intlSetup}
-        
+
     set intlSetup(UOMList) [db eval "SELECT UOM FROM UOM"]
     set intlSetup(TERMSList) [db eval "SELECT TermsAbbr FROM IntlShipTerms"]
     set intlSetup(PAYERList) ""
@@ -212,24 +215,30 @@ proc ea::db::init_secArray {} {
     #
     # COPYRIGHT
     #	(c) 2015 Casey Ackels
-    #   
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     #***
     global log sec
 
     array set sec { groupNames "" \
                     UserLogins ""}
 
-    
+
 } ;# ea::db::init_secArray
 
 proc ea::db::init_intlSetupArray {} {
     global log intlSetup
-    
+
     #set intlSetup(UOMList) [db eval "SELECT UOM from UOM"]
     #set intlSetup(TERMSList) [db eval "SELECT "]
     #set intlSetup(PAYERList)
     #set intlSetup(LICENSEList)
 }
+
+proc  ea::db::init_mod {} {
+    # See file: boxlabels_code.tcl / ea::code::bl::transformToVar
+    global log mod
+    set mod(Box_Labels,uservars) [list #JobName #TitleName #CustomerName #CurrentMonth #NextMonth #CurrentYear #NextYear]
+} ;# ea::tools::user_vars

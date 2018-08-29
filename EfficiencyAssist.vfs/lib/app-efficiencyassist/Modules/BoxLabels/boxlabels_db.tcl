@@ -3,158 +3,151 @@
 # File Initial Date: 09 10,2014
 # Last revised: 2/27/18
 
-proc ea::db::bl::getTplData {tpl btn1 shipToWid shipListWid} {
-    global log GS_textVar tplLabel job blWid labelText
+# proc ea::db::bl::getTplData {tpl btn1 shipToWid shipListWid} {
+#     global log GS_textVar tplLabel job blWid labelText
+#
+#     set tpl [string trim $tpl]
+#     ${log}::debug template id: $tpl
+#
+#     # Retrieve the data and populate the tplLabel array
+#     if {$tpl != ""} {
+#         # Make sure that the number entered, matches the database.
+#         set idExist [db eval "SELECT tplID from LabelTPL WHERE tplID = $tpl"]
+#         if {$idExist == ""} {
+#             ${log}::notice Template: $tpl, doesn't match anything in the database. Clearing variables, and widgets...
+#             Error_Message::errorMsg BL001
+#
+#             ea::code::bl::resetBoxLabels $btn1 $shipToWid $shipListWid
+#
+#             return
+#         }
+#
+#         set tplLabel(ID) $tpl
+#         # id exists, retrieving data
+#         db eval "SELECT PubTitleID, LabelTpl.LabelProfileID as labelProfileID, tplLabelName, tplLabelPath, tplNotePub, tplFixedBoxQty, tplFixedLabelInfo, tplSerialize, LabelProfiles.labelSizeID as labelSizeID  FROM LabelTPL
+#                     INNER JOIN LabelProfiles ON LabelProfiles.LabelProfileID = LabelTPL.LabelProfileID
+#                     WHERE tplID = $tplLabel(ID)" {
+#             set job(Title,id) $PubTitleID
+#             set tplLabel(LabelProfileID) $labelProfileID
+#             set tplLabel(LabelSizeID) $labelSizeID
+#             set tplLabel(Name) $tplLabelName
+#             set tplLabel(LabelPath) $tplLabelPath
+#             set tplLabel(NotePub) $tplNotePub
+#             set tplLabel(FixedBoxQty) $tplFixedBoxQty
+#             set tplLabel(FixedLabelInfo) $tplFixedLabelInfo
+#             set tplLabel(SerializeLabel) $tplSerialize
+#         }
+#
+#         if {$tplLabel(LabelProfileID) == 0 || $tplLabel(LabelProfileID) == 16} {
+#             ${log}::debug We're using a label that uses a run-list, or all text is on the label. Check modification date/time on runlist to see if it has been updated (less than a month)
+#
+#             # Disable all widgets
+#             foreach item [winfo children $blWid(f0BL)] {
+#                 if {[string match *entry* $item] || [string match *cbox* $item] == 1} {
+#                     ${log}::debug Disable Widget: $item
+#                     $item configure -state disabled
+#                 }
+#             }
+#
+#             if {$tplLabel(LabelProfileID) == 0} {
+#                 # only disable if we are using a run-list
+#                 foreach item [winfo children $blWid(f1BL)] {
+#                     if {[string match *txt* $item] != 1} {
+#                         ${log}::debug Disable Widget: $item
+#                         $item configure -state disabled
+#                     }
+#                 }
+#             }
+#
+#         }
+#     }
+#
+#     # Get Profile Info
+#     if {$tplLabel(LabelProfileID) != 0} {
+#         # If the value is 0, that means we do not have a set profile. The label file contains all data, we are just printing the labels.
+#         set tplLabel(LabelProfileDesc) [db eval "SELECT LabelProfileDesc FROM LabelProfiles WHERE LabelProfileID = $tplLabel(LabelProfileID)"]
+#
+#     } else {
+#         set tplLabel(LabelProfileDesc) default
+#     }
+#
+#     # Get Label size info
+#     db eval "SELECT labelSizeDesc, labelPrinter FROM LabelSizes WHERE labelSizeID = $tplLabel(LabelSizeID)" {
+#         set tplLabel(Size) $labelSizeDesc
+#         set tplLabel(LabelPrinter) $labelPrinter
+#     }
+#
+#
+#     if {$tplLabel(FixedBoxQty) != ""} {
+#         set GS_textVar(maxBoxQty) $tplLabel(FixedBoxQty)
+#     }
+#
+#     # Populate the widgets with the label data
+#     ea::db::bl::getLabelText
+# } ;# ea::db::bl::getTplData
 
-    set tpl [string trim $tpl]
-    ${log}::debug template id: $tpl
+# proc ea::db::bl::getLabelText {} {
+#     global log tplLabel GS_textVar blWid
+#     # Find out if we have label text, and if we do populate the text widgets with the data.
+#
+#     if {$tplLabel(LabelProfileID) != 0} {
+#         # No need to issue this query if the LabelProfileID is 0, since that is reserved for a no-user interaction label
+#         # Retrieve the versions
+#             db eval "SELECT labelVersionID, LabelVersionDesc FROM LabelVersions WHERE tplID = $tplLabel(ID)" {
+#                 lappend tplLabel(LabelVersionID) $labelVersionID
+#                 lappend tplLabel(LabelVersionDesc) $LabelVersionDesc
+#             }
+#
+#         # Do we need to retrieve label text?
+#         if {$tplLabel(FixedLabelInfo) != 0 && $tplLabel(LabelVersionID) != 0} {
+#
+#             # Get first version
+#             db eval "SELECT min(ROWID), labelVersionID, LabelVersionDesc FROM LabelVersions WHERE tplID = $tplLabel(ID)" {
+#                 set tplLabel(LabelVersionID,current) $labelVersionID
+#                 set tplLabel(LabelVersionDesc,current) $LabelVersionDesc
+#             }
+#
+#             # Set the active version, and disable the widget
+#             $blWid(f0BL).cbox1 configure -values $tplLabel(LabelVersionDesc)
+#             $blWid(f0BL).cbox1 set $tplLabel(LabelVersionDesc,current)
+#             #$blWid(f0BL).cbox1 state readonly
+#         }
+#         ea::db::bl::populateWidget
+#     } else {
+#         # if the profile is empty, we want to issue a notice to the user that no data will populate the screen
+#         Error_Message::errorMsg BL007
+#     }
+# } ;# ea::db::bl::getLabelText
 
-    # Retrieve the data and populate the tplLabel array
-    if {$tpl != ""} {
-        # Make sure that the number entered, matches the database.
-        set idExist [db eval "SELECT tplID from LabelTPL WHERE tplID = $tpl"]
-        if {$idExist == ""} {
-            ${log}::notice Template: $tpl, doesn't match anything in the database. Clearing variables, and widgets...
-            Error_Message::errorMsg BL001
-
-            ea::code::bl::resetBoxLabels $btn1 $shipToWid $shipListWid
-
-            return
-        }
-
-        set tplLabel(ID) $tpl
-        # id exists, retrieving data
-        db eval "SELECT PubTitleID, LabelTpl.LabelProfileID as labelProfileID, tplLabelName, tplLabelPath, tplNotePub, tplFixedBoxQty, tplFixedLabelInfo, tplSerialize, LabelProfiles.labelSizeID as labelSizeID  FROM LabelTPL
-                    INNER JOIN LabelProfiles ON LabelProfiles.LabelProfileID = LabelTPL.LabelProfileID
-                    WHERE tplID = $tplLabel(ID)" {
-            set job(Title,id) $PubTitleID
-            set tplLabel(LabelProfileID) $labelProfileID
-            set tplLabel(LabelSizeID) $labelSizeID
-            set tplLabel(Name) $tplLabelName
-            set tplLabel(LabelPath) $tplLabelPath
-            set tplLabel(NotePub) $tplNotePub
-            set tplLabel(FixedBoxQty) $tplFixedBoxQty
-            set tplLabel(FixedLabelInfo) $tplFixedLabelInfo
-            set tplLabel(SerializeLabel) $tplSerialize
-        }
-
-        if {$tplLabel(LabelProfileID) == 0 || $tplLabel(LabelProfileID) == 16} {
-            ${log}::debug We're using a label that uses a run-list, or all text is on the label. Check modification date/time on runlist to see if it has been updated (less than a month)
-
-            # Disable all widgets
-            foreach item [winfo children $blWid(f0BL)] {
-                if {[string match *entry* $item] || [string match *cbox* $item] == 1} {
-                    ${log}::debug Disable Widget: $item
-                    $item configure -state disabled
-                }
-            }
-
-            if {$tplLabel(LabelProfileID) == 0} {
-                # only disable if we are using a run-list
-                foreach item [winfo children $blWid(f1BL)] {
-                    if {[string match *txt* $item] != 1} {
-                        ${log}::debug Disable Widget: $item
-                        $item configure -state disabled
-                    }
-                }
-            }
-
-        }
-
-        # # We entered a correct template number, but a title was never assigned.
-        # if {$job(Title,id) eq ""} {
-        #     ${log}::critical Template $tpl exists, but a Title was never assigned
-        #     set tplLabel(LabelPath) "" ;# Clear this out so the end-user doesn't keep going
-        #     return
-        # }
-    }
-
-    # Get Profile Info
-    if {$tplLabel(LabelProfileID) != 0} {
-        # If the value is 0, that means we do not have a set profile. The label file contains all data, we are just printing the labels.
-        set tplLabel(LabelProfileDesc) [db eval "SELECT LabelProfileDesc FROM LabelProfiles WHERE LabelProfileID = $tplLabel(LabelProfileID)"]
-
-    } else {
-        set tplLabel(LabelProfileDesc) default
-    }
-
-    # Get Label size info
-    db eval "SELECT labelSizeDesc, labelPrinter FROM LabelSizes WHERE labelSizeID = $tplLabel(LabelSizeID)" {
-        set tplLabel(Size) $labelSizeDesc
-        set tplLabel(LabelPrinter) $labelPrinter
-    }
-
-
-    if {$tplLabel(FixedBoxQty) != ""} {
-        set GS_textVar(maxBoxQty) $tplLabel(FixedBoxQty)
-    }
-
-    # Populate the widgets with the label data
-    ea::db::bl::getLabelText
-} ;# ea::db::bl::getTplData
-
-proc ea::db::bl::getLabelText {} {
-    global log tplLabel GS_textVar blWid
-    # Find out if we have label text, and if we do populate the text widgets with the data.
-
-    if {$tplLabel(LabelProfileID) != 0} {
-        # No need to issue this query if the LabelProfileID is 0, since that is reserved for a no-user interaction label
-        # Retrieve the versions
-            db eval "SELECT labelVersionID, LabelVersionDesc FROM LabelVersions WHERE tplID = $tplLabel(ID)" {
-                lappend tplLabel(LabelVersionID) $labelVersionID
-                lappend tplLabel(LabelVersionDesc) $LabelVersionDesc
-            }
-
-        # Do we need to retrieve label text?
-        if {$tplLabel(FixedLabelInfo) != 0 && $tplLabel(LabelVersionID) != 0} {
-
-            # Get first version
-            db eval "SELECT min(ROWID), labelVersionID, LabelVersionDesc FROM LabelVersions WHERE tplID = $tplLabel(ID)" {
-                set tplLabel(LabelVersionID,current) $labelVersionID
-                set tplLabel(LabelVersionDesc,current) $LabelVersionDesc
-            }
-
-            # Set the active version, and disable the widget
-            $blWid(f0BL).cbox1 configure -values $tplLabel(LabelVersionDesc)
-            $blWid(f0BL).cbox1 set $tplLabel(LabelVersionDesc,current)
-            #$blWid(f0BL).cbox1 state readonly
-        }
-        ea::db::bl::populateWidget
-    } else {
-        # if the profile is empty, we want to issue a notice to the user that no data will populate the screen
-        Error_Message::errorMsg BL007
-    }
-} ;# ea::db::bl::getLabelText
-
-proc ea::db::bl::populateWidget {} {
-    global log tplLabel GS_textVar labelText blWid
-
-    # Clear out the widgets
-    foreach item [array names labelText] {
-        set labelText($item) ""
-    }
-
-    # Populate the widgets with the first version
-    db eval "SELECT labelRowNum, labelRowText, userEditable, LabelVersions.LabelVersionDesc FROM LabelData
-                INNER JOIN LabelVersions ON LabelVersions.labelVersionID = LabelData.labelVersionID
-                WHERE LabelVersions.LabelVersionDesc = '$tplLabel(LabelVersionDesc,current)' ORDER BY labelRowNum ASC" {
-                    # Add a zero if needed (all digits under 9 will need it)
-                    if {[string length $labelRowNum] == 1} {
-                      set labelRowNum 0$labelRowNum
-                    }
-
-                    set labelText(Row$labelRowNum) [string toupper $labelRowText]
-
-                    set labelRowNum_trimmed [string trim $labelRowNum 0]
-                    if {$userEditable != 1} {
-                        # Do not let the end user edit this field.
-                        $blWid(f0BL).entry$labelRowNum_trimmed configure -state disable
-                    } else {
-                        # set the widget to edit
-                        $blWid(f0BL).entry$labelRowNum_trimmed configure -state normal
-                    }
-                }
-} ;# ea::db::bl::populateWidget
+# proc ea::db::bl::populateWidget {} {
+#     global log tplLabel GS_textVar labelText blWid
+#
+#     # Clear out the widgets
+#     foreach item [array names labelText] {
+#         set labelText($item) ""
+#     }
+#
+#     # Populate the widgets with the first version
+#     db eval "SELECT labelRowNum, labelRowText, userEditable, LabelVersions.LabelVersionDesc FROM LabelData
+#                 INNER JOIN LabelVersions ON LabelVersions.labelVersionID = LabelData.labelVersionID
+#                 WHERE LabelVersions.LabelVersionDesc = '$tplLabel(LabelVersionDesc,current)' ORDER BY labelRowNum ASC" {
+#                     # Add a zero if needed (all digits under 9 will need it)
+#                     if {[string length $labelRowNum] == 1} {
+#                       set labelRowNum 0$labelRowNum
+#                     }
+#
+#                     set labelText(Row$labelRowNum) [string toupper $labelRowText]
+#
+#                     set labelRowNum_trimmed [string trim $labelRowNum 0]
+#                     if {$userEditable != 1} {
+#                         # Do not let the end user edit this field.
+#                         $blWid(f0BL).entry$labelRowNum_trimmed configure -state disable
+#                     } else {
+#                         # set the widget to edit
+#                         $blWid(f0BL).entry$labelRowNum_trimmed configure -state normal
+#                     }
+#                 }
+# } ;# ea::db::bl::populateWidget
 
 ###
 ### Ship to labels
@@ -236,14 +229,6 @@ proc ea::db::bl::getShipToData {btn wid_text} {
 
 proc ea::db::bl::getJobData {btn1 wid shipToWid shipListWid} {
     global log job labelText blWid tplLabel
-    # First version
-    # Populate customer info, label info, ship counts and Ship Order IDs.
-    # if {$job(Number) eq "" && $job(Template) eq ""} {return}
-    # if {$job(Number) eq "" && $job(Template) ne ""} {
-    #     ${log}::notice We are looking for template: $job(Template) but a job number does not exist.
-    #     Error_Message::errorMsg BL005
-    #     return
-    # }
 
     if {[string length $job(Number)] < 6} {
         ${log}::notice The job number is less than 5 numbers. Aborting.
@@ -257,11 +242,8 @@ proc ea::db::bl::getJobData {btn1 wid shipToWid shipListWid} {
 
     # Disable entry widgets
     $blWid(f).entry1 state disabled
-    #$blWid(f).entry2 state disabled
 
     set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
-
-
     # Job Data
     set stmt [$monarch_db prepare "SELECT TOP 1 CUSTOMERNAME, TITLENAME, ISSUENAME
                                         FROM EA.dbo.Planner_Shipping_View
@@ -271,14 +253,11 @@ proc ea::db::bl::getJobData {btn1 wid shipToWid shipListWid} {
 
     while {[$res nextlist val]} {
         set job(CustName) [lindex $val 0]
-        set job(Title) [lindex $val 1]
-        set job(Name) [lindex $val 2]
+        set job(Title) [string toupper [lindex $val 1]]
+        set job(Name) [string toupper [lindex $val 2]]
     }
 
     $stmt close
-
-
-
 
     # Retrieve ship order id's
     # Reset ShipToOrderIDs so we aren't just adding to the list
@@ -306,99 +285,123 @@ proc ea::db::bl::getJobData {btn1 wid shipToWid shipListWid} {
 
     set job(Description) "$job(Title) | $job(Name)"
 
-    # Check for Templates
-    ea::db::bl::getAssociatedTemplates
-
-    if {$tplLabel(ID) ne "" } {
-        ${log}::debug Retrieving template information
-        #ea::db::bl::getTplData $job(Template) $btn1 $shipToWid $shipListWid
-
-    } else {
-        ea::db::bl::getAllVersions $wid 1
-        ea::db::bl::getShipCounts
-
-        set labelText(Row01) [string toupper $job(Title)]
-        set labelText(Row02) [string toupper $job(Name)]
-    }
+    ea::db::bl::getAllVersions $wid
+    ea::db::bl::getShipCounts
 } ;# ea::db::bl::getJobData
 
-proc ea::db::bl::getAllVersions {wid args} {
-    global log job labelText
+proc ea::db::bl::getAllVersions {wid} {
+    global log job labelText tplLabel
     # Get list of versions
 
     # Exit out if no job number
     if {$job(Number) eq ""} {return}
-
-    # Handle versions differently if we're using a template
-    if {$job(Template) ne ""} {
-      ${log}::debug getAllVersions: We are using a template, not displaying Versions from Monarch
-      ea::db::bl::getTplVersions
-      return
-    }
-
     # Ensure var is empty
     set job(Versions) ""
-    set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
 
-    # Retrieve versions that have boxes
-    set stmt [$monarch_db prepare "SELECT DISTINCT ALIASNAME
-                                        FROM EA.dbo.Planner_Shipping_View
-                                        WHERE JOBNAME='$job(Number)'
-                                        AND (DISTRIBNAME LIKE '%customer%' OR DISTRIBNAME LIKE '%freight%' OR DISTRIBNAME LIKE '%package%')
-                                        AND PACKAGENAME LIKE '%ctn%'
-                                        ORDER BY ALIASNAME"]
-    set res [$stmt execute]
+    # Add the template versions first if we have any
+    set tpl_version [ea::db::bl::getAssociatedTemplates]
+    if {$tpl_version ne ""} {
+        ${log}::debug Retrieving templates
+        lappend job(Versions) ".CUSTOM. $tpl_version"
+    } else {
+        set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
 
-    while {[$res nextlist val]} {
-        ${log}::debug Versions with boxes: $val
-        lappend job(Versions) [join [string toupper $val]]
+        # Retrieve versions that have boxes
+        set stmt [$monarch_db prepare "SELECT DISTINCT ALIASNAME
+                                            FROM EA.dbo.Planner_Shipping_View
+                                            WHERE JOBNAME='$job(Number)'
+                                            AND (DISTRIBNAME LIKE '%customer%' OR DISTRIBNAME LIKE '%freight%' OR DISTRIBNAME LIKE '%package%')
+                                            AND PACKAGENAME LIKE '%ctn%'
+                                            ORDER BY ALIASNAME"]
+        set res [$stmt execute]
+
+        while {[$res nextlist val]} {
+            ${log}::debug Versions with boxes: $val
+            lappend job(Versions) [join [string toupper $val]]
+        }
+        ${log}::debug All Versions: $job(Versions)
+
+        $stmt close
+
+        # See if we have one or multiple versions on the job. IF we only have one version, do not populate Row03
+        set stmt [$monarch_db prepare "SELECT DISTINCT ALIASNAME
+                                            FROM EA.dbo.Planner_Shipping_View
+                                            WHERE JOBNAME='$job(Number)'"]
+
+        set res [$stmt execute]
+
+        set job(TotalVersions) ""
+        while {[$res nextlist val]} {
+            ${log}::debug Total Versions: $val
+            lappend job(TotalVersions) [string toupper [join $val]]
+        }
+
+        db2 close
     }
-
-    $stmt close
-
-    # See if we have one or multiple versions on the job. IF we only have one version, do not populate Row03
-    set stmt [$monarch_db prepare "SELECT DISTINCT ALIASNAME
-                                        FROM EA.dbo.Planner_Shipping_View
-                                        WHERE JOBNAME='$job(Number)'"]
-
-    set res [$stmt execute]
-
-    set job(TotalVersions) ""
-    while {[$res nextlist val]} {
-        ${log}::debug Total Versions: $val
-        lappend job(TotalVersions) [string toupper [join $val]]
-    }
-
-    db2 close
 
     ${log}::debug List of versions: $job(TotalVersions)
 
-    if {$args == 1} {
-        # Populating the dropdown with the versions, and setting the selection to the first result.
-        # This should only be done once.
-        set job(Version) [lindex $job(TotalVersions) 0]
-        $wid configure -values $job(TotalVersions)
-        $wid set $job(Version)
-    }
+    # Populating the dropdown with the versions, and setting the selection to the first result.
+    # This should only be done once.
+    ${log}::debug Populating dropdown with Version: [lindex $job(Versions) 0]
+    set job(Version) [lindex $job(Versions) 0]
+    $wid configure -values $job(Versions)
+    $wid set $job(Version)
 
-    # If we only have one version, don't populate the label text
-    if {[llength $job(TotalVersions)] > 1} {
-        set labelText(Row03) $job(Version)
+    # Populate the widgets / this runs only once
+    # This is the same code as what is in the BINDING for the Versions dropdown
+    set verExists ""
+    if {$job(Template) ne ""} {
+        # If the job(Template) var is empty, that means we didn't find a template. So we'll be using Planner only data.
+        set ver [ea::code::bl::cleanVersionNames $job(Version)]
+        set verExists [db eval "SELECT LabelVersionDesc FROM LabelVersions WHERE tplID = $job(Template) AND LOWER(LabelVersionDesc) = LOWER('$ver')"]
+        unset ver
     }
+        if {$verExists ne ""} {
+            ${log}::debug GUI: We are using a template.
+            ea::code::bl::resetLabelText
+            ea::db::bl::getTplVersions
+        } else {
+            # Version doesn't exists, probably from Planner.....
+            ea::code::bl::resetLabelText
+            ${log}::debug Populate widgets based on Planner data
+            set labelText(Row01) $job(Title)
+            set labelText(Row02) $job(Name)
+            if {[llength $job(TotalVersions)] > 1} {
+                set labelText(Row03) $job(Version)
+                ${log}::debug Change Version to $job(Version)
+            }
+        }
 } ;# ea::db::bl::getAllVersions
 
 proc ea::db::bl::getTplVersions {} {
-  global log job tplLabel blWid labelText
+  global log job blWid labelText GS_textVar
 
-  ${log}::debug getTplVersions: Current Version: [$blWid(f0BL).cbox1 get]
-
+  # Retrieving label text
+  ${log}::debug getTplVersions: Current Version: [ea::code::bl::cleanVersionNames [$blWid(f0BL).cbox1 get]]
+  set ver [ea::code::bl::cleanVersionNames [$blWid(f0BL).cbox1 get]]
   db eval "SELECT labelRowNum, labelRowText FROM LabelData
             JOIN LabelVersions ON LabelData.labelVersionID = LabelVersions.labelVersionID
-            WHERE tplID = '$tplLabel(ID)'
-            AND LabelVersionDesc = '[$blWid(f0BL).cbox1 get]'" {
-              ${log}::debug $labelRowNum, $labelRowText
-              set labelText(Row$labelRowNum) $labelRowText
+            WHERE tplID = $job(Template)
+            AND LOWER(LabelVersionDesc) = LOWER('$ver')" {
+
+              ${log}::debug $labelRowNum, $labelRowText [string toupper [ea::code::bl::transformToVar $labelRowText]]
+              #set labelText($labelRowNum) $labelRowText
+              set labelText($labelRowNum) [string toupper [ea::code::bl::transformToVar $labelRowText]]
             }
+
+    # Retrieving Max Box Qty
+    ${log}::debug Retrieving max box qty ...
+    set maxBoxQty [join [db eval "SELECT LabelVersionMaxBoxQty FROM LabelVersions WHERE tplID = $job(Template) AND LOWER(LabelVersionDesc) = LOWER('$ver')"]]
+    if {$maxBoxQty ne ""} {
+        ${log}::debug Box Quantity is: $maxBoxQty
+        set GS_textVar(maxBoxQty) $maxBoxQty
+    } else {
+        ${log}::debug Nothing returned for the Box Qty.
+    }
+
+    # Let the user know that this job has templates
+    Error_Message::errorMsg BL008
 } ;# ea::db::bl::getTplVersions
 
 proc ea::db::bl::getShipCounts {} {
@@ -430,6 +433,14 @@ proc ea::db::bl::getShipCounts {} {
     $stmt close
     db2 close
 
+    # If we're using a template ...
+    if {$job(Template) ne ""} {
+        ${log}::notice Inserting quantities from Template
+        db eval "SELECT shipQty FROM LabelShipQty WHERE LabelVersionID = (SELECT LabelVersionID FROM LabelVersions WHERE tplID = $job(Template) AND LOWER(LabelVersionDesc) = LOWER('$job(Version)' ) )" {
+            ${log}::debug ShipQty: $shipQty
+            $blWid(f2BL).listbox insert end "{} {} $shipQty"
+        }
+    }
     ea::code::bl::trackTotalQuantities
 } ;# ea::db::bl::getShipCounts
 
@@ -452,8 +463,8 @@ proc ea::db::bl::getAssociatedTemplates {} {
     set titleID [db eval "SELECT tplID FROM LabelTPL WHERE PubTitleID = $job(TitleID)"]
     if {$titleID ne ""} {
         # we have a template, lets populate the widgets
-        set tplLabel(ID) $titleID
-        ${log}::debug We have a template: $tplLabel(ID)
-        return [db eval "SELECT LabelVersionDesc from LabelVersions WHERE tplID = $tplLabel(ID)"]
+        set job(Template) $titleID
+        ${log}::debug We have a template: $job(Template)
+        return [db eval "SELECT LabelVersionDesc from LabelVersions WHERE tplID = $job(Template)"]
     }
 } ;# ea::db::bl::getAssociatedTemplates

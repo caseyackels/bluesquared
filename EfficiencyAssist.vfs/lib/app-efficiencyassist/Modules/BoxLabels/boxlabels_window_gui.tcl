@@ -52,7 +52,7 @@ proc ea::gui::bl::Main {} {
 	grid [ttk::label $blWid(f).text2a -text [mc "Job Title / Name:"]] -column 0 -row 1 -padx 2p -pady 2p -sticky e
 	grid [ttk::label $blWid(f).text2b -textvariable job(Description) ] -column 1 -columnspan 4 -row 1 -padx 2p -pady 2p -sticky w
 
-	grid [ttk::label $blWid(f).text3a -text [mc "Job # / Template #:"]] -column 0 -row 2 -padx 2p -pady 2p -sticky e
+	grid [ttk::label $blWid(f).text3a -text [mc "Job #:"]] -column 0 -row 2 -padx 2p -pady 2p -sticky e
 	grid [ttk::entry $blWid(f).entry1 -textvariable job(Number) -width 20 \
 								-validate key \
 								-validatecommand {Shipping_Code::filterKeys -numeric %S %W %P}] -column 1 -row 2 -padx 2p -pady 2p -sticky ew
@@ -62,22 +62,6 @@ proc ea::gui::bl::Main {} {
 				ea::db::bl::getJobData ".container.f0.btn1" $blWid(f0BL).cbox1 $blWid(tab2f2).txt $blWid(f2BL).listbox
 			}
 		}
-
-
-
-	# grid [ttk::entry $blWid(f).entry2 -textvariable job(Template) -width 5 \
-	# 							-validate key \
-	# 							-validatecommand {Shipping_Code::filterKeys -numeric %S %W %P}] -column 2 -row 2 -padx 2p -pady 2p -sticky ew
-	# 	bind $blWid(f).entry2 <Return> {
-	# 		if {$job(Template) ne "" && $job(Number) eq ""} {
-	# 			${log}::notice We are looking for template: $job(Template) but a job number does not exist.
-	# 			Error_Message::errorMsg BL005
-	# 			return
-	# 		}
-	# 		if {$job(Template) != ""} {
-	# 			ea::db::bl::getJobData ".container.f0.btn1" $blWid(f0BL).cbox1 $blWid(tab2f2).txt $blWid(f2BL).listbox
-	# 		}
-	# 	}
 
 	grid [ttk::button $blWid(f).btn1 -text [mc "Search"] -command {${log}::debug Searching for $job(Number) ; ea::db::bl::getJobData ".container.f0.btn1" $blWid(f0BL).cbox1 $blWid(tab2f2).txt $blWid(f2BL).listbox}] -column 3 -padx 2p -pady 2p -row 2 -sticky w
 
@@ -98,25 +82,39 @@ proc ea::gui::bl::Main {} {
 	# Label Information
 	set blWid(f0BL) [ttk::labelframe $nbk.boxlabels.f0 -text [mc "Label Information"] -padding 5]
 	pack $blWid(f0BL) -fill x -pady 3p -padx 5p
-	#grid columnconfigure $f0BL 1 -weight 2
 
 	grid [ttk::label $blWid(f0BL).cboxText -text [mc "Versions"]] -column 0 -row 0 -pady 15p -padx 5p -sticky ne
-	grid [ttk::combobox $blWid(f0BL).cbox1 -state readonly -postcommand {ea::db::bl::getAllVersions $blWid(f0BL).cbox1}] -column 1 -row 0 -pady 15p -padx 4p -sticky new
+	grid [ttk::combobox $blWid(f0BL).cbox1 -state readonly] -column 1 -row 0 -pady 15p -padx 4p -sticky new
 
 		bind $blWid(f0BL).cbox1 <<ComboboxSelected>> {
-			if {$job(Template) eq ""} {
-				set job(Version) [%W get]
-				if {[llength $job(TotalVersions)] > 1} {
-					set labelText(Row03) $job(Version)
-					${log}::debug Change Version to $job(Version)
+			${log}::debug Selecting an item from the version dropdown
+			set job(Version) [%W get]
+			set GS_textVar(maxBoxQty) "" ;# Clear out the var, just in case we are switching from a template to Planner data.
+				# Check to see if the current selected version is a template version
+				set verExists ""
+				if {$job(Template) ne ""} {
+					# If the job(Template) var is empty, that means we didn't find a template. So we'll be using Planner only data.
+					set ver [ea::code::bl::cleanVersionNames $job(Version)]
+					set verExists [db eval "SELECT LabelVersionDesc FROM LabelVersions WHERE tplID = $job(Template) AND LOWER(LabelVersionDesc) = LOWER('$ver')"]
+					unset ver
 				}
-
-				ea::db::bl::getShipCounts
-				${log}::debug Change Counts
-			} else {
-				${log}::debug GUI: We are using a template. Not displaying Versions from Monarch.
-				ea::db::bl::getTplVersions
-			}
+				if {$verExists ne ""} {
+					${log}::debug We are using a template.
+					ea::code::bl::resetLabelText
+					ea::db::bl::getTplVersions
+				} else {
+					# Version doesn't exists, probably from Planner.....
+					ea::code::bl::resetLabelText
+					${log}::debug No Templates, using data from Planner.
+					set labelText(Row01) $job(Title)
+					set labelText(Row02) $job(Name)
+					if {[llength $job(TotalVersions)] > 1} {
+						set labelText(Row03) $job(Version)
+						${log}::debug Change Version to $job(Version)
+					}
+				}
+			${log}::debug Change Counts
+			ea::db::bl::getShipCounts
 		}
 
 	set col 0
@@ -179,7 +177,7 @@ proc ea::gui::bl::Main {} {
 
 	tablelist::tablelist $blWid(f2BL).listbox -columns {
                                                     3 "..." center
-													0 "Order ID"
+													0 "Order ID" center
                                                     0 "Ship Qty"
 													25 "Distribution Type"
                                                     } \
@@ -195,8 +193,8 @@ proc ea::gui::bl::Main {} {
 
         $blWid(f2BL).listbox columnconfigure 0 -showlinenumbers 1 -name count
 		$blWid(f2BL).listbox columnconfigure 1 -name orderid
-        $blWid(f2BL).listbox columnconfigure 2 -name shipments
-		$blWid(f2BL).listbox columnconfigure 3 -name disttype
+        $blWid(f2BL).listbox columnconfigure 2 -name shipments -labelalign center
+		$blWid(f2BL).listbox columnconfigure 3 -name disttype -labelalign center
 
     ttk::scrollbar $blWid(f2BL).scrolly -orient v -command [list $blWid(f2BL).listbox yview]
 
@@ -242,9 +240,6 @@ proc ea::gui::bl::Main {} {
 			# Entry, Entry2, Add
 			${log}::debug Re-enable widgets in $blWid(f1BL) Max Box, Qty and Add to List
 			foreach child [winfo children $blWid(f1BL)] {
-				#if {[string match *entry1 $child] != 1 || [string match *cbox* $child] == 1 || [string match *add* $child] == 1} {
-				#	$child configure -state normal
-				#}
 				$child configure -state normal
 			}
 		}
