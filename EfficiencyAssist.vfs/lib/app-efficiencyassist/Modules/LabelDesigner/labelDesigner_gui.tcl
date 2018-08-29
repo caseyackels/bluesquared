@@ -57,8 +57,8 @@ proc ea::gui::ld::designerUI {} {
                                         -yscrollcommand [list $ldWid(f1b).scrolly set]
 
         $ldWid(f1b).listbox columnconfigure 0 -showlinenumbers 1 -name count
-		$ldWid(f1b).listbox columnconfigure 1 -name customerName
-        $ldWid(f1b).listbox columnconfigure 2 -name titleName
+		$ldWid(f1b).listbox columnconfigure 1 -name customerName -labelalign center
+        $ldWid(f1b).listbox columnconfigure 2 -name titleName -labelalign center
 		$ldWid(f1b).listbox columnconfigure 3 -name status
 
     ttk::scrollbar $ldWid(f1b).scrolly -orient v -command [list $ldWid(f1b).listbox yview]
@@ -165,20 +165,22 @@ proc ea::gui::ld::addTemplate {args} {
 
     grid [ttk::checkbutton $ldWid(addTpl,f2).ckbtnSerialize -text [mc "Serialize?"] -variable tplLabel(SerializeLabel)] -column 2 -row 0 -sticky w -padx 2p -pady 2p
 
-    grid [ttk::label $ldWid(addTpl,f2).text4 -text [mc "Label Document"]] -column 0 -row 1 -pady 2p -padx 2p -sticky e
-    grid [ttk::entry $ldWid(addTpl,f2).entry3 -textvariable tplLabel(LabelPath) -width 30] -column 1 -row 1 -pady 2p -padx 2p -sticky ew
-    grid [ttk::button $ldWid(addTpl,f2).btn1 -text [mc "Browse..."] \
-                                                -command {ea::code::ld::getOpenFile $ldWid(addTpl,f2).entry3}] -column 2 -row 1 -pady 2p -padx 2p -sticky w
-
-    grid [ttk::label $ldWid(addTpl,f2).text3 -text [mc "Label Size"]] -column 0 -row 2 -pady 2p -padx 2p -sticky e
+    grid [ttk::label $ldWid(addTpl,f2).text3 -text [mc "Label Size"]] -column 0 -row 1 -pady 2p -padx 2p -sticky e
     grid [ttk::combobox $ldWid(addTpl,f2).cbox1 -textvariable tplLabel(LabelSize) \
                                                 -state readonly \
-                                                -postcommand {ea::db::ld::getSizes $ldWid(addTpl,f2).cbox1}] -column 1 -row 2 -pady 2p -padx 2p -sticky ew
+                                                -postcommand {ea::db::ld::getSizes $ldWid(addTpl,f2).cbox1}] -column 1 -row 1 -pady 2p -padx 2p -sticky ew
 
         bind $ldWid(addTpl,f2).cbox1 <<ComboboxSelected>> {
             ea::db::ld::getLabelSizeID  %W
         }
-    grid [ttk::button $ldWid(addTpl,f2).delBtn -text [mc "Delete"]] -column 2 -row 3 -padx 2p -pady 5p
+
+    grid [ttk::label $ldWid(addTpl,f2).text4 -text [mc "Label Document"]] -column 0 -row 2 -pady 2p -padx 2p -sticky e
+    grid [ttk::entry $ldWid(addTpl,f2).entry3 -textvariable tplLabel(LabelPath) -width 30] -column 1 -row 2 -pady 2p -padx 2p -sticky ew
+    grid [ttk::button $ldWid(addTpl,f2).btn1 -text [mc "Browse..."] \
+                                                -command {ea::code::ld::getOpenFile $ldWid(addTpl,f2).entry3}] -column 2 -row 2 -pady 2p -padx 2p -sticky w
+
+
+    #grid [ttk::button $ldWid(addTpl,f2).delBtn -text [mc "Delete"]] -column 2 -row 3 -padx 2p -pady 5p
 
 
 
@@ -205,8 +207,8 @@ proc ea::gui::ld::addTemplate {args} {
 
         $ldWid(f2b).listbox columnconfigure 0 -showlinenumbers 1 -name count
         $ldWid(f2b).listbox columnconfigure 1 -name row -editable yes -editwindow ttk::combobox
-        $ldWid(f2b).listbox columnconfigure 2 -name labelText -editable yes -editwindow ttk::combobox -labelalign center
-        $ldWid(f2b).listbox columnconfigure 3 -name editable -editable yes -editwindow ttk::combobox -labelalign center
+        $ldWid(f2b).listbox columnconfigure 2 -name labelText -editable yes -editwindow ttk::combobox -labelalign center -stretch yes
+        $ldWid(f2b).listbox columnconfigure 3 -name editable -editable yes -editwindow ttk::combobox -labelalign center -hide yes
 
     ttk::scrollbar $ldWid(f2b).scrolly -orient v -command [list $ldWid(f2b).listbox yview]
 
@@ -264,6 +266,8 @@ proc ea::gui::ld::addTemplate {args} {
         for {set x 1} {10 >= $x} {incr x} {
             $ldWid(f2b).listbox insert end ""
         }
+
+        # Clear out all variables
     }
 
     ##
@@ -279,7 +283,6 @@ proc ea::gui::ld::addTemplate {args} {
     if {[winfo exists .popupMenu]} {destroy .popupMenu}
     set m [menu .popupMenu]
     $m add command -label "Paste" -command {ea::gui::ld::menuPasteQty $ldWid(addTpl,f2b).lbox}
-    # Example - bind $bodyTag <<Button3>> +[list tk_popup $mName %X %Y]
     bind $ldWid(addTpl,f2b).lbox <<Button3>> {tk_popup .popupMenu %X %Y}
 } ;# ea::gui::ld::addTemplate
 
