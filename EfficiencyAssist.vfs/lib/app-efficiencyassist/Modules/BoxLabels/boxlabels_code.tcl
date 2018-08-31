@@ -92,23 +92,19 @@ proc controlFile {args} {
     #	N/A
     #
     #***
-    global log files mySettings tmp tplLabel
+    global log files mySettings tmp tplLabel job
     ${log}::debug Initiating controlFile - $args
 
     switch -- [lindex $args 0] {
         destination {
-                    if {$tplLabel(LabelProfileID) != ""} {
+                    if {$tplLabel(LabelVersionID) != ""} {
                         ${log}::debug controlFile - Using custom label settings
-                        set tmp(hdr_names) [db eval "SELECT LabelHeaders.LabelHeaderDesc FROM LabelHeaderGrp
-                                                INNER JOIN LabelHeaders ON LabelHeaders.LabelHeaderID = LabelHeaderGrp.LabelHeaderID
-                                                WHERE LabelHeaderGrp.LabelProfileID = $tplLabel(LabelProfileID)
-                                                ORDER BY LabelHeaders.LabelHeaderSystemOnly DESC"]
+                        set tmp(hdr_names) "[db eval "SELECT LabelHeaderDesc FROM LabelHeaders WHERE LabelHeaderSystemOnly = 1 ORDER BY LabelHeaderID"] [db eval "SELECT labelRowNum FROM LabelData WHERE labelVersionID = $tplLabel(LabelVersionID) ORDER BY labelRowNum"]"
 
                         set headers [::csv::join $tmp(hdr_names)]
-                        set f_name [list $tplLabel(Name) - [join $tplLabel(LabelProfileDesc)]]
+                        set f_name $job(TemplateName)
                         set f_path [file dirname $tplLabel(LabelPath)]
                         ${log}::debug file name: [file join $f_path $f_name.csv]
-
                     } else {
                         # Set Default headers - These are used in all Generic labels (Generic1 through Generic5)
                         ${log}::debug controlFile - Using default settings
@@ -118,16 +114,9 @@ proc controlFile {args} {
                     }
 
                     if {[lindex $args 1] eq "fileopen"} {
-                        #set files(destination) [open [file join $mySettings(path,labelDBfile) $mySettings(name,labelDBfile).csv] w]
-
-                        # Check to see if we can write to the path. If we can't, fail gracefully.
-                        # todo this should happen when we know we're using a template.
-                        #set writable [eAssist_Global::fileAccessibility [file join $f_path] [join $f_name].csv]
-
                         set files(destination) [open [file join $f_path [join $f_name].csv] w]
 
                         # Insert Header row
-                        #chan puts $files(destination) [::csv::join "Labels Quantity Line1 Line2 Line3 Line4 Line5"]
                         chan puts $files(destination) $headers
 
                     } elseif {[lindex $args 1] eq "fileclose"} {
@@ -135,7 +124,6 @@ proc controlFile {args} {
                         unset files(destination)
                         }
                     }
-
         history {
                     if {[file exists [file join $mySettings(Home) history.csv]] ne 1} {
                         set files(history) [open [file join $mySettings(Home) history.csv] w]
@@ -162,40 +150,36 @@ proc controlFile {args} {
 
 proc writeText {labels quantity total_boxes} {
     ## ATTENTION: The Open/Close commands are in proc [controlFile]
-    global log files GS_textVar tplLabel tmp labelText
+    global log files GS_textVar tplLabel tmp labelText job
     ${log}::debug Initiating writeText
 
-    # Use lappend so that if the text contains spaces ::csv::join will handle it correctly
-    if {$tplLabel(ID) ne ""} {
+    # Set the system data, label data will be after.
+    if {$job(Template) ne ""} {
+        ${log}::debug writeText - Using the template data
         set NumLabels $labels
         set BoxQuantity $quantity
         set TotalBoxes $total_boxes
 
+        lappend textValues $quantity $labels $total_boxes $job(Number)
+        ${log}::debug writeText - $textValues
+
         if {$tplLabel(SerializeLabel) eq ""} {
             ${log}::debug We are not serializing.
-            lappend textValues $quantity $labels
+            #lappend textValues $quantity $labels $tplLabel(JobNumber)
+            #lappend textValues $quantity $labels $tplLabel(JobNumber)
         } else {
             ${log}::debug We are serializing, inserting total boxes for shipment
-            lappend textValues $quantity $labels $total_boxes
+            #lappend textValues $quantity $labels $tplLabel(JobNumber) $total_boxes
+            #lappend textValues $quantity $labels $total_boxes $tplLabel(JobNumber)
         }
-
-        # Get Profile Headers. These should only be the headers that contain text.
-        #foreach item [lsort [array names labelText]] {
-        #    if {[string match Row* $item]} {
-        #        if {$GS_textVar($item) != ""} {
-        #            lappend textValues "$labelText($item)"
-        #        }
-        #    }
-        #}
-
     } else {
         # This is for the Generic labels
-        #lappend textValues $labels $quantity "$GS_textVar(Row01)" "$GS_textVar(Row02)" "$GS_textVar(Row03)" "$GS_textVar(Row04)" "$GS_textVar(Row05)"
+        ${log}::debug writeText - Using the generic data
         lappend textValues $labels $quantity
-
+        ${log}::debug writeText - $textValues
     }
 
-    # Get Profile Headers. These should only be the headers that contain text.
+    # Set the label data
     foreach item [lsort [array names labelText]] {
         if {[string match Row* $item]} {
             if {$labelText($item) != ""} {
@@ -313,7 +297,7 @@ proc createList {args} {
     ${log}::debug Start Createlist
     ea::code::bl::trackTotalQuantities
 
-    if {$tplLabel(LabelProfileID) == 0} {
+    if {$tplLabel(LabelVersionID) == 0} {
         ${log}::debug No Profile ID, skipping createList
         return
     }
@@ -334,14 +318,6 @@ proc createList {args} {
     # L_rawEntries holds each qty (i.e. 200 204 317)
     foreach entry $L_rawEntries {
         set result [doMath $entry $GS_textVar(maxBoxQty)]
-
-            #if {[lrange $result 0 0 ]!= 0} {
-            #    ${log}::debug Result: [lrange $result 0 0] Label @ $GS_textVar(maxBoxQty)
-            #}
-            #
-            #if {[lrange $result 1 end] != 0} {
-            #    ${log}::debug Result: 1 Label @ [lrange $result 1 end]
-            #}
 
         # Make sure the variables are cleared out; we don't want any data to lag behind.
         set FullBoxes_text ""
@@ -551,7 +527,7 @@ proc displayListHelper {fullboxes partialboxes total_boxes {reset 0}} {
 } ;# End of displayListHelper proc
 
 proc printLabels {} {
-    global log GS_textVar programPath lineNumber mySettings tplLabel tmp labelText
+    global log GS_textVar programPath lineNumber mySettings tplLabel tmp labelText job
 
     ${log}::debug Initiating printLabels
     set gate 1
@@ -606,19 +582,14 @@ proc printLabels {} {
         return
     }
 
-    if {$tplLabel(ID) eq ""} {
-        #Shipping_Code::createList
-
-        #Shipping_Code::writeHistory $GS_textVar(maxBoxQty)
-        #Shipping_Code::openHistory
-
-        Shipping_Gui::printbreakDown email ; # Send an email of the breakdown
-    }
+    # if {$tplLabel(ID) eq ""} {
+    #     Shipping_Gui::printbreakDown email ; # Send an email of the breakdown
+    # }
 
 
 
-    if {$tplLabel(ID) != ""} {
-        ${log}::debug Printing from template: $tplLabel(ID) $tplLabel(Name)
+    if {$job(Template) != ""} {
+        ${log}::debug Printing from template: $job(Template) $job(TemplateName)
 
         set labelDir [file dirname $tplLabel(LabelPath)]
         set filename [file tail $tplLabel(LabelPath)]
@@ -627,7 +598,8 @@ proc printLabels {} {
         set labelDir [join [split $labelDir /] \\]
 
         # Set runlist file name, maybe this should be placed into the tplLabel array? tplLabel(RunListFile)
-        set runlist "$labelDir\\[join "$tplLabel(LabelVersionDesc) - $tplLabel(LabelProfileDesc)"].csv"
+        #set runlist "$labelDir\\[join "$tplLabel(LabelVersionDesc) - $tplLabel(LabelProfileDesc)"].csv"
+        set runlist "$labelDir\\$job(TemplateName).csv"
 
         # Using a specific printer: /PRN=<printer name>
         if {$tplLabel(LabelPrinter) eq ""} {
@@ -635,7 +607,6 @@ proc printLabels {} {
             exec $mySettings(path,bartender) /AF=$labelDir\\$filename /D=$runlist /P /CLOSE /MIN=TASKBAR
         } else {
             ${log}::debug $mySettings(path,bartender) /AF=$labelDir\\$filename /D=$runlist /PRN=$tplLabel(LabelPrinter) /P /CLOSE /MIN=TASKBAR
-            #exec $mySettings(path,bartender) /AF=$labelDir\\$filename /D=$runlist
             exec $mySettings(path,bartender) /AF=$labelDir\\$filename /D=$runlist /PRN=$tplLabel(LabelPrinter) /P /CLOSE /MIN=TASKBAR
         }
         update idletasks
@@ -667,240 +638,6 @@ proc printLabels {} {
             update idletasks
     } ;# End generic labels
 } ;# printLabels
-
-proc truncateHistory {} {
-    #****f* truncateHistory/Shipping_Code
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2008 - Casey Ackels
-    #
-    # FUNCTION
-    #	Opens the history file, and truncates it.
-    #
-    # SYNOPSIS
-    #	truncateHistory
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #	Shipping_Code::writeHistory
-    #
-    # NOTES
-    #	N/A
-    #
-    # SEE ALSO
-    #	N/A
-    #
-    #***
-    global files GS_textVar frame1 log
-
-    controlFile history fileread
-    set history_data [read $files(history)]
-    controlFile history fileclose
-    set lines [split $history_data \n]
-
-    # Keep the history file trimmed down
-    if {[llength $lines] >= 16} {
-        # llength starts at 1
-
-        controlFile history filewrite
-        set GS_textVar(history) "" ;# clear out the variable
-        foreach line [lrange $lines end-15 end] {
-            if {$line != ""} {
-            #puts "truncate_csv: [::csv::join $line]"
-            chan puts $files(history) $line
-            puts "truncate lines: $line"
-            }
-            lappend GS_textVar(history) [lindex [::csv::split $line] 0]
-        }
-        controlFile history fileclose
-    }
-
-    if {[winfo exists .container] eq 1} {
-        puts "config textVar: $GS_textVar(history)"
-        $frame1.entry1 configure -values $GS_textVar(history)
-    }
-} ;# truncateHistory
-
-proc writeHistory {maxBoxQty} {
-    #****f* writeHistory/Shipping_Code
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2008 - Casey Ackels
-    #
-    # FUNCTION
-    #	Write the history of the entry labels out to a file; allowing a user to select it from the combobox
-    #
-    # SYNOPSIS
-    #	 writeHistory
-    #
-    # CHILDREN
-    #	 Shipping_Code::truncateHistory
-    #
-    # PARENTS
-    #	Shipping_Code::displayListHelper
-    #
-    # NOTES
-    #	N/A
-    #
-    # SEE ALSO
-    #	N/A
-    #
-    #***
-    global GS_textVar files log
-
-    #puts "lsearch: [lsearch -glob -inline $GS_textVar(history) $GS_textVar(Row01)]"
-
-    if {[lsearch -glob -inline $GS_textVar(history) $GS_textVar(Row01)] eq ""} {
-        # Save only an entry if it is unique. Otherwise, discard it.
-        # Use lappend so that if the text contains spaces ::csv::join will handle it correctly
-        lappend textHistory "$GS_textVar(Row01)" "$GS_textVar(Row02)" "$GS_textVar(Row03)" "$GS_textVar(Row04)" "$GS_textVar(Row05)" $maxBoxQty
-
-        # Insert the values
-        controlFile history fileappend
-        chan puts $files(history) [::csv::join $textHistory]
-        #puts "text: $textHistory"
-        controlFile history fileclose
-
-        ${log}::debug "WriteHistory: Saved $GS_textVar(Row01)"
-    }
-
-    # After we add the new labels, lets make sure we trim the file back down to the allotted amount.
-    #truncateHistory
-} ;# writeHistory
-
-proc openHistory {} {
-    #****f* openHistory/Shipping_Code
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2008 - Casey Ackels
-    #
-    # FUNCTION
-    #	Reads the history file
-    #
-    # SYNOPSIS
-    #	openHistory
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #	Shipping_Code::writeHistory Shipping_Code::readHistory
-    #
-    # NOTES
-    #	N/A
-    #
-    # SEE ALSO
-    #	Shipping_Code::writeHistory Shipping_Code::readHistory Shipping_Code::controlFile
-    #
-    #***
-    global GS_textVar files frame1 log
-    ${log}::debug openHistory: Starting
-
-    controlFile history fileread
-    set history_data [read $files(history)]
-    controlFile history fileclose
-
-    puts "Open historyData: $history_data"
-    ;# Guard against an empty history file. If nothing is found set the *(history) variable with an empty string
-    if {$history_data eq ""} {
-        set GS_textVar(history) ""
-
-    } else {
-        set lines [split $history_data \n]
-        #set lines [lrange [split $history_data \n] end-5 end] ;# This means we'll have 5 labels, and one "empty label"
-        #puts "openHistory_lines: $lines"
-        set GS_textVar(history) "" ;# make sure the variable is cleared out.
-
-        foreach line $lines {
-            lappend GS_textVar(history) [lindex [::csv::split $line] 0]
-        }
-    }
-
-    ${log}::debug "historyData: $GS_textVar(history)"
-
-    #puts "openHistory: Ending"
-} ;#openHistory
-
-proc readHistory {args} {
-    #****f* openHistory/Shipping_Code
-    # AUTHOR
-    #	Casey Ackels
-    #
-    # COPYRIGHT
-    #	(c) 2008 - Casey Ackels
-    #
-    # FUNCTION
-    #	Opens the flat-file database of the 15 most recent labels that have previously been made.
-    #   This is called by the <<ComboboxSelected>> virtual event
-    #
-    # SYNOPSIS
-    #	openHistory
-    #
-    # CHILDREN
-    #	N/A
-    #
-    # PARENTS
-    #	N/A
-    #
-    # NOTES
-    #	N/A
-    #
-    # SEE ALSO
-    #	N/A
-    #
-    #***
-    global GS_textVar files lineText log
-
-    controlFile history fileread
-    set history_data [read $files(history)]
-    set lines [split $history_data \n]
-    ${log}::debug Read history lines: $lines
-    controlFile history fileclose
-
-
-    set text [lindex $lines $args]
-    ${log}::debug text: $text
-
-    set x 1
-    foreach line [::csv::split $text] {
-        #puts "retrieve: $line"
-        if {$x <= 5} {
-            set GS_textVar(Row0$x) $line
-            #set lineText(data$x) [string length $GS_textVar(line$x)]
-            if {[string length $GS_textVar(Row0$x)] != 0} {
-                set lineText(data$x) [string length $GS_textVar(Row0$x)]
-                    } else {
-                set lineText(data$x) ""
-            }
-            incr x
-        } else {
-            set GS_textVar(maxBoxQty) $line
-            }
-    }
-    # If text holds no data, clear all lines
-      if {$text eq ""} {
-        for {set x 1} {$x<6} {incr x} {
-            set GS_textVar(Row0$x) ""
-            #set lineText(data$x) [string length $GS_textVar(line$x)]
-            if {[string length $GS_textVar(Row0$x)] != 0} {
-                set lineText(data$x) [string length $GS_textVar(Row0$x)]
-                    } else {
-                set lineText(data$x) ""
-            }
-        }
-        set GS_textVar(maxBoxQty) ""
-    }
-    ;# clear the listbox
-    Shipping_Code::clearList
-} ;# readHistory
 
 proc addMaster {destQty batch shipvia} {
     #****f* addmaster/Shipping_Code
@@ -1263,6 +1000,13 @@ proc ea::code::bl::transformToVar {labelRowText} {
     set date(NextMonth) [clock format [clock add [clock seconds] 1 month] -format %B]
     set date(NextYear) [clock format [clock add [clock seconds] 1 year] -format %Y]
 
-    set varMapping {#JobName $job(Name) #TitleName $job(Title) #CustomerName $job(CustName) #CurrentMonth $date(CurrentMonth) #CurrentYear $date(CurrentYear) #NextMonth $date(NextMonth) #NextYear $date(NextYear)}
+    set varMapping {#JobName $job(Name) \
+                    #TitleName $job(Title) \
+                    #CustomerName $job(CustName) \
+                    #CurrentMonth $date(CurrentMonth) \
+                    #CurrentYear $date(CurrentYear) \
+                    #NextMonth $date(NextMonth) \
+                    #NextYear $date(NextYear) \
+                    #JobNumber $job(Number)}
     return [subst [string map $varMapping $labelRowText]]
 } ;# ea::code::bl::transformToVar

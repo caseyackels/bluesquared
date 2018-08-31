@@ -301,8 +301,9 @@ proc ea::db::bl::getAllVersions {wid} {
     # Add the template versions first if we have any
     set tpl_version [ea::db::bl::getAssociatedTemplates]
     if {$tpl_version ne ""} {
-        ${log}::debug Retrieving templates
-        lappend job(Versions) ".CUSTOM. $tpl_version"
+        set job(Versions) $tpl_version
+        # Let the user know that this job has templates
+        Error_Message::errorMsg BL008
     } else {
         set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
 
@@ -375,20 +376,25 @@ proc ea::db::bl::getAllVersions {wid} {
 } ;# ea::db::bl::getAllVersions
 
 proc ea::db::bl::getTplVersions {} {
-  global log job blWid labelText GS_textVar
+  global log job blWid labelText GS_textVar tplLabel
 
   # Retrieving label text
   ${log}::debug getTplVersions: Current Version: [ea::code::bl::cleanVersionNames [$blWid(f0BL).cbox1 get]]
   set ver [ea::code::bl::cleanVersionNames [$blWid(f0BL).cbox1 get]]
-  db eval "SELECT labelRowNum, labelRowText FROM LabelData
+  db eval "SELECT labelRowNum, labelRowText, LabelVersions.labelVersionID, LabelVersions.LabelSizeID, LabelVersions.LabelBartenderDoc, LabelVersions.LabelVersionSerialize FROM LabelData
             JOIN LabelVersions ON LabelData.labelVersionID = LabelVersions.labelVersionID
             WHERE tplID = $job(Template)
-            AND LOWER(LabelVersionDesc) = LOWER('$ver')" {
-
-              ${log}::debug $labelRowNum, $labelRowText [string toupper [ea::code::bl::transformToVar $labelRowText]]
-              #set labelText($labelRowNum) $labelRowText
-              set labelText($labelRowNum) [string toupper [ea::code::bl::transformToVar $labelRowText]]
+            AND LOWER(LabelVersionDesc) = LOWER('$ver')
+            ORDER BY LOWER(LabelVersionDesc)" {
+                set tplLabel(LabelVersionID) $labelVersionID
+                set tplLabel(LabelSizeID) $LabelSizeID
+                set tplLabel(LabelPath) $LabelBartenderDoc
+                set tplLabel(SerializeLabel) $LabelVersionSerialize
+                ${log}::debug $labelRowNum, $labelRowText [string toupper [ea::code::bl::transformToVar $labelRowText]]
+                set labelText($labelRowNum) [string toupper [ea::code::bl::transformToVar $labelRowText]]
             }
+    # Retrieve printer path
+    set tplLabel(LabelPrinter) [join [db eval "SELECT labelPrinter FROM LabelSizes WHERE labelSizeID = $tplLabel(LabelSizeID)"]]
 
     # Retrieving Max Box Qty
     ${log}::debug Retrieving max box qty ...
@@ -400,8 +406,16 @@ proc ea::db::bl::getTplVersions {} {
         ${log}::debug Nothing returned for the Box Qty.
     }
 
-    # Let the user know that this job has templates
-    Error_Message::errorMsg BL008
+    # Disable Batch Entry if this is a 'serialized' version
+    if {$tplLabel(SerializeLabel) == 1} {
+        $blWid(f1BL).entry1 configure -state normal
+        $blWid(f1BL).entry2 configure -state disable
+        $blWid(f1BL).entry3 configure -state normal
+    } else {
+        $blWid(f1BL).entry1 configure -state normal
+        $blWid(f1BL).entry2 configure -state normal
+        $blWid(f1BL).entry3 configure -state normal
+    }
 } ;# ea::db::bl::getTplVersions
 
 proc ea::db::bl::getShipCounts {} {
@@ -410,7 +424,8 @@ proc ea::db::bl::getShipCounts {} {
     # Make sure we start with an empty widget
     $blWid(f2BL).listbox delete 0 end
     ${log}::debug getShipCounts: Deleting data from the tablelist
-    ${log}::debug getShipCounts: Retrieving data for version: $job(Version)
+    set ver [ea::code::bl::cleanVersionNames $job(Version)]
+    ${log}::debug getShipCounts: Retrieving data for version: $ver
 
     # Ensure var is empty
     set job(ShipCount) ""
@@ -436,11 +451,13 @@ proc ea::db::bl::getShipCounts {} {
     # If we're using a template ...
     if {$job(Template) ne ""} {
         ${log}::notice Inserting quantities from Template
-        db eval "SELECT shipQty FROM LabelShipQty WHERE LabelVersionID = (SELECT LabelVersionID FROM LabelVersions WHERE tplID = $job(Template) AND LOWER(LabelVersionDesc) = LOWER('$job(Version)' ) )" {
+        db eval "SELECT shipQty FROM LabelShipQty WHERE LabelVersionID = (SELECT LabelVersionID FROM LabelVersions WHERE tplID = $job(Template) AND LOWER(LabelVersionDesc) = LOWER('$ver' ) )" {
             ${log}::debug ShipQty: $shipQty
             $blWid(f2BL).listbox insert end "{} {} $shipQty"
         }
     }
+    # Add everything together for the running total
+    Shipping_Code::addListboxNums
     ea::code::bl::trackTotalQuantities
 } ;# ea::db::bl::getShipCounts
 
@@ -462,9 +479,15 @@ proc ea::db::bl::getAssociatedTemplates {} {
 
     set titleID [db eval "SELECT tplID FROM LabelTPL WHERE PubTitleID = $job(TitleID)"]
     if {$titleID ne ""} {
+        # Retrieve template name
+        set job(TemplateName) [db eval "SELECT tplLabelName FROM LabelTPL WHERE tplID = $titleID"]
         # we have a template, lets populate the widgets
         set job(Template) $titleID
         ${log}::debug We have a template: $job(Template)
-        return [db eval "SELECT LabelVersionDesc from LabelVersions WHERE tplID = $job(Template)"]
+        db eval "SELECT LabelVersionDesc from LabelVersions WHERE tplID = $job(Template) ORDER BY LabelVersionDesc" {
+            lappend ver ".CUSTOM. $LabelVersionDesc"
+        }
+        return $ver
+        unset ver
     }
 } ;# ea::db::bl::getAssociatedTemplates

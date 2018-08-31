@@ -240,5 +240,12 @@ proc ea::db::init_intlSetupArray {} {
 proc  ea::db::init_mod {} {
     # See file: boxlabels_code.tcl / ea::code::bl::transformToVar
     global log mod
-    set mod(Box_Labels,uservars) [list #JobName #TitleName #CustomerName #CurrentMonth #NextMonth #CurrentYear #NextYear]
+    set mod(Box_Labels,uservars) [list #JobName \
+                                        #TitleName \
+                                        #CustomerName \
+                                        #CurrentMonth \
+                                        #NextMonth \
+                                        #CurrentYear \
+                                        #NextYear \
+                                        #JobNumber]
 } ;# ea::tools::user_vars

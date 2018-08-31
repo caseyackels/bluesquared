@@ -407,6 +407,7 @@ proc 'eAssist_initVariables {} {
 				   Version "" \
 				   Versions "" \
 				   Template "" \
+				   TemplateName "" \
 				   TotalVersions "" \
 				   JobSaveFileLocation "" \
 				   TitleSaveFileLocation "" \
@@ -439,9 +440,6 @@ proc 'eAssist_initVariables {} {
 						LabelVersionID,current "" \
 						LabelVersionDesc "" \
 						LabelVersionDesc,current "" \
-						LabelProfileID "" \
-						LabelProfileDesc "" \
-						LabelProfileRowNum "" \
 						LabelPrinter "" \
 						tmpValues,rbtn "" \
                         tmpValues "" \
