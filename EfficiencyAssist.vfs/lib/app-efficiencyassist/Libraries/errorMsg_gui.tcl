@@ -101,52 +101,52 @@ proc Error_Message::errorMsg {code args} {
                             set title [mc $defaultTitle]
                             set icon warning}
         SETUP001        {set message [mc "Record is already used on Header: %s" $args]
-                            set message2 [mc "Error Location: %s" $code]
+                            set message2 [mc "ID: %s" $code]
                             set title $dupeTitle
                             set icon warning
                         }
         BL001           {set message [mc "Template ID is invalid. Try again."]
-                            set message2 [mc "Error Location: %s" $code]
+                            set message2 [mc "ID: %s" $code]
                             set title [mc "Warning"]
                             set icon warning
                         }
         BL002           {set message [mc "Please enter a quantity for Max. Qty per Box"]
-                            set message2 [mc "Error Location: %s" $code]
+                            set message2 [mc "ID: %s" $code]
                             set title [mc "Warning"]
                             set icon warning
                         }
         BL003           {set message [mc "You still have a quantity in the Quantity field."]
-                            set message2 [mc "Error Location: %s" $code]
+                            set message2 [mc "ID: %s" $code]
                             set title [mc "Warning"]
                             set icon warning
                         }
         BL003           {set message [mc "You still have a quantity in the Quantity field."]
-                            set message2 [mc "Error Location: %s" $code]
+                            set message2 [mc "ID: %s" $code]
                             set title [mc "Warning"]
                             set icon warning
                         }
         BL004           {set message [mc "You have not entered a Max Qty Per Box."]
-                            set message2 [mc "Error Location: %s" $code]
+                            set message2 [mc "ID: %s" $code]
                             set title [mc "Warning"]
                             set icon warning
                         }
         BL005           {set message [mc "You must enter a job number."]
-                            set message2 [mc "Error Location: %s" $code]
+                            set message2 [mc "ID: %s" $code]
                             set title [mc "Warning"]
                             set icon warning
                         }
         BL006           {set message [mc "The job number is less than 6 numbers."]
-                            set message2 [mc "Error Location: %s" $code]
+                            set message2 [mc "ID: %s" $code]
                             set title [mc "Warning"]
                             set icon warning
                         }
         BL007           {set message [mc "Your label is using a separate file for the information.\nClick OK, then click Print Labels."]
-                            set message2 [mc "Location: %s" $code]
+                            set message2 [mc "ID: %s" $code]
                             set title [mc "Information"]
                             set icon info
                         }
-        BL008           {set message [mc "This job has templates.\nUse the 'Versions' prefixed with CUSTOM.\nTotal Versions: %s" [llength $job(Versions)]]
-                            set message2 [mc "Location: %s" $code]
+        BL008           {set message [mc "This job has at leaset one template.\nUse the 'Versions' prefixed with .CUSTOM.\nTotal Versions: %s" [llength $job(Versions)]]
+                            set message2 [mc "ID: %s" $code]
                             set title [mc "Information"]
                             set icon info
                         }
