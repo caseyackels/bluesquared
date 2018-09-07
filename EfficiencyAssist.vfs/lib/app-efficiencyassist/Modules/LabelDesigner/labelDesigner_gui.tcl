@@ -136,8 +136,8 @@ proc ea::gui::ld::addTemplate {args} {
             ${log}::debug [db eval "SELECT tplID from LabelTPL WHERE PubTitleID = $job(TitleID) AND tplLabelName = '[%W get]'"]
         }
 
-    grid [ttk::label $ldWid(addTpl,f1).text2b -text [mc "Template ID"]] -column 0 -row 3 -padx 2p -pady 2p -sticky e
-    grid [ttk::label $ldWid(addTpl,f1).text2c -textvariable tplLabel(ID)] -column 1 -row 3 -padx 2p -pady 2p -sticky w
+    #grid [ttk::label $ldWid(addTpl,f1).text2b -text [mc "Template ID"]] -column 0 -row 3 -padx 2p -pady 2p -sticky e
+    #grid [ttk::label $ldWid(addTpl,f1).text2c -textvariable tplLabel(ID)] -column 1 -row 3 -padx 2p -pady 2p -sticky w
 
 
 
