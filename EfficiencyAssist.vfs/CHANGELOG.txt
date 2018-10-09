@@ -1,3 +1,9 @@
+= Version 4.1.1 RC6.3 (September 2018)
+== Box Labels
+* [BUG] Resolved issue where text could be longer than what could fit on a label
+
+--
+
 = Version 4.1.1 RC6.1 (August 2018)
 == Box Labels
 * [BUG] Resolved issue where orders/shipment quantities could be doubled causing extra labels to be printed.

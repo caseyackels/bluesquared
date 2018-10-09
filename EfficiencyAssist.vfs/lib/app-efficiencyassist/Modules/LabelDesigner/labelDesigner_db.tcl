@@ -557,3 +557,14 @@ proc ea::db::ld::getLabelSizeID {cbox} {
     ${log}::debug Label Size Desc: [$cbox get]
     set tplLabel(LabelSizeID) [db eval "SELECT labelSizeID from LabelSizes where labelSizeDesc = '[$cbox get]'"]
 }
+
+proc ea::db::ld::getDefaultLabelDoc {dest_dir labelSizeID} {
+    global log
+
+    ${log}::debug Copying default label document to current dir ($dest_dir)
+
+    set labelDocPath [db eval "SELECT labelDefaultDocument FROM LabelSizes WHERE labelSizeID = $labelSizeID"]
+
+    ${log}::debug copy $labelDocPath $dest_dir
+    file copy [join $labelDocPath] [join $dest_dir]
+}

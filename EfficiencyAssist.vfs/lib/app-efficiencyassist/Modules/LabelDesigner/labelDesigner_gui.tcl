@@ -91,7 +91,12 @@ proc ea::gui::ld::addTemplate {args} {
     wm title $ldWid(addTpl) [mc "Add/Edit Template"]
 
     ${log}::debug addTemplate: winfo geom: [winfo geometry $ldWid(addTpl)]
-    wm geometry $ldWid(addTpl) +854+214
+    set width [winfo reqwidth .]
+    set height [winfo reqheight .]
+    set x [expr {$width / 2}]
+    set y [expr {$height / 2}]
+    wm geometry $ldWid(addTpl) +$x+$y
+
 
     ${log}::debug addTemplate window Created...
 

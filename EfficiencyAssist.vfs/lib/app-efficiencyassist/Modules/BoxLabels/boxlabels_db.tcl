@@ -366,11 +366,32 @@ proc ea::db::bl::getAllVersions {wid} {
             # Version doesn't exists, probably from Planner.....
             ea::code::bl::resetLabelText
             ${log}::debug Populate widgets based on Planner data
+
             set labelText(Row01) $job(Title)
             set labelText(Row02) $job(Name)
             if {[llength $job(TotalVersions)] > 1} {
                 set labelText(Row03) $job(Version)
                 ${log}::debug Change Version to $job(Version)
+            }
+            # string is longer than allocated length, we need to trim it down. Or alert the user.
+            set idx 1
+            foreach item [list Row01 Row02 Row03] {
+                if {[string length $labelText($item)] >= 29} {
+                    # see boxlabels_code.tcl for filterKeys; the length of text that fits on the default label or table: LabelSizes
+                    ${log}::critical $item is longer than 29 chars! Trim to [string range $labelText($item) 0 28]?
+                    set s_length [string length $labelText($item)] ; # get length of string
+                    set s_wholeLineIndex [string wordstart $labelText($item) 29] ;# retrieve the index of the last whole word
+                    set s_wholeLine [string range $labelText($item) 0 [expr $s_wholeLineIndex - 1]] ;# retrieve the text within the new string parameters
+                    set s_remainingText [string range $labelText($item) $s_wholeLineIndex end]
+                    set labelText($item) [string trim $s_wholeLine]
+                    ${log}::debug Modified text $item: $s_wholeLine
+                    ${log}::debug Modified text $item: $s_remainingText
+
+                    set nextRow [expr $idx + 1]
+                    set labelText(Row0$nextRow) [string trim "$s_remainingText $labelText(Row0$nextRow)"]
+                    ${log}::debug Modified text: $labelText(Row0$nextRow)
+                }
+                incr idx
             }
         }
 } ;# ea::db::bl::getAllVersions

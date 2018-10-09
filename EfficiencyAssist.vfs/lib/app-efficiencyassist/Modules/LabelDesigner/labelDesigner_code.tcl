@@ -30,6 +30,9 @@ proc ea::code::ld::getOpenFile {wid} {
     if {$tplLabel(LabelPath) eq ""} {
         # This will be empty if we are creating a new template
         ${log}::debug Copying template file for label size $tplLabel(LabelSize)
+
+        ${log}::debug dest_path $tplLabel(titlePath) labelID: $tplLabel(LabelSizeID)
+        ea::db::ld::getDefaultLabelDoc $tplLabel(titlePath) $tplLabel(LabelSizeID)
     }
 
     #set tplLabel(titlePath) [join [split $tplLabel(titlePath) /] \\]

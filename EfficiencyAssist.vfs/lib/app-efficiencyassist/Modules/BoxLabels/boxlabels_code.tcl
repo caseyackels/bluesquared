@@ -54,7 +54,7 @@ proc filterKeys {args} {
 
     switch -- $type {
         -numeric    {if {[string is integer $entryValue] == 1} {set returnValue 1}}
-        -textLength {if {[string length $validate_P] <= 33} {set returnValue 1}}
+        -textLength {if {[string length $validate_P] <= 29} {set returnValue 1}}
     }
 
     return $returnValue
@@ -855,8 +855,8 @@ proc Shipping_Code::writeShipTo {wid_entry3 wid_txt} {
     chan close $files(ShipTo)
     unset files(ShipTo)
 
-    exec $mySettings(path,bartender) "/AF=\\\\fileprint\\Labels\\Templates\\Blank Ship To\\BLANK SHIP TO 3x5.btw" /P /CLOSE /MIN=TASKBAR
-    ${log}::debug $mySettings(path,bartender) "/AF=\\\\fileprint\\Labels\\Templates\\Blank Ship To\\BLANK SHIP TO 3x5.btw" /P /CLOSE /MIN=TASKBAR
+    exec $mySettings(path,bartender) "/AF=\\\\fileprint\\Labels\\Templates\\Blank Ship To\\BLANK SHIP TO.btw" /P /CLOSE /MIN=TASKBAR
+    ${log}::debug $mySettings(path,bartender) "/AF=\\\\fileprint\\Labels\\Templates\\Blank Ship To\\BLANK SHIP TO.btw" /P /CLOSE /MIN=TASKBAR
 } ;# Shipping_Code::writeShipTo
 
 proc ea::code::bl::resetLabelText {} {
