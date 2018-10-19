@@ -204,7 +204,7 @@ proc ea::code::ld::modifyTemplate {wid} {
     ea::db::ld::getTemplates
 
     # Populate the combobox with the label versions
-    ea::db::ld::getLabelVersionList $ldWid(addTpl,f2).versionDescCbox
+    ea::db::ld::getLabelVersionList $ldWid(addTpl,ldf0).versionDescCbox
 }
 
 # Tablelist helper

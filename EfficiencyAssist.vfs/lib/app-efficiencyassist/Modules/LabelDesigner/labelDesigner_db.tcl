@@ -566,5 +566,5 @@ proc ea::db::ld::getDefaultLabelDoc {dest_dir labelSizeID} {
     set labelDocPath [db eval "SELECT labelDefaultDocument FROM LabelSizes WHERE labelSizeID = $labelSizeID"]
 
     ${log}::debug copy $labelDocPath $dest_dir
-    file copy [join $labelDocPath] [join $dest_dir]
+    file copy -force [join $labelDocPath] [join $dest_dir]
 }

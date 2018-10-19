@@ -141,56 +141,63 @@ proc ea::gui::ld::addTemplate {args} {
             ${log}::debug [db eval "SELECT tplID from LabelTPL WHERE PubTitleID = $job(TitleID) AND tplLabelName = '[%W get]'"]
         }
 
-    #grid [ttk::label $ldWid(addTpl,f1).text2b -text [mc "Template ID"]] -column 0 -row 3 -padx 2p -pady 2p -sticky e
-    #grid [ttk::label $ldWid(addTpl,f1).text2c -textvariable tplLabel(ID)] -column 1 -row 3 -padx 2p -pady 2p -sticky w
-
-
 
     grid [ttk::checkbutton $ldWid(addTpl,f1).bkbtn1 -text [mc "Active?"] -variable tplLabel(Status)] -column 4 -row 2 -pady 2p -padx 2p -sticky w
+
+    ##
+	## Setup the Notebook
+	##
+    set nbk [ttk::notebook $ldWid(addTpl).f2 -padding 10]
+    pack $nbk -fill both
+
+    ttk::notebook::enableTraversal $nbk
+
+    # Create the tabs
+    #
+    $nbk add [ttk::frame $nbk.labelData] -text [mc "Label Data"]
+    $nbk add [ttk::frame $nbk.shipments] -text [mc "Shipments"]
 
     ##
     ## Body / Label Data
     ## This is automatically created based on the profile selected, and ea::gui::ld::genLines
 
-    set ldWid(addTpl,f2) [ttk::labelframe $ldWid(addTpl).f2 -text [mc "Label Information"] -padding 2]
-    pack $ldWid(addTpl,f2) -expand no -fill x -side left -pady 5p -padx 5p
+    set ldWid(addTpl,ldf0) [ttk::labelframe $nbk.labelData.ldf0 -text [mc "Label Information"] -padding 2]
+    pack $ldWid(addTpl,ldf0) -expand yes -fill x -pady 5p -padx 5p
 
-    grid [ttk::label $ldWid(addTpl,f2).versionTxt -text [mc "Label Version"]] -column 0 -row 0 -padx 2p -pady 2p -sticky e
-    grid [ttk::combobox $ldWid(addTpl,f2).versionDescCbox -width 35 \
+    grid [ttk::label $ldWid(addTpl,ldf0).versionTxt -text [mc "Label Version"]] -column 0 -row 0 -padx 2p -pady 2p -sticky e
+    grid [ttk::combobox $ldWid(addTpl,ldf0).versionDescCbox -width 35 \
                                                             -textvariable tplLabel(LabelVersionDesc,current) \
-                                                            -postcommand {ea::db::ld::getLabelVersionList $ldWid(addTpl,f2).versionDescCbox}] -column 1 -row 0 -padx 2p -pady 5p -sticky ew
+                                                            -postcommand {ea::db::ld::getLabelVersionList $ldWid(addTpl,ldf0).versionDescCbox}] -column 1 -row 0 -padx 2p -pady 5p -sticky ew
 
 
-        bind $ldWid(addTpl,f2).versionDescCbox <FocusOut> {
+        bind $ldWid(addTpl,ldf0).versionDescCbox <FocusOut> {
              ${log}::debug Is this an unknown version (new?) $tplLabel(LabelVersionDesc,current)
 
              if {$tplLabel(LabelVersionDesc,current) eq ""} {return}
              ea::db::ld::setLabelVersionVars
         }
 
-    grid [ttk::checkbutton $ldWid(addTpl,f2).ckbtnSerialize -text [mc "Serialize?"] -variable tplLabel(SerializeLabel)] -column 2 -row 0 -sticky w -padx 2p -pady 2p
+    grid [ttk::checkbutton $ldWid(addTpl,ldf0).ckbtnSerialize -text [mc "Serialize?"] -variable tplLabel(SerializeLabel)] -column 2 -row 0 -sticky w -padx 2p -pady 2p
 
-    grid [ttk::label $ldWid(addTpl,f2).text3 -text [mc "Label Size"]] -column 0 -row 1 -pady 2p -padx 2p -sticky e
-    grid [ttk::combobox $ldWid(addTpl,f2).cbox1 -textvariable tplLabel(LabelSize) \
+    grid [ttk::label $ldWid(addTpl,ldf0).text3 -text [mc "Label Size"]] -column 0 -row 1 -pady 2p -padx 2p -sticky e
+    grid [ttk::combobox $ldWid(addTpl,ldf0).cbox1 -textvariable tplLabel(LabelSize) \
                                                 -state readonly \
-                                                -postcommand {ea::db::ld::getSizes $ldWid(addTpl,f2).cbox1}] -column 1 -row 1 -pady 2p -padx 2p -sticky ew
+                                                -postcommand {ea::db::ld::getSizes $ldWid(addTpl,ldf0).cbox1}] -column 1 -row 1 -pady 2p -padx 2p -sticky ew
 
-        bind $ldWid(addTpl,f2).cbox1 <<ComboboxSelected>> {
+        bind $ldWid(addTpl,ldf0).cbox1 <<ComboboxSelected>> {
             ea::db::ld::getLabelSizeID  %W
         }
 
-    grid [ttk::label $ldWid(addTpl,f2).text4 -text [mc "Label Document"]] -column 0 -row 2 -pady 2p -padx 2p -sticky e
-    grid [ttk::entry $ldWid(addTpl,f2).entry3 -textvariable tplLabel(LabelPath) -width 30] -column 1 -row 2 -pady 2p -padx 2p -sticky ew
-    grid [ttk::button $ldWid(addTpl,f2).btn1 -text [mc "Browse..."] \
-                                                -command {ea::code::ld::getOpenFile $ldWid(addTpl,f2).entry3}] -column 2 -row 2 -pady 2p -padx 2p -sticky w
+    grid [ttk::label $ldWid(addTpl,ldf0).text4 -text [mc "Label Document"]] -column 0 -row 2 -pady 2p -padx 2p -sticky e
+    grid [ttk::entry $ldWid(addTpl,ldf0).entry3 -textvariable tplLabel(LabelPath) -width 30] -column 1 -row 2 -pady 2p -padx 2p -sticky ew
+    grid [ttk::button $ldWid(addTpl,ldf0).btn1 -text [mc "Browse..."] \
+                                                -command {ea::code::ld::getOpenFile $ldWid(addTpl,ldf0).entry3}] -column 2 -row 2 -pady 2p -padx 2p -sticky w
 
 
     #grid [ttk::button $ldWid(addTpl,f2).delBtn -text [mc "Delete"]] -column 2 -row 3 -padx 2p -pady 5p
 
-
-
     # Tablelist goes here
-    set ldWid(f2b) [ttk::frame $ldWid(addTpl,f2).f2b]
+    set ldWid(f2b) [ttk::frame $ldWid(addTpl,ldf0).f2b]
     grid $ldWid(f2b) -column 0 -columnspan 3 -row 5 -pady 3p -padx 5p -sticky news
 
     tablelist::tablelist $ldWid(f2b).listbox -columns {
@@ -225,28 +232,38 @@ proc ea::gui::ld::addTemplate {args} {
 
     ::autoscroll::autoscroll $ldWid(f2b).scrolly ;# Enable the 'autoscrollbar'
 
+    #set btnBarLabelData [ttk::frame $nbk.labelData.f3]
+    #pack $btnBarLabelData -pady 5p -padx 5p -anchor se
+    #grid [ttk::button $btnBarLabelData.save -text [mc "Save"] -command {ea::code::ld::saveTemplateHeader}] -column 0 -row 0 -pady 2p -padx 2p -sticky se
+
+
     ##
-    ## Body / Shipment Info
+    ## Tab 2 / Shipments
     ##
-    set ldWid(addTpl,f2b) [ttk::labelframe $ldWid(addTpl).f2b -text [mc "Shipment Quantities"] -padding 2]
+    set ldWid(addTpl,f2b) [ttk::labelframe $nbk.shipments.shf0 -text [mc "Shipment Quantities"] -padding 2]
     pack $ldWid(addTpl,f2b) -expand no -fill x -pady 5p -padx 5p
 
-    grid [ttk::label $ldWid(addTpl,f2b).boxQtyTxt -text [mc "Max. Box Qty"]] -column 0 -row 0 -padx 2p -sticky e
+    grid [ttk::label $ldWid(addTpl,f2b).versionTxt -text [mc "Label Version"]] -column 0 -row 0 -padx 2p -pady 2p -sticky e
+    grid [ttk::combobox $ldWid(addTpl,f2b).versionDescCbox -width 35 -state readonly \
+                                                            -textvariable xx \
+                                                            -postcommand {ea::db::ld::getLabelVersionList $ldWid(addTpl,f2b).versionDescCbox}] -column 1 -columnspan 2 -row 0 -padx 2p -pady 5p -sticky ew
+
+    grid [ttk::label $ldWid(addTpl,f2b).boxQtyTxt -text [mc "Max. Box Qty"]] -column 0 -row 1 -padx 2p -sticky e
         tooltip::tooltip $ldWid(addTpl,f2b).boxQtyTxt [mc "This is optional, leave blank if unknown"]
 
-    grid [ttk::entry $ldWid(addTpl,f2b).boxQtyEntry -textvariable tplLabel(MaxBoxQty)] -column 1 -row 0
+    grid [ttk::entry $ldWid(addTpl,f2b).boxQtyEntry -textvariable tplLabel(MaxBoxQty)] -column 1 -row 1 -padx 2p -sticky ew
         tooltip::tooltip $ldWid(addTpl,f2b).boxQtyEntry [mc "This is optional, leave blank if unknown"]
 
-    grid [ttk::label $ldWid(addTpl,f2b).shipQtyTxt -text [mc "Ship. Qty"]] -column 0 -row 1 -padx 2p -sticky e
+    grid [ttk::label $ldWid(addTpl,f2b).shipQtyTxt -text [mc "Ship. Qty"]] -column 0 -row 2 -padx 2p -sticky e
 
-    grid [ttk::entry $ldWid(addTpl,f2b).shipQtyEntry] -column 1 -row 1
+    grid [ttk::entry $ldWid(addTpl,f2b).shipQtyEntry] -column 1 -row 2 -padx 2p -sticky ew
         bind $ldWid(addTpl,f2b).shipQtyEntry <Return> {
             ea::code::ld::AddShipQty $ldWid(addTpl,f2b).shipQtyEntry $ldWid(addTpl,f2b).lbox
         }
 
-    grid [ttk::button $ldWid(addTpl,f2b).addBtn -text [mc "Add"] -command {ea::code::ld::AddShipQty $ldWid(addTpl,f2b).shipQtyEntry $ldWid(addTpl,f2b).lbox}] -column 2 -row 1
+    grid [ttk::button $ldWid(addTpl,f2b).addBtn -text [mc "Add"] -command {ea::code::ld::AddShipQty $ldWid(addTpl,f2b).shipQtyEntry $ldWid(addTpl,f2b).lbox}] -column 2 -row 2 -padx 2p -sticky ew
 
-    grid [listbox $ldWid(addTpl,f2b).lbox -selectmode extended] -column 1 -row 2 -pady 5p -sticky news
+    grid [listbox $ldWid(addTpl,f2b).lbox -selectmode extended] -column 1 -row 3 -pady 5p -sticky news
         bind $ldWid(addTpl,f2b).lbox <Double-1> {
             ea::code::ld::delShipQty %W
         }
