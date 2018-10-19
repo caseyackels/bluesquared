@@ -1,3 +1,9 @@
+= Version 3.0.4 (October 2018)
+== Notes
+* Update Ship Via's for USPS. RegionalRateA and B are now supported.
+
+--
+
 = Version 3.0.3 (December 2016)
 == Notes
 * Correct how USPS quantities are put on the label in the Attention line.

@@ -117,9 +117,9 @@ proc 'distHelper_sourceReqdFiles {} {
     source [file join [file dirname [info script]] Libraries popups.tcl]
     source [file join [file dirname [info script]] Libraries errorMsg_gui.tcl]
     source [file join [file dirname [info script]] Libraries StreetSuffixState.tcl]
-    
+
     loadSuffix ;# Initialize variables from StreetSuffixState.tcl
-    
+
     #load [file join [file dirname [info script]] Libraries twapi twapi-x86-3.1.17.dll]
     #source [file join [file dirname [info script]] Libraries debug.tcl]
 
@@ -155,15 +155,15 @@ proc 'distHelper_initVariables {} {
     global settings header mySettings env intl ship international
 
     # hackish, but this will allow us to add new defaults/settings without killing an existing config file.
-    
+
     # Create personal settings file %appdata%
     if {[file isdirectory [file join $env(APPDATA) E_A]] == 0} {
         file mkdir [file join $env(APPDATA) E_A]
     }
-    
+
     # Find out where we are in the system
     set settings(Home) [pwd]
-    
+
     #if {![info exists settings(Home)]} {
     #    # Application location
     #    set settings(Home) [pwd]
@@ -175,7 +175,7 @@ proc 'distHelper_initVariables {} {
         # DEPRECATED 7-23
         set settings(outFilePath) [file dirname $settings(Home)]
     }
-    
+
     if {![info exists mySettings(outFilePath)]} {
         # NEW 7-23 / Putting these settings into %APPDATA% instead of the server.
         # Location for saving the file
@@ -187,7 +187,7 @@ proc 'distHelper_initVariables {} {
         # DEPRECATED 7-23
         set settings(outFilePathCopy) [file dirname $settings(Home)]
     }
-    
+
     if {![info exists mySettings(outFilePathCopy)]} {
         # NEW 7-23 / Putting these settings into %APPDATA% instead of the server.
         # Location for saving a copy of the file (this should just be up one directory)
@@ -199,7 +199,7 @@ proc 'distHelper_initVariables {} {
         # DEPRECATED 7-23
         set settings(sourceFiles) [file dirname $settings(Home)]
     }
-    
+
     if {![info exists mySettings(sourceFiles)]} {
         # NEW 7-23 / Putting these settings into %APPDATA% instead of the server.
         # Default for finding the source import files
@@ -220,10 +220,10 @@ proc 'distHelper_initVariables {} {
         # Set possible pre paid shipvia codes
         set settings(shipviaPP) [list 017 018]
     }
-    
+
     # If changing this, you must also change the packingtype assignment in Disthelper_Helper::shipVia
     if {![info exists settings(shipviaUSPS)]} {
-        set settings(shipviaUSPS) [list 201 202 203 204 205 208 213 215]
+        set settings(shipviaUSPS) [list 201 202 203 204 205 208 209 210 213 215]
     }
 
     if {![info exists settings(BoxTareWeight)]} {
@@ -234,7 +234,7 @@ proc 'distHelper_initVariables {} {
     #
     # Header
     #
-    
+
     if {![info exists header(shipvia)]} {
         set header(shipvia) [list ShipViaCode "ship via" shipvia]
     }
@@ -267,11 +267,11 @@ proc 'distHelper_initVariables {} {
     if {![info exists header(city)]} {
         set header(city) [list City ShipToCity]
     }
-    
+
     if {![info exists header(state)]} {
         set header(state) [list ShipToState st st. state]
     }
-    
+
     if {![info exists header(country)]} {
         set header(country) [list country ShipToCountry]
     }
@@ -279,15 +279,15 @@ proc 'distHelper_initVariables {} {
      if {![info exists header(zip)]} {
         set header(zip) [list ShipToZipCode zip zipcode "zip code" postalcode "postal code" postal]
     }
-    
+
     if {![info exists header(phone)]} {
         set header(phone) [list phone ShipToPhone]
     }
-    
+
     if {![info exists header(email)]} {
         set header(email) [list email ShipToEmail]
     }
-    
+
     if {![info exists header(shipdate)]} {
         set header(shipdate) [list "Ship Date" shipdate]
     }
@@ -302,12 +302,12 @@ proc 'distHelper_initVariables {} {
         # After we output the file, Reference1 will hold the job number
         set header(Reference1) [list Reference1]
     }
-    
+
     if {![info exists header(version)]} {
         # This is used in the original file, and reassigned to the Reference2 column
         set header(version) [list version vers]
     }
-    
+
     if {![info exists header(Reference2)]} {
         # After we output the file, Reference2 will hold the Version/Qty
         set header(Reference2) [list Reference2]
@@ -317,7 +317,7 @@ proc 'distHelper_initVariables {} {
         # This is used in the original file, and reassigned to the Reference2 column
         set header(quantity) [list quantity qty]
     }
-    
+
     if {![info exists header(PackageQuantity)]} {
         set header(PackageQuantity) [list PackageQuantity]
     }
@@ -326,14 +326,14 @@ proc 'distHelper_initVariables {} {
         # 3P Account Number
         set header(3rdPartyNumber) [list ThirdPartyAccountNumber "3rd Party" 3rdParty 3p]
     }
-    
+
     if {![info exists header(3rdPartyCode)]} {
         # Customer Code within Process Shipper
         set header(3rdPartyCode) [list ThirdPartyID]
     }
     #
     # - These are used internally
-    # 
+    #
     if {![info exists header(pieceweight)]} {
         set header(pieceweight) [list pieceweight "pc weight" "piece weight" "pc wgt"]
     }
@@ -341,61 +341,61 @@ proc 'distHelper_initVariables {} {
     if {![info exists header(fullbox)]} {
         set header(fullbox) [list fullbox "full box"]
     }
-    
+
     if {![info exists header(residential)]} {
         # This column is used when we use address cleansing. We run it through Process Shipper once, then open it again in EA.
         set header(residential) [list ResidentialDelivery]
     }
-    
-    # International Array 
+
+    # International Array
     if {![info exists international(itemDesc,check)]} {
         set international(itemDesc,check) 1
     }
-    
+
     if {![info exists international(uom)]} {
         set international(uom) Each
     }
-    
+
     if {![info exists international(dutiesPayer)]} {
         set international(dutiesPayer) SENDER
     }
-    
+
     if {![info exists international(dutiesPayerAcct)]} {
         set international(dutiesPayerAcct) ""
     }
-    
+
     if {![info exists international(itemNum,check)]} {
         set international(itemNum,check) 1
     }
-    
+
     if {![info exists international(itemQty,check)]} {
         set international(itemQty,check) 1
     }
-    
+
     if {![info exists international(license)]} {
         set international(license) NLR
     }
-    
+
     if {![info exists international(licenseDate,check)]} {
         set international(licenseDate,check) 1
     }
-    
+
     if {![info exists international(countryOfOrigin)]} {
         set international(countryOfOrigin) US
     }
-    
+
     if {![info exists international(termsOfShipment)]} {
         set international(termsOfShipment) DDP
     }
-    
+
     if {![info exists international(unitValue)]} {
         set international(unitValue) 1
     }
-    
+
     if {![info exists international(itemWeight,check)]} {
         set international(itemWeight,check) 1
-    }  
-    
+    }
+
 }
 
 
@@ -435,13 +435,13 @@ proc 'distHelper_loadSettings {} {
     puts "Platform: $tcl_platform(osVersion)"
     puts [parray tcl_platform]
 
-    
+
     set program(Version) 3
-    set program(PatchLevel) 3
+    set program(PatchLevel) 5
     set program(beta) ""
     set program(Name) "Efficiency Assist"
     set program(FullName) "$program(Name) - $program(Version).$program(PatchLevel) $program(beta)"
-    
+
     tk appname $program(Name)
 
     # Theme setting for Tile
@@ -460,7 +460,7 @@ proc 'distHelper_loadSettings {} {
         # Initialize default values
         #'distHelper_initVariables
     } else {
-	
+
     set configFile [split [read $fd] \n]
 	catch {chan close $fd}
 
@@ -472,20 +472,20 @@ proc 'distHelper_loadSettings {} {
         puts "Loaded variables"
         #parray company
     }
-    
+
     set fd "" ;# Make sure we are cleared out before reusing.
     # Load Personalized settings
     if {[catch {open [file join $env(APPDATA) E_A settings.txt] r} fd]} {
         puts "Cannot find settings.txt; loading defaults"
         set settings(newSettingsTxt) no
-        
+
         'distHelper_initVariables ;# load defaults
-        
+
     } else {
         set settings(newSettingsTxt) yes
         set settingsFile [split [read $fd] \n]
         catch {chan close $fd}
-        
+
         foreach line $settingsFile {
                 if {$line == ""} {continue}
                 set l_line [split $line " "]

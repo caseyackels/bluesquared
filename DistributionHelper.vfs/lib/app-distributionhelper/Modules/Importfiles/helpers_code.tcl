@@ -81,7 +81,7 @@ proc Disthelper_Helper::resetVars {args} {
 		    }
 
 		    array unset importFile
-            
+
 		    # Clear out the listbox
 		    .container.frame1.listbox delete 0 end
 
@@ -129,7 +129,7 @@ proc Disthelper_Helper::getOpenFile {} {
     global settings mySettings
         ;#{{Excel 97-2003}        {.xls}      }
         ;#{{Excel}                {.xlsx}     }
-        
+
     set filetypes {
         {{CSV Files}            {.csv}      }
 
@@ -379,7 +379,7 @@ proc Disthelper_Helper::processChildren {child key} {
         # Configure Entry Fields
         [lrange $child2 [lsearch -glob $child2 *Entry] [lsearch -glob $child2 *Entry]] configure -state $key
         }
-        
+
 
 
         if {[lsearch -glob $child2 *Combo] != -1} {
@@ -428,7 +428,7 @@ proc Disthelper_Helper::detectData {args} {
     'debug "StringLength: [string length [[lindex $args 0] get]]"
     'debug "String: [[lindex $args 0] get]"
     #'debug "Widget: [lindex $args 1]"
-    
+
     if {![info exists tempVars]} {
         # Detect if we exist, if not set the array.
         array set tempVars {
@@ -438,7 +438,7 @@ proc Disthelper_Helper::detectData {args} {
             shipDateTmp ""
         }
     }
-    
+
 
     switch -- [lindex $args 2] {
 	shipVia     {
@@ -488,11 +488,11 @@ proc Disthelper_Helper::detectData {args} {
         }
     }
     # END SWITCH
-    
+
 	# Only enable the Generate File button if the required fields are populated.
         puts [parray tempVars]
-	
-        
+
+
         if {($tempVars(pieceWeightTmp) == 1) &&
             ($tempVars(fullBoxTmp) == 1) &&
             ($tempVars(shipDateTmp) == 1) &&
@@ -581,7 +581,7 @@ proc Disthelper_Helper::shipVia {l_line name} {
     #
     #***
     global importFile settings GS_job header customer3P intl
-    
+
     puts "Starting ShipVia"
 
     # See if we need to add any leading zero's.
@@ -606,8 +606,8 @@ proc Disthelper_Helper::shipVia {l_line name} {
     } else {
                 set shipVia [list [lindex $l_line $importFile($name)]]
     }
-    
-    
+
+
     switch -- $shipVia {
         201     {set packtype MediumFlatRateBox}
         202     {set packtype MediumFlatRateBox}
@@ -615,12 +615,14 @@ proc Disthelper_Helper::shipVia {l_line name} {
         204     {set packtype Flat}
         205     {set packtype Parcel}
         208     {set packtype Parcel}
+        209     {set packtype RegionalRateBoxA}
+        210     {set packtype RegionalRateBoxB}
         213     {set packtype Letter}
         215     {set packtype Parcel}
         216     {set packtype FlatRateEnvelope}
         default {set packtype ""}
     }
-    
+
     set intl(13_PackingType) $packtype
 
     # Fill the 3P variables with dummy data, it will be over written if we are actually doing 3P
@@ -635,7 +637,7 @@ proc Disthelper_Helper::shipVia {l_line name} {
             Error_Message::errorMsg 3rdParty1
             return -code 2
         }
-        
+
         foreach customer $customer3P(table) {
             puts "3pCode $GS_job(3rdPartyName)"
             if {[lsearch $customer $GS_job(3rdPartyName)] == 0} {
@@ -744,11 +746,11 @@ proc Disthelper_Helper::Excel {filename args} {
     global matrix tcl_platform program
     set application [::tcom::ref createobject Excel.Application]
     #set CellFormat [::tcom::ref createobject Excel.CellFormat]
-    
+
     # Suppress Excel Gui and Alerts
     $application Visible 0
     $application DisplayAlerts [expr 0]
-    
+
     # Create workbook
     set workbooks [$application Workbooks]
 
@@ -756,23 +758,23 @@ proc Disthelper_Helper::Excel {filename args} {
     set worksheets [$workbook Worksheets]
     # Delete all but on worksheet
     set sheetCount [$worksheets Count]
-        
+
         for {set n ${sheetCount}} {${n}>1} {incr n -1} {
             set worksheet [$worksheets Item [expr ${n}]]
             ${worksheet} Delete
         }
-    
+
     # Rename first worksheet
     set worksheet [$worksheets Item [expr 1]]
     $worksheet Name "UPS Import"
-    
+
     #set CellFormat [$application CellFormat]
     #set number [$CellFormat NumberFormat]
-    
+
     # Populate the worksheet
     set cells [$worksheet Cells]
     #set number [$worksheet CellFormat]
-    
+
     ##
     ## HEADER NAMES & DESCRIPTIONS
     ##
@@ -825,7 +827,7 @@ proc Disthelper_Helper::Excel {filename args} {
     #AddressCleansingComment
     #AddressCleansingReconciled
 
-    
+
     # Set the Header Row, Columns, and Addresses
     set header [list ShipViaCode ShipToName ShipToContact ShipToAddressline1 ShipToAddressline2 ShipToAddressLine3 ShipToCity \
                 ShipToState ShipToZipCode ShipToCountry ShipToPhoneNo ShipToEmail DeliveryDocNumber Reference1 PackageId PackageQuantity \
@@ -884,14 +886,14 @@ proc Disthelper_Helper::Excel {filename args} {
 
     #set columnList [list A B C D E F G H I J K L M N O P Q R S T U V W X Y]
     set columnList [list A B C D E F G H I J K L M N O P Q R S T U V W X Y Z AA AB AC AD AE AF AG AH AI AJ AK AL AM AN AO AP AQ AR AS AT AU AV]
-    
+
     set x 0 ;# x is only used for the header row.
     set row 1
     foreach column $columnList {
             $cells Item $row $column [lindex $header $x]
             incr x
     }
-    
+
     # Insert the addresses
     set i 0 ;# i is only used for the addresses
     set row 2
@@ -919,14 +921,14 @@ proc Disthelper_Helper::Excel {filename args} {
         $workbook SaveAs $filename
         puts "Platform: $tcl_platform(osVersion)"
     }
-    
-    
+
+
     # Release the connection to Excel
     $application Quit
     set application {}
-    
+
     set program(fileComplete) "File Complete!"
-    
+
 } ;# Disthelper_Helper::Excel
 
 proc Disthelper_Helper::filterKeys {args} {
@@ -988,13 +990,13 @@ proc Disthelper_Helper::setIntlVarDefault {args} {
     #
     #***
     global international
-    
+
     #varValue = 0 (off) or 1 (on)
     #varValue is ultimately the name of the variable minus the array portion (i.e. itemDesc,check for internatinal(itemDesc,check))
-    
+
     set varValue [lindex $args 0]
     set widgetPath [lindex $args 1]
-    
+
     if {$international($varValue) == 1} {
         $widgetPath configure -state disabled
     } else {
