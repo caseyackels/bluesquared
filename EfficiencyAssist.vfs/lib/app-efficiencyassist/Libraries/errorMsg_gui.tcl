@@ -145,10 +145,15 @@ proc Error_Message::errorMsg {code args} {
                             set title [mc "Information"]
                             set icon info
                         }
-        BL008           {set message [mc "This job has at leaset one template.\nUse the 'Versions' prefixed with .CUSTOM.\nTotal Versions: %s" [llength $job(Versions)]]
+        BL008           {set message [mc "This job has at least one template.\nUse the 'Versions' prefixed with .CUSTOM.\nTotal Versions: %s" [llength $job(Versions)]]
                             set message2 [mc "ID: %s" $code]
                             set title [mc "Information"]
                             set icon info
+                        }
+        LD001           {set message [mc "This version already exists in the database."]
+                            set message2 [mc "ID: %s" $code]
+                            set title [mc "Warning"]
+                            set icon warning
                         }
         default         {set message [mc "Unknown Error Message"]
                             set message2 [mc "Received Message: %s" $code]

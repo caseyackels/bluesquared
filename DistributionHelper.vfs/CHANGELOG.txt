@@ -1,4 +1,10 @@
-= Version 3.0.4 (October 2018)
+= Version 3.6 (October 2018)
+== Bug
+* Fixed issue where partial box qty wasn't being printed on the labels, in the attention field.
+
+--
+
+= Version 3.5 (October 2018)
 == Notes
 * Update Ship Via's for USPS. RegionalRateA and B are now supported.
 

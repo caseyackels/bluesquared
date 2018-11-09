@@ -498,7 +498,7 @@ proc ea::db::bl::getAssociatedTemplates {} {
     # Match title code to EA DB
     set titleID [ea::db::ld::getTemplateID $job(TitleID)]
 
-    set titleID [db eval "SELECT tplID FROM LabelTPL WHERE PubTitleID = $job(TitleID)"]
+    set titleID [db eval "SELECT tplID FROM LabelTPL WHERE PubTitleID = $job(TitleID) AND Status = 1"]
     if {$titleID ne ""} {
         # Retrieve template name
         set job(TemplateName) [db eval "SELECT tplLabelName FROM LabelTPL WHERE tplID = $titleID"]

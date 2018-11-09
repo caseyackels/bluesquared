@@ -223,7 +223,7 @@ proc 'distHelper_initVariables {} {
 
     # If changing this, you must also change the packingtype assignment in Disthelper_Helper::shipVia
     if {![info exists settings(shipviaUSPS)]} {
-        set settings(shipviaUSPS) [list 201 202 203 204 205 208 209 210 213 215]
+        set settings(shipviaUSPS) [list 201 202 203 204 205 208 209 210 213 215 216]
     }
 
     if {![info exists settings(BoxTareWeight)]} {
@@ -437,7 +437,7 @@ proc 'distHelper_loadSettings {} {
 
 
     set program(Version) 3
-    set program(PatchLevel) 5
+    set program(PatchLevel) 6
     set program(beta) ""
     set program(Name) "Efficiency Assist"
     set program(FullName) "$program(Name) - $program(Version).$program(PatchLevel) $program(beta)"

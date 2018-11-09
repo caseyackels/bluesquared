@@ -143,6 +143,9 @@ proc 'eAssist_sourceReqdFiles {} {
     namespace eval ea::code::init {}
     namespace eval ea::db::init {}
 
+	# icons
+	namespace eval ea::icons {}
+
     # Batch formatter
     namespace eval ea::code::bf {}
     namespace eval ea::gui::bf {}
@@ -443,7 +446,10 @@ proc 'eAssist_initVariables {} {
 						LabelPrinter "" \
 						tmpValues,rbtn "" \
                         tmpValues "" \
-						Status 1]
+						MatchBy "" \
+						MatchOn "" \
+						Status 1 \
+						LabelVersionStatus 1]
 
 	# Filters
 	array set filter [list run,stripASCII_CC 0 \
@@ -705,6 +711,7 @@ proc 'eAssist_loadSettings {} {
 	# user(id)
 
 }
+
 # Load required packages and DB
 'eAssist_bootStrap
 
@@ -714,7 +721,35 @@ proc 'eAssist_loadSettings {} {
 # Load the config file
 'eAssist_loadSettings
 
+proc ea::icons::InitializeIcons {} {
+    global program
 
+	#set iconList [glob -directory [file join $starkit::topdir lib app-NextGenRM icons] *]
+	set program(themeName) led
+	set iconDir16x16 [file join $starkit::topdir lib app-efficiencyassist Libraries IconThemes $program(themeName) Icons16x16]
+
+	## 16x16 Images
+	# Add Item
+	image create photo addItem16x16 -file [file join $iconDir16x16 add.png]
+
+	# Delete item
+	image create photo delItem16x16 -file [file join $iconDir16x16 delete.png]
+
+	# Add Page
+	image create photo addPage16x16 -file [file join $iconDir16x16 page.png]
+
+	# Delete Page
+	image create photo delPage16x16 -file [file join $iconDir16x16 page_white_delete.png]
+
+	# Edit Page
+	image create photo editPage16x16 -file [file join $iconDir16x16 page_white_edit.png]
+
+	# Copy Page
+	image create photo copyPage16x16 -file [file join $iconDir16x16 page_copy.png]
+}
+
+# Load the icons
+ea::icons::InitializeIcons
 
 # Get the currently loaded modules (box labels, batch maker, etc)
 #eAssist_Global::getModules

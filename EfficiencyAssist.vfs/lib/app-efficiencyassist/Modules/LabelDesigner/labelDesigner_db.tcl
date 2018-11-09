@@ -1,7 +1,6 @@
 # Creator: Casey Ackels (C) 2017
 
 # Retrieve Data
-# NOT UPDATED
 proc ea::db::ld::getLabelProfile {} {
     # Called by:
     ## ea::gui::ld::genLines
@@ -147,7 +146,9 @@ proc ea::db::ld::writeTemplate {} {
                     SET tplLabelName = '$tplLabel(Name)',
                         tplNotePriv = '$tplLabel(NotePriv)',
                         tplNotePub = '$tplLabel(NotePub)',
-                        Status = '$tplLabel(Status)'
+                        Status = '$tplLabel(Status)',
+                        tplLabelMatchOn = '$tplLabel(MatchOn)',
+                        tplLabelMatchBy = '$tplLabel(MatchBy)'
                     WHERE tplID = $tplLabel(ID)"
     }
 } ;# ea::db::ld::writeTemplate
@@ -219,14 +220,13 @@ proc ea::db::ld::writeLabelData {} {
         ${log}::debug LabelVersionID,current has no value. Exiting.
         return
     }
-    # Delete any existing data before adding to the database
-    #db eval "DELETE FROM LabelData WHERE labelVersionID = $tplLabel(LabelVersionID,current)"
 
     for {set x 0} {[$ldWid(f2b).listbox size] > $x} {incr x} {
         if {[$ldWid(f2b).listbox getcells $x,1] ne ""} {
             #${log}::debug [$ldWid(f2b).listbox get $x]
             foreach item [lrange [$ldWid(f2b).listbox get $x] 1 end] {
-                lappend insItem '$item'
+                ${log}::debug Row Data: $item
+                lappend insItem '[string map {' ''} $item]'
             }
 
             set insItem [join $insItem ,]
@@ -281,8 +281,8 @@ proc ea::db::ld::getLabelVersionList {wid} {
         return
     }
 
-    ${log}::debug db eval "SELECT LabelVersionDesc FROM LabelVersions WHERE tplID = $tplLabel(ID) ORDER BY LOWER(LabelVersionDesc)"
-    $wid configure -values [db eval "SELECT LabelVersionDesc FROM LabelVersions WHERE tplID = $tplLabel(ID) ORDER BY LOWER(LabelVersionDesc)"]
+    ${log}::debug db eval "SELECT LabelVersionDesc FROM LabelVersions WHERE tplID = $tplLabel(ID) AND LabelVersionDeleted = 0 ORDER BY LOWER(LabelVersionDesc)"
+    $wid configure -values [db eval "SELECT LabelVersionDesc FROM LabelVersions WHERE tplID = $tplLabel(ID) AND LabelVersionDeleted = 0 ORDER BY LOWER(LabelVersionDesc)"]
     #set tplLabel(LabelVersionDesc,current)
 } ;# ea::db::ld::getLabelVersionList $wid
 
@@ -327,8 +327,10 @@ proc ea::db::ld::setLabelVersionVars {} {
                         set tplLabel(SerializeLabel) $LabelVersionSerialize
                         set tplLabel(MaxBoxQty) $LabelVersionMaxBoxQty
                     }
-
-        set tplLabel(LabelSize) [join [db eval "SELECT labelSizeDesc FROM LabelSizes WHERE labelSizeID = $tplLabel(LabelSizeID)"]]
+        if {$tplLabel(LabelSizeID) ne ""} {
+            # It's possible that the user did not fully complete their label setup, and never set the label document
+            set tplLabel(LabelSize) [join [db eval "SELECT labelSizeDesc FROM LabelSizes WHERE labelSizeID = $tplLabel(LabelSizeID)"]]
+        }
     }
 
     ea::db::ld::populateLabelVersionWids
@@ -370,19 +372,24 @@ proc ea::db::ld::isVersionUnique {tpl_id versionDesc} {
 proc ea::db::ld::getTemplates {} {
     # Check the LabelTPL table in DB: EA
     global log tplLabel job ldWid
-    ${log}::debug TitleID: $job(TitleID) / TitleName: $job(Title)
-    set templatesExists [db eval "SELECT tplLabelName FROM LabelTPL WHERE PubTitleID = '$job(TitleID)'"]
+    ${log}::debug TitleID: $job(TitleID) / TitleName: $job(Title) - Retrieving template
 
+    set templatesExists [db eval "SELECT tplLabelName FROM LabelTPL WHERE PubTitleID = '$job(TitleID)'"]
     if {$templatesExists == ""} {
         ${log}::notice No templates found for Title: $job(TitleID)
         #$ldWid(addTpl,f1).cbox0a configure -values [db eval "SELECT tplLabelName FROM LabelTPL WHERE PubTitleID = 11"]
 
     } else {
+        ${log}::notice Templates found for Title: $job(TitleID), setting tplLabel(ID) to $tplLabel(ID)
         $ldWid(addTpl,f1).cbox0a configure -values $templatesExists
         $ldWid(addTpl,f1).cbox0a set [lindex $templatesExists 0]
 
         set tplLabel(ID) [db eval "SELECT tplID FROM LabelTPL WHERE PubTitleID = '$job(TitleID)' AND tplLabelName = '[$ldWid(addTpl,f1).cbox0a get]'"]
-        ${log}::notice Templates found for Title: $job(TitleID), setting tplLabel(ID) to $tplLabel(ID)
+
+        db eval "SELECT tplLabelMatchOn, tplLabelMatchBy FROM LabelTPL WHERE tplID = '$tplLabel(ID)'" {
+            set tplLabel(MatchOn) $tplLabelMatchBy
+            set tplLabel(MatchBy) $tplLabelMatchOn
+        }
     }
 } ;# ea::db::ld::getTemplates
 
@@ -519,17 +526,17 @@ proc ea::db::ld::getCustomerName {title_id} {
     db2 close
 } ;# ea::db::ld::getCustomerName
 
-proc ea::db::ld::getProfile {cbox} {
-    global log
+# proc ea::db::ld::getProfile {cbox} {
+#     global log
+#
+#     $cbox configure -values [db eval "SELECT LabelProfileDesc FROM LabelProfiles ORDER BY LabelProfileID"]
+# } ;# ea::db::ld::getProfile
 
-    $cbox configure -values [db eval "SELECT LabelProfileDesc FROM LabelProfiles ORDER BY LabelProfileID"]
-} ;# ea::db::ld::getProfile
-
-proc ea::db::ld::getLabelProfileID {profile} {
-    global log tplLabel
-
-    set tplLabel(LabelProfileID) [db eval "SELECT LabelProfileID FROM LabelProfiles WHERE LabelProfileDesc = '$profile'"]
-} ;# ea::db::ld::getLabelProfileID
+# proc ea::db::ld::getLabelProfileID {profile} {
+#     global log tplLabel
+#
+#     set tplLabel(LabelProfileID) [db eval "SELECT LabelProfileID FROM LabelProfiles WHERE LabelProfileDesc = '$profile'"]
+# } ;# ea::db::ld::getLabelProfileID
 
 proc ea::db::ld::getNumRows {} {
     global log tplLabel
@@ -556,7 +563,7 @@ proc ea::db::ld::getLabelSizeID {cbox} {
 
     ${log}::debug Label Size Desc: [$cbox get]
     set tplLabel(LabelSizeID) [db eval "SELECT labelSizeID from LabelSizes where labelSizeDesc = '[$cbox get]'"]
-}
+} ;# ea::db::ld::getLabelSizeID
 
 proc ea::db::ld::getDefaultLabelDoc {dest_dir labelSizeID} {
     global log
@@ -567,4 +574,51 @@ proc ea::db::ld::getDefaultLabelDoc {dest_dir labelSizeID} {
 
     ${log}::debug copy $labelDocPath $dest_dir
     file copy -force [join $labelDocPath] [join $dest_dir]
-}
+} ;# ea::db::ld::getDefaultLabelDoc
+
+proc ea::db::ld::writeVersion {wid} {
+    # Write the version name to the DB after checking db for duplicates
+    global log job tplLabel ldWid
+
+    set version_tmp [$wid get]
+    ${log}::debug Version:  [$wid get]
+
+    #set verExists [db eval "SELECT LabelVersionDesc as verName FROM LabelVersions WHERE lower(LabelVersionDesc) = lower('$version_tmp') AND tplID = $tplLabel(ID)"]
+    if {$tplLabel(ID) eq ""} {
+        ea::db::ld::writeTemplate
+    }
+    set verExists [ea::db::ld::isVersionUnique $tplLabel(ID) $version_tmp]
+
+    if {$verExists eq ""} {
+            ${log}::debug Insert $version_tmp into database!
+            db eval "INSERT INTO LabelVersions (tplID, LabelVersionDesc) VALUES ($tplLabel(ID), '$version_tmp')"
+            destroy $ldWid(addVersion)
+    } else {
+        # Version already exists, alert the end user
+         Error_Message::errorMsg LD001
+        ${log}::notice Version $version_tmp already exists in the database
+    }
+} ;# ea::db::ld::writeVersion
+
+proc ea::db::ld::deleteVersion {version tbl_wid} {
+    global log job tplLabel
+    # Retrieve active version, and set the LabelVersionStatus to 0 and LabelVersionDeleted to 0.
+
+    ${log}::debug Deleting version $version from LabelVersions
+    db eval "UPDATE LabelVersions SET LabelVersionStatus = 0, LabelVersionDeleted = 1 WHERE lower(LabelVersionDesc) = lower('$version') AND tplID = $tplLabel(ID)"
+
+    # Reset variables and table widget
+    ${log}::debug [info level 0]: Clearing out the variables and table widget
+    ea::code::ld::resetLabelVersion -complete
+    # set tplLabel(LabelVersionID,current) ""
+    # set tplLabel(LabelVersionDesc,current) ""
+    # set tplLabel(LabelSizeID) ""
+    # set tplLabel(LabelPath) ""
+    # set tplLabel(SerializeLabel) 0
+    # set tplLabel(MaxBoxQty) ""
+    # set tplLabel(LabelSize) ""
+    # set tplLabel(LabelVersionStatus) 1
+    #
+    # $tbl_wid delete 0 end
+
+} ;# ea::db::ld::deleteVersion

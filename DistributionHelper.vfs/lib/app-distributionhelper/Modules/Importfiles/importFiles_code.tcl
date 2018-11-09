@@ -73,7 +73,7 @@ proc Disthelper_Code::readFile {filename} {
     set GS_job(Number) [string trimleft $GS_job(Number) #]
     'debug "Job Number: $GS_job(Number)"
     'debug "filename: $filename"
-    
+
     set GS_job(Description) [join [lrange [split $GS_file(Name)] 1 end-1]]
     set GS_job(DescLength) [string length $GS_job(Description)]
 
@@ -90,7 +90,7 @@ proc Disthelper_Code::readFile {filename} {
         lappend GL_file(dataList) [string toupper $line]
         #'debug while: $line
     }
-    
+
     #'debug ***RECORDS*: [llength $GL_file(dataList)]
 
     chan close $fileName
@@ -145,7 +145,7 @@ proc Disthelper_Code::readFile {filename} {
             # Feature to be added; to split columns that contain city,state,zip
             #elseif {[lsearch -nocase $header(CityStateZip) $line1] != -1} {set internal_line cityStateZip; 'debug Found a CityStateZip!}
             #if {[lsearch -nocase $city $line] != -1} {set internal_line City}
-            
+
             } elseif { [lsearch -nocase $header(city) $line1] != -1} {
                 set GS_address(City) $line
                 Disthelper_RemoveListBoxItem $line
@@ -157,7 +157,7 @@ proc Disthelper_Code::readFile {filename} {
             } elseif { [lsearch -nocase $header(zip) $line1] != -1} {
                 set GS_address(Zip) $line
                 Disthelper_RemoveListBoxItem $line
-                
+
             } elseif { [lsearch -nocase $header(country) $line1] != -1} {
                 set GS_address(Country) $line
                 Disthelper_RemoveListBoxItem $line
@@ -165,16 +165,16 @@ proc Disthelper_Code::readFile {filename} {
             } elseif {[lsearch -nocase $header(phone) $line1] != -1} {
                 set GS_address(Phone) $line
                 Disthelper_RemoveListBoxItem $line
-                
+
             } elseif {[lsearch -nocase $header(email) $line1] != -1} {
                 set GS_job(Email) $line
                 Disthelper_RemoveListBoxItem $line
-                
+
             } elseif {[lsearch -nocase $header(shipdate) $line1] != -1} {
                 set GS_job(Date) $line
                 Disthelper_RemoveListBoxItem $line
                 Disthelper_Helper::detectData .container.frame2.frame2d.shipmentDateEntry .container.frame2.frame2d.shipmentDateField shipDate
-            
+
             } elseif {[lsearch -nocase $header(quantity) $line1] != -1} {
                 set GS_job(Quantity) $line
                 Disthelper_RemoveListBoxItem $line
@@ -183,18 +183,18 @@ proc Disthelper_Code::readFile {filename} {
             } elseif {[lsearch -nocase $header(version) $line1] != -1} {
                 set GS_job(Version) $line
                 Disthelper_RemoveListBoxItem $line
-            
+
             } elseif {[lsearch -nocase $header(pieceweight) $line1] != -1} {
                 set GS_job(pieceWeight) $line
                 Disthelper_RemoveListBoxItem $line
                 Disthelper_Helper::detectData .container.frame2.frame2d.shipmentPieceWeightEntry .container.frame2.frame2d.shipmentPieceWeightField pieceWeight
-            
+
             } elseif {[lsearch -nocase $header(fullbox) $line1] != -1} {
                 set GS_job(fullBoxQty) $line
                 Disthelper_RemoveListBoxItem $line
                 Disthelper_Helper::detectData .container.frame2.frame2d.shipmentFullBoxEntry .container.frame2.frame2d.shipmentFullBoxField fullBox
             }
-            
+
         # Continue processing the list for potential matches where we don't need to search for possible alternate spellings
         switch -nocase -- $line1 {
             ResidentialDelivery {set GS_job(Residential) $line; Disthelper_RemoveListBoxIem $line}
@@ -205,7 +205,7 @@ proc Disthelper_Code::readFile {filename} {
     # Highlight list elements if they exist to raise visiblity that they are there.
     Disthelper_HighlightListBoxItem
     #set ea_header(haveHeaders) ""
-    
+
     if {$ea_header(haveHeaders) eq "yes"} {
         # We have headers, so lets skip the first line.
         #'debug "Headers Found"
@@ -319,7 +319,7 @@ proc Disthelper_Code::writeOutPut {} {
     #
     #***
     global GS_job GS_ship GS_address GL_file GS_file settings mySettings program importFile matrix intl ship
-    
+
     if {[info exists matrix(importFile)]} {unset matrix(importFile)}
 
     # Get the indices of each element of the address/shipment information. Later we will use this to map the data.
@@ -365,7 +365,7 @@ proc Disthelper_Code::writeOutPut {} {
         # escape if we have 'blank' lines
         # It will show up as a string of ,,,,,,,,, in a csv file
         if {[string is punc $line] == 1} {continue}
-            
+
         ## Ensure we have good data; if we don't, lets try to fix it.
         ## This typically occurs when there is a hard return in the data. Excel does not fix it when the file is exported to .csv format
         if {[csv::iscomplete $line] == 0} {
@@ -384,7 +384,7 @@ proc Disthelper_Code::writeOutPut {} {
 
         #set l_line [csv::split $line]
         set l_line [join [split $l_line ,] ""] ;# remove all comma's
-        
+
         'debug Line: $l_line
 
         # Map data to variable
@@ -436,13 +436,13 @@ proc Disthelper_Code::writeOutPut {} {
                         }
 
                         set deladdr [Disthelper_Code::processAddresses delAddr $04_delAddr]
-                        
+
                         if {[lindex $deladdr 0] == "fail"} {
                             set $name [join [lindex $deladdr 1]]
                         } else {
                             set $name [join $deladdr]
                         }
-                        
+
                         #puts "***### 04_delAddr: $04_delAddr"
                 }
                 05_delAddr2 {
@@ -451,7 +451,7 @@ proc Disthelper_Code::writeOutPut {} {
                         if {([lindex $l_line $importFile($name)] != "") && ([lindex $l_line $importFile($name)] != " ")} {
                             set $name [list [lindex $l_line $importFile($name)]]
                         }
-                        
+
                         if {[lindex $deladdr 0] == "fail"} {
                             if {$05_delAddr2 == ""} {
                                 #puts "FAILED - No secondary Address, so reusing"
@@ -469,7 +469,7 @@ proc Disthelper_Code::writeOutPut {} {
                             set $name [list [lindex $l_line $importFile($name)]]
                         } else {
                             set $name [list ""]
-                        }   
+                        }
                 }
                 07_City {
                         #'debug City/$name
@@ -537,7 +537,7 @@ proc Disthelper_Code::writeOutPut {} {
                 }
                 16_3rdPartyName {
                             # If we're blank, check to see if the textvariable from the combobox has a value; if blank we assume it isn't 3rdParty
-                    
+
                 }
                 17_pieceweight {
                             #'debug pieceweight/$importFile($name)
@@ -590,11 +590,11 @@ proc Disthelper_Code::writeOutPut {} {
                                     } else {
                                        set $name [list ""]
                                         #'debug "renaming2: $name"
-                                    }   
+                                    }
                 }
             } ;# End Switch
         } ;# End foreach
-        
+
 
         if {[string is integer [lindex $l_line $importFile(12_Quantity)]]} {
             set val [Disthelper_Code::doMath [lindex $l_line $importFile(12_Quantity)] $18_fullbox]
@@ -632,7 +632,7 @@ proc Disthelper_Code::writeOutPut {} {
             set totalBoxes 1
             #'debug "(boxes3) $totalBoxes - Partial Only"
         }
-        
+
         if {$10_Country ne "US"} {
             if {$11_Phone eq ""} {
                 set 11_Phone 5037909100
@@ -641,33 +641,34 @@ proc Disthelper_Code::writeOutPut {} {
                 set 03_Attention MANAGER
             }
         }
-        
+
         # This handles the USPS ship via's. There isn't a PKGID field on these labels, so we need to prefix the partial box into the attention to name field.
         # e.g qty5 MANAGER
         # We will also truncate the name if it exceeds the 35 char limit
         if {[lsearch $settings(shipviaUSPS) $01_shipVia] != -1} {
             set txtVal [lindex $val 1]
-            
-            if {$txtVal == 0} {set txtVal $18_fullbox}
+            'debug txtVal = $txtVal
+
+            if {$txtVal == 0 || $txtVal eq ""} {set txtVal $18_fullbox}
             #set 03_Attention [Disthelper_Code::processAddresses Attention "QTY[lindex $val 1] $03_Attention"]
             set 03_Attention [Disthelper_Code::processAddresses Attention "QTY$txtVal $03_Attention"]
         }
-        
-        
-        
+
+
+
 
         for {set x 1} {$x <= $totalBoxes} {incr x} {
             'debug Writing to file...
             if {($x != $totalBoxes) || ($onlyFullBoxes eq yes)} {
                 #'debug "boxes: $x - TotalBoxes: $totalBoxes"
                 incr program(totalBooks) $18_fullbox
-                
+
                 # Detect if we are shipping to int'l addresses; if we are, set the required int'l parameters.
                 Disthelper_Code::international $10_Country $17_pieceweight $14_Date $18_fullbox
-                
+
                 if {[string match $13_Version [list ""]] == 1 } { set boxVersion $18_fullbox } else { set boxVersion [list [concat [join $13_Version] / $18_fullbox]] }
                 set boxWeight [::tcl::mathfunc::round [expr {$18_fullbox * $17_pieceweight + $settings(BoxTareWeight)}]]
-                
+
                 if {$GS_job(country) ne "US"} {
                     set pkg 0
                     set boxVersion [list [lindex $alphaList $F_pkg]_$boxVersion]
@@ -729,20 +730,20 @@ proc Disthelper_Code::writeOutPut {} {
 
                 # Detect if we are shipping to int'l addresses; if we are, set the required int'l parameters.
                 Disthelper_Code::international $10_Country $17_pieceweight $14_Date [lindex $val 1]
-                
+
                 if {[string match $13_Version [list ""]] == 1} {
                     set boxVersion [lindex $val 1]
                     } else {
                         set boxVersion [list [concat [join $13_Version] / [lindex $val 1]]]
                     }
-                    
+
                 if {$GS_job(country) ne "US"} {
                     set boxVersion [list [lindex $alphaList $P_pkg]_$boxVersion]
                     incr P_pkg
                 }
 
                 set boxWeight [::tcl::mathfunc::round [expr {[lindex $val 1] * $17_pieceweight + $settings(BoxTareWeight)}]]
-                
+
 
 
 
@@ -810,7 +811,7 @@ proc Disthelper_Code::writeOutPut {} {
     # Set the file path and name
     set outFile [file join $mySettings(outFilePath) "$GS_file(Name) EA GENERATED"]
     set xfile [file nativename [file normalize $outFile]]
-    
+
     # Check to see if the file exists already, if it does lets delete it
     if {[file exists $xfile.xls]} {
         puts "EXISTS: $xfile.xls"
@@ -820,7 +821,7 @@ proc Disthelper_Code::writeOutPut {} {
     puts "llength on records: $"
 
     Disthelper_Helper::Excel $xfile
-     
+
     #puts "matrix: $matrix(importFile)"
 
 } ;# End of writeOutPut
