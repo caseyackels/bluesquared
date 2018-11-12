@@ -226,7 +226,8 @@ proc ea::gui::ld::addTemplate {args} {
                                         -fullseparators yes \
                                         -forceeditendcommand yes \
                                         -yscrollcommand [list $ldWid(f2b).scrolly set] \
-                                        -editstartcommand ea::code::ld::editStartCmd
+                                        -editstartcommand ea::code::ld::editStartCmd \
+                                        -editendcommand ea::code::ld::editEndCmd
 
         $ldWid(f2b).listbox columnconfigure 0 -showlinenumbers 1 -name count
         $ldWid(f2b).listbox columnconfigure 1 -name row -editable yes -editwindow ttk::combobox
@@ -251,8 +252,15 @@ proc ea::gui::ld::addTemplate {args} {
 
     grid [ttk::label $ldWid(addTpl,f2b).versionTxt -text [mc "Label Version"]] -column 0 -row 0 -padx 2p -pady 2p -sticky e
     grid [ttk::combobox $ldWid(addTpl,f2b).versionDescCbox -width 35 -state readonly \
-                                                            -textvariable xx \
+                                                            -textvariable tplLabel(LabelVersionDesc,current) \
                                                             -postcommand {ea::db::ld::getLabelVersionList $ldWid(addTpl,f2b).versionDescCbox}] -column 1 -columnspan 2 -row 0 -padx 2p -pady 5p -sticky ew
+        bind $ldWid(addTpl,f2b).versionDescCbox <<ComboboxSelected>> {
+             ${log}::debug Changing versions for Shipment Quantities
+             ea::code::ld::resetLabelVersion -keepVersion
+
+             if {$tplLabel(LabelVersionDesc,current) eq ""} {return}
+             ea::db::ld::setLabelVersionVars
+        }
 
     grid [ttk::label $ldWid(addTpl,f2b).boxQtyTxt -text [mc "Max. Box Qty"]] -column 0 -row 1 -padx 2p -sticky e
         tooltip::tooltip $ldWid(addTpl,f2b).boxQtyTxt [mc "This is optional, leave blank if unknown"]
@@ -267,7 +275,7 @@ proc ea::gui::ld::addTemplate {args} {
             ea::code::ld::AddShipQty $ldWid(addTpl,f2b).shipQtyEntry $ldWid(addTpl,f2b).lbox
         }
 
-    grid [ttk::button $ldWid(addTpl,f2b).addBtn -text [mc "Add"] -command {ea::code::ld::AddShipQty $ldWid(addTpl,f2b).shipQtyEntry $ldWid(addTpl,f2b).lbox}] -column 2 -row 2 -padx 2p -sticky ew
+    grid [ttk::button $ldWid(addTpl,f2b).addBtn  -image addItem16x16 -command {ea::code::ld::AddShipQty $ldWid(addTpl,f2b).shipQtyEntry $ldWid(addTpl,f2b).lbox}] -column 2 -row 2 -padx 2p -sticky w
 
     grid [listbox $ldWid(addTpl,f2b).lbox -selectmode extended] -column 1 -row 3 -pady 5p -sticky news
         bind $ldWid(addTpl,f2b).lbox <Double-1> {

@@ -496,16 +496,31 @@ proc ea::db::bl::getAssociatedTemplates {} {
     ea::db::ld::getCustomerTitleID
 
     # Match title code to EA DB
-    set titleID [ea::db::ld::getTemplateID $job(TitleID)]
+    set titleID ""
+    set matchBy ""
 
-    set titleID [db eval "SELECT tplID FROM LabelTPL WHERE PubTitleID = $job(TitleID) AND Status = 1"]
+    db eval "SELECT tplID, tplLabelMatchBy, tplLabelMatchOn FROM LabelTPL WHERE PubTitleID = $job(TitleID) AND Status = 1" {
+        set titleID $tplID
+        set matchBy $tplLabelMatchBy ;# Options are Job Name, Job Number, <blank>
+    }
+
+
     if {$titleID ne ""} {
-        # Retrieve template name
-        set job(TemplateName) [db eval "SELECT tplLabelName FROM LabelTPL WHERE tplID = $titleID"]
+        set titleID [ea::db::ld::getTemplateID $job(TitleID)]
+        # Find out if we must match on a certain job name or number
+        if {$matchBy ne ""} {
+            if {$matchBy eq "Job Number"} {
+                set job(TemplateName) [db eval "SELECT tplLabelName FROM LabelTPL WHERE tplID = $titleID AND tplLabelMatchOn = '$job(Number)'"]
+
+            } elseif {$matchBy eq "Job Name"} {
+                set job(TemplateName) [db eval "SELECT tplLabelName FROM LabelTPL WHERE tplID = $titleID AND tplLabelMatchOn = '%$job(Name)%'"]
+            }
+        }
+
         # we have a template, lets populate the widgets
         set job(Template) $titleID
         ${log}::debug We have a template: $job(Template)
-        db eval "SELECT LabelVersionDesc from LabelVersions WHERE tplID = $job(Template) ORDER BY LabelVersionDesc" {
+        db eval "SELECT LabelVersionDesc from LabelVersions WHERE tplID = $job(Template) AND LabelVersionStatus = 1 ORDER BY LabelVersionDesc" {
             lappend ver ".CUSTOM. $LabelVersionDesc"
         }
         return $ver

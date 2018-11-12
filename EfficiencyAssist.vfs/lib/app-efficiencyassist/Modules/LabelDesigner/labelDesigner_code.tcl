@@ -243,14 +243,24 @@ proc ea::code::ld::modifyTemplate {wid} {
 proc ea::code::ld::editStartCmd {tbl row col text} {
     global log mod
     set w [$tbl editwinpath]
-
+     # Row
+     # $ldWid(f2b).listbox getcells 0,1 [row,colunn]
     switch [$tbl columncget $col -name] {
         "row"       {$w configure -values {Row01 Row02 Row03 Row04 Row05 Row06 Row07 ""} -state readonly}
-        "labelText" {$w configure -values $mod(Box_Labels,uservars)}
+        "labelText" {
+            $w configure -values $mod(Box_Labels,uservars)
+            ${log}::debug current row: $ldWid(f2b).listbox getcells $row,1
+        }
         "editable"  {$w configure -values {Yes No} -state readonly}
         default     {}
     }
+
+    $tbl cellconfigure $row,$col -text $text
 } ;# ea::code::ld::editStartCmd
+
+proc ea::code::ld::editEndCmd {tbl row col text} {
+
+} ;# ea::code::ld::editEndCmd
 
 # Add ship qty's to list box
 proc ea::code::ld::AddShipQty {widEntry widListBox} {
