@@ -449,7 +449,9 @@ proc 'eAssist_initVariables {} {
 						MatchBy "" \
 						MatchOn "" \
 						Status 1 \
-						LabelVersionStatus 1]
+						LabelVersionStatus 1 \
+						labelHeaders,system \
+						labelHeaders,tmp]
 
 	# Filters
 	array set filter [list run,stripASCII_CC 0 \

@@ -110,6 +110,9 @@ proc ea::db::ld::getTemplateData {} {
         if {$company ne ""} {
             #${log}::debug $ldWid(f1b).listbox insert end [list "" "$tplID" "$company" "$title" "$Status"]
             $ldWid(f1b).listbox insert end [list "" "$company" "$title" "$newStatus"]
+        } else {
+            # This should only happen with our default templates
+            $ldWid(f1b).listbox insert end [list "" "DEFAULT" "ALL" "$newStatus"]
         }
     }
     db2 close
@@ -133,8 +136,8 @@ proc ea::db::ld::writeTemplate {} {
 
     if {$tplLabel(ID) eq ""} {
         ${log}::notice Creating New Template for: $job(CustName)
-        db eval "INSERT INTO LabelTPL (PubTitleID, tplLabelName, tplNotePriv, tplNotePub, Status)
-                VALUES ($job(TitleID), '$tplLabel(Name)', '$tplLabel(NotePriv)', '$tplLabel(NotePub)', '$tplLabel(Status)')"
+        db eval "INSERT INTO LabelTPL (PubTitleID, tplLabelName, tplNotePriv, tplNotePub, Status, tplLabelMatchOn, tplLabelMatchBy)
+                VALUES ($job(TitleID), '$tplLabel(Name)', '$tplLabel(NotePriv)', '$tplLabel(NotePub)', '$tplLabel(Status)', '$tplLabel(MatchOn)', '$tplLabel(MatchBy)'"
 
         # Get Template ID - First time
         set tplLabel(ID) [db eval "SELECT MAX(tplID) FROM LabelTPL WHERE PubTitleID = '$job(TitleID)'"]
@@ -610,15 +613,4 @@ proc ea::db::ld::deleteVersion {version tbl_wid} {
     # Reset variables and table widget
     ${log}::debug [info level 0]: Clearing out the variables and table widget
     ea::code::ld::resetLabelVersion -complete
-    # set tplLabel(LabelVersionID,current) ""
-    # set tplLabel(LabelVersionDesc,current) ""
-    # set tplLabel(LabelSizeID) ""
-    # set tplLabel(LabelPath) ""
-    # set tplLabel(SerializeLabel) 0
-    # set tplLabel(MaxBoxQty) ""
-    # set tplLabel(LabelSize) ""
-    # set tplLabel(LabelVersionStatus) 1
-    #
-    # $tbl_wid delete 0 end
-
 } ;# ea::db::ld::deleteVersion

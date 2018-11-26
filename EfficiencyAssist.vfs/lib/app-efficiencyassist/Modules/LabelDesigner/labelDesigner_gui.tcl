@@ -76,7 +76,7 @@ proc ea::gui::ld::designerUI {} {
 } ;# ea::gui::ld::designerUI
 
 proc ea::gui::ld::addTemplate {args} {
-    global log ldWid job tplLabel
+    global log ldWid job tplLabel mod
 
     # SETUP
     # Retrieve list of Customers
@@ -134,8 +134,10 @@ proc ea::gui::ld::addTemplate {args} {
     grid [ttk::label $ldWid(addTpl,f1).text2a -text [mc "Template Name"]] -column 0 -row 2 -padx 2p -pady 2p -sticky e
 
     grid [ttk::label $ldWid(addTpl,f1).text2b -text [mc "Match on"]] -column 0 -row 3 -padx 2p -pady 2p -sticky e
-    grid [ttk::combobox $ldWid(addTpl,f1).cboxb -width 12 -state readonly -values [list "Job Number" "Job Name" ""] -textvariable tplLabel(MatchBy)] -column 1 -row 3 -padx 2p -pady 2p -sticky w
-    grid [ttk::entry $ldWid(addTpl,f1).entryb -textvariable tplLabel(MatchOn)] -column 2 -row 3 -padx 2p -pady 2p -sticky ew
+    grid [ttk::combobox $ldWid(addTpl,f1).cboxb -width 12 -state readonly -values [list "Job Number" "Job Name" ""] -textvariable tplLabel(MatchOn)] -column 1 -row 3 -padx 2p -pady 2p -sticky w
+
+    grid [ttk::entry $ldWid(addTpl,f1).entryb -textvariable tplLabel(MatchBy)] -column 2 -row 3 -padx 2p -pady 2p -sticky ew
+        tooltip::tooltip $ldWid(addTpl,f1).entryb [mc "Use % as a wildcard"]
 
 
     grid [ttk::checkbutton $ldWid(addTpl,f1).bkbtn1 -text [mc "Active?"] -variable tplLabel(Status)] -column 4 -row 2 -pady 2p -padx 2p -sticky w
@@ -152,6 +154,7 @@ proc ea::gui::ld::addTemplate {args} {
     #
     $nbk add [ttk::frame $nbk.labelData] -text [mc "Label Data"]
     $nbk add [ttk::frame $nbk.shipments] -text [mc "Shipments"]
+    $nbk add [ttk::frame $nbk.defaults] -text [mc "Defaults"]
 
     ##
     ## Body / Label Data
@@ -170,7 +173,7 @@ proc ea::gui::ld::addTemplate {args} {
 
         # <FocusOut>
         bind $ldWid(addTpl,ldf0).versionDescCbox <<ComboboxSelected>> {
-             ${log}::debug Is this an unknown version (new?) $tplLabel(LabelVersionDesc,current)
+             #${log}::debug Is this an unknown version (new?) $tplLabel(LabelVersionDesc,current)
              ea::code::ld::resetLabelVersion -keepVersion
 
              if {$tplLabel(LabelVersionDesc,current) eq ""} {return}
@@ -224,7 +227,7 @@ proc ea::gui::ld::addTemplate {args} {
                                         -exportselection yes \
                                         -showseparators yes \
                                         -fullseparators yes \
-                                        -forceeditendcommand yes \
+                                        -forceeditendcommand no \
                                         -yscrollcommand [list $ldWid(f2b).scrolly set] \
                                         -editstartcommand ea::code::ld::editStartCmd \
                                         -editendcommand ea::code::ld::editEndCmd
@@ -290,6 +293,55 @@ proc ea::gui::ld::addTemplate {args} {
             ea::code::ld::delShipQty %W
         }
 
+
+    ##
+    ## Body / Defaults
+    ## This is to adjust the default behavior for the Box Labels module
+    set ldWid(addTpl,df0) [ttk::labelframe $nbk.defaults.f0 -text [mc "Default Label Mapping"] -padding 2]
+    pack $ldWid(addTpl,df0) -expand no -fill x -pady 5p -padx 5p
+
+    grid [ttk::label $ldWid(addTpl,df0).row01 -text [mc "Row01"]] -column 0 -row 0 -padx 2p -pady 2p -sticky e
+    grid [ttk::combobox $ldWid(addTpl,df0).row01Cbox -width 35 -state readonly \
+                                                            -textvariable "" \
+                                                            -values $mod(Box_Labels,uservars) \
+                                                            -postcommand {}] -column 1 -row 0 -padx 2p -pady 2p -sticky ew
+
+    grid [ttk::label $ldWid(addTpl,df0).row02 -text [mc "Row02"]] -column 0 -row 1 -padx 2p -pady 2p -sticky e
+    grid [ttk::combobox $ldWid(addTpl,df0).row02Cbox -width 35 -state readonly \
+                                                            -textvariable "" \
+                                                            -values $mod(Box_Labels,uservars) \
+                                                            -postcommand {}] -column 1 -row 1 -padx 2p -pady 2p -sticky ew
+
+    grid [ttk::label $ldWid(addTpl,df0).row03 -text [mc "Row03"]] -column 0 -row 2 -padx 2p -pady 2p -sticky e
+    grid [ttk::combobox $ldWid(addTpl,df0).row03Cbox -width 35 -state readonly \
+                                                            -textvariable "" \
+                                                            -values $mod(Box_Labels,uservars) \
+                                                            -postcommand {}] -column 1 -row 2 -padx 2p -pady 2p -sticky ew
+
+    set ldWid(addTpl,df1) [ttk::labelframe $nbk.defaults.f1 -text [mc "Misc. Options"] -padding 2]
+    pack $ldWid(addTpl,df1) -expand no -fill x -pady 5p -padx 5p
+
+    grid [ttk::checkbutton $ldWid(addTpl,df1).ckbtn -text [mc "Do not import quantities"]] -column 0 -row 0 -pady 2p -padx 2p
+
+
+    ##
+    ## Save buttons
+    ##
+    set btnBar [ttk::frame $ldWid(addTpl).f3]
+    pack $btnBar -pady 5p -padx 5p -anchor se
+
+    grid [ttk::button $btnBar.save -text [mc "Save"] -command {ea::code::ld::saveTemplateHeader}] -column 0 -row 0 -pady 2p -padx 2p
+    grid [ttk::button $btnBar.cncl -text [mc "Close"] -command {destroy $ldWid(addTpl); ea::db::ld::getTemplateData; ea::code::ld::resetWidgets}] -column 1 -row 0 -pady 2p -padx 2p
+
+    # Context Menu
+    if {[winfo exists .popupMenu]} {destroy .popupMenu}
+    set m [menu .popupMenu]
+    $m add command -label [mc "Paste"] -command {ea::gui::ld::menuPasteQty $ldWid(addTpl,f2b).lbox}
+    bind $ldWid(addTpl,f2b).lbox <<Button3>> {tk_popup .popupMenu %X %Y}
+
+    ##
+    ## MODIFY
+    ##
     # If we are modifying then populate the widgets, and disable Customer and Title fields
     if {$args eq "-modify"} {
         grid [ttk::combobox $ldWid(addTpl,f1).cbox0a -width 30 -textvariable tplLabel(Name) -state readonly] -column 1 -row 2 -columnspan 2 -padx 2p -pady 2p -sticky ew
@@ -318,21 +370,6 @@ proc ea::gui::ld::addTemplate {args} {
             $ldWid(f2b).listbox insert end ""
         }
     }
-
-    ##
-    ## Save buttons
-    ##
-    set btnBar [ttk::frame $ldWid(addTpl).f3]
-    pack $btnBar -pady 5p -padx 5p -anchor se
-
-    grid [ttk::button $btnBar.save -text [mc "Save"] -command {ea::code::ld::saveTemplateHeader}] -column 0 -row 0 -pady 2p -padx 2p
-    grid [ttk::button $btnBar.cncl -text [mc "Close"] -command {destroy $ldWid(addTpl); ea::db::ld::getTemplateData; ea::code::ld::resetWidgets}] -column 1 -row 0 -pady 2p -padx 2p
-
-    # Context Menu
-    if {[winfo exists .popupMenu]} {destroy .popupMenu}
-    set m [menu .popupMenu]
-    $m add command -label [mc "Paste"] -command {ea::gui::ld::menuPasteQty $ldWid(addTpl,f2b).lbox}
-    bind $ldWid(addTpl,f2b).lbox <<Button3>> {tk_popup .popupMenu %X %Y}
 } ;# ea::gui::ld::addTemplate
 
 proc ea::gui::ld::version {args} {

@@ -1,3 +1,9 @@
+= Version 4.1.1 RC6.3.2 (November 2018)
+== Label Designer
+* [NEW] Easier to add/edit/delete multiple label versions. 
+
+--
+
 = Version 4.1.1 RC6.3 (September 2018)
 == Box Labels
 * [BUG] Resolved issue where text could be longer than what could fit on a label

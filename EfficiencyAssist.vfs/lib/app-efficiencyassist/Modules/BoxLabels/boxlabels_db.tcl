@@ -3,152 +3,6 @@
 # File Initial Date: 09 10,2014
 # Last revised: 2/27/18
 
-# proc ea::db::bl::getTplData {tpl btn1 shipToWid shipListWid} {
-#     global log GS_textVar tplLabel job blWid labelText
-#
-#     set tpl [string trim $tpl]
-#     ${log}::debug template id: $tpl
-#
-#     # Retrieve the data and populate the tplLabel array
-#     if {$tpl != ""} {
-#         # Make sure that the number entered, matches the database.
-#         set idExist [db eval "SELECT tplID from LabelTPL WHERE tplID = $tpl"]
-#         if {$idExist == ""} {
-#             ${log}::notice Template: $tpl, doesn't match anything in the database. Clearing variables, and widgets...
-#             Error_Message::errorMsg BL001
-#
-#             ea::code::bl::resetBoxLabels $btn1 $shipToWid $shipListWid
-#
-#             return
-#         }
-#
-#         set tplLabel(ID) $tpl
-#         # id exists, retrieving data
-#         db eval "SELECT PubTitleID, LabelTpl.LabelProfileID as labelProfileID, tplLabelName, tplLabelPath, tplNotePub, tplFixedBoxQty, tplFixedLabelInfo, tplSerialize, LabelProfiles.labelSizeID as labelSizeID  FROM LabelTPL
-#                     INNER JOIN LabelProfiles ON LabelProfiles.LabelProfileID = LabelTPL.LabelProfileID
-#                     WHERE tplID = $tplLabel(ID)" {
-#             set job(Title,id) $PubTitleID
-#             set tplLabel(LabelProfileID) $labelProfileID
-#             set tplLabel(LabelSizeID) $labelSizeID
-#             set tplLabel(Name) $tplLabelName
-#             set tplLabel(LabelPath) $tplLabelPath
-#             set tplLabel(NotePub) $tplNotePub
-#             set tplLabel(FixedBoxQty) $tplFixedBoxQty
-#             set tplLabel(FixedLabelInfo) $tplFixedLabelInfo
-#             set tplLabel(SerializeLabel) $tplSerialize
-#         }
-#
-#         if {$tplLabel(LabelProfileID) == 0 || $tplLabel(LabelProfileID) == 16} {
-#             ${log}::debug We're using a label that uses a run-list, or all text is on the label. Check modification date/time on runlist to see if it has been updated (less than a month)
-#
-#             # Disable all widgets
-#             foreach item [winfo children $blWid(f0BL)] {
-#                 if {[string match *entry* $item] || [string match *cbox* $item] == 1} {
-#                     ${log}::debug Disable Widget: $item
-#                     $item configure -state disabled
-#                 }
-#             }
-#
-#             if {$tplLabel(LabelProfileID) == 0} {
-#                 # only disable if we are using a run-list
-#                 foreach item [winfo children $blWid(f1BL)] {
-#                     if {[string match *txt* $item] != 1} {
-#                         ${log}::debug Disable Widget: $item
-#                         $item configure -state disabled
-#                     }
-#                 }
-#             }
-#
-#         }
-#     }
-#
-#     # Get Profile Info
-#     if {$tplLabel(LabelProfileID) != 0} {
-#         # If the value is 0, that means we do not have a set profile. The label file contains all data, we are just printing the labels.
-#         set tplLabel(LabelProfileDesc) [db eval "SELECT LabelProfileDesc FROM LabelProfiles WHERE LabelProfileID = $tplLabel(LabelProfileID)"]
-#
-#     } else {
-#         set tplLabel(LabelProfileDesc) default
-#     }
-#
-#     # Get Label size info
-#     db eval "SELECT labelSizeDesc, labelPrinter FROM LabelSizes WHERE labelSizeID = $tplLabel(LabelSizeID)" {
-#         set tplLabel(Size) $labelSizeDesc
-#         set tplLabel(LabelPrinter) $labelPrinter
-#     }
-#
-#
-#     if {$tplLabel(FixedBoxQty) != ""} {
-#         set GS_textVar(maxBoxQty) $tplLabel(FixedBoxQty)
-#     }
-#
-#     # Populate the widgets with the label data
-#     ea::db::bl::getLabelText
-# } ;# ea::db::bl::getTplData
-
-# proc ea::db::bl::getLabelText {} {
-#     global log tplLabel GS_textVar blWid
-#     # Find out if we have label text, and if we do populate the text widgets with the data.
-#
-#     if {$tplLabel(LabelProfileID) != 0} {
-#         # No need to issue this query if the LabelProfileID is 0, since that is reserved for a no-user interaction label
-#         # Retrieve the versions
-#             db eval "SELECT labelVersionID, LabelVersionDesc FROM LabelVersions WHERE tplID = $tplLabel(ID)" {
-#                 lappend tplLabel(LabelVersionID) $labelVersionID
-#                 lappend tplLabel(LabelVersionDesc) $LabelVersionDesc
-#             }
-#
-#         # Do we need to retrieve label text?
-#         if {$tplLabel(FixedLabelInfo) != 0 && $tplLabel(LabelVersionID) != 0} {
-#
-#             # Get first version
-#             db eval "SELECT min(ROWID), labelVersionID, LabelVersionDesc FROM LabelVersions WHERE tplID = $tplLabel(ID)" {
-#                 set tplLabel(LabelVersionID,current) $labelVersionID
-#                 set tplLabel(LabelVersionDesc,current) $LabelVersionDesc
-#             }
-#
-#             # Set the active version, and disable the widget
-#             $blWid(f0BL).cbox1 configure -values $tplLabel(LabelVersionDesc)
-#             $blWid(f0BL).cbox1 set $tplLabel(LabelVersionDesc,current)
-#             #$blWid(f0BL).cbox1 state readonly
-#         }
-#         ea::db::bl::populateWidget
-#     } else {
-#         # if the profile is empty, we want to issue a notice to the user that no data will populate the screen
-#         Error_Message::errorMsg BL007
-#     }
-# } ;# ea::db::bl::getLabelText
-
-# proc ea::db::bl::populateWidget {} {
-#     global log tplLabel GS_textVar labelText blWid
-#
-#     # Clear out the widgets
-#     foreach item [array names labelText] {
-#         set labelText($item) ""
-#     }
-#
-#     # Populate the widgets with the first version
-#     db eval "SELECT labelRowNum, labelRowText, userEditable, LabelVersions.LabelVersionDesc FROM LabelData
-#                 INNER JOIN LabelVersions ON LabelVersions.labelVersionID = LabelData.labelVersionID
-#                 WHERE LabelVersions.LabelVersionDesc = '$tplLabel(LabelVersionDesc,current)' ORDER BY labelRowNum ASC" {
-#                     # Add a zero if needed (all digits under 9 will need it)
-#                     if {[string length $labelRowNum] == 1} {
-#                       set labelRowNum 0$labelRowNum
-#                     }
-#
-#                     set labelText(Row$labelRowNum) [string toupper $labelRowText]
-#
-#                     set labelRowNum_trimmed [string trim $labelRowNum 0]
-#                     if {$userEditable != 1} {
-#                         # Do not let the end user edit this field.
-#                         $blWid(f0BL).entry$labelRowNum_trimmed configure -state disable
-#                     } else {
-#                         # set the widget to edit
-#                         $blWid(f0BL).entry$labelRowNum_trimmed configure -state normal
-#                     }
-#                 }
-# } ;# ea::db::bl::populateWidget
-
 ###
 ### Ship to labels
 ###
@@ -499,23 +353,29 @@ proc ea::db::bl::getAssociatedTemplates {} {
     set titleID ""
     set matchBy ""
 
-    db eval "SELECT tplID, tplLabelMatchBy, tplLabelMatchOn FROM LabelTPL WHERE PubTitleID = $job(TitleID) AND Status = 1" {
+    db eval "SELECT tplID, tplLabelMatchOn FROM LabelTPL WHERE PubTitleID = $job(TitleID) AND Status = 1" {
         set titleID $tplID
-        set matchBy $tplLabelMatchBy ;# Options are Job Name, Job Number, <blank>
+        set matchOn $tplLabelMatchOn ;# Options are Job Name, Job Number, <blank>
     }
 
 
     if {$titleID ne ""} {
-        set titleID [ea::db::ld::getTemplateID $job(TitleID)]
         # Find out if we must match on a certain job name or number
-        if {$matchBy ne ""} {
-            if {$matchBy eq "Job Number"} {
-                set job(TemplateName) [db eval "SELECT tplLabelName FROM LabelTPL WHERE tplID = $titleID AND tplLabelMatchOn = '$job(Number)'"]
+        if {$matchOn ne ""} {
+            if {$matchOn eq "Job Number"} {
+                set titleID [db eval "SELECT tplID FROM LabelTPL WHERE PubTitleID = $job(TitleID) AND tplLabelMatchBy = '$job(Number)' AND Status = 1"]
 
-            } elseif {$matchBy eq "Job Name"} {
-                set job(TemplateName) [db eval "SELECT tplLabelName FROM LabelTPL WHERE tplID = $titleID AND tplLabelMatchOn = '%$job(Name)%'"]
+            } elseif {$matchOn eq "Job Name"} {
+                set titleID [db eval "SELECT tplID FROM LabelTPL WHERE PubTitleID = $job(TitleID) AND tplLabelMatchBy LIKE '$job(Name)' AND Status = 1"]
             }
+        } else {
+            set titleID [db eval "SELECT tplID FROM LabelTPL WHERE PubTitleID = $job(TitleID) AND Status = 1"]
         }
+
+        # if the title id still isn't set, it's because we didn't find a match. Abort.
+        if {$titleID eq ""} {return}
+
+        set job(TemplateName) [db eval "SELECT tplLabelName FROM LabelTPL WHERE tplID = $titleID"]
 
         # we have a template, lets populate the widgets
         set job(Template) $titleID

@@ -218,14 +218,17 @@ proc ea::code::ld::modifyTemplate {wid} {
         set tplLabel(Status) 0
     }
 
-    # Retrieve customer title ID
-    ea::db::ld::getCustomerTitleID
+    if {$job(CustName) ne "DEFAULT"} {
+        # DEFAULT is for the generic template that all jobs that don't have a specific template, will use.
+        # Retrieve customer title ID
+        ea::db::ld::getCustomerTitleID
 
-    # Retrieve customer name from Monarch
-    ea::db::ld::getCustomerName $job(TitleID)
+        # Retrieve customer name from Monarch
+        ea::db::ld::getCustomerName $job(TitleID)
 
-    # Retrieve Title Name from Monarch
-    ea::db::ld::getCustomerTitleName $job(TitleID)
+        # Retrieve Title Name from Monarch
+        ea::db::ld::getCustomerTitleName $job(TitleID)
+    }
 
     # Populate title dropdown
     #$ldWid(addTpl,f1).cbox0 configure -state normal
@@ -241,25 +244,26 @@ proc ea::code::ld::modifyTemplate {wid} {
 
 # Tablelist helper
 proc ea::code::ld::editStartCmd {tbl row col text} {
-    global log mod
+    global log mod tplLabel
     set w [$tbl editwinpath]
-     # Row
-     # $ldWid(f2b).listbox getcells 0,1 [row,colunn]
+
     switch [$tbl columncget $col -name] {
-        "row"       {$w configure -values {Row01 Row02 Row03 Row04 Row05 Row06 Row07 ""} -state readonly}
+        "row"       {
+            $w configure -values {Row01 Row02 Row03 Row04 Row05 ""} -state readonly
+        }
         "labelText" {
             $w configure -values $mod(Box_Labels,uservars)
-            ${log}::debug current row: $ldWid(f2b).listbox getcells $row,1
+            ${log}::debug current row: $w getcells $row,1
         }
-        "editable"  {$w configure -values {Yes No} -state readonly}
         default     {}
     }
-
-    $tbl cellconfigure $row,$col -text $text
+    return $text
 } ;# ea::code::ld::editStartCmd
 
 proc ea::code::ld::editEndCmd {tbl row col text} {
-
+    global log
+    ${log}::debug editEndCmd text: $text
+    return $text
 } ;# ea::code::ld::editEndCmd
 
 # Add ship qty's to list box
