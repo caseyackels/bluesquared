@@ -137,7 +137,7 @@ proc ea::db::ld::writeTemplate {} {
     if {$tplLabel(ID) eq ""} {
         ${log}::notice Creating New Template for: $job(CustName)
         db eval "INSERT INTO LabelTPL (PubTitleID, tplLabelName, tplNotePriv, tplNotePub, Status, tplLabelMatchOn, tplLabelMatchBy)
-                VALUES ($job(TitleID), '$tplLabel(Name)', '$tplLabel(NotePriv)', '$tplLabel(NotePub)', '$tplLabel(Status)', '$tplLabel(MatchOn)', '$tplLabel(MatchBy)'"
+                VALUES ($job(TitleID), '$tplLabel(Name)', '$tplLabel(NotePriv)', '$tplLabel(NotePub)', '$tplLabel(Status)', '$tplLabel(MatchOn)', '$tplLabel(MatchBy)')"
 
         # Get Template ID - First time
         set tplLabel(ID) [db eval "SELECT MAX(tplID) FROM LabelTPL WHERE PubTitleID = '$job(TitleID)'"]
@@ -228,16 +228,17 @@ proc ea::db::ld::writeLabelData {} {
         if {[$ldWid(f2b).listbox getcells $x,1] ne ""} {
             #${log}::debug [$ldWid(f2b).listbox get $x]
             foreach item [lrange [$ldWid(f2b).listbox get $x] 1 end] {
-                ${log}::debug Row Data: $item
-                lappend insItem '[string map {' ''} $item]'
-            }
+                ${log}::debug Row Data1: $item
 
+                lappend insItem '[string map {' ''} $item]'
+                ${log}::debug Row Data2: $insItem
+            }
             set insItem [join $insItem ,]
             ${log}::debug db eval "INSERT INTO LabelData (labelVersionID, labelRowNum, labelRowText, userEditable) VALUES ($tplLabel(LabelVersionID,current), $insItem)"
             db eval "INSERT INTO LabelData (labelVersionID, labelRowNum, labelRowText, userEditable) VALUES ($tplLabel(LabelVersionID,current), $insItem)"
-        }
 
-        if {[info exists insItem]} {unset insItem}
+            if {[info exists insItem]} {unset insItem}
+        }
     }
 } ;# ea::db::ld::writeLabelData
 
@@ -390,8 +391,8 @@ proc ea::db::ld::getTemplates {} {
         set tplLabel(ID) [db eval "SELECT tplID FROM LabelTPL WHERE PubTitleID = '$job(TitleID)' AND tplLabelName = '[$ldWid(addTpl,f1).cbox0a get]'"]
 
         db eval "SELECT tplLabelMatchOn, tplLabelMatchBy FROM LabelTPL WHERE tplID = '$tplLabel(ID)'" {
-            set tplLabel(MatchOn) $tplLabelMatchBy
-            set tplLabel(MatchBy) $tplLabelMatchOn
+            set tplLabel(MatchOn) $tplLabelMatchOn
+            set tplLabel(MatchBy) $tplLabelMatchBy
         }
     }
 } ;# ea::db::ld::getTemplates

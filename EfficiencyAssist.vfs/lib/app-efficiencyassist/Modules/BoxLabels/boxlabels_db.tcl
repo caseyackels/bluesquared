@@ -212,42 +212,43 @@ proc ea::db::bl::getAllVersions {wid} {
         set verExists [db eval "SELECT LabelVersionDesc FROM LabelVersions WHERE tplID = $job(Template) AND LOWER(LabelVersionDesc) = LOWER('$ver')"]
         unset ver
     }
-        if {$verExists ne ""} {
-            ${log}::debug GUI: We are using a template.
-            ea::code::bl::resetLabelText
-            ea::db::bl::getTplVersions
-        } else {
-            # Version doesn't exists, probably from Planner.....
-            ea::code::bl::resetLabelText
-            ${log}::debug Populate widgets based on Planner data
 
-            set labelText(Row01) $job(Title)
-            set labelText(Row02) $job(Name)
-            if {[llength $job(TotalVersions)] > 1} {
-                set labelText(Row03) $job(Version)
-                ${log}::debug Change Version to $job(Version)
-            }
-            # string is longer than allocated length, we need to trim it down. Or alert the user.
-            set idx 1
-            foreach item [list Row01 Row02 Row03] {
-                if {[string length $labelText($item)] >= 29} {
-                    # see boxlabels_code.tcl for filterKeys; the length of text that fits on the default label or table: LabelSizes
-                    ${log}::critical $item is longer than 29 chars! Trim to [string range $labelText($item) 0 28]?
-                    set s_length [string length $labelText($item)] ; # get length of string
-                    set s_wholeLineIndex [string wordstart $labelText($item) 29] ;# retrieve the index of the last whole word
-                    set s_wholeLine [string range $labelText($item) 0 [expr $s_wholeLineIndex - 1]] ;# retrieve the text within the new string parameters
-                    set s_remainingText [string range $labelText($item) $s_wholeLineIndex end]
-                    set labelText($item) [string trim $s_wholeLine]
-                    ${log}::debug Modified text $item: $s_wholeLine
-                    ${log}::debug Modified text $item: $s_remainingText
+    if {$verExists ne ""} {
+        ${log}::debug GUI: We are using a template.
+        ea::code::bl::resetLabelText
+        ea::db::bl::getTplVersions
+    } else {
+        # Version doesn't exist, probably from Planner.....
+        ea::code::bl::resetLabelText
+        ${log}::debug Populate widgets based on Planner data
 
-                    set nextRow [expr $idx + 1]
-                    set labelText(Row0$nextRow) [string trim "$s_remainingText $labelText(Row0$nextRow)"]
-                    ${log}::debug Modified text: $labelText(Row0$nextRow)
-                }
-                incr idx
-            }
+        set labelText(Row01) $job(Title)
+        set labelText(Row02) $job(Name)
+        if {[llength $job(TotalVersions)] > 1} {
+            set labelText(Row03) $job(Version)
+            ${log}::debug Change Version to $job(Version)
         }
+        # string is longer than allocated length, we need to trim it down. Or alert the user.
+        set idx 1
+        foreach item [list Row01 Row02 Row03] {
+            if {[string length $labelText($item)] >= 29} {
+                # see boxlabels_code.tcl for filterKeys; the length of text that fits on the default label or table: LabelSizes
+                ${log}::critical $item is longer than 29 chars! Trim to [string range $labelText($item) 0 28]?
+                set s_length [string length $labelText($item)] ; # get length of string
+                set s_wholeLineIndex [string wordstart $labelText($item) 29] ;# retrieve the index of the last whole word
+                set s_wholeLine [string range $labelText($item) 0 [expr $s_wholeLineIndex - 1]] ;# retrieve the text within the new string parameters
+                set s_remainingText [string range $labelText($item) $s_wholeLineIndex end]
+                set labelText($item) [string trim $s_wholeLine]
+                ${log}::debug Modified text $item: $s_wholeLine
+                ${log}::debug Modified text $item: $s_remainingText
+
+                set nextRow [expr $idx + 1]
+                set labelText(Row0$nextRow) [string trim "$s_remainingText $labelText(Row0$nextRow)"]
+                ${log}::debug Modified text: $labelText(Row0$nextRow)
+            }
+            incr idx
+        }
+    }
 } ;# ea::db::bl::getAllVersions
 
 proc ea::db::bl::getTplVersions {} {
@@ -353,22 +354,25 @@ proc ea::db::bl::getAssociatedTemplates {} {
     set titleID ""
     set matchBy ""
 
-    db eval "SELECT tplID, tplLabelMatchOn FROM LabelTPL WHERE PubTitleID = $job(TitleID) AND Status = 1" {
+    db eval "SELECT tplID, tplLabelMatchBy FROM LabelTPL WHERE PubTitleID = $job(TitleID) AND Status = 1" {
         set titleID $tplID
-        set matchOn $tplLabelMatchOn ;# Options are Job Name, Job Number, <blank>
+        set matchBy $tplLabelMatchBy ;# Options are Job Name, Job Number, <blank>
     }
 
 
     if {$titleID ne ""} {
         # Find out if we must match on a certain job name or number
-        if {$matchOn ne ""} {
-            if {$matchOn eq "Job Number"} {
-                set titleID [db eval "SELECT tplID FROM LabelTPL WHERE PubTitleID = $job(TitleID) AND tplLabelMatchBy = '$job(Number)' AND Status = 1"]
+        if {$matchBy ne ""} {
+            if {$matchBy eq "Job Number"} {
+                ${log}::debug Matching Label Template by Job Number
+                set titleID [db eval "SELECT tplID FROM LabelTPL WHERE PubTitleID = $job(TitleID) AND tplLabelMatchOn = '$job(Number)' AND Status = 1"]
 
-            } elseif {$matchOn eq "Job Name"} {
-                set titleID [db eval "SELECT tplID FROM LabelTPL WHERE PubTitleID = $job(TitleID) AND tplLabelMatchBy LIKE '$job(Name)' AND Status = 1"]
+            } elseif {$matchBy eq "Job Name"} {
+                ${log}::debug Matching Label Template by Job Name
+                set titleID [db eval "SELECT tplID FROM LabelTPL WHERE PubTitleID = $job(TitleID) AND tplLabelMatchOn LIKE '$job(Name)' AND Status = 1"]
             }
         } else {
+            ${log}::debug Matching Label Template by Title
             set titleID [db eval "SELECT tplID FROM LabelTPL WHERE PubTitleID = $job(TitleID) AND Status = 1"]
         }
 

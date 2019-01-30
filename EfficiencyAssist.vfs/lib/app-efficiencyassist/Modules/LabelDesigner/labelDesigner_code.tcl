@@ -8,7 +8,7 @@ proc ea::code::ld::getOpenFile {wid} {
 
     # Check to see if Customer, and Title folders have been created already
     set customerPath [file join $tplLabel(RootPath) "$job(CustID) $job(CustName)"]
-    set tplLabel(titlePath) [file join $customerPath "$job(TitleID) $job(Title)"]
+    set tplLabel(titlePath) [file join $customerPath "$job(TitleID) [string map {' ""} $job(Title)]"]
 
     if {[file isdirectory $customerPath] == 0} {
         ${log}::notice $customerPath doesn't exist, creating ...
