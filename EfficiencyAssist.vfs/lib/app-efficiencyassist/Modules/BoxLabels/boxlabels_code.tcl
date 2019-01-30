@@ -598,7 +598,6 @@ proc printLabels {} {
         set labelDir [join [split $labelDir /] \\]
 
         # Set runlist file name, maybe this should be placed into the tplLabel array? tplLabel(RunListFile)
-        #set runlist "$labelDir\\[join "$tplLabel(LabelVersionDesc) - $tplLabel(LabelProfileDesc)"].csv"
         set runlist "$labelDir\\$job(TemplateName).csv"
 
         # Using a specific printer: /PRN=<printer name>
