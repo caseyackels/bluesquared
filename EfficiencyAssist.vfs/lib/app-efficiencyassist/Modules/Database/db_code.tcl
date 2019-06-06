@@ -1,7 +1,7 @@
 # Creator: Casey Ackels
 # Initial Date: March 12, 2011]
 # File Initial Date: 07 16,2014
-# Dependencies: 
+# Dependencies:
 #-------------------------------------------------------------------------------
 #
 # Subversion
@@ -32,7 +32,7 @@ proc ea::db::loadMonarch {} {
     set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
 }
 
-proc eAssist_db::loadDB {} {
+proc eAssist_db::loadDB {args} {
     #****f* openDB/eAssist_db
     # AUTHOR
     #	Casey Ackels
@@ -58,21 +58,34 @@ proc eAssist_db::loadDB {} {
     #
     #***
     global log program
-    #${log}::debug --START-- [info level 1]
-    
-    set myDB [file join $program(Home) EA_setup.edb]
-    
-    # Loading sqlite - EA's local db.
-    sqlite3 db $myDB
-    
+
+    switch -- $args {
+        -open   {
+            set myDB [file join $program(Home) EA_setup.edb]
+
+            # Loading sqlite - EA's local db.
+            sqlite3 db $myDB
+
+            eAssist_db::getEmailSetup
+        }
+        -close {
+            $db close
+        }
+        default {
+            ${log}::warning DB OPEN: If this is shown in the log, change the proc to use the new args. [info level 1]
+            set myDB [file join $program(Home) EA_setup.edb]
+
+            # Loading sqlite - EA's local db.
+            sqlite3 db $myDB
+
+            eAssist_db::getEmailSetup
+        }
+    }
+
     # Load Monarch database
     #ea::db::loadMonarch
-    
+
     #eAssist_db::initContainers
-    eAssist_db::getEmailSetup
-    
-	
-    #${log}::debug --END-- [info level 1]
 } ;# eAssist_db::loadDB
 
 
@@ -103,7 +116,7 @@ proc eAssist_db::initContainers {type wid} {
     #***
     global log packagingSetup
     #${log}::debug --START-- [info level 1]
-    
+
     switch -nocase $type {
         packages    {set items [eAssist_db::dbSelectQuery -columnNames Package -table Packages]}
         containers  {set items [eAssist_db::dbSelectQuery -columnNames Container -table Containers]}
@@ -112,14 +125,14 @@ proc eAssist_db::initContainers {type wid} {
 
     # get rid of all data before inserting new data ...
     $wid delete 0 end
-    
+
     if {$items ne ""} {
         foreach item $items {
             $wid insert end $item
         }
     }
-    
-    
+
+
     #${log}::debug --END-- [info level 1]
 } ;# eAssist_db::initContainers
 
@@ -135,32 +148,32 @@ proc eAssist_db::dbInsert {args} {
     #
     # COPYRIGHT
     #	(c) 2014 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
     #   eAssist_db::dbInsert -columnNames ?value1 ... valueN? -table value -data value
     #
     # FUNCTION
     #	Inserts or Updates data in specified columns and table
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # NOTES
     #   Always make sure your index column is first. If we come up with a mismatch (4 values for 5 columns), we drop the first column, assuming it is the index and not wanted.
-    #   
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log tmp
 
     if {$args == ""} {return -code 1 [mc "wrong # args: Must be -columnNames ?value1 .. valueN? -table value -data value\nNOTE: Each data value must be enclosed with single quotes"]}
-    
+
     foreach {key value} $args {
         switch -- $key {
             -columnNames {set colNames $value}
@@ -169,13 +182,13 @@ proc eAssist_db::dbInsert {args} {
             default {return -code 1 [mc "Unknown $key $value"]}
         }
     }
-    
+
     foreach val {colNames tbl data} {
         if {![info exists $val]} {
             return -code 1 [mc "wrong # args: Should be -columnNames value ... valueN -table value -where value ... valueN\nNOTE: Each data value must be enclosed with single quotes\nCommand Issued: [info level 0] "]
         }
     }
-    
+
     # See if this is a new entry or if we should update an entry ...
     set dbCheck [eAssist_db::dbWhereQuery -columnNames [lrange $colNames 0 0] -table $tbl -where [lrange $colNames 0 0]='[lrange $data 0 0]']
     #${log}::debug ColNames: $colNames [lrange $colNames 0 0]
@@ -184,20 +197,20 @@ proc eAssist_db::dbInsert {args} {
 	#${log}::debug After dbCheck: $dbCheck
 	if {$dbCheck != ""} {
 		set tmp(db,rowID) [eAssist_db::getRowID $tbl [lrange $colNames 0 0]='$dbCheck']
-		${log}::debug We are updating record $dbCheck - [lrange $colNames 0 0] on $tbl 
+		${log}::debug We are updating record $dbCheck - [lrange $colNames 0 0] on $tbl
 	}
-    
+
     if {[info exists cleansedData]} {unset cleansedData}
     foreach item $data {
         lappend cleansedData '$item'
     }
     set data $cleansedData
-    
+
     if {[llength $colNames] != [llength $cleansedData]} {
         ${log}::notice [info level 1] Mismatched columns and data to insert into db. Dropping [lrange $colNames 0 0]
         set colNames [lrange $colNames 1 end]
     }
-       
+
     # If rowID exists, issue an update statement.
     if {[info exists tmp(db,rowID)] == 1} {
         if {$tmp(db,rowID) != ""} {
@@ -216,14 +229,14 @@ proc eAssist_db::dbInsert {args} {
             set updateStatement [join $updateStatement ,]
             #${log}::debug db eval "UPDATE $tbl SET $updateStatement WHERE rowid=$tmp(db,rowID)"
             db eval "UPDATE $tbl SET $updateStatement WHERE rowid=$tmp(db,rowID)"
-                
+
             set tmp(db,rowID) ""
             return
         }
     } else {
 		${log}::debug tmp(db,rowID) does not contain a rowid, are you updating or inserting?
 	}
-    
+
     if {$dbCheck eq ""} {
         # No preexisting data, lets insert...
         if {[llength $colNames] == 1} {
@@ -235,7 +248,7 @@ proc eAssist_db::dbInsert {args} {
             #${log}::debug Insert_DATA: $data
             #${log}::debug INSERT or ABORT INTO $tbl $colNames VALUES ($data)
             db eval "INSERT or ABORT INTO $tbl ($colNames) VALUES ($data)"
-            
+
         } else {
             #${log}::debug Insert_COLS: [join $colNames ,]
             #${log}::debug Insert_Data: [join $data ,]
@@ -248,12 +261,12 @@ proc eAssist_db::dbInsert {args} {
         #UPDATE COMPANY SET ADDRESS = 'Texas', SALARY = 20000.00;
         #db eval "UPDATE $tbl SET "
     }
-    
+
     #db eval {INSERT or ABORT INTO EventNotifications (ModID, EventName, EventSubstitutions EnableEventNotification)
     #    VALUES ($modID, $tmpEmailEvent, $tmpSubstitution, $emailSetup(Event,Notification))
     #}
 
-    
+
 } ;# eAssist_db::dbInsert
 
 
@@ -275,7 +288,7 @@ proc eAssist_db::delete {table col args} {
     #	N/A
     #
     # PARENTS
-    #	
+    #
     #
     # NOTES
     #
@@ -284,9 +297,9 @@ proc eAssist_db::delete {table col args} {
     #***
     global log
     #${log}::debug --START-- [info level 1]
-    
+
     set args [join $args]
-    
+
     if {$col != ""} {
         ${log}::debug "DELETE from $table WHERE $col='$args'"
         db eval "DELETE from $table WHERE $col='$args'"
@@ -306,7 +319,7 @@ proc eAssist_db::delete {table col args} {
 
 proc eAssist_db::checkDBwritable {} {
     global program
-    
+
     set mydb [file join $program(Home) EA_setup.edb]
     return [file writable $mydb]
 }
@@ -321,34 +334,34 @@ proc eAssist_db::checkModuleName {moduleName args} {
     #
     # COPYRIGHT
     #	(c) 2014 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
-    #   eAssist_db::checkModuleName moduleName 
+    #   eAssist_db::checkModuleName moduleName
     #
     # FUNCTION
     #	Check to see if the module name is inserted into the DB, if it doesn't insert it.
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log emailSetup
-    
+
     ${log}::debug Looking for $moduleName in the database ...
-       
+
     if {[info exists ModNames]} {unset ModNames}
-        
+
     db eval {SELECT ModuleName from Modules} {
         # Note this var ModuleName <-- upper case 'M'; and is a table in the DB
         lappend ModNames $ModuleName
@@ -362,7 +375,7 @@ proc eAssist_db::checkModuleName {moduleName args} {
         } else {
             ${log}::debug Database *IS* writable. Writing $moduleName ...
         }
-            
+
         ${log}::debug Couldn't find $moduleName, inserting ...
         #db eval {INSERT or ABORT INTO Modules (ModuleName EnableModNotification)
         #    VALUES ($moduleName $emailSetup(mod,Notification))}
@@ -370,7 +383,7 @@ proc eAssist_db::checkModuleName {moduleName args} {
     } else {
             ${log}::debug Found $moduleName!
     }
-    
+
     ${log}::debug $moduleName Event Notifications: [db eval {SELECT ModuleName FROM Modules WHERE ModuleName = $moduleName}]
     #unset ModNames
 } ;# eAssist_db::checkModuleName
@@ -386,7 +399,7 @@ proc eAssist_db::checkEvents {moduleName args} {
     #
     # COPYRIGHT
     #	(c) 2014 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
     #   eAssist_db::initValues -module ?moduleName? -eventName ?event substitution? ?event substitution? ...
@@ -400,19 +413,19 @@ proc eAssist_db::checkEvents {moduleName args} {
     #     eAssist_db::checkEvents "Box Labels" \
     #                        -eventName onPrint "Substitutions\n %1-%5: Each line of the box labels\n %b: Breakdown information" \
     #                        onPrintBreakDown "None at this time"
-    #   
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log desc emailSetup
 
@@ -420,7 +433,7 @@ proc eAssist_db::checkEvents {moduleName args} {
     #
     set modID [db eval {SELECT Mod_ID FROM Modules WHERE ModuleName = $moduleName}]
     ${log}::debug Looking for Module: $moduleName / ID: $modID
-    
+
     set tmpEvents [db eval { SELECT EventName
                                 FROM EventNotifications
                                     LEFT OUTER JOIN Modules
@@ -428,62 +441,62 @@ proc eAssist_db::checkEvents {moduleName args} {
                                 WHERE ModuleName = $moduleName
                     }]
     ${log}::debug Found events for $moduleName: $tmpEvents
-    
-       
+
+
     # Setup args to only contain the event and notification text, and remove '-eventName'
     set eventArgs [lrange $args 1 end]
-    
+
     switch -- [lrange $args 0 0] {
         -eventName {
             foreach {tmpEmailEvent tmpSubstitution} $eventArgs {
                 ${log}::debug Looking for $tmpEmailEvent in the database ...
-                
+
                 if {[lsearch -nocase $tmpEvents $tmpEmailEvent] == -1} {
                     ${log}::debug Couldn't find $tmpEmailEvent, inserting ...
-                    
+
                     db eval {INSERT or ABORT INTO EventNotifications (ModID, EventName, EventSubstitutions EnableEventNotification)
                         VALUES ($modID, $tmpEmailEvent, $tmpSubstitution, $emailSetup(Event,Notification))
                     }
-                
+
                 } else {
                     # An event already exists, now we check for the substitutions.
                     ${log}::debug Found $tmpEmailEvent, checking for the Substitutions!
-                    
+
                     set dbMod [db eval {SELECT ModID
                                                 From EventNotifications
-                                                    LEFT OUTER JOIN Modules 
+                                                    LEFT OUTER JOIN Modules
                                                         ON EventNotifications.ModID = Modules.Mod_ID
                                                     WHERE EventName = $tmpEmailEvent}]
-                    
+
                     set dbSubstitution [join [db eval {SELECT EventSubstitutions
                                                     FROM EventNotifications
                                                         WHERE ModID = $dbMod
                                                     AND
                                                         EventName = $tmpEmailEvent}]]
-                    
+
                         # Nothing found in the column, lets insert what we have.
                         if {$dbSubstitution eq ""} {
                             ${log}::debug Nothing found in the column, lets insert.
                             ${log}::debug Mod: $moduleName $tmpSubstitution
-                            
+
                             db eval {INSERT or ABORT INTO EventNotifications} (EventSubstitutions)
                                VALUES ($tmpSubstitution)
-                        
+
                         # We found an existing substitution, but it doesn't match. Lets update what we were passed.
                         } elseif {![string match $tmpSubstitution $dbSubstitution]} {
                             ${log}::notice Data exists in the DB, but it doesn't match what was passed to this proc, lets update to:
                             ${log}::debug Mod: $moduleName, Event: $tmpEmailEvent
                             ${log}::notice Old: $dbSubstitution
                             ${log}::notice New: $tmpSubstitution
-                            
+
                             db eval {UPDATE EventNotifications
                                                     SET EventSubstitutions = $tmpSubstitution
                                                         WHERE ModID = $dbMod
                                                     AND
                                                         EventName = $tmpEmailEvent}
-                            
+
                         }
-                }                
+                }
             }
         }
         default {
@@ -493,7 +506,7 @@ proc eAssist_db::checkEvents {moduleName args} {
 
     #${log}::debug Events passed to: [info level 1]
     #${log}::debug All Event Notifications: [db eval {SELECT EventName,  FROM EventNotifications}]
-    
+
 } ;# eAssist_db::checkEvents
 
 
@@ -515,40 +528,40 @@ proc eAssist_db::getEmailSetup {} {
     #
     # COPYRIGHT
     #	(c) 2014 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
-    #   eAssist_db::getEmailSetup  
+    #   eAssist_db::getEmailSetup
     #
     # FUNCTION
     #	Retrieves the email setup data and initilizes the emailSetup array
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
     #   eAssist_db::loadDB
-    #   
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log emailSetup
-    
+
     db eval {SELECT EmailServer, EmailPort, EmailLogin, EmailPassword, TLS, GlobalEmailNotification FROM EmailSetup} {
         set emailSetup(email,serverName) $EmailServer
         set emailSetup(email,port) $EmailPort
         set emailSetup(email,userName) $EmailLogin
         set emailSetup(email,password) $EmailPassword
-        
+
         set emailSetup(TLS) $TLS
         set emailSetup(globalNotifications) $GlobalEmailNotification
     }
-    
+
 } ;# eAssist_db::getEmailSetup
 
 
@@ -562,32 +575,32 @@ proc eAssist_db::getDBModules {} {
     #
     # COPYRIGHT
     #	(c) 2014 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
-    #   eAssist_db::getDBModules  
+    #   eAssist_db::getDBModules
     #
     # FUNCTION
     #	Retrieves all module names that are loaded in the DB
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
     #   eAssistSetup::getModules
-    #   
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log
 
     db eval {SELECT ModuleName FROM Modules}
-    
+
 } ;# eAssist_db::getDBModules
 
 
@@ -601,27 +614,27 @@ proc eAssist_db::getJoinedEvents {moduleName} {
     #
     # COPYRIGHT
     #	(c) 2014 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
-    #   eAssist_db::getJoinedEvents args 
+    #   eAssist_db::getJoinedEvents args
     #
     # FUNCTION
     #	Retrieve the Email Events associated with moduleName to populate the dropdown widget
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log
 
@@ -630,9 +643,9 @@ proc eAssist_db::getJoinedEvents {moduleName} {
                             LEFT OUTER JOIN Modules
                                     ON EventNotifications.ModID = Modules.Mod_ID
                         WHERE ModuleName = $moduleName }]
-    
+
     ${log}::debug Event Values: $eventValues
-    
+
     return $eventValues
 
 } ;# eAssist_db::getJoinedEvents
@@ -648,28 +661,28 @@ proc eAssist_db::dbSelectQuery {args} {
     #
     # COPYRIGHT
     #	(c) 2014 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
-    #   eAssist_db::dbSelectQuery args 
+    #   eAssist_db::dbSelectQuery args
     #
     # FUNCTION
     #	Just a simple SELECT statement that accepts
     #   -columnNames ?value ... valueN? -table value
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log
 
@@ -679,19 +692,19 @@ proc eAssist_db::dbSelectQuery {args} {
             -table {set tbl $value; if {[llength $value] != 1} {return -code 1 [mc "wrong # args: Should be -table value]}}
             default {return -code 1 [mc "Unknown $key $value"]}
         }
-    } 
+    }
 
     foreach val {colNames tbl} {
         if {![info exists $val]} {
             return -code 1 [mc "wrong # args: Should be -columnNames value ... valueN -table value\nCommand Issued: [info level 0] "]
         }
     }
-    
-    
+
+
     if {[info exists returnQuery]} {unset returnQuery}
     if {[info exists myNewCommand]} {unset myNewCommand}
-        
-        
+
+
     if {[llength $colNames] == 1} {
         set returnQuery [db eval "SELECT $colNames FROM $tbl"]
     } else {
@@ -708,10 +721,10 @@ proc eAssist_db::dbSelectQuery {args} {
 			#${log}::debug returnQuery: $returnQuery
 		}
     }
-	
+
 	if {![info exists returnQuery]} {set returnQuery 0}
     return $returnQuery
-    
+
 } ;# eAssist_db::dbSelectQuery
 
 
@@ -725,32 +738,32 @@ proc eAssist_db::dbWhereQuery {args} {
     #
     # COPYRIGHT
     #	(c) 2014 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
     #   eAssist_db::dbWhereQuery -columnNames ?value(s)? -table <tableName> -where <where clause>
     #   Example: eAssist_db::dbWhereQuery -columnNames {FirstName LastName} -table CSRS -where Status=1
-    #   
+    #
     #
     # FUNCTION
     #	Issues a query to specified table, with a WHERE clause
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log
-    
+
     foreach {key value} $args {
         #${log}::debug KEY: $key VALUE: $value
         switch -- $key {
@@ -760,18 +773,18 @@ proc eAssist_db::dbWhereQuery {args} {
             default {return -code 1 [mc "Unknown $key $value"]}
         }
     }
-    
+
     foreach val {colNames tbl where} {
         if {![info exists $val]} {
             return -code 1 [mc "wrong # args: Should be -columnNames value ... valueN -table value -where value ... valueN\nCommand Issued: [info level 0] "]
         }
     }
-    
-    
+
+
     if {[info exists returnQuery]} {unset returnQuery}
     if {[info exists myNewCommand]} {unset myNewCommand}
-        
-        
+
+
     if {[llength $colNames] == 1} {
         #${log}::debug colNames: $colNames
         #${log}::debug tbl: $tbl
@@ -787,12 +800,12 @@ proc eAssist_db::dbWhereQuery {args} {
                 lappend returnQuery "[join [subst $myNewCommand]]"
             }
     }
-    
+
     if {![info exists returnQuery]} {
         ${log}::debug returnQuery not set, Could not find $where in $tbl
         return 0
         } else {
-             return $returnQuery            
+             return $returnQuery
         }
 
 
@@ -809,28 +822,28 @@ proc eAssist_db::getRowID {tbl args} {
     #
     # COPYRIGHT
     #	(c) 2014 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
-    #   eAssist_db::getRowID tbl args 
+    #   eAssist_db::getRowID tbl args
     #
     # FUNCTION
     #	Retrieves the rowID of the passed arguments
-    #   args must be in [WHERE] format: <colName>=<value> AND <colName>=<value> 
-    #   
-    #   
+    #   args must be in [WHERE] format: <colName>=<value> AND <colName>=<value>
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log
     #${log}::debug $tbl
@@ -839,7 +852,7 @@ proc eAssist_db::getRowID {tbl args} {
 
     db eval "SELECT rowid FROM $tbl WHERE $args"
 
-    
+
 } ;# eAssist_db::getRowID
 
 
@@ -853,27 +866,27 @@ proc eAssist_db::leftOuterJoin {args} {
     #
     # COPYRIGHT
     #	(c) 2014 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
     #   eAssist_db::leftOuterJoin -cols value -table value -jtable value -where value1...valueN
     #
     # FUNCTION
     #	Issues a SELECT statement on the columns and tables given in the argument
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log
 
@@ -889,7 +902,7 @@ proc eAssist_db::leftOuterJoin {args} {
     #${log}::debug table: $dbTable
     #${log}::debug jtable: $jdbTable
     #${log}::debug where: $whereStmt
-    
+
     db eval "SELECT $cols FROM $dbTable LEFT OUTER JOIN $jdbTable WHERE $whereStmt"
 
 } ;# eAssist_db::leftOuterJoin
@@ -905,30 +918,30 @@ proc ea::db::countQuantity {args} {
     #
     # COPYRIGHT
     #	(c) 2015 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
     #   ea::db::countQuantity -db <name> -job <number> -and <clause>
     #
     # FUNCTION
     #	Counts quantity associated with shipping orders in the Shipping Orders table, and has an active status from the Addresses table.
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log
-	
+
 	foreach {key value} $args {
 		switch -- $key {
 			-db		{set titleDB $value}
@@ -937,9 +950,9 @@ proc ea::db::countQuantity {args} {
 			default	{${log}::debug [info level 0] invalid parameters, must be: -db, -job -where}
 		}
 	}
-	
+
 	if {$titleDB == "" || $jobNumber == ""} {${log}::notice [info level 0] [mc "Job Number or Title DB was not supplied, aborting."]; return}
-	
+
 	set sql "SELECT SUM(Quantity) FROM ShippingOrders
 							INNER JOIN Addresses
 								ON ShippingOrders.AddressID = Addresses.SysAddresses_ID
@@ -947,15 +960,15 @@ proc ea::db::countQuantity {args} {
 								on ShippingOrders.Versions = Versions.Version_ID
 							WHERE Addresses.SysActive = 1
 							AND ShippingOrders.JobInformationID = '$jobNumber'"
-	
+
 	if {[info exists and] && $and ne ""} {
 		set sql "$sql $and"
 	}
-	
+
 	set value [$titleDB eval $sql]
-    
+
 	return $value
-    
+
 } ;# ea::db::countQuantity <db name> <job number>
 
 
@@ -969,27 +982,27 @@ proc ea::db::getUniqueValues {db dbCol dbTbl} {
     #
     # COPYRIGHT
     #	(c) 2015 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
-    #   ea::db::getUniqueValues db dbCol dbTbl 
+    #   ea::db::getUniqueValues db dbCol dbTbl
     #
     # FUNCTION
     #	Retrieves the versions from the specified db and db table
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log
 
@@ -1011,32 +1024,32 @@ proc ea::db::initUserDefinedValues {args} {
     #
     # COPYRIGHT
     #	(c) 2015 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
     #   ea::db::initUserDefinedValues -desc <desc> -table <table name> -pk <primary key column name>
     #
     # FUNCTION
     #	Inserts a database table name, primary key and a description into the UserDefinedValules database table that can then be displayed to the user as choices. Primarily used in Setup > Header Config
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # NOTES
 	# 	All registration should be done in the startup.tcl file; ['eAssist_initVariables] proc.
-    #   
-    #   
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log
 	# Inserts the table and primary key into the UserDefinedValues table, so that it can be used in the Header Config section. It populates the "Values" dropdown.
-	
+
 	foreach {key value} $args {
 		switch -- $key {
 			-pk				{set pk $value}
@@ -1046,10 +1059,10 @@ proc ea::db::initUserDefinedValues {args} {
 			default	{${log}::debug $key is unknown; return}
 		}
 	}
-	
+
 	# Insert the data; if the values are not unique, the err variable will be populated, and an error notice will be issued.
 	catch {db eval "INSERT INTO UserDefinedValues (PrimaryKeyName, TableName, Description, DisplayColValues) VALUES ('$pk', '$tbl', '$desc', '$display')"} err
-	
+
 	if {[info exists err]} {
 		if {$err != ""} {
 			${log}::notice [lindex [info level 0] 0]: $err - Used: $pk
@@ -1058,7 +1071,7 @@ proc ea::db::initUserDefinedValues {args} {
 		}
 	}
 
-    
+
 } ;# ea::db::initUserDefinedValues
 
 proc ea::db::getGroupNames {{mode -all}} {
@@ -1071,21 +1084,21 @@ proc ea::db::getGroupNames {{mode -all}} {
 	#
 	# COPYRIGHT
 	#	(c) 2015 Casey Ackels
-	#   
+	#
 	# NOTES
 	#   retrieves the group names which can be all, active or inactive. Defaults to all.
 	#   ea::db::getGroups -all|-active|-inactive
-	#   
+	#
 	#***
 	global log
-	
+
 	switch -- $mode {
 		-all		{set sql "Status = 1 OR Status = 0"}
 		-active		{set sql "Status = 1"}
 		-inactive	{set sql "Status = 0"}
 		default		{${log}::notice [info level 0] switch doesn't know that command: $mode}
 	}
-	
+
 	db eval "SELECT SecGroupName FROM SecGroupNames WHERE $sql"
 
 } ;# ea::db::getGroupNames
@@ -1100,13 +1113,13 @@ proc ea::db::getUserList {mode} {
 	#
 	# COPYRIGHT
 	#	(c) 2015 Casey Ackels
-	#   
+	#
 	# NOTES
 	#   mode can be one of: -login, -name, -email
-	#   
+	#
 	#***
 	global log
-	
+
 	switch -- $mode {
 		-login	{set column UserLogin}
 		-name 	{set column UserName}
@@ -1128,21 +1141,21 @@ proc ea::db::getGroups {mode {status -active}} {
     #
     # COPYRIGHT
     #	(c) 2015 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
     #   ea::db::getGroups -id|-name -active|-inactive|-all
     #
     # FUNCTION
     #	Retrieves the value returned by using the parameters given.
-    #   
-    #   
+    #
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log
 
@@ -1151,14 +1164,14 @@ proc ea::db::getGroups {mode {status -active}} {
         "-name" {set col SecGroupName}
         default {${log}::debug [info level 0] Unknown switch statement, aborting.; return}
     }
-        
+
     switch -- $status {
         -active     { set actStatus 1}
         -inactive   { set actStatus 0}
         -all        { set actStatus "(1 OR 0)"}
         default     {}
     }
-    
+
     return [db eval "SELECT $col FROM SecGroupNames WHERE Status = $actStatus"]
 
 } ;# ea::db::getGroups -name -active
@@ -1173,15 +1186,15 @@ proc ea::db::getUserAccess {args} {
 	#
 	# COPYRIGHT
 	#	(c) 2015 Casey Ackels
-	#   
+	#
 	# NOTES
 	#   ea::db::getUserAccess R,W,D
-	#   
+	#
 	#***
 	global log user
-	
+
 	if {$args eq ""} {return}
-	
+
 	set sql "SELECT Modules.ModuleName FROM SecurityAccess
 											-- # get Module Name
 											INNER JOIN Modules on Modules.Mod_ID = SecurityAccess.ModID
@@ -1191,7 +1204,7 @@ proc ea::db::getUserAccess {args} {
 												AND SecGroupNames.Status = 1"
 
 	set args [split $args ""]
-	
+
 	foreach key $args {
 		switch -- [string tolower $key] {
 			r		{append sql " AND SecurityAccess.SecAccess_Read = 1"}
@@ -1203,7 +1216,7 @@ proc ea::db::getUserAccess {args} {
 			}
 		}
 	}
-	
+
 	return [db eval $sql]
 
 } ;# ea::db::getUserAccess rwd
@@ -1218,10 +1231,10 @@ proc ea::db::getModAccess {userid module} {
 	#
 	# COPYRIGHT
 	#	(c) 2015 Casey Ackels
-	#   
+	#
 	# NOTES
 	#   Returns Read, Write, Delet access (1 for yes, 0 for no)
-	#   
+	#
 	#***
 	global log
 
@@ -1244,10 +1257,10 @@ proc ea::db::getModInfo {args} {
 	#
 	# COPYRIGHT
 	#	(c) 2015 Casey Ackels
-	#   
+	#
 	# NOTES
-	#   
-	#   
+	#
+	#
 	#***
 	global log
 
@@ -1258,7 +1271,7 @@ proc ea::db::getModInfo {args} {
 			default		{}
 		}
 	}
-	
+
 	return [join $value]
 } ;# ea::db::getModInfo
 proc ea::db::getDistTypeConfig {args} {
@@ -1271,12 +1284,12 @@ proc ea::db::getDistTypeConfig {args} {
 	#
 	# COPYRIGHT
 	#	(c) 2015 Casey Ackels
-	#   
+	#
 	# NOTES
 	#   This is tied to the configuration setup in the Rpt tables, and in the GUI: Setup, DistTypes
 	#   Parameters: -method Report|Export -action Single|Summarize|Default -disttype <distribution type name>
 	#   Returns: Address and ShipViaName
-	#   
+	#
 	#***
 	global log
 
@@ -1288,7 +1301,7 @@ proc ea::db::getDistTypeConfig {args} {
 			default		{${log}::debug [info level 0] args: $args is not a valid parameter. Should be: -method, -action, -disttype}
 		}
 	}
-	
+
 	db eval "SELECT MasterAddr_Company, MasterAddr_Attn,
 				MasterAddr_Addr1, MasterAddr_Addr2, MasterAddr_Addr3,
 				MasterAddr_City, MasterAddr_StateAbbr, MasterAddr_Zip,
@@ -1312,7 +1325,7 @@ proc ea::db::getDistTypeConfig {args} {
 				AND RptActions.RptAction = '$action'
 				AND DistributionTypes.DistTypeName = '$disttype'"
 
-	
+
 } ;# ea::db::getDistTypeConfig -method Export -action Single -disttype "06. JG Mail"
 proc ea::db::getDistSetup {args} {
     #****f* getDistSetup/ea::db
@@ -1324,31 +1337,31 @@ proc ea::db::getDistSetup {args} {
     #
     # COPYRIGHT
     #	(c) 2015 Casey Ackels
-    #   
+    #
     #
     # USAGE
-    #   ea::db::getDistSetup args 
+    #   ea::db::getDistSetup args
     #
     # FUNCTION
     #	Retrieves the distribution types that match the passed in paramaters
 	#
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # EXAMPLE
-    #   ea::db::getDistSetup 
+    #   ea::db::getDistSetup
     #
     # NOTES
-    #   
-    #  
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log
         # Get the distribution types that are blacklisted

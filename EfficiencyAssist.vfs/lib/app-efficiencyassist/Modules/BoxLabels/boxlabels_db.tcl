@@ -98,6 +98,7 @@ proc ea::db::bl::getJobData {btn1 wid shipToWid shipListWid} {
     $blWid(f).entry1 state disabled
 
     set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+    
     # Job Data
     set stmt [$monarch_db prepare "SELECT TOP 1 CUSTOMERNAME, TITLENAME, ISSUENAME
                                         FROM EA.dbo.Planner_Shipping_View

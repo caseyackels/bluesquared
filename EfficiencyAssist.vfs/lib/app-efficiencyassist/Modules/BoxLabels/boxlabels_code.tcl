@@ -938,6 +938,11 @@ proc ea::code::bl::resetBoxLabels {btn shipToWid shipListWid} {
         flush $files(ShipTo)
         chan close $files(ShipTo)
     }
+
+    ${log}::debug Closing and reopening the sqlite db...
+    eAssist_db::loadDB -close
+    eAssist_db::loadDB -open
+
 } ;# ea::code::bl::resetBoxLabels
 
 proc ea::code::bl::trackTotalQuantities {} {
