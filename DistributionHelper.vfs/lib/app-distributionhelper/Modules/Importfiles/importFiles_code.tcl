@@ -193,6 +193,7 @@ proc Disthelper_Code::readFile {filename} {
                 set GS_job(fullBoxQty) $line
                 Disthelper_RemoveListBoxItem $line
                 Disthelper_Helper::detectData .container.frame2.frame2d.shipmentFullBoxEntry .container.frame2.frame2d.shipmentFullBoxField fullBox
+
             }
 
         # Continue processing the list for potential matches where we don't need to search for possible alternate spellings
@@ -321,6 +322,8 @@ proc Disthelper_Code::writeOutPut {} {
     global GS_job GS_ship GS_address GL_file GS_file settings mySettings program importFile matrix intl ship
 
     if {[info exists matrix(importFile)]} {unset matrix(importFile)}
+    set GS_job(onerate) N
+    set GS_job(instructions) $GS_job(Description)
 
     # Get the indices of each element of the address/shipment information. Later we will use this to map the data.
     array set importFile "
@@ -633,14 +636,14 @@ proc Disthelper_Code::writeOutPut {} {
             #'debug "(boxes3) $totalBoxes - Partial Only"
         }
 
-        if {$10_Country ne "US"} {
-            if {$11_Phone eq ""} {
-                set 11_Phone 5037909100
-            }
-            if {$03_Attention eq ""} {
-                set 03_Attention MANAGER
-            }
+        # If either Phone or Attention is blank, lets populate it with default values. Certain shipment methods require a phone number! (FedEx)
+        if {$11_Phone eq ""} {
+            set 11_Phone 5037909100
         }
+        if {$03_Attention eq ""} {
+            set 03_Attention MANAGER
+        }
+
 
         # This handles the USPS ship via's. There isn't a PKGID field on these labels, so we need to prefix the partial box into the attention to name field.
         # e.g qty5 MANAGER
@@ -701,6 +704,8 @@ proc Disthelper_Code::writeOutPut {} {
                                             $x \
                                             $totalBoxes \
                                             $14_Date \
+                                            $GS_job(onerate) \
+                                            $GS_job(instructions) \
                                             $intl(01_ItemDescription) \
                                             $intl(02_ItemNumber) \
                                             $intl(03_ItemQuantity) \
@@ -774,6 +779,8 @@ proc Disthelper_Code::writeOutPut {} {
                                             $x \
                                             $totalBoxes \
                                             $14_Date \
+                                            $GS_job(onerate) \
+                                            $GS_job(instructions) \
                                             $intl(01_ItemDescription) \
                                             $intl(02_ItemNumber) \
                                             $intl(03_ItemQuantity) \

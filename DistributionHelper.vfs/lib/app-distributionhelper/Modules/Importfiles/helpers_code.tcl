@@ -609,6 +609,14 @@ proc Disthelper_Helper::shipVia {l_line name} {
 
 
     switch -- $shipVia {
+        085     {set packtype "FedEx[format %c 0x00AE] Envelope"; set GS_job(onerate) Y}
+        086     {set packtype "FedEx[format %c 0x00AE] Pak"; set GS_job(onerate) Y}
+        087     {set packtype "FedEx[format %c 0x00AE] Small Box"; set GS_job(onerate) Y}
+        088     {set packtype "FedEx[format %c 0x00AE] Medium Box"; set GS_job(onerate) Y}
+        089     {set packtype "FedEx[format %c 0x00AE] Envelope"; set GS_job(onerate) Y}
+        090     {set packtype "FedEx[format %c 0x00AE] Pak"; set GS_job(onerate) Y}
+        091     {set packtype "FedEx[format %c 0x00AE] Small Box"; set GS_job(onerate) Y}
+        092     {set packtype "FedEx[format %c 0x00AE] Medium Box"; set GS_job(onerate) Y}
         201     {set packtype MediumFlatRateBox}
         202     {set packtype MediumFlatRateBox}
         203     {set packtype Flat}
@@ -832,7 +840,7 @@ proc Disthelper_Helper::Excel {filename args} {
     set header [list ShipViaCode ShipToName ShipToContact ShipToAddressline1 ShipToAddressline2 ShipToAddressLine3 ShipToCity \
                 ShipToState ShipToZipCode ShipToCountry ShipToPhoneNo ShipToEmail DeliveryDocNumber Reference1 PackageId PackageQuantity \
                 PackageDescription ThirdPartyID ThirdPartyAccountNumber PackageWeight PackageNumber TotalPackages \
-                ShipDate ItemDescription ItemNumber ItemQuantity UOM DutiesPayer DutiesPayerAccountNumber License \
+                ShipDate OneRate Instructions ItemDescription ItemNumber ItemQuantity UOM DutiesPayer DutiesPayerAccountNumber License \
                 LicenseDate CountryOfOrigin TermsOfShipment UnitValue ItemWeight PackingType ShipFromName ShipFromContact ShipFromAddressLine1 \
                 ShipFromAddressLine2 ShipFromCity ShipFromState ShipFromCountry ShipFromZipCode ShipFromPhoneNo ResidentialDelivery AddressCleansingComment AddressCleansingReconciled]
 #01_ShipViaCode
@@ -885,7 +893,7 @@ proc Disthelper_Helper::Excel {filename args} {
 #48_AddressCleansingReconciled
 
     #set columnList [list A B C D E F G H I J K L M N O P Q R S T U V W X Y]
-    set columnList [list A B C D E F G H I J K L M N O P Q R S T U V W X Y Z AA AB AC AD AE AF AG AH AI AJ AK AL AM AN AO AP AQ AR AS AT AU AV]
+    set columnList [list A B C D E F G H I J K L M N O P Q R S T U V W X Y Z AA AB AC AD AE AF AG AH AI AJ AK AL AM AN AO AP AQ AR AS AT AU AV AW AX]
 
     set x 0 ;# x is only used for the header row.
     set row 1
