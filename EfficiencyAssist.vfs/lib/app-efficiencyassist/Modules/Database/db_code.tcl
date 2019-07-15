@@ -69,10 +69,10 @@ proc eAssist_db::loadDB {args} {
             eAssist_db::getEmailSetup
         }
         -close {
-            $db close
+            db close
         }
         default {
-            ${log}::warning DB OPEN: If this is shown in the log, change the proc to use the new args. [info level 1]
+            ${log}::info DB OPEN: If this is shown in the log, change the proc to use the new args. [info level 1]
             set myDB [file join $program(Home) EA_setup.edb]
 
             # Loading sqlite - EA's local db.

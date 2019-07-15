@@ -582,10 +582,7 @@ proc printLabels {} {
         return
     }
 
-    # if {$tplLabel(ID) eq ""} {
-    #     Shipping_Gui::printbreakDown email ; # Send an email of the breakdown
-    # }
-
+    Shipping_Gui::printbreakDown email ; # Send an email of the breakdown
 
 
     if {$job(Template) != ""} {
