@@ -36,7 +36,7 @@ proc ea::db::init_vars {} {
     #
     #
     #***
-    global log program sec intlSetup
+    global log program sec intlSetup sysdb monarch_db
 
     ${log}::debug Initilizing list of modules
     set program(moduleNames) [eAssist_db::getDBModules]
@@ -55,6 +55,11 @@ proc ea::db::init_vars {} {
 
     ${log}::debug Initilizing Array: mod()
     ea::db::init_mod
+
+    ${log}::debug Initilizing Array: sysdb()
+    ea::db::init_sysdb
+
+    set monarch_db [tdbc::odbc::connection create db2 "$sysdb(dbLoginString)"]
 
     # Populate individual vars
     ${log}::debug Initilizing list of security groups
@@ -249,3 +254,22 @@ proc  ea::db::init_mod {} {
                                         #NextYear \
                                         #JobNumber]
 } ;# ea::tools::user_vars
+
+
+proc ea::db::init_sysdb {} {
+    global sysdb
+    array set sysdb { serverName "" \
+                        database "" \
+                        userid "" \
+                        userpwd "" \
+                    }
+
+    db eval "SELECT db_ServerName, db_dbName, db_userid, db_pwd FROM db_integration" {
+        set sysdb(serverName) $db_ServerName
+        set sysdb(database) $db_dbName
+        set sysdb(userid) $db_userid
+        set sysdb(userpwd) $db_pwd
+    }
+
+    set sysdb(dbLoginString) "Driver={SQL Server};Server=$sysdb(serverName);Database=$sysdb(database);UID=$sysdb(userid);PWD=$sysdb(userpwd)"
+} ;# ea::db::init_sysdb

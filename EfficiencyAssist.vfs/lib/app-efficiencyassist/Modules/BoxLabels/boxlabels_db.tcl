@@ -8,14 +8,15 @@
 ###
 
 proc ea::db::bl::getShipToData {btn wid_text} {
-    global log job
+    global log job sysdb monarch_db
 
     if {$job(Number) eq ""} {${log}::debug getShipToData: Exiting, $job(Number) (Job Number) is empty; return}
     if {$job(ShipOrderID) eq ""} {${log}::debug getShipToData: Exiting, $job(ShipOrderID) (Ship Order ID) is empty ; return}
 
     ${log}::debug $job(Number) - $job(ShipOrderID)
 
-    set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+    #set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+    #set monarch_db [tdbc::odbc::connection create db2 "$sysdb(dbLoginString)"]
     #### BOX LABELS
     #set stmt [$monarch_db prepare {SELECT TITLENAME
     #                                ,ISSUENAME
@@ -76,13 +77,13 @@ proc ea::db::bl::getShipToData {btn wid_text} {
     set job(ShipToDestination) [join $job(ShipToDestination) " _n_ "]
     set job(ShipToDestination) [list $job(ShipToDestination)]
     $stmt close
-    db2 close
+    #db2 close
 
     #$btn configure -text [mc "Reset"] -command "Shipping_Code::resetShipTo $btn $wid_text"
 } ;# ea::db::bl::getShipToData
 
 proc ea::db::bl::getJobData {btn1 wid shipToWid shipListWid} {
-    global log job labelText blWid tplLabel
+    global log job labelText blWid tplLabel sysdb monarch_db
 
     if {[string length $job(Number)] < 6} {
         ${log}::notice The job number is less than 5 numbers. Aborting.
@@ -97,8 +98,9 @@ proc ea::db::bl::getJobData {btn1 wid shipToWid shipListWid} {
     # Disable entry widgets
     $blWid(f).entry1 state disabled
 
-    set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
-    
+    #set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+    #set monarch_db [tdbc::odbc::connection create db2 "$sysdb(dbLoginString)"]
+
     # Job Data
     set stmt [$monarch_db prepare "SELECT TOP 1 CUSTOMERNAME, TITLENAME, ISSUENAME
                                         FROM EA.dbo.Planner_Shipping_View
@@ -134,7 +136,7 @@ proc ea::db::bl::getJobData {btn1 wid shipToWid shipListWid} {
     $blWid(tab2f1).cbox1 set $job(ShipOrderID)
 
     $stmt close
-    db2 close
+    #db2 close
 
     ea::db::bl::getShipToData {} $blWid(tab2f2).txt
 
@@ -145,7 +147,7 @@ proc ea::db::bl::getJobData {btn1 wid shipToWid shipListWid} {
 } ;# ea::db::bl::getJobData
 
 proc ea::db::bl::getAllVersions {wid} {
-    global log job labelText tplLabel
+    global log job labelText tplLabel sysdb monarch_db
     # Get list of versions
 
     # Exit out if no job number
@@ -160,7 +162,8 @@ proc ea::db::bl::getAllVersions {wid} {
         # Let the user know that this job has templates
         Error_Message::errorMsg BL008
     } else {
-        set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+        #set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+        #set monarch_db [tdbc::odbc::connection create db2 "$sysdb(dbLoginString)"]
 
         # Retrieve versions that have boxes
         set stmt [$monarch_db prepare "SELECT DISTINCT ALIASNAME
@@ -192,7 +195,7 @@ proc ea::db::bl::getAllVersions {wid} {
             lappend job(TotalVersions) [string toupper [join $val]]
         }
 
-        db2 close
+        #db2 close
     }
 
     ${log}::debug List of versions: $job(TotalVersions)
@@ -296,7 +299,7 @@ proc ea::db::bl::getTplVersions {} {
 } ;# ea::db::bl::getTplVersions
 
 proc ea::db::bl::getShipCounts {} {
-    global log job blWid
+    global log job blWid sysdb monarch_db
 
     # Make sure we start with an empty widget
     $blWid(f2BL).listbox delete 0 end
@@ -306,7 +309,8 @@ proc ea::db::bl::getShipCounts {} {
 
     # Ensure var is empty
     set job(ShipCount) ""
-    set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+    #set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+    #set monarch_db [tdbc::odbc::connection create db2 "$sysdb(dbLoginString)"]
     set stmt [$monarch_db prepare "SELECT DISTINCT(ORDERID), SHIPCOUNT, DISTRIBNAME
                                         FROM EA.dbo.Planner_Shipping_View
                                         WHERE JOBNAME = '$job(Number)'
@@ -323,7 +327,7 @@ proc ea::db::bl::getShipCounts {} {
     }
 
     $stmt close
-    db2 close
+    #db2 close
 
     # If we're using a template ...
     if {$job(Template) ne ""} {

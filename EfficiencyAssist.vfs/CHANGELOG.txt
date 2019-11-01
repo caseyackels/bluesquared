@@ -1,6 +1,12 @@
+Version 4.1.1 RC8.1 (Sept 2019)
+== Setup
+* [NEW] Ability to change database server and credentials through user interface
+
+--
+
 = Version 4.1.1 RC6.3.2 (November 2018)
 == Label Designer
-* [NEW] Easier to add/edit/delete multiple label versions. 
+* [NEW] Easier to add/edit/delete multiple label versions.
 
 --
 

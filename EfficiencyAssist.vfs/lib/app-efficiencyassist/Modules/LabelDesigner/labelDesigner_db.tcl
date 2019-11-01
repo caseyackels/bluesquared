@@ -84,9 +84,9 @@ proc ea::db::ld::getLabelProfile {} {
 } ;# ea::db::ld::getLabelProfile
 
 proc ea::db::ld::getTemplateData {} {
-    global ldWid log
+    global ldWid log monarch_db
     # This populates the main table listing the template id, template name, customer, title and status
-    set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+    #set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
     $ldWid(f1b).listbox delete 0 end
 
     db eval "SELECT DISTINCT(PubTitleID), Status FROM LabelTPL ORDER BY PubTitleID AND STATUS = 1" {
@@ -115,7 +115,7 @@ proc ea::db::ld::getTemplateData {} {
             $ldWid(f1b).listbox insert end [list "" "DEFAULT" "ALL" "$newStatus"]
         }
     }
-    db2 close
+    #db2 close
 } ;# ea::db::ld::getTemplateData
 
 # Write Data
@@ -403,10 +403,10 @@ proc ea::db::ld::getTemplateID {title_id} {
 } ;# ea::db::ld::getTemplateID
 
 proc ea::db::ld::getCustomerList {} {
-    global log tplLabel job
+    global log tplLabel job monarch_db
 
     set job(CustomerList) ""
-    set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+    #set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
     set stmt [$monarch_db prepare "SELECT DISTINCT COMPANYNAME FROM EA.dbo.Customer_Jobs_Issues_CSR"]
 
     set res [$stmt execute]
@@ -416,17 +416,17 @@ proc ea::db::ld::getCustomerList {} {
     }
 
     $stmt close
-    db2 close
+    #db2 close
 
     ${log}::debug CustomerList retrieved
     set job(CustomerList) [join $job(CustomerList)]
 } ;# ea::db::ld::getCustomerList
 
 proc ea::db::ld::getCustomerTitles {} {
-    global log job
+    global log job monarch_db
 
     set job(CustomerTitles) ""
-    set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+    #set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
     set stmt [$monarch_db prepare "SELECT DISTINCT TITLENAME FROM EA.dbo.Customer_Jobs_Issues_CSR
                                     WHERE COMPANYNAME = '$job(CustName)'"]
 
@@ -438,7 +438,7 @@ proc ea::db::ld::getCustomerTitles {} {
     }
 
     $stmt close
-    db2 close
+    #db2 close
 
     ${log}::debug CustomerTitles retrieved
     set job(CustomerTitles) [join $job(CustomerTitles)]
@@ -447,11 +447,11 @@ proc ea::db::ld::getCustomerTitles {} {
 proc ea::db::ld::getCustomerTitleID {} {
     # Retrieve the ID of the selected Title, and the CSR
     # This will be used internally (ea db) and to prefix folders
-    global log job
+    global log job monarch_db
 
     set job(TitleID) ""
     set job_title [string map {' ''} $job(Title)]
-    set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+    #set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
     set stmt [$monarch_db prepare "SELECT TOP 1 JOBID, ACCOUNTMGR FROM EA.dbo.Customer_Jobs_Issues_CSR
                                     WHERE TITLENAME = '$job_title'"]
 
@@ -464,7 +464,7 @@ proc ea::db::ld::getCustomerTitleID {} {
     }
 
     $stmt close
-    db2 close
+    #db2 close
 
     set job(TitleID) [join $job(TitleID)]
     set job(CSRID) [join $job(CSRID)]
@@ -472,10 +472,10 @@ proc ea::db::ld::getCustomerTitleID {} {
 } ;# ea::db::ld::getCustomerTitleID
 
 proc ea::db::ld::getCustomerTitleName {title_id} {
-    global log job
+    global log job monarch_db
 
     set job(Title) ""
-    set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+    #set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
     set stmt [$monarch_db prepare "SELECT DISTINCT TITLENAME FROM EA.dbo.Customer_Jobs_Issues_CSR
                                     WHERE JOBID = '$title_id'"]
 
@@ -487,13 +487,13 @@ proc ea::db::ld::getCustomerTitleName {title_id} {
     }
 
     $stmt close
-    db2 close
+    #db2 close
 } ;# ea::db::ld::getCustomerTitleName
 
 proc ea::db::ld::getCustomerCode {} {
-    global log job
+    global log job monarch_db
     set job(CustID) ""
-    set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+    #set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
     set stmt [$monarch_db prepare "SELECT DISTINCT HAGEN_ID FROM EA.dbo.Customer_Jobs_Issues_CSR
                                     WHERE COMPANYNAME = '$job(CustName)'"]
 
@@ -505,17 +505,17 @@ proc ea::db::ld::getCustomerCode {} {
     }
 
     $stmt close
-    db2 close
+    #db2 close
 
     ${log}::debug Customer Code retrieved
     set job(CustID) [join $job(CustID)]
 } ;# ea::db::ld::getCustomerCode
 
 proc ea::db::ld::getCustomerName {title_id} {
-    global log job
+    global log job monarch_db
 
     set job(CustName) ""
-    set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
+    #set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
     set stmt [$monarch_db prepare "SELECT DISTINCT COMPANYNAME FROM EA.dbo.Customer_Jobs_Issues_CSR
                                     WHERE JOBID = '$title_id'"]
 
@@ -527,7 +527,7 @@ proc ea::db::ld::getCustomerName {title_id} {
     }
 
     $stmt close
-    db2 close
+    #db2 close
 } ;# ea::db::ld::getCustomerName
 
 # proc ea::db::ld::getProfile {cbox} {

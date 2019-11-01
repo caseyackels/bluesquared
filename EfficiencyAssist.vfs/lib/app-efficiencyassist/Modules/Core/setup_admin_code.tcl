@@ -16,13 +16,13 @@ proc ea::code::admin::initWidSecArray {mode {widRow ""}} {
     #
     # COPYRIGHT
     #	(c) 2015 Casey Ackels
-    #   
+    #
     # NOTES
     #   widRow is only used when using -populate
-    #   
+    #
     #***
     global log widSec widTmp
-    
+
     if {$mode eq "-populate"} {
         for {set x 0} {$x < [$widTmp(sec,users_f2).listbox columncount]} {incr x} {
                 set widSec(users,[$widTmp(sec,users_f2).listbox columncget $x -name]) [$widTmp(sec,users_f2).listbox cellcget $widRow,$x -text]
@@ -44,24 +44,24 @@ proc eAssistSetup::readSecGroup {wid} {
     #
     # COPYRIGHT
     #	(c) 2015 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
-    #   eAssistSetup::readSecGroup wid 
+    #   eAssistSetup::readSecGroup wid
     #
     # FUNCTION
     #   Helper function for the Groups tab
     #	Reads the security groups from the database, and populates <wid>
-    #   
-    #    
+    #
+    #
     # NOTES
-    #   
-    #    
+    #
+    #
     #***
     global log
-    
+
     $wid delete 0 end
-    
+
     db eval "SELECT SecGroupName_ID, SecGroupName, Status FROM SecGroupNames" {
         $wid insert end [list {} $SecGroupName_ID $SecGroupName $Status]
     }
@@ -78,36 +78,36 @@ proc eAssistSetup::populateSecGroupEdit {dbid} {
     #
     # COPYRIGHT
     #	(c) 2015 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
-    #   eAssistSetup::populateSecGroupEdit dbid 
+    #   eAssistSetup::populateSecGroupEdit dbid
     #
     # FUNCTION
     #	Retrieves the given dbid data and populates the Group Name widget, and the Active checkbutton
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log widSec
-    
+
     db eval "SELECT SecGroupName, Status FROM SecGroupNames WHERE SecGroupName_ID = $dbid" {
         set widSec(group,Name) $SecGroupName
         set widSec(group,Active) $Status
     }
 
-    
+
 } ;# eAssistSetup::populateSecGroupEdit
 
 proc ea::db::insertSecGroup {mode widTbl args} {
@@ -120,7 +120,7 @@ proc ea::db::insertSecGroup {mode widTbl args} {
     #
     # COPYRIGHT
     #	(c) 2015 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
     #   ea::db::insertSecGroup <add|update> <widTbl> ?dbid?
@@ -128,40 +128,40 @@ proc ea::db::insertSecGroup {mode widTbl args} {
     # FUNCTION
     #	Inserts a new entry into the SecGroupNames table
     #	The dbid is required when using 'update'
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     # SEE ALSO
     #   TODO: Upon inserting into SecGroupNames, we need to insert into SecurityAccess also.
-    #   
+    #
     #***
     global log widSec
-    
+
     set dbid $args
-    
+
     if {$mode eq "add"} {
         # Insert into the db
         db eval "INSERT OR ABORT INTO SecGroupNames (SecGroupName, Status) VALUES ('$widSec(group,Name)','$widSec(group,Active)')"
-        
+
         set lastGroupID [db eval "SELECT MAX(SecGroupName_ID) FROM SecGroupNames"]
-        
+
         set modIDs [db eval "SELECT Mod_ID from Modules ORDER BY Mod_ID"]
-        
+
         foreach mod $modIDs  {
             lappend sql_modsGroups "($lastGroupID, $mod)"
         }
-        
+
         ${log}::debug db eval "INSERT OR ABORT INTO SecurityAccess (SecGrpNameID, ModID) VALUES [join $sql_modsGroups ,]"
         db eval "INSERT OR ABORT INTO SecurityAccess (SecGrpNameID, ModID) VALUES [join $sql_modsGroups ,]"
-        
+
     } elseif {$mode eq "update" && $args ne ""} {
         ${log}::debug Updating ID: $dbid - $widSec(group,Name)
         db eval "UPDATE SecGroupNames SET SecGroupName='$widSec(group,Name)', Status='$widSec(group,Active)' WHERE SecGroupName_ID=$dbid"
@@ -180,30 +180,30 @@ proc ea::db::populateSecGroupSingleEntry {widTbl {widRow ""} {dbid ""}} {
     #
     # COPYRIGHT
     #	(c) 2015 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
     #   ea::db::populateSecGroupSingleEntry tablelist_path ?dbid?
     #
     # FUNCTION
     #	Updates the tablelist with the newly added or updated data
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log widTmp widSec
-    
+
     # If a dbid was supplied, we've updated...
     if {$widRow eq "" && $dbid eq ""} {
         # Insert values into the tablelist
@@ -218,11 +218,11 @@ proc ea::db::populateSecGroupSingleEntry {widTbl {widRow ""} {dbid ""}} {
         db eval "SELECT SecGroupName_ID, SecGroupName, Status FROM SecGroupNames WHERE SecGroupName_ID = $dbid" {
             $widTbl insert $widRow [list {} $SecGroupName_ID $SecGroupName $Status]
         }
-        
+
         # Ensure button says "Add"; this could have been changed to 'update' a record.
         $widTmp(sec,group_wid_btn) configure -text [mc "Add"] -command {ea::db::insertSecGroup add $widTmp(sec,group_f2).listbox; ea::db::populateSecGroupSingleEntry $widTmp(sec,group_f2),listbox}
     }
-    
+
     # Clear variables
     set widSec(group,Name) ""
     set widSec(group,Active) 0
@@ -238,30 +238,30 @@ proc eAssistSetup::populateSecUsersEdit {method widTbl {widRow end} {userLogin "
     #
     # COPYRIGHT
     #	(c) 2015 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
     #   eAssistSetup::populateSecUsersEdit -update|-populate widTbl ?widRow? ?userLogin?
     #
     # FUNCTION
     #	Populates the Users tablelist widget from the database
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log tmp
-    
+
     set sql "SELECT SecGroupNames.SecGroupName as groupName,
                     Users.User_ID as User_ID,
                     Users.UserLogin as UserLogin,
@@ -297,55 +297,55 @@ proc eAssistSetup::writeSecUsers {method widTbl widRow userGroup userName userLo
     #
     # COPYRIGHT
     #	(c) 2015 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
     #   eAssistSetup::writeSecUsers -insert|-update <widTbl> <widRow> <userGroup> <userName> <userLogin> <userPasswd> ?userEmail? ?userStatus? ?userID?
     #
     # FUNCTION
     #	Command function, which controls writing/updating user data including passwords
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # NOTES
     #   userEmail defaults to <empty> if not supplied
     #   userStatus defaults to '1'
-    #   
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log
-    
+
     if {$method eq "-insert"} {
         # Adding a new record, password doesn't exist yet. Create Salt and encrypt.
         ${log}::debug [info level 0] -insert
         set passSalt [ea::sec::setPasswd $userPasswd]
             set pass [lindex $passSalt 0]
             set salt [lindex $passSalt 1]
-            
+
             set widRow end
-        
+
     } elseif {$method eq "-update"} {
         # Record exists, now check to see if the password field was populated, if it was retrieve pass and salt from DB
         ${log}::debug [info level 0] -update
-        
+
         ${log}::debug [info level 0] -update - Password Field is blank, skipping...
         # Retrieve old pass and salt - these get overwritten if a new pass is detected
         set oldPassSalt [ea::db::getPasswd $userLogin]
             set pass [lindex $oldPassSalt 0]
             set salt [lindex $oldPassSalt 1]
-        
+
         if {$userPasswd ne ""} {
             # Generate new pass and salt based on userPasswd
             ${log}::debug [info level 0] -update - Password Field contains data, adding to db...
             set newPassSalt [ea::sec::setPasswd $userPasswd $salt]
-            
+
             # Compare the two, if they don't match, update passwd in db.
             if {![string match $oldPassSalt $newPassSalt]} {
                 ${log}::debug [info level 0] -update - Field contains a new password
@@ -355,18 +355,18 @@ proc eAssistSetup::writeSecUsers {method widTbl widRow userGroup userName userLo
         }
         $widTbl delete $widRow
     }
-    
-    
+
+
     # Write user data to database
     ea::db::writeUser $method $userGroup $userName $userLogin $pass $salt $userEmail $userStatus $userID
-    
+
     # Update the widget
     eAssistSetup::populateSecUsersEdit -update $widTbl $widRow $userLogin
 
     ## Populate new/updated entry in tablelist
     #$widTbl insert $widRow "{} [ea::db::getUser $method $userID]"
 
-    
+
 } ;# eAssistSetup::writeSecUsers
 proc ea::db::admin::populateModPerms {widTbl grpName} {
     #****if* populateModPerms/ea::db::admin
@@ -378,15 +378,15 @@ proc ea::db::admin::populateModPerms {widTbl grpName} {
     #
     # COPYRIGHT
     #	(c) 2015 Casey Ackels
-    #   
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     #***
     global log
 
     $widTbl delete 0 end
-    
+
     db eval "SELECT Modules.ModuleName as ModName, SecAccess_Read, SecAccess_Write, SecAccess_Delete FROM SecurityAccess
                 INNER JOIN SecGroupNames ON SecurityAccess.SecGrpNameID = SecGroupNames.SecGroupName_ID
                 INNER Join Modules ON SecurityAccess.ModID = Modules.Mod_ID
@@ -399,7 +399,7 @@ proc ea::db::admin::populateModPerms {widTbl grpName} {
                     $widTbl insert end "{} [list $ModName] $secRead $secWrite $secDel"
                 }
 
-    
+
 } ;# ea::db::admin::populateModPerms
 
 proc ea::db::admin::updateModPerms {col value modName groupName} {
@@ -412,13 +412,13 @@ proc ea::db::admin::updateModPerms {col value modName groupName} {
     #
     # COPYRIGHT
     #	(c) 2015 Casey Ackels
-    #   
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     #***
     global log
-    
+
     ${log}::debug $col $value $modName $groupName
 
     db eval "UPDATE SecurityAccess SET $col=$value
@@ -438,27 +438,27 @@ proc ea::db::admin::addUserToGroup {userLogin userModule} {
     #
     # COPYRIGHT
     #	(c) 2015 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
-    #   ea::db::admin::addUserToGroup args 
+    #   ea::db::admin::addUserToGroup args
     #
     # FUNCTION
     #	Adds/Edits the User's assigned group. We delete any existing entries before inserting, so we don't have to keep track if we are adding (new) or editing (updating existing)
-    #   
-    #   
+    #
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     #***
     global log
 
     set userid [db eval "SELECT User_ID from Users WHERE UserLogin = '$userLogin'"]
     set module [db eval "SELECT SecGroupName_ID FROM SecGroupNames WHERE SecGroupName = '$userModule'"]
-    
+
     # Delete all records if they already exist
     db eval "DELETE FROM SecGroups WHERE UserID = $userid"
 
@@ -466,5 +466,13 @@ proc ea::db::admin::addUserToGroup {userLogin userModule} {
     # Now insert
     db eval "INSERT OR ABORT INTO SecGroups (SecGroupNameID, UserID)
                 VALUES ($module, $userid)"
-    
+
 } ;# ea::db::admin::addUserToGroup
+
+proc ea::db::admin::saveDBInfo {} {
+    global log sysdb
+
+    db eval "INSERT INTO db_integration (db_ServerName, db_dbName, db_userid, db_pwd) VALUES ('$sysdb(serverName)', '$sysdb(database)', '$sysdb(userid)', '$sysdb(userpwd)')"
+    ${log}::debug Inserting sysdb array values - [parray sysdb]
+
+} ;# ea::db::admin::saveDBInfo

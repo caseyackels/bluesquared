@@ -26,12 +26,6 @@ package provide eAssist_db 1.0
 namespace eval eAssist_db {} ;# Old do not use
 namespace eval ea::db {}
 
-proc ea::db::loadMonarch {} {
-    global log monach_db
-
-    set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
-}
-
 proc eAssist_db::loadDB {args} {
     #****f* openDB/eAssist_db
     # AUTHOR
@@ -83,7 +77,8 @@ proc eAssist_db::loadDB {args} {
     }
 
     # Load Monarch database
-    #ea::db::loadMonarch
+    # This is launched in db_initvars.tcl // ea::db::init_vars
+
 
     #eAssist_db::initContainers
 } ;# eAssist_db::loadDB
