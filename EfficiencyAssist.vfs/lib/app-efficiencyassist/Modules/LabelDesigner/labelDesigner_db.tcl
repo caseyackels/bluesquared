@@ -452,14 +452,16 @@ proc ea::db::ld::getCustomerTitleID {} {
     set job(TitleID) ""
     set job_title [string map {' ''} $job(Title)]
     #set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
-    set stmt [$monarch_db prepare "SELECT TOP 1 JOBID, ACCOUNTMGR FROM EA.dbo.Customer_Jobs_Issues_CSR
+    # set stmt [$monarch_db prepare "SELECT TOP 1 JOBID, ACCOUNTMGR FROM EA.dbo.Customer_Jobs_Issues_CSR
+    #                                 WHERE TITLENAME = '$job_title'"]
+    set stmt [$monarch_db prepare "SELECT TOP 1 JOBID FROM EA.dbo.Customer_Jobs_Issues_CSR
                                     WHERE TITLENAME = '$job_title'"]
 
     set res [$stmt execute]
 
     while {[$res nextlist val]} {
         set job(TitleID) [lindex $val 0]
-        set job(CSRID) [lindex $val 1]
+        #set job(CSRID) [lindex $val 1]
         #puts $val
     }
 
@@ -467,8 +469,8 @@ proc ea::db::ld::getCustomerTitleID {} {
     #db2 close
 
     set job(TitleID) [join $job(TitleID)]
-    set job(CSRID) [join $job(CSRID)]
-    ${log}::debug Monarch Title ID $job(TitleID) and CSR $job(CSRID) retrieved
+    #set job(CSRID) [join $job(CSRID)]
+    ${log}::debug Monarch Title ID $job(TitleID) retrieved
 } ;# ea::db::ld::getCustomerTitleID
 
 proc ea::db::ld::getCustomerTitleName {title_id} {

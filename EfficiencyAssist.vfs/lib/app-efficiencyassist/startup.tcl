@@ -401,6 +401,9 @@ proc 'eAssist_initVariables {} {
 					CustomerTitles "" \
 				   CustID "" \
 				   CSRName "" \
+				   CSR,LastName "" \
+				   CSR,FirstName "" \
+				   CSR,Email "" \
 				   CSRID "" \
 				   Title "" \
 				   TitleID "" \
