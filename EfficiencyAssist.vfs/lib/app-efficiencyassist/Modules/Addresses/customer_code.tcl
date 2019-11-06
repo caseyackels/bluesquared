@@ -21,20 +21,27 @@
 
 # - Procedures: Proc names should have two words. The first word lowercase the first character of the first word,
 #   will be uppercase. I.E sourceFiles, sourceFileExample
-
-proc ea::code::customer::getJobData {jobNum} {
+#ea::db::customer
+proc ea::db::customer::getJobData {} {
     global log job monarch_db
 
-    if {$jobNum eq ""} {return}
-    if {[string length $jobNum] < 6} {
+    if {$job(Number) eq ""} {
+        # Reset variables if they happen to have previously been filled in??? ??
+        return
+    }
+
+    if {[string length $job(Number)] < 6} {
             ${log}::notice The job number is less than 5 numbers. Aborting.
-            Error_Message::errorMesg BL006
+            Error_Message::errorMsg BL006
             return
         }
 
-    set stmt [$monarch_db prepare "SELECT TOP 1 CUSTOMERNAME, TITLENAME, ISSUENAME
-                                        FROM EA.dbo.Planner_Shipping_View
-                                        WHERE JOBNAME='$jobNum'"]
+    # set stmt [$monarch_db prepare "SELECT TOP 1 CUSTOMERNAME, TITLENAME, ISSUENAME
+    #                                     FROM EA.dbo.Planner_Shipping_View
+    #                                     WHERE JOBNAME='$jobNum'"]
+    set stmt [$monarch_db prepare "SELECT COMPANYNAME, TITLENAME, ISSUENAME, HAGEN_ID, FIRSTNAME, LASTNAME, EMAILADDRESS
+                                        FROM EA.dbo.Customer_Jobs_Issues_CSR
+                                        WHERE JOBNAME='$job(Number)'"]
 
     set res [$stmt execute]
 
@@ -42,11 +49,16 @@ proc ea::code::customer::getJobData {jobNum} {
         set job(CustName) [lindex $val 0]
         set job(Title) [string toupper [lindex $val 1]]
         set job(Name) [string toupper [lindex $val 2]]
+        set job(CustID) [lindex $val 3]
+        set job(CSR,FirstName) [lindex $val 4]
+        set job(CSR,LastName) [lindex $val 5]
+        set job(CSR,Email) [lindex $val 6]
     }
+    set job(CSRName) "$job(CSR,FirstName) $job(CSR,LastName)"
 
     $stmt close
     set job(Description) "$job(Title) / $job(Name)"
-}
+} ;# ea::db::customer::getJobData
 
 
 #####

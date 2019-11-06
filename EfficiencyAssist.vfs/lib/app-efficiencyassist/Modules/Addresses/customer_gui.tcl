@@ -68,12 +68,6 @@ proc customer::projSetup {args} {
     set locY [expr {[winfo screenheight . ] / 5 + [winfo y .]}]
     wm geometry .ps +${locX}+${locY}
 
-    #set f1 [ttk::labelframe .ps.f1 -text [mc "Title Information"] -padding 10]
-    #pack $f1 -fill both -expand yes -padx 5p -pady 5p
-
-    # Retrieve list of customers
-    #ea::db::ld::getCustomerList
-
     set wid(cust,f1) [ttk::labelframe .ps.f1 -text [mc "Job Information"] -padding 5 -width 25]
     pack $wid(cust,f1) -fill both -expand yes -pady 2p -padx 2p
 
@@ -88,25 +82,31 @@ proc customer::projSetup {args} {
                                 -width 20 \
 								-validate key \
 								-validatecommand {Shipping_Code::filterKeys -numeric %S %W %P}] -column 1 -row 2 -padx 2p -pady 2p -sticky ew
-    grid [ttk::button $wid(cust,f1).btn1 -text [mc "Search"] -command {ea::code::customer::getJobData $job(Number)}] -column 2 -row 2 -padx 2p -pady 2p -sticky w
+    grid [ttk::button $wid(cust,f1).btn1 -text [mc "Search"] -command {ea::db::customer::getJobData}] -column 2 -row 2 -padx 2p -pady 2p -sticky w
 
         focus $wid(cust,f1).entry1
-		# bind $wid(cust,f1).entry1 <Return> {
-		# 	if {$job(Number) != ""} {
-        #         ${log}::debug No data entered, exiting...
-        #     } else {
-        #         ea::code::customer::getJobData
-        #     }
-        # }
+
+        bind $wid(cust,f1).entry1 <Return> {
+            ea::db::customer::getJobData
+        }
+
+    grid [ttk::label $wid(cust,f1).text2 -text [mc "Save Location"]] -column 0 -row 3 -padx 2p -pady 2p -sticky e
+    grid [ttk::entry $wid(cust,f1).entry2 -textvariable job(TitleSaveFileLocation) -width 45] -column 1 -row 3 -padx 2p -pady 2p -sticky ew
+            tooltip::tooltip $wid(cust,f1).entry2 [mc "Location where you want to save this Title."]
+    grid [ttk::button $wid(cust,f1).btn2 -text [mc "..."] -width 3 -command {customer::getFileSaveLocation title}] -column 2 -row 3 -padx 2p -pady 2p -sticky ew
+
+
 
         set btnBar [ttk::frame .ps.btnBar -padding 10]
         pack $btnBar -anchor se ;#-padx 5p -pady 5p
 
         ttk::button $btnBar.ok -text [mc "Close"] -command {destroy .ps} ;# Default command
-        ttk::button $btnBar.import -text [mc "Import File"] -command {${log}::debug -tName $job(Title) -tCSR $job(CSRName) -tSaveLocation $job(TitleSaveFileLocation) -tCustCode $job(CustID) -tHistNote {Initial Entry} -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jForestCert $job(ForestCert) -jHistNote {Initial Job Entry}}
-        #{customer::dbUpdateCustomer
-            #job::db::createDB -tName $job(Title) -tCSR $job(CSRName) -tSaveLocation $job(TitleSaveFileLocation) -tCustCode $job(CustID) -tHistNote {Initial Entry} -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jForestCert $job(ForestCert) -jHistNote {Initial Job Entry}
-            #importFiles::fileImportGUI; destroy .ps}
+        #ttk::button $btnBar.import -text [mc "Import File"] -command {${log}::debug -tName $job(Title) -tCSR $job(CSRName) -tSaveLocation $job(TitleSaveFileLocation) -tCustCode $job(CustID) -tHistNote {Initial Entry} -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jForestCert $job(ForestCert) -jHistNote {Initial Job Entry}}
+        ttk::button $btnBar.import -text [mc "Import File"] -command {
+            job::db::createDB -tName $job(Title) -tCSR $job(CSRName) -tSaveLocation $job(TitleSaveFileLocation) -tCustCode $job(CustID) -tHistNote {Initial Entry} -jNumber $job(Number) -jName $job(Name) -jSaveLocation $job(JobSaveFileLocation) -jShipStart "" -jShipBal "" -jForestCert $job(ForestCert) -jHistNote {Initial Job Entry}
+            importFiles::fileImportGUI; destroy .ps}
+
+            # Not used customer::dbUpdateCustomer
 
         grid $btnBar.ok -column 0 -row 0 -sticky news
         grid $btnBar.import -column 1 -row 0 -sticky news
