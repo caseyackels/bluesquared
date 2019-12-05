@@ -1,6 +1,6 @@
 # Creator: Casey Ackels
 # Initial Date: March 12, 2011]
-# File Initial Date: 10 07,2013 
+# File Initial Date: 10 07,2013
 #-------------------------------------------------------------------------------
 #
 # Subversion
@@ -39,7 +39,7 @@ proc importFiles::readFile {fileName lbox} {
     #	N/A
     #
     # PARENTS
-    #	
+    #
     #
     # NOTES
     #
@@ -50,14 +50,14 @@ proc importFiles::readFile {fileName lbox} {
     #${log}::debug --START-- [info level 1]
     ${log}::debug file name: $fileName
     ${log}::debug file tail: [file tail $fileName]
-    
+
     # Reset variables because we might be importing a 2nd file
     eAssistHelper::resetImportInterface 1
-    
+
     if {$fileName eq ""} {return}
-    
+
     set process(fileName) [file tail $fileName] ;# retrieve just the file name, so we can display it in a friendly matter
-    
+
     # Open the file
     set process(fd) [open "$fileName" RDONLY]
 
@@ -71,11 +71,11 @@ proc importFiles::readFile {fileName lbox} {
             ${log}::notice Found some punc data, skipping ...
             continue
         }
-        
+
         # Cycle through the rows until we find something that resembles a header row. Once we find it, start appending the data to a variable.
         # The imported files may have several rows of information before getting to the header row.
         if {$gateway == 0} {
-            
+
             set Tmphdr [split $line ,]
             set hdr_lines 0
             foreach temp $Tmphdr {
@@ -84,13 +84,13 @@ proc importFiles::readFile {fileName lbox} {
                     #${log}::debug Setting gateway to 1
                     break
                     }
-                
+
                 foreach hdr $headerParent(headerList) {
-                    
+
                     if {[lsearch -nocase $headerAddress($hdr) $temp] != -1} {
                         # Searching the subheaders for a match ...
                         incr hdr_lines
-                
+
                         # Once we reach 4 matches lets stop looping
                         if {$hdr_lines >= 4} {
                             ${log}::notice Found the Header row - $line
@@ -111,7 +111,7 @@ proc importFiles::readFile {fileName lbox} {
         }
 
     }
-    
+
     #${log}::debug *Header RECORDS*: [expr [llength $process(dataList)]-1]
     set process(numOfRecords) [expr [llength $process(dataList)]-1]
 
@@ -120,7 +120,7 @@ proc importFiles::readFile {fileName lbox} {
     # Only retrieve the first record. We use this as the 'header' row.
     set process(Header) [string toupper [csv::split [lindex $process(dataList) 0]]]
     ${log}::debug process(Header): $process(Header)
-    
+
     set process(dataList) [lrange $process(dataList) 1 end] ;#we don't want the header, so lets trim it down.
 
     # headerList contains headers that are in SETUP:Headers
@@ -128,14 +128,14 @@ proc importFiles::readFile {fileName lbox} {
     foreach header $process(Header) {
         # Insert all headers, regardless if they match or not.
         $lbox insert end $header
-        
+
         if {$options(AutoAssignHeader) == 1} {
             foreach headerName $headerParent(headerList) {
                 # Get the HeaderID
                set subheaders [db eval "SELECT SubHeaderName FROM SubHeaders LEFT OUTER JOIN HeadersConfig
                         WHERE HeaderConfigID=HeaderConfig_ID
                     AND HeaderConfigID=(SELECT HeaderConfig_ID FROM HeadersConfig WHERE dbColName='$headerName')"]
-                
+
                 if {$process(Header) != ""} {
                     if {[lsearch -nocase $subheaders $header] != -1} {
                         eAssistHelper::autoMap $headerName $header
@@ -145,7 +145,7 @@ proc importFiles::readFile {fileName lbox} {
             }
         }
     }
-    
+
     importFiles::enableButtons $w(wi).top.btn2 $w(wi).btns.btn1 $w(wi).btns.btn2
     #${log}::debug --END-- [info level 1]
 } ;# importFiles::readFile
@@ -170,7 +170,7 @@ proc importFiles::processFile {win} {
     #	N/A
     #
     # PARENTS
-    #	
+    #
     #
     # NOTES
     #   headerParent(headerList) - List of InternalHeaderName
@@ -185,27 +185,27 @@ proc importFiles::processFile {win} {
     #***
     global log files headerAddress position process headerParams headerParent dist w job L_states options
     #${log}::debug --START-- [info level 1]
-    
+
     # Close the file importer window
     destroy $win
-    
+
     # This will allow us to append, or reset the interface depending on the user's selection in the File Importer window
     if {$options(ClearExistingData) == 1} {
         # Reset the entire interface
         eAssistHelper::resetImportInterface 2
     }
- 
+
     set process(versionList) ""
-    
+
     # Index (i.e. 01, from 01_HeaderName)
     set FileHeaders [lsort [array names position]]
     #${log}::debug FileHeaders: $FileHeaders
 
-    
+
     # launch progress bar window
     eAssistHelper::importProgBar
     #${log}::debug Launching Progress Bar
-    
+
     # configure value of progress bar (number of total records)
     set max [expr {$process(numOfRecords) + 1}]
     $::gwin(importpbar) configure -maximum $max
@@ -214,13 +214,13 @@ proc importFiles::processFile {win} {
     # This must be a balanced list
     # Only replace known 'bad' values. Commas, Apostrophe, and Quotes. Further filtering will be done by the user.
     set replaceBadChars [list ' "" , " " \" " "]
-    
+
     foreach record $process(dataList) {
         if {[info exists newRow]} {unset newRow}
         if {[info exists header_order]} {unset header_order}
         # .. Skip over any 'blank' lines in found in the file
         if {[string is punc $record] == 1} {continue}
-            
+
         ## Ensure we have good data; if we don't, lets try to fix it.
         ## This typically occurs when there is a hard return in the data. Excel does not fix it when the file is exported to .csv format
         if {[csv::iscomplete $record] == 0} {
@@ -236,12 +236,12 @@ proc importFiles::processFile {win} {
                 set l_line [csv::split $record]
             }
         }
-        
+
         # Check to see if we have a versions column in the user file.
         if {[lsearch $FileHeaders *Versions] == -1} {
             lappend FileHeaders 99_Versions
         }
-        
+
         # FileHeader = 00_Company
         foreach hdr $FileHeaders {
             set pos [lrange [split $hdr _] 0 0]
@@ -253,12 +253,12 @@ proc importFiles::processFile {win} {
                        }
             set hdr_ [lrange [split $hdr _] 1 end]
             set data [lrange $l_line $pos $pos]
-            
+
             # Cleanse data
             set data [string map $replaceBadChars $data]
             # Remove leading/trailing spaces
             set data [string trim [join $data]]
-            
+
             # manipulate data; we know what column we are in, and we have the data.
             switch -glob $hdr_ {
                 *Versions    {
@@ -283,11 +283,11 @@ proc importFiles::processFile {win} {
                                 }
                 }
                 ship*date   {
-                    
+
                 }
                 default     {}
             }
-            
+
             # Figure out what table to put the data into.
             if {[lsearch $headerParent(headerList,consignee) $hdr_ ] != -1} {
                     # Table: Addresses
@@ -301,49 +301,49 @@ proc importFiles::processFile {win} {
 
             ${log}::debug hdr_ $hdr_
         }
-        
+
         set sysGUID [ea::tools::getGUID]
         set histNote [job::db::insertHistory [mc "Sys: Import - Addresses"]]
-        
+
         set header_order_consignee "SysAddresses_ID SysAddressParentID HistoryID $header_order_consignee"
         set newRow_consignee "'$sysGUID' '$sysGUID' '$histNote' $newRow_consignee"
-        
+
         set header_order_shiporder "JobInformationID AddressID $header_order_shiporder"
         set newRow_shiporder "'$job(Number)' '$sysGUID' $newRow_shiporder"
-        
+
         # Insert data into the DB
         #${log}::debug HEADER: [join $header_order_consignee ,]
         #${log}::debug CONSIGNEE: [join $newRow_consignee ,]
-        
+
 
         $job(db,Name) eval "INSERT INTO Addresses ([join $header_order_consignee ,]) VALUES ([join $newRow_consignee ,])"
-        
+
         ##
         ## DE DUPING
-        ## Inserting into Shipping Orders should happen in the dedupe window  
+        ## Inserting into Shipping Orders should happen in the dedupe window
         ##
         $job(db,Name) eval "INSERT INTO ShippingOrders ([join $header_order_shiporder ,]) VALUES ([join $newRow_shiporder ,])"
-        
+
         # Clear variables
         unset header_order_consignee
         unset newRow_consignee
         unset header_order_shiporder
         unset newRow_shiporder
-        
+
         $::gwin(importpbar) step 1
         ${log}::debug Updating Progress Bar - [$::gwin(importpbar) cget -value]
         update
     }
-    
+
     ## Ensure the progress bar is at the max, by the time we are done with the loop
     $::gwin(importpbar) configure -value $max
-    
+
     ## Destroy the progress bar window
     eAssistHelper::importProgBar destroy
-    
+
     # Insert the data into the widget
-    importFiles::insertIntoGUI $files(tab3f2).tbl -dedupe
-    
+    importFiles::insertIntoGUI $files(tab3f2).tbl ;#-dedupe
+
 
     ## Enable menu items
     importFiles::enableMenuItems
@@ -352,7 +352,7 @@ proc importFiles::processFile {win} {
     job::db::getTotalCopies
 
     importFiles::highlightAllRecords $files(tab3f2).tbl
-    
+
     ## Destroy the progress bar window
     #eAssistHelper::importProgBar destroy
 
@@ -371,44 +371,44 @@ proc importFiles::insertIntoGUI {wid args} {
     #
     # COPYRIGHT
     #	(c) 2015 Casey Ackels
-    #   
+    #
     #
     # USAGE
-    #   importFiles::insertIntoGUI <wid> 
+    #   importFiles::insertIntoGUI <wid>
     #
     # FUNCTION
     #	Creates the required columns in the tablelist widget; then inserts the data.
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # EXAMPLE
-    #   importFiles::insertIntoGUI 
+    #   importFiles::insertIntoGUI
     #
     # NOTES
     #   This is called when importing a new file AND when opening an existing database
-    #  
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log headerParent job files
-    
+
     if {$args eq "-dedupe"} {
         # Run basic deduping
         ea::dedupe::exactMatch Company Attention Address1 Address2 City State Zip
     }
 
     if {[info exists hdrs_show]} {unset hdrs_show}
-        
+
     # make sure we are starting new. Clear the columns and clear the table
     if {[$wid columncount] != 0} {$wid deletecolumns 0 end}
     #${log}::debug Row Count 1: [$files(tab3f2).tbl size]
-        
+
     # Insert the columns into the widget
     # The tablelist widget is initialized in importFiles_gui.tcl [importFiles::eAssistGUI]
     # get the config values
@@ -425,7 +425,7 @@ proc importFiles::insertIntoGUI {wid args} {
                                 widDisplayType,
                                 widUIGroup,
                                 dbColName FROM HeadersConfig WHERE dbActive = 1" {
-                                    
+
             # Check to see if we need to configure the column (Always, Dynamic (with data), or Never)
             switch -- $widDisplayType {
                 "Dynamic"   {
@@ -439,21 +439,21 @@ proc importFiles::insertIntoGUI {wid args} {
                 "Always"    {}
                 default     {${log}::critical insertIntoGUI - $widDisplayType is not a valid switch option!}
             }
-            
+
 
             if {$widUIGroup eq "Consignee"} {set tbl Addresses} else {set tbl ShippingOrders}
                 #${log}::debug Table/Columns: $tbl.$dbColName
                 lappend hdrs_show "$tbl.$dbColName"
 
-            
+
             set lenWidLabelName [string length $widLabelName]
-            
+
             if {$lenWidLabelName >= $widStartColWidth} {
                     set colWidth $lenWidLabelName
                 } else {
                     set colWidth $widStartColWidth
             }
-            
+
             # Make sure we don't mistakenly set a dynamic width column shorter than the label text.
             # If we are in a dynamic width column, and the strings are less than the text label, we do not honor the dynamic setting.
             if {$widResizeToLongestEntry == 1 && $lenWidLabelName != $colWidth} {
@@ -462,21 +462,21 @@ proc importFiles::insertIntoGUI {wid args} {
                 # Increase colWidth by 1 to make the column a bit wider
                 incr colWidth
             }
-            
-            
+
+
             $wid insertcolumns end $colWidth $widLabelName
             $wid columnconfigure end -name $dbColName \
                                     -labelalign [string tolower $widLabelAlignment] \
                                     -align [string tolower $widColAlignment] \
                                     -maxwidth $widMaxWidth \
                                     -sortmode [string tolower $widDataType]
-            
+
             # If this is a required column; colorize the label text
             if {$widRequired == 1} {
                 $wid columnconfigure end -labelforeground red
             }
         } ;# End query for column configuration
-        
+
     #${log}::debug Row Count 2: [$files(tab3f2).tbl size]
 
     #${log}::debug hdrs_show: $hdrs_show
@@ -484,12 +484,12 @@ proc importFiles::insertIntoGUI {wid args} {
     # first manipulate the column names; we need two lists. One for the 'select' args, and one for the variables.
     if {[info exists hdr_list]} {unset hdr_list}
     if {[info exists hdr_data]} {unset hdr_data}
-    
+
     foreach hdr $hdrs_show {
         # look for a header that contains 'vers', because we need to append .VersionNames (Table: Versions, column VersionNames) so we can display the version name vs the version id
         if {[string match -nocase *vers* $hdr]} {
             #${log}::debug Found a vers match! $hdr
-    
+
             lappend hdr_list "Versions.VersionName as VersionName"
             lappend hdr_data \$VersionName
         } else {
@@ -514,13 +514,13 @@ proc importFiles::insertIntoGUI {wid args} {
                                 #${log}::debug data: [subst $hdr_data]
                                 $files(tab3f2).tbl insert end [subst $hdr_data]
                             }
-                            
+
     ## Insert columns that we should always see, and make sure that we don't create it multiple times if it already exists
     if {[$files(tab3f2).tbl findcolumnname OrderNumber] == -1} {
         $files(tab3f2).tbl insertcolumns 0 0 "..."
         $files(tab3f2).tbl columnconfigure 0 -name "OrderNumber" -labelalign center -showlinenumbers 1
     }
-    
+
 } ;# importFiles::insertIntoGUI $files(tab3f2).tbl
 
 
@@ -534,27 +534,27 @@ proc importFiles::highlightAllRecords {tbl} {
     #
     # COPYRIGHT
     #	(c) 2015 Casey Ackels
-    #   
+    #
     #
     # SYNOPSIS
-    #   importFiles::highlightAllRecords tbl 
+    #   importFiles::highlightAllRecords tbl
     #
     # FUNCTION
     #	Cycles through the tablelist widget, and highlights all records that exceed our max string length. See Setup/Headers
-    #   
-    #   
+    #
+    #
     # CHILDREN
     #	N/A
-    #   
+    #
     # PARENTS
-    #   
-    #   
+    #
+    #
     # NOTES
-    #   
-    #   
+    #
+    #
     # SEE ALSO
-    #   
-    #   
+    #
+    #
     #***
     global log
 
@@ -567,9 +567,9 @@ proc importFiles::highlightAllRecords {tbl} {
         set maxLength [db eval "SELECT widMaxStringLength FROM HeadersConfig where widLabelName='$colName'"]
         set backGround [join [db eval "SELECT widHighlightColor FROM HeadersConfig where widLabelName='$colName'"]]
         if {$backGround eq ""} {set backGround yellow} ;# Default to yellow if nothing was customized.
-        
+
         if {$maxLength eq ""} {continue} ;# Skip if we haven't set a value
-        
+
         # Retrieve column data, and apply color if needed
         set colData [$tbl getcolumns $x]
         set i_row 0
@@ -584,7 +584,7 @@ proc importFiles::highlightAllRecords {tbl} {
         }
     }
 
-    
+
 } ;# importFiles::highlightAllRecords $files(tab3f2).tbl
 
 
@@ -606,7 +606,7 @@ proc importFiles::startCmd {tbl row col text} {
     #	N/A
     #
     # PARENTS
-    #	
+    #
     #
     # NOTES
     #   dist() - Contains all distribution types
@@ -617,9 +617,9 @@ proc importFiles::startCmd {tbl row col text} {
     global log dist carrierSetup job process packagingSetup
     #${log}::debug --START-- [info level 1]
     set w [$tbl editwinpath]
-    
+
     set colName [$tbl columncget $col -name]
-    
+
     switch -nocase $colName {
             "distributiontype"  {
                                 $w configure -values $dist(distributionTypes) -state readonly
@@ -656,7 +656,7 @@ proc importFiles::startCmd {tbl row col text} {
                 #${log}::debug Column Name: [string tolower [$tbl columncget $col -name]]
             }
         }
-        
+
         $tbl cellconfigure $row,$col -text $text
 
     #set idx [lsearch -nocase [array names headerParams] $colName]
@@ -666,7 +666,7 @@ proc importFiles::startCmd {tbl row col text} {
     #if {$idx != -1} {}
     if {[string length $text] > $stringLength} {
         #${log}::debug length [string length $text]
-            
+
         if {$bgColor != ""} {
             set backGround $bgColor
         } else {
@@ -678,9 +678,9 @@ proc importFiles::startCmd {tbl row col text} {
     }
     # Update the internal list with the current text so that we can run calculations on it.
     $tbl cellconfigure $row,$col -background $backGround
-    
+
     return $text
-    
+
     #${log}::debug --END-- [info level 1]
 } ;#importFiles::startCmd
 
@@ -703,7 +703,7 @@ proc importFiles::endCmd {tbl row col text} {
     #	N/A
     #
     # PARENTS
-    #	
+    #
     #
     # NOTES
     #
@@ -712,10 +712,10 @@ proc importFiles::endCmd {tbl row col text} {
     #***
     global log headerParams headerParent files process job
     #${log}::debug --START-- [info level 1]
-    
+
     set colName [$tbl columncget $col -name]
     #set updateCount 0
-    
+
     switch -nocase $colName {
         version  {# Add $text to list of versions if that version doesn't exist (i.e. user created a new version)
                     if {$text == ""} {
@@ -724,7 +724,7 @@ proc importFiles::endCmd {tbl row col text} {
                         #${log}::debug Text is: $text
                         #${log}::debug $process(startTblText) should be removed from the list: $process(versionList)
                     }
-                    
+
                     if {[lsearch $process(versionList) $text] == -1} {
                         #${log}::debug Old Version List: $process(versionList)
                         set newItem [lsearch $process(versionList) $process(startTblText)]
@@ -741,19 +741,19 @@ proc importFiles::endCmd {tbl row col text} {
                         $tbl rejectinput
                         return
                     }
-                    #set updateCount 1                    
+                    #set updateCount 1
         }
     }
-    
+
     #$tbl cellconfigure $row,$col -text $text
     # Update the widget and DB
     job::db::write $job(db,Name) Addresses $text $tbl $row,$col $colName
 
-    
+
     set stringLength [eAssist_db::dbWhereQuery -columnNames HeaderMaxLength -table Headers -where InternalHeaderName='$colName']
     set bgColor [join [eAssist_db::dbWhereQuery -columnNames Highlight -table Headers -where InternalHeaderName='$colName']]
 
-    if {[string length $text] > $stringLength} { 
+    if {[string length $text] > $stringLength} {
         if {$bgColor != ""} {
             set backGround $bgColor
         } else {
@@ -769,7 +769,7 @@ proc importFiles::endCmd {tbl row col text} {
 
     #set job(TotalCopies) [ea::db::countQuantity $job(db,Name) Addresses]
     job::db::getTotalCopies
-    
+
 	return $text
     #${log}::debug --END-- [info level 1]
 } ;# importFiles::endCmd
@@ -794,7 +794,7 @@ proc importFiles::enableMenuItems {} {
     #	N/A
     #
     # PARENTS
-    #	
+    #
     #
     # NOTES
     #
@@ -803,14 +803,14 @@ proc importFiles::enableMenuItems {} {
     #***
     global log mb
     #${log}::debug --START-- [info level 1]
-    
+
     set menuCount [$mb.modMenu index end]
-    
+
      # Enable/Disable the menu items depending on which one is active.
     for {set x 0} {$menuCount >= $x} {incr x} {
         catch {$mb.modMenu entryconfigure $x -state normal}
     }
-	
+
     #${log}::debug --END-- [info level 1]
 } ;# importFiles::enableMenuItems
 
@@ -833,7 +833,7 @@ proc importFiles::enableMenuItems {} {
 #    #	N/A
 #    #
 #    # PARENTS
-#    #	
+#    #
 #    #
 #    # NOTES
 #    #   $l_line = the entire row of data being read in.
@@ -843,18 +843,18 @@ proc importFiles::enableMenuItems {} {
 #    #***
 #    global log L_states L_countryCodes
 #    ${log}::debug --START-- [info level 1]
-#    
+#
 #    set domestic yes
 #    set zip [string trim [lindex $l_line $idxZip]]
-#    
+#
 #    ${log}::debug State-Zip: $state - $zip
 #    ${log}::debug US State? [lsearch -nocase $L_states(US) $state]
-#    
+#
 #    if {[lsearch -nocase $L_states(US) $state] == -1} {
 #        ${log}::debug State not found - $state
 #        set domestic no
 #    }
-#    
+#
 #    if {$domestic eq "no"} {
 #        # Check for common abbreviations for canada, mexico and japan
 #        if {[lsearch -nocase $L_countryCodes $state] == -1} {
@@ -863,7 +863,7 @@ proc importFiles::enableMenuItems {} {
 #            ${log}::debug State was found: $state
 #            set domestic yes
 #        }
-#        
+#
 #        # Check the zip code
 #        # USA Zip Codes [zip+4], each state starts with a 0-9.
 #        for {set x 0} {$x < 10} {incr x} {
@@ -874,7 +874,7 @@ proc importFiles::enableMenuItems {} {
 #            }
 #        }
 #    }
-#    
+#
 #    # If it still isn't domestic, lets try to find the country
 #    if {$domestic eq "no"} {
 #        # Canadian format A1A 1A1
@@ -883,7 +883,7 @@ proc importFiles::enableMenuItems {} {
 #        ${log}::debug alphanum? [string is alnum [string range $zip 0 2]]
 #        ${log}::debug Non-US Zip code: $zip
 #    }
-#    
-#	
+#
+#
 #    ${log}::debug --END-- [info level 1]
 #} ;# importFiles::detectCountry

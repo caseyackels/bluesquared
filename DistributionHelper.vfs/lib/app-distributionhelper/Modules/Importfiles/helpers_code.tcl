@@ -923,6 +923,7 @@ proc Disthelper_Helper::Excel {filename args} {
             # Windows 7 / 6.1
             # Save the file $xlsFileNum
             $workbook SaveAs $filename $xlsFileNum
+            puts "SaveAs $filename $xlsFileNum"
             puts "Platform: $tcl_platform(osVersion)"
     } else {
         # Windows XP SP3 / 5.1
