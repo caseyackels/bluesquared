@@ -235,11 +235,11 @@ proc ea::db::bl::getAllVersions {wid} {
         # string is longer than allocated length, we need to trim it down. Or alert the user.
         set idx 1
         foreach item [list Row01 Row02 Row03] {
-            if {[string length $labelText($item)] >= 29} {
+            if {[string length $labelText($item)] >= 20} {
                 # see boxlabels_code.tcl for filterKeys; the length of text that fits on the default label or table: LabelSizes
-                ${log}::critical $item is longer than 29 chars! Trim to [string range $labelText($item) 0 28]?
+                ${log}::critical $item is longer than 29 chars! Trim to [string range $labelText($item) 0 20]?
                 set s_length [string length $labelText($item)] ; # get length of string
-                set s_wholeLineIndex [string wordstart $labelText($item) 29] ;# retrieve the index of the last whole word
+                set s_wholeLineIndex [string wordstart $labelText($item) 20] ;# retrieve the index of the last whole word
                 set s_wholeLine [string range $labelText($item) 0 [expr $s_wholeLineIndex - 1]] ;# retrieve the text within the new string parameters
                 set s_remainingText [string range $labelText($item) $s_wholeLineIndex end]
                 set labelText($item) [string trim $s_wholeLine]

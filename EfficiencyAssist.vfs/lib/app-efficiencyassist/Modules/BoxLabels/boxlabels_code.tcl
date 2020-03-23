@@ -52,6 +52,7 @@ proc filterKeys {args} {
     set window [lindex $args 2]
     set validate_P [lindex $args 3]
 
+    # 2020-03-23 TextLength was 29 chars
     switch -- $type {
         -numeric    {if {[string is integer $entryValue] == 1} {set returnValue 1}}
         -textLength {if {[string length $validate_P] <= 29} {set returnValue 1}}
