@@ -1,3 +1,10 @@
+Version 4.1.1 RC8.2 (March 2020)
+== Box Labels
+* [ENHANCEMENT] Lowered the number of allowed characters from 29 to 20 on a single line
+* [ENHANCEMENT] If a row contains too many characters, EA will move whole words to the next row, existing data will be moved to the next row down.
+
+--
+
 Version 4.1.1 RC8.1 (Sept 2019)
 == Setup
 * [NEW] Ability to change database server and credentials through user interface

@@ -235,20 +235,36 @@ proc ea::db::bl::getAllVersions {wid} {
         # string is longer than allocated length, we need to trim it down. Or alert the user.
         set idx 1
         foreach item [list Row01 Row02 Row03] {
+            ${log}::debug Moving Text - Current Row: $item
             if {[string length $labelText($item)] >= 20} {
                 # see boxlabels_code.tcl for filterKeys; the length of text that fits on the default label or table: LabelSizes
-                ${log}::critical $item is longer than 29 chars! Trim to [string range $labelText($item) 0 20]?
+                ${log}::critical $item is longer than 20 chars! Trim to [string range $labelText($item) 0 20]?
                 set s_length [string length $labelText($item)] ; # get length of string
+                    ${log}::debug Moving Text - s_length: $s_length
+
                 set s_wholeLineIndex [string wordstart $labelText($item) 20] ;# retrieve the index of the last whole word
+                    ${log}::debug Moving Text - s_wholeLineIndex: $s_wholeLineIndex -- Retriving the index of the last word
+
                 set s_wholeLine [string range $labelText($item) 0 [expr $s_wholeLineIndex - 1]] ;# retrieve the text within the new string parameters
+                    ${log}::debug Moving Text - s_wholeLine: $s_wholeLineIndex -- retrieve the text within the new string parameters
+
                 set s_remainingText [string range $labelText($item) $s_wholeLineIndex end]
+                    ${log}::debug Moving Text - s_remainingText: $s_remainingText
+
                 set labelText($item) [string trim $s_wholeLine]
-                ${log}::debug Modified text $item: $s_wholeLine
-                ${log}::debug Modified text $item: $s_remainingText
+                    ${log}::debug Moving Text - labelText($item): $labelText($item)
+                    ${log}::debug Modified text $item: $s_wholeLine
+                    ${log}::debug Modified text $item: $s_remainingText
 
                 set nextRow [expr $idx + 1]
-                set labelText(Row0$nextRow) [string trim "$s_remainingText $labelText(Row0$nextRow)"]
-                ${log}::debug Modified text: $labelText(Row0$nextRow)
+                set nextRow2 [expr $idx + 2]
+                #set labelText(Row0$nextRow) [string trim "$s_remainingText $labelText(Row0$nextRow)"]
+
+                # Move the existing data to the new row down first
+                set labelText(Row0$nextRow2) [string trim "$labelText(Row0$nextRow)"]
+
+                set labelText(Row0$nextRow) [string trim "$s_remainingText"]
+                    ${log}::debug Modified text: $labelText(Row0$nextRow)
             }
             incr idx
         }
