@@ -118,7 +118,8 @@ IF %wrap% == n GOTO NOWRAP
 ECHO Generating executable file...
 ECHO Please wait...
 cd Builds
-..\base-tcl8.6-thread-win32-ix86.exe ..\sdx.kit wrap %programName%.exe -runtime ..\base-tk8.6-thread-win32-ix86.exe -writable
+:: ..\base-tcl8.6-thread-win32-ix86.exe ..\sdx.kit wrap %programName%.exe -runtime ..\base-tk8.6-thread-win32-ix86.exe -writable
+..\tcl-8.6.10-threaded-x64.exe ..\sdx.kit wrap %programName%.exe -runtime ..\tk-8.6.10-threaded-x64.exe -writable
 
 ping -n 5 127.0.0.1>nul
 
