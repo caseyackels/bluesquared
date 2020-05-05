@@ -1,3 +1,10 @@
+Version 4.1.1 RC9 (TBD)
+== Development
+* [ENHANCEMENT] Updated Tcl/Tk to 8.6.10
+* [ENHANCEMENT] Updated TWAPI to 4.3.8
+
+--
+
 Version 4.1.1 RC8.2 (March 2020)
 == Box Labels
 * [ENHANCEMENT] Lowered the number of allowed characters from 29 to 20 on a single line
