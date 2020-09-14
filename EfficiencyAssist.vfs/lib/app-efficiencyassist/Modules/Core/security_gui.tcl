@@ -1,7 +1,7 @@
 # Creator: Casey Ackels
 # Initial Date: March 12, 2011]
 # File Initial Date: 03/13 2015
-# Dependencies: 
+# Dependencies:
 #-------------------------------------------------------------------------------
 #
 # Subversion
@@ -35,15 +35,15 @@ proc ea::sec::guiWarning {} {
     #	N/A
     #
     # PARENTS
-    #	
+    #
     #
     # NOTES
     #
     # SEE ALSO
     #
     #***
-    global log 
-	
+    global log
+
     toplevel .preferences
     wm transient .preferences .
     wm title .preferences [mc "$currentModule Preferences"]
@@ -55,6 +55,5 @@ proc ea::sec::guiWarning {} {
 
     focus .preferences
     ${log}::debug which Preferences : $currentModule
-    
-    
+
 }

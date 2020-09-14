@@ -101,6 +101,11 @@ proc 'eAssist_sourceReqdFiles {} {
 	namespace eval ea::db::admin {}
 	namespace eval ea::gui::admin {}
 
+	# Setup, Email
+	namespace eval ea::code::email {}
+	namespace eval ea::db::email {}
+	namespace eval ea::gui::email {}
+
 	# Preferences
 	namespace eval ea::code::pref {}
 	namespace eval ea::db::pref {}
