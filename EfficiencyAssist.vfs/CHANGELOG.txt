@@ -1,7 +1,16 @@
-Version 4.1.1 RC9 (TBD)
+Version 4.1.1 RC9.1 (August 31st 2020)
+== Box Labels
+* [UPDATE] Reverted code changes, updated SQL view
+
+--
+
+Version 4.1.1 RC9 (August 31st 2020)
 == Development
 * [ENHANCEMENT] Updated Tcl/Tk to 8.6.10
 * [ENHANCEMENT] Updated TWAPI to 4.3.8
+
+== Box Labels
+* [UPDATE] Update EA to use Product Versions instead of Versions
 
 --
 

@@ -165,6 +165,9 @@ proc ea::db::bl::getAllVersions {wid} {
         #set monarch_db [tdbc::odbc::connection create db2 "Driver={SQL Server};Server=monarch-main;Database=ea;UID=labels;PWD=sh1pp1ng"]
         #set monarch_db [tdbc::odbc::connection create db2 "$sysdb(dbLoginString)"]
 
+        # Final Product Verison == DB column: PRODUCTNAME // was ALIASNAME
+        #
+
         # Retrieve versions that have boxes
         set stmt [$monarch_db prepare "SELECT DISTINCT ALIASNAME
                                             FROM EA.dbo.Planner_Shipping_View
@@ -175,8 +178,11 @@ proc ea::db::bl::getAllVersions {wid} {
         set res [$stmt execute]
 
         while {[$res nextlist val]} {
-            ${log}::debug Versions with boxes: $val
-            lappend job(Versions) [join [string toupper $val]]
+            #${log}::debug Versions with boxes: [join [string trim $val]]
+            puts "versions with boxes: $val"
+            if {$val ne [list " <Multiple>"]} {
+                lappend job(Versions) [join [string toupper $val]]
+            }
         }
         ${log}::debug All Versions: $job(Versions)
 
